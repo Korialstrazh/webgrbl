@@ -158,10 +158,10 @@ describe(WebSerialTransport.name, () => {
 
   it.each([
     [
+      'disconnect event',
       (): void => {
         serial.dispatchEvent(port.newDisconnectEvent());
       },
-      (): void => serial.dispatchEvent(port.newDisconnectEvent()),
     ],
     [
       'read error',
