@@ -1,0 +1,21 @@
+.browserStatusBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status {
+  padding: 0.25rem 0.625rem;
+  border-radius: 999rem;
+  font-size: 0.8125rem;
+}
+
+.positive {
+  background-color: #064e3b;
+  color: #a7f3d0;
+}
+
+.negative {
+  background-color: #7f1d1d;
+  color: #fecaca;
+}
