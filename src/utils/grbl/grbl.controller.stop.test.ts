@@ -101,6 +101,13 @@ const getLatestStatus = (harness: GrblControllerHarness): GrblResolvedStatus => 
 
 const getMachineX = (status: GrblResolvedStatus): number => status.machinePosition?.x ?? Number.NaN;
 
+/** The latest status may still say Run, so disconnect() stops the machine first; its stop needs fake time to finish. */
+const disconnectAfterStop = async (harness: GrblControllerHarness): Promise<void> => {
+  const disconnect: Promise<void> = harness.controller.disconnect();
+  await vi.advanceTimersByTimeAsync(STOP_SETTLE_MS);
+  await disconnect;
+};
+
 const newPromiseTracker = (promise: Promise<void>): { isResolved: () => boolean } => {
   let isResolved = false;
   void promise.then((): void => {
@@ -207,7 +214,7 @@ describe(GrblController.name, () => {
     ]);
     expect(stopTracker.isResolved()).toBe(true);
 
-    await harness.controller.disconnect();
+    await disconnectAfterStop(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -411,7 +418,7 @@ describe(GrblController.name, () => {
       GRBL_REALTIME_COMMAND.CYCLE_RESUME,
     ]);
 
-    await harness.controller.disconnect();
+    await disconnectAfterStop(harness);
   });
 
   it('machine commands while disconnected write nothing', async () => {
@@ -428,14 +435,14 @@ describe(GrblController.name, () => {
     expect(harness.events).toEqual([]);
   });
 
-  it('disconnect during the hold wait ends the stop without a reset and leaves no timer behind', async () => {
+  it('connection loss during the hold wait ends the stop without a reset and leaves no timer behind', async () => {
     const harness: GrblControllerHarness = await newConnectedHarness();
     harness.controller.sendConsoleCommand(LONG_MOVE);
     await vi.advanceTimersByTimeAsync(MOVE_RUNNING_MS);
     harness.transport.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.STOP_RESPONDING });
     const stop: Promise<void> = harness.controller.stopMachine();
 
-    await harness.controller.disconnect();
+    harness.transport.simulateConnectionLoss();
     await stop;
 
     expect(getSentRealtimeCommands(harness.events)).toEqual([GRBL_REALTIME_COMMAND.FEED_HOLD]);

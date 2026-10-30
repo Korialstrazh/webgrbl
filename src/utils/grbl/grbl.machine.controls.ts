@@ -1,8 +1,4 @@
-import {
-  GRBL_CONTROLLER_EVENT_KIND,
-  GRBL_REALTIME_COMMAND,
-  GRBL_RESET_BANNER_TIMEOUT_MS,
-} from './grbl.constants';
+import { GRBL_REALTIME_COMMAND, GRBL_RESET_BANNER_TIMEOUT_MS } from './grbl.constants';
 import { runGrblStopSequence } from './grbl.stop.sequence';
 import type { GrblRealtimeCommand } from './grbl.constants';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
@@ -57,7 +53,14 @@ export class GrblMachineControls {
 
     this.host.commandWriter.holdQueueUntilBanner();
     this.startBannerWaitTimer();
+    this.host.handleMachineReset();
     await this.host.commandWriter.writeRealtimeCommand(GRBL_REALTIME_COMMAND.SOFT_RESET);
+  }
+
+  /** For the $C that leaves check mode: GRBL resets itself after its ok, so the queue waits for that banner. */
+  public holdQueueUntilCheckModeBanner(): void {
+    this.host.commandWriter.holdQueueUntilBannerKeepingLines();
+    this.startBannerWaitTimer();
   }
 
   public async writeConnectedRealtimeCommand(command: GrblRealtimeCommand): Promise<void> {
@@ -76,6 +79,7 @@ export class GrblMachineControls {
 
     if (!this.host.commandWriter.isQueueHeldForBanner()) {
       this.clearBannerWaitTimer();
+      this.host.handleBannerWaitEnded();
     }
   }
 
@@ -95,7 +99,8 @@ export class GrblMachineControls {
   private handleBannerWaitTimeout(): void {
     this.bannerWaitTimerId = undefined;
     this.host.commandWriter.releaseQueueBannerHold();
-    this.host.emitEvent({ kind: GRBL_CONTROLLER_EVENT_KIND.NOT_RESPONDING });
+    this.host.reportNotResponding();
+    this.host.handleBannerWaitEnded();
   }
 
   private clearBannerWaitTimer(): void {

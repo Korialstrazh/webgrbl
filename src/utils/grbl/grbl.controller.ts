@@ -1,33 +1,33 @@
 import {
-  GRBL_CONSOLE_DIRECTION,
   GRBL_CONTROLLER_EVENT_KIND,
   GRBL_CONTROLLER_PHASE,
-  GRBL_EMPTY_TEXT,
   GRBL_LINE_ORIGIN,
+  GRBL_MACHINE_STATE,
   GRBL_REALTIME_COMMAND,
-  GRBL_RESPONSE_KIND,
   GRBL_STATUS_POLL_INTERVAL_MS,
   GRBL_UNLOCK_COMMAND,
 } from './grbl.constants';
 import { GrblCommandWriter } from './grbl.command.writer';
 import { GrblConnectionClosedError } from './grbl.connection.closed.error';
-import { newGrblConsoleEntryEvent } from './grbl.console.entry.event';
 import { GrblControllerBusyError } from './grbl.controller.busy.error';
 import { performGrblHandshake } from './grbl.handshake';
 import { newGrblHandshakeContext } from './grbl.handshake.context';
 import { GrblLineFramer } from './grbl.line.framer';
 import { getPreparedGrblLine } from './grbl.line.preparer';
 import { GrblMachineControls } from './grbl.machine.controls';
-import { getParsedGrblResponse } from './grbl.response.parser';
+import { GrblNotRespondingWatchdog } from './grbl.not.responding.watchdog';
+import { GrblProgramStreamer } from './grbl.program.streamer';
+import { GrblResponseRouter } from './grbl.response.router';
 import { GrblStatusPoller } from './grbl.status.poller';
 import { GrblStatusTracker } from './grbl.status.tracker';
-import type { GrblControllerPhase } from './grbl.constants';
+import type { GrblControllerPhase, GrblMachineState } from './grbl.constants';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblFirmwareIdentity } from './interfaces/GrblFirmwareIdentity';
-import type { GrblQueuedLine } from './interfaces/GrblQueuedLine';
+import type { GrblProgramLineError } from './interfaces/GrblProgramLineError';
+import type { GrblProgramResult } from './interfaces/GrblProgramResult';
+import type { GrblProgramStreamOptions } from './interfaces/GrblProgramStreamOptions';
 import type { GrblResolvedStatus } from './interfaces/GrblResolvedStatus';
-import type { GrblResponse } from './interfaces/GrblResponse';
 import type { SerialTransport } from './interfaces/SerialTransport';
 
 /** Receives every controller event. */
@@ -39,13 +39,15 @@ type GrblBannerListener = (identity: GrblFirmwareIdentity) => void;
 /** Cancels the running handshake with the given error. */
 type GrblHandshakeCanceller = (error: Error) => void;
 
-/** Developer-facing message for a response kind the controller does not route. */
-const getUnknownResponseMessage = (response: never): string => `Unknown GRBL response ${JSON.stringify(response)}`;
+/** States in which closing the port without a stop would leave the machine moving. */
+const MOVING_MACHINE_STATES: readonly GrblMachineState[] = [GRBL_MACHINE_STATE.RUN, GRBL_MACHINE_STATE.JOG];
 
 /**
- * Drives one GRBL controller over a serial transport: handshake, status polling, console commands, stop, reset and
- * hold controls, response routing and typed events. Writing lives in GrblCommandWriter, the machine controls in
- * GrblMachineControls. Framework-free, so the Redux bridge owns one instance.
+ * Drives one GRBL controller over a serial transport: handshake, status polling, console commands, program streaming
+ * and check mode, stop, reset and hold controls, and typed events. Its collaborators do the work: GrblCommandWriter
+ * writes, GrblResponseRouter routes what arrives, GrblMachineControls stops and resets, GrblProgramStreamer streams
+ * and checks programs, GrblNotRespondingWatchdog watches for silence. Framework-free, so the Redux bridge owns one
+ * instance.
  *
  * @author michael.morosov
  *
@@ -75,20 +77,52 @@ export class GrblController {
   private readonly statusPoller: GrblStatusPoller;
   /** Stop, reset, feed hold and cycle resume. */
   private readonly machineControls: GrblMachineControls;
+  /** Streams and checks programs. */
+  private readonly programStreamer: GrblProgramStreamer;
+  /** Reports a silent controller. */
+  private readonly notRespondingWatchdog: GrblNotRespondingWatchdog;
+  /** Routes every received line. */
+  private readonly responseRouter: GrblResponseRouter;
 
   public constructor(transport: SerialTransport) {
+    const emitEvent = (event: GrblControllerEvent): void => this.emitEvent(event);
+    const isConnected = (): boolean => this.phase === GRBL_CONTROLLER_PHASE.CONNECTED;
+
     this.transport = transport;
-    this.commandWriter = new GrblCommandWriter(transport, (event: GrblControllerEvent): void => this.emitEvent(event));
+    this.commandWriter = new GrblCommandWriter(transport, emitEvent);
     this.statusPoller = new GrblStatusPoller(
       (): void => void this.commandWriter.writeRealtimeCommand(GRBL_REALTIME_COMMAND.STATUS_QUERY),
     );
+    this.notRespondingWatchdog = new GrblNotRespondingWatchdog({
+      hasInFlightLines: (): boolean => this.commandWriter.hasInFlightLines(),
+      getLatestStatus: (): GrblResolvedStatus | undefined => this.statusTracker.getLatestStatus(),
+      emitEvent,
+    });
     this.machineControls = new GrblMachineControls({
       commandWriter: this.commandWriter,
       statusPoller: this.statusPoller,
       statusTracker: this.statusTracker,
-      isConnected: (): boolean => this.phase === GRBL_CONTROLLER_PHASE.CONNECTED,
+      isConnected,
       addEventListener: (listener: GrblControllerEventListener): (() => void) => this.addEventListener(listener),
-      emitEvent: (event: GrblControllerEvent): void => this.emitEvent(event),
+      handleMachineReset: (): void => this.programStreamer.handleMachineReset(),
+      handleBannerWaitEnded: (): void => this.programStreamer.handleBannerWaitEnded(),
+      reportNotResponding: (): void => this.notRespondingWatchdog.reportNotResponding(),
+    });
+    this.programStreamer = new GrblProgramStreamer({
+      commandWriter: this.commandWriter,
+      isConnected,
+      stopMachine: (): Promise<void> => this.stopMachine(),
+      holdQueueUntilCheckModeBanner: (): void => this.machineControls.holdQueueUntilCheckModeBanner(),
+      emitEvent,
+    });
+    this.responseRouter = new GrblResponseRouter({
+      commandWriter: this.commandWriter,
+      statusTracker: this.statusTracker,
+      machineControls: this.machineControls,
+      programStreamer: this.programStreamer,
+      notRespondingWatchdog: this.notRespondingWatchdog,
+      emitEvent,
+      handleHandshakeBanner: (identity: GrblFirmwareIdentity): void => this.bannerListener?.(identity),
     });
     this.transport.setReceiveListener((chunk: Uint8Array): void => this.handleReceivedChunk(chunk));
     this.transport.setConnectionLostListener((): void => this.handleConnectionLost());
@@ -122,6 +156,7 @@ export class GrblController {
       this.commandWriter.setRxBufferSize(connectionInfo.rxBufferSize);
       this.phase = GRBL_CONTROLLER_PHASE.CONNECTED;
       this.statusPoller.startPolling(GRBL_STATUS_POLL_INTERVAL_MS);
+      this.notRespondingWatchdog.startWatching();
 
       return connectionInfo;
     } catch (error: unknown) {
@@ -134,8 +169,15 @@ export class GrblController {
     }
   }
 
-  /** Stops polling, drops queued lines and closes the transport. */
+  /**
+   * Stops polling, drops queued lines and closes the transport. A machine that still runs or jogs is stopped first,
+   * so closing the port never leaves it moving with nobody able to stop it.
+   */
   public async disconnect(): Promise<void> {
+    if (this.isMachineMoving()) {
+      await this.stopMachine();
+    }
+
     const wasTransportOpen: boolean = this.phase !== GRBL_CONTROLLER_PHASE.DISCONNECTED;
 
     this.releaseConnectionState();
@@ -160,6 +202,19 @@ export class GrblController {
     if (this.phase === GRBL_CONTROLLER_PHASE.CONNECTED) {
       this.commandWriter.enqueueLine(preparedLine, GRBL_LINE_ORIGIN.CONSOLE);
     }
+  }
+
+  /**
+   * Streams a program; resolves with how it ended (see GrblProgramStreamer). Rejects with GrblControllerBusyError
+   * while a program or check runs and with GrblConnectionClosedError while disconnected.
+   */
+  public streamProgram(programLines: string[], options: GrblProgramStreamOptions): Promise<GrblProgramResult> {
+    return this.programStreamer.streamProgram(programLines, options);
+  }
+
+  /** Checks a program in GRBL check mode and resolves with its line errors (see runGrblCheckMode). */
+  public checkProgram(programLines: string[]): Promise<GrblProgramLineError[]> {
+    return this.programStreamer.checkProgram(programLines);
   }
 
   /**
@@ -201,11 +256,16 @@ export class GrblController {
     return this.statusTracker.getLatestStatus();
   }
 
-  /** Forgets everything tied to the current connection; a running handshake and waiting private commands fail. */
+  /**
+   * Forgets everything tied to the current connection; a running handshake and waiting private commands fail, and a
+   * running program ends.
+   */
   private releaseConnectionState(): void {
     this.phase = GRBL_CONTROLLER_PHASE.DISCONNECTED;
     this.handshakeCanceller?.(new GrblConnectionClosedError());
     this.machineControls.releaseMachineControls();
+    this.programStreamer.releaseProgram(new GrblConnectionClosedError());
+    this.notRespondingWatchdog.stopWatching();
     this.statusPoller.stopPolling();
     this.commandWriter.releaseAllLines(new GrblConnectionClosedError());
     this.lineFramer.reset();
@@ -222,75 +282,15 @@ export class GrblController {
 
   private handleReceivedChunk(chunk: Uint8Array): void {
     for (const lineText of this.lineFramer.getCompleteLines(chunk)) {
-      this.handleReceivedLine(lineText);
+      this.responseRouter.routeReceivedLine(lineText);
     }
   }
 
-  private handleReceivedLine(lineText: string): void {
-    const response: GrblResponse = getParsedGrblResponse(lineText);
+  private isMachineMoving(): boolean {
+    const machineState: GrblMachineState | undefined = this.statusTracker.getLatestStatus()?.machineState;
+    const isConnected: boolean = this.phase === GRBL_CONTROLLER_PHASE.CONNECTED;
 
-    this.emitEvent(newGrblConsoleEntryEvent({
-      direction: GRBL_CONSOLE_DIRECTION.RECEIVED,
-      text: lineText,
-      realtimeCommand: undefined,
-      isStatusReport: response.kind === GRBL_RESPONSE_KIND.STATUS,
-    }));
-    this.routeResponse(response, lineText);
-  }
-
-  private routeResponse(response: GrblResponse, lineText: string): void {
-    switch (response.kind) {
-    case GRBL_RESPONSE_KIND.OK:
-      this.commandWriter.acknowledgeOldestLine();
-      this.commandWriter.sendQueuedLines();
-      break;
-    case GRBL_RESPONSE_KIND.ERROR:
-      this.handleErrorResponse(response.code);
-      break;
-    case GRBL_RESPONSE_KIND.ALARM:
-      this.emitEvent({ kind: GRBL_CONTROLLER_EVENT_KIND.GRBL_ALARM, code: response.code });
-      break;
-    case GRBL_RESPONSE_KIND.STATUS:
-      this.commandWriter.trackStatusReportReceived();
-      this.emitEvent({
-        kind: GRBL_CONTROLLER_EVENT_KIND.STATUS_REPORT,
-        status: this.statusTracker.trackStatusReport(response.report),
-      });
-      break;
-    case GRBL_RESPONSE_KIND.BANNER:
-      this.bannerListener?.(response.identity);
-      this.machineControls.handleReceivedBanner();
-      break;
-    case GRBL_RESPONSE_KIND.SETTING:
-    case GRBL_RESPONSE_KIND.FEEDBACK:
-    case GRBL_RESPONSE_KIND.OTHER:
-      this.commandWriter.collectAnswerLine(lineText);
-      break;
-    default: {
-      const unknownResponse: never = response;
-      throw new Error(getUnknownResponseMessage(unknownResponse));
-    }
-    }
-  }
-
-  /**
-   * The error event goes out before more lines are sent, so a listener can still stop the queue. Before the banner
-   * after a reset an error belongs to a wiped line, so no event goes out: it would show a misleading error.
-   */
-  private handleErrorResponse(errorCode: number): void {
-    if (this.commandWriter.isQueueHeldForBanner()) {
-      return;
-    }
-
-    const failedLine: GrblQueuedLine | undefined = this.commandWriter.acknowledgeOldestLine();
-
-    this.emitEvent({
-      kind: GRBL_CONTROLLER_EVENT_KIND.GRBL_ERROR,
-      code: errorCode,
-      lineText: failedLine?.text ?? GRBL_EMPTY_TEXT,
-      origin: failedLine?.origin ?? GRBL_LINE_ORIGIN.CONSOLE,
-    });
-    this.commandWriter.sendQueuedLines();
+    return isConnected && !!machineState && MOVING_MACHINE_STATES.includes(machineState);
   }
 
   private emitEvent(event: GrblControllerEvent): void {

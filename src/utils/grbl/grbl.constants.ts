@@ -71,6 +71,8 @@ export const GRBL_BUILD_INFO_COMMAND = '$I';
 export const GRBL_SETTINGS_COMMAND = '$$';
 /** System command that clears the Alarm lock. */
 export const GRBL_UNLOCK_COMMAND = '$X';
+/** System command that enters check mode, or leaves it with a reset. */
+export const GRBL_CHECK_MODE_COMMAND = '$C';
 // #endregion
 
 // #region Response patterns

@@ -5,9 +5,9 @@ const LINE_BREAK_BYTE_COUNT = 1;
 
 /**
  * Releases lines only while the controller receive buffer has room for them, so the buffer never overruns.
- * A line that writes to EEPROM is sent alone. After a soft reset the queue is held until the controller prints its
- * banner again: answers arriving meanwhile belong to lines the reset wiped, and lines sent meanwhile could be wiped as
- * well while still counting as in flight.
+ * A line marked to be sent alone (an EEPROM write) waits for an empty buffer and nothing follows it until answered.
+ * After a soft reset the queue is held until the controller prints its banner again: answers arriving meanwhile
+ * belong to lines the reset wiped, and lines sent meanwhile could be wiped as well while still counting as in flight.
  *
  * @author michael.morosov
  *
@@ -107,6 +107,21 @@ export class GrblCharacterCountingQueue {
     this.expectedBannerCount = 0;
   }
 
+  /** Drops all pending and in-flight lines but keeps a banner hold, for an alarm that flushed the controller. */
+  public dropAllLines(): void {
+    this.clearPendingLines();
+    this.inFlightLines = [];
+    this.inFlightByteCount = 0;
+  }
+
+  /**
+   * Holds the queue until one more banner arrives without dropping any line, for a controller that resets itself
+   * after the line just answered (leaving check mode). Only safe while nothing is in flight.
+   */
+  public holdUntilBannerKeepingLines(): void {
+    this.expectedBannerCount++;
+  }
+
   /**
    * For a soft reset: drops all pending and in-flight lines and holds the queue until the reset's banner arrives.
    * Each reset prints its own banner, so a second reset keeps the queue held until the second banner.
@@ -145,17 +160,11 @@ export class GrblCharacterCountingQueue {
   }
 
   private canSendMoreLines(): boolean {
-    return !this.isHeldForBanner() && !this.hasEepromLineInFlight();
+    return !this.isHeldForBanner() && !this.hasSentAloneLineInFlight();
   }
 
-  private dropAllLines(): void {
-    this.clearPendingLines();
-    this.inFlightLines = [];
-    this.inFlightByteCount = 0;
-  }
-
-  private hasEepromLineInFlight(): boolean {
-    return this.inFlightLines.some((line: GrblQueuedLine) => line.isEepromWrite);
+  private hasSentAloneLineInFlight(): boolean {
+    return this.inFlightLines.some((line: GrblQueuedLine) => line.isSentAlone);
   }
 
   /** An empty buffer always accepts a line, even a longer one, so the queue cannot deadlock. */
@@ -164,7 +173,7 @@ export class GrblCharacterCountingQueue {
       return true;
     }
 
-    if (line.isEepromWrite) {
+    if (line.isSentAlone) {
       return false;
     }
 

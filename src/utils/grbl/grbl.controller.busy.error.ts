@@ -1,8 +1,10 @@
 /** Developer-facing message of the error. */
-const CONTROLLER_BUSY_ERROR_MESSAGE = 'The GRBL controller is already connected or connecting';
+const CONTROLLER_BUSY_ERROR_MESSAGE =
+  'The GRBL controller is busy: already connecting or connected, or already running a program';
 
 /**
- * Rejects connect() while the controller is already connecting or connected; the open connection is left untouched.
+ * Rejects connect() while the controller is already connecting or connected (the open connection is left untouched),
+ * and streamProgram() or checkProgram() while a program or check already runs.
  *
  * @author michael.morosov
  *

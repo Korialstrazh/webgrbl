@@ -24,6 +24,10 @@ export interface GrblMachineControlsHost {
   isConnected(): boolean;
   /** Adds a controller event listener and returns the function that removes it. */
   addEventListener(listener: (event: GrblControllerEvent) => void): () => void;
-  /** Tells every controller event listener about an event. */
-  emitEvent(event: GrblControllerEvent): void;
+  /** Told right after a soft reset dropped all lines, before the reset byte is written. */
+  handleMachineReset(): void;
+  /** Told when the queue stops waiting for banners: the last expected banner arrived or the wait timed out. */
+  handleBannerWaitEnded(): void;
+  /** Reports the controller as not responding, at most once per silence. */
+  reportNotResponding(): void;
 }

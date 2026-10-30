@@ -11,8 +11,8 @@ const EEPROM_TEXT = '$100=250';
 const LONG_TEXT = 'G1X1111111111';
 const LARGE_PROGRAM_LINE_COUNT = 200000;
 
-function newQueuedLine(text: string, isEepromWrite = false): GrblQueuedLine {
-  return { text, isEepromWrite, origin: GRBL_LINE_ORIGIN.PROGRAM, programLineNumber: undefined };
+function newQueuedLine(text: string, isSentAlone = false): GrblQueuedLine {
+  return { text, isSentAlone, origin: GRBL_LINE_ORIGIN.PROGRAM, programLineNumber: undefined };
 }
 
 function getTexts(lines: GrblQueuedLine[]): string[] {

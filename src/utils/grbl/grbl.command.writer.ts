@@ -8,6 +8,7 @@ import {
   GRBL_REALTIME_COMMAND_TEXT,
 } from './grbl.constants';
 import { GrblCharacterCountingQueue } from './grbl.character.counting.queue';
+import { GrblCommandWipedError } from './grbl.command.wiped.error';
 import { newGrblConsoleEntryEvent } from './grbl.console.entry.event';
 import { isEepromWritingGrblLine } from './grbl.eeprom.command.detector';
 import { GrblPrivateCommandRegistry } from './grbl.private.command.registry';
@@ -52,7 +53,13 @@ export class GrblCommandWriter {
 
   /** Queues one prepared line and sends whatever fits. */
   public enqueueLine(text: string, origin: GrblLineOrigin): void {
-    this.enqueueQueuedLine(this.newQueuedLine(text, origin));
+    this.enqueueLines([this.newQueuedLine(text, origin)]);
+  }
+
+  /** Queues ready-made lines, such as a whole program, and sends whatever fits. */
+  public enqueueLines(lines: GrblQueuedLine[]): void {
+    this.sendQueue.enqueueLines(lines);
+    this.sendQueuedLines();
   }
 
   /** Queues a private line; resolves with the lines GRBL printed before acknowledging it. */
@@ -60,7 +67,7 @@ export class GrblCommandWriter {
     const line: GrblQueuedLine = this.newQueuedLine(commandText, GRBL_LINE_ORIGIN.PRIVATE);
     const answer: Promise<string[]> = this.privateCommands.registerPrivateLine(line);
 
-    this.enqueueQueuedLine(line);
+    this.enqueueLines([line]);
 
     return answer;
   }
@@ -117,9 +124,24 @@ export class GrblCommandWriter {
     this.sendQueue.clearPendingLines();
   }
 
-  /** For a soft reset: drops every line and holds the queue until the reset's banner. */
+  /**
+   * For a soft reset: drops every line and holds the queue until the reset's banner. Waiting private lines fail, as
+   * the reset wiped them before they were answered.
+   */
   public holdQueueUntilBanner(): void {
     this.sendQueue.holdUntilBanner();
+    this.privateCommands.rejectAllPrivateLines(new GrblCommandWipedError());
+  }
+
+  /** For a controller that resets itself after the line just answered: holds the queue until its banner. */
+  public holdQueueUntilBannerKeepingLines(): void {
+    this.sendQueue.holdUntilBannerKeepingLines();
+  }
+
+  /** For an alarm, which flushes the controller receive buffer: drops every line and fails waiting private lines. */
+  public dropAllLines(): void {
+    this.sendQueue.dropAllLines();
+    this.privateCommands.rejectAllPrivateLines(new GrblCommandWipedError());
   }
 
   /** Counts a received banner and sends what the queue holds once no banner is expected any more. */
@@ -138,6 +160,10 @@ export class GrblCommandWriter {
     return this.sendQueue.isHeldForBanner();
   }
 
+  public hasInFlightLines(): boolean {
+    return this.sendQueue.hasInFlightLines();
+  }
+
   public trackStatusReportReceived(): void {
     this.unansweredStatusQueryCount = Math.max(0, this.unansweredStatusQueryCount - 1);
   }
@@ -154,12 +180,7 @@ export class GrblCommandWriter {
   }
 
   private newQueuedLine(text: string, origin: GrblLineOrigin): GrblQueuedLine {
-    return { text, isEepromWrite: isEepromWritingGrblLine(text), origin, programLineNumber: undefined };
-  }
-
-  private enqueueQueuedLine(line: GrblQueuedLine): void {
-    this.sendQueue.enqueueLines([line]);
-    this.sendQueuedLines();
+    return { text, isSentAlone: isEepromWritingGrblLine(text), origin, programLineNumber: undefined };
   }
 
   private async writeBytesToTransport(bytes: Uint8Array): Promise<void> {

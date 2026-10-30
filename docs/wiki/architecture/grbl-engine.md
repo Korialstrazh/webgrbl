@@ -16,21 +16,21 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - **Response parsing.** `getParsedGrblResponse` turns one line into a `GrblResponse` (discriminated on `kind`): `ok`, `error:N`, `ALARM:N`, `<...>` status, `$n=v` setting, `[...]` feedback, a Grbl/GrblHAL banner, or `other`. Each variant is its own interface under `interfaces/`.
 - **Status reports.** `getParsedGrblStatusReport` reads the state (and optional `:substate`), `MPos`, `WPos`, `WCO`, `Bf` (planner, RX), `FS` and `F` (feed), `Ov`; unknown fields are ignored and an unknown state yields `undefined`. `getResolvedGrblPositions` fills WPos from MPos - WCO (or MPos from WPos + WCO); a WCO in the report replaces the cached one.
 - **Banner and build info.** `getParsedGrblFirmwareIdentity` keeps the version letter suffix (`1.1h`). `isSupportedGrblFirmware` accepts 1.1 or later (1.2 clones and FluidNC `Grbl 3.x` pass, 0.9 does not). `getGrblRxBufferSizeFromBuildOption` returns `rx - 1` from `[OPT:flags,blocks,rx]` because one byte of the reported serial buffer is unusable.
-- **Send queue.** `GrblCharacterCountingQueue` releases a line only while the bytes in flight plus the line (with its line feed) fit the RX buffer; each `ok`/`error` frees the oldest in-flight line (`getOldestInFlightLine()` tells which line the next answer belongs to). EEPROM-writing lines go alone with nothing else in flight.
-- **Planned layers.** Program streaming, check mode and the Redux/saga bridge are added on top in later steps; this article grows with them. The controller, its stop controls and the simulated laser are described below.
+- **Send queue.** `GrblCharacterCountingQueue` releases a line only while the bytes in flight plus the line (with its line feed) fit the RX buffer; each `ok`/`error` frees the oldest in-flight line (`getOldestInFlightLine()` tells which line the next answer belongs to). Lines marked `isSentAlone` (EEPROM writes, and the `$C` that leaves check mode) go alone: they wait for an empty buffer and nothing follows them until they are answered.
+- **Planned layers.** The Redux/saga bridge is added on top in a later step; this article grows with it. The controller, its stop controls, program streaming and check mode, and the simulated laser are described below.
 
 ## Controller
 
 `GrblController` (`grbl.controller.ts`) drives one controller over a `SerialTransport`. Writing (send queue, private lines, realtime bytes and their console entries) lives in `GrblCommandWriter`; the handshake context is built by `newGrblHandshakeContext`. It is framework-free; the Redux bridge owns a single instance and listens through `addEventListener`, which returns an unsubscribe function.
 
-- **Events** (`GrblControllerEvent`, discriminated on `kind`, one interface per variant under `interfaces/`): `console-entry`, `status-report`, `grbl-error` (code, line text, origin), `grbl-alarm`, `connection-lost`, `not-responding`, `program-stopped-on-error`. The last two are declared now and emitted by the streaming step.
+- **Events** (`GrblControllerEvent`, discriminated on `kind`, one interface per variant under `interfaces/`): `console-entry`, `status-report`, `grbl-error` (code, line text, origin), `grbl-alarm`, `connection-lost`, `not-responding`, `program-stopped-on-error` (line number, line text, error code).
 - **Console entries.** Every line written and received becomes a `GrblConsoleEntry` (`direction` sent / received / realtime, `text`, `realtimeCommand`, `isStatusReport`, `timestamp`). Private lines (`$I`, `$$`) appear like all traffic. Realtime bytes are written straight to the transport, never queued, and shown as `?`, `!`, `~`, `0x18`, `0x85`. The `?` poll and the `<...>` replies carry `isStatusReport: true`, so the console can hide them.
 - **Handshake** (`performGrblHandshake` in `grbl.handshake.ts`, run through a small `GrblHandshakeContext`): open the transport, write `0x18`, wait for the first banner, then `$I` and `$$`. One 10 s deadline covers the whole handshake, so a controller that prints a banner but never answers `$I` fails too. Only the first banner counts: opening the port often resets the board and the soft reset prints another one, and taking both would send `$I` and `$$` twice (Review Focus 3). Missing the deadline gives `GrblHandshakeError` with reason `timeout`, a banner below 1.1 reason `unsupported-firmware`; both close the transport. `disconnect()` or a connection loss during the handshake cancels it through a canceller the handshake registers: the deadline timer and banner listener are cleared and `connect()` rejects with `GrblConnectionClosedError` (the transport is not closed a second time). `connect()` while already connecting or connected rejects with `GrblControllerBusyError` and leaves the port alone. Then `$I` and `$$` go through the send queue as private lines; the RX buffer size comes from `[OPT:...]` (default 127) and the settings from the `$n=v` lines. `connect()` resolves with `GrblConnectionInfo` (identity, RX buffer size, settings, build info lines) and starts the 250 ms status poll.
 - **Private commands.** `GrblPrivateCommandRegistry` pairs each private line with the lines GRBL prints before acknowledging it. GRBL answers in order, so setting, feedback and other lines that arrive while a private line is the oldest in flight belong to it. An `error` also settles the request (with what arrived); the error itself goes out as `grbl-error` with origin `private`. Closing or losing the connection rejects waiting requests with `GrblConnectionClosedError`, so `connect()` never hangs.
-- **Response routing.** `ok` frees the oldest in-flight line and sends whatever now fits. `error` frees it too, emits `grbl-error` and only then sends more, so a listener can still stop the queue (the streaming step's stop-on-error relies on this). `ALARM:N` emits `grbl-alarm`. Status reports pass through `GrblStatusTracker`, which fills the positions with `getResolvedGrblPositions` and caches the last WCO; `getLatestStatus()` returns the result. Banners after the handshake are shown only.
+- **Response routing** (`GrblResponseRouter` in `grbl.response.router.ts`). Every received line restarts the not-responding silence clock and becomes a console entry. `ok` frees the oldest in-flight line and sends whatever now fits. `error` frees it too; for a console or private line it emits `grbl-error`, for a program line it goes to the program streamer. Only then are more lines sent, so a stop on error drops them first. `ALARM:N` emits `grbl-alarm` and ends a running program. Status reports pass through `GrblStatusTracker`, which fills the positions with `getResolvedGrblPositions` and caches the last WCO; `getLatestStatus()` returns the result. Banners after the handshake are shown only.
 - **Console commands.** `sendConsoleCommand` prepares the line (`getPreparedGrblLine`) and queues it with origin `console`; empty results are ignored, and so are commands until the handshake is done (phase `connected`): a line written during the reset would be wiped but still count as in flight, so `$I`'s `ok` would acknowledge it.
-- **Polling and teardown.** `GrblStatusPoller` writes `?` every 250 ms (the interval can change, for the faster poll during a stop). `disconnect()` and a transport connection loss stop the poll, clear the queue and reset the line framer, so no timer stays behind; a loss also emits `connection-lost`. A failed write is ignored because the transport reports a dead port through its connection-lost listener.
-- **Stop, reset, hold and unlock.** See [Stop and machine controls](#stop-and-machine-controls).
+- **Polling and teardown.** `GrblStatusPoller` writes `?` every 250 ms (the interval can change, for the faster poll during a stop). `disconnect()` and a transport connection loss stop the poll and the not-responding watchdog, clear the queue, end a running program or check, and reset the line framer, so no timer stays behind; a loss also emits `connection-lost`. If the latest status is `Run` or `Jog`, `disconnect()` first runs `stopMachine()` and closes the port only after the reset, so closing never leaves the machine moving. A failed write is ignored because the transport reports a dead port through its connection-lost listener.
+- **Stop, reset, hold and unlock.** See [Stop and machine controls](#stop-and-machine-controls). Programs and check mode: see [Program streaming and check mode](#program-streaming-and-check-mode).
 - **Tests** (`grbl.controller.connect.test.ts`) run against `SimulatedLaserTransport` with fake timers. Fake timers schedule a 0 ms timer set during a tick 1 ms later, so each simulator round trip costs 1 ms of fake time; the tests advance 10 ms to let a handshake settle.
 
 ## Stop and machine controls
@@ -42,8 +42,8 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
   2. Always write `!`, or 0x85 when the latest status says `Jog`. In GRBL 1.1, `!` holds a run, gives `Hold:0` at once when idle, cancels a jog, and is ignored in Alarm.
   3. Wait for the first status report answering a query written after that byte whose state is not `Run`, `Jog` or `Hold:1` (so `Hold:0`, `Idle`, `Alarm`, `Door`, ...), at most 2 000 ms (`GRBL_HOLD_COMPLETE_MAX_WAIT_MS`). Reports to queries already unanswered when the byte went out are skipped (`GrblCommandWriter` counts unanswered `?` queries), because they describe the machine before the byte took effect. During the wait the status poll runs every 50 ms (`GRBL_STOP_STATUS_POLL_INTERVAL_MS`, builder's call) instead of 250 ms, so the end of the deceleration is noticed within 50 ms instead of up to 250 ms.
   4. `resetMachine()`, then the poll returns to 250 ms.
-  The promise resolves once the reset byte is written. A second `stopMachine()` while one runs returns the same promise, so only one reset goes out (Review Focus 5). `disconnect()` or a connection loss during the wait ends it at once through a canceller; no reset is written and no timer stays behind.
-- **`resetMachine()`** writes 0x18 at once, drops queued and in-flight lines and holds the send queue until the reset's banner (`GrblCharacterCountingQueue.holdUntilBanner()`). While held, `ok`/`error` answers free nothing (they belong to lines the reset wiped), an `error:N` raises no `grbl-error` event (it would show a misleading error after every stop), and newly queued lines wait (bytes sent while GRBL restarts could be wiped too, yet would count as in flight). Each reset prints its own banner, so the queue counts expected banners: after two quick resets it sends again only after the second banner. The banner releases the queue, so a command sent right after the reset (for example `$X`) gets its own `ok`. If no banner arrives within 10 000 ms (`GRBL_RESET_BANNER_TIMEOUT_MS`, counted from the latest reset), the queue is released anyway and a `not-responding` event goes out, so later commands do not wait forever without any message.
+  The promise resolves once the reset byte is written. A second `stopMachine()` while one runs returns the same promise, so only one reset goes out (Review Focus 5). A connection loss during the wait ends it at once through a canceller; no reset is written and no timer stays behind. `disconnect()` does the same unless the latest status says `Run` or `Jog`: then it waits for the stop (sharing the running one) and closes after the reset.
+- **`resetMachine()`** writes 0x18 at once, drops queued and in-flight lines, fails waiting private commands with `GrblCommandWipedError` (so nothing can hang), ends a running program and holds the send queue until the reset's banner (`GrblCharacterCountingQueue.holdUntilBanner()`). While held, `ok`/`error` answers free nothing (they belong to lines the reset wiped), an `error:N` raises no `grbl-error` event (it would show a misleading error after every stop), and newly queued lines wait (bytes sent while GRBL restarts could be wiped too, yet would count as in flight). Each reset prints its own banner, so the queue counts expected banners: after two quick resets it sends again only after the second banner. The banner releases the queue, so a command sent right after the reset (for example `$X`) gets its own `ok`. If no banner arrives within 10 000 ms (`GRBL_RESET_BANNER_TIMEOUT_MS`, counted from the latest reset), the queue is released anyway and `not-responding` is reported (through the watchdog, so one silence gives one event), so later commands do not wait forever without any message.
 - **`sendFeedHold()` / `sendCycleResume()`** write `!` / `~`.
 - **`unlockMachine()`** queues `$X` as a console line.
 - **Tests.** `grbl.controller.stop.test.ts` (against the simulator) covers these cases:
@@ -60,9 +60,49 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
   - banner timeout after 10 000 ms;
   - feed hold and resume;
   - no writes while disconnected;
-  - disconnect during the wait.
+  - connection loss during the wait.
 
   `grbl.stop.sequence.test.ts` unit-tests skipping the earlier reports and the states that end the wait. Shared test helpers live in `src/utils/grbl/test.support/`.
+
+## Program streaming and check mode
+
+`GrblProgramStreamer` (`grbl.program.streamer.ts`) runs one program at a time; the controller delegates `streamProgram` and `checkProgram` to it. A second `streamProgram()` or `checkProgram()` while one runs rejects with `GrblControllerBusyError`. While disconnected they reject with `GrblConnectionClosedError`.
+
+- **Streaming.** `streamProgram(programLines, { isStopOnErrorEnabled })` resolves with `GrblProgramResult { isCompleted, lineErrors }`. Each `GrblProgramLineError` has `lineNumber`, `lineText` and `errorCode`.
+  - `getProgramQueuedLines` prepares every line with `getPreparedGrblLine`. Blank and comment lines are not sent but keep their place, so `lineNumber` is always the 1-based index into the original `programLines`.
+  - All lines go into the shared send queue at once; the queue handles 200 000-line programs. Console commands typed during a program share the buffer budget, so the controller buffer never overflows (Review Focus 4).
+  - EEPROM lines (`$32=1`, `G10 L2`, ...) wait for an empty buffer through the queue's sent-alone rule.
+  - The program completes (`isCompleted: true`) once every sent line is answered.
+- **Stop on error** (user decision: stop as fast as possible). On the first `error:N` for a program line the streamer emits `program-stopped-on-error` and calls the existing `stopMachine()`. No `grbl-error` goes out, so the user is not told twice. This happens before the router sends another line, and the stop's first step drops the unsent lines. The promise resolves `isCompleted: false` once the stop has written the reset. Answers to lines already in flight are ignored.
+- **Stop on error off.** Every error is collected and emitted as `grbl-error` with origin `program`, and streaming continues. The program still completes.
+- **Ending early.** These all resolve the program with `isCompleted: false` and the errors collected so far:
+  - a user `stopMachine()` or `resetMachine()` (the reset wipes the lines);
+  - an `ALARM:N`: GRBL flushed its receive buffer, so the queue drops pending and in-flight lines (a banner hold is kept);
+  - a closed connection.
+- **Check mode** (`runGrblCheckMode` in `grbl.check.mode.ts`; user decision: the basis for a later pre-run validator). In check mode GRBL parses every line but moves nothing and keeps the laser off. `checkProgram(programLines)`:
+  1. sends `$C` and waits for its answer; program lines are sent only after `ok`;
+  2. streams the lines with stop-on-error off;
+  3. sends `$C` again, alone; on its `ok` the queue is held until the banner without dropping lines (`holdUntilBannerKeepingLines()`), with the same 10 000 ms banner timeout as a reset, so console lines typed meanwhile go out after GRBL's reset and keep their own answers;
+  4. waits for the banner and resolves with the line errors.
+
+  Check errors are results: they raise no `grbl-error` event (no toast per line) but still appear as console entries. Failures reject instead of resolving with a partial list, which a validator could take for a valid program:
+  - `$C` refused (for example `error:8` while running) rejects with `GrblCheckModeRefusedError`; no program line is sent;
+  - a reset or alarm during the check rejects with `GrblCommandWipedError`;
+  - a closed connection rejects with `GrblConnectionClosedError`.
+
+  Once every line is checked, a reset or connection loss while leaving still resolves with the errors.
+- **Not responding** (`GrblNotRespondingWatchdog`, `grbl.not.responding.watchdog.ts`). It emits `not-responding` once per silence when lines are in flight, nothing was received for 10 000 ms (`GRBL_NOT_RESPONDING_SILENCE_MS`) and the latest state is neither `Hold` nor `Door`. Any received line starts a new silence. A silence without lines in flight is checked again every 250 ms, so a line sent into it later is still reported. The stream continues. The reset-banner timeout reports through the watchdog too, so one silence never gives two events.
+- **Tests.** `grbl.controller.stream.test.ts` runs against the simulator:
+  - a 200-line program without overflow, and a console command in the middle of one;
+  - an EEPROM write only after all earlier lines are answered;
+  - stop on error at line 5 (line number, text, code; nothing received after the reset), and errors collected with stop-on-error off;
+  - check mode results, its sent lines and leaving check mode; `$C` refused; a reset and a connection loss during a check;
+  - busy and disconnected rejections; a program of only blank and comment lines;
+  - a user stop and an alarm during a program;
+  - not-responding after exactly 10 000 ms of silence, not twice with the banner timeout, not in Hold;
+  - connection loss during a program; disconnect while running holds and resets before closing.
+
+  `grbl.command.writer.test.ts` covers failing private commands on reset, alarm and closed connection.
 
 ## Simulator
 
@@ -105,6 +145,13 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - `src/utils/grbl/grbl.command.writer.ts`
 - `src/utils/grbl/grbl.console.entry.event.ts`
 - `src/utils/grbl/grbl.handshake.context.ts`
+- `src/utils/grbl/grbl.response.router.ts`
+- `src/utils/grbl/grbl.program.streamer.ts`
+- `src/utils/grbl/grbl.program.queued.lines.ts`
+- `src/utils/grbl/grbl.check.mode.ts`
+- `src/utils/grbl/grbl.check.mode.refused.error.ts`
+- `src/utils/grbl/grbl.command.wiped.error.ts`
+- `src/utils/grbl/grbl.not.responding.watchdog.ts`
 - `src/utils/grbl/test.support/`
 - `src/utils/grbl/interfaces/`
 - `src/utils/grbl/simulator/` (whole simulator, including the G-code interpreter and default settings)
