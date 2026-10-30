@@ -13,9 +13,14 @@ import { GRBL_SIMULATOR_FAULT_KIND } from './grbl.simulator.constants';
 const BANNER = "Grbl 1.1h ['$' for help]";
 const UNLOCK_REQUIRED_MESSAGE = "[MSG:'$H'|'$X' to unlock]";
 const OK = 'ok';
+const UNLOCKED_MESSAGE = '[MSG:Caution: Unlocked]';
 const LINE_ENDING = '\r\n';
 const RX_BUFFER_BYTES = 127;
 const PLANNER_BLOCK_COUNT = 15;
+/** Lines sent beyond a full planner, which wait in the RX buffer. */
+const WAITING_LINE_COUNT = 3;
+const VERSION_REPORT = '[VER:1.1h.20190825:]';
+const BUILD_OPTION_REPORT = '[OPT:V,15,128]';
 const TICK_MS = 20;
 const DECELERATION_MS = 200;
 /** G1X10F600 from the origin takes 1000 ms. */
@@ -33,6 +38,7 @@ const HOLD_DECELERATING_STATE = 'Hold:1';
 const HOLD_COMPLETE_STATE = 'Hold:0';
 const ORIGIN_POSITION = '0.000,0.000,0.000';
 const RAPID_TO_X1 = 'G0X1';
+const IDLE_AT_ORIGIN = '<Idle|MPos:0.000,0.000,0.000|FS:0,0>';
 const IDLE_AT_X10 = '<Idle|MPos:10.000,0.000,0.000|FS:0,0>';
 /** A jog cancelled at X10 (after 1 s at 10 mm/s) stops within the 200 ms deceleration, well before this X. */
 const JOG_CANCEL_STOP_LIMIT_X = 15;
@@ -123,12 +129,18 @@ describe(GrblSimulator.name, () => {
     const harness: SimulatorHarness = newSimulatorHarness();
 
     expect(getStatusReport(harness)).toBe(IDLE_AT_ORIGIN_WITH_WCO);
-    expect(getStatusReport(harness)).toBe('<Idle|MPos:0.000,0.000,0.000|FS:0,0>');
+    expect(getStatusReport(harness)).toBe(IDLE_AT_ORIGIN);
 
     sendLine(harness.simulator, 'G92X-5');
     takeOutputLines(harness);
 
     expect(getStatusReport(harness)).toBe('<Idle|MPos:0.000,0.000,0.000|FS:0,0|WCO:5.000,0.000,0.000>');
+    expect(getStatusReport(harness)).toBe(IDLE_AT_ORIGIN);
+
+    sendLine(harness.simulator, SHORT_MOVE);
+    takeOutputLines(harness);
+
+    expect(getStatusReport(harness)).not.toContain('WCO');
   });
 
   it('reports the effective laser power while burning', async () => {
@@ -205,7 +217,7 @@ describe(GrblSimulator.name, () => {
 
     sendLine(harness.simulator, '$X');
 
-    expect(takeOutputLines(harness)).toEqual(['[MSG:Caution: Unlocked]', OK]);
+    expect(takeOutputLines(harness)).toEqual([UNLOCKED_MESSAGE, OK]);
     expect(getReportedState(harness)).toBe(GRBL_MACHINE_STATE.IDLE);
   });
 
@@ -261,7 +273,7 @@ describe(GrblSimulator.name, () => {
 
     sendLine(harness.simulator, '$I');
 
-    expect(takeOutputLines(harness)).toEqual(['[VER:1.1h.20190825:]', '[OPT:V,15,128]', OK]);
+    expect(takeOutputLines(harness)).toEqual([VERSION_REPORT, BUILD_OPTION_REPORT, OK]);
   });
 
   it('$$ lists the settings and a setting write is listed afterwards', () => {
@@ -392,5 +404,90 @@ describe(GrblSimulator.name, () => {
     sendRealtimeByte(harness.simulator, GRBL_SOFT_RESET_BYTE);
 
     expect(harness.simulator.getReceivedLineCount()).toBe(0);
+  });
+
+  it('alarm fault flushes lines waiting in the RX buffer so $X is answered alone', () => {
+    const harness: SimulatorHarness = newSimulatorHarness();
+
+    for (let lineIndex = 1; lineIndex <= PLANNER_BLOCK_COUNT + WAITING_LINE_COUNT; lineIndex++) {
+      sendLine(harness.simulator, `G1X${lineIndex * 10}F600`);
+    }
+
+    takeOutputLines(harness);
+    harness.simulator.injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.ALARM, alarmCode: FAULT_ALARM_CODE });
+    sendLine(harness.simulator, '$X');
+
+    expect(takeOutputLines(harness)).toEqual([`ALARM:${FAULT_ALARM_CODE}`, UNLOCKED_MESSAGE, OK]);
+    expect(harness.simulator.getReceivedLineCount()).toBe(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('feed hold while idle reports Hold:0 at once and resume returns to Idle', () => {
+    const harness: SimulatorHarness = newSimulatorHarness();
+
+    sendRealtimeByte(harness.simulator, GRBL_FEED_HOLD_BYTE);
+
+    expect(getReportedState(harness)).toBe(HOLD_COMPLETE_STATE);
+
+    sendRealtimeByte(harness.simulator, GRBL_CYCLE_RESUME_BYTE);
+
+    expect(getReportedState(harness)).toBe(GRBL_MACHINE_STATE.IDLE);
+  });
+
+  it('feed hold during a jog cancels the jog: decelerates, then Idle', async () => {
+    const harness: SimulatorHarness = newSimulatorHarness();
+    sendLine(harness.simulator, '$J=G91X100F600');
+    await vi.advanceTimersByTimeAsync(SHORT_MOVE_MS);
+
+    sendRealtimeByte(harness.simulator, GRBL_FEED_HOLD_BYTE);
+
+    expect(getReportedState(harness)).toBe(GRBL_MACHINE_STATE.JOG);
+
+    await vi.advanceTimersByTimeAsync(DECELERATION_MS + TICK_MS);
+
+    expect(getReportedState(harness)).toBe(GRBL_MACHINE_STATE.IDLE);
+    expect(Number(getReportedMachinePosition(harness).split(',')[0])).toBeLessThan(JOG_CANCEL_STOP_LIMIT_X);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('soft reset during Hold:1 raises ALARM:3', async () => {
+    const harness: SimulatorHarness = newSimulatorHarness();
+    sendLine(harness.simulator, LONG_MOVE);
+    await vi.advanceTimersByTimeAsync(SHORT_MOVE_MS);
+    sendRealtimeByte(harness.simulator, GRBL_FEED_HOLD_BYTE);
+    await vi.advanceTimersByTimeAsync(DECELERATION_MS / 2);
+    takeOutputLines(harness);
+
+    sendRealtimeByte(harness.simulator, GRBL_SOFT_RESET_BYTE);
+
+    expect(takeOutputLines(harness)).toEqual(['ALARM:3', BANNER, UNLOCK_REQUIRED_MESSAGE]);
+    expect(getReportedState(harness)).toBe(GRBL_MACHINE_STATE.ALARM);
+  });
+
+  it('cycle resume during Hold:1 is ignored; it is accepted once Hold:0 is reached', async () => {
+    const harness: SimulatorHarness = newSimulatorHarness();
+    sendLine(harness.simulator, LONG_MOVE);
+    await vi.advanceTimersByTimeAsync(SHORT_MOVE_MS);
+    sendRealtimeByte(harness.simulator, GRBL_FEED_HOLD_BYTE);
+
+    sendRealtimeByte(harness.simulator, GRBL_CYCLE_RESUME_BYTE);
+
+    expect(getReportedState(harness)).toBe(HOLD_DECELERATING_STATE);
+
+    await vi.advanceTimersByTimeAsync(DECELERATION_MS + TICK_MS);
+
+    expect(getReportedState(harness)).toBe(HOLD_COMPLETE_STATE);
+
+    sendRealtimeByte(harness.simulator, GRBL_CYCLE_RESUME_BYTE);
+
+    expect(getReportedState(harness)).toBe(GRBL_MACHINE_STATE.RUN);
+  });
+
+  it('answers a CRLF-terminated line normally', () => {
+    const harness: SimulatorHarness = newSimulatorHarness();
+
+    harness.simulator.receiveBytes(new TextEncoder().encode('$I\r\n'));
+
+    expect(takeOutputLines(harness)).toEqual([VERSION_REPORT, BUILD_OPTION_REPORT, OK]);
   });
 });

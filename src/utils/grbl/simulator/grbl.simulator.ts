@@ -117,6 +117,8 @@ export class GrblSimulator {
     case GRBL_SIMULATOR_FAULT_KIND.ALARM:
       this.motion.stopMotion();
       this.syncModalPosition();
+      this.rxBuffer.clearStoredBytes();
+      this.receivedLineCount = 0;
       this.isAlarmLocked = true;
       this.emitLines(`${GRBL_SIMULATOR_RESPONSE_PREFIX.ALARM}${fault.alarmCode}`);
       break;
