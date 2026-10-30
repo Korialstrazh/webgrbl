@@ -18,6 +18,11 @@ const START_STATE: GrblSimulatorModalState = {
 };
 const FEED_600_LINE = 'G1X10F600';
 const FEED_600_DURATION_MS = 1000;
+const FEED_600_RATE = 600;
+const DWELL_SECONDS = 2;
+const DWELL_DURATION_MS = 2000;
+const SLOW_MAX_RATE_SETTING = '3000';
+const SLOW_MOVE_DURATION_MS = 2000;
 const MILLIMETRES_PER_INCH = 25.4;
 const ARC_RADIUS = 5;
 const ARC_FEED = 600;
@@ -50,7 +55,7 @@ describe(getInterpretedGcodeLine.name, () => {
       durationMs: FEED_600_DURATION_MS,
       spindleSpeed: 0,
     });
-    expect(result.nextState.feedRate).toBe(ARC_FEED);
+    expect(result.nextState.feedRate).toBe(FEED_600_RATE);
   });
 
   it('accepts lower case words', () => {
@@ -113,15 +118,22 @@ describe(getInterpretedGcodeLine.name, () => {
   });
 
   it('G4 P is a dwell in seconds at the current position', () => {
-    const result = interpretLine('G4P2', { ...START_STATE, position: { x: 3, y: 0, z: 0 } });
+    const result = interpretLine(`G4P${DWELL_SECONDS}`, { ...START_STATE, position: { x: 3, y: 0, z: 0 } });
 
-    expect(result.motionBlock).toEqual({ target: { x: 3, y: 0, z: 0 }, durationMs: 2000, spindleSpeed: 0 });
+    expect(result.motionBlock).toEqual({
+      target: { x: 3, y: 0, z: 0 },
+      durationMs: DWELL_DURATION_MS,
+      spindleSpeed: 0,
+    });
   });
 
   it('G0 uses the slower of the X and Y max rates', () => {
-    const result = getInterpretedGcodeLine('G0X100', START_STATE, { ...GRBL_SIMULATOR_DEFAULT_SETTINGS, 111: '3000' });
+    const result = getInterpretedGcodeLine('G0X100', START_STATE, {
+      ...GRBL_SIMULATOR_DEFAULT_SETTINGS,
+      111: SLOW_MAX_RATE_SETTING,
+    });
 
-    expect(result).toMatchObject({ motionBlock: { durationMs: 2000 } });
+    expect(result).toMatchObject({ motionBlock: { durationMs: SLOW_MOVE_DURATION_MS } });
   });
 
   it('M3 with S switches the laser on and M5 off, without motion', () => {
@@ -170,7 +182,7 @@ describe(getInterpretedGcodeLine.name, () => {
 
     expect(spindleOnly).toMatchObject({ motionBlock: undefined, nextState: { motionMode: 1, spindleSpeed: 0 } });
     expect(feedOnly.motionBlock).toBeUndefined();
-    expect(feedOnly.nextState.feedRate).toBe(ARC_FEED);
+    expect(feedOnly.nextState.feedRate).toBe(FEED_600_RATE);
     expect(interpretLine('G0').motionBlock).toBeUndefined();
   });
 

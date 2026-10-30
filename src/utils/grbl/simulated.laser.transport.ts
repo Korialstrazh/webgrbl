@@ -25,6 +25,10 @@ export class SimulatedLaserTransport implements SerialTransport {
   /** Told once when the connection is lost. */
   private connectionLostListener: (() => void) | undefined;
 
+  /**
+   * @param simulator An existing simulator to drive; its output listener is replaced by this transport.
+   *   When omitted, the transport creates its own simulator.
+   */
   public constructor(simulator?: GrblSimulator) {
     const outputListener = (text: string): void => this.deliverSimulatorOutput(text);
 

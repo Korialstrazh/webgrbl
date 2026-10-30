@@ -26,20 +26,24 @@ export class GrblCharacterCountingQueue {
   /** Bytes the in-flight lines occupy in the controller receive buffer. */
   private inFlightByteCount = 0;
 
+  /** @param rxBufferSize Size of the controller receive buffer in bytes. */
   public constructor(rxBufferSize: number) {
     this.rxBufferSize = rxBufferSize;
   }
 
+  /** Changes the receive buffer size used for later send decisions; lines already in flight are unaffected. */
   public setRxBufferSize(rxBufferSize: number): void {
     this.rxBufferSize = rxBufferSize;
   }
 
+  /** Appends lines to the end of the pending lines. */
   public enqueueLines(lines: GrblQueuedLine[]): void {
     for (const line of lines) {
       this.pendingLines.push(line);
     }
   }
 
+  /** Moves every pending line that fits the receive buffer into the in-flight lines and returns them in send order. */
   public takeSendableLines(): GrblQueuedLine[] {
     const sendableLines: GrblQueuedLine[] = [];
 
@@ -64,6 +68,7 @@ export class GrblCharacterCountingQueue {
     return sendableLines;
   }
 
+  /** Removes the oldest in-flight line, freeing its buffer bytes; returns undefined when nothing is in flight. */
   public acknowledgeOldestInFlightLine(): GrblQueuedLine | undefined {
     const acknowledgedLine: GrblQueuedLine | undefined = this.inFlightLines.shift();
 
@@ -74,6 +79,7 @@ export class GrblCharacterCountingQueue {
     return acknowledgedLine;
   }
 
+  /** Drops all pending and in-flight lines. */
   public clearAllLines(): void {
     this.pendingLines = [];
     this.pendingHeadIndex = 0;
@@ -81,10 +87,12 @@ export class GrblCharacterCountingQueue {
     this.inFlightByteCount = 0;
   }
 
+  /** True while at least one sent line is not acknowledged yet. */
   public hasInFlightLines(): boolean {
     return this.inFlightLines.length > 0;
   }
 
+  /** True while at least one line is waiting to be sent. */
   public hasPendingLines(): boolean {
     return this.pendingHeadIndex < this.pendingLines.length;
   }

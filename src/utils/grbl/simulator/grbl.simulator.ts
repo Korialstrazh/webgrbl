@@ -283,7 +283,9 @@ export class GrblSimulator {
 
     const faultErrorCode: number | undefined = this.lineFaults.takeFaultErrorCode(this.receivedLineCount);
 
-    if (faultErrorCode) {
+    // Error code 0 is a valid injected fault, so a falsy check would treat it as no fault.
+    // eslint-disable-next-line no-restricted-syntax -- 0 is distinct from absent here
+    if (faultErrorCode !== undefined) {
       this.emitError(faultErrorCode);
     } else {
       this.lineExecutor.executePreparedLine(getPreparedGrblLine(rawLine));

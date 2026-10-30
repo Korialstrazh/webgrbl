@@ -11,7 +11,7 @@
 import type { GrblLineOrigin } from '../grbl.constants';
 
 export interface GrblQueuedLine {
-  /** The prepared line, without the line break. */
+  /** The prepared G-code line: ASCII only, without the line break. Its byte cost is text.length + 1. */
   text: string;
   /** Whether the line writes to the controller EEPROM and so must be sent alone. */
   isEepromWrite: boolean;
