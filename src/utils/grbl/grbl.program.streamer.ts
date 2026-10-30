@@ -74,6 +74,11 @@ export class GrblProgramStreamer {
     }
   }
 
+  /** True from the start of a stream or check until its promise settles. */
+  public isProgramActive(): boolean {
+    return this.isProgramRunning;
+  }
+
   /** Counts an ok for a program or check line; the program completes with the answer to its last line. */
   public handleLineAcknowledged(line: GrblQueuedLine | undefined): void {
     if (!line) {

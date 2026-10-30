@@ -170,11 +170,11 @@ export class GrblController {
   }
 
   /**
-   * Stops polling, drops queued lines and closes the transport. A machine that still runs or jogs is stopped first,
-   * so closing the port never leaves it moving with nobody able to stop it.
+   * Stops polling, drops queued lines and closes the transport. A machine that runs or jogs, or still holds lines of a
+   * program or the queue, is stopped first, so closing the port never leaves it moving with nobody able to stop it.
    */
   public async disconnect(): Promise<void> {
-    if (this.isMachineMoving()) {
+    if (this.isStopNeededBeforeClose()) {
       await this.stopMachine();
     }
 
@@ -286,11 +286,13 @@ export class GrblController {
     }
   }
 
-  private isMachineMoving(): boolean {
+  /** A program that just started may still show Idle, so queued and running work counts as well as the state. */
+  private isStopNeededBeforeClose(): boolean {
     const machineState: GrblMachineState | undefined = this.statusTracker.getLatestStatus()?.machineState;
-    const isConnected: boolean = this.phase === GRBL_CONTROLLER_PHASE.CONNECTED;
+    const isMachineMoving: boolean = !!machineState && MOVING_MACHINE_STATES.includes(machineState);
+    const hasPendingWork: boolean = this.programStreamer.isProgramActive() || this.commandWriter.hasUnansweredLines();
 
-    return isConnected && !!machineState && MOVING_MACHINE_STATES.includes(machineState);
+    return this.phase === GRBL_CONTROLLER_PHASE.CONNECTED && (isMachineMoving || hasPendingWork);
   }
 
   private emitEvent(event: GrblControllerEvent): void {

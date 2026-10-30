@@ -396,7 +396,7 @@ describe(GrblController.name, () => {
       { kind: GRBL_CONTROLLER_EVENT_KIND.NOT_RESPONDING },
     ]);
 
-    await harness.controller.disconnect();
+    await disconnectAfterStop(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 

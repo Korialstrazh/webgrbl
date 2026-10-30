@@ -59,6 +59,10 @@ const LONG_MOVE_COUNT = 30;
 const MOVE_RUNNING_MS = 500;
 const ALARM_CODE = 1;
 const TRANSPORT_CLOSE_LOG_ENTRY = 'close';
+const FEED_HOLD_TEXT = '!';
+const SOFT_RESET_TEXT = '0x18';
+/** A status report showing the hold complete, so a reset loses no steps and raises no alarm. */
+const HOLD_COMPLETE_PREFIX = '<Hold:0';
 
 const newConnectedHarness = async (): Promise<GrblControllerHarness> => {
   const harness: GrblControllerHarness = newGrblControllerHarness();
@@ -109,6 +113,19 @@ const getSentTexts = (events: GrblControllerEvent[]): string[] =>
   getConsoleEntries(events)
     .filter((entry: GrblConsoleEntry) => entry.direction === GRBL_CONSOLE_DIRECTION.SENT)
     .map((entry: GrblConsoleEntry) => entry.text);
+
+/** Lines written to the send queue after the first received entry with the given text; realtime bytes are not lines. */
+const getSentTextsAfterReceived = (events: GrblControllerEvent[], receivedText: string): string[] => {
+  const entries: GrblConsoleEntry[] = getConsoleEntries(events);
+  const receivedIndex: number = entries.findIndex(
+    (entry: GrblConsoleEntry) => entry.direction === GRBL_CONSOLE_DIRECTION.RECEIVED && entry.text === receivedText,
+  );
+
+  return entries
+    .slice(receivedIndex + 1)
+    .filter((entry: GrblConsoleEntry) => entry.direction === GRBL_CONSOLE_DIRECTION.SENT)
+    .map((entry: GrblConsoleEntry) => entry.text);
+};
 
 /** The latest status may still say Run, so disconnect() stops the machine first; its stop needs fake time to finish. */
 const disconnectAfterStop = async (harness: GrblControllerHarness): Promise<void> => {
@@ -207,7 +224,8 @@ describe(GrblController.name, () => {
 
   it('stops on error line 5 and reports line number, text and code', async () => {
     const harness: GrblControllerHarness = await newConnectedHarness();
-    const programLines: string[] = newShortMoveProgram(ERROR_PROGRAM_LINE_COUNT);
+    // Long enough that unsent lines are still waiting when the error arrives.
+    const programLines: string[] = newShortMoveProgram(STREAMED_PROGRAM_LINE_COUNT);
     const expectedLineError: GrblProgramLineError = {
       lineNumber: ERROR_LINE_NUMBER,
       lineText: getProgramLineText(programLines, ERROR_LINE_NUMBER),
@@ -230,6 +248,7 @@ describe(GrblController.name, () => {
     ]);
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.GRBL_ERROR)).toEqual([]);
     expect(getReceivedTexts(harness.events)).toContain(GRBL_SIMULATOR_BANNER);
+    expect(getSentTextsAfterReceived(harness.events, `error:${FAULT_ERROR_CODE}`)).toEqual([]);
 
     await vi.advanceTimersByTimeAsync(STOP_SETTLE_MS);
 
@@ -474,7 +493,7 @@ describe(GrblController.name, () => {
 
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.NOT_RESPONDING)).toHaveLength(1);
 
-    await harness.controller.disconnect();
+    await disconnectAfterStop(harness);
     await expect(stream).resolves.toEqual({ isCompleted: false, lineErrors: [] });
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -513,7 +532,7 @@ describe(GrblController.name, () => {
 
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.NOT_RESPONDING)).toEqual([]);
 
-    await harness.controller.disconnect();
+    await disconnectAfterStop(harness);
   });
 
   it('connection loss during a program emits connection-lost and resolves isCompleted false', async () => {
@@ -541,6 +560,46 @@ describe(GrblController.name, () => {
 
     await expect(check).rejects.toBeInstanceOf(GrblConnectionClosedError);
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('disconnect right after a program starts, before a poll saw it run, holds and resets before closing', async () => {
+    const harness: GrblControllerHarness = await newConnectedHarness();
+    await vi.advanceTimersByTimeAsync(GRBL_STATUS_POLL_INTERVAL_MS + ANSWER_SETTLE_MS);
+    const controllerLog: string[] = [];
+    const originalClose: () => Promise<void> = harness.transport.close.bind(harness.transport);
+    vi.spyOn(harness.transport, 'close').mockImplementation((): Promise<void> => {
+      controllerLog.push(TRANSPORT_CLOSE_LOG_ENTRY);
+
+      return originalClose();
+    });
+    harness.controller.addEventListener((event: GrblControllerEvent): void => {
+      if (event.kind === GRBL_CONTROLLER_EVENT_KIND.CONSOLE_ENTRY) {
+        controllerLog.push(event.entry.text);
+      }
+    });
+
+    const stream: Promise<GrblProgramResult> = harness.controller.streamProgram(newLongMoveProgram(), {
+      isStopOnErrorEnabled: true,
+    });
+
+    expect(harness.controller.getLatestStatus()?.machineState).toBe(GRBL_MACHINE_STATE.IDLE);
+
+    const disconnect: Promise<void> = harness.controller.disconnect();
+    await vi.advanceTimersByTimeAsync(STOP_SETTLE_MS);
+    await disconnect;
+    const feedHoldIndex: number = controllerLog.indexOf(FEED_HOLD_TEXT);
+    const softResetIndex: number = controllerLog.indexOf(SOFT_RESET_TEXT);
+    const holdCompleteIndex: number = controllerLog.findIndex(
+      (text: string) => text.startsWith(HOLD_COMPLETE_PREFIX),
+    );
+
+    expect(feedHoldIndex).toBeGreaterThanOrEqual(0);
+    expect(holdCompleteIndex).toBeGreaterThan(feedHoldIndex);
+    expect(softResetIndex).toBeGreaterThan(holdCompleteIndex);
+    expect(controllerLog.indexOf(TRANSPORT_CLOSE_LOG_ENTRY)).toBeGreaterThan(softResetIndex);
+    expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.GRBL_ALARM)).toEqual([]);
+    await expect(stream).resolves.toEqual({ isCompleted: false, lineErrors: [] });
     expect(vi.getTimerCount()).toBe(0);
   });
 
