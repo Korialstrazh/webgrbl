@@ -31,14 +31,8 @@ import type { GrblResponse } from './interfaces/GrblResponse';
  * soft reset prints a second banner, so taking only the first keeps $I and $$ from being sent twice.
  */
 const waitForFirstGrblBanner = (context: GrblHandshakeContext): Promise<GrblFirmwareIdentity> =>
-  new Promise<GrblFirmwareIdentity>((resolveBanner: (identity: GrblFirmwareIdentity) => void, rejectBanner) => {
-    const timeoutId: ReturnType<typeof setTimeout> = setTimeout((): void => {
-      context.setBannerListener(undefined);
-      rejectBanner(new GrblHandshakeError(GRBL_HANDSHAKE_FAILURE_REASON.TIMEOUT));
-    }, GRBL_HANDSHAKE_TIMEOUT_MS);
-
+  new Promise<GrblFirmwareIdentity>((resolveBanner: (identity: GrblFirmwareIdentity) => void): void => {
     context.setBannerListener((identity: GrblFirmwareIdentity): void => {
-      clearTimeout(timeoutId);
       context.setBannerListener(undefined);
       resolveBanner(identity);
     });
@@ -74,21 +68,16 @@ const getSupportedGrblIdentity = async (context: GrblHandshakeContext): Promise<
   const bannerWait: Promise<GrblFirmwareIdentity> = waitForFirstGrblBanner(context);
   context.writeRealtimeCommand(GRBL_REALTIME_COMMAND.SOFT_RESET);
 
-  try {
-    const identity: GrblFirmwareIdentity = await bannerWait;
+  const identity: GrblFirmwareIdentity = await bannerWait;
 
-    if (!isSupportedGrblFirmware(identity)) {
-      throw new GrblHandshakeError(GRBL_HANDSHAKE_FAILURE_REASON.UNSUPPORTED_FIRMWARE);
-    }
-
-    return identity;
-  } catch (error: unknown) {
-    await context.closeTransport();
-    throw error;
+  if (!isSupportedGrblFirmware(identity)) {
+    throw new GrblHandshakeError(GRBL_HANDSHAKE_FAILURE_REASON.UNSUPPORTED_FIRMWARE);
   }
+
+  return identity;
 };
 
-export const performGrblHandshake = async (context: GrblHandshakeContext): Promise<GrblConnectionInfo> => {
+const runGrblHandshakeSteps = async (context: GrblHandshakeContext): Promise<GrblConnectionInfo> => {
   await context.openTransport();
 
   const identity: GrblFirmwareIdentity = await getSupportedGrblIdentity(context);
@@ -101,4 +90,33 @@ export const performGrblHandshake = async (context: GrblHandshakeContext): Promi
     settings: getSettingsFromSettingLines(settingLines),
     buildInfoLines,
   };
+};
+
+/**
+ * The deadline covers the whole handshake, so a controller that prints a banner but never answers $I or $$ fails
+ * too. The controller cancels the handshake through the registered canceller when it disconnects or loses the port;
+ * the transport is closed here only for a handshake failure, never for a cancel or an open failure.
+ */
+export const performGrblHandshake = async (context: GrblHandshakeContext): Promise<GrblConnectionInfo> => {
+  let deadlineTimerId: ReturnType<typeof setTimeout> | undefined;
+  const handshakeAbort: Promise<never> = new Promise<never>((_resolve, rejectHandshake: (error: Error) => void) => {
+    deadlineTimerId = setTimeout((): void => {
+      rejectHandshake(new GrblHandshakeError(GRBL_HANDSHAKE_FAILURE_REASON.TIMEOUT));
+    }, GRBL_HANDSHAKE_TIMEOUT_MS);
+    context.setHandshakeCanceller(rejectHandshake);
+  });
+
+  try {
+    return await Promise.race([runGrblHandshakeSteps(context), handshakeAbort]);
+  } catch (error: unknown) {
+    if (error instanceof GrblHandshakeError) {
+      await context.closeTransport();
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(deadlineTimerId);
+    context.setBannerListener(undefined);
+    context.setHandshakeCanceller(undefined);
+  }
 };

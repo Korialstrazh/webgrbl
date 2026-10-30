@@ -20,6 +20,8 @@ export interface GrblHandshakeContext {
   writeRealtimeCommand(command: GrblRealtimeCommand): void;
   /** Sets the callback told about every received banner, or removes it with undefined. */
   setBannerListener(listener: ((identity: GrblFirmwareIdentity) => void) | undefined): void;
+  /** Sets the callback that cancels the running handshake with the given error, or removes it with undefined. */
+  setHandshakeCanceller(canceller: ((error: Error) => void) | undefined): void;
   /** Sends a private line through the send queue; resolves with its answer lines once it is acknowledged. */
   sendPrivateCommand(commandText: string): Promise<string[]>;
 }

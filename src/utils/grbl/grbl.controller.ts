@@ -1,6 +1,7 @@
 import {
   GRBL_CONSOLE_DIRECTION,
   GRBL_CONTROLLER_EVENT_KIND,
+  GRBL_CONTROLLER_PHASE,
   GRBL_DEFAULT_RX_BUFFER_BYTES,
   GRBL_EMPTY_TEXT,
   GRBL_LINE_ORIGIN,
@@ -13,6 +14,7 @@ import {
 } from './grbl.constants';
 import { GrblCharacterCountingQueue } from './grbl.character.counting.queue';
 import { GrblConnectionClosedError } from './grbl.connection.closed.error';
+import { GrblControllerBusyError } from './grbl.controller.busy.error';
 import { isEepromWritingGrblLine } from './grbl.eeprom.command.detector';
 import { performGrblHandshake } from './grbl.handshake';
 import { GrblLineFramer } from './grbl.line.framer';
@@ -21,7 +23,7 @@ import { GrblPrivateCommandRegistry } from './grbl.private.command.registry';
 import { getParsedGrblResponse } from './grbl.response.parser';
 import { GrblStatusPoller } from './grbl.status.poller';
 import { GrblStatusTracker } from './grbl.status.tracker';
-import type { GrblLineOrigin, GrblRealtimeCommand } from './grbl.constants';
+import type { GrblControllerPhase, GrblLineOrigin, GrblRealtimeCommand } from './grbl.constants';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblConsoleEntry } from './interfaces/GrblConsoleEntry';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
@@ -40,6 +42,9 @@ type GrblControllerEventListener = (event: GrblControllerEvent) => void;
 
 /** Receives every banner while set. */
 type GrblBannerListener = (identity: GrblFirmwareIdentity) => void;
+
+/** Cancels the running handshake with the given error. */
+type GrblHandshakeCanceller = (error: Error) => void;
 
 /**
  * Drives one GRBL controller over a serial transport: handshake, status polling, the character-counting send queue,
@@ -69,8 +74,10 @@ export class GrblController {
   private bannerListener: GrblBannerListener | undefined;
   /** Latest status with resolved positions. */
   private readonly statusTracker: GrblStatusTracker = new GrblStatusTracker();
-  /** True from opening the transport until it is closed or lost. */
-  private isTransportOpen = false;
+  /** Cancels the running handshake; set only while one runs. */
+  private handshakeCanceller: GrblHandshakeCanceller | undefined;
+  /** Disconnected, connecting (handshake running) or connected (handshake done). */
+  private phase: GrblControllerPhase = GRBL_CONTROLLER_PHASE.DISCONNECTED;
   /** Sends the status query at an interval while connected. */
   private readonly statusPoller: GrblStatusPoller = new GrblStatusPoller(
     (): void => this.writeRealtimeCommand(GRBL_REALTIME_COMMAND.STATUS_QUERY),
@@ -82,27 +89,40 @@ export class GrblController {
     this.transport.setConnectionLostListener((): void => this.handleConnectionLost());
   }
 
-  /** Opens the transport and runs the handshake; rejects with GrblHandshakeError when the controller is unusable. */
+  /**
+   * Opens the transport and runs the handshake. Rejects with GrblHandshakeError when the controller is unusable,
+   * GrblConnectionClosedError when disconnected or lost meanwhile, and GrblControllerBusyError when already
+   * connecting or connected.
+   */
   public async connect(): Promise<GrblConnectionInfo> {
-    this.releaseConnectionState();
+    if (this.phase !== GRBL_CONTROLLER_PHASE.DISCONNECTED) {
+      throw new GrblControllerBusyError();
+    }
+
+    this.phase = GRBL_CONTROLLER_PHASE.CONNECTING;
     this.statusTracker.clearTrackedStatus();
 
     try {
       const connectionInfo: GrblConnectionInfo = await performGrblHandshake(this.newHandshakeContext());
 
       this.sendQueue.setRxBufferSize(connectionInfo.rxBufferSize);
+      this.phase = GRBL_CONTROLLER_PHASE.CONNECTED;
       this.statusPoller.startPolling(GRBL_STATUS_POLL_INTERVAL_MS);
 
       return connectionInfo;
     } catch (error: unknown) {
-      this.releaseConnectionState();
+      // A closed connection was already released by whoever closed it, possibly before a new connect() started.
+      if (!(error instanceof GrblConnectionClosedError)) {
+        this.releaseConnectionState();
+      }
+
       throw error;
     }
   }
 
   /** Stops polling, drops queued lines and closes the transport. */
   public async disconnect(): Promise<void> {
-    const wasTransportOpen: boolean = this.isTransportOpen;
+    const wasTransportOpen: boolean = this.phase !== GRBL_CONTROLLER_PHASE.DISCONNECTED;
 
     this.releaseConnectionState();
 
@@ -111,7 +131,11 @@ export class GrblController {
     }
   }
 
-  /** Prepares a typed line and queues it; a line that is empty after preparation is ignored. */
+  /**
+   * Prepares a typed line and queues it. A line that is empty after preparation is ignored, and so is any line
+   * before the handshake is done: the reset would wipe it while it still counted as in flight, so $I's ok would
+   * acknowledge it.
+   */
   public sendConsoleCommand(commandText: string): void {
     const preparedLine: string | undefined = getPreparedGrblLine(commandText);
 
@@ -119,7 +143,7 @@ export class GrblController {
       return;
     }
 
-    if (this.isTransportOpen) {
+    if (this.phase === GRBL_CONTROLLER_PHASE.CONNECTED) {
       this.enqueueLine(this.newQueuedLine(preparedLine, GRBL_LINE_ORIGIN.CONSOLE));
     }
   }
@@ -139,17 +163,14 @@ export class GrblController {
 
   private newHandshakeContext(): GrblHandshakeContext {
     return {
-      openTransport: async (): Promise<void> => {
-        this.isTransportOpen = true;
-        await this.transport.open();
-      },
-      closeTransport: async (): Promise<void> => {
-        this.isTransportOpen = false;
-        await this.transport.close();
-      },
+      openTransport: (): Promise<void> => this.transport.open(),
+      closeTransport: (): Promise<void> => this.transport.close(),
       writeRealtimeCommand: (command: GrblRealtimeCommand): void => this.writeRealtimeCommand(command),
       setBannerListener: (listener: GrblBannerListener | undefined): void => {
         this.bannerListener = listener;
+      },
+      setHandshakeCanceller: (canceller: GrblHandshakeCanceller | undefined): void => {
+        this.handshakeCanceller = canceller;
       },
       sendPrivateCommand: (commandText: string): Promise<string[]> => this.sendPrivateCommand(commandText),
     };
@@ -209,9 +230,10 @@ export class GrblController {
     }
   }
 
-  /** Forgets everything tied to the current connection; waiting private commands fail. */
+  /** Forgets everything tied to the current connection; a running handshake and waiting private commands fail. */
   private releaseConnectionState(): void {
-    this.isTransportOpen = false;
+    this.phase = GRBL_CONTROLLER_PHASE.DISCONNECTED;
+    this.handshakeCanceller?.(new GrblConnectionClosedError());
     this.statusPoller.stopPolling();
     this.sendQueue.clearAllLines();
     this.lineFramer.reset();
@@ -219,7 +241,7 @@ export class GrblController {
   }
 
   private handleConnectionLost(): void {
-    if (!this.isTransportOpen) {
+    if (this.phase === GRBL_CONTROLLER_PHASE.DISCONNECTED) {
       return;
     }
 

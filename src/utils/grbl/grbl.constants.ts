@@ -208,6 +208,15 @@ export const GRBL_CONTROLLER_EVENT_KIND = {
 
 export type GrblControllerEventKind = (typeof GRBL_CONTROLLER_EVENT_KIND)[keyof typeof GRBL_CONTROLLER_EVENT_KIND];
 
+/** Where the controller is in its connection life cycle. */
+export const GRBL_CONTROLLER_PHASE = {
+  DISCONNECTED: 'disconnected',
+  CONNECTING: 'connecting',
+  CONNECTED: 'connected',
+} as const;
+
+export type GrblControllerPhase = (typeof GRBL_CONTROLLER_PHASE)[keyof typeof GRBL_CONTROLLER_PHASE];
+
 /** Why the handshake failed. */
 export const GRBL_HANDSHAKE_FAILURE_REASON = {
   TIMEOUT: 'timeout',

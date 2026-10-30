@@ -11,6 +11,7 @@ import {
 } from './grbl.constants';
 import { GrblConnectionClosedError } from './grbl.connection.closed.error';
 import { GrblController } from './grbl.controller';
+import { GrblControllerBusyError } from './grbl.controller.busy.error';
 import { GrblHandshakeError } from './grbl.handshake.error';
 import { SimulatedLaserTransport } from './simulated.laser.transport';
 import { GRBL_SIMULATOR_FAULT_KIND } from './simulator/grbl.simulator.constants';
@@ -24,6 +25,10 @@ import type { SerialTransport } from './interfaces/SerialTransport';
 const BUILD_INFO_LINE = '$I\n';
 const SETTINGS_LINE = '$$\n';
 const UNSUPPORTED_BANNER_OUTPUT = "Grbl 0.9j ['$' for help]\r\n";
+const SUPPORTED_BANNER_OUTPUT = "Grbl 1.1h ['$' for help]\r\n";
+const EARLY_CONSOLE_LINE = 'G0X1\n';
+/** Time into the banner wait at which a test disconnects. */
+const BANNER_WAIT_ELAPSED_MS = 100;
 const CONSOLE_COMMAND = 'G1 X10 F600 ; move';
 const PREPARED_CONSOLE_COMMAND = 'G1X10F600';
 const FEEDLESS_MOVE = 'G1X10';
@@ -105,14 +110,19 @@ const getHandshakeFailureReason = async (connection: Promise<GrblConnectionInfo>
   return undefined;
 };
 
-/** Transport whose controller only ever prints an old GRBL 0.9 banner. */
-class OldFirmwareTransport implements SerialTransport {
+/** Transport whose controller prints one banner on open and never answers anything. */
+class BannerOnlyTransport implements SerialTransport {
   public readonly close = vi.fn(async (): Promise<void> => undefined);
+  private readonly bannerOutput: string;
   private receiveListener: ((chunk: Uint8Array) => void) | undefined;
+
+  public constructor(bannerOutput: string) {
+    this.bannerOutput = bannerOutput;
+  }
 
   public async open(): Promise<void> {
     setTimeout((): void => {
-      this.receiveListener?.(new TextEncoder().encode(UNSUPPORTED_BANNER_OUTPUT));
+      this.receiveListener?.(new TextEncoder().encode(this.bannerOutput));
     }, 0);
   }
 
@@ -206,7 +216,7 @@ describe(GrblController.name, () => {
   });
 
   it('connect rejects Grbl 0.9j with reason unsupported-firmware and closes the transport', async () => {
-    const transport: OldFirmwareTransport = new OldFirmwareTransport();
+    const transport: BannerOnlyTransport = new BannerOnlyTransport(UNSUPPORTED_BANNER_OUTPUT);
     const controller: GrblController = new GrblController(transport);
 
     const failureReason: Promise<string | undefined> = getHandshakeFailureReason(controller.connect());
@@ -235,6 +245,109 @@ describe(GrblController.name, () => {
     await rejection;
     expect(harness.events).toContainEqual({ kind: GRBL_CONTROLLER_EVENT_KIND.CONNECTION_LOST });
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('connect times out at 10000 ms when the controller sends a banner but never answers $I', async () => {
+    const transport: BannerOnlyTransport = new BannerOnlyTransport(SUPPORTED_BANNER_OUTPUT);
+    const controller: GrblController = new GrblController(transport);
+
+    const failureReason: Promise<string | undefined> = getHandshakeFailureReason(controller.connect());
+    await vi.advanceTimersByTimeAsync(GRBL_HANDSHAKE_TIMEOUT_MS - 1);
+
+    expect(transport.close).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(1);
+
+    expect(await failureReason).toBe(GRBL_HANDSHAKE_FAILURE_REASON.TIMEOUT);
+    expect(transport.close).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('disconnect during the banner wait rejects connect with GrblConnectionClosedError, no timer', async () => {
+    const harness: ControllerHarness = newControllerHarness();
+    const closeSpy = vi.spyOn(harness.transport, 'close');
+    harness.transport.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.STOP_RESPONDING });
+    const connection: Promise<GrblConnectionInfo> = harness.controller.connect();
+    const rejection: Promise<void> = expect(connection).rejects.toBeInstanceOf(GrblConnectionClosedError);
+    await vi.advanceTimersByTimeAsync(BANNER_WAIT_ELAPSED_MS);
+
+    await harness.controller.disconnect();
+
+    await rejection;
+    expect(closeSpy).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('connection loss during the banner wait rejects connect with GrblConnectionClosedError, no timer', async () => {
+    const harness: ControllerHarness = newControllerHarness();
+    const closeSpy = vi.spyOn(harness.transport, 'close');
+    harness.transport.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.STOP_RESPONDING });
+    const connection: Promise<GrblConnectionInfo> = harness.controller.connect();
+    const rejection: Promise<void> = expect(connection).rejects.toBeInstanceOf(GrblConnectionClosedError);
+    await vi.advanceTimersByTimeAsync(BANNER_WAIT_ELAPSED_MS);
+
+    harness.transport.simulateConnectionLoss();
+
+    await rejection;
+    expect(closeSpy).not.toHaveBeenCalled();
+    expect(harness.events).toContainEqual({ kind: GRBL_CONTROLLER_EVENT_KIND.CONNECTION_LOST });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('a cancelled connect does not disturb the next connect past the original 10000 ms deadline', async () => {
+    const harness: ControllerHarness = newControllerHarness();
+    const closeSpy = vi.spyOn(harness.transport, 'close');
+    const firstConnection: Promise<GrblConnectionInfo> = harness.controller.connect();
+    const firstRejection: Promise<void> = expect(firstConnection).rejects.toBeInstanceOf(GrblConnectionClosedError);
+    await harness.controller.disconnect();
+    await firstRejection;
+
+    await connectHarness(harness);
+    harness.events.length = 0;
+    await vi.advanceTimersByTimeAsync(GRBL_HANDSHAKE_TIMEOUT_MS);
+
+    expect(closeSpy).toHaveBeenCalledOnce();
+    expect(getStatusReports(harness.events).length).toBeGreaterThan(POLL_COUNT);
+    expect(harness.events).not.toContainEqual({ kind: GRBL_CONTROLLER_EVENT_KIND.CONNECTION_LOST });
+
+    await harness.controller.disconnect();
+  });
+
+  it('console command issued during the handshake is dropped, not written or queued', async () => {
+    const harness: ControllerHarness = newControllerHarness();
+    const writeSpy = vi.spyOn(harness.transport, 'write');
+    const connection: Promise<GrblConnectionInfo> = harness.controller.connect();
+
+    harness.controller.sendConsoleCommand(EARLY_CONSOLE_LINE);
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    await connection;
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+    expect(getWrittenTexts(writeSpy)).not.toContain(EARLY_CONSOLE_LINE);
+
+    await harness.controller.disconnect();
+  });
+
+  it('connect while connecting or connected rejects with GrblControllerBusyError, port untouched', async () => {
+    const harness: ControllerHarness = newControllerHarness();
+    const openSpy = vi.spyOn(harness.transport, 'open');
+    const closeSpy = vi.spyOn(harness.transport, 'close');
+    const firstConnection: Promise<GrblConnectionInfo> = harness.controller.connect();
+
+    await expect(harness.controller.connect()).rejects.toBeInstanceOf(GrblControllerBusyError);
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    await firstConnection;
+    await expect(harness.controller.connect()).rejects.toBeInstanceOf(GrblControllerBusyError);
+
+    expect(openSpy).toHaveBeenCalledOnce();
+    expect(closeSpy).not.toHaveBeenCalled();
+
+    harness.events.length = 0;
+    await vi.advanceTimersByTimeAsync(GRBL_STATUS_POLL_INTERVAL_MS);
+
+    expect(getStatusReports(harness.events)).toHaveLength(1);
+
+    await harness.controller.disconnect();
   });
 
   it('polls status every 250 ms and emits resolved status reports', async () => {
