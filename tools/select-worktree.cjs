@@ -6,7 +6,10 @@
 // Enter, an invalid answer, or a non-interactive shell selects.
 //
 // Usage:
-//   node tools/select-worktree.cjs [target]
+//   node tools/select-worktree.cjs [target] [-- dev server flags]
+//
+// Arguments after the target (or all arguments, when the first starts with a
+// dash) are forwarded to the dev server, so `npm run dev -- --host` reaches Vite.
 
 const fs = require('fs');
 const path = require('path');
@@ -30,10 +33,19 @@ const BRANCH_LINE_PREFIX = 'branch ';
 const DETACHED_LINE = 'detached';
 const MAX_SELECTION_ATTEMPTS = 3;
 
+const FLAG_PREFIX = '-';
+const ARGUMENT_SEPARATOR = '--';
+const DOUBLE_QUOTE = '"';
+
+const isFlagArgument = (argument) => Boolean(argument) && argument.startsWith(FLAG_PREFIX);
+
+const getCommandLineArguments = () => process.argv.slice(2).filter((argument) => argument !== ARGUMENT_SEPARATOR);
+
 // An unknown target is a wiring mistake in package.json, not a user choice, so
 // it fails loudly instead of falling back to the default.
 const resolveTarget = () => {
-  const requestedName = process.argv[2] || DEFAULT_TARGET;
+  const [firstArgument] = getCommandLineArguments();
+  const requestedName = firstArgument && !isFlagArgument(firstArgument) ? firstArgument : DEFAULT_TARGET;
   const target = TARGETS[requestedName];
 
   if (!target) {
@@ -42,6 +54,22 @@ const resolveTarget = () => {
   }
 
   return target;
+};
+
+const getForwardedArguments = () => {
+  const commandLineArguments = getCommandLineArguments();
+  const forwardedArguments = isFlagArgument(commandLineArguments[0])
+    ? commandLineArguments
+    : commandLineArguments.slice(1);
+
+  // Windows runs the command through cmd.exe, where a double quote inside a
+  // quoted argument cannot be escaped reliably.
+  if (IS_WINDOWS && forwardedArguments.some((argument) => argument.includes(DOUBLE_QUOTE))) {
+    console.error('Dev server flags must not contain double quotes on Windows.');
+    process.exit(1);
+  }
+
+  return forwardedArguments;
 };
 
 const getGitOutput = (args, cwd) => {
@@ -174,17 +202,23 @@ const selectChoice = async (target, choices) => {
   return rootChoice;
 };
 
-const startDevServer = (target, choice) => {
+const startDevServer = (target, choice, forwardedArguments) => {
   if (!fs.existsSync(path.join(choice.cwd, 'node_modules'))) {
     console.log(`Warning: ${choice.label} has no node_modules - run "npm install" there first.`);
   }
 
   console.log(`\nStarting the ${target.label} dev server in ${choice.label}...\n`);
+  const npmArguments = forwardedArguments.length
+    ? [...target.args, ARGUMENT_SEPARATOR, ...forwardedArguments]
+    : target.args;
   // npm.cmd is a batch file, which Node refuses to spawn without a shell. With a shell, Node 24 deprecates an
-  // args array (DEP0190), so Windows gets one command string; the args are fixed TARGETS constants, never input.
+  // args array (DEP0190), so Windows gets one command string with every forwarded argument quoted.
+  const windowsCommand = [NPM_BINARY, ...target.args, ...npmArguments.slice(target.args.length)
+    .map((argument) => (argument === ARGUMENT_SEPARATOR ? argument : `${DOUBLE_QUOTE}${argument}${DOUBLE_QUOTE}`))]
+    .join(' ');
   const devProcess = IS_WINDOWS
-    ? spawn([NPM_BINARY, ...target.args].join(' '), { cwd: choice.cwd, stdio: 'inherit', shell: true })
-    : spawn(NPM_BINARY, target.args, { cwd: choice.cwd, stdio: 'inherit' });
+    ? spawn(windowsCommand, { cwd: choice.cwd, stdio: 'inherit', shell: true })
+    : spawn(NPM_BINARY, npmArguments, { cwd: choice.cwd, stdio: 'inherit' });
 
   devProcess.on('error', (error) => {
     console.error(`Could not start the ${target.label} dev server: ${error.message}`);
@@ -198,6 +232,7 @@ const startDevServer = (target, choice) => {
 
 const main = async () => {
   const target = resolveTarget();
+  const forwardedArguments = getForwardedArguments();
   const repositoryRoot = getRepositoryRoot();
   const branchByPath = getBranchByWorktreePath(repositoryRoot);
   const rootChoice = {
@@ -207,7 +242,7 @@ const main = async () => {
   };
   const choices = [rootChoice, ...getWorktreeChoices(repositoryRoot, branchByPath)];
 
-  startDevServer(target, await selectChoice(target, choices));
+  startDevServer(target, await selectChoice(target, choices), forwardedArguments);
 };
 
 main().catch((error) => {

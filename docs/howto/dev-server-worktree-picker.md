@@ -12,6 +12,7 @@ Select 0-1 [0]:
 ```
 
 - Enter, three invalid answers, or a non-interactive shell all start in `<root>`.
+- Flags after `--` go to Vite: `npm run dev -- --host`.
 - `npm run dev:root` skips the picker and starts Vite in the current checkout. Use it from scripts and other tools.
 - A worktree without `node_modules` gets a warning; run `npm install` in it first.
 
