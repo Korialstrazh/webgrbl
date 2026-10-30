@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { getParsedGrblFirmwareIdentity } from './grbl.firmware.banner.parser';
 
+const FIRMWARE_NAME_GRBL = 'Grbl';
+
 describe(getParsedGrblFirmwareIdentity.name, () => {
   it('parses a Grbl banner and keeps the letter suffix', () => {
     expect(getParsedGrblFirmwareIdentity("Grbl 1.1h ['$' for help]")).toEqual({
-      firmwareName: 'Grbl',
+      firmwareName: FIRMWARE_NAME_GRBL,
       version: '1.1h',
       vendorText: "['$' for help]",
     });
@@ -18,7 +20,11 @@ describe(getParsedGrblFirmwareIdentity.name, () => {
   });
 
   it('parses a version without suffix or vendor text', () => {
-    expect(getParsedGrblFirmwareIdentity('Grbl 1.2')).toEqual({ firmwareName: 'Grbl', version: '1.2', vendorText: '' });
+    expect(getParsedGrblFirmwareIdentity('Grbl 1.2')).toEqual({
+      firmwareName: FIRMWARE_NAME_GRBL,
+      version: '1.2',
+      vendorText: '',
+    });
   });
 
   it('returns undefined for other firmware', () => {

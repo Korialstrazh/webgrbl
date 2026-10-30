@@ -11,6 +11,7 @@ import { GRBL_LINE_BREAK_PATTERN } from './grbl.constants';
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 export class GrblLineFramer {
+  /** Decoder that keeps the start of a character split across two chunks. */
   private decoder: TextDecoder = new TextDecoder();
   /** Text received after the last line break; the start of a line that is still arriving. */
   private pendingText = '';

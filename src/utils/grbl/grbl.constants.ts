@@ -36,39 +36,62 @@ export const GRBL_DEFAULT_BAUD_RATE = 115200;
 // #endregion
 
 // #region Realtime bytes
+/** Realtime byte that asks for a status report. */
 export const GRBL_STATUS_QUERY_BYTE = 0x3f;
+/** Realtime byte that pauses motion. */
 export const GRBL_FEED_HOLD_BYTE = 0x21;
+/** Realtime byte that continues after a feed hold. */
 export const GRBL_CYCLE_RESUME_BYTE = 0x7e;
+/** Realtime byte that resets the controller. */
 export const GRBL_SOFT_RESET_BYTE = 0x18;
+/** Realtime byte that stops a jog in progress. */
 export const GRBL_JOG_CANCEL_BYTE = 0x85;
 // #endregion
 
 // #region Line patterns
+/** Splits received text into lines for both LF and CRLF endings. */
 export const GRBL_LINE_BREAK_PATTERN = /\r?\n/;
+/** Matches a semicolon comment to the end of the line or a parenthesis comment. */
 export const GRBL_LINE_COMMENT_PATTERN = /;.*$|\([^)]*\)/g;
+/** Matches any run of whitespace. */
 export const GRBL_WHITESPACE_PATTERN = /\s+/g;
+/** First character of a GRBL system command such as a setting write. */
 export const GRBL_SYSTEM_COMMAND_PREFIX = '$';
 /** Commands that write the controller EEPROM and so must be sent one at a time (G10L2 also covers G10L20). */
 export const GRBL_EEPROM_COMMAND_PATTERN = /^(\$(\d+|N[01]|RST|I)=|G10L2|G28\.1|G30\.1)/i;
 // #endregion
 
 // #region Response patterns
+/** Fallback for text that is missing. */
 export const GRBL_EMPTY_TEXT = '';
+/** Text of a successful acknowledgement. */
 export const GRBL_OK_RESPONSE_TEXT = 'ok';
+/** Matches an error line and captures the error code. */
 export const GRBL_ERROR_PATTERN = /^error:(\d+)$/i;
+/** Matches an alarm line and captures the alarm code. */
 export const GRBL_ALARM_PATTERN = /^ALARM:(\d+)$/i;
+/** Matches a setting line and captures its number and value. */
 export const GRBL_SETTING_PATTERN = /^\$(\d+)=(.*)$/;
+/** Matches a bracketed feedback message. */
 export const GRBL_FEEDBACK_PATTERN = /^\[.*\]$/;
+/** Matches a status report and captures what is inside the angle brackets. */
 export const GRBL_STATUS_REPORT_PATTERN = /^<(.*)>$/;
+/** Matches the welcome banner and captures firmware name, version and the remaining text. */
 export const GRBL_BANNER_PATTERN = /^(grbl(?:hal)?)\s+v?(\d+\.\d+[a-z]?)\s*(.*)$/i;
+/** Captures the major and minor number of a firmware version. */
 export const GRBL_VERSION_NUMBER_PATTERN = /^(\d+)\.(\d+)/;
+/** Matches the build option line and captures the reported receive buffer size. */
 export const GRBL_BUILD_OPTION_PATTERN = /^\[OPT:[^,\]]*,\d+,(\d+)\]$/i;
 // #endregion
 
 // #region Status report fields
+/** Separates the fields of a status report. */
 export const GRBL_STATUS_FIELD_SEPARATOR = '|';
+/** Separates a status field name from its value. */
 export const GRBL_STATUS_VALUE_SEPARATOR = ':';
+/** Separates the numbers inside one status field value. */
 export const GRBL_STATUS_NUMBER_SEPARATOR = ',';
+/** Names of the status report fields this app reads. */
 export const GRBL_STATUS_FIELD = {
   MACHINE_POSITION: 'MPos',
   WORK_POSITION: 'WPos',
@@ -81,7 +104,9 @@ export const GRBL_STATUS_FIELD = {
 // #endregion
 
 // #region Firmware support
+/** Oldest firmware major version the app supports. */
 export const GRBL_MIN_SUPPORTED_MAJOR_VERSION = 1;
+/** Oldest firmware minor version the app supports within the minimum major version. */
 export const GRBL_MIN_SUPPORTED_MINOR_VERSION = 1;
 /** GRBL reports its serial buffer size, but one byte of it cannot be used. */
 export const GRBL_RX_BUFFER_UNUSABLE_BYTES = 1;

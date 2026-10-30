@@ -23,6 +23,7 @@ import type { GrblStatusReport } from './interfaces/GrblStatusReport';
 
 const AXIS_COUNT = 3;
 const PAIR_COUNT = 2;
+const SINGLE_COUNT = 1;
 /** Stands in for a number that a length-checked list cannot be missing. */
 const CHECKED_NUMBER_FALLBACK = 0;
 
@@ -48,33 +49,33 @@ const getParsedAxisPosition = (text: string): GrblAxisPosition | undefined => {
 const getMachineStateByName = (stateName: string): GrblMachineState | undefined =>
   Object.values(GRBL_MACHINE_STATE).find((knownState: GrblMachineState): boolean => knownState === stateName);
 
-const applyStatusField = (report: GrblStatusReport, fieldText: string): void => {
+const getStatusFieldChanges = (fieldText: string): Partial<GrblStatusReport> => {
   const separatorIndex: number = fieldText.indexOf(GRBL_STATUS_VALUE_SEPARATOR);
   const fieldName: string = fieldText.slice(0, separatorIndex);
   const fieldValue: string = fieldText.slice(separatorIndex + 1);
-  const pair: number[] | undefined = getParsedNumberList(fieldValue, PAIR_COUNT);
 
   switch (fieldName) {
   case GRBL_STATUS_FIELD.MACHINE_POSITION:
-    report.machinePosition = getParsedAxisPosition(fieldValue);
-    break;
+    return { machinePosition: getParsedAxisPosition(fieldValue) };
   case GRBL_STATUS_FIELD.WORK_POSITION:
-    report.workPosition = getParsedAxisPosition(fieldValue);
-    break;
+    return { workPosition: getParsedAxisPosition(fieldValue) };
   case GRBL_STATUS_FIELD.WORK_COORDINATE_OFFSET:
-    report.workCoordinateOffset = getParsedAxisPosition(fieldValue);
-    break;
-  case GRBL_STATUS_FIELD.BUFFER:
-    report.plannerBlocksAvailable = pair?.[0];
-    report.rxBytesAvailable = pair?.[1];
-    break;
-  case GRBL_STATUS_FIELD.FEED_AND_SPINDLE:
-    report.feedRate = pair?.[0];
-    report.spindleSpeed = pair?.[1];
-    break;
-  case GRBL_STATUS_FIELD.FEED:
-    report.feedRate = getParsedNumberList(fieldValue, 1)?.[0];
-    break;
+    return { workCoordinateOffset: getParsedAxisPosition(fieldValue) };
+  case GRBL_STATUS_FIELD.BUFFER: {
+    const [plannerBlocksAvailable, rxBytesAvailable] = getParsedNumberList(fieldValue, PAIR_COUNT) ?? [];
+
+    return { plannerBlocksAvailable, rxBytesAvailable };
+  }
+  case GRBL_STATUS_FIELD.FEED_AND_SPINDLE: {
+    const [feedRate, spindleSpeed] = getParsedNumberList(fieldValue, PAIR_COUNT) ?? [];
+
+    return { feedRate, spindleSpeed };
+  }
+  case GRBL_STATUS_FIELD.FEED: {
+    const [feedRate] = getParsedNumberList(fieldValue, SINGLE_COUNT) ?? [];
+
+    return { feedRate };
+  }
   case GRBL_STATUS_FIELD.OVERRIDES: {
     const percents: number[] | undefined = getParsedNumberList(fieldValue, AXIS_COUNT);
 
@@ -84,11 +85,10 @@ const applyStatusField = (report: GrblStatusReport, fieldText: string): void => 
       spindlePercent = CHECKED_NUMBER_FALLBACK,
     ] = percents ?? [];
 
-    report.overrides = percents ? { feedPercent, rapidPercent, spindlePercent } : undefined;
-    break;
+    return { overrides: percents ? { feedPercent, rapidPercent, spindlePercent } : undefined };
   }
   default:
-    break;
+    return {};
   }
 };
 
@@ -108,9 +108,11 @@ export const getParsedGrblStatusReport = (line: string): GrblStatusReport | unde
     return undefined;
   }
 
-  const report: GrblStatusReport = {
+  const [machineSubstate] = (substateText ? getParsedNumberList(substateText, SINGLE_COUNT) : undefined) ?? [];
+
+  let report: GrblStatusReport = {
     machineState,
-    machineSubstate: substateText ? getParsedNumberList(substateText, 1)?.[0] : undefined,
+    machineSubstate,
     machinePosition: undefined,
     workPosition: undefined,
     workCoordinateOffset: undefined,
@@ -122,7 +124,7 @@ export const getParsedGrblStatusReport = (line: string): GrblStatusReport | unde
   };
 
   for (const fieldText of otherFields) {
-    applyStatusField(report, fieldText);
+    report = { ...report, ...getStatusFieldChanges(fieldText) };
   }
 
   return report;
