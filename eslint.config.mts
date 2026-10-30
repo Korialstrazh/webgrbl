@@ -7,8 +7,8 @@
 // jiti is mandatory, not optional: ESLint loads a .mts flat config through it.
 // typescript-eslint re-exports the parser and plugin - do not install
 // @typescript-eslint/parser or @typescript-eslint/eslint-plugin alongside it.
-// eslint-plugin-react is not used: 7.37 crashes on ESLint 10 (it calls the removed context.getFilename), and the
-// JSX formatting rules it provided come from @stylistic instead.
+// eslint-plugin-react is not used: 7.37 crashes on ESLint 10 (it calls the removed context.getFilename). JSX
+// indentation is covered by @stylistic/indent, the other JSX rules it provided by their @stylistic versions.
 
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import stylisticTsPlugin from '@stylistic/eslint-plugin';
