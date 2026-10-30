@@ -10,7 +10,13 @@
  */
 import { combineReducers } from '@reduxjs/toolkit';
 import { BROWSER_ENVIRONMENT_STATE_NAME, browserEnvironmentReducer } from './browser.environment.state';
+import { GRBL_CONNECTION_STATE_NAME, grblConnectionReducer } from './grbl.connection.state';
+import { GRBL_CONSOLE_STATE_NAME, grblConsoleReducer } from './grbl.console.state';
+import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
 
 export const rootReducer = combineReducers({
   [BROWSER_ENVIRONMENT_STATE_NAME]: browserEnvironmentReducer,
+  [GRBL_CONNECTION_STATE_NAME]: grblConnectionReducer,
+  [MACHINE_STATUS_STATE_NAME]: machineStatusReducer,
+  [GRBL_CONSOLE_STATE_NAME]: grblConsoleReducer,
 });
