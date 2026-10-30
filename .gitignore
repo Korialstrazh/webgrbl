@@ -1,0 +1,17 @@
+# Per-developer Gitea configuration
+.gitea-local
+
+# Machine-local ruleset install state
+docs/rulesets/.rulesets-manifest.json
+
+# Agent worktrees
+.claude/worktrees/
+.claude/settings.local.json
+
+# Dependencies and build output
+node_modules/
+dist/
+dev-dist/
+
+# Local vitest report output
+.vitest/
