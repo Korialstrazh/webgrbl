@@ -7,18 +7,24 @@
     "node": ">=24.14.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "node tools/select-worktree.cjs",
+    "dev:root": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "vitest run --maxWorkers=4"
+    "test": "vitest run --maxWorkers=4",
+    "locales:update": "node ./tools/localization/build.locales.from.csv.cjs",
+    "locales:check": "npm run locales:update && git diff --exit-code -- src/utils/localization/default.locales.ts tools/localization",
+    "check": "npm run lint && npm run typecheck && npm test && npm run locales:check && npm run build && npm audit --audit-level=moderate"
   },
   "dependencies": {
     "@reduxjs/toolkit": "2.13.0",
+    "i18next": "26.5.3",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "react-i18next": "17.1.0",
     "react-redux": "9.3.0",
     "redux-saga": "1.5.1"
   },
@@ -32,8 +38,7 @@
     "@types/react-dom": "19.3.0",
     "@types/w3c-web-serial": "1.0.8",
     "@vitejs/plugin-react": "6.1.2",
-    "eslint": "9.39.5",
-    "eslint-plugin-react": "7.37.5",
+    "eslint": "10.13.0",
     "eslint-plugin-react-hooks": "7.1.1",
     "jiti": "2.7.0",
     "jsdom": "29.1.1",

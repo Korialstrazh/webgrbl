@@ -11,6 +11,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
+// Must stay above the app imports: registers every translation bundle before any module calls t().
+import './utils/localization/default.locales';
 import { AppRoute } from './routes/AppRoute';
 import { newStore } from './utils/states/new.store';
 import type { AppStore } from './utils/states/new.store';
