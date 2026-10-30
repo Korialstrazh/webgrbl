@@ -10,15 +10,13 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { DEFAULT } from '../../utils/localization/default.locales';
 import styles from './styles.module.scss';
 
-const OFFLINE_READY_MESSAGE = 'webgrbl is ready to work offline.';
-const NEED_REFRESH_MESSAGE = 'A new version of webgrbl is available.';
-const RELOAD_LABEL = 'Reload';
-const DISMISS_LABEL = 'Dismiss';
-
 export const AppUpdatePrompt = (): ReactNode => {
+  const { t } = useTranslation();
   const {
     offlineReady: [isOfflineReady, setIsOfflineReady],
     needRefresh: [isRefreshNeeded, setIsRefreshNeeded],
@@ -40,9 +38,9 @@ export const AppUpdatePrompt = (): ReactNode => {
 
   return (
     <div className={styles.appUpdatePrompt} role="alert">
-      <span>{isRefreshNeeded ? NEED_REFRESH_MESSAGE : OFFLINE_READY_MESSAGE}</span>
-      {isRefreshNeeded && <button type="button" onClick={reloadWithNewVersion}>{RELOAD_LABEL}</button>}
-      <button type="button" onClick={dismissUpdatePrompt}>{DISMISS_LABEL}</button>
+      <span>{t(isRefreshNeeded ? DEFAULT.APP_UPDATE_NEED_REFRESH : DEFAULT.APP_UPDATE_OFFLINE_READY)}</span>
+      {isRefreshNeeded && <button type="button" onClick={reloadWithNewVersion}>{t(DEFAULT.APP_UPDATE_RELOAD)}</button>}
+      <button type="button" onClick={dismissUpdatePrompt}>{t(DEFAULT.APP_UPDATE_DISMISS)}</button>
     </div>
   );
 };
