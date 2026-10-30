@@ -19,7 +19,7 @@ import { dirname } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default [
-  { ignores: ['dist', 'build', 'dev-dist', '*.cjs', '.claude/worktrees/**'] },
+  { ignores: ['dist', 'build', 'dev-dist', '*.cjs', '.claude/worktrees/**', '.worktrees/**'] },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {

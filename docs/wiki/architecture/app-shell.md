@@ -13,6 +13,7 @@ The scaffold every feature builds on: entry point, Redux store with sagas, PWA s
 - **Redux with class actions.** Every action is a class extending `Action<TPayload>`; `classActionToPlainObjectMiddleware` runs first and turns instances into plain objects. Each state file holds its state, actions, reducer, sagas, and curried selectors in `#region` blocks.
 - **Browser environment state.** `browserEnvironment` tracks `isOnline` (fed by a saga listening to `online`/`offline` events) and `isWebSerialSupported` (`'serial' in navigator`). `BrowserStatusBar` shows both.
 - **PWA.** `vite-plugin-pwa` in `generateSW` mode precaches all built assets. `registerType: 'prompt'` means a new version is never activated automatically; `AppUpdatePrompt` asks the user. In tests, `vitest.setup.ts` mocks `virtual:pwa-register/react`.
+- **Strings.** Every visible string comes from `t(DEFAULT.<KEY>)`; see [[localization]].
 - **Types.** `tsconfig.json` loads `vite/client`, `vite-plugin-pwa/react`, and `w3c-web-serial` (types for `navigator.serial`).
 
 ## Source
