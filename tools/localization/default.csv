@@ -9,6 +9,7 @@ BROWSER_STATUS_OFFLINE;Offline
 BROWSER_STATUS_ONLINE;Online
 BROWSER_STATUS_WEB_SERIAL_SUPPORTED;Web Serial ready
 BROWSER_STATUS_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
+CONSOLE_RAW_ERROR;{{detail}}
 GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again.
 GRBL_ALARM_10;Emergency stop asserted - clear it and reset.
 GRBL_ALARM_2;Soft limit alarm - the G-code target is beyond the machine travel. The position is kept and it is safe to unlock.

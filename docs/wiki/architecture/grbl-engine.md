@@ -17,7 +17,7 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - **Status reports.** `getParsedGrblStatusReport` reads the state (and optional `:substate`), `MPos`, `WPos`, `WCO`, `Bf` (planner, RX), `FS` and `F` (feed), `Ov`; unknown fields are ignored and an unknown state yields `undefined`. `getResolvedGrblPositions` fills WPos from MPos - WCO (or MPos from WPos + WCO); a WCO in the report replaces the cached one.
 - **Banner and build info.** `getParsedGrblFirmwareIdentity` keeps the version letter suffix (`1.1h`). `isSupportedGrblFirmware` accepts 1.1 or later (1.2 clones and FluidNC `Grbl 3.x` pass, 0.9 does not). `getGrblRxBufferSizeFromBuildOption` returns `rx - 1` from `[OPT:flags,blocks,rx]` because one byte of the reported serial buffer is unusable.
 - **Send queue.** `GrblCharacterCountingQueue` releases a line only while the bytes in flight plus the line (with its line feed) fit the RX buffer; each `ok`/`error` frees the oldest in-flight line (`getOldestInFlightLine()` tells which line the next answer belongs to). Lines marked `isSentAlone` (EEPROM writes, and the `$C` that leaves check mode) go alone: they wait for an empty buffer and nothing follows them until they are answered.
-- **Planned layers.** The Redux/saga bridge is added on top in a later step; this article grows with it. The controller, its stop controls, program streaming and check mode, and the simulated laser are described below.
+- **Redux bridge.** `watchGrblController` (`src/utils/states/grbl.controller.saga.ts`) owns the one controller instance and maps requests to controller calls and events to actions; see [Redux bridge](#redux-bridge). The controller, its stop controls, program streaming and check mode, and the simulated laser are described below.
 
 ## Controller
 
@@ -131,6 +131,19 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - **Preferences.** `CONNECTION_PREFERENCES_STORAGE` keeps `ConnectionPreferences` (baud rate and the port choice) in `localStorage` under `webgrbl.connectionPreferences`. Every access is in try/catch and the parsed value is checked with type guards; a missing, corrupt or wrongly shaped value, or a throwing storage, reads as `undefined`.
 - **Tests** use `FakeSerialPort` (`test.support/fake.serial.port.ts`) and stub `navigator.serial` with an `EventTarget`, removed after each test so other suites still see Web Serial as unsupported.
 
+## Redux bridge
+
+`watchGrblController(dependencies)` in `src/utils/states/grbl.controller.saga.ts` connects the engine to the store. It is the only code outside `src/utils/grbl/` that creates a `GrblController`, and it keeps the instance in saga-local scope, never in the store. Slices it drives: `grblConnection`, `machineStatus`, `grblConsole`, `toast` (see [[app-shell]]).
+
+- **Dependencies** (`GrblControllerSagaDependencies`): `newTransport(portId, baudRate)`, `requestSerialPort()` (undefined when the user cancels), `getGrantedSerialPorts()`, and `storage` (`CONNECTION_PREFERENCES_STORAGE`). `newStore(dependencies?)` defaults to `newBrowserGrblControllerSagaDependencies()`: the simulated id gives `SimulatedLaserTransport`, any other id the registered port in a `WebSerialTransport` (an unknown id throws `SerialPortOpenError` with reason `port-not-found`); `navigator.serial` is looked up on each call, so without Web Serial the granted ports are `[]` and the picker returns `undefined`. A picker closed without a choice (`NotFoundError`) is silent.
+- **At start.** The granted ports are registered and put as `AvailableSerialPortsReceived`; stored preferences restore the baud rate (only a listed one) and the port: `isSimulated` selects `simulated`, a stored USB vendor/product pair selects the granted port with the same ids. Requests are taken from the start, while the port list is still loading.
+- **Picker.** `SerialPortPickerRequested` requests a port, registers it, reloads the granted ports and selects it.
+- **Session.** `ConnectRequested` starts one session; further connect requests are ignored until it ends (a new one is taken after a disconnect, a failure or a loss). Status goes `connecting`, the transport and controller are created and subscribed through an `eventChannel` with an expanding buffer, then `connect()` runs. Success puts `ConnectionEstablished`, status `connected`, an info `TOAST_CONNECTED {firmware, version}`, and stores `{baudRate, portChoice}`. A failure puts an error toast (`SerialPortOpenError` reasons map to `TOAST_PORT_ACCESS_DENIED_OR_BUSY` / `TOAST_PORT_NOT_FOUND` / `TOAST_PORT_OPEN_FAILED`, `GrblHandshakeError` to `TOAST_CONNECT_TIMEOUT` / `TOAST_UNSUPPORTED_FIRMWARE`, anything else `TOAST_PORT_OPEN_FAILED`), status `disconnected`, and the raw error text (with its cause) as a console error line `CONSOLE_RAW_ERROR {detail}`. Toasts never carry raw error text. `GrblConnectionClosedError` is silent, because the disconnect or loss that caused it reports itself.
+- **Events.** `console-entry` becomes `ConsoleEntryReceived`, `status-report` `MachineStatusReceived`, `grbl-error` an error `TOAST_GRBL_ERROR {code, description}` and `grbl-alarm` an error `TOAST_GRBL_ALARM {code, description}` (the description is a localisation key from `getGrblErrorDescriptionKey` / `getGrblAlarmDescriptionKey`, translated by the toast view), `connection-lost` status `lost` plus an error `TOAST_CONNECTION_LOST`, `not-responding` a warning `TOAST_NOT_RESPONDING`, `program-stopped-on-error` an error `TOAST_PROGRAM_STOPPED_ON_ERROR {lineNumber, code}`. The mapping is `getGrblControllerEventActions` (`grbl.controller.event.actions.ts`). Every status report and console line is dispatched as it arrives; there is no batching.
+- **Commands** (only while connected): `ConsoleCommandSubmitted` calls `sendConsoleCommand`, `MachineStopRequested` `stopMachine`, `MachineResetRequested` `resetMachine`, `MachineUnlockRequested` `unlockMachine`. A failing command adds a raw console error line instead of ending the saga.
+- **Teardown.** The session races event forwarding against the connection flow: a `connection-lost` event ends forwarding and cancels the flow; `DisconnectRequested` (also while connecting) calls `disconnect()` and puts status `disconnected`. Either way the event channel is closed, which removes the controller listener.
+- **Tests** (`grbl.controller.saga.test.ts`) run `newStore(testDependencies)` with a `SimulatedLaserTransport` factory, in-memory storage and fake timers, and disconnect after each test so no timer stays behind.
+
 ## Source
 
 - `src/utils/grbl/grbl.constants.ts`
@@ -181,6 +194,12 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - `src/utils/grbl/serial.port.open.error.ts`
 - `src/utils/grbl/serial.port.registry.ts`
 - `src/utils/grbl/test.support/fake.serial.port.ts`
+- `src/utils/states/grbl.controller.saga.ts`
+- `src/utils/states/grbl.controller.event.actions.ts`
+- `src/utils/states/grbl.connect.failure.toast.key.ts`
+- `src/utils/states/grbl.raw.error.console.info.ts`
+- `src/utils/states/browser.grbl.controller.saga.dependencies.ts`
+- `src/utils/states/interfaces/GrblControllerSagaDependencies.ts`
 - `src/utils/storage/connection.preferences.storage.ts`
 - `src/utils/storage/interfaces/ConnectionPreferences.ts`
 - `src/utils/type.guards/`

@@ -11,7 +11,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
 import type { SagaMiddleware } from 'redux-saga';
+import { newBrowserGrblControllerSagaDependencies } from './browser.grbl.controller.saga.dependencies';
 import { classActionToPlainObjectMiddleware } from './class.action.to.plain.object.middleware';
+import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import { rootReducer } from './root.reducer';
 import { rootSaga } from './root.saga';
 
@@ -38,11 +40,14 @@ export type AppDispatch = AppStore['dispatch'];
 
 export type AppRootState = ReturnType<AppStore['getState']>;
 
-export const newStore = (): AppStore => {
+/** Tests pass their own dependencies, such as a simulated laser and in-memory storage, instead of the browser's. */
+export const newStore = (
+  grblControllerSagaDependencies: GrblControllerSagaDependencies = newBrowserGrblControllerSagaDependencies(),
+): AppStore => {
   const sagaMiddleware: SagaMiddleware = createSagaMiddleware({ onError: logSagaCrash });
   const store: AppStore = configureAppStore(sagaMiddleware);
 
-  sagaMiddleware.run(rootSaga);
+  sagaMiddleware.run(rootSaga, grblControllerSagaDependencies);
 
   return store;
 };
