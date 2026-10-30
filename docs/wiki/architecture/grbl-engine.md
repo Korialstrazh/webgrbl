@@ -17,7 +17,7 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - **Status reports.** `getParsedGrblStatusReport` reads the state (and optional `:substate`), `MPos`, `WPos`, `WCO`, `Bf` (planner, RX), `FS` and `F` (feed), `Ov`; unknown fields are ignored and an unknown state yields `undefined`. `getResolvedGrblPositions` fills WPos from MPos - WCO (or MPos from WPos + WCO); a WCO in the report replaces the cached one.
 - **Banner and build info.** `getParsedGrblFirmwareIdentity` keeps the version letter suffix (`1.1h`). `isSupportedGrblFirmware` accepts 1.1 or later (1.2 clones and FluidNC `Grbl 3.x` pass, 0.9 does not). `getGrblRxBufferSizeFromBuildOption` returns `rx - 1` from `[OPT:flags,blocks,rx]` because one byte of the reported serial buffer is unusable.
 - **Send queue.** `GrblCharacterCountingQueue` releases a line only while the bytes in flight plus the line (with its line feed) fit the RX buffer; each `ok`/`error` frees the oldest in-flight line (`getOldestInFlightLine()` tells which line the next answer belongs to). EEPROM-writing lines go alone with nothing else in flight.
-- **Planned layers.** Stop sequence, program streaming, check mode and the Redux/saga bridge are added on top in later steps; this article grows with them. The controller and the simulated laser are described below.
+- **Planned layers.** Program streaming, check mode and the Redux/saga bridge are added on top in later steps; this article grows with them. The controller, its stop controls and the simulated laser are described below.
 
 ## Controller
 
@@ -30,7 +30,23 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - **Response routing.** `ok` frees the oldest in-flight line and sends whatever now fits. `error` frees it too, emits `grbl-error` and only then sends more, so a listener can still stop the queue (the streaming step's stop-on-error relies on this). `ALARM:N` emits `grbl-alarm`. Status reports pass through `GrblStatusTracker`, which fills the positions with `getResolvedGrblPositions` and caches the last WCO; `getLatestStatus()` returns the result. Banners after the handshake are shown only.
 - **Console commands.** `sendConsoleCommand` prepares the line (`getPreparedGrblLine`) and queues it with origin `console`; empty results are ignored, and so are commands until the handshake is done (phase `connected`): a line written during the reset would be wiped but still count as in flight, so `$I`'s `ok` would acknowledge it.
 - **Polling and teardown.** `GrblStatusPoller` writes `?` every 250 ms (the interval can change, for the faster poll during a stop). `disconnect()` and a transport connection loss stop the poll, clear the queue and reset the line framer, so no timer stays behind; a loss also emits `connection-lost`. A failed write is ignored because the transport reports a dead port through its connection-lost listener.
+- **Stop, reset, hold and unlock.** See [Stop and machine controls](#stop-and-machine-controls).
 - **Tests** (`grbl.controller.connect.test.ts`) run against `SimulatedLaserTransport` with fake timers. Fake timers schedule a 0 ms timer set during a tick 1 ms later, so each simulator round trip costs 1 ms of fake time; the tests advance 10 ms to let a handshake settle.
+
+## Stop and machine controls
+
+All of these do nothing (and resolve at once) unless the controller phase is `connected`. Realtime bytes go straight to the transport and appear as realtime console entries.
+
+- **`stopMachine()`** runs `runGrblStopSequence` (`grbl.stop.sequence.ts`, through a small `GrblStopSequenceContext`). The goal is to halt as fast as possible without losing the position: a soft reset while the machine moves loses steps and raises `ALARM:3`, so a moving machine is decelerated first.
+  1. Drop the unsent lines (`clearPendingLines()`; lines in flight stay counted until the reset).
+  2. Decide from the latest status: `Jog` writes 0x85, `Run` writes `!`, `Hold:1` (already decelerating) writes nothing but still waits. `Hold:0`, `Idle`, `Alarm` and every other state skip to step 4.
+  3. Wait for a status of `Hold:0` or `Idle`, at most 2 000 ms (`GRBL_HOLD_COMPLETE_MAX_WAIT_MS`). During the wait the status poll runs every 50 ms (`GRBL_STOP_STATUS_POLL_INTERVAL_MS`, builder's call) instead of 250 ms: the status that started the stop may be up to 250 ms old, and the faster poll notices the end of the 200 ms deceleration within 50 ms instead of up to 250 ms.
+  4. `resetMachine()`, then the poll returns to 250 ms.
+  The promise resolves once the reset byte is written. A second `stopMachine()` while one runs returns the same promise, so only one reset goes out (Review Focus 5). `disconnect()` or a connection loss during the wait ends it at once through a canceller; no reset is written and no timer stays behind.
+- **`resetMachine()`** writes 0x18 at once and clears queued and in-flight lines. Until the controller prints its banner again, `ok`/`error` answers free nothing (they belong to lines the reset wiped) and queued lines are held back (bytes sent while GRBL restarts could be wiped too, yet would count as in flight). The banner releases the queue, so a command sent right after the reset (for example `$X`) gets its own `ok`.
+- **`sendFeedHold()` / `sendCycleResume()`** write `!` / `~`.
+- **`unlockMachine()`** queues `$X` as a console line.
+- **Tests** (`grbl.controller.stop.test.ts`): stop during a move holds, then resets without an alarm and keeps the position; the 50 ms poll during the wait and 250 ms after it; jog cancel instead of feed hold during a jog; reset after 2 000 ms when the controller stops responding; idle stop sends only the reset; a second stop shares the promise; reset drops pending lines; `$X` right after a reset waits for the banner; feed hold and resume; no writes while disconnected; disconnect during the wait.
 
 ## Simulator
 
@@ -68,6 +84,7 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - `src/utils/grbl/grbl.private.command.registry.ts`
 - `src/utils/grbl/grbl.status.poller.ts`
 - `src/utils/grbl/grbl.status.tracker.ts`
+- `src/utils/grbl/grbl.stop.sequence.ts`
 - `src/utils/grbl/interfaces/`
 - `src/utils/grbl/simulator/` (whole simulator, including the G-code interpreter and default settings)
 - `src/utils/grbl/simulator/grbl.simulator.ts`

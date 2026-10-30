@@ -84,10 +84,15 @@ export class GrblCharacterCountingQueue {
     return this.inFlightLines[0];
   }
 
-  /** Drops all pending and in-flight lines. */
-  public clearAllLines(): void {
+  /** Drops the lines not sent yet; in-flight lines stay counted until the controller answers or is reset. */
+  public clearPendingLines(): void {
     this.pendingLines = [];
     this.pendingHeadIndex = 0;
+  }
+
+  /** Drops all pending and in-flight lines. */
+  public clearAllLines(): void {
+    this.clearPendingLines();
     this.inFlightLines = [];
     this.inFlightByteCount = 0;
   }

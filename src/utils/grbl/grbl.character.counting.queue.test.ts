@@ -85,6 +85,20 @@ describe(GrblCharacterCountingQueue.name, () => {
     expect(queue.takeSendableLines()).toEqual([]);
   });
 
+  it('clearPendingLines drops unsent lines and keeps in-flight lines counted', () => {
+    const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(SMALL_BUFFER_SIZE);
+    queue.enqueueLines([newQueuedLine(FIRST_TEXT), newQueuedLine(SECOND_TEXT)]);
+    queue.takeSendableLines();
+    queue.clearPendingLines();
+
+    expect(queue.hasPendingLines()).toBe(false);
+    expect(queue.getOldestInFlightLine()?.text).toBe(FIRST_TEXT);
+
+    queue.acknowledgeOldestInFlightLine();
+
+    expect(queue.takeSendableLines()).toEqual([]);
+  });
+
   it('a line longer than the buffer is still sent when nothing is in flight', () => {
     const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(SMALL_BUFFER_SIZE);
     queue.enqueueLines([newQueuedLine(LONG_TEXT), newQueuedLine(FIRST_TEXT)]);

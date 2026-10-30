@@ -11,6 +11,7 @@ import {
   GRBL_REALTIME_COMMAND_TEXT,
   GRBL_RESPONSE_KIND,
   GRBL_STATUS_POLL_INTERVAL_MS,
+  GRBL_UNLOCK_COMMAND,
 } from './grbl.constants';
 import { GrblCharacterCountingQueue } from './grbl.character.counting.queue';
 import { GrblConnectionClosedError } from './grbl.connection.closed.error';
@@ -23,6 +24,7 @@ import { GrblPrivateCommandRegistry } from './grbl.private.command.registry';
 import { getParsedGrblResponse } from './grbl.response.parser';
 import { GrblStatusPoller } from './grbl.status.poller';
 import { GrblStatusTracker } from './grbl.status.tracker';
+import { runGrblStopSequence } from './grbl.stop.sequence';
 import type { GrblControllerPhase, GrblLineOrigin, GrblRealtimeCommand } from './grbl.constants';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblConsoleEntry } from './interfaces/GrblConsoleEntry';
@@ -32,6 +34,7 @@ import type { GrblHandshakeContext } from './interfaces/GrblHandshakeContext';
 import type { GrblQueuedLine } from './interfaces/GrblQueuedLine';
 import type { GrblResolvedStatus } from './interfaces/GrblResolvedStatus';
 import type { GrblResponse } from './interfaces/GrblResponse';
+import type { GrblStopSequenceContext } from './interfaces/GrblStopSequenceContext';
 import type { SerialTransport } from './interfaces/SerialTransport';
 
 /** A console entry before the controller stamps its time. */
@@ -46,12 +49,16 @@ type GrblBannerListener = (identity: GrblFirmwareIdentity) => void;
 /** Cancels the running handshake with the given error. */
 type GrblHandshakeCanceller = (error: Error) => void;
 
+/** Ends the hold wait of a running stop at once. */
+type GrblHoldWaitCanceller = () => void;
+
 /** Developer-facing message for a response kind the controller does not route. */
 const getUnknownResponseMessage = (response: never): string => `Unknown GRBL response ${JSON.stringify(response)}`;
 
 /**
  * Drives one GRBL controller over a serial transport: handshake, status polling, the character-counting send queue,
- * private commands, response routing and typed events. Framework-free, so the Redux bridge owns one instance.
+ * private commands, stop, reset and hold controls, response routing and typed events. Framework-free, so the Redux
+ * bridge owns one instance.
  *
  * @author michael.morosov
  *
@@ -83,8 +90,18 @@ export class GrblController {
   private phase: GrblControllerPhase = GRBL_CONTROLLER_PHASE.DISCONNECTED;
   /** Sends the status query at an interval while connected. */
   private readonly statusPoller: GrblStatusPoller = new GrblStatusPoller(
-    (): void => this.writeRealtimeCommand(GRBL_REALTIME_COMMAND.STATUS_QUERY),
+    (): void => void this.writeRealtimeCommand(GRBL_REALTIME_COMMAND.STATUS_QUERY),
   );
+
+  /** The stop sequence in progress; a second stop request shares it. */
+  private runningStop: Promise<void> | undefined;
+  /** Ends the hold wait of the running stop; set only while it waits. */
+  private holdWaitCanceller: GrblHoldWaitCanceller | undefined;
+  /**
+   * True from a soft reset until the controller prints its banner again: answers arriving meanwhile belong to lines
+   * the reset wiped, and lines sent meanwhile could be wiped as well, so the queue holds them back.
+   */
+  private isAwaitingResetBanner = false;
 
   public constructor(transport: SerialTransport) {
     this.transport = transport;
@@ -151,6 +168,44 @@ export class GrblController {
     }
   }
 
+  /**
+   * Stops the machine as fast as possible without losing its position (see runGrblStopSequence). Resolves once the
+   * reset byte is written; a stop requested while one runs returns the running stop.
+   */
+  public stopMachine(): Promise<void> {
+    if (this.phase !== GRBL_CONTROLLER_PHASE.CONNECTED) {
+      return Promise.resolve();
+    }
+
+    this.runningStop ??= this.runStopSequence();
+
+    return this.runningStop;
+  }
+
+  /** Writes the soft reset at once and drops all queued and in-flight lines. */
+  public async resetMachine(): Promise<void> {
+    if (this.phase !== GRBL_CONTROLLER_PHASE.CONNECTED) {
+      return;
+    }
+
+    this.sendQueue.clearAllLines();
+    this.isAwaitingResetBanner = true;
+    await this.writeRealtimeCommand(GRBL_REALTIME_COMMAND.SOFT_RESET);
+  }
+
+  /** Queues $X, which clears the Alarm lock, as a console line. */
+  public unlockMachine(): void {
+    this.sendConsoleCommand(GRBL_UNLOCK_COMMAND);
+  }
+
+  public sendFeedHold(): Promise<void> {
+    return this.writeConnectedRealtimeCommand(GRBL_REALTIME_COMMAND.FEED_HOLD);
+  }
+
+  public sendCycleResume(): Promise<void> {
+    return this.writeConnectedRealtimeCommand(GRBL_REALTIME_COMMAND.CYCLE_RESUME);
+  }
+
   /** Adds an event listener and returns the function that removes it. */
   public addEventListener(listener: GrblControllerEventListener): () => void {
     this.eventListeners.add(listener);
@@ -168,7 +223,7 @@ export class GrblController {
     return {
       openTransport: (): Promise<void> => this.transport.open(),
       closeTransport: (): Promise<void> => this.transport.close(),
-      writeRealtimeCommand: (command: GrblRealtimeCommand): void => this.writeRealtimeCommand(command),
+      writeRealtimeCommand: (command: GrblRealtimeCommand): void => void this.writeRealtimeCommand(command),
       setBannerListener: (listener: GrblBannerListener | undefined): void => {
         this.bannerListener = listener;
       },
@@ -177,6 +232,38 @@ export class GrblController {
       },
       sendPrivateCommand: (commandText: string): Promise<string[]> => this.sendPrivateCommand(commandText),
     };
+  }
+
+  private newStopSequenceContext(): GrblStopSequenceContext {
+    return {
+      clearPendingLines: (): void => this.sendQueue.clearPendingLines(),
+      getLatestStatus: (): GrblResolvedStatus | undefined => this.statusTracker.getLatestStatus(),
+      writeRealtimeCommand: (command: GrblRealtimeCommand): void => void this.writeRealtimeCommand(command),
+      setStatusPollInterval: (intervalMs: number): void => {
+        if (this.phase === GRBL_CONTROLLER_PHASE.CONNECTED) {
+          this.statusPoller.startPolling(intervalMs);
+        }
+      },
+      addEventListener: (listener: GrblControllerEventListener): (() => void) => this.addEventListener(listener),
+      setHoldWaitCanceller: (canceller: GrblHoldWaitCanceller | undefined): void => {
+        this.holdWaitCanceller = canceller;
+      },
+      resetMachine: (): Promise<void> => this.resetMachine(),
+    };
+  }
+
+  private async runStopSequence(): Promise<void> {
+    try {
+      await runGrblStopSequence(this.newStopSequenceContext());
+    } finally {
+      this.runningStop = undefined;
+    }
+  }
+
+  private async writeConnectedRealtimeCommand(command: GrblRealtimeCommand): Promise<void> {
+    if (this.phase === GRBL_CONTROLLER_PHASE.CONNECTED) {
+      await this.writeRealtimeCommand(command);
+    }
   }
 
   private newQueuedLine(text: string, origin: GrblLineOrigin): GrblQueuedLine {
@@ -199,6 +286,10 @@ export class GrblController {
 
   /** Writes every queued line the controller receive buffer has room for. */
   private sendQueuedLines(): void {
+    if (this.isAwaitingResetBanner) {
+      return;
+    }
+
     for (const line of this.sendQueue.takeSendableLines()) {
       this.emitConsoleEntry({
         direction: GRBL_CONSOLE_DIRECTION.SENT,
@@ -211,14 +302,15 @@ export class GrblController {
   }
 
   /** Realtime bytes skip the send queue, so they reach the controller even when its buffer is full. */
-  private writeRealtimeCommand(command: GrblRealtimeCommand): void {
+  private writeRealtimeCommand(command: GrblRealtimeCommand): Promise<void> {
     this.emitConsoleEntry({
       direction: GRBL_CONSOLE_DIRECTION.REALTIME,
       text: GRBL_REALTIME_COMMAND_TEXT[command],
       realtimeCommand: command,
       isStatusReport: command === GRBL_REALTIME_COMMAND.STATUS_QUERY,
     });
-    this.writeBytes(Uint8Array.of(GRBL_REALTIME_COMMAND_BYTE[command]));
+
+    return this.writeBytesToTransport(Uint8Array.of(GRBL_REALTIME_COMMAND_BYTE[command]));
   }
 
   private writeBytes(bytes: Uint8Array): void {
@@ -236,7 +328,9 @@ export class GrblController {
   /** Forgets everything tied to the current connection; a running handshake and waiting private commands fail. */
   private releaseConnectionState(): void {
     this.phase = GRBL_CONTROLLER_PHASE.DISCONNECTED;
+    this.isAwaitingResetBanner = false;
     this.handshakeCanceller?.(new GrblConnectionClosedError());
+    this.holdWaitCanceller?.();
     this.statusPoller.stopPolling();
     this.sendQueue.clearAllLines();
     this.lineFramer.reset();
@@ -290,6 +384,7 @@ export class GrblController {
       break;
     case GRBL_RESPONSE_KIND.BANNER:
       this.bannerListener?.(response.identity);
+      this.handleResetBanner();
       break;
     case GRBL_RESPONSE_KIND.SETTING:
     case GRBL_RESPONSE_KIND.FEEDBACK:
@@ -303,8 +398,22 @@ export class GrblController {
     }
   }
 
-  /** Frees the oldest in-flight line and settles it if it was a private line; returns that line. */
+  private handleResetBanner(): void {
+    if (this.isAwaitingResetBanner) {
+      this.isAwaitingResetBanner = false;
+      this.sendQueuedLines();
+    }
+  }
+
+  /**
+   * Frees the oldest in-flight line and settles it if it was a private line; returns that line. Before the banner
+   * after a reset, an answer belongs to a wiped line and frees nothing.
+   */
   private acknowledgeOldestLine(): GrblQueuedLine | undefined {
+    if (this.isAwaitingResetBanner) {
+      return undefined;
+    }
+
     const acknowledgedLine: GrblQueuedLine | undefined = this.sendQueue.acknowledgeOldestInFlightLine();
 
     this.privateCommands.completePrivateLine(acknowledgedLine);
