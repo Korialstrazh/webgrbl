@@ -6,6 +6,7 @@ docs/rulesets/.rulesets-manifest.json
 
 # Agent worktrees
 .claude/worktrees/
+.worktrees/
 .claude/settings.local.json
 
 # Dependencies and build output
