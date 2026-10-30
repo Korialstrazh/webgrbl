@@ -19,6 +19,7 @@ import {
   ToastShown,
   selectToasts,
   toastReducer,
+  watchInfoToastExpiry,
 } from './toast.state';
 import type { ToastState } from './toast.state';
 
@@ -127,7 +128,7 @@ describe(toastReducer.name, () => {
   });
 });
 
-describe('watchInfoToastExpiry', () => {
+describe(watchInfoToastExpiry.name, () => {
   let store: AppStore;
 
   beforeEach(() => {

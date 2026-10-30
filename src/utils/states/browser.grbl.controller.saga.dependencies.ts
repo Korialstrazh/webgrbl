@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { isWebSerialAvailable } from '../browser/is.web.serial.available';
 import { SIMULATED_LASER_PORT_ID, WEB_SERIAL_OPEN_ERROR_NAME } from '../grbl/grbl.constants';
 import type { SerialTransport } from '../grbl/interfaces/SerialTransport';
 import { SerialPortOpenError } from '../grbl/serial.port.open.error';
@@ -21,8 +22,6 @@ import type { GrblControllerSagaDependencies } from './interfaces/GrblController
 
 /** Developer-facing message used when no granted port has the requested id. */
 const UNKNOWN_PORT_ID_MESSAGE = 'No granted serial port has this id';
-
-const isWebSerialAvailable = (): boolean => 'serial' in navigator;
 
 /** requestPort() rejects with NotFoundError when the user closes the picker without choosing a port. */
 const isPortPickerCancel = (error: unknown): boolean =>

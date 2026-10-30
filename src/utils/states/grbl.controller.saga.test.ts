@@ -12,7 +12,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   GRBL_CONNECTION_STATUS,
-  GRBL_CONSOLE_VIEW_DIRECTION,
   GRBL_HANDSHAKE_TIMEOUT_MS,
   GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
   GRBL_MACHINE_STATE,
@@ -44,6 +43,7 @@ import {
 } from './grbl.connection.state';
 import { watchGrblController } from './grbl.controller.saga';
 import { ConsoleCommandSubmitted, selectConsoleEntries } from './grbl.console.state';
+import { GRBL_CONSOLE_VIEW_DIRECTION } from './grbl.console.view.direction';
 import type { GrblConsoleViewEntry } from './interfaces/GrblConsoleViewEntry';
 import type { AppToast } from './interfaces/AppToast';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
@@ -381,7 +381,7 @@ describe(watchGrblController.name, () => {
     store.dispatch(new SerialPortPickerRequested());
     await vi.advanceTimersByTimeAsync(0);
 
-    const [pickedPortDescriptor] = selectAvailablePorts(store.getState());
+    const [pickedPortDescriptor]: SerialPortDescriptor[] = selectAvailablePorts(store.getState());
     expect(selectAvailablePorts(store.getState())).toHaveLength(1);
     expect(selectSelectedPortId(store.getState())).toBe(pickedPortDescriptor?.portId);
   });

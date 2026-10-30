@@ -3,7 +3,6 @@ import {
   GRBL_COMMAND_HISTORY_LIMIT,
   GRBL_CONSOLE_DIRECTION,
   GRBL_CONSOLE_ENTRY_LIMIT,
-  GRBL_CONSOLE_VIEW_DIRECTION,
 } from '../grbl/grbl.constants';
 import type { GrblConsoleEntry } from '../grbl/interfaces/GrblConsoleEntry';
 import { Action } from './action';
@@ -18,6 +17,7 @@ import {
   selectConsoleEntries,
   selectIsStatusReportVisible,
 } from './grbl.console.state';
+import { GRBL_CONSOLE_VIEW_DIRECTION } from './grbl.console.view.direction';
 import type { GrblConsoleState } from './grbl.console.state';
 
 const UNKNOWN_ACTION_TYPE = 'unknown action';
@@ -49,7 +49,7 @@ const getStateAfterEntries = (state: GrblConsoleState, count: number): GrblConso
   return next;
 };
 
-describe('grblConsoleReducer', () => {
+describe(grblConsoleReducer.name, () => {
   it('appends engine entries with running ids', () => {
     const state: GrblConsoleState = getStateAfterEntries(getInitialState(), 2);
 

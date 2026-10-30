@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { GrblConsoleViewDirection } from '../../grbl/grbl.constants';
+import type { GrblConsoleViewDirection } from '../grbl.console.view.direction';
 import type { GrblConsoleEntry } from '../../grbl/interfaces/GrblConsoleEntry';
 
 export interface GrblConsoleViewEntry extends Omit<GrblConsoleEntry, 'direction'> {

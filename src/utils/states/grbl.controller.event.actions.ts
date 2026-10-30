@@ -18,10 +18,8 @@ import type { Action } from './action';
 import { ConnectionStatusChanged } from './grbl.connection.state';
 import { ConsoleEntryReceived } from './grbl.console.state';
 import { MachineStatusReceived } from './machine.status.state';
-import { TOAST_SEVERITY } from './toast.constants';
+import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
-
-const NO_TOAST_PARAMETERS: Record<string, string | number> = {};
 
 export const getGrblControllerEventActions = (event: GrblControllerEvent): Action<unknown>[] => {
   switch (event.kind) {

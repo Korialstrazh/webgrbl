@@ -38,7 +38,7 @@ const getRootState = (status: GrblResolvedStatus | undefined): { [MACHINE_STATUS
   [MACHINE_STATUS_STATE_NAME]: { status },
 });
 
-describe('machineStatusReducer', () => {
+describe(machineStatusReducer.name, () => {
   it('stores a received status', () => {
     const status: GrblResolvedStatus = getStatus(GRBL_MACHINE_STATE.IDLE);
     const state: MachineStatusState = machineStatusReducer(undefined, new MachineStatusReceived({ status }));

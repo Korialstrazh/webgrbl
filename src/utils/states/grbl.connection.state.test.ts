@@ -34,7 +34,7 @@ class UnknownAction extends Action {
 
 const getInitialState = (): GrblConnectionState => grblConnectionReducer(undefined, new UnknownAction());
 
-describe('grblConnectionReducer', () => {
+describe(grblConnectionReducer.name, () => {
   it('starts disconnected with the simulated laser and the default baud rate', () => {
     expect(getInitialState()).toEqual({
       connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED,

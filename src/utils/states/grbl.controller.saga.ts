@@ -22,7 +22,6 @@ import {
 import type { GrblConnectionStatus } from '../grbl/grbl.constants';
 import { GrblConnectionClosedError } from '../grbl/grbl.connection.closed.error';
 import { GrblController } from '../grbl/grbl.controller';
-import type { GrblConnectionInfo } from '../grbl/interfaces/GrblConnectionInfo';
 import type { GrblControllerEvent } from '../grbl/interfaces/GrblControllerEvent';
 import type { SerialPortDescriptor } from '../grbl/interfaces/SerialPortDescriptor';
 import { SERIAL_PORT_REGISTRY } from '../grbl/serial.port.registry';
@@ -46,14 +45,14 @@ import { ConsoleCommandSubmitted } from './grbl.console.state';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
+import type { GrblHandshakeRaceResult } from './interfaces/GrblHandshakeRaceResult';
+import type { StoredPortChoice } from './interfaces/StoredPortChoice';
 import { MachineResetRequested, MachineStopRequested, MachineUnlockRequested } from './machine.status.state';
-import { TOAST_SEVERITY } from './toast.constants';
+import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
 
 /** Room for the events of a burst; the buffer grows beyond it, so no event is ever dropped. */
 const CONTROLLER_EVENT_BUFFER_INITIAL_SIZE = 64;
-
-const NO_TOAST_PARAMETERS: Record<string, string | number> = {};
 
 // #region Action builders
 const newConnectionStatusChanged = (connectionStatus: GrblConnectionStatus): ConnectionStatusChanged =>
@@ -81,7 +80,7 @@ const getConnectionPreferences = (
 
 /** A stored port is found again by its USB ids; ports without them cannot be told apart between sessions. */
 const getPreferredPortId = (
-  portChoice: ConnectionPreferences['portChoice'],
+  portChoice: StoredPortChoice,
   availablePorts: SerialPortDescriptor[],
 ): string | undefined => {
   if (portChoice.isSimulated) {
@@ -161,7 +160,7 @@ function* runGrblMachineCommand(machineCommand: () => Promise<void> | void): Gen
 }
 
 function* submitConsoleCommand(controller: GrblController, action: ConsoleCommandSubmitted): Generator {
-  yield call([controller, controller.sendConsoleCommand], action.payload.commandText);
+  yield call(runGrblMachineCommand, (): void => controller.sendConsoleCommand(action.payload.commandText));
 }
 
 function* handleGrblControllerCommands(controller: GrblController): Generator {
@@ -231,7 +230,7 @@ function* connectGrblController(
     const { connectionInfo } = (yield race({
       connectionInfo: call([controller, controller.connect]),
       disconnectRequest: take(DisconnectRequested.type),
-    })) as { connectionInfo: GrblConnectionInfo | undefined };
+    })) as GrblHandshakeRaceResult;
 
     if (!connectionInfo) {
       yield call(disconnectGrblController, controller);

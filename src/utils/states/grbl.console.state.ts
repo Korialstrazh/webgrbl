@@ -12,12 +12,12 @@
 import {
   GRBL_COMMAND_HISTORY_LIMIT,
   GRBL_CONSOLE_ENTRY_LIMIT,
-  GRBL_CONSOLE_VIEW_DIRECTION,
   GRBL_EMPTY_TEXT,
 } from '../grbl/grbl.constants';
 import type { GrblConsoleEntry } from '../grbl/interfaces/GrblConsoleEntry';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
+import { GRBL_CONSOLE_VIEW_DIRECTION } from './grbl.console.view.direction';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { GrblConsoleViewEntry } from './interfaces/GrblConsoleViewEntry';
 
