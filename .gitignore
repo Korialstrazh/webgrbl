@@ -16,3 +16,6 @@ dev-dist/
 
 # Local vitest report output
 .vitest/
+
+# Read-only clones of upstream projects used as reference (e.g. LaserGRBL)
+.reference/
