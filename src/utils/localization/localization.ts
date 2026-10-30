@@ -10,7 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import i18next from 'i18next';
-import type { ResourceLanguage } from 'i18next';
+import type { Resource } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { DEFAULT_LANGUAGE, FALLBACK_LANGUAGE, LANGUAGE_CODE, STORED_LANGUAGE_KEY } from './constants';
 import type { LanguageCode } from './constants';
@@ -31,8 +31,8 @@ const getInitialLanguage = (): string => {
   }
 };
 
-const getResourcesByLanguage = (locales: LocalesCollection): Record<string, ResourceLanguage> => {
-  const resources: Record<string, ResourceLanguage> = {};
+const getResourcesByLanguage = (locales: LocalesCollection): Resource => {
+  const resources: Resource = {};
 
   for (const locale of Object.values(locales)) {
     resources[locale.code] = { [TRANSLATION_NAMESPACE]: locale.translation };
@@ -46,7 +46,7 @@ const getResourcesByLanguage = (locales: LocalesCollection): Record<string, Reso
  * matter because later calls merge into the running instance.
  */
 export const registerLocales = (locales: LocalesCollection): void => {
-  const resources: Record<string, ResourceLanguage> = getResourcesByLanguage(locales);
+  const resources: Resource = getResourcesByLanguage(locales);
 
   if (!isInitialized) {
     void i18n.use(initReactI18next).init({

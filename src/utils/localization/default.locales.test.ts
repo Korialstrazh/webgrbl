@@ -7,11 +7,13 @@ const MINIMUM_EXPECTED_KEYS = 5;
 const OPAQUE_KEY_PATTERN = /^[A-Z][A-Z0-9_]*$/;
 const PLURAL_KEY_PATTERN = /^(.+)_(zero|one|two|few|many|other)$/;
 
+type LocaleKeyGroup = Record<string, string>;
+
 // All groups share one namespace, so parity is checked over every group at once.
 const LANGUAGE_CODES: LanguageCode[] = Object.values(LANGUAGE_CODE);
 
 const getDeclaredKeys = (): Set<string> => new Set<string>(
-  Object.values(LOCALE_GROUPS).flatMap((group: Record<string, string>) => Object.values(group)),
+  Object.values(LOCALE_GROUPS).flatMap((group: LocaleKeyGroup) => Object.values(group)),
 );
 
 // A plural row (ITEM_COUNT_one) belongs to the key code uses (ITEM_COUNT).

@@ -9,6 +9,8 @@ const path = require('path');
 const DELIMITER = ';';
 const KEY_COLUMN = 'key';
 const KEY_PATTERN = /^[A-Z][A-Z0-9_]*$/;
+// The header line plus at least one translation row.
+const MIN_CSV_LINE_COUNT = 2;
 // i18next plural keys: GROUPS_MATCH_COUNT_one, GROUPS_MATCH_COUNT_other. The
 // suffixes are the Intl.PluralRules categories; code uses the bare base key
 // with a `count` option, and i18next picks the row.
@@ -31,7 +33,7 @@ import { registerLocales } from './localization';
 `;
 
 const errors = [];
-const fail = (fileName, message) => errors.push(`${fileName}: ${message}`);
+const addCsvError = (fileName, message) => errors.push(`${fileName}: ${message}`);
 
 /** default.csv -> DEFAULT, success.messages.csv -> SUCCESS_MESSAGES */
 const getGroupName = (fileName) => path
@@ -97,23 +99,23 @@ for (const fileName of csvNames) {
   const lines = readLines(fileName);
   const groupName = getGroupName(fileName);
 
-  if (lines.length < 2) {
-    fail(fileName, 'has a header but no rows');
+  if (lines.length < MIN_CSV_LINE_COUNT) {
+    addCsvError(fileName, 'has a header but no rows');
     continue;
   }
 
   if (!KEY_PATTERN.test(groupName)) {
-    fail(fileName, `basename yields "${groupName}", which is not a valid identifier`);
+    addCsvError(fileName, `basename yields "${groupName}", which is not a valid identifier`);
     continue;
   }
 
   if (RESERVED_GROUP_NAMES.has(groupName)) {
-    fail(fileName, `basename yields "${groupName}", which the generated module already exports`);
+    addCsvError(fileName, `basename yields "${groupName}", which the generated module already exports`);
     continue;
   }
 
   if (groupFiles.has(groupName)) {
-    fail(fileName, `basename yields "${groupName}", which ${groupFiles.get(groupName)} already produces`);
+    addCsvError(fileName, `basename yields "${groupName}", which ${groupFiles.get(groupName)} already produces`);
     continue;
   }
 
@@ -122,19 +124,19 @@ for (const fileName of csvNames) {
   const headerCells = dropTrailingEmptyCells(splitRow(lines[0]));
 
   if (headerCells.some((cell) => !cell.length)) {
-    fail(fileName, 'header has an empty column between language columns');
+    addCsvError(fileName, 'header has an empty column between language columns');
     continue;
   }
 
   const [keyHeader, ...languages] = headerCells;
 
   if (keyHeader !== KEY_COLUMN) {
-    fail(fileName, `first header cell must be "${KEY_COLUMN}", found "${keyHeader}"`);
+    addCsvError(fileName, `first header cell must be "${KEY_COLUMN}", found "${keyHeader}"`);
     continue;
   }
 
   if (!languages.length) {
-    fail(fileName, 'declares no language columns');
+    addCsvError(fileName, 'declares no language columns');
     continue;
   }
 
@@ -146,24 +148,24 @@ for (const fileName of csvNames) {
     const baseKey = getBaseKey(key);
 
     if (!KEY_PATTERN.test(baseKey)) {
-      fail(fileName, `key "${key}" must match ${KEY_PATTERN}, optionally with a plural suffix`);
+      addCsvError(fileName, `key "${key}" must match ${KEY_PATTERN}, optionally with a plural suffix`);
       continue;
     }
 
     if (seenKeys.has(key)) {
-      fail(fileName, `key "${key}" is already declared in ${seenKeys.get(key)}`);
+      addCsvError(fileName, `key "${key}" is already declared in ${seenKeys.get(key)}`);
       continue;
     }
 
     if (values.length > languages.length) {
-      fail(fileName, `key "${key}" has more cells than languages - does a translation contain "${DELIMITER}"?`);
+      addCsvError(fileName, `key "${key}" has more cells than languages - does a translation contain "${DELIMITER}"?`);
       continue;
     }
 
-    const missing = languages.filter((language, index) => !values[index]);
+    const missingLanguages = languages.filter((language, index) => !values[index]);
 
-    if (missing.length) {
-      fail(fileName, `key "${key}" has no translation for: ${missing.join(', ')}`);
+    if (missingLanguages.length) {
+      addCsvError(fileName, `key "${key}" has no translation for: ${missingLanguages.join(', ')}`);
       continue;
     }
 
@@ -192,12 +194,12 @@ const validatePluralKeys = () => {
     const [fileName] = fileNames;
 
     if (fileNames.size > 1) {
-      fail(fileName, `plural key "${baseKey}" has rows in more than one CSV: ${[...fileNames].join(', ')}`);
+      addCsvError(fileName, `plural key "${baseKey}" has rows in more than one CSV: ${[...fileNames].join(', ')}`);
       continue;
     }
 
     if (plainKeys.has(baseKey)) {
-      fail(fileName, `key "${baseKey}" is declared both plain and with plural suffixes`);
+      addCsvError(fileName, `key "${baseKey}" is declared both plain and with plural suffixes`);
       continue;
     }
 
@@ -209,7 +211,7 @@ const validatePluralKeys = () => {
       .filter((rowKey) => !seenKeys.has(rowKey));
 
     if (missingRows.length) {
-      fail(fileName, `plural key "${baseKey}" needs rows for: ${missingRows.join(', ')}`);
+      addCsvError(fileName, `plural key "${baseKey}" needs rows for: ${missingRows.join(', ')}`);
     }
   }
 };
