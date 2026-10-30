@@ -19,6 +19,8 @@ export class GrblCharacterCountingQueue {
   private rxBufferSize: number;
   /** Lines not sent yet, oldest first. */
   private pendingLines: GrblQueuedLine[] = [];
+  /** Index of the oldest pending line; avoids the linear cost of removing from the array front. */
+  private pendingHeadIndex = 0;
   /** Lines sent and not yet acknowledged, oldest first. */
   private inFlightLines: GrblQueuedLine[] = [];
   /** Bytes the in-flight lines occupy in the controller receive buffer. */
@@ -33,23 +35,30 @@ export class GrblCharacterCountingQueue {
   }
 
   public enqueueLines(lines: GrblQueuedLine[]): void {
-    this.pendingLines.push(...lines);
+    for (const line of lines) {
+      this.pendingLines.push(line);
+    }
   }
 
   public takeSendableLines(): GrblQueuedLine[] {
     const sendableLines: GrblQueuedLine[] = [];
 
     while (!this.hasEepromLineInFlight()) {
-      const nextLine: GrblQueuedLine | undefined = this.pendingLines[0];
+      const nextLine: GrblQueuedLine | undefined = this.pendingLines[this.pendingHeadIndex];
 
       if (!nextLine || !this.canSendLine(nextLine)) {
         break;
       }
 
-      this.pendingLines.shift();
+      this.pendingHeadIndex++;
       this.inFlightLines.push(nextLine);
       this.inFlightByteCount += this.getLineByteCount(nextLine);
       sendableLines.push(nextLine);
+    }
+
+    if (!this.hasPendingLines()) {
+      this.pendingLines = [];
+      this.pendingHeadIndex = 0;
     }
 
     return sendableLines;
@@ -67,6 +76,7 @@ export class GrblCharacterCountingQueue {
 
   public clearAllLines(): void {
     this.pendingLines = [];
+    this.pendingHeadIndex = 0;
     this.inFlightLines = [];
     this.inFlightByteCount = 0;
   }
@@ -76,7 +86,7 @@ export class GrblCharacterCountingQueue {
   }
 
   public hasPendingLines(): boolean {
-    return this.pendingLines.length > 0;
+    return this.pendingHeadIndex < this.pendingLines.length;
   }
 
   private getLineByteCount(line: GrblQueuedLine): number {

@@ -9,6 +9,7 @@ const FIRST_TEXT = 'G1X1';
 const SECOND_TEXT = 'G1X22';
 const EEPROM_TEXT = '$100=250';
 const LONG_TEXT = 'G1X1111111111';
+const LARGE_PROGRAM_LINE_COUNT = 200000;
 
 function newQueuedLine(text: string, isEepromWrite = false): GrblQueuedLine {
   return { text, isEepromWrite, origin: GRBL_LINE_ORIGIN.PROGRAM, programLineNumber: undefined };
@@ -79,5 +80,26 @@ describe(GrblCharacterCountingQueue.name, () => {
     queue.acknowledgeOldestInFlightLine();
 
     expect(getTexts(queue.takeSendableLines())).toEqual([FIRST_TEXT]);
+  });
+
+  it('enqueues and drains a very large program in one call without overflowing the stack', () => {
+    const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(SMALL_BUFFER_SIZE);
+    const lines: GrblQueuedLine[] = [];
+
+    for (let lineIndex = 0; lineIndex < LARGE_PROGRAM_LINE_COUNT; lineIndex++) {
+      lines.push(newQueuedLine(FIRST_TEXT));
+    }
+
+    expect(() => queue.enqueueLines(lines)).not.toThrow();
+
+    let acknowledgedCount = 0;
+
+    while (queue.hasPendingLines() || queue.hasInFlightLines()) {
+      queue.takeSendableLines();
+      queue.acknowledgeOldestInFlightLine();
+      acknowledgedCount++;
+    }
+
+    expect(acknowledgedCount).toBe(LARGE_PROGRAM_LINE_COUNT);
   });
 });
