@@ -59,6 +59,12 @@ export const GRBL_WHITESPACE_PATTERN = /\s+/g;
 export const GRBL_SYSTEM_COMMAND_PREFIX = '$';
 /** Commands that write the controller EEPROM and so must be sent one at a time (G10L2 also covers G10L20). */
 export const GRBL_EEPROM_COMMAND_PATTERN = /^(\$(\d+|N[01]|RST|I)=|G10L2|G28\.1|G30\.1)/i;
+/** Line break written after every queued line. */
+export const GRBL_LINE_TERMINATOR = '\n';
+/** System command that reports the firmware version and build options. */
+export const GRBL_BUILD_INFO_COMMAND = '$I';
+/** System command that lists all settings. */
+export const GRBL_SETTINGS_COMMAND = '$$';
 // #endregion
 
 // #region Response patterns
@@ -161,4 +167,62 @@ export const GRBL_REALTIME_COMMAND = {
 } as const;
 
 export type GrblRealtimeCommand = (typeof GRBL_REALTIME_COMMAND)[keyof typeof GRBL_REALTIME_COMMAND];
+
+/** Byte written for each realtime command. */
+export const GRBL_REALTIME_COMMAND_BYTE: Readonly<Record<GrblRealtimeCommand, number>> = {
+  [GRBL_REALTIME_COMMAND.STATUS_QUERY]: GRBL_STATUS_QUERY_BYTE,
+  [GRBL_REALTIME_COMMAND.FEED_HOLD]: GRBL_FEED_HOLD_BYTE,
+  [GRBL_REALTIME_COMMAND.CYCLE_RESUME]: GRBL_CYCLE_RESUME_BYTE,
+  [GRBL_REALTIME_COMMAND.SOFT_RESET]: GRBL_SOFT_RESET_BYTE,
+  [GRBL_REALTIME_COMMAND.JOG_CANCEL]: GRBL_JOG_CANCEL_BYTE,
+};
+
+/** Console text of each realtime command; the bytes without a printable character are shown in hex. */
+export const GRBL_REALTIME_COMMAND_TEXT: Readonly<Record<GrblRealtimeCommand, string>> = {
+  [GRBL_REALTIME_COMMAND.STATUS_QUERY]: '?',
+  [GRBL_REALTIME_COMMAND.FEED_HOLD]: '!',
+  [GRBL_REALTIME_COMMAND.CYCLE_RESUME]: '~',
+  [GRBL_REALTIME_COMMAND.SOFT_RESET]: '0x18',
+  [GRBL_REALTIME_COMMAND.JOG_CANCEL]: '0x85',
+};
+
+/** Which way a console entry travelled. */
+export const GRBL_CONSOLE_DIRECTION = {
+  SENT: 'sent',
+  RECEIVED: 'received',
+  REALTIME: 'realtime',
+} as const;
+
+export type GrblConsoleDirection = (typeof GRBL_CONSOLE_DIRECTION)[keyof typeof GRBL_CONSOLE_DIRECTION];
+
+/** Kinds of event the controller emits. */
+export const GRBL_CONTROLLER_EVENT_KIND = {
+  CONSOLE_ENTRY: 'console-entry',
+  STATUS_REPORT: 'status-report',
+  GRBL_ERROR: 'grbl-error',
+  GRBL_ALARM: 'grbl-alarm',
+  CONNECTION_LOST: 'connection-lost',
+  NOT_RESPONDING: 'not-responding',
+  PROGRAM_STOPPED_ON_ERROR: 'program-stopped-on-error',
+} as const;
+
+export type GrblControllerEventKind = (typeof GRBL_CONTROLLER_EVENT_KIND)[keyof typeof GRBL_CONTROLLER_EVENT_KIND];
+
+/** Where the controller is in its connection life cycle. */
+export const GRBL_CONTROLLER_PHASE = {
+  DISCONNECTED: 'disconnected',
+  CONNECTING: 'connecting',
+  CONNECTED: 'connected',
+} as const;
+
+export type GrblControllerPhase = (typeof GRBL_CONTROLLER_PHASE)[keyof typeof GRBL_CONTROLLER_PHASE];
+
+/** Why the handshake failed. */
+export const GRBL_HANDSHAKE_FAILURE_REASON = {
+  TIMEOUT: 'timeout',
+  UNSUPPORTED_FIRMWARE: 'unsupported-firmware',
+} as const;
+
+export type GrblHandshakeFailureReason =
+  (typeof GRBL_HANDSHAKE_FAILURE_REASON)[keyof typeof GRBL_HANDSHAKE_FAILURE_REASON];
 // #endregion
