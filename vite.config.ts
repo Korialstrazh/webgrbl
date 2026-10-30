@@ -1,0 +1,50 @@
+/**
+ * Vite and Vitest configuration. The PWA plugin precaches the whole app shell so the controller UI keeps working
+ * offline in the workshop; updates wait for the user's confirmation because reloading mid-job would stop the laser
+ * stream.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-10-30
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+/// <reference types="vitest/config" />
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
+import { configDefaults } from 'vitest/config';
+
+const APP_NAME = 'webgrbl';
+const APP_DESCRIPTION = 'Control a GRBL laser cutter or engraver straight from the browser.';
+const THEME_COLOR = '#111827';
+const ICON_PATH = 'favicon.svg';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'prompt',
+      includeAssets: [ICON_PATH],
+      manifest: {
+        name: APP_NAME,
+        short_name: APP_NAME,
+        description: APP_DESCRIPTION,
+        theme_color: THEME_COLOR,
+        background_color: THEME_COLOR,
+        display: 'standalone',
+        icons: [{ src: ICON_PATH, sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      },
+    }),
+  ],
+  test: {
+    globals: true,
+    exclude: [...configDefaults.exclude, '.claude/worktrees/**'],
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+  },
+});
