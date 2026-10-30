@@ -21,6 +21,13 @@ class FakeSerialDisconnectEvent extends Event {
 /**
  * Hand-written stand-in for a Web Serial port. Bytes the transport writes are collected in `writtenChunks`;
  * `receiveChunk` and `failReading` play the controller side of the cable.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-10-30
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 export class FakeSerialPort extends EventTarget implements SerialPort {
   public onconnect: ((this: SerialPort, ev: Event) => void) | null = null;

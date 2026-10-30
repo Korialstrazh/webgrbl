@@ -35,6 +35,7 @@ export const SERIAL_PORT_REGISTRY = {
     return { portId, usbVendorId, usbProductId };
   },
 
+  /** Finds the port that was registered under the id; undefined when the id is unknown. */
   getRegisteredSerialPort(portId: string): SerialPort | undefined {
     return portsById.get(portId);
   },
