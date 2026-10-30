@@ -2,22 +2,16 @@ import { GRBL_CONTROLLER_EVENT_KIND, GRBL_LINE_ORIGIN } from './grbl.constants';
 import { runGrblCheckMode } from './grbl.check.mode';
 import { GrblCommandWipedError } from './grbl.command.wiped.error';
 import { GrblConnectionClosedError } from './grbl.connection.closed.error';
+import { GrblControlLineExchange } from './grbl.control.line.exchange';
 import { GrblControllerBusyError } from './grbl.controller.busy.error';
 import { getProgramQueuedLines } from './grbl.program.queued.lines';
 import type { GrblCheckModeContext } from './interfaces/GrblCheckModeContext';
-import type { GrblControlLineWait } from './interfaces/GrblControlLineWait';
 import type { GrblProgramLineError } from './interfaces/GrblProgramLineError';
 import type { GrblProgramResult } from './interfaces/GrblProgramResult';
 import type { GrblProgramRun } from './interfaces/GrblProgramRun';
 import type { GrblProgramStreamerHost } from './interfaces/GrblProgramStreamerHost';
 import type { GrblProgramStreamOptions } from './interfaces/GrblProgramStreamOptions';
 import type { GrblQueuedLine } from './interfaces/GrblQueuedLine';
-
-/** True when GRBL resets itself after this answer: the line expects a reset and was answered ok. */
-const isResetFollowingControlLineAnswer = (
-  wait: GrblControlLineWait | undefined,
-  errorCode: number | undefined,
-): boolean => !errorCode && !!wait?.isFollowedByReset;
 
 /**
  * Streams one program at a time through the shared send queue (console commands typed meanwhile share its buffer
@@ -38,15 +32,12 @@ export class GrblProgramStreamer {
   private isProgramRunning = false;
   /** The program lines being streamed; undefined between runs and while check mode sends its $C lines. */
   private activeRun: GrblProgramRun | undefined;
-  /** The $C line of check mode waiting for its answer. */
-  private controlLineWait: GrblControlLineWait | undefined;
-  /** True from the ok of the $C that leaves check mode until the queue stops waiting for the reset banner. */
-  private isResetBannerAwaited = false;
-  /** Resolves the wait for the reset banner; set only while someone waits. */
-  private resolveResetBannerWait: (() => void) | undefined;
+  /** Sends the $C lines of check mode and tracks the wait for the reset banner. */
+  private readonly controlLines: GrblControlLineExchange;
 
   public constructor(host: GrblProgramStreamerHost) {
     this.host = host;
+    this.controlLines = new GrblControlLineExchange(host);
   }
 
   /**
@@ -85,9 +76,7 @@ export class GrblProgramStreamer {
       return;
     }
 
-    if (line === this.controlLineWait?.line) {
-      this.settleControlLine(undefined);
-
+    if (this.controlLines.settleIfControlLine(line, undefined)) {
       return;
     }
 
@@ -107,9 +96,7 @@ export class GrblProgramStreamer {
    * more lines, so nothing after the error is sent. Errors in check mode are results and raise no grbl-error event.
    */
   public handleProgramLineError(line: GrblQueuedLine, errorCode: number): void {
-    if (line === this.controlLineWait?.line) {
-      this.settleControlLine(errorCode);
-
+    if (this.controlLines.settleIfControlLine(line, errorCode)) {
       return;
     }
 
@@ -149,7 +136,7 @@ export class GrblProgramStreamer {
 
   /** A soft reset wiped the program lines; a stop on error ends its run itself once the stop is done. */
   public handleMachineReset(): void {
-    this.failControlLineWait(new GrblCommandWipedError());
+    this.controlLines.failControlLineWait(new GrblCommandWipedError());
 
     const answeringRun: GrblProgramRun | undefined = this.getAnswerAcceptingRun();
 
@@ -165,28 +152,27 @@ export class GrblProgramStreamer {
     }
 
     this.host.commandWriter.dropAllLines();
-    this.failControlLineWait(new GrblCommandWipedError());
+    this.controlLines.failControlLineWait(new GrblCommandWipedError());
 
     if (this.activeRun) {
       this.finishRun(this.activeRun, false);
     }
   }
 
+  /** Ends the wait for the reset banner of check mode. */
   public handleBannerWaitEnded(): void {
-    this.isResetBannerAwaited = false;
-    this.resolveResetBannerWait?.();
-    this.resolveResetBannerWait = undefined;
+    this.controlLines.handleBannerWaitEnded();
   }
 
   /** Ends whatever runs, for a closed connection. */
   public releaseProgram(error: Error): void {
-    this.failControlLineWait(error);
+    this.controlLines.failControlLineWait(error);
 
     if (this.activeRun) {
       this.finishRun(this.activeRun, false);
     }
 
-    this.handleBannerWaitEnded();
+    this.controlLines.handleBannerWaitEnded();
   }
 
   private claimProgramSlot(): void {
@@ -260,58 +246,13 @@ export class GrblProgramStreamer {
     run.resolveRun({ isCompleted, lineErrors: run.lineErrors });
   }
 
-  private sendControlLine(commandText: string, isFollowedByReset: boolean): Promise<number | undefined> {
-    const line: GrblQueuedLine = {
-      text: commandText,
-      isSentAlone: isFollowedByReset,
-      origin: GRBL_LINE_ORIGIN.PROGRAM,
-      programLineNumber: undefined,
-    };
-
-    return new Promise(
-      (resolveAnswer: (errorCode: number | undefined) => void, rejectAnswer: (error: Error) => void): void => {
-        this.controlLineWait = { line, isFollowedByReset, resolveAnswer, rejectAnswer };
-        this.host.commandWriter.enqueueLines([line]);
-      },
-    );
-  }
-
-  /** The hold for the reset banner starts before the router sends more lines, so none of them is wiped. */
-  private settleControlLine(errorCode: number | undefined): void {
-    const wait: GrblControlLineWait | undefined = this.controlLineWait;
-
-    this.controlLineWait = undefined;
-
-    if (isResetFollowingControlLineAnswer(wait, errorCode)) {
-      this.isResetBannerAwaited = true;
-      this.host.holdQueueUntilCheckModeBanner();
-    }
-
-    wait?.resolveAnswer(errorCode);
-  }
-
-  private failControlLineWait(error: Error): void {
-    this.controlLineWait?.rejectAnswer(error);
-    this.controlLineWait = undefined;
-  }
-
-  private waitForResetBanner(): Promise<void> {
-    if (!this.isResetBannerAwaited) {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolveWait: () => void): void => {
-      this.resolveResetBannerWait = resolveWait;
-    });
-  }
-
   private newCheckModeContext(): GrblCheckModeContext {
     return {
       sendControlLine: (commandText: string, isFollowedByReset: boolean): Promise<number | undefined> =>
-        this.sendControlLine(commandText, isFollowedByReset),
+        this.controlLines.sendControlLine(commandText, isFollowedByReset),
       streamCheckedLines: (programLines: string[]): Promise<GrblProgramResult> =>
         this.runProgramLines(programLines, false, true),
-      waitForResetBanner: (): Promise<void> => this.waitForResetBanner(),
+      waitForResetBanner: (): Promise<void> => this.controlLines.waitForResetBanner(),
       getInterruptionError: (): Error =>
         this.host.isConnected() ? new GrblCommandWipedError() : new GrblConnectionClosedError(),
     };

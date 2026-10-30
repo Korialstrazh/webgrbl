@@ -235,10 +235,12 @@ export class GrblController {
     this.sendConsoleCommand(GRBL_UNLOCK_COMMAND);
   }
 
+  /** Writes the feed hold realtime command, which pauses motion. */
   public sendFeedHold(): Promise<void> {
     return this.machineControls.writeConnectedRealtimeCommand(GRBL_REALTIME_COMMAND.FEED_HOLD);
   }
 
+  /** Writes the cycle resume realtime command, which continues motion after a feed hold. */
   public sendCycleResume(): Promise<void> {
     return this.machineControls.writeConnectedRealtimeCommand(GRBL_REALTIME_COMMAND.CYCLE_RESUME);
   }
