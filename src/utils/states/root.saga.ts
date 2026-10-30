@@ -10,7 +10,8 @@
  */
 import { all, fork } from 'redux-saga/effects';
 import { watchOnlineStatus } from './browser.environment.state';
+import { watchInfoToastExpiry } from './toast.state';
 
 export function* rootSaga(): Generator {
-  yield all([fork(watchOnlineStatus)]);
+  yield all([fork(watchOnlineStatus), fork(watchInfoToastExpiry)]);
 }
