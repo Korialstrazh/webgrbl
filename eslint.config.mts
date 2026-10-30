@@ -1,15 +1,15 @@
 // ESLint config - React + TypeScript client, copied from the agent-skills-and-rules frontend baseline.
 //
 // Requires (npm i -D):
-//   eslint@^9.39 (min 9.23)   typescript-eslint@^8.57   @stylistic/eslint-plugin@^5.10
-//   eslint-plugin-react@^7.37   eslint-plugin-react-hooks@^7   jiti@^2.6   typescript@^5.9
+//   eslint@^10.13   typescript-eslint@^8.57   @stylistic/eslint-plugin@^5.10
+//   eslint-plugin-react-hooks@^7   jiti@^2.6   typescript@^5.9
 //
 // jiti is mandatory, not optional: ESLint loads a .mts flat config through it.
 // typescript-eslint re-exports the parser and plugin - do not install
 // @typescript-eslint/parser or @typescript-eslint/eslint-plugin alongside it.
-// eslint-plugin-react-refresh is not needed: no rule from it is enabled here.
+// eslint-plugin-react is not used: 7.37 crashes on ESLint 10 (it calls the removed context.getFilename). JSX
+// indentation is covered by @stylistic/indent, the other JSX rules it provided by their @stylistic versions.
 
-import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import stylisticTsPlugin from '@stylistic/eslint-plugin';
 import tseslint from 'typescript-eslint';
@@ -32,9 +32,7 @@ export default [
         ecmaFeatures: { jsx: true },
       },
     },
-    settings: { react: { version: 'detect' } },
     plugins: {
-      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       '@stylistic': stylisticTsPlugin,
       '@typescript-eslint': tseslint.plugin,
@@ -74,17 +72,11 @@ export default [
       'max-len': ['error', 120, { ignorePattern: '^import\\s.+\\sfrom\\s.+$', ignoreUrls: true }],
       curly: ['error', 'all'],                                     // ts-braces-required
       'newline-before-return': ['error'],                          // ts-function-phase-blank-lines
-      'react/jsx-indent': ['error', 2],
-      'react/jsx-indent-props': ['error', 2],
+      '@stylistic/jsx-indent-props': ['error', 2],
 
       // --- React ---
-      'react/react-in-jsx-scope': 'off',
-      'react/self-closing-comp': 'error',
-      'react/prop-types': 0,
-      'react/require-default-props': 'off',
-      'react/jsx-props-no-spreading': 'off',
-      'react/jsx-max-props-per-line': 'off',
-      'react/jsx-filename-extension': [1, { extensions: ['.js', '.ts', '.jsx', '.tsx'] }],
+      '@stylistic/jsx-self-closing-comp': 'error',
+      'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'off',
 
       // --- deliberate relaxations ---
