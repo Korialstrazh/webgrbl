@@ -119,6 +119,18 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - **Status report.** `<State|MPos:x,y,z|FS:feed,power>`. MPos is the machine position ($10=1), FS is the current feed and the effective laser power (0 while idle, held or on a G0). `|WCO:x,y,z` is added to the first report after power-on or reset and after a G92. Hold carries its substate (`Hold:0`, `Hold:1`).
 - **Faults** (`injectFault`). `error-on-line` answers the given 1-based line number once with `error:N` instead of running it. `alarm` stops motion, flushes the receive buffer and the line count (as GRBL's reset on alarm does, so no stale lines are answered after `$X`), prints `ALARM:N` and enters Alarm. `stop-responding` silences all output from then on, even across power-on. `SimulatedLaserTransport.simulateConnectionLoss()` stops output, ignores further writes and calls the connection-lost listener once.
 
+## Web Serial transport
+
+`WebSerialTransport` (`web.serial.transport.ts`) implements `SerialTransport` over a granted `SerialPort`, opened 8N1 at the chosen baud rate (`new WebSerialTransport(port, baudRate)`).
+
+- **Open.** A failing `port.open` becomes `SerialPortOpenError` with the original error as `cause` and a `reason`: `access-denied-or-busy` for a `NetworkError` or `InvalidStateError` DOMException, `port-not-found` for `NotFoundError`, otherwise `unknown`. The reader and writer are locked once per open.
+- **Reading.** One loop on `readable.getReader()` hands each chunk to the receive listener. A read error, an unexpected end of the stream, or `navigator.serial`'s `disconnect` event whose target is this port calls the connection-lost listener once per open; the locks and the port are then released best effort.
+- **Writing.** Writes go through the one writer and run in order (each is awaited before the next). A write after `close()` or after a loss rejects with `WebSerialClosedError`.
+- **Closing.** `close()` waits for pending writes, cancels the reader, ends the read loop, releases both locks, removes the `disconnect` listener, then closes the port. It never throws and a second call does nothing; it does not call the connection-lost listener.
+- **Port registry.** `SERIAL_PORT_REGISTRY.registerSerialPort(port)` gives each port object a stable id `serial-<n>` (same port, same id) and returns a `SerialPortDescriptor` with the USB ids; `getRegisteredSerialPort(portId)` finds the port again. The id of the simulated laser is `SIMULATED_LASER_PORT_ID` (`simulated`).
+- **Preferences.** `CONNECTION_PREFERENCES_STORAGE` keeps `ConnectionPreferences` (baud rate and the port choice) in `localStorage` under `webgrbl.connectionPreferences`. Every access is in try/catch and the parsed value is checked with type guards; a missing, corrupt or wrongly shaped value, or a throwing storage, reads as `undefined`.
+- **Tests** use `FakeSerialPort` (`test.support/fake.serial.port.ts`) and stub `navigator.serial` with an `EventTarget`, removed after each test so other suites still see Web Serial as unsupported.
+
 ## Source
 
 - `src/utils/grbl/grbl.constants.ts`
@@ -164,4 +176,12 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - `src/utils/grbl/simulator/grbl.simulator.constants.ts`
 - `src/utils/grbl/simulator/interfaces/`
 - `src/utils/grbl/simulated.laser.transport.ts`
+- `src/utils/grbl/web.serial.transport.ts`
+- `src/utils/grbl/web.serial.closed.error.ts`
+- `src/utils/grbl/serial.port.open.error.ts`
+- `src/utils/grbl/serial.port.registry.ts`
+- `src/utils/grbl/test.support/fake.serial.port.ts`
+- `src/utils/storage/connection.preferences.storage.ts`
+- `src/utils/storage/interfaces/ConnectionPreferences.ts`
+- `src/utils/type.guards/`
 - `docs/superpowers/specs/2026-10-30_(01)_connection-streaming-engine.spec.md`

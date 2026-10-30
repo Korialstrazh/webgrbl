@@ -240,3 +240,35 @@ export const GRBL_HANDSHAKE_FAILURE_REASON = {
 export type GrblHandshakeFailureReason =
   (typeof GRBL_HANDSHAKE_FAILURE_REASON)[keyof typeof GRBL_HANDSHAKE_FAILURE_REASON];
 // #endregion
+
+// #region Web Serial
+/** Port id of the built-in simulated laser, which has no real serial port behind it. */
+export const SIMULATED_LASER_PORT_ID = 'simulated';
+/** Prefix of the ids given to registered serial ports; the running number follows. */
+export const SERIAL_PORT_ID_PREFIX = 'serial-';
+/** Data bits of the GRBL serial link (8N1). */
+export const WEB_SERIAL_DATA_BITS = 8;
+/** Stop bits of the GRBL serial link (8N1). */
+export const WEB_SERIAL_STOP_BITS = 1;
+/** Parity of the GRBL serial link (8N1). */
+export const WEB_SERIAL_PARITY: ParityType = 'none';
+/** Name of the `disconnect` event that `navigator.serial` and each port dispatch when the device is unplugged. */
+export const WEB_SERIAL_DISCONNECT_EVENT = 'disconnect';
+
+/** Names of the DOMException errors that opening a serial port can fail with. */
+export const WEB_SERIAL_OPEN_ERROR_NAME = {
+  NETWORK: 'NetworkError',
+  INVALID_STATE: 'InvalidStateError',
+  NOT_FOUND: 'NotFoundError',
+} as const;
+
+/** Why opening a serial port failed. */
+export const SERIAL_PORT_OPEN_FAILURE_REASON = {
+  ACCESS_DENIED_OR_BUSY: 'access-denied-or-busy',
+  PORT_NOT_FOUND: 'port-not-found',
+  UNKNOWN: 'unknown',
+} as const;
+
+export type SerialPortOpenFailureReason =
+  (typeof SERIAL_PORT_OPEN_FAILURE_REASON)[keyof typeof SERIAL_PORT_OPEN_FAILURE_REASON];
+// #endregion
