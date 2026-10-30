@@ -99,6 +99,66 @@ describe(GrblCharacterCountingQueue.name, () => {
     expect(queue.takeSendableLines()).toEqual([]);
   });
 
+  it('holdUntilBanner drops all lines and holds later lines and answers until the banner', () => {
+    const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(LARGE_BUFFER_SIZE);
+    queue.enqueueLines([newQueuedLine(FIRST_TEXT)]);
+    queue.takeSendableLines();
+    queue.enqueueLines([newQueuedLine(SECOND_TEXT)]);
+
+    queue.holdUntilBanner();
+    queue.enqueueLines([newQueuedLine(FIRST_TEXT)]);
+
+    expect(queue.isHeldForBanner()).toBe(true);
+    expect(queue.hasInFlightLines()).toBe(false);
+    expect(queue.takeSendableLines()).toEqual([]);
+    expect(queue.acknowledgeOldestInFlightLine()).toBeUndefined();
+
+    queue.releaseAfterBanner();
+
+    expect(queue.isHeldForBanner()).toBe(false);
+    expect(getTexts(queue.takeSendableLines())).toEqual([FIRST_TEXT]);
+    expect(queue.acknowledgeOldestInFlightLine()?.text).toBe(FIRST_TEXT);
+  });
+
+  it('two holds need two banners before lines are sent again', () => {
+    const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(LARGE_BUFFER_SIZE);
+    queue.holdUntilBanner();
+    queue.holdUntilBanner();
+    queue.enqueueLines([newQueuedLine(FIRST_TEXT)]);
+
+    queue.releaseAfterBanner();
+
+    expect(queue.takeSendableLines()).toEqual([]);
+
+    queue.releaseAfterBanner();
+
+    expect(getTexts(queue.takeSendableLines())).toEqual([FIRST_TEXT]);
+  });
+
+  it('a banner without a hold does not release the next hold early', () => {
+    const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(LARGE_BUFFER_SIZE);
+    queue.releaseAfterBanner();
+    queue.holdUntilBanner();
+
+    expect(queue.isHeldForBanner()).toBe(true);
+  });
+
+  it('releaseBannerHold and clearAllLines end the hold at once', () => {
+    const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(LARGE_BUFFER_SIZE);
+    queue.holdUntilBanner();
+    queue.holdUntilBanner();
+    queue.enqueueLines([newQueuedLine(FIRST_TEXT)]);
+
+    queue.releaseBannerHold();
+
+    expect(getTexts(queue.takeSendableLines())).toEqual([FIRST_TEXT]);
+
+    queue.holdUntilBanner();
+    queue.clearAllLines();
+
+    expect(queue.isHeldForBanner()).toBe(false);
+  });
+
   it('a line longer than the buffer is still sent when nothing is in flight', () => {
     const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(SMALL_BUFFER_SIZE);
     queue.enqueueLines([newQueuedLine(LONG_TEXT), newQueuedLine(FIRST_TEXT)]);

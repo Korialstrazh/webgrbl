@@ -19,6 +19,8 @@ export interface GrblStopSequenceContext {
   getLatestStatus(): GrblResolvedStatus | undefined;
   /** Writes one realtime byte straight to the transport. */
   writeRealtimeCommand(command: GrblRealtimeCommand): void;
+  /** Status queries already written whose report has not arrived yet. */
+  getUnansweredStatusQueryCount(): number;
   /** Changes the status poll interval; does nothing while disconnected. */
   setStatusPollInterval(intervalMs: number): void;
   /** Adds a controller event listener and returns the function that removes it. */

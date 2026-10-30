@@ -18,6 +18,8 @@ export const GRBL_STATUS_POLL_INTERVAL_MS = 250;
 export const GRBL_HOLD_COMPLETE_MAX_WAIT_MS = 2_000;
 /** Time between two status queries while a stop waits for the hold to complete. */
 export const GRBL_STOP_STATUS_POLL_INTERVAL_MS = 50;
+/** Longest wait for the banner after a soft reset before the held queue sends again and not-responding is reported. */
+export const GRBL_RESET_BANNER_TIMEOUT_MS = 10_000;
 /** Silence with lines in flight after which the controller is reported as not responding. */
 export const GRBL_NOT_RESPONDING_SILENCE_MS = 10_000;
 /** How long an informational toast stays visible. */

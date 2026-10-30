@@ -12,60 +12,58 @@ import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblResolvedStatus } from './interfaces/GrblResolvedStatus';
 import type { GrblStopSequenceContext } from './interfaces/GrblStopSequenceContext';
 
-/** How the stop sequence brings a moving machine to rest before the reset. */
-interface GrblMotionStopPlan {
-  /** Byte that starts the deceleration; undefined when the machine is already decelerating. */
-  realtimeCommand: GrblRealtimeCommand | undefined;
-}
-
 const isHoldDecelerating = (status: GrblResolvedStatus): boolean =>
   status.machineState === GRBL_MACHINE_STATE.HOLD && status.machineSubstate === GRBL_HOLD_SUBSTATE.DECELERATING;
 
-const isHoldComplete = (status: GrblResolvedStatus): boolean =>
-  status.machineState === GRBL_MACHINE_STATE.HOLD && status.machineSubstate === GRBL_HOLD_SUBSTATE.COMPLETE;
-
-/** True once the machine stands still, so a soft reset keeps the position. */
-const isMachineAtRest = (status: GrblResolvedStatus): boolean =>
-  status.machineState === GRBL_MACHINE_STATE.IDLE || isHoldComplete(status);
+/** True while a soft reset would cut off motion, lose steps and raise ALARM:3. */
+const isMachineMoving = (status: GrblResolvedStatus): boolean =>
+  status.machineState === GRBL_MACHINE_STATE.RUN ||
+  status.machineState === GRBL_MACHINE_STATE.JOG ||
+  isHoldDecelerating(status);
 
 /**
- * A reset while moving loses steps, so a moving machine is first decelerated; undefined means the machine does not
- * move and can be reset at once.
+ * GRBL cancels a jog on a feed hold as well, but 0x85 is the jog's own stop. A feed hold is safe in every other
+ * state: it holds a run, gives Hold:0 at once when idle, and is ignored in Alarm.
  */
-const getMotionStopPlan = (status: GrblResolvedStatus | undefined): GrblMotionStopPlan | undefined => {
-  switch (status?.machineState) {
-  case GRBL_MACHINE_STATE.JOG:
-    return { realtimeCommand: GRBL_REALTIME_COMMAND.JOG_CANCEL };
-  case GRBL_MACHINE_STATE.RUN:
-    return { realtimeCommand: GRBL_REALTIME_COMMAND.FEED_HOLD };
-  default:
-    return status && isHoldDecelerating(status) ? { realtimeCommand: undefined } : undefined;
-  }
-};
+const getStopRealtimeCommand = (status: GrblResolvedStatus | undefined): GrblRealtimeCommand =>
+  status?.machineState === GRBL_MACHINE_STATE.JOG ? GRBL_REALTIME_COMMAND.JOG_CANCEL : GRBL_REALTIME_COMMAND.FEED_HOLD;
 
-/** Resolves once a status report shows the machine at rest, after the maximum wait, or when cancelled. */
-const waitForMachineAtRest = (context: GrblStopSequenceContext): Promise<void> =>
+/**
+ * Resolves on the first status report answering a query written after the stop byte that shows the machine not
+ * moving, after the maximum wait, or when cancelled. Reports to earlier queries describe the machine before the stop
+ * byte took effect, so they are skipped.
+ */
+const waitForMachineAtRest = (context: GrblStopSequenceContext, earlierReportCount: number): Promise<void> =>
   new Promise((resolve: () => void): void => {
+    let remainingEarlierReportCount: number = earlierReportCount;
     const endWait = (): void => {
       clearTimeout(maxWaitTimerId);
       removeStatusListener();
       context.setHoldWaitCanceller(undefined);
       resolve();
     };
-    const maxWaitTimerId: ReturnType<typeof setTimeout> = setTimeout(endWait, GRBL_HOLD_COMPLETE_MAX_WAIT_MS);
-    const removeStatusListener: () => void = context.addEventListener((event: GrblControllerEvent): void => {
-      if (event.kind === GRBL_CONTROLLER_EVENT_KIND.STATUS_REPORT && isMachineAtRest(event.status)) {
+    const handleControllerEvent = (event: GrblControllerEvent): void => {
+      if (event.kind !== GRBL_CONTROLLER_EVENT_KIND.STATUS_REPORT) {
+        return;
+      }
+
+      if (remainingEarlierReportCount) {
+        remainingEarlierReportCount--;
+      } else if (!isMachineMoving(event.status)) {
         endWait();
       }
-    });
+    };
+    const maxWaitTimerId: ReturnType<typeof setTimeout> = setTimeout(endWait, GRBL_HOLD_COMPLETE_MAX_WAIT_MS);
+    const removeStatusListener: () => void = context.addEventListener(handleControllerEvent);
 
     context.setHoldWaitCanceller(endWait);
   });
 
 /**
- * Stops the machine as fast as possible without losing its position: drops unsent lines, decelerates a moving
- * machine with a jog cancel or feed hold, waits for it to stand still (polling faster meanwhile, at most 2000 ms),
- * then soft-resets. Resolves once the reset byte is written.
+ * Stops the machine as fast as possible without losing its position. The latest status may be up to one poll
+ * interval old, so it is not trusted to say the machine stands still: unsent lines are dropped, a feed hold (or jog
+ * cancel while jogging) is always written, and the sequence waits until a fresh status report shows the machine not
+ * moving, polling faster meanwhile, at most 2000 ms. Then it soft-resets and resolves once the reset byte is written.
  *
  * @author michael.morosov
  *
@@ -76,18 +74,12 @@ const waitForMachineAtRest = (context: GrblStopSequenceContext): Promise<void> =
  */
 export const runGrblStopSequence = async (context: GrblStopSequenceContext): Promise<void> => {
   context.clearPendingLines();
+  context.writeRealtimeCommand(getStopRealtimeCommand(context.getLatestStatus()));
 
-  const motionStopPlan: GrblMotionStopPlan | undefined = getMotionStopPlan(context.getLatestStatus());
+  const earlierReportCount: number = context.getUnansweredStatusQueryCount();
 
-  if (motionStopPlan) {
-    if (motionStopPlan.realtimeCommand) {
-      context.writeRealtimeCommand(motionStopPlan.realtimeCommand);
-    }
-
-    context.setStatusPollInterval(GRBL_STOP_STATUS_POLL_INTERVAL_MS);
-    await waitForMachineAtRest(context);
-  }
-
+  context.setStatusPollInterval(GRBL_STOP_STATUS_POLL_INTERVAL_MS);
+  await waitForMachineAtRest(context, earlierReportCount);
   await context.resetMachine();
   context.setStatusPollInterval(GRBL_STATUS_POLL_INTERVAL_MS);
 };
