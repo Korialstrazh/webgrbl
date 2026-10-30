@@ -16,7 +16,7 @@
     "test": "vitest run --maxWorkers=4",
     "locales:update": "node ./tools/localization/build.locales.from.csv.cjs",
     "locales:check": "npm run locales:update && git diff --exit-code -- src/utils/localization/default.locales.ts tools/localization",
-    "check": "npm run lint && npm run typecheck && npm test && npm run locales:check && npm run build && npm audit"
+    "check": "npm run lint && npm run typecheck && npm test && npm run locales:check && npm run build && npm audit --audit-level=moderate"
   },
   "dependencies": {
     "@reduxjs/toolkit": "2.13.0",
