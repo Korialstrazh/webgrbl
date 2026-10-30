@@ -48,6 +48,20 @@ const getTypeName = (groupName) => groupName
 
 const splitRow = (line) => line.split(DELIMITER).map((cell) => cell.trim());
 
+// A line ending in the delimiter (a trailing empty column) is allowed; empty cells inside the row are not.
+const dropTrailingEmptyCells = (cells) => {
+  const trimmedCells = [...cells];
+
+  while (trimmedCells.length && !trimmedCells[trimmedCells.length - 1].length) {
+    trimmedCells.pop();
+  }
+
+  return trimmedCells;
+};
+
+// The generated module exports this name itself, so no CSV may produce it.
+const RESERVED_GROUP_NAMES = new Set(['LOCALE_GROUPS']);
+
 const readLines = (fileName) => fs
   .readFileSync(path.join(__dirname, fileName), 'utf8')
   .replace(/^\uFEFF/, '') // Excel writes a BOM; it would corrupt the `key` header.
@@ -74,6 +88,7 @@ const getBaseKey = (key) => {
 const isPluralKey = (key) => PLURAL_KEY_PATTERN.test(key);
 
 const groups = [];
+const groupFiles = new Map(); // group name -> the CSV that produced it first
 const seenKeys = new Map(); // key -> the CSV that declared it first
 const pluralRowFiles = new Map(); // plural base key -> every CSV that declares one of its rows
 const plainKeys = new Set();
@@ -92,7 +107,26 @@ for (const fileName of csvNames) {
     continue;
   }
 
-  const [keyHeader, ...languages] = splitRow(lines[0]).filter((cell) => cell.length);
+  if (RESERVED_GROUP_NAMES.has(groupName)) {
+    fail(fileName, `basename yields "${groupName}", which the generated module already exports`);
+    continue;
+  }
+
+  if (groupFiles.has(groupName)) {
+    fail(fileName, `basename yields "${groupName}", which ${groupFiles.get(groupName)} already produces`);
+    continue;
+  }
+
+  groupFiles.set(groupName, fileName);
+
+  const headerCells = dropTrailingEmptyCells(splitRow(lines[0]));
+
+  if (headerCells.some((cell) => !cell.length)) {
+    fail(fileName, 'header has an empty column between language columns');
+    continue;
+  }
+
+  const [keyHeader, ...languages] = headerCells;
 
   if (keyHeader !== KEY_COLUMN) {
     fail(fileName, `first header cell must be "${KEY_COLUMN}", found "${keyHeader}"`);
@@ -107,7 +141,7 @@ for (const fileName of csvNames) {
   const rows = [];
 
   for (const line of lines.slice(1)) {
-    const [key, ...values] = splitRow(line);
+    const [key, ...values] = dropTrailingEmptyCells(splitRow(line));
 
     const baseKey = getBaseKey(key);
 
@@ -118,6 +152,11 @@ for (const fileName of csvNames) {
 
     if (seenKeys.has(key)) {
       fail(fileName, `key "${key}" is already declared in ${seenKeys.get(key)}`);
+      continue;
+    }
+
+    if (values.length > languages.length) {
+      fail(fileName, `key "${key}" has more cells than languages - does a translation contain "${DELIMITER}"?`);
       continue;
     }
 
