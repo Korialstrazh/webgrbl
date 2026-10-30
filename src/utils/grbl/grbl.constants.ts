@@ -52,6 +52,41 @@ export const GRBL_SYSTEM_COMMAND_PREFIX = '$';
 export const GRBL_EEPROM_COMMAND_PATTERN = /^(\$(\d+|N[01]|RST|I)=|G10L2|G28\.1|G30\.1)/i;
 // #endregion
 
+// #region Response patterns
+export const GRBL_EMPTY_TEXT = '';
+export const GRBL_OK_RESPONSE_TEXT = 'ok';
+export const GRBL_ERROR_PATTERN = /^error:(\d+)$/i;
+export const GRBL_ALARM_PATTERN = /^ALARM:(\d+)$/i;
+export const GRBL_SETTING_PATTERN = /^\$(\d+)=(.*)$/;
+export const GRBL_FEEDBACK_PATTERN = /^\[.*\]$/;
+export const GRBL_STATUS_REPORT_PATTERN = /^<(.*)>$/;
+export const GRBL_BANNER_PATTERN = /^(grbl(?:hal)?)\s+v?(\d+\.\d+[a-z]?)\s*(.*)$/i;
+export const GRBL_VERSION_NUMBER_PATTERN = /^(\d+)\.(\d+)/;
+export const GRBL_BUILD_OPTION_PATTERN = /^\[OPT:[^,\]]*,\d+,(\d+)\]$/i;
+// #endregion
+
+// #region Status report fields
+export const GRBL_STATUS_FIELD_SEPARATOR = '|';
+export const GRBL_STATUS_VALUE_SEPARATOR = ':';
+export const GRBL_STATUS_NUMBER_SEPARATOR = ',';
+export const GRBL_STATUS_FIELD = {
+  MACHINE_POSITION: 'MPos',
+  WORK_POSITION: 'WPos',
+  WORK_COORDINATE_OFFSET: 'WCO',
+  BUFFER: 'Bf',
+  FEED_AND_SPINDLE: 'FS',
+  FEED: 'F',
+  OVERRIDES: 'Ov',
+} as const;
+// #endregion
+
+// #region Firmware support
+export const GRBL_MIN_SUPPORTED_MAJOR_VERSION = 1;
+export const GRBL_MIN_SUPPORTED_MINOR_VERSION = 1;
+/** GRBL reports its serial buffer size, but one byte of it cannot be used. */
+export const GRBL_RX_BUFFER_UNUSABLE_BYTES = 1;
+// #endregion
+
 // #region Closed sets
 /** What kind of line the controller sent. */
 export const GRBL_RESPONSE_KIND = {

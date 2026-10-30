@@ -13,7 +13,10 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - **Line framing.** `GrblLineFramer` decodes bytes with a streaming `TextDecoder` (multi-byte characters may split across chunks), splits on CRLF or LF, keeps the unfinished tail for the next chunk, trims and drops empty lines.
 - **Line preparation.** `getPreparedGrblLine` strips `;` and `(...)` comments and, for non-`$` lines, all whitespace (case is kept). `$` lines keep their inner spaces. It returns `undefined` when nothing is left, so empty lines are never sent.
 - **EEPROM detection.** `isEepromWritingGrblLine` flags `$n=`, `$N0=`, `$N1=`, `$RST=`, `$I=`, `G10 L2`/`L20`, `G28.1` and `G30.1` on a prepared line. GRBL needs those sent one at a time with nothing in flight.
-- **Planned layers.** Response parser, character-counting send queue, simulated laser, engine controller and the Redux/saga bridge are added on top in later steps; this article grows with them.
+- **Response parsing.** `getParsedGrblResponse` turns one line into a `GrblResponse` (discriminated on `kind`): `ok`, `error:N`, `ALARM:N`, `<...>` status, `$n=v` setting, `[...]` feedback, a Grbl/GrblHAL banner, or `other`. Each variant is its own interface under `interfaces/`.
+- **Status reports.** `getParsedGrblStatusReport` reads the state (and optional `:substate`), `MPos`, `WPos`, `WCO`, `Bf` (planner, RX), `FS` and `F` (feed), `Ov`; unknown fields are ignored and an unknown state yields `undefined`. `getResolvedGrblPositions` fills WPos from MPos - WCO (or MPos from WPos + WCO); a WCO in the report replaces the cached one.
+- **Banner and build info.** `getParsedGrblFirmwareIdentity` keeps the version letter suffix (`1.1h`). `isSupportedGrblFirmware` accepts 1.1 or later (1.2 clones and FluidNC `Grbl 3.x` pass, 0.9 does not). `getGrblRxBufferSizeFromBuildOption` returns `rx - 1` from `[OPT:flags,blocks,rx]` because one byte of the reported serial buffer is unusable.
+- **Planned layers.** Character-counting send queue, simulated laser, engine controller and the Redux/saga bridge are added on top in later steps; this article grows with them.
 
 ## Source
 
@@ -21,4 +24,11 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - `src/utils/grbl/grbl.line.framer.ts`
 - `src/utils/grbl/grbl.line.preparer.ts`
 - `src/utils/grbl/grbl.eeprom.command.detector.ts`
+- `src/utils/grbl/grbl.response.parser.ts`
+- `src/utils/grbl/grbl.status.report.parser.ts`
+- `src/utils/grbl/grbl.firmware.banner.parser.ts`
+- `src/utils/grbl/grbl.firmware.support.ts`
+- `src/utils/grbl/grbl.build.info.parser.ts`
+- `src/utils/grbl/grbl.position.resolver.ts`
+- `src/utils/grbl/interfaces/`
 - `docs/superpowers/specs/2026-10-30_(01)_connection-streaming-engine.spec.md`
