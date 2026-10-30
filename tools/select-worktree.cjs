@@ -20,6 +20,9 @@ const SCRIPT_ROOT = path.resolve(__dirname, '..');
 const WORKTREE_FOLDERS = [path.join('.claude', 'worktrees'), '.worktrees'];
 const IS_WINDOWS = process.platform === 'win32';
 const NPM_BINARY = IS_WINDOWS ? 'npm.cmd' : 'npm';
+const GIT_BINARY = 'git';
+const GIT_ENTRY_NAME = '.git';
+const NODE_MODULES_FOLDER = 'node_modules';
 // One entry per dev server, each holding that server's plain, non-interactive
 // command. webgrbl has a single Vite client.
 const TARGETS = {
@@ -74,7 +77,7 @@ const getForwardedArguments = () => {
 
 const getGitOutput = (args, cwd) => {
   try {
-    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    return execFileSync(GIT_BINARY, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
   } catch {
     return '';
   }
@@ -118,14 +121,16 @@ const getWorktreeChoices = (repositoryRoot, branchByPath) => {
 
   for (const folder of WORKTREE_FOLDERS) {
     const folderPath = path.join(repositoryRoot, folder);
+
     if (!fs.existsSync(folderPath)) {
       continue;
     }
 
     for (const entry of fs.readdirSync(folderPath, { withFileTypes: true })) {
       const worktreePath = path.join(folderPath, entry.name);
+
       // A live worktree always carries a .git file pointing back at the main repository.
-      if (!entry.isDirectory() || !fs.existsSync(path.join(worktreePath, '.git'))) {
+      if (!entry.isDirectory() || !fs.existsSync(path.join(worktreePath, GIT_ENTRY_NAME))) {
         continue;
       }
 
@@ -142,8 +147,9 @@ const getWorktreeChoices = (repositoryRoot, branchByPath) => {
 
 const printChoices = (choices) => {
   choices.forEach((choice, index) => {
-    const branch = choice.branch ? ` (${choice.branch})` : '';
-    console.log(`  ${index}) ${choice.label}${branch}`);
+    const branchSuffix = choice.branch ? ` (${choice.branch})` : '';
+
+    console.log(`  ${index}) ${choice.label}${branchSuffix}`);
   });
 };
 
@@ -169,6 +175,7 @@ const askQuestion = (question) => new Promise((resolve) => {
 
 const selectChoice = async (target, choices) => {
   const rootChoice = choices[0];
+
   if (choices.length === 1) {
     return rootChoice;
   }
@@ -181,15 +188,18 @@ const selectChoice = async (target, choices) => {
 
   console.log(`\nWhere should the ${target.label} dev server run?\n`);
   printChoices(choices);
+
   const lastIndex = choices.length - 1;
 
   for (let attempt = 0; attempt < MAX_SELECTION_ATTEMPTS; attempt++) {
     const answer = await askQuestion(`\nSelect 0-${lastIndex} [0]: `);
+
     if (!answer.length) {
       return rootChoice;
     }
 
     const selectedIndex = Number(answer);
+
     if (Number.isInteger(selectedIndex) && selectedIndex >= 0 && selectedIndex <= lastIndex) {
       return choices[selectedIndex];
     }
@@ -203,19 +213,22 @@ const selectChoice = async (target, choices) => {
 };
 
 const startDevServer = (target, choice, forwardedArguments) => {
-  if (!fs.existsSync(path.join(choice.cwd, 'node_modules'))) {
+  if (!fs.existsSync(path.join(choice.cwd, NODE_MODULES_FOLDER))) {
     console.log(`Warning: ${choice.label} has no node_modules - run "npm install" there first.`);
   }
 
   console.log(`\nStarting the ${target.label} dev server in ${choice.label}...\n`);
+
   const npmArguments = forwardedArguments.length
     ? [...target.args, ARGUMENT_SEPARATOR, ...forwardedArguments]
     : target.args;
+
   // npm.cmd is a batch file, which Node refuses to spawn without a shell. With a shell, Node 24 deprecates an
   // args array (DEP0190), so Windows gets one command string with every forwarded argument quoted.
   const windowsCommand = [NPM_BINARY, ...target.args, ...npmArguments.slice(target.args.length)
     .map((argument) => (argument === ARGUMENT_SEPARATOR ? argument : `${DOUBLE_QUOTE}${argument}${DOUBLE_QUOTE}`))]
     .join(' ');
+
   const devProcess = IS_WINDOWS
     ? spawn(windowsCommand, { cwd: choice.cwd, stdio: 'inherit', shell: true })
     : spawn(NPM_BINARY, npmArguments, { cwd: choice.cwd, stdio: 'inherit' });
