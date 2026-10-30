@@ -59,6 +59,21 @@ describe(GrblCharacterCountingQueue.name, () => {
     expect(getTexts(queue.takeSendableLines())).toEqual([SECOND_TEXT]);
   });
 
+  it('getOldestInFlightLine returns the line the next acknowledgement frees', () => {
+    const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(LARGE_BUFFER_SIZE);
+    queue.enqueueLines([newQueuedLine(FIRST_TEXT), newQueuedLine(SECOND_TEXT)]);
+
+    expect(queue.getOldestInFlightLine()).toBeUndefined();
+
+    queue.takeSendableLines();
+
+    expect(queue.getOldestInFlightLine()?.text).toBe(FIRST_TEXT);
+
+    queue.acknowledgeOldestInFlightLine();
+
+    expect(queue.getOldestInFlightLine()?.text).toBe(SECOND_TEXT);
+  });
+
   it('clearAllLines drops pending and in-flight lines', () => {
     const queue: GrblCharacterCountingQueue = new GrblCharacterCountingQueue(SMALL_BUFFER_SIZE);
     queue.enqueueLines([newQueuedLine(FIRST_TEXT), newQueuedLine(SECOND_TEXT)]);

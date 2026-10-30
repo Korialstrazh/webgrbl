@@ -16,7 +16,21 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - **Response parsing.** `getParsedGrblResponse` turns one line into a `GrblResponse` (discriminated on `kind`): `ok`, `error:N`, `ALARM:N`, `<...>` status, `$n=v` setting, `[...]` feedback, a Grbl/GrblHAL banner, or `other`. Each variant is its own interface under `interfaces/`.
 - **Status reports.** `getParsedGrblStatusReport` reads the state (and optional `:substate`), `MPos`, `WPos`, `WCO`, `Bf` (planner, RX), `FS` and `F` (feed), `Ov`; unknown fields are ignored and an unknown state yields `undefined`. `getResolvedGrblPositions` fills WPos from MPos - WCO (or MPos from WPos + WCO); a WCO in the report replaces the cached one.
 - **Banner and build info.** `getParsedGrblFirmwareIdentity` keeps the version letter suffix (`1.1h`). `isSupportedGrblFirmware` accepts 1.1 or later (1.2 clones and FluidNC `Grbl 3.x` pass, 0.9 does not). `getGrblRxBufferSizeFromBuildOption` returns `rx - 1` from `[OPT:flags,blocks,rx]` because one byte of the reported serial buffer is unusable.
-- **Planned layers.** Character-counting send queue, engine controller and the Redux/saga bridge are added on top in later steps; this article grows with them. The simulated laser is described below.
+- **Send queue.** `GrblCharacterCountingQueue` releases a line only while the bytes in flight plus the line (with its line feed) fit the RX buffer; each `ok`/`error` frees the oldest in-flight line (`getOldestInFlightLine()` tells which line the next answer belongs to). EEPROM-writing lines go alone with nothing else in flight.
+- **Planned layers.** Stop sequence, program streaming, check mode and the Redux/saga bridge are added on top in later steps; this article grows with them. The controller and the simulated laser are described below.
+
+## Controller
+
+`GrblController` (`grbl.controller.ts`) drives one controller over a `SerialTransport`. It is framework-free; the Redux bridge owns a single instance and listens through `addEventListener`, which returns an unsubscribe function.
+
+- **Events** (`GrblControllerEvent`, discriminated on `kind`, one interface per variant under `interfaces/`): `console-entry`, `status-report`, `grbl-error` (code, line text, origin), `grbl-alarm`, `connection-lost`, `not-responding`, `program-stopped-on-error`. The last two are declared now and emitted by the streaming step.
+- **Console entries.** Every line written and received becomes a `GrblConsoleEntry` (`direction` sent / received / realtime, `text`, `realtimeCommand`, `isStatusReport`, `timestamp`). Private lines (`$I`, `$$`) appear like all traffic. Realtime bytes are written straight to the transport, never queued, and shown as `?`, `!`, `~`, `0x18`, `0x85`. The `?` poll and the `<...>` replies carry `isStatusReport: true`, so the console can hide them.
+- **Handshake** (`performGrblHandshake` in `grbl.handshake.ts`, run through a small `GrblHandshakeContext`): open the transport, write `0x18`, wait up to 10 s for the first banner. Only the first banner counts: opening the port often resets the board and the soft reset prints another one, and taking both would send `$I` and `$$` twice (Review Focus 3). No banner gives `GrblHandshakeError` with reason `timeout`, a banner below 1.1 reason `unsupported-firmware`; both close the transport. Then `$I` and `$$` go through the send queue as private lines; the RX buffer size comes from `[OPT:...]` (default 127) and the settings from the `$n=v` lines. `connect()` resolves with `GrblConnectionInfo` (identity, RX buffer size, settings, build info lines) and starts the 250 ms status poll.
+- **Private commands.** `GrblPrivateCommandRegistry` pairs each private line with the lines GRBL prints before acknowledging it. GRBL answers in order, so setting, feedback and other lines that arrive while a private line is the oldest in flight belong to it. An `error` also settles the request (with what arrived); the error itself goes out as `grbl-error` with origin `private`. Closing or losing the connection rejects waiting requests with `GrblConnectionClosedError`, so `connect()` never hangs.
+- **Response routing.** `ok` frees the oldest in-flight line and sends whatever now fits. `error` frees it too, emits `grbl-error` and only then sends more, so a listener can still stop the queue (the streaming step's stop-on-error relies on this). `ALARM:N` emits `grbl-alarm`. Status reports pass through `GrblStatusTracker`, which fills the positions with `getResolvedGrblPositions` and caches the last WCO; `getLatestStatus()` returns the result. Banners after the handshake are shown only.
+- **Console commands.** `sendConsoleCommand` prepares the line (`getPreparedGrblLine`) and queues it with origin `console`; empty results are ignored, and so are commands while no transport is open.
+- **Polling and teardown.** `GrblStatusPoller` writes `?` every 250 ms (the interval can change, for the faster poll during a stop). `disconnect()` and a transport connection loss stop the poll, clear the queue and reset the line framer, so no timer stays behind; a loss also emits `connection-lost`. A failed write is ignored because the transport reports a dead port through its connection-lost listener.
+- **Tests** (`grbl.controller.connect.test.ts`) run against `SimulatedLaserTransport` with fake timers. Fake timers schedule a 0 ms timer set during a tick 1 ms later, so each simulator round trip costs 1 ms of fake time; the tests advance 10 ms to let a handshake settle.
 
 ## Simulator
 
@@ -45,6 +59,14 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - `src/utils/grbl/grbl.firmware.support.ts`
 - `src/utils/grbl/grbl.build.info.parser.ts`
 - `src/utils/grbl/grbl.position.resolver.ts`
+- `src/utils/grbl/grbl.character.counting.queue.ts`
+- `src/utils/grbl/grbl.controller.ts`
+- `src/utils/grbl/grbl.handshake.ts`
+- `src/utils/grbl/grbl.handshake.error.ts`
+- `src/utils/grbl/grbl.connection.closed.error.ts`
+- `src/utils/grbl/grbl.private.command.registry.ts`
+- `src/utils/grbl/grbl.status.poller.ts`
+- `src/utils/grbl/grbl.status.tracker.ts`
 - `src/utils/grbl/interfaces/`
 - `src/utils/grbl/simulator/` (whole simulator, including the G-code interpreter and default settings)
 - `src/utils/grbl/simulator/grbl.simulator.ts`

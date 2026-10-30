@@ -79,6 +79,11 @@ export class GrblCharacterCountingQueue {
     return acknowledgedLine;
   }
 
+  /** The sent line the next ok or error answers; undefined when nothing is in flight. */
+  public getOldestInFlightLine(): GrblQueuedLine | undefined {
+    return this.inFlightLines[0];
+  }
+
   /** Drops all pending and in-flight lines. */
   public clearAllLines(): void {
     this.pendingLines = [];
