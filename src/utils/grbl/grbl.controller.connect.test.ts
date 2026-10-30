@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  GRBL_BUILD_INFO_COMMAND,
   GRBL_CONSOLE_DIRECTION,
   GRBL_CONTROLLER_EVENT_KIND,
   GRBL_HANDSHAKE_FAILURE_REASON,
@@ -7,6 +8,7 @@ import {
   GRBL_LINE_ORIGIN,
   GRBL_MACHINE_STATE,
   GRBL_REALTIME_COMMAND,
+  GRBL_SETTINGS_COMMAND,
   GRBL_STATUS_POLL_INTERVAL_MS,
 } from './grbl.constants';
 import { GrblConnectionClosedError } from './grbl.connection.closed.error';
@@ -23,6 +25,7 @@ import type { GrblResolvedStatus } from './interfaces/GrblResolvedStatus';
 import type { SerialTransport } from './interfaces/SerialTransport';
 
 const BUILD_INFO_LINE = '$I\n';
+const OPTIONS_LINE = '[OPT:V,15,128]';
 const SETTINGS_LINE = '$$\n';
 const UNSUPPORTED_BANNER_OUTPUT = "Grbl 0.9j ['$' for help]\r\n";
 const SUPPORTED_BANNER_OUTPUT = "Grbl 1.1h ['$' for help]\r\n";
@@ -157,7 +160,7 @@ describe(GrblController.name, () => {
       identity: { firmwareName: 'Grbl', version: '1.1h', vendorText: "['$' for help]" },
       rxBufferSize: 127,
       settings: GRBL_SIMULATOR_DEFAULT_SETTINGS,
-      buildInfoLines: ['[VER:1.1h.20190825:]', '[OPT:V,15,128]'],
+      buildInfoLines: ['[VER:1.1h.20190825:]', OPTIONS_LINE],
     });
 
     await harness.controller.disconnect();
@@ -189,10 +192,14 @@ describe(GrblController.name, () => {
       realtimeCommand: GRBL_REALTIME_COMMAND.SOFT_RESET,
       isStatusReport: false,
     });
-    expect(entries).toContainEqual(expect.objectContaining({ direction: GRBL_CONSOLE_DIRECTION.SENT, text: '$I' }));
-    expect(entries).toContainEqual(expect.objectContaining({ direction: GRBL_CONSOLE_DIRECTION.SENT, text: '$$' }));
     expect(entries).toContainEqual(
-      expect.objectContaining({ direction: GRBL_CONSOLE_DIRECTION.RECEIVED, text: '[OPT:V,15,128]' }),
+      expect.objectContaining({ direction: GRBL_CONSOLE_DIRECTION.SENT, text: GRBL_BUILD_INFO_COMMAND }),
+    );
+    expect(entries).toContainEqual(
+      expect.objectContaining({ direction: GRBL_CONSOLE_DIRECTION.SENT, text: GRBL_SETTINGS_COMMAND }),
+    );
+    expect(entries).toContainEqual(
+      expect.objectContaining({ direction: GRBL_CONSOLE_DIRECTION.RECEIVED, text: OPTIONS_LINE }),
     );
 
     await harness.controller.disconnect();

@@ -46,6 +46,9 @@ type GrblBannerListener = (identity: GrblFirmwareIdentity) => void;
 /** Cancels the running handshake with the given error. */
 type GrblHandshakeCanceller = (error: Error) => void;
 
+/** Developer-facing message for a response kind the controller does not route. */
+const getUnknownResponseMessage = (response: never): string => `Unknown GRBL response ${JSON.stringify(response)}`;
+
 /**
  * Drives one GRBL controller over a serial transport: handshake, status polling, the character-counting send queue,
  * private commands, response routing and typed events. Framework-free, so the Redux bridge owns one instance.
@@ -264,7 +267,10 @@ export class GrblController {
       realtimeCommand: undefined,
       isStatusReport: response.kind === GRBL_RESPONSE_KIND.STATUS,
     });
+    this.routeResponse(response, lineText);
+  }
 
+  private routeResponse(response: GrblResponse, lineText: string): void {
     switch (response.kind) {
     case GRBL_RESPONSE_KIND.OK:
       this.acknowledgeOldestLine();
@@ -292,7 +298,7 @@ export class GrblController {
       break;
     default: {
       const unknownResponse: never = response;
-      throw new Error(`Unknown GRBL response ${JSON.stringify(unknownResponse)}`);
+      throw new Error(getUnknownResponseMessage(unknownResponse));
     }
     }
   }
