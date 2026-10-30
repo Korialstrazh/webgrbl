@@ -9,28 +9,30 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsOnline, selectIsWebSerialSupported } from '../../utils/states/browser.environment.state';
 import styles from './styles.module.scss';
-
-const ONLINE_LABEL = 'Online';
-const OFFLINE_LABEL = 'Offline';
-const WEB_SERIAL_SUPPORTED_LABEL = 'Web Serial ready';
-const WEB_SERIAL_UNSUPPORTED_LABEL = 'Web Serial unavailable - use Chrome or Edge on desktop';
 
 const getStatusClassName = (isPositive: boolean): string =>
   [styles.status, isPositive ? styles.positive : styles.negative].join(' ');
 
+const getOnlineStatusKey = (isOnline: boolean): string =>
+  isOnline ? DEFAULT.BROWSER_STATUS_ONLINE : DEFAULT.BROWSER_STATUS_OFFLINE;
+
+const getWebSerialStatusKey = (isWebSerialSupported: boolean): string =>
+  isWebSerialSupported ? DEFAULT.BROWSER_STATUS_WEB_SERIAL_SUPPORTED : DEFAULT.BROWSER_STATUS_WEB_SERIAL_UNSUPPORTED;
+
 export const BrowserStatusBar = (): ReactNode => {
+  const { t } = useTranslation();
   const isOnline: boolean = useSelector(selectIsOnline);
   const isWebSerialSupported: boolean = useSelector(selectIsWebSerialSupported);
 
   return (
     <div className={styles.browserStatusBar} role="status">
-      <span className={getStatusClassName(isOnline)}>{isOnline ? ONLINE_LABEL : OFFLINE_LABEL}</span>
-      <span className={getStatusClassName(isWebSerialSupported)}>
-        {isWebSerialSupported ? WEB_SERIAL_SUPPORTED_LABEL : WEB_SERIAL_UNSUPPORTED_LABEL}
-      </span>
+      <span className={getStatusClassName(isOnline)}>{t(getOnlineStatusKey(isOnline))}</span>
+      <span className={getStatusClassName(isWebSerialSupported)}>{t(getWebSerialStatusKey(isWebSerialSupported))}</span>
     </div>
   );
 };

@@ -1,0 +1,11 @@
+key;en
+APP_TAGLINE;GRBL laser control in your browser - works offline.
+APP_TITLE;webgrbl
+APP_UPDATE_DISMISS;Dismiss
+APP_UPDATE_NEED_REFRESH;A new version of webgrbl is available.
+APP_UPDATE_OFFLINE_READY;webgrbl is ready to work offline.
+APP_UPDATE_RELOAD;Reload
+BROWSER_STATUS_OFFLINE;Offline
+BROWSER_STATUS_ONLINE;Online
+BROWSER_STATUS_WEB_SERIAL_SUPPORTED;Web Serial ready
+BROWSER_STATUS_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
