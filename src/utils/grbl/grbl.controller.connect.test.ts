@@ -15,14 +15,17 @@ import { GrblConnectionClosedError } from './grbl.connection.closed.error';
 import { GrblController } from './grbl.controller';
 import { GrblControllerBusyError } from './grbl.controller.busy.error';
 import { GrblHandshakeError } from './grbl.handshake.error';
-import { SimulatedLaserTransport } from './simulated.laser.transport';
 import { GRBL_SIMULATOR_FAULT_KIND } from './simulator/grbl.simulator.constants';
 import { GRBL_SIMULATOR_DEFAULT_SETTINGS } from './simulator/grbl.simulator.default.settings';
+import { ANSWER_SETTLE_MS } from './test.support/grbl.answer.settle';
+import { getConsoleEntries } from './test.support/grbl.console.entries';
+import { newGrblControllerHarness } from './test.support/grbl.controller.harness';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblConsoleEntry } from './interfaces/GrblConsoleEntry';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblResolvedStatus } from './interfaces/GrblResolvedStatus';
 import type { SerialTransport } from './interfaces/SerialTransport';
+import type { GrblControllerHarness } from './test.support/GrblControllerHarness';
 
 const BUILD_INFO_LINE = '$I\n';
 const OPTIONS_LINE = '[OPT:V,15,128]';
@@ -39,43 +42,12 @@ const UNDEFINED_FEED_ERROR_CODE = 22;
 const OK_TEXT = 'ok';
 const POLL_COUNT = 4;
 const ORIGIN = { x: 0, y: 0, z: 0 };
-/** Fake timers delay a 0 ms timer set during a tick by 1 ms, so each simulator round trip costs 1 ms. */
-const ANSWER_SETTLE_MS = 10;
 
-interface ControllerHarness {
-  transport: SimulatedLaserTransport;
-  controller: GrblController;
-  events: GrblControllerEvent[];
-}
-
-const newControllerHarness = (): ControllerHarness => {
-  const transport: SimulatedLaserTransport = new SimulatedLaserTransport();
-  const controller: GrblController = new GrblController(transport);
-  const events: GrblControllerEvent[] = [];
-  controller.addEventListener((event: GrblControllerEvent): void => {
-    events.push(event);
-  });
-
-  return { transport, controller, events };
-};
-
-const connectHarness = async (harness: ControllerHarness): Promise<GrblConnectionInfo> => {
+const connectHarness = async (harness: GrblControllerHarness): Promise<GrblConnectionInfo> => {
   const connection: Promise<GrblConnectionInfo> = harness.controller.connect();
   await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
 
   return connection;
-};
-
-const getConsoleEntries = (events: GrblControllerEvent[]): GrblConsoleEntry[] => {
-  const entries: GrblConsoleEntry[] = [];
-
-  for (const event of events) {
-    if (event.kind === GRBL_CONTROLLER_EVENT_KIND.CONSOLE_ENTRY) {
-      entries.push(event.entry);
-    }
-  }
-
-  return entries;
 };
 
 const getStatusReports = (events: GrblControllerEvent[]): GrblResolvedStatus[] => {
@@ -152,7 +124,7 @@ describe(GrblController.name, () => {
   });
 
   it('connect resolves with Grbl 1.1h, rx buffer 127 and the simulator settings', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
 
     const connectionInfo: GrblConnectionInfo = await connectHarness(harness);
 
@@ -167,7 +139,7 @@ describe(GrblController.name, () => {
   });
 
   it('connect ignores a second banner and queries $I and $$ once', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const writeSpy = vi.spyOn(harness.transport, 'write');
 
     await connectHarness(harness);
@@ -182,7 +154,7 @@ describe(GrblController.name, () => {
   });
 
   it('connect emits the reset, private lines and their answers as console entries', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
 
     await connectHarness(harness);
     const entries: GrblConsoleEntry[] = getConsoleEntries(harness.events);
@@ -206,7 +178,7 @@ describe(GrblController.name, () => {
   });
 
   it('connect times out after 10000 ms with reason timeout when the controller is silent', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const closeSpy = vi.spyOn(harness.transport, 'close');
     harness.transport.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.STOP_RESPONDING });
 
@@ -235,7 +207,7 @@ describe(GrblController.name, () => {
   });
 
   it('connection loss while waiting for $I rejects connect with GrblConnectionClosedError', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const forwardWrite = harness.transport.write.bind(harness.transport);
     vi.spyOn(harness.transport, 'write').mockImplementation(async (bytes: Uint8Array): Promise<void> => {
       await forwardWrite(bytes);
@@ -271,7 +243,7 @@ describe(GrblController.name, () => {
   });
 
   it('disconnect during the banner wait rejects connect with GrblConnectionClosedError, no timer', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const closeSpy = vi.spyOn(harness.transport, 'close');
     harness.transport.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.STOP_RESPONDING });
     const connection: Promise<GrblConnectionInfo> = harness.controller.connect();
@@ -286,7 +258,7 @@ describe(GrblController.name, () => {
   });
 
   it('connection loss during the banner wait rejects connect with GrblConnectionClosedError, no timer', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const closeSpy = vi.spyOn(harness.transport, 'close');
     harness.transport.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.STOP_RESPONDING });
     const connection: Promise<GrblConnectionInfo> = harness.controller.connect();
@@ -302,7 +274,7 @@ describe(GrblController.name, () => {
   });
 
   it('a cancelled connect does not disturb the next connect past the original 10000 ms deadline', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const closeSpy = vi.spyOn(harness.transport, 'close');
     const firstConnection: Promise<GrblConnectionInfo> = harness.controller.connect();
     const firstRejection: Promise<void> = expect(firstConnection).rejects.toBeInstanceOf(GrblConnectionClosedError);
@@ -321,7 +293,7 @@ describe(GrblController.name, () => {
   });
 
   it('console command issued during the handshake is dropped, not written or queued', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const writeSpy = vi.spyOn(harness.transport, 'write');
     const connection: Promise<GrblConnectionInfo> = harness.controller.connect();
 
@@ -336,7 +308,7 @@ describe(GrblController.name, () => {
   });
 
   it('connect while connecting or connected rejects with GrblControllerBusyError, port untouched', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const openSpy = vi.spyOn(harness.transport, 'open');
     const closeSpy = vi.spyOn(harness.transport, 'close');
     const firstConnection: Promise<GrblConnectionInfo> = harness.controller.connect();
@@ -358,7 +330,7 @@ describe(GrblController.name, () => {
   });
 
   it('polls status every 250 ms and emits resolved status reports', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     await connectHarness(harness);
     harness.events.length = 0;
 
@@ -388,7 +360,7 @@ describe(GrblController.name, () => {
   });
 
   it('disconnect stops polling, closes the transport and leaves no timer behind', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const closeSpy = vi.spyOn(harness.transport, 'close');
     await connectHarness(harness);
 
@@ -402,7 +374,7 @@ describe(GrblController.name, () => {
   });
 
   it('connection loss emits connection-lost once and stops polling', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     await connectHarness(harness);
     harness.events.length = 0;
 
@@ -414,7 +386,7 @@ describe(GrblController.name, () => {
   });
 
   it('console command is sent, echoed as a sent entry, and its ok is received', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     await connectHarness(harness);
     harness.events.length = 0;
 
@@ -443,7 +415,7 @@ describe(GrblController.name, () => {
   });
 
   it('console command that is only a comment sends nothing', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     await connectHarness(harness);
     const writeSpy = vi.spyOn(harness.transport, 'write');
     harness.events.length = 0;
@@ -458,7 +430,7 @@ describe(GrblController.name, () => {
   });
 
   it('error reply emits grbl-error with the line text', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     await connectHarness(harness);
     harness.events.length = 0;
 
@@ -476,7 +448,7 @@ describe(GrblController.name, () => {
   });
 
   it('alarm line emits grbl-alarm with its code', async () => {
-    const harness: ControllerHarness = newControllerHarness();
+    const harness: GrblControllerHarness = newGrblControllerHarness();
     const alarmCode = 1;
     await connectHarness(harness);
     harness.events.length = 0;

@@ -16,6 +16,10 @@ export const GRBL_HANDSHAKE_TIMEOUT_MS = 10_000;
 export const GRBL_STATUS_POLL_INTERVAL_MS = 250;
 /** Longest wait for the machine to finish a feed hold before a soft reset is sent. */
 export const GRBL_HOLD_COMPLETE_MAX_WAIT_MS = 2_000;
+/** Time between two status queries while a stop waits for the hold to complete. */
+export const GRBL_STOP_STATUS_POLL_INTERVAL_MS = 50;
+/** Longest wait for the banner after a soft reset before the held queue sends again and not-responding is reported. */
+export const GRBL_RESET_BANNER_TIMEOUT_MS = 10_000;
 /** Silence with lines in flight after which the controller is reported as not responding. */
 export const GRBL_NOT_RESPONDING_SILENCE_MS = 10_000;
 /** How long an informational toast stays visible. */
@@ -65,6 +69,10 @@ export const GRBL_LINE_TERMINATOR = '\n';
 export const GRBL_BUILD_INFO_COMMAND = '$I';
 /** System command that lists all settings. */
 export const GRBL_SETTINGS_COMMAND = '$$';
+/** System command that clears the Alarm lock. */
+export const GRBL_UNLOCK_COMMAND = '$X';
+/** System command that enters check mode, or leaves it with a reset. */
+export const GRBL_CHECK_MODE_COMMAND = '$C';
 // #endregion
 
 // #region Response patterns
@@ -147,6 +155,12 @@ export const GRBL_MACHINE_STATE = {
 } as const;
 
 export type GrblMachineState = (typeof GRBL_MACHINE_STATE)[keyof typeof GRBL_MACHINE_STATE];
+
+/** Substate GRBL prints after Hold: 0 once the machine stands still, 1 while it is still slowing down. */
+export const GRBL_HOLD_SUBSTATE = {
+  COMPLETE: 0,
+  DECELERATING: 1,
+} as const;
 
 /** Where a sent line came from, which decides whether it counts as job traffic. */
 export const GRBL_LINE_ORIGIN = {
