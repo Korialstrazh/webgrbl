@@ -17,6 +17,8 @@ const INVALID_STORED_TEXTS = [
   '"text"',
   '{"baudRate":"fast","portChoice":{"isSimulated":true}}',
   '{"baudRate":9600}',
+  '{"baudRate":9600,"portChoice":{"isSimulated":false,"usbVendorId":null}}',
+  '{"baudRate":9600,"portChoice":{"isSimulated":false,"usbProductId":false}}',
 ];
 
 describe('CONNECTION_PREFERENCES_STORAGE', () => {

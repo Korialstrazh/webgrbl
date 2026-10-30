@@ -9,7 +9,12 @@ import { WebSerialClosedError } from './web.serial.closed.error';
 import type { SerialTransport } from './interfaces/SerialTransport';
 
 /** Developer-facing message used when an opened port exposes no streams. */
-const PORT_WITHOUT_STREAMS_MESSAGE = 'The serial port opened without readable and writable streams';
+const PORT_WITHOUT_STREAMS_MESSAGE =
+  'The serial port opened without readable and writable streams';
+
+/** Log text used when the receive listener throws. */
+const RECEIVE_LISTENER_FAILED_LOG_MESSAGE =
+  'The serial receive listener threw; the connection stays open';
 
 /** Locks and tasks that exist only while the port is open. */
 interface WebSerialOpenStreams {
@@ -66,8 +71,10 @@ export class WebSerialTransport implements SerialTransport {
       throw new SerialPortOpenError(new Error(PORT_WITHOUT_STREAMS_MESSAGE));
     }
 
-    const reader: ReadableStreamDefaultReader<Uint8Array> = readable.getReader();
-    const writer: WritableStreamDefaultWriter<Uint8Array> = writable.getWriter();
+    const reader: ReadableStreamDefaultReader<Uint8Array> =
+      readable.getReader();
+    const writer: WritableStreamDefaultWriter<Uint8Array> =
+      writable.getWriter();
 
     this.isOpen = true;
     this.lastWrite = Promise.resolve();
@@ -82,7 +89,11 @@ export class WebSerialTransport implements SerialTransport {
       throw new WebSerialClosedError();
     }
 
-    const writeResult: Promise<void> = this.writeAfter(this.lastWrite, streams.writer, bytes);
+    const writeResult: Promise<void> = this.writeAfter(
+      this.lastWrite,
+      streams.writer,
+      bytes,
+    );
 
     this.lastWrite = this.waitQuietly(writeResult);
 
@@ -138,22 +149,43 @@ export class WebSerialTransport implements SerialTransport {
     }
   }
 
-  private async runReadLoop(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
-    try {
-      for (;;) {
-        const { done, value } = await reader.read();
+  private async runReadLoop(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+  ): Promise<void> {
+    for (;;) {
+      const chunk: Uint8Array | undefined = await this.readChunkQuietly(reader);
 
-        if (done) {
-          break;
-        }
-
-        this.receiveListener?.(value);
+      if (!chunk) {
+        break;
       }
-    } catch {
-      // A failed read means the device is gone; it is handled the same way as the stream ending.
+
+      this.deliverChunk(chunk);
     }
 
     void this.handleConnectionLoss();
+  }
+
+  /** Reads one chunk; undefined means the stream ended or failed, which both mean the device is gone. */
+  private async readChunkQuietly(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+  ): Promise<Uint8Array | undefined> {
+    try {
+      const { done, value } = await reader.read();
+
+      return done ? undefined : value;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private deliverChunk(chunk: Uint8Array): void {
+    try {
+      this.receiveListener?.(chunk);
+    } catch (listenerError) {
+      // A bug in the receiver must not look like a lost connection, so it is logged and the session goes on.
+      // eslint-disable-next-line no-console -- a failing receive listener would otherwise be invisible
+      console.error(RECEIVE_LISTENER_FAILED_LOG_MESSAGE, listenerError);
+    }
   }
 
   private startWatchingDisconnect(): void {
@@ -164,7 +196,10 @@ export class WebSerialTransport implements SerialTransport {
     };
 
     this.disconnectListener = disconnectListener;
-    navigator.serial.addEventListener(WEB_SERIAL_DISCONNECT_EVENT, disconnectListener);
+    navigator.serial.addEventListener(
+      WEB_SERIAL_DISCONNECT_EVENT,
+      disconnectListener,
+    );
   }
 
   private stopWatchingDisconnect(): void {
@@ -172,7 +207,10 @@ export class WebSerialTransport implements SerialTransport {
       return;
     }
 
-    navigator.serial.removeEventListener(WEB_SERIAL_DISCONNECT_EVENT, this.disconnectListener);
+    navigator.serial.removeEventListener(
+      WEB_SERIAL_DISCONNECT_EVENT,
+      this.disconnectListener,
+    );
     this.disconnectListener = undefined;
   }
 
@@ -183,8 +221,12 @@ export class WebSerialTransport implements SerialTransport {
 
     this.isOpen = false;
     this.stopWatchingDisconnect();
-    this.connectionLostListener?.();
-    await this.releaseConnection(false);
+
+    try {
+      await this.releaseConnection(false);
+    } finally {
+      this.connectionLostListener?.();
+    }
   }
 
   /**
@@ -211,7 +253,9 @@ export class WebSerialTransport implements SerialTransport {
     await this.closePortQuietly();
   }
 
-  private async cancelReaderQuietly(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
+  private async cancelReaderQuietly(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+  ): Promise<void> {
     try {
       await reader.cancel();
     } catch {
