@@ -15,6 +15,6 @@ export interface GrblSimulatorMotionBlock {
   target: GrblAxisPosition;
   /** How long the block takes to execute, in milliseconds. */
   durationMs: number;
-  /** Spindle (laser power) value in force during the block. */
+  /** Effective laser power: 0 when the laser is off and for G0 rapids (laser mode, $32=1); otherwise the modal S. */
   spindleSpeed: number;
 }

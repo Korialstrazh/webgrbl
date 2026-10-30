@@ -19,6 +19,8 @@ export interface GrblSimulatorModalState {
   feedRate: number;
   /** Current spindle (laser power) value set by S. */
   spindleSpeed: number;
+  /** Active modal motion code: 0 (G0), 1 (G1), 2 (G2) or 3 (G3); G0 at power-up. */
+  motionMode: number;
   /** True while the laser is switched on by M3 or M4. */
   isLaserOn: boolean;
   /** Machine position in millimetres. */

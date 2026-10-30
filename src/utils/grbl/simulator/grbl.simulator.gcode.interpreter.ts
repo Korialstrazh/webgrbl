@@ -19,6 +19,8 @@ import {
   GRBL_SIMULATOR_MM_PER_INCH,
   GRBL_SIMULATOR_MS_PER_MINUTE,
   GRBL_SIMULATOR_MS_PER_SECOND,
+  GRBL_SIMULATOR_NOOP_G_CODES,
+  GRBL_SIMULATOR_NOOP_M_CODES,
   GRBL_SIMULATOR_M_CODE,
   GRBL_SIMULATOR_SETTING_MAX_RATE_X,
   GRBL_SIMULATOR_SETTING_MAX_RATE_Y,
@@ -51,6 +53,13 @@ const STATE_G_CODES: readonly number[] = [
   GRBL_SIMULATOR_G_CODE.ABSOLUTE,
   GRBL_SIMULATOR_G_CODE.RELATIVE,
 ];
+const MODAL_MOTION_G_CODES: readonly number[] = [
+  GRBL_SIMULATOR_G_CODE.RAPID,
+  GRBL_SIMULATOR_G_CODE.LINEAR,
+  GRBL_SIMULATOR_G_CODE.ARC_CLOCKWISE,
+  GRBL_SIMULATOR_G_CODE.ARC_COUNTER_CLOCKWISE,
+];
+const AXIS_WORD_LETTERS: readonly string[] = [GRBL_SIMULATOR_WORD.X, GRBL_SIMULATOR_WORD.Y, GRBL_SIMULATOR_WORD.Z];
 const SUPPORTED_M_CODES: readonly number[] = Object.values(GRBL_SIMULATOR_M_CODE);
 const AXIS_LETTERS: Readonly<Record<keyof GrblAxisPosition, string>> = {
   x: GRBL_SIMULATOR_WORD.X,
@@ -72,9 +81,27 @@ const getWordNumbers = (words: GcodeWords, letter: string): number[] =>
 
 const isMotionGCode = (gCode: number): boolean => MOTION_G_CODES.includes(gCode);
 
-const isGCodeKnown = (gCode: number): boolean => isMotionGCode(gCode) || STATE_G_CODES.includes(gCode);
+const isGCodeKnown = (gCode: number): boolean =>
+  isMotionGCode(gCode) || STATE_G_CODES.includes(gCode) || GRBL_SIMULATOR_NOOP_G_CODES.includes(gCode);
 
-const isMCodeKnown = (mCode: number): boolean => SUPPORTED_M_CODES.includes(mCode);
+const isMCodeKnown = (mCode: number): boolean =>
+  SUPPORTED_M_CODES.includes(mCode) || GRBL_SIMULATOR_NOOP_M_CODES.includes(mCode);
+
+const isLaserSwitchMCode = (mCode: number): boolean => SUPPORTED_M_CODES.includes(mCode);
+
+const isModalMotionGCode = (gCode: number): boolean => MODAL_MOTION_G_CODES.includes(gCode);
+
+const isAxisWord = (word: GrblSimulatorGcodeWord): boolean => AXIS_WORD_LETTERS.includes(word.letter);
+
+const isArcGCode = (gCode: number): boolean =>
+  gCode === GRBL_SIMULATOR_G_CODE.ARC_CLOCKWISE || gCode === GRBL_SIMULATOR_G_CODE.ARC_COUNTER_CLOCKWISE;
+
+const hasMotionWords = (words: GcodeWords, gCode: number): boolean =>
+  words.some(isAxisWord) ||
+  (isArcGCode(gCode) && (hasWord(words, GRBL_SIMULATOR_WORD.I) || hasWord(words, GRBL_SIMULATOR_WORD.J)));
+
+const getEffectiveLaserPower = (state: GrblSimulatorModalState, gCode: number): number =>
+  state.isLaserOn && gCode !== GRBL_SIMULATOR_G_CODE.RAPID ? state.spindleSpeed : 0;
 
 const getCommandErrorCode = (words: GcodeWords): number | undefined => {
   const gCodes: number[] = getWordNumbers(words, GRBL_SIMULATOR_WORD.G);
@@ -127,11 +154,14 @@ const getStateAfterModalWords = (state: GrblSimulatorModalState, words: GcodeWor
     nextState = { ...nextState, spindleSpeed: getWordValue(words, GRBL_SIMULATOR_WORD.S) };
   }
 
-  for (const mCode of getWordNumbers(words, GRBL_SIMULATOR_WORD.M)) {
+  for (const mCode of getWordNumbers(words, GRBL_SIMULATOR_WORD.M).filter(isLaserSwitchMCode)) {
     nextState = { ...nextState, isLaserOn: mCode !== GRBL_SIMULATOR_M_CODE.LASER_OFF };
   }
 
-  return nextState;
+  const modalMotionCode: number | undefined = getWordNumbers(words, GRBL_SIMULATOR_WORD.G).findLast(isModalMotionGCode);
+  const motionMode: number = modalMotionCode ?? nextState.motionMode;
+
+  return { ...nextState, motionMode };
 };
 
 const getAxisTarget = (state: GrblSimulatorModalState, words: GcodeWords, axis: keyof GrblAxisPosition): number => {
@@ -197,9 +227,10 @@ const getMovedResult = (
   state: GrblSimulatorModalState,
   target: GrblAxisPosition,
   durationMs: number,
+  gCode: number,
 ): GrblSimulatorInterpretedLine => ({
   nextState: { ...state, position: target },
-  motionBlock: { target, durationMs, spindleSpeed: state.spindleSpeed },
+  motionBlock: { target, durationMs, spindleSpeed: getEffectiveLaserPower(state, gCode) },
 });
 
 const getArcResult = (
@@ -217,7 +248,7 @@ const getArcResult = (
   const isClockwise: boolean = gCode === GRBL_SIMULATOR_G_CODE.ARC_CLOCKWISE;
   const arcLength: number = getArcLength(state.position, target, centerOffset, isClockwise);
 
-  return getMovedResult(state, target, getDurationMs(arcLength, state.feedRate));
+  return getMovedResult(state, target, getDurationMs(arcLength, state.feedRate), gCode);
 };
 
 const getMotionResult = (
@@ -230,7 +261,7 @@ const getMotionResult = (
   const distance: number = getLinearDistance(state.position, target);
 
   if (gCode === GRBL_SIMULATOR_G_CODE.RAPID) {
-    return getMovedResult(state, target, getDurationMs(distance, getRapidRate(settings)));
+    return getMovedResult(state, target, getDurationMs(distance, getRapidRate(settings)), gCode);
   }
 
   if (!state.feedRate) {
@@ -238,7 +269,7 @@ const getMotionResult = (
   }
 
   if (gCode === GRBL_SIMULATOR_G_CODE.LINEAR) {
-    return getMovedResult(state, target, getDurationMs(distance, state.feedRate));
+    return getMovedResult(state, target, getDurationMs(distance, state.feedRate), gCode);
   }
 
   return getArcResult(gCode, state, words, target);
@@ -251,7 +282,9 @@ const getDwellResult = (state: GrblSimulatorModalState, words: GcodeWords): Inte
 
   const durationMs: number = getWordValue(words, GRBL_SIMULATOR_WORD.P) * GRBL_SIMULATOR_MS_PER_SECOND;
 
-  return { nextState: state, motionBlock: { target: state.position, durationMs, spindleSpeed: state.spindleSpeed } };
+  const spindleSpeed: number = getEffectiveLaserPower(state, GRBL_SIMULATOR_G_CODE.DWELL);
+
+  return { nextState: state, motionBlock: { target: state.position, durationMs, spindleSpeed } };
 };
 
 export const getInterpretedGcodeLine = (
@@ -272,7 +305,8 @@ export const getInterpretedGcodeLine = (
   }
 
   const modalState: GrblSimulatorModalState = getStateAfterModalWords(state, words);
-  const motionGCode: number | undefined = getWordNumbers(words, GRBL_SIMULATOR_WORD.G).find(isMotionGCode);
+  const explicitGCode: number | undefined = getWordNumbers(words, GRBL_SIMULATOR_WORD.G).find(isMotionGCode);
+  const motionGCode: number = explicitGCode ?? modalState.motionMode;
 
   switch (motionGCode) {
   case GRBL_SIMULATOR_G_CODE.SET_OFFSET:
@@ -282,9 +316,11 @@ export const getInterpretedGcodeLine = (
     };
   case GRBL_SIMULATOR_G_CODE.DWELL:
     return getDwellResult(modalState, words);
-  case undefined:
-    return { nextState: modalState, motionBlock: undefined };
   default:
+    if (!hasMotionWords(words, motionGCode)) {
+      return { nextState: modalState, motionBlock: undefined };
+    }
+
     return getMotionResult(motionGCode, modalState, words, settings);
   }
 };

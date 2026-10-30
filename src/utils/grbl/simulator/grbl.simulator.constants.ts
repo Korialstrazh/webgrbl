@@ -85,3 +85,10 @@ export const GRBL_SIMULATOR_SETTING_MAX_RATE_X = 110;
 /** Setting number of the maximum rate of the Y axis, in mm/min. */
 export const GRBL_SIMULATOR_SETTING_MAX_RATE_Y = 111;
 // #endregion
+
+// #region Accepted no-op words
+/** G-codes (plane, cutter, offsets, path control, canned cycle and feed modes) accepted without effect. */
+export const GRBL_SIMULATOR_NOOP_G_CODES: readonly number[] = [17, 40, 49, 54, 55, 56, 57, 58, 59, 61, 80, 94];
+/** M-codes (program end, coolant) accepted without effect. */
+export const GRBL_SIMULATOR_NOOP_M_CODES: readonly number[] = [2, 7, 8, 9, 30];
+// #endregion
