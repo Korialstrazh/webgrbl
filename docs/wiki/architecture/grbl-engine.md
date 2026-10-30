@@ -1,0 +1,34 @@
+---
+title: GRBL Engine
+created: 2026-10-30
+---
+
+# GRBL Engine
+
+Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protocol. It imports nothing from React, Redux or i18next, so it is unit-testable and could later move into a Web Worker. LaserGRBL behaviour it mirrors: [[lg-connection]], [[lg-streaming]].
+
+## Key Takeaways
+
+- **Constants in one file.** `grbl.constants.ts` holds the timing values (10 s handshake, 250 ms status poll, 2 s hold-complete wait, 10 s not-responding silence, 5 s info toast), sizes (127-byte default RX buffer, 2,000 console entries, 100 history entries, baud list with 115200 default), the realtime bytes (`?` 0x3F, `!` 0x21, `~` 0x7E, reset 0x18, jog cancel 0x85) and the closed sets `GRBL_RESPONSE_KIND`, `GRBL_MACHINE_STATE`, `GRBL_LINE_ORIGIN`, `GRBL_REALTIME_COMMAND`.
+- **Line framing.** `GrblLineFramer` decodes bytes with a streaming `TextDecoder` (multi-byte characters may split across chunks), splits on CRLF or LF, keeps the unfinished tail for the next chunk, trims and drops empty lines.
+- **Line preparation.** `getPreparedGrblLine` strips `;` and `(...)` comments and, for non-`$` lines, all whitespace (case is kept). `$` lines keep their inner spaces. It returns `undefined` when nothing is left, so empty lines are never sent.
+- **EEPROM detection.** `isEepromWritingGrblLine` flags `$n=`, `$N0=`, `$N1=`, `$RST=`, `$I=`, `G10 L2`/`L20`, `G28.1` and `G30.1` on a prepared line. GRBL needs those sent one at a time with nothing in flight.
+- **Response parsing.** `getParsedGrblResponse` turns one line into a `GrblResponse` (discriminated on `kind`): `ok`, `error:N`, `ALARM:N`, `<...>` status, `$n=v` setting, `[...]` feedback, a Grbl/GrblHAL banner, or `other`. Each variant is its own interface under `interfaces/`.
+- **Status reports.** `getParsedGrblStatusReport` reads the state (and optional `:substate`), `MPos`, `WPos`, `WCO`, `Bf` (planner, RX), `FS` and `F` (feed), `Ov`; unknown fields are ignored and an unknown state yields `undefined`. `getResolvedGrblPositions` fills WPos from MPos - WCO (or MPos from WPos + WCO); a WCO in the report replaces the cached one.
+- **Banner and build info.** `getParsedGrblFirmwareIdentity` keeps the version letter suffix (`1.1h`). `isSupportedGrblFirmware` accepts 1.1 or later (1.2 clones and FluidNC `Grbl 3.x` pass, 0.9 does not). `getGrblRxBufferSizeFromBuildOption` returns `rx - 1` from `[OPT:flags,blocks,rx]` because one byte of the reported serial buffer is unusable.
+- **Planned layers.** Character-counting send queue, simulated laser, engine controller and the Redux/saga bridge are added on top in later steps; this article grows with them.
+
+## Source
+
+- `src/utils/grbl/grbl.constants.ts`
+- `src/utils/grbl/grbl.line.framer.ts`
+- `src/utils/grbl/grbl.line.preparer.ts`
+- `src/utils/grbl/grbl.eeprom.command.detector.ts`
+- `src/utils/grbl/grbl.response.parser.ts`
+- `src/utils/grbl/grbl.status.report.parser.ts`
+- `src/utils/grbl/grbl.firmware.banner.parser.ts`
+- `src/utils/grbl/grbl.firmware.support.ts`
+- `src/utils/grbl/grbl.build.info.parser.ts`
+- `src/utils/grbl/grbl.position.resolver.ts`
+- `src/utils/grbl/interfaces/`
+- `docs/superpowers/specs/2026-10-30_(01)_connection-streaming-engine.spec.md`

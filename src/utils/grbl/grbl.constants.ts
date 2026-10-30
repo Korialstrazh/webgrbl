@@ -1,0 +1,164 @@
+/**
+ * Timing, size and wire values of the GRBL protocol engine, plus the closed sets the engine and its callers share.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-10-30
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+
+// #region Timing
+/** How long to wait for the welcome banner after opening the port. */
+export const GRBL_HANDSHAKE_TIMEOUT_MS = 10_000;
+/** Time between two status queries while connected. */
+export const GRBL_STATUS_POLL_INTERVAL_MS = 250;
+/** Longest wait for the machine to finish a feed hold before a soft reset is sent. */
+export const GRBL_HOLD_COMPLETE_MAX_WAIT_MS = 2_000;
+/** Silence with lines in flight after which the controller is reported as not responding. */
+export const GRBL_NOT_RESPONDING_SILENCE_MS = 10_000;
+/** How long an informational toast stays visible. */
+export const GRBL_INFO_TOAST_LIFETIME_MS = 5_000;
+// #endregion
+
+// #region Sizes
+/** Controller receive buffer size in bytes when the controller does not report one. */
+export const GRBL_DEFAULT_RX_BUFFER_BYTES = 127;
+/** Most console entries kept before the oldest are dropped. */
+export const GRBL_CONSOLE_ENTRY_LIMIT = 2_000;
+/** Most commands kept in the console command history. */
+export const GRBL_COMMAND_HISTORY_LIMIT = 100;
+/** Baud rates offered when connecting. */
+export const GRBL_BAUD_RATES: readonly number[] = [9600, 19200, 38400, 57600, 115200, 230400, 250000];
+/** Baud rate selected when the user has not chosen one. */
+export const GRBL_DEFAULT_BAUD_RATE = 115200;
+// #endregion
+
+// #region Realtime bytes
+/** Realtime byte that asks for a status report. */
+export const GRBL_STATUS_QUERY_BYTE = 0x3f;
+/** Realtime byte that pauses motion. */
+export const GRBL_FEED_HOLD_BYTE = 0x21;
+/** Realtime byte that continues after a feed hold. */
+export const GRBL_CYCLE_RESUME_BYTE = 0x7e;
+/** Realtime byte that resets the controller. */
+export const GRBL_SOFT_RESET_BYTE = 0x18;
+/** Realtime byte that stops a jog in progress. */
+export const GRBL_JOG_CANCEL_BYTE = 0x85;
+// #endregion
+
+// #region Line patterns
+/** Splits received text into lines for both LF and CRLF endings. */
+export const GRBL_LINE_BREAK_PATTERN = /\r?\n/;
+/** Matches a semicolon comment to the end of the line or a parenthesis comment. */
+export const GRBL_LINE_COMMENT_PATTERN = /;.*$|\([^)]*\)/g;
+/** Matches any run of whitespace. */
+export const GRBL_WHITESPACE_PATTERN = /\s+/g;
+/** First character of a GRBL system command such as a setting write. */
+export const GRBL_SYSTEM_COMMAND_PREFIX = '$';
+/** Commands that write the controller EEPROM and so must be sent one at a time (G10L2 also covers G10L20). */
+export const GRBL_EEPROM_COMMAND_PATTERN = /^(\$(\d+|N[01]|RST|I)=|G10L2|G28\.1|G30\.1)/i;
+// #endregion
+
+// #region Response patterns
+/** Fallback for text that is missing. */
+export const GRBL_EMPTY_TEXT = '';
+/** Text of a successful acknowledgement. */
+export const GRBL_OK_RESPONSE_TEXT = 'ok';
+/** Matches an error line and captures the error code. */
+export const GRBL_ERROR_PATTERN = /^error:(\d+)$/i;
+/** Matches an alarm line and captures the alarm code. */
+export const GRBL_ALARM_PATTERN = /^ALARM:(\d+)$/i;
+/** Matches a setting line and captures its number and value. */
+export const GRBL_SETTING_PATTERN = /^\$(\d+)=(.*)$/;
+/** Matches a bracketed feedback message. */
+export const GRBL_FEEDBACK_PATTERN = /^\[.*\]$/;
+/** Matches a status report and captures what is inside the angle brackets. */
+export const GRBL_STATUS_REPORT_PATTERN = /^<(.*)>$/;
+/** Matches the welcome banner and captures firmware name, version and the remaining text. */
+export const GRBL_BANNER_PATTERN = /^(grbl(?:hal)?)\s+v?(\d+\.\d+[a-z]?)\s*(.*)$/i;
+/** Captures the major and minor number of a firmware version. */
+export const GRBL_VERSION_NUMBER_PATTERN = /^(\d+)\.(\d+)/;
+/** Matches the build option line and captures the reported receive buffer size. */
+export const GRBL_BUILD_OPTION_PATTERN = /^\[OPT:[^,\]]*,\d+,(\d+)\]$/i;
+// #endregion
+
+// #region Status report fields
+/** Separates the fields of a status report. */
+export const GRBL_STATUS_FIELD_SEPARATOR = '|';
+/** Separates a status field name from its value. */
+export const GRBL_STATUS_VALUE_SEPARATOR = ':';
+/** Separates the numbers inside one status field value. */
+export const GRBL_STATUS_NUMBER_SEPARATOR = ',';
+/** Names of the status report fields this app reads. */
+export const GRBL_STATUS_FIELD = {
+  MACHINE_POSITION: 'MPos',
+  WORK_POSITION: 'WPos',
+  WORK_COORDINATE_OFFSET: 'WCO',
+  BUFFER: 'Bf',
+  FEED_AND_SPINDLE: 'FS',
+  FEED: 'F',
+  OVERRIDES: 'Ov',
+} as const;
+// #endregion
+
+// #region Firmware support
+/** Oldest firmware major version the app supports. */
+export const GRBL_MIN_SUPPORTED_MAJOR_VERSION = 1;
+/** Oldest firmware minor version the app supports within the minimum major version. */
+export const GRBL_MIN_SUPPORTED_MINOR_VERSION = 1;
+/** GRBL reports its serial buffer size, but one byte of it cannot be used. */
+export const GRBL_RX_BUFFER_UNUSABLE_BYTES = 1;
+// #endregion
+
+// #region Closed sets
+/** What kind of line the controller sent. */
+export const GRBL_RESPONSE_KIND = {
+  OK: 'ok',
+  ERROR: 'error',
+  ALARM: 'alarm',
+  STATUS: 'status',
+  BANNER: 'banner',
+  SETTING: 'setting',
+  FEEDBACK: 'feedback',
+  OTHER: 'other',
+} as const;
+
+export type GrblResponseKind = (typeof GRBL_RESPONSE_KIND)[keyof typeof GRBL_RESPONSE_KIND];
+
+/** Machine states exactly as GRBL prints them in status reports. */
+export const GRBL_MACHINE_STATE = {
+  IDLE: 'Idle',
+  RUN: 'Run',
+  HOLD: 'Hold',
+  JOG: 'Jog',
+  ALARM: 'Alarm',
+  DOOR: 'Door',
+  CHECK: 'Check',
+  HOME: 'Home',
+  SLEEP: 'Sleep',
+} as const;
+
+export type GrblMachineState = (typeof GRBL_MACHINE_STATE)[keyof typeof GRBL_MACHINE_STATE];
+
+/** Where a sent line came from, which decides whether it counts as job traffic. */
+export const GRBL_LINE_ORIGIN = {
+  CONSOLE: 'console',
+  PROGRAM: 'program',
+  PRIVATE: 'private',
+} as const;
+
+export type GrblLineOrigin = (typeof GRBL_LINE_ORIGIN)[keyof typeof GRBL_LINE_ORIGIN];
+
+/** Commands that are sent as single realtime bytes outside the send queue. */
+export const GRBL_REALTIME_COMMAND = {
+  STATUS_QUERY: 'status-query',
+  FEED_HOLD: 'feed-hold',
+  CYCLE_RESUME: 'cycle-resume',
+  SOFT_RESET: 'soft-reset',
+  JOG_CANCEL: 'jog-cancel',
+} as const;
+
+export type GrblRealtimeCommand = (typeof GRBL_REALTIME_COMMAND)[keyof typeof GRBL_REALTIME_COMMAND];
+// #endregion
