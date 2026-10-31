@@ -17,8 +17,6 @@ export const BED_PLACEHOLDER_KIND = {
 export type BedPlaceholderKind = (typeof BED_PLACEHOLDER_KIND)[keyof typeof BED_PLACEHOLDER_KIND];
 
 export const DEFAULT_BED_SIZE_MM = 400;
-export const GRBL_SETTING_X_MAX_TRAVEL = 130;
-export const GRBL_SETTING_Y_MAX_TRAVEL = 131;
 export const GRID_STEP_MM = 10;
 export const MAJOR_GRID_STEP_MM = 50;
 export const RULER_LABEL_STEP_MM = 50;

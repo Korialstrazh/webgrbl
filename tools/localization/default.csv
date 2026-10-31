@@ -140,6 +140,12 @@ MACHINE_PANEL_TITLE;Machine
 MACHINE_PREFLIGHT_DESCRIPTION;Checks the machine, the job and the material before the job starts.
 MACHINE_PREFLIGHT_RUN;Run pre-flight check
 MACHINE_PREFLIGHT_TITLE;Pre-flight check
+MACHINE_PROFILE_ERROR_JOG_FEED_RATE_INVALID;Jog feed must be between {{min}} and {{max}} mm/min
+MACHINE_PROFILE_ERROR_MAX_POWER_INVALID;Laser power must be greater than 0 W and at most {{max}} W
+MACHINE_PROFILE_ERROR_NAME_REQUIRED;Enter a name for the machine
+MACHINE_PROFILE_ERROR_S_VALUE_MAX_INVALID;Maximum S value must be a whole number from {{min}} to {{max}}
+MACHINE_PROFILE_ERROR_WORK_AREA_X_INVALID;Work area width must be greater than 0 and at most {{max}} mm
+MACHINE_PROFILE_ERROR_WORK_AREA_Y_INVALID;Work area height must be greater than 0 and at most {{max}} mm
 MACHINE_START_JOB;Start job
 MACHINE_START_JOB_DESCRIPTION;Starts the job once the pre-flight check has passed.
 MACHINE_START_JOB_TITLE;Job
@@ -169,10 +175,13 @@ TOAST_CONTROLLER_RESET;The controller reset itself - running work was stopped.
 TOAST_DISMISS;Dismiss
 TOAST_GRBL_ALARM;Alarm {{code}}: {{description}} - unlock or home the machine.
 TOAST_GRBL_ERROR;Error {{code}}: {{description}}
+TOAST_LASER_MODE_OFF;Laser mode is off ($32=0): the laser may burn spots where it slows down, and the laser pointer may not light. Send $32=1 in the console to turn it on.
 TOAST_NOT_RESPONDING;The controller is not responding.
 TOAST_PORT_ACCESS_DENIED_OR_BUSY;Could not open the port. On Linux, add your user to the dialout group. On any system, close other apps or tabs using the port.
 TOAST_PORT_NOT_FOUND;The port is gone - check the USB cable.
 TOAST_PORT_OPEN_FAILED;Could not open the port.
+TOAST_PROFILE_CREATED;Created the machine profile {{name}} from the laser's settings.
+TOAST_PROFILE_DIFFERS;The laser reports a work area of {{laserWidth}} x {{laserHeight}} mm, but the profile {{name}} has {{profileWidth}} x {{profileHeight}} mm. Nothing was changed - you can update the profile from the laser in the Machine profiles dialog.
 TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}} - {{description}}
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
 TOP_BAR_AUTOSAVE_DESCRIPTION;Your design will be saved automatically.

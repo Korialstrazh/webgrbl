@@ -18,7 +18,9 @@ import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { doNothing } from '../../utils/do.nothing';
 import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectGrblSettings, selectIsConnected } from '../../utils/states/grbl.connection.state';
+import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { BedView } from '../../views/BedView';
 import { ComingSoon } from '../../views/ComingSoon';
@@ -35,7 +37,8 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const settings: Record<number, string> = useSelector(selectGrblSettings);
   const isConnected: boolean = useSelector(selectIsConnected);
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
-  const dimensions: BedDimensions = getBedDimensions(settings, isConnected);
+  const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const dimensions: BedDimensions = getBedDimensions(settings, isConnected, activeProfile);
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
   const viewModeOptions: BedViewModeOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option: BedViewModeOptionKey) => ({
     value: option.value,

@@ -7,6 +7,10 @@ import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosit
 import type { GrblStatusReport } from '../../utils/grbl/interfaces/GrblStatusReport';
 import type { GrblResolvedPositions } from '../../utils/grbl/interfaces/GrblResolvedPositions';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.profile.constants';
+import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
@@ -21,6 +25,9 @@ const WORK_COORDINATE_OFFSET: GrblAxisPosition = { x: 100, y: 30, z: 0 };
 const EXPECTED_HEAD_TRANSFORM = 'translate(110 350)';
 const VIEW_MODE_LABEL = 'Bed view';
 const DESIGN_VIEW_LABEL = 'Design';
+const PROFILE_WIDTH_MM = 300;
+const PROFILE_HEIGHT_MM = 200;
+const PROFILE_BED_LABEL = 'Machine bed, 300 by 200 mm';
 
 const renderPanel = (store: AppStore): void => {
   render(
@@ -63,6 +70,24 @@ describe(BedPanel.name, () => {
     renderPanel(newStore());
 
     expect(screen.getByText(NO_MACHINE_TEXT)).toBeInTheDocument();
+  });
+
+  it('draws the bed from the active profile without the placeholder while disconnected', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile({
+      workAreaXMm: PROFILE_WIDTH_MM,
+      workAreaYMm: PROFILE_HEIGHT_MM,
+    });
+
+    renderPanel(store);
+    act(() => {
+      store.dispatch(new MachineProfilesLoaded({
+        document: { version: MACHINE_PROFILES_DOCUMENT_VERSION, activeProfileId: profile.id, profiles: [profile] },
+      }));
+    });
+
+    expect(screen.getByLabelText(PROFILE_BED_LABEL, { exact: false })).toBeInTheDocument();
+    expect(screen.queryByText(NO_MACHINE_TEXT)).not.toBeInTheDocument();
   });
 
   it('status with only WPos and a cached WCO still places the crosshair', () => {
