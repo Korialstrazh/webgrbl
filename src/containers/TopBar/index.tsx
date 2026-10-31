@@ -1,5 +1,5 @@
 /**
- * The top region: app title, browser status and connection controls.
+ * The top region: app name, project placeholder, menus that are not built yet, the connection pill and update notice.
  *
  * @author michael.morosov
  *
@@ -10,11 +10,16 @@
  */
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { REDO_ARROW, UNDO_ARROW } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { BUTTON_VARIANT } from '../../views/Button/button.constants';
+import { Button } from '../../views/Button';
+import { ComingSoon } from '../../views/ComingSoon';
+import { IconButton } from '../../views/IconButton';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
-import { BrowserStatusBar } from '../BrowserStatusBar';
-import { ConnectBar } from '../ConnectBar';
+import { ConnectionPill } from '../ConnectionPill';
 import styles from './styles.module.scss';
+import { TOP_BAR_MENU_LABEL_KEYS } from './top.bar.constants';
 
 export const TopBar = (): ReactNode => {
   const { t } = useTranslation();
@@ -23,11 +28,28 @@ export const TopBar = (): ReactNode => {
     <header className={styles.topBar}>
       <div className={styles.heading}>
         <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
-        <p className={styles.tagline}>{t(DEFAULT.APP_TAGLINE)}</p>
+        <p className={styles.project}>{t(DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER)}</p>
       </div>
-      <BrowserStatusBar />
-      <ConnectBar />
-      <AppUpdatePrompt />
+      <ComingSoon description={t(DEFAULT.TOP_BAR_MENUS_DESCRIPTION)}>
+        <div className={styles.group}>
+          {TOP_BAR_MENU_LABEL_KEYS.map((menuLabelKey: string) => (
+            <Button key={menuLabelKey} variant={BUTTON_VARIANT.GHOST}>{t(menuLabelKey)}</Button>
+          ))}
+        </div>
+      </ComingSoon>
+      <ComingSoon description={t(DEFAULT.TOP_BAR_HISTORY_DESCRIPTION)}>
+        <div className={styles.group}>
+          <IconButton label={t(DEFAULT.TOP_BAR_UNDO)} iconComponent={UNDO_ARROW} />
+          <IconButton label={t(DEFAULT.TOP_BAR_REDO)} iconComponent={REDO_ARROW} />
+        </div>
+      </ComingSoon>
+      <ComingSoon description={t(DEFAULT.TOP_BAR_AUTOSAVE_DESCRIPTION)}>
+        <p className={styles.autosave}>{t(DEFAULT.TOP_BAR_AUTOSAVE_READOUT)}</p>
+      </ComingSoon>
+      <div className={styles.trailing}>
+        <AppUpdatePrompt />
+        <ConnectionPill />
+      </div>
     </header>
   );
 };

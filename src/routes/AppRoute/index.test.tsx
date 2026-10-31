@@ -5,7 +5,7 @@ import { installMatchMediaMock, setMatchMediaMatches } from '../../utils/test.su
 import { newStore } from '../../utils/states/new.store';
 
 const APP_TITLE = 'webgrbl';
-const CONNECT_LABEL = 'Connect';
+const CONNECTION_PILL_PATTERN = /Disconnected/;
 const STOP_LABEL = 'Stop';
 const CONSOLE_TITLE = 'Console';
 const DESIGN_PANEL_LABEL = 'Design';
@@ -48,10 +48,10 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
   });
 
-  it('keeps the connection controls and the console working inside their regions', () => {
+  it('keeps the connection pill and the console working inside their regions', () => {
     renderAppRoute();
 
-    expect(within(getTopBar()).getByRole('button', { name: CONNECT_LABEL })).toBeInTheDocument();
+    expect(within(getTopBar()).getByRole('button', { name: CONNECTION_PILL_PATTERN })).toBeInTheDocument();
     expect(within(screen.getByRole('contentinfo')).getByRole('heading', { name: CONSOLE_TITLE })).toBeInTheDocument();
   });
 

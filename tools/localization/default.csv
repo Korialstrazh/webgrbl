@@ -6,21 +6,26 @@ APP_UPDATE_NEED_REFRESH;A new version of webgrbl is available.
 APP_UPDATE_OFFLINE_READY;webgrbl is ready to work offline.
 APP_UPDATE_RELOAD;Reload
 BED_PANEL_TITLE;Bed
-BROWSER_STATUS_OFFLINE;Offline
-BROWSER_STATUS_ONLINE;Online
-BROWSER_STATUS_WEB_SERIAL_SUPPORTED;Web Serial ready
-BROWSER_STATUS_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
 COMING_SOON;Coming soon
-CONNECT_BAR_BAUD;Baud rate
-CONNECT_BAR_CHOOSE_PORT;Choose port...
-CONNECT_BAR_CONNECT;Connect
-CONNECT_BAR_CONNECTING;Connecting...
-CONNECT_BAR_DISCONNECT;Disconnect
-CONNECT_BAR_FIRMWARE;{{firmwareName}} {{version}}
-CONNECT_BAR_PORT;Port
-CONNECT_BAR_SERIAL_PORT;Serial port
-CONNECT_BAR_SIMULATED_LASER;Simulated laser
-CONNECT_BAR_USB_PORT;USB {{vendorId}}:{{productId}}
+CONNECTION_PILL_CONNECTED;Connected
+CONNECTION_PILL_CONNECTING;Connecting
+CONNECTION_PILL_DISCONNECTED;Disconnected
+CONNECTION_PILL_FIRMWARE;{{firmwareName}} {{version}}
+CONNECTION_PILL_LOST;Connection lost
+CONNECTION_PILL_OFFLINE;Offline
+CONNECTION_PILL_ONLINE;Online
+CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED;No Web Serial
+CONNECTION_POPOVER_BAUD;Baud rate
+CONNECTION_POPOVER_CHOOSE_PORT;Choose port...
+CONNECTION_POPOVER_CONNECT;Connect
+CONNECTION_POPOVER_CONNECTING;Connecting...
+CONNECTION_POPOVER_DISCONNECT;Disconnect
+CONNECTION_POPOVER_LABEL;Laser connection
+CONNECTION_POPOVER_PORT;Port
+CONNECTION_POPOVER_SERIAL_PORT;Serial port
+CONNECTION_POPOVER_SIMULATED_LASER;Simulated laser
+CONNECTION_POPOVER_USB_PORT;USB {{vendorId}}:{{productId}}
+CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
 CONSOLE_INPUT_LABEL;Console command
 CONSOLE_INPUT_PLACEHOLDER;Type a command, for example $$
 CONSOLE_LOG_LABEL;Console output
@@ -116,3 +121,14 @@ TOAST_PORT_NOT_FOUND;The port is gone - check the USB cable.
 TOAST_PORT_OPEN_FAILED;Could not open the port.
 TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}} - {{description}}
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
+TOP_BAR_AUTOSAVE_DESCRIPTION;Your design will be saved automatically.
+TOP_BAR_AUTOSAVE_READOUT;Autosave: off
+TOP_BAR_HISTORY_DESCRIPTION;Undo and redo for design edits.
+TOP_BAR_MENU_IMPORT_SVG;Import SVG
+TOP_BAR_MENU_MACHINE_PROFILES;Machine profiles
+TOP_BAR_MENU_MATERIALS;Materials
+TOP_BAR_MENU_PROJECT;Project
+TOP_BAR_MENUS_DESCRIPTION;Project files, SVG import, materials and machine profiles.
+TOP_BAR_PROJECT_PLACEHOLDER;Untitled project
+TOP_BAR_REDO;Redo
+TOP_BAR_UNDO;Undo

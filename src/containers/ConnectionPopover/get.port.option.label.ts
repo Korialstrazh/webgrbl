@@ -19,10 +19,10 @@ export const getPortOptionLabel = (port: SerialPortDescriptor, t: TFunction): st
   // Id 0 is a valid USB id, so only a missing id means the browser gave none.
   // eslint-disable-next-line no-restricted-syntax -- 0 is distinct from absent here
   if (usbVendorId === undefined || usbProductId === undefined) {
-    return t(DEFAULT.CONNECT_BAR_SERIAL_PORT);
+    return t(DEFAULT.CONNECTION_POPOVER_SERIAL_PORT);
   }
 
-  return t(DEFAULT.CONNECT_BAR_USB_PORT, {
+  return t(DEFAULT.CONNECTION_POPOVER_USB_PORT, {
     vendorId: getUsbIdHex(usbVendorId),
     productId: getUsbIdHex(usbProductId),
   });
