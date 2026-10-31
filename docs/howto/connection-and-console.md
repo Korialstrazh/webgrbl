@@ -30,17 +30,20 @@ Then log out and back in. Only one application or browser tab can hold a port at
 ## Console
 
 - Type a command and press **Enter** to send it (for example `$$`, `$I` or `$J=G91X10F1000`).
-- **ArrowUp** / **ArrowDown** step through the command history (last 100 entries).
+- **ArrowUp** / **ArrowDown** step through the command history (last 100 entries). Typing after a recall starts the history again from the newest command.
+- Commands may only contain plain ASCII letters, digits and symbols. A command with any other character (for example an umlaut or an accented letter) is not sent and the console shows an error: such bytes would reach GRBL as realtime commands, for example a laser power override. Characters inside a `;` or `( )` comment are fine, as comments are never sent.
 - The status-report toggle hides the `?` polls and `<...>` replies, which otherwise fill the console every 250 ms.
 - The console keeps the last 2,000 entries.
 
 ## Stop, Reset, Unlock
 
-- **Stop** sends a feed hold (a jog cancel while jogging), waits until the machine has come to rest (at most 2 s), then soft-resets. The position is kept and no alarm is raised.
+- **Stop** sends a feed hold (which also cancels a jog), waits until the machine has come to rest (at most 2 s), then soft-resets. The position is kept and no alarm is raised.
 - **Reset** soft-resets at once. Moving machines lose steps and raise `ALARM:3`, so home again afterwards.
 - **Unlock** sends `$X` to clear an Alarm lock.
 
-Leaving the page while the machine is running asks for confirmation; disconnecting while it runs performs a Stop first.
+Leaving the page while the machine is running asks for confirmation. Disconnecting always performs a Stop first (about 50 ms when the machine is idle), so the laser never keeps moving after the port is closed.
+
+If the controller resets itself (a homing failure, its reset button, a power dip), a warning toast says so: GRBL dropped what it had received, so any running job is stopped and the app forgets the commands GRBL will never answer.
 
 ## Using the engine from code
 
@@ -82,4 +85,7 @@ Notes:
 - `lineNumber` in results and events is the 1-based index into the `lines` array you passed; blank and comment lines are skipped when sending but keep their number.
 - Only one program or check runs at a time; a second call rejects with `GrblControllerBusyError`. While disconnected they reject with `GrblConnectionClosedError`.
 - With `isStopOnErrorEnabled: true` the first `error:N` stops the machine and emits `program-stopped-on-error`; the promise resolves with `isCompleted: false`. With `false`, errors are collected and streaming continues.
+- Lines with a character outside printable ASCII are never sent. They are reported as line errors with `NON_ASCII_LINE_ERROR_CODE` (-1, a client-side code, not a GRBL one). With stop-on-error on, such a line refuses the whole program before anything is sent; with it off, the line is skipped and reported. `checkProgram` lists them among its results. `sendConsoleCommand` throws `GrblNonAsciiLineError` instead.
+- A reset the controller did by itself ends a running program with `isCompleted: false` and emits `controller-reset`.
+- `disconnect()` runs the stop sequence first whenever the controller is connected.
 - Other controls: `sendConsoleCommand(text)`, `resetMachine()`, `unlockMachine()`, `sendFeedHold()`, `sendCycleResume()`, `getLatestStatus()`.
