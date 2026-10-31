@@ -176,7 +176,11 @@ MACHINE_PROFILES_ORIGIN_BACK_RIGHT;Back right
 MACHINE_PROFILES_ORIGIN_FRONT_LEFT;Front left
 MACHINE_PROFILES_ORIGIN_FRONT_RIGHT;Front right
 MACHINE_PROFILES_READ_FROM_LASER;Read from connected laser
-MACHINE_PROFILES_READ_SUMMARY;Read from the laser: work area {{width}} x {{height}} mm, maximum S value {{sValueMax}}. Press Save to keep these values.
+MACHINE_PROFILES_READ_NO;no
+MACHINE_PROFILES_READ_NOTHING;The laser reported none of these settings, so the form was not changed.
+MACHINE_PROFILES_READ_SUMMARY;Read from the laser. Press Save to keep these values.
+MACHINE_PROFILES_READ_VALUE;{{label}}: {{value}}
+MACHINE_PROFILES_READ_YES;yes
 MACHINE_PROFILES_SAVE;Save
 MACHINE_PROFILES_SET_ACTIVE;Set active
 MACHINE_PROFILES_TITLE;Machine profiles

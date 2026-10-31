@@ -62,7 +62,15 @@ const STORED_WORK_AREA_Y_MM = 500;
 const STORED_S_VALUE_MAX = 255;
 const SIMULATOR_WORK_AREA_MM = 400;
 const SIMULATOR_S_VALUE_MAX = 1000;
-const READ_SUMMARY_PATTERN = /work area 400 x 400 mm, maximum S value 1000/;
+const READ_SUMMARY_TEXT = 'Read from the laser. Press Save to keep these values.';
+const READ_WIDTH_TEXT = 'Work area width (mm): 400';
+const READ_HEIGHT_TEXT = 'Work area height (mm): 400';
+const READ_S_VALUE_MAX_TEXT = 'Maximum S value ($30): 1000';
+const READ_PARTIAL_HEIGHT_TEXT = 'Work area height (mm): 200';
+const READ_HOMING_ON_TEXT = 'Homing switches: yes';
+const READ_NOTHING_TEXT = 'The laser reported none of these settings, so the form was not changed.';
+const PARTIAL_WORK_AREA_Y_MM = 200;
+const DRAFT_WORK_AREA_X_MM = 300;
 const LASER_MODE_OFF_PATTERN = /Laser mode is off/;
 const STOP_SETTLE_MS = GRBL_HOLD_COMPLETE_MAX_WAIT_MS + GRBL_STATUS_POLL_INTERVAL_MS + ANSWER_SETTLE_MS;
 const EXPORT_FILE_NAME = 'webgrbl-machine-profiles.json';
@@ -72,6 +80,8 @@ const NOT_A_PROFILES_DOCUMENT_JSON = '{"profiles": "none"}';
 const IMPORT_FILE_NAME = 'profiles.json';
 const FIRMWARE_IDENTITY: GrblFirmwareIdentity = { firmwareName: 'Grbl', version: '1.1h', vendorText: '' };
 const LASER_MODE_OFF_SETTINGS: Record<number, string> = { 130: '400', 131: '400', 30: '1000', 22: '0', 32: '0' };
+const SETTINGS_WITHOUT_X_TRAVEL_AND_LASER_MODE: Record<number, string> = { 131: '200', 22: '1' };
+const SETTINGS_WITHOUT_PROFILE_VALUES: Record<number, string> = { 0: '10' };
 const RX_BUFFER_SIZE = 127;
 
 const renderDialog = (store: AppStore, onClose: () => void = vi.fn()): void => {
@@ -243,7 +253,10 @@ describe(MachineProfilesDialog.name, () => {
       expect(screen.getByLabelText(WORK_AREA_X_LABEL)).toHaveValue(String(SIMULATOR_WORK_AREA_MM));
       expect(screen.getByLabelText(WORK_AREA_Y_LABEL)).toHaveValue(String(SIMULATOR_WORK_AREA_MM));
       expect(screen.getByLabelText(S_VALUE_MAX_LABEL)).toHaveValue(String(SIMULATOR_S_VALUE_MAX));
-      expect(screen.getByText(READ_SUMMARY_PATTERN)).toBeInTheDocument();
+      expect(screen.getByText(READ_SUMMARY_TEXT)).toBeInTheDocument();
+      expect(screen.getByText(READ_WIDTH_TEXT)).toBeInTheDocument();
+      expect(screen.getByText(READ_HEIGHT_TEXT)).toBeInTheDocument();
+      expect(screen.getByText(READ_S_VALUE_MAX_TEXT)).toBeInTheDocument();
       expect(screen.queryByText(LASER_MODE_OFF_PATTERN)).not.toBeInTheDocument();
       expect(selectActiveMachineProfile(store.getState())).toEqual(storedProfile);
 
@@ -258,24 +271,59 @@ describe(MachineProfilesDialog.name, () => {
     });
   });
 
-  it('warns in the dialog when the laser reports laser mode off', () => {
-    const store: AppStore = newStore();
+  describe('with reported settings', () => {
+    const connectWithSettings = (store: AppStore, settings: Record<number, string>): void => {
+      act(() => {
+        store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
+        store.dispatch(new ConnectionEstablished({
+          connectionInfo: {
+            identity: FIRMWARE_IDENTITY,
+            rxBufferSize: RX_BUFFER_SIZE,
+            settings,
+            buildInfoLines: [],
+          },
+        }));
+      });
+    };
 
-    renderDialog(store);
-    act(() => {
-      store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
-      store.dispatch(new ConnectionEstablished({
-        connectionInfo: {
-          identity: FIRMWARE_IDENTITY,
-          rxBufferSize: RX_BUFFER_SIZE,
-          settings: LASER_MODE_OFF_SETTINGS,
-          buildInfoLines: [],
-        },
-      }));
+    it('warns in the dialog when the laser reports laser mode off', () => {
+      const store: AppStore = newStore();
+
+      renderDialog(store);
+      connectWithSettings(store, LASER_MODE_OFF_SETTINGS);
+      clickButton(READ_FROM_LASER_LABEL);
+
+      expect(screen.getByText(LASER_MODE_OFF_PATTERN)).toBeInTheDocument();
     });
-    clickButton(READ_FROM_LASER_LABEL);
 
-    expect(screen.getByText(LASER_MODE_OFF_PATTERN)).toBeInTheDocument();
+    it('reads only the reported values and gives no laser mode warning without $32', () => {
+      const store: AppStore = newStore();
+
+      renderDialog(store);
+      connectWithSettings(store, SETTINGS_WITHOUT_X_TRAVEL_AND_LASER_MODE);
+      changeField(WORK_AREA_X_LABEL, DRAFT_WORK_AREA_X_MM);
+      clickButton(READ_FROM_LASER_LABEL);
+
+      expect(screen.getByLabelText(WORK_AREA_X_LABEL)).toHaveValue(String(DRAFT_WORK_AREA_X_MM));
+      expect(screen.getByLabelText(WORK_AREA_Y_LABEL)).toHaveValue(String(PARTIAL_WORK_AREA_Y_MM));
+      expect(screen.getByText(READ_PARTIAL_HEIGHT_TEXT)).toBeInTheDocument();
+      expect(screen.getByText(READ_HOMING_ON_TEXT)).toBeInTheDocument();
+      expect(screen.queryByText(READ_WIDTH_TEXT)).not.toBeInTheDocument();
+      expect(screen.queryByText(LASER_MODE_OFF_PATTERN)).not.toBeInTheDocument();
+    });
+
+    it('says nothing was read and leaves the form unchanged when the laser reports no profile values', () => {
+      const store: AppStore = newStore();
+
+      renderDialog(store);
+      connectWithSettings(store, SETTINGS_WITHOUT_PROFILE_VALUES);
+      changeField(WORK_AREA_X_LABEL, DRAFT_WORK_AREA_X_MM);
+      clickButton(READ_FROM_LASER_LABEL);
+
+      expect(screen.getByText(READ_NOTHING_TEXT)).toBeInTheDocument();
+      expect(screen.queryByText(READ_SUMMARY_TEXT)).not.toBeInTheDocument();
+      expect(screen.getByLabelText(WORK_AREA_X_LABEL)).toHaveValue(String(DRAFT_WORK_AREA_X_MM));
+    });
   });
 
   it('merges an imported file and gives a profile whose id is taken a new id', async () => {

@@ -1,7 +1,7 @@
 /**
  * The form of one machine profile. It edits a draft and stores it only on Save, after the profile checks pass; a
- * failed check shows its message under the field. "Read from connected laser" fills the draft from the laser's
- * settings and shows what was read, with a warning when laser mode is off.
+ * failed check shows its message under the field. "Read from connected laser" fills the draft with the values the
+ * laser reports validly and shows what was read, with a warning when the laser reports laser mode off.
  *
  * @author michael.morosov
  *
@@ -10,26 +10,23 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Alert, Button, Form, Input, InputNumber, Select, Switch } from 'antd';
+import { Button, Form, Input, InputNumber, Select, Switch } from 'antd';
 import { useId, useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  ANTD_ALERT_TYPE_INFO,
-  ANTD_ALERT_TYPE_WARNING,
   ANTD_BUTTON_TYPE_PRIMARY,
   ANTD_FORM_ITEM_STATUS_ERROR,
   ANTD_FORM_LAYOUT_VERTICAL,
 } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getMachineProfileErrors } from '../../../utils/profiles/get.machine.profile.errors';
-import { getProfileValuesFromSettings } from '../../../utils/profiles/get.profile.values.from.settings';
+import { getReportedProfileFields } from '../../../utils/profiles/get.reported.profile.fields';
+import { getValidlyReportedProfileValues } from '../../../utils/profiles/get.validly.reported.profile.values';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import type { MachineProfileFieldError } from '../../../utils/profiles/interfaces/MachineProfileFieldError';
-import type {
-  MachineProfileValuesFromSettings,
-} from '../../../utils/profiles/interfaces/MachineProfileValuesFromSettings';
+import type { ReportedMachineProfileValues } from '../../../utils/profiles/interfaces/ReportedMachineProfileValues';
 import { MACHINE_ORIGIN_CORNER } from '../../../utils/profiles/machine.profile.constants';
 import type { MachineOriginCorner } from '../../../utils/profiles/machine.profile.constants';
 import { selectGrblSettings, selectIsConnected } from '../../../utils/states/grbl.connection.state';
@@ -41,6 +38,7 @@ import type { MachineProfileChanges } from './interfaces/MachineProfileChanges';
 import type { ProfileFieldStatus } from './interfaces/ProfileFieldStatus';
 import type { ProfileFormProps } from './interfaces/ProfileFormProps';
 import type { ProfileNumberFieldDefinition } from './interfaces/ProfileNumberFieldDefinition';
+import { LaserReadingAlerts } from './LaserReadingAlerts';
 import styles from './styles.module.scss';
 
 const FIELD_ID_SEPARATOR = '-';
@@ -67,8 +65,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
   const grblSettings: Record<number, string> = useSelector(selectGrblSettings);
   const [draft, setDraft] = useState<MachineProfile>(profile);
   const [fieldErrors, setFieldErrors] = useState<MachineProfileFieldError[]>([]);
-  const [laserValues, setLaserValues] = useState<MachineProfileValuesFromSettings | undefined>(undefined);
-  const isLaserModeReportedOff: boolean = !!laserValues && !laserValues.isLaserModeOn;
+  const [reportedLaserValues, setReportedLaserValues] = useState<ReportedMachineProfileValues | undefined>(undefined);
 
   const changeDraft = (changes: MachineProfileChanges): void => {
     setDraft({ ...draft, ...changes });
@@ -98,15 +95,11 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
   };
 
   const readDraftFromLaser = (): void => {
-    const valuesFromSettings: MachineProfileValuesFromSettings = getProfileValuesFromSettings(grblSettings);
+    // Only validly reported values reach the draft; every field the laser did not report keeps the draft's value.
+    const reportedValues: ReportedMachineProfileValues = getValidlyReportedProfileValues(grblSettings);
 
-    changeDraft({
-      workAreaXMm: valuesFromSettings.workAreaXMm,
-      workAreaYMm: valuesFromSettings.workAreaYMm,
-      sValueMax: valuesFromSettings.sValueMax,
-      hasHomingSwitches: valuesFromSettings.hasHomingSwitches,
-    });
-    setLaserValues(valuesFromSettings);
+    changeDraft(getReportedProfileFields(reportedValues));
+    setReportedLaserValues(reportedValues);
   };
 
   return (
@@ -157,17 +150,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
           />
           {t(DEFAULT.MACHINE_PROFILES_FIELD_HOMING)}
         </label>
-        {laserValues && (
-          <Alert
-            type={ANTD_ALERT_TYPE_INFO}
-            title={t(DEFAULT.MACHINE_PROFILES_READ_SUMMARY, {
-              width: laserValues.workAreaXMm,
-              height: laserValues.workAreaYMm,
-              sValueMax: laserValues.sValueMax,
-            })}
-          />
-        )}
-        {isLaserModeReportedOff && <Alert type={ANTD_ALERT_TYPE_WARNING} title={t(DEFAULT.TOAST_LASER_MODE_OFF)} />}
+        {reportedLaserValues && <LaserReadingAlerts reportedValues={reportedLaserValues} />}
         <div className={styles.actions}>
           <Button disabled={!isConnected} onClick={readDraftFromLaser}>
             {t(DEFAULT.MACHINE_PROFILES_READ_FROM_LASER)}
