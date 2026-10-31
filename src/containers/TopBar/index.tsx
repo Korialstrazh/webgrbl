@@ -26,27 +26,29 @@ export const TopBar = (): ReactNode => {
   const { t } = useTranslation();
 
   return (
-    <Layout.Header className={styles.topBar}>
+    <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
       <div className={styles.heading}>
         <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
         <p className={styles.project}>{t(DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER)}</p>
       </div>
-      <ComingSoon description={t(DEFAULT.TOP_BAR_MENUS_DESCRIPTION)}>
-        <div className={styles.group}>
-          {TOP_BAR_MENU_LABEL_KEYS.map((menuLabelKey: string) => (
-            <Button key={menuLabelKey} variant={BUTTON_VARIANT.GHOST}>{t(menuLabelKey)}</Button>
-          ))}
-        </div>
-      </ComingSoon>
-      <ComingSoon description={t(DEFAULT.TOP_BAR_HISTORY_DESCRIPTION)}>
-        <div className={styles.group}>
-          <IconButton label={t(DEFAULT.TOP_BAR_UNDO)} iconComponent={UNDO_ARROW} />
-          <IconButton label={t(DEFAULT.TOP_BAR_REDO)} iconComponent={REDO_ARROW} />
-        </div>
-      </ComingSoon>
-      <ComingSoon description={t(DEFAULT.TOP_BAR_AUTOSAVE_DESCRIPTION)}>
-        <p className={styles.autosave}>{t(DEFAULT.TOP_BAR_AUTOSAVE_READOUT)}</p>
-      </ComingSoon>
+      <div className={styles.comingSoonGroups}>
+        <ComingSoon description={t(DEFAULT.TOP_BAR_MENUS_DESCRIPTION)}>
+          <div className={styles.group}>
+            {TOP_BAR_MENU_LABEL_KEYS.map((menuLabelKey: string) => (
+              <Button key={menuLabelKey} variant={BUTTON_VARIANT.GHOST}>{t(menuLabelKey)}</Button>
+            ))}
+          </div>
+        </ComingSoon>
+        <ComingSoon description={t(DEFAULT.TOP_BAR_HISTORY_DESCRIPTION)}>
+          <div className={styles.group}>
+            <IconButton label={t(DEFAULT.TOP_BAR_UNDO)} iconComponent={UNDO_ARROW} />
+            <IconButton label={t(DEFAULT.TOP_BAR_REDO)} iconComponent={REDO_ARROW} />
+          </div>
+        </ComingSoon>
+        <ComingSoon description={t(DEFAULT.TOP_BAR_AUTOSAVE_DESCRIPTION)}>
+          <p className={styles.autosave}>{t(DEFAULT.TOP_BAR_AUTOSAVE_READOUT)}</p>
+        </ComingSoon>
+      </div>
       <div className={styles.trailing}>
         <AppUpdatePrompt />
         <ConnectionPill />

@@ -11,6 +11,7 @@ const CONSOLE_TOGGLE_LABEL = 'Console';
 const INPUT_LABEL = 'Console command';
 const SETTINGS_COMMAND = '$$';
 const ENTER_KEY = 'Enter';
+const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const READOUT_LABELS: readonly string[] = ['Cursor', 'Job size', 'Estimate'];
 
 const renderStatusStrip = (store: AppStore = newStore()): void => {
@@ -65,5 +66,11 @@ describe(StatusStrip.name, () => {
     fireEvent.keyDown(input, { key: ENTER_KEY });
 
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ConsoleCommandSubmitted));
+  });
+
+  it('keeps a fixed height on one row', () => {
+    renderStatusStrip();
+
+    expect(screen.getByRole('contentinfo').className).toContain(FIXED_HEIGHT_CLASS_NAME);
   });
 });

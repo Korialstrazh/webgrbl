@@ -4,10 +4,17 @@
   flex-direction: column;
   gap: var(--space-3);
   min-width: 0;
-  min-height: 20rem;
   padding: var(--space-4);
   background-color: var(--color-bed);
   color: var(--color-text);
+}
+
+// Stacked in a narrow window the bed needs its own height; side by side it fills the space between the bars.
+// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width < 80rem) {
+  .bedPanel {
+    min-height: 20rem;
+  }
 }
 
 .title {

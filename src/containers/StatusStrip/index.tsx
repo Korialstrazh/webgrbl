@@ -25,28 +25,33 @@ export const StatusStrip = (): ReactNode => {
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
 
   return (
-    <Layout.Footer className={styles.statusStrip} aria-label={t(DEFAULT.STATUS_STRIP_TITLE)}>
+    <Layout.Footer
+      className={[styles.statusStrip, styles.fixedHeightBar].join(' ')}
+      aria-label={t(DEFAULT.STATUS_STRIP_TITLE)}
+    >
       {isConsoleOpen && (
         <div className={styles.consoleOverlay}>
           <ConsolePanel />
         </div>
       )}
-      <ComingSoon description={t(DEFAULT.STATUS_STRIP_READOUTS_DESCRIPTION)}>
-        <dl className={styles.readouts}>
-          <div className={styles.readout}>
-            <dt>{t(DEFAULT.STATUS_STRIP_CURSOR)}</dt>
-            <dd>{MISSING_VALUE_TEXT}</dd>
-          </div>
-          <div className={styles.readout}>
-            <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
-            <dd>{MISSING_VALUE_TEXT}</dd>
-          </div>
-          <div className={styles.readout}>
-            <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>
-            <dd>{MISSING_VALUE_TEXT}</dd>
-          </div>
-        </dl>
-      </ComingSoon>
+      <div className={styles.readoutsArea}>
+        <ComingSoon description={t(DEFAULT.STATUS_STRIP_READOUTS_DESCRIPTION)}>
+          <dl className={styles.readouts}>
+            <div className={styles.readout}>
+              <dt>{t(DEFAULT.STATUS_STRIP_CURSOR)}</dt>
+              <dd>{MISSING_VALUE_TEXT}</dd>
+            </div>
+            <div className={styles.readout}>
+              <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
+              <dd>{MISSING_VALUE_TEXT}</dd>
+            </div>
+            <div className={styles.readout}>
+              <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>
+              <dd>{MISSING_VALUE_TEXT}</dd>
+            </div>
+          </dl>
+        </ComingSoon>
+      </div>
       <Toggle label={t(DEFAULT.CONSOLE_TOGGLE)} isChecked={isConsoleOpen} onChange={setIsConsoleOpen} />
     </Layout.Footer>
   );

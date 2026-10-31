@@ -8,10 +8,14 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  // antd App sets its own line height for everything inside it; our text keeps the browser default it was designed for.
+  line-height: normal;
 }
 
+// A window too short for the regions scrolls them here, never the page.
 .regions {
   min-height: 0;
+  overflow: auto;
 }
 
 // Below the wide breakpoint the regions stack and scroll together; 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
@@ -22,7 +26,6 @@
 
     .regions {
       display: block;
-      overflow: auto;
     }
   }
 }

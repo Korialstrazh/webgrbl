@@ -20,8 +20,20 @@ const APP_NAME = 'webgrbl';
 const APP_DESCRIPTION = 'Control a GRBL laser cutter or engraver straight from the browser.';
 const THEME_COLOR = '#121417';
 const ICON_PATH = 'favicon.svg';
+// antd and the packages it is built from go into their own chunk, so the app chunk stays small and caches apart.
+const ANTD_CHUNK_NAME = 'antd';
+const ANTD_MODULE_PATTERN = /[\\/]node_modules[\\/](?:antd|@ant-design|@rc-component)[\\/]/;
 
 export default defineConfig({
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [{ name: ANTD_CHUNK_NAME, test: ANTD_MODULE_PATTERN }],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
