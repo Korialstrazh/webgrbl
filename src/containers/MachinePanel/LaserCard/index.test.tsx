@@ -32,6 +32,8 @@ const MAX_POWER_WATTS = 10;
 const POWER_PERCENT = 3;
 const WATTS_PATTERN = /0\.30 W/;
 const ANY_WATTS_PATTERN = / W$/;
+const FIRMWARE_NOTE_TEXT = 'Some firmwares keep the laser off while the head stands still. It switches off when you '
+  + 'let go, when the window loses focus, after 10 seconds, or on any stop or alarm.';
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -308,5 +310,11 @@ describe(LaserCard.name, () => {
     fireEvent.click(screen.getByText(FRAME_LABEL));
 
     expect(getRequestedLines(dispatchSpy)).toEqual([]);
+  });
+
+  it('shows the firmware note with the maximum hold time', () => {
+    renderLaserCard(newStore());
+
+    expect(screen.getByText(FIRMWARE_NOTE_TEXT)).toBeInTheDocument();
   });
 });

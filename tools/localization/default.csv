@@ -126,7 +126,7 @@ MACHINE_JOG_UP_LEFT;Jog up and left
 MACHINE_JOG_UP_RIGHT;Jog up and right
 MACHINE_LASER_AIR_ASSIST;Air assist
 MACHINE_LASER_FIRE;Hold to fire
-MACHINE_LASER_FIRMWARE_NOTE;The pointer needs laser mode ($32=1). It switches off when you let go, when the window loses focus, after 10 seconds, or on any stop or alarm.
+MACHINE_LASER_FIRMWARE_NOTE;Some firmwares keep the laser off while the head stands still. It switches off when you let go, when the window loses focus, after {{seconds}} seconds, or on any stop or alarm.
 MACHINE_LASER_FRAME;Frame job
 MACHINE_LASER_FRAME_DESCRIPTION;Trace the outline of the job with the pointer.
 MACHINE_LASER_ON;LASER ON
@@ -169,6 +169,7 @@ MACHINE_PROFILES_GRBL_SETTINGS;GRBL settings ($$)...
 MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION;View and change the settings stored in the laser.
 MACHINE_PROFILES_IMPORT;Import...
 MACHINE_PROFILES_IMPORT_FILE;Import profiles file
+MACHINE_PROFILES_LASER_MODE_OFF;This laser reports laser mode off ($32=0), so it may burn spots where it slows down. Send $32=1 in the console to turn it on.
 MACHINE_PROFILES_LIST;Profiles
 MACHINE_PROFILES_NEW;+ New profile
 MACHINE_PROFILES_ORIGIN_BACK_LEFT;Back left
@@ -213,7 +214,7 @@ TOAST_CONTROLLER_RESET;The controller reset itself - running work was stopped.
 TOAST_DISMISS;Dismiss
 TOAST_GRBL_ALARM;Alarm {{code}}: {{description}} - unlock or home the machine.
 TOAST_GRBL_ERROR;Error {{code}}: {{description}}
-TOAST_LASER_MODE_OFF;Laser mode is off ($32=0): the laser may burn spots where it slows down, and the laser pointer may not light. Send $32=1 in the console to turn it on.
+TOAST_LASER_MODE_OFF;Laser mode is off ($32=0): the laser may burn spots where it slows down. Send $32=1 in the console to turn it on.
 TOAST_NOT_RESPONDING;The controller is not responding.
 TOAST_PORT_ACCESS_DENIED_OR_BUSY;Could not open the port. On Linux, add your user to the dialout group. On any system, close other apps or tabs using the port.
 TOAST_PORT_NOT_FOUND;The port is gone - check the USB cable.

@@ -5,7 +5,7 @@ The Move card, the Laser pointer card and the Machine profiles dialog drive a GR
 ## What the user gets
 
 - **Move card** (`src/containers/MachinePanel/MoveCard/`): a 3 x 3 jog pad, step sizes 0.1 / 1 / 10 / 50 mm, a jog speed saved to the active profile, Set zero, and Home when the profile has homing switches. Unlock and Reset are in the Status card.
-- **Laser pointer card** (`src/containers/MachinePanel/LaserCard/`): power 0.1..5 % of S max, a hold-to-fire button, and an air assist switch for profiles with air assist. Frame job is still coming soon.
+- **Laser pointer card** (`src/containers/MachinePanel/LaserCard/`): power 0.1..5 % of S max (the connected laser's reported `$30`, else the active profile's), a hold-to-fire button, and an air assist switch for profiles with air assist. Frame job is still coming soon.
 - **Machine profiles** (`src/containers/MachineProfilesDialog/`, opened from the top bar): bed size, rated power, `$30`, origin corner, homing switches, air assist and jog speed per laser, with import, export and "Read from connected laser". The active profile's name is shown in the connection pill.
 
 ## Send a command from a control
@@ -30,7 +30,7 @@ The pointer is a hold: `LaserPointerFireRequested` on press, `LaserPointerReleas
 
 - A fire control must request release on every way a press can end: `pointerup`, `pointerleave`, `pointercancel`, `blur`, key up and unmount (see `PointerFireButton`). Release while not firing is harmless.
 - React only to the primary pointer button, and ignore key repeat.
-- Never send `M3` from anywhere else. The power is clamped to 0.1..5 % by `getClampedPointerPowerPercent`.
+- Never send `M3` from anywhere else. The power is clamped to 0.1..5 % by `getClampedPointerPowerPercent` and scaled by `getPointerSValueMax`, so the laser's own `$30` sets the cap.
 
 ## Profiles
 
@@ -49,7 +49,7 @@ dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
 
 `npm run dev`, then connect the simulated laser in the connection popover: jog and Set zero move the head and the zero marker on the bed. To see a pointer cut-off, hold the fire button and switch tab: the button releases.
 
-Hardware check (stationary pointer on the ACMER firmware, air assist): pending.
+Hardware check (stationary pointer on the ACMER firmware, air assist): pending. Stock GRBL with laser mode on (`$32=1`) keeps a stationary pointer dark; the card's note says so in plain words.
 
 ## Tests
 

@@ -71,7 +71,9 @@ const READ_HOMING_ON_TEXT = 'Homing switches: yes';
 const READ_NOTHING_TEXT = 'The laser reported none of these settings, so the form was not changed.';
 const PARTIAL_WORK_AREA_Y_MM = 200;
 const DRAFT_WORK_AREA_X_MM = 300;
-const LASER_MODE_OFF_PATTERN = /Laser mode is off/;
+const LASER_MODE_OFF_PATTERN = /reports laser mode off/;
+const LASER_MODE_OFF_TEXT = 'This laser reports laser mode off ($32=0), so it may burn spots where it slows down. Send '
+  + '$32=1 in the console to turn it on.';
 const STOP_SETTLE_MS = GRBL_HOLD_COMPLETE_MAX_WAIT_MS + GRBL_STATUS_POLL_INTERVAL_MS + ANSWER_SETTLE_MS;
 const EXPORT_FILE_NAME = 'webgrbl-machine-profiles.json';
 const EXPORT_OBJECT_URL = 'blob:machine-profiles';
@@ -293,7 +295,7 @@ describe(MachineProfilesDialog.name, () => {
       connectWithSettings(store, LASER_MODE_OFF_SETTINGS);
       clickButton(READ_FROM_LASER_LABEL);
 
-      expect(screen.getByText(LASER_MODE_OFF_PATTERN)).toBeInTheDocument();
+      expect(screen.getByText(LASER_MODE_OFF_TEXT)).toBeInTheDocument();
     });
 
     it('reads only the reported values and gives no laser mode warning without $32', () => {

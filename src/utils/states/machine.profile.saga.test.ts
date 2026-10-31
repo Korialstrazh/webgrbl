@@ -17,6 +17,7 @@ import { GrblSimulator } from '../grbl/simulator/grbl.simulator';
 import { ANSWER_SETTLE_MS } from '../grbl/test.support/grbl.answer.settle';
 import { GRBL_HOLD_COMPLETE_MAX_WAIT_MS, GRBL_STATUS_POLL_INTERVAL_MS } from '../grbl/grbl.constants';
 import { DEFAULT } from '../localization/default.locales';
+import { i18n } from '../localization/localization';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { MachineProfilesDocument } from '../profiles/interfaces/MachineProfilesDocument';
 import {
@@ -57,6 +58,7 @@ const PROFILE_S_VALUE_MAX = 255;
 const PROFILE_NAME = 'Workshop laser';
 const CUSTOM_LASER_SETTING_LINES: string[] = ['$130=300', '$131=200', '$30=255', '$22=1'];
 const LASER_MODE_OFF_SETTING_LINES: string[] = ['$32=0'];
+const POINTER_PATTERN = /pointer/i;
 const SETTING_LINE_END = '\n';
 const CONNECT_AND_READ_WARNING_COUNT = 2;
 const INVALID_WORK_AREA_SETTING_LINES: string[] = ['$130=0'];
@@ -204,6 +206,8 @@ describe(watchMachineProfiles.name, () => {
     await connectStore(store);
 
     expect(getToast(store, DEFAULT.TOAST_LASER_MODE_OFF)).toMatchObject({ severity: TOAST_SEVERITY.WARNING });
+    // With $32=0 stock GRBL lights a stationary pointer, so the warning must not blame the pointer.
+    expect(i18n.t(DEFAULT.TOAST_LASER_MODE_OFF)).not.toMatch(POINTER_PATTERN);
   });
 
   it('laser mode on shows no laser mode warning', async () => {

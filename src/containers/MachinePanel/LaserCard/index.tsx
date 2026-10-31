@@ -19,7 +19,9 @@ import { doNothing } from '../../../utils/do.nothing';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getPointerApproximateWatts } from '../../../utils/machine/get.pointer.approximate.watts';
 import {
+  MAX_POINTER_HOLD_MS,
   MAX_POINTER_POWER_PERCENT,
+  MILLISECONDS_PER_SECOND,
   MIN_POINTER_POWER_PERCENT,
   POINTER_POWER_STEP_PERCENT,
 } from '../../../utils/machine/machine.command.constants';
@@ -80,7 +82,9 @@ export const LaserCard = (): ReactNode => {
           )}
         </div>
         <PointerFireButton />
-        <p className={styles.firmwareNote}>{t(DEFAULT.MACHINE_LASER_FIRMWARE_NOTE)}</p>
+        <p className={styles.firmwareNote}>
+          {t(DEFAULT.MACHINE_LASER_FIRMWARE_NOTE, { seconds: MAX_POINTER_HOLD_MS / MILLISECONDS_PER_SECOND })}
+        </p>
         <ComingSoon description={t(DEFAULT.MACHINE_LASER_FRAME_DESCRIPTION)}>
           <Button size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
             {t(DEFAULT.MACHINE_LASER_FRAME)}
