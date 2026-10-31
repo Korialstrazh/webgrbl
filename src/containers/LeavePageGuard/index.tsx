@@ -1,0 +1,39 @@
+/**
+ * Asks the browser to confirm leaving the page while the laser is moving. Renders nothing.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-10-30
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+import type { ReactNode } from 'react';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIsMachineMoving } from '../../utils/states/machine.status.state';
+
+const BEFORE_UNLOAD_EVENT_NAME = 'beforeunload';
+const EMPTY_RETURN_VALUE = '';
+
+// Browsers only show the leave-page prompt when the event is cancelled and, in older ones, returnValue is set.
+const preventPageUnload = (event: BeforeUnloadEvent): void => {
+  event.preventDefault();
+  event.returnValue = EMPTY_RETURN_VALUE;
+};
+
+export const LeavePageGuard = (): ReactNode => {
+  const isMachineMoving: boolean = useSelector(selectIsMachineMoving);
+
+  useEffect(() => {
+    if (!isMachineMoving) {
+      return undefined;
+    }
+
+    window.addEventListener(BEFORE_UNLOAD_EVENT_NAME, preventPageUnload);
+
+    return () => window.removeEventListener(BEFORE_UNLOAD_EVENT_NAME, preventPageUnload);
+  }, [isMachineMoving]);
+
+  return null;
+};
