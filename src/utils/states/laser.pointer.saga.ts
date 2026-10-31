@@ -1,7 +1,8 @@
 /**
  * Fires the low-power laser pointer while the user holds it and turns it off on the first of the safety cut-offs:
  * release, the window losing focus, the tab being hidden, the connection ending, a stop request, an alarm, or the
- * maximum hold time. The pointer fires only when connected and Idle, never above the power cap.
+ * maximum hold time. The pointer fires only when connected and Idle, never above the power cap, which is a share of
+ * the connected laser's reported `$30` when it reports one.
  *
  * @author michael.morosov
  *
@@ -22,11 +23,11 @@ import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../grbl/grbl.constan
 import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
 import { getCanFireLaserPointer } from '../machine/get.can.fire.laser.pointer';
 import { getPointerOnCommands } from '../machine/get.pointer.on.commands';
+import { getPointerSValueMax } from '../machine/get.pointer.s.value.max';
 import { MAX_POINTER_HOLD_MS } from '../machine/machine.command.constants';
 import { MACHINE_COMMAND } from '../machine/machine.commands';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
-import { DEFAULT_MACHINE_S_VALUE_MAX } from '../profiles/machine.profile.constants';
-import { ConnectionStatusChanged, selectIsConnected } from './grbl.connection.state';
+import { ConnectionStatusChanged, selectGrblSettings, selectIsConnected } from './grbl.connection.state';
 import {
   LaserPointerFireRequested,
   LaserPointerFiringStarted,
@@ -80,12 +81,15 @@ function* waitForMachineAlarm(): Generator {
   }
 }
 
+/** Runs only while connected, so the settings are the connected laser's own. */
 function* sendPointerOnLines(): Generator {
   const powerPercent: number = (yield select(selectLaserPointerPowerPercent)) as number;
+  const laserSettings: Record<number, string> = (yield select(selectGrblSettings)) as Record<number, string>;
   const activeProfile: MachineProfile | undefined =
     (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
+  const sValueMax: number = getPointerSValueMax(laserSettings, activeProfile);
 
-  for (const line of getPointerOnCommands(powerPercent, activeProfile?.sValueMax ?? DEFAULT_MACHINE_S_VALUE_MAX)) {
+  for (const line of getPointerOnCommands(powerPercent, sValueMax)) {
     yield put(new MachineLineRequested({ line }));
   }
 }
