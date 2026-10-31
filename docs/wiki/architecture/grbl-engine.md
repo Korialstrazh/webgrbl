@@ -79,7 +79,7 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
   - a user `stopMachine()` or `resetMachine()` (the reset wipes the lines);
   - an `ALARM:N`: GRBL flushed its receive buffer, so the queue drops pending and in-flight lines (a banner hold is kept);
   - a closed connection.
-- **Check mode** (`runGrblCheckMode` in `grbl.check.mode.ts`; user decision: the basis for a later pre-run validator). In check mode GRBL parses every line but moves nothing and keeps the laser off. `checkProgram(programLines)`:
+- **Check mode** (`runGrblCheckMode` in `grbl.check.mode.ts`, sending its own `$C` lines through `GrblControlLineExchange` in `grbl.control.line.exchange.ts`; user decision: the basis for a later pre-run validator). In check mode GRBL parses every line but moves nothing and keeps the laser off. `checkProgram(programLines)`:
   1. sends `$C` and waits for its answer; program lines are sent only after `ok`;
   2. streams the lines with stop-on-error off;
   3. sends `$C` again, alone; on its `ok` the queue is held until the banner without dropping lines (`holdUntilBannerKeepingLines()`), with the same 10 000 ms banner timeout as a reset, so console lines typed meanwhile go out after GRBL's reset and keep their own answers;
@@ -173,6 +173,7 @@ Framework-free TypeScript under `src/utils/grbl/` that talks the GRBL 1.1 protoc
 - `src/utils/grbl/grbl.response.router.ts`
 - `src/utils/grbl/grbl.program.streamer.ts`
 - `src/utils/grbl/grbl.program.queued.lines.ts`
+- `src/utils/grbl/grbl.control.line.exchange.ts`
 - `src/utils/grbl/grbl.check.mode.ts`
 - `src/utils/grbl/grbl.check.mode.refused.error.ts`
 - `src/utils/grbl/grbl.command.wiped.error.ts`

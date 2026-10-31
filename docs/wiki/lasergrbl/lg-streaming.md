@@ -45,7 +45,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
   - **Status** is derived from the result text: `null` = Queued, `""` = WaitingResponse, `OK…` = ResponseGood, `ERROR…` = ResponseBad, anything else = InvalidResponse.
   - **Error decoding:** `error:N` shows a brief text and a tooltip description from `error_codes.csv` ([[lg-connection]] LG-CONN-16).
 - **Upstream source:** [`LaserGRBL/GrblCommand.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblCommand.cs) (`GrblCommand`, `SerialData`, `BuildHelper`, `Status`, `GetResult`, `GrblMessage`), [`LaserGRBL/StateBuilder.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/StateBuilder.cs) (`StatePositionBuilder`, modal state)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Keep an immutable `{ raw, wire, words }` record. Compute `wire` at load time in a worker, not per send.
   - Do not strip spaces inside comments; better, strip comments entirely, which saves RX buffer.
   - Strip only spaces that Grbl ignores; do not strip spaces inside string args of grblHAL/FluidNC `$` commands.
@@ -71,7 +71,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
     - VigoWork is fixed at 127.
   - **Firmware overrides:** Smoothie and Marlin cores force Synchronous regardless of the setting.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`CanSend`, `PeekNextCommand`, `HasSpaceInBuffer`, `SendLine`, `SendToSerial`, `ManageCommandResponse`, `ParseBf`, `EnlargeBuffer`, `BufferSize`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Port as a pure state machine (`onLineQueued`, `onAck`, `canSend`) with exhaustive unit tests, then drive it with the TS emulator ([[lg-connection]] LG-CONN-06).
   - Count UTF-8 bytes.
   - Consider leaving a small safety margin (e.g. bufferSize − 1) for injected realtime bytes on clones.
@@ -100,7 +100,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
   - If the head of the pending FIFO is a `$n=value` line, `PeekNextCommand` returns nothing, so no further line is sent until that line is acked, in any streaming mode.
   - A good ack also updates the cached configuration with the written value.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`PeekNextCommand`, `ManageCommandResponse`), [`LaserGRBL/GrblCommand.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblCommand.cs) (`IsWriteEEPROM`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Keep this behaviour.
   - Extend it to the other EEPROM-writing commands Grbl documents (`G10 L2/L20`, `G28.1`, `G30.1`, `$N0=`, `$RST=`, `$I=`), which the upstream comment flags as missing.
 
@@ -165,7 +165,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
     - The state is parsed with `Enum.Parse` against `Idle, Run, Hold, Door, Home, Alarm, Check, Jog, Queue, Tool` (case-sensitive). States outside this list (e.g. Grbl `Sleep`) throw and are only logged, so the state stays stale.
     - F and S are also fed to the laser-usage counter ([[lg-app-features]]).
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`QueryPosition`, `ManageRealTimeStatus`, `ParseMachineStatus`, `ParseMPos`, `ParseWPos`, `ParseWCO`, `ParseBf`, `ParseFS`, `ParseF`, `ParseOverrides`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Write a tolerant parser (unit-tested with real report fixtures) that handles `Sleep`, grblHAL `Tool`, and FluidNC extra fields, and keeps unknown fields in a map for display.
   - With `$10` configured, Grbl may omit `WCO` in most reports; keep the last WCO, as LaserGRBL does.
   - Show the `Pn:` pin states (limit, probe, door) in a diagnostics widget, which LaserGRBL lacks.
@@ -201,7 +201,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
     - CanSendManualCommand: connected and not in program.
     - CanReadWriteConfig: connected, not in program, Idle or Alarm.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`MacStatus`, `SetStatus`, `ParseMachineStatus`, `Can*` properties), [`LaserGRBL/MainForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/MainForm.cs) (`TimerUpdate`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Derive all button enablement from one selector over `{connection, machineState, job}` so rules stay consistent.
   - Show substate (`Hold:0` vs `Hold:1`, `Door:0..3`) and a human hint per state ("Alarm: press Unlock or Home").
   - Provide colour-blind-safe status colours plus an icon.
@@ -232,7 +232,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
   - **Jog cancel:** `0x85` is used by continuous jog ([[lg-machine-control]]).
   - Realtime writes are skipped silently if the port is closed.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`FeedHold`, `CycleStartResume`, `SafetyDoor`, `GrblReset`, `InternalReset`, `SendImmediate`, `SendBoardResetCommand`), [`LaserGRBL/PreviewForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/PreviewForm.cs), [`LaserGRBL/HotKeysManager.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/HotKeysManager.cs)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: improved (stop holds before the reset and keeps the position) — see [[grbl-engine]].
   - Implement a priority write path. Hold one `WritableStreamDefaultWriter` and serialize writes through a tiny async mutex, so a realtime byte is written right after the current chunk. Never queue it behind pending lines.
   - Large G-code writes should be per-line to keep realtime latency low.
   - Make hold/reset reachable via big always-visible buttons and the keyboard (Space = hold?), also as PWA shortcuts.
@@ -507,7 +507,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
     - The Alarm state pauses the job timer.
   - **Decoding:** error and alarm texts come from `error_codes.csv` / `alarm_codes.csv` (or the firmware-specific variants), for version ≥ 1.1.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`ManageCommandResponse`, `ManageStandardBlockingAlarm`, `TimeProjection.JobError`), [`LaserGRBL/GrblCommand.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblCommand.cs) (`GetResult`, `GetToolTip`, `GrblMessage`), [`LaserGRBL/CSV/error_codes.csv`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/CSV/error_codes.csv), [`LaserGRBL/CSV/alarm_codes.csv`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/CSV/alarm_codes.csv)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: improved (stop on error halts the machine at once) — see [[grbl-engine]].
   - Add an "On error: continue / pause (feed hold) / abort" option, defaulting to pause for alarms.
   - On `ALARM`, stop the stream immediately (clear the queue) instead of pumping thousands of `error:9`s.
   - Show a summary list of errored lines, clickable to highlight them in the preview.
@@ -552,7 +552,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
     - The list grows unbounded for the whole job.
     - `$$` / `$I` / config writes run on a private log, so they do not appear here.
 - **Upstream source:** [`LaserGRBL/UserControls/CommandLog.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/UserControls/CommandLog.cs) (`OnPaint`, `SetPosition`), [`LaserGRBL/GrblCommand.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblCommand.cs) (`GrblMessage`, `IGrblRow`), [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`SentCommand`, `ManageGenericMessage`, `ClearQueue`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Use a virtualized list (only the visible rows rendered) backed by a ring buffer with a cap (e.g. 10k rows in the UI; full detail stays in the job model).
   - Add filters (hide ok-only rows, show errors only), search, copy/export, timestamps, and a "show status polls" debug toggle.
   - Never clear on connect; insert separators instead.
@@ -572,7 +572,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
   - Typing `!`, `~` or `?` sends them as a line (`!\n`); Grbl still treats them as realtime, but they consume buffer accounting. Custom code handles these properly.
   - Multi-line paste is not supported.
 - **Upstream source:** [`LaserGRBL/UserControls/GrblTextBox.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/UserControls/GrblTextBox.cs) (`ProcessCmdKey`), [`LaserGRBL/ConnectLogForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ConnectLogForm.cs) (`TxtManualCommandCommandEntered`, `TxtManualCommand_Enter`, `TxtManualCommand_Leave`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Persist history (deduplicated, capped) in localStorage.
   - Add autocomplete for `$` commands and settings (from the CSV tables), and multi-line paste (enqueue each line).
   - Map `!`, `~`, `?` and `ctrl-x` to realtime bytes, like custom code does.
