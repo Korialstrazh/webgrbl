@@ -60,9 +60,26 @@ GRBL_ERROR_7;Reading the settings failed - defaults were restored.
 GRBL_ERROR_8;This $ command only works while the machine is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_UNKNOWN;Unknown error.
+MACHINE_CONTROL_RESET;Reset
+MACHINE_CONTROL_STOP;Stop
+MACHINE_CONTROL_UNLOCK;Unlock
+MACHINE_STATE_ALARM;Alarm
+MACHINE_STATE_CHECK;Check
+MACHINE_STATE_DOOR;Door
+MACHINE_STATE_HOLD;Hold
+MACHINE_STATE_HOME;Homing
+MACHINE_STATE_IDLE;Idle
+MACHINE_STATE_JOG;Jog
+MACHINE_STATE_RUN;Run
+MACHINE_STATE_SLEEP;Sleep
+MACHINE_STATUS_FEED;Feed
+MACHINE_STATUS_MACHINE_POSITION;Machine position
+MACHINE_STATUS_POWER;Power
+MACHINE_STATUS_WORK_POSITION;Work position
 TOAST_CONNECT_TIMEOUT;No response from the controller - check the baud rate and that the laser is powered.
 TOAST_CONNECTED;Connected to {{firmware}} {{version}}
 TOAST_CONNECTION_LOST;Connection lost. The laser may still finish moves it had already received.
+TOAST_DISMISS;Dismiss
 TOAST_GRBL_ALARM;Alarm {{code}}: {{description}} - unlock or home the machine.
 TOAST_GRBL_ERROR;Error {{code}}: {{description}}
 TOAST_NOT_RESPONDING;The controller is not responding.
