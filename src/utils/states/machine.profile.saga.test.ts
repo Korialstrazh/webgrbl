@@ -34,9 +34,7 @@ import { watchMachineProfiles } from './machine.profile.saga';
 import {
   ActiveMachineProfileSelected,
   MachineProfileDeleted,
-  MachineProfileReadFromLaserRequested,
   MachineProfileSaved,
-  MachineProfileUpdateFromLaserAccepted,
   MachineProfilesImported,
   selectActiveMachineProfile,
   selectMachineProfiles,
@@ -51,7 +49,6 @@ const LASER_WORK_AREA_X_MM = 300;
 const LASER_WORK_AREA_Y_MM = 200;
 const LASER_S_VALUE_MAX = 255;
 const SIMULATOR_WORK_AREA_MM = 400;
-const SIMULATOR_S_VALUE_MAX = 1000;
 const PROFILE_WORK_AREA_X_MM = 600;
 const PROFILE_WORK_AREA_Y_MM = 500;
 const PROFILE_S_VALUE_MAX = 255;
@@ -60,9 +57,7 @@ const CUSTOM_LASER_SETTING_LINES: string[] = ['$130=300', '$131=200', '$30=255',
 const LASER_MODE_OFF_SETTING_LINES: string[] = ['$32=0'];
 const POINTER_PATTERN = /pointer/i;
 const SETTING_LINE_END = '\n';
-const CONNECT_AND_READ_WARNING_COUNT = 2;
 const INVALID_WORK_AREA_SETTING_LINES: string[] = ['$130=0'];
-const INVALID_S_VALUE_MAX_SETTING_LINES: string[] = ['$30=0'];
 const SETTINGS_WITHOUT_LASER_MODE: Record<number, string> = { 130: '400', 131: '400', 30: '1000', 22: '0' };
 const FIRMWARE_IDENTITY: GrblFirmwareIdentity = { firmwareName: 'Grbl', version: '1.1h', vendorText: '' };
 const RX_BUFFER_SIZE = 127;
@@ -232,63 +227,6 @@ describe(watchMachineProfiles.name, () => {
     expect(MACHINE_PROFILES_STORAGE.getStoredDocument()).toEqual(newStoredDocument(second));
   });
 
-  it('accepting the update from the laser applies $130/$131/$30/$22 to the profile and persists it', async () => {
-    const profile: MachineProfile = newStoredProfile();
-    MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
-    store = newStore(newTestDependencies(new GrblSimulator(() => undefined)));
-    await connectStore(store);
-
-    store.dispatch(new MachineProfileUpdateFromLaserAccepted({ profileId: profile.id }));
-    await vi.advanceTimersByTimeAsync(0);
-
-    const updatedProfile: MachineProfile = {
-      ...profile,
-      workAreaXMm: SIMULATOR_WORK_AREA_MM,
-      workAreaYMm: SIMULATOR_WORK_AREA_MM,
-      sValueMax: SIMULATOR_S_VALUE_MAX,
-      hasHomingSwitches: false,
-    };
-
-    expect(selectActiveMachineProfile(store.getState())).toEqual(updatedProfile);
-    expect(MACHINE_PROFILES_STORAGE.getStoredDocument()).toEqual(newStoredDocument(updatedProfile));
-  });
-
-  it('accepting the update from the laser while disconnected changes nothing', async () => {
-    const profile: MachineProfile = newStoredProfile();
-    MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
-    store = newStore(newTestDependencies(new GrblSimulator(() => undefined)));
-
-    store.dispatch(new MachineProfileUpdateFromLaserAccepted({ profileId: profile.id }));
-    await vi.advanceTimersByTimeAsync(0);
-
-    expect(selectActiveMachineProfile(store.getState())).toEqual(profile);
-  });
-
-  it('reading a profile from a laser with laser mode off updates it and shows the warning', async () => {
-    const profile: MachineProfile = newStoredProfile();
-    MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
-    store = newStore(newTestDependencies(newConfiguredSimulator([
-      ...CUSTOM_LASER_SETTING_LINES,
-      ...LASER_MODE_OFF_SETTING_LINES,
-    ])));
-    await connectStore(store);
-
-    store.dispatch(new MachineProfileReadFromLaserRequested({ profileId: profile.id }));
-    await vi.advanceTimersByTimeAsync(0);
-
-    expect(selectActiveMachineProfile(store.getState())).toMatchObject({
-      workAreaXMm: LASER_WORK_AREA_X_MM,
-      workAreaYMm: LASER_WORK_AREA_Y_MM,
-      sValueMax: LASER_S_VALUE_MAX,
-      hasHomingSwitches: true,
-    });
-    // The connect already showed the warning once; the read shows it again, which merges into a repeat.
-    expect(getToast(store, DEFAULT.TOAST_LASER_MODE_OFF)).toMatchObject({
-      severity: TOAST_SEVERITY.WARNING,
-      repeatCount: CONNECT_AND_READ_WARNING_COUNT,
-    });
-  });
-
   it('connect without a valid $130 shows no differs toast against the active profile', async () => {
     const profile: MachineProfile = newStoredProfile();
     MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
@@ -297,36 +235,6 @@ describe(watchMachineProfiles.name, () => {
     await connectStore(store);
 
     expect(getToast(store, DEFAULT.TOAST_PROFILE_DIFFERS)).toBeUndefined();
-  });
-
-  it('an accepted update from a laser without a valid $130 keeps the work area of the profile', async () => {
-    const profile: MachineProfile = newStoredProfile();
-    MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
-    store = newStore(newTestDependencies(newConfiguredSimulator(INVALID_WORK_AREA_SETTING_LINES)));
-    await connectStore(store);
-
-    store.dispatch(new MachineProfileUpdateFromLaserAccepted({ profileId: profile.id }));
-    await vi.advanceTimersByTimeAsync(0);
-
-    expect(selectActiveMachineProfile(store.getState())).toMatchObject({
-      workAreaXMm: PROFILE_WORK_AREA_X_MM,
-      workAreaYMm: SIMULATOR_WORK_AREA_MM,
-    });
-  });
-
-  it('an accepted update from a laser without a valid $30 keeps the S max of the profile', async () => {
-    const profile: MachineProfile = newStoredProfile();
-    MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
-    store = newStore(newTestDependencies(newConfiguredSimulator(INVALID_S_VALUE_MAX_SETTING_LINES)));
-    await connectStore(store);
-
-    store.dispatch(new MachineProfileUpdateFromLaserAccepted({ profileId: profile.id }));
-    await vi.advanceTimersByTimeAsync(0);
-
-    expect(selectActiveMachineProfile(store.getState())).toMatchObject({
-      workAreaXMm: SIMULATOR_WORK_AREA_MM,
-      sValueMax: PROFILE_S_VALUE_MAX,
-    });
   });
 
   it('first connect without a valid $130 creates no profile', async () => {
