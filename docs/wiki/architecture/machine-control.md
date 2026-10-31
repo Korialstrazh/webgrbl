@@ -33,7 +33,7 @@ Machine profiles hold the facts that differ from laser to laser, so the app can 
 
 ## Source
 
-- `src/utils/profiles/` (`machine.profile.constants.ts`, `new.machine.profile.ts`, `get.machine.profile.errors.ts`, `is.machine.profile.ts`, `is.machine.profiles.document.ts`, `is.machine.origin.corner.ts`, `machine.profiles.storage.ts`, `get.merged.profiles.document.ts`, `get.profiles.export.text.ts`, `get.profile.values.from.settings.ts`, `get.validly.reported.profile.values.ts`, `interfaces/`)
+- `src/utils/profiles/` (`machine.profile.constants.ts`, `new.machine.profile.ts`, `get.machine.profile.errors.ts`, `is.machine.profile.ts`, `is.machine.profiles.document.ts`, `is.machine.origin.corner.ts`, `machine.profiles.storage.ts`, `get.merged.profiles.document.ts`, `get.profiles.export.text.ts`, `get.validly.reported.profile.values.ts`, `interfaces/`)
 - `src/utils/states/machine.profile.state.ts`, `src/utils/states/machine.profile.saga.ts`, `src/utils/states/interfaces/MachineProfileIdPayload.ts`, `MachineProfileSavedPayload.ts`, `MachineProfilesDocumentPayload.ts`
 - `src/utils/machine/` (`machine.commands.ts`, `machine.command.constants.ts`, `get.jog.command.ts`, `get.go.to.work.zero.command.ts`, `get.pointer.on.commands.ts`, `get.pointer.s.value.max.ts`, `get.clamped.pointer.power.percent.ts`, `format.gcode.number.ts`, `interfaces/JogAxisSigns.ts`)
 - `src/utils/states/machine.status.state.ts` (`MachineLineRequested`, `MachineAirAssistChanged`, `selectIsAirAssistOn`), `src/utils/states/grbl.controller.saga.ts` (sends the line)
