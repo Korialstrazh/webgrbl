@@ -1,7 +1,6 @@
 import { act } from '@testing-library/react';
+import { CHANGE_EVENT_NAME } from '../browser/browser.events.constants';
 import { WIDE_LAYOUT_MEDIA_QUERY } from '../layout.constants';
-
-const CHANGE_EVENT_NAME = 'change';
 
 let isWideMatch: boolean = false;
 const listeners: Set<EventListener> = new Set();

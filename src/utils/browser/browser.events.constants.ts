@@ -1,5 +1,5 @@
 /**
- * Names of the browser events the app listens to on window.
+ * Names of the browser events the app listens to on window and on media query lists, and the key values it checks.
  *
  * @author michael.morosov
  *
@@ -19,3 +19,5 @@ export const OFFLINE_EVENT_NAME = 'offline';
 export const KEYDOWN_EVENT_NAME = 'keydown';
 /** The `key` value of the Escape key. */
 export const ESCAPE_KEY = 'Escape';
+/** Fired by a media query list when its match changes, for example when the window crosses a breakpoint. */
+export const CHANGE_EVENT_NAME = 'change';
