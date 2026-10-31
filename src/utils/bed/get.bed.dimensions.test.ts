@@ -5,12 +5,25 @@ import {
   GRBL_SETTING_X_MAX_TRAVEL,
   GRBL_SETTING_Y_MAX_TRAVEL,
 } from './bed.constants';
+import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
+import { newMachineProfile } from '../profiles/new.machine.profile';
 import { getBedDimensions } from './get.bed.dimensions';
 
 const CONNECTED = true;
 const DISCONNECTED = false;
 const WIDTH_SETTING = GRBL_SETTING_X_MAX_TRAVEL;
 const HEIGHT_SETTING = GRBL_SETTING_Y_MAX_TRAVEL;
+
+const PROFILE_WIDTH_MM = 300;
+const PROFILE_HEIGHT_MM = 200;
+const PROFILE_SIZE = {
+  widthMm: PROFILE_WIDTH_MM,
+  heightMm: PROFILE_HEIGHT_MM,
+  placeholderKind: BED_PLACEHOLDER_KIND.NONE,
+};
+
+const newProfile = (): MachineProfile =>
+  newMachineProfile({ workAreaXMm: PROFILE_WIDTH_MM, workAreaYMm: PROFILE_HEIGHT_MM });
 
 const UNKNOWN_SIZE = {
   widthMm: DEFAULT_BED_SIZE_MM,
@@ -49,5 +62,20 @@ describe(getBedDimensions.name, () => {
       heightMm: DEFAULT_BED_SIZE_MM,
       placeholderKind: BED_PLACEHOLDER_KIND.NO_MACHINE,
     });
+  });
+
+  it('uses the work area of the profile when disconnected', () => {
+    expect(getBedDimensions({}, DISCONNECTED, newProfile())).toEqual(PROFILE_SIZE);
+  });
+
+  it('prefers the work area of the profile over the travel settings when connected', () => {
+    expect(getBedDimensions({ [WIDTH_SETTING]: '400', [HEIGHT_SETTING]: '400' }, CONNECTED, newProfile()))
+      .toEqual(PROFILE_SIZE);
+  });
+
+  it('ignores a profile whose work area is out of range', () => {
+    const hugeProfile: MachineProfile = newMachineProfile({ workAreaXMm: BED_MAX_TRAVEL_MM + 1 });
+
+    expect(getBedDimensions({}, CONNECTED, hugeProfile)).toEqual(UNKNOWN_SIZE);
   });
 });
