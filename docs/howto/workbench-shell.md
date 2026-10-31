@@ -4,13 +4,13 @@ The app is one screen, the Workbench, made of five regions plus overlays. This p
 
 ## Regions
 
-`AppRoute` (`src/routes/AppRoute/`) composes the regions. From 1280 px they form a grid; narrower they stack.
+`AppRoute` (`src/routes/AppRoute/`) composes the regions. From 1280 px they sit side by side (antd flex Layout); narrower they stack.
 
 | Region | Container | Holds |
 | --- | --- | --- |
 | Top bar | `TopBar` | title, project and menus (coming soon), undo/redo, autosave, update prompt, `ConnectionPill` with its `ConnectionPopover` |
 | Left | `DesignPanel` | Layers, Objects, Material (coming soon) |
-| Centre | `BedPanel` | toolbar (coming soon), `BedView`, `ToastStack` |
+| Centre | `BedPanel` | toolbar (coming soon), `BedView`, `ToastStack`; host element for dialogs and drawers |
 | Right | `MachinePanel` | status, reset/unlock, Move, Laser pointer, Pre-flight, Job cards, STOP when wide |
 | Bottom | `StatusStrip` | readouts (coming soon), Console toggle; the console opens as an overlay above the strip |
 
@@ -19,13 +19,21 @@ The app is one screen, the Workbench, made of five regions plus overlays. This p
 Regions for unbuilt features are wrapped in `ComingSoon` (`src/views/ComingSoon/`). To build one:
 
 1. Replace the `ComingSoon` block with your real component in the owning container (or a new child container next to it).
-2. Put state and dispatching in a container; keep pure drawing in `src/views/`. Build controls from antd (`Button`, `Switch`, `Segmented`, `Popover`, `Modal`, `Drawer`, and inputs, selects and sliders as needed) with prop values from `src/utils/antd.constants.ts`; do not write new self-built buttons or toggles. Machine controls use `size={ANTD_BUTTON_SIZE_LARGE}` (44 px), icon-only buttons need an `aria-label`, and a `Switch` sits in a `<label>` with visible text.
+2. Put state and dispatching in a container; keep pure drawing in `src/views/`. Build controls from antd (`Button`, `Switch`, `Checkbox`, `Input`, `Segmented`, `Popover`, and selects and sliders as needed; dialogs and drawers only through `BedRegionModal` / `BedRegionDrawer`) with prop values from `src/utils/antd.constants.ts`; do not write new self-built buttons or toggles. Machine controls use `size={ANTD_BUTTON_SIZE_LARGE}` (44 px), icon-only buttons need an `aria-label`, and a `Switch` sits in a `<label>` with visible text.
 3. Never dispatch from inside `ComingSoon`: it renders children inert and stops events, and its handlers are `doNothing`. Once a block is real, remove the wrapper.
 4. Add strings to the localization CSV (see `docs/howto/localization.md`) and use `t(DEFAULT.<KEY>)`.
 
 ## Overlays and Escape
 
-- Every container that owns an antd `Popover`, `Modal` or `Drawer` must call `useOverlayRegistration(OVERLAY_ID_PREFIX, isOpen)` from `src/utils/hooks/use.overlay.registration.ts`, with the same `isOpen` it passes to the overlay's `open`. The hook adds a unique id (prefix plus `useId()`) to the `uiOverlay` slice while open and removes it on close or unmount.
+- Always open a dialog with `BedRegionModal` (`src/containers/BedRegionModal/`) and a drawer with `BedRegionDrawer` (`src/containers/BedRegionDrawer/`); never use a raw antd `Modal` or `Drawer`. The wrappers render into the bed region with a mask over the bed only, so STOP stays visible and clickable; they register as open overlays themselves and close on Escape through `onClose`.
+
+```tsx
+<BedRegionModal isOpen={isOpen} overlayIdPrefix={MATERIAL_DIALOG_OVERLAY_ID} title={titleText} onClose={closeDialog}>
+  {contentComponent}
+</BedRegionModal>
+```
+
+- Every container that owns an antd `Popover` must call `useOverlayRegistration(OVERLAY_ID_PREFIX, isOpen)` from `src/utils/hooks/use.overlay.registration.ts`, with the same `isOpen` it passes to the overlay's `open`. The hook adds a unique id (prefix plus `useId()`) to the `uiOverlay` slice while open and removes it on close or unmount.
 
 ```tsx
 useOverlayRegistration(CONNECTION_POPOVER_OVERLAY_ID, isOpen);
@@ -38,8 +46,7 @@ return (
 ```
 
 - Escape rule: `StopHotkey` stops the machine only when connected **and** no overlay is registered open. antd closes the overlay on Escape after `StopHotkey` (capture phase) has already seen it registered, so one press never does both. A forgotten registration would make Escape stop the machine while the overlay is open.
-- antd `Popover` moves no focus: move focus into it on open and back to the opener on close, as `ConnectionPopover` does. `Modal` and `Drawer` handle focus themselves.
-- A drawer opens on the bed side: render it into the bed region with `getContainer` so it never covers the machine panel or STOP.
+- antd `Popover` moves no focus: move focus into it on open and back to the opener on close, as `ConnectionPopover` does. The dialog and drawer wrappers handle focus themselves (antd `Modal` and `Drawer` trap it).
 - Tests that open antd overlays render inside `AntdTestProvider` (`src/utils/test.support/antd.test.provider.tsx`), which turns antd motion off for jsdom.
 
 ## One STOP
