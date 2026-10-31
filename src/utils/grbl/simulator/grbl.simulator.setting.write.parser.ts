@@ -26,7 +26,7 @@ export const getParsedSimulatorSettingWrite = (
   settings: Readonly<Record<number, string>>,
 ): GrblSimulatorSettingWrite | GrblSimulatorGcodeError => {
   const match: RegExpExecArray | null = GRBL_SIMULATOR_SETTING_WRITE_PATTERN.exec(command);
-  const settingNumber = Number(match?.[1]);
+  const settingNumber: number = Number(match?.[1]);
   const value: string = match?.[2] ?? '';
 
   if (!isKnownSettingNumber(settingNumber, settings)) {

@@ -11,9 +11,9 @@
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { BEFORE_UNLOAD_EVENT_NAME } from '../../utils/browser/browser.events.constants';
 import { selectIsMachineMoving } from '../../utils/states/machine.status.state';
 
-const BEFORE_UNLOAD_EVENT_NAME = 'beforeunload';
 const EMPTY_RETURN_VALUE = '';
 
 // Browsers only show the leave-page prompt when the event is cancelled and, in older ones, returnValue is set.
