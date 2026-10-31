@@ -51,6 +51,7 @@
   dominant-baseline: middle;
 }
 
-.outsideBed path {
+.outsideBed path,
+.workOrigin.outsideBed {
   stroke-dasharray: 3 3;
 }
