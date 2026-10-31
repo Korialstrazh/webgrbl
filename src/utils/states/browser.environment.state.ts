@@ -12,6 +12,7 @@
 import { eventChannel } from 'redux-saga';
 import type { EventChannel } from 'redux-saga';
 import { call, put, take } from 'redux-saga/effects';
+import { isWebSerialAvailable } from '../browser/is.web.serial.available';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
@@ -45,8 +46,6 @@ export class OnlineStatusChangeReceived extends Action<OnlineStatusPayload> {
 // #endregion
 
 // #region Initial state
-const isWebSerialAvailable = (): boolean => 'serial' in navigator;
-
 const getInitialBrowserEnvironmentState = (): BrowserEnvironmentState => ({
   isOnline: navigator.onLine,
   isWebSerialSupported: isWebSerialAvailable(),

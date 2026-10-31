@@ -43,6 +43,8 @@ export class FakeSerialPort extends EventTarget implements SerialPort {
   public readonly writtenChunks: Uint8Array[] = [];
   /** How many times close() was called. */
   public closeCallCount = 0;
+  /** USB ids getInfo() reports; none by default. */
+  public portInfo: SerialPortInfo = {};
   private readableController:
     ReadableStreamDefaultController<Uint8Array> | undefined;
 
@@ -88,7 +90,7 @@ export class FakeSerialPort extends EventTarget implements SerialPort {
   }
 
   public getInfo(): SerialPortInfo {
-    return {};
+    return this.portInfo;
   }
 
   public async forget(): Promise<void> {}

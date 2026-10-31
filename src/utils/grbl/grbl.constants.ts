@@ -209,6 +209,16 @@ export const GRBL_CONSOLE_DIRECTION = {
 
 export type GrblConsoleDirection = (typeof GRBL_CONSOLE_DIRECTION)[keyof typeof GRBL_CONSOLE_DIRECTION];
 
+/** Where the app's connection to the laser stands; `lost` means an established connection broke unexpectedly. */
+export const GRBL_CONNECTION_STATUS = {
+  DISCONNECTED: 'disconnected',
+  CONNECTING: 'connecting',
+  CONNECTED: 'connected',
+  LOST: 'lost',
+} as const;
+
+export type GrblConnectionStatus = (typeof GRBL_CONNECTION_STATUS)[keyof typeof GRBL_CONNECTION_STATUS];
+
 /** Kinds of event the controller emits. */
 export const GRBL_CONTROLLER_EVENT_KIND = {
   CONSOLE_ENTRY: 'console-entry',
