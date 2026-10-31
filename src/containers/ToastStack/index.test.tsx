@@ -9,6 +9,8 @@ import { ToastShown } from '../../utils/states/toast.state';
 
 const ERROR_CODE = 9;
 const ERROR_TEXT = 'Error 9: G-code is locked during an alarm or jog.';
+const STOPPED_LINE_NUMBER = 5;
+const STOPPED_ON_ERROR_TEXT = 'Job stopped at line 5: error 9 - G-code is locked during an alarm or jog.';
 const NOT_RESPONDING_TEXT = 'The controller is not responding.';
 const CONNECTED_TEXT = 'Connected to Grbl 1.1h';
 const DISMISS_LABEL = 'Dismiss';
@@ -43,6 +45,20 @@ describe(ToastStack.name, () => {
     showErrorToast(store);
 
     expect(screen.getByRole('alert')).toHaveTextContent(ERROR_TEXT);
+  });
+
+  it('shows the translated error description in the stop-on-error toast', () => {
+    const store: AppStore = renderToastStack();
+
+    act(() => {
+      store.dispatch(new ToastShown({
+        severity: TOAST_SEVERITY.ERROR,
+        messageKey: DEFAULT.TOAST_PROGRAM_STOPPED_ON_ERROR,
+        messageParameters: { lineNumber: STOPPED_LINE_NUMBER, code: ERROR_CODE, description: DEFAULT.GRBL_ERROR_9 },
+      }));
+    });
+
+    expect(screen.getByRole('alert')).toHaveTextContent(STOPPED_ON_ERROR_TEXT);
   });
 
   it('shows warnings as alerts and info as status', () => {

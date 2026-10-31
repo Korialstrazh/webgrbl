@@ -109,5 +109,5 @@ TOAST_NOT_RESPONDING;The controller is not responding.
 TOAST_PORT_ACCESS_DENIED_OR_BUSY;Could not open the port. On Linux, add your user to the dialout group. On any system, close other apps or tabs using the port.
 TOAST_PORT_NOT_FOUND;The port is gone - check the USB cable.
 TOAST_PORT_OPEN_FAILED;Could not open the port.
-TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}}.
+TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}} - {{description}}
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).

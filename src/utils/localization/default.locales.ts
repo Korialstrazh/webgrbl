@@ -244,7 +244,7 @@ registerLocales({
       [DEFAULT.TOAST_PORT_ACCESS_DENIED_OR_BUSY]: "Could not open the port. On Linux, add your user to the dialout group. On any system, close other apps or tabs using the port.",
       [DEFAULT.TOAST_PORT_NOT_FOUND]: "The port is gone - check the USB cable.",
       [DEFAULT.TOAST_PORT_OPEN_FAILED]: "Could not open the port.",
-      [DEFAULT.TOAST_PROGRAM_STOPPED_ON_ERROR]: "Job stopped at line {{lineNumber}}: error {{code}}.",
+      [DEFAULT.TOAST_PROGRAM_STOPPED_ON_ERROR]: "Job stopped at line {{lineNumber}}: error {{code}} - {{description}}",
       [DEFAULT.TOAST_UNSUPPORTED_FIRMWARE]: "This firmware is not supported yet (GRBL 1.1 or newer is required).",
     },
   },
