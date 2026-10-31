@@ -61,8 +61,12 @@ export const GRBL_LINE_COMMENT_PATTERN = /;.*$|\([^)]*\)/g;
 export const GRBL_WHITESPACE_PATTERN = /\s+/g;
 /** First character of a GRBL system command such as a setting write. */
 export const GRBL_SYSTEM_COMMAND_PREFIX = '$';
-/** Commands that write the controller EEPROM and so must be sent one at a time (G10L2 also covers G10L20). */
-export const GRBL_EEPROM_COMMAND_PATTERN = /^(\$(\d+|N[01]|RST|I)=|G10L2|G28\.1|G30\.1)/i;
+/**
+ * Commands that write the controller EEPROM and so must be sent one at a time. System commands only count at the
+ * start of the line; G10L2 (which also covers G10L20), G28.1 and G30.1 count anywhere, as program lines often put
+ * other words or a line number before them.
+ */
+export const GRBL_EEPROM_COMMAND_PATTERN = /^\$(\d+|N[01]|RST|I)=|G10L2|G28\.1|G30\.1/i;
 /**
  * Matches a prepared line made only of printable ASCII (0x20 to 0x7E). Any other character either takes more bytes
  * than counted for the controller receive buffer (UTF-8) or is a GRBL realtime command (every byte from 0x80 on).
