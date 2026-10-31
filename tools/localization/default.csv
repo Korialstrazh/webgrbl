@@ -4,7 +4,21 @@ APP_UPDATE_DISMISS;Dismiss
 APP_UPDATE_NEED_REFRESH;A new version of webgrbl is available.
 APP_UPDATE_OFFLINE_READY;webgrbl is ready to work offline.
 APP_UPDATE_RELOAD;Reload
+BED_ARIA_HEAD;Laser head at X {{x}}, Y {{y}} (machine coordinates)
+BED_ARIA_LABEL;Machine bed, {{width}} by {{height}} mm
+BED_ARIA_WORK_ORIGIN;Work zero at X {{x}}, Y {{y}} (machine coordinates)
+BED_NO_MACHINE;Connect a machine to see its bed
 BED_PANEL_TITLE;Bed
+BED_SIZE_UNKNOWN;Bed size unknown, showing a default bed
+BED_TOOL_ALIGN;Align
+BED_TOOL_EDIT_NODES;Edit nodes
+BED_TOOL_MOVE;Move
+BED_TOOL_SELECT;Select
+BED_TOOLBAR_DESCRIPTION;Select, move and edit design objects and switch the bed view.
+BED_VIEW_3D;3D
+BED_VIEW_DESIGN;Design
+BED_VIEW_MODE_LABEL;Bed view
+BED_VIEW_TOOLPATH;Toolpath
 COMING_SOON;Coming soon
 CONNECTION_PILL_CONNECTED;Connected
 CONNECTION_PILL_CONNECTING;Connecting
