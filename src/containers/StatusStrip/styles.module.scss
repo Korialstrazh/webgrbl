@@ -53,11 +53,13 @@
   background-color: var(--color-surface-2);
 }
 
-// The status strip spans the full width, so in a wide window the console stops short of the machine panel and STOP.
+// The status strip spans the full width, so in a wide window the console covers only the bed's lower part: it starts
+// at the design panel's right edge and stops short of the machine panel and STOP.
 // 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
 @media (min-width: 80rem) {
   .consoleOverlay {
     right: layout.$machine-panel-width;
+    left: layout.$design-panel-width;
   }
 }
 

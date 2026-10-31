@@ -1,5 +1,6 @@
 /**
- * The toasts on screen, newest last. Each one can be dismissed; warnings and errors are announced as alerts.
+ * The toasts on screen, newest last. Each one can be dismissed; warnings and errors are announced as alerts. In a
+ * narrow window the stack is pinned to the window, so it stays visible while the stacked regions scroll.
  *
  * @author michael.morosov
  *
@@ -20,7 +21,9 @@ import type { AppToast } from '../../utils/states/interfaces/AppToast';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import { ToastDismissed, selectToasts } from '../../utils/states/toast.state';
+import type { ToastStackProps } from './interfaces/ToastStackProps';
 import styles from './styles.module.scss';
+import { TOAST_STACK_TEST_ID } from './toast.stack.constants';
 
 const DESCRIPTION_PARAMETER_NAME = 'description';
 const ROLE_ALERT = 'alert';
@@ -29,6 +32,9 @@ const FIRST_REPEAT_COUNT = 1;
 
 const getToastRole = (toast: AppToast): string =>
   toast.severity === TOAST_SEVERITY.INFO ? ROLE_STATUS : ROLE_ALERT;
+
+const getToastStackClassName = (isWide: boolean): string =>
+  (isWide ? [styles.toastStack] : [styles.toastStack, styles.pinnedToWindow]).join(' ');
 
 const getToastClassName = (toast: AppToast): string => [styles.toast, styles[toast.severity]].join(' ');
 
@@ -44,13 +50,13 @@ const getToastMessage = (toast: AppToast, t: TFunction): string => {
   return t(toast.messageKey, parameters);
 };
 
-export const ToastStack = (): ReactNode => {
+export const ToastStack = ({ isWide }: ToastStackProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const toasts: AppToast[] = useSelector(selectToasts);
 
   return (
-    <div className={styles.toastStack}>
+    <div className={getToastStackClassName(isWide)} data-testid={TOAST_STACK_TEST_ID}>
       {toasts.map((toast: AppToast) => (
         <div key={toast.toastId} className={getToastClassName(toast)} role={getToastRole(toast)}>
           <span className={styles.message}>{getToastMessage(toast, t)}</span>

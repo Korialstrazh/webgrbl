@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ToastStack } from '.';
+import { TOAST_STACK_TEST_ID } from './toast.stack.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
@@ -18,12 +19,14 @@ const ANTD_BUTTON_CLASS_NAME = 'ant-btn';
 const ANTD_SMALL_BUTTON_CLASS_NAME = 'ant-btn-sm';
 const TWICE_LABEL = '\u00D72';
 
-const renderToastStack = (): AppStore => {
+const PINNED_TO_WINDOW_CLASS_NAME = 'pinnedToWindow';
+
+const renderToastStack = (isWide: boolean = true): AppStore => {
   const store: AppStore = newStore();
 
   render(
     <Provider store={store}>
-      <ToastStack />
+      <ToastStack isWide={isWide} />
     </Provider>,
   );
 
@@ -109,5 +112,17 @@ describe(ToastStack.name, () => {
     fireEvent.click(screen.getByRole('button', { name: DISMISS_LABEL }));
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('pins the stack to the window in a narrow window, so it stays visible while the regions scroll', () => {
+    renderToastStack(false);
+
+    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).toContain(PINNED_TO_WINDOW_CLASS_NAME);
+  });
+
+  it('keeps the stack in the bed region in a wide window', () => {
+    renderToastStack(true);
+
+    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).not.toContain(PINNED_TO_WINDOW_CLASS_NAME);
   });
 });

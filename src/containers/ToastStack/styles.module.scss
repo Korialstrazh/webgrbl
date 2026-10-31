@@ -1,3 +1,5 @@
+@use '../../styles/layout' as layout;
+
 // Anchored to the top right of the bed area, above the console overlay (z-index 30).
 .toastStack {
   position: absolute;
@@ -9,6 +11,14 @@
   gap: var(--space-2);
   max-width: calc(100% - 2 * var(--space-4));
   pointer-events: none;
+}
+
+// Narrow, the regions stack and scroll, so the stack is pinned to the window just below the top bar, far from the
+// sticky stop bar at the bottom; z-index 40 keeps it above the console overlay and the sticky bar.
+.pinnedToWindow {
+  position: fixed;
+  top: calc(#{layout.$top-bar-height} + var(--space-4));
+  max-width: calc(100vw - 2 * var(--space-4));
 }
 
 .toast {

@@ -35,7 +35,7 @@ export const AppRoute = (): ReactNode => {
         <TopBar />
         <Layout className={styles.regions} hasSider={isWide}>
           <DesignPanel />
-          <BedPanel hostRef={setBedRegionHost} />
+          <BedPanel hostRef={setBedRegionHost} isWide={isWide} />
           <MachinePanel isWide={isWide} />
         </Layout>
         <StatusStrip />

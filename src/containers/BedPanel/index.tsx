@@ -30,7 +30,7 @@ import type { BedViewModeOption } from './interfaces/BedViewModeOption';
 import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
 import styles from './styles.module.scss';
 
-export const BedPanel = ({ hostRef }: BedPanelProps): ReactNode => {
+export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const { t } = useTranslation();
   const settings: Record<number, string> = useSelector(selectGrblSettings);
   const isConnected: boolean = useSelector(selectIsConnected);
@@ -69,7 +69,7 @@ export const BedPanel = ({ hostRef }: BedPanelProps): ReactNode => {
           placeholderLabel={placeholderKey && t(placeholderKey)}
         />
       </div>
-      <ToastStack />
+      <ToastStack isWide={isWide} />
     </Layout.Content>
   );
 };
