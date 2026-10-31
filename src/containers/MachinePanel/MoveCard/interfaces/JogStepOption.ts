@@ -10,7 +10,7 @@
  */
 
 export interface JogStepOption {
-  /** The step distance in millimetres, as text. */
-  value: string;
+  /** The step distance in millimetres. */
+  value: number;
   label: string;
 }

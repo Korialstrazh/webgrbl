@@ -1,0 +1,8 @@
+.firing,
+.firing:hover,
+.firing:active {
+  border-color: var(--color-warning);
+  background: var(--color-warning);
+  color: var(--color-bg);
+  font-weight: 700;
+}

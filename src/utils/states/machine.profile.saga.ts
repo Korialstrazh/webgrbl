@@ -12,6 +12,7 @@
  */
 import { call, put, select, takeEvery } from 'redux-saga/effects';
 import { DEFAULT } from '../localization/default.locales';
+import { getReportedProfileFields } from '../profiles/get.reported.profile.fields';
 import { getValidlyReportedProfileValues } from '../profiles/get.validly.reported.profile.values';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { MachineProfilesDocument } from '../profiles/interfaces/MachineProfilesDocument';
@@ -59,11 +60,6 @@ const isActiveWorkAreaDifferent = (
 /** True only when the laser reports `$32` and it is off; a laser that does not report it gets no warning. */
 const isLaserModeReportedOff = (laserValues: ReportedMachineProfileValues | undefined): boolean =>
   isBoolean(laserValues?.isLaserModeOn) && !laserValues.isLaserModeOn;
-
-/** The reported values that are profile fields; laser mode is not stored in a profile. */
-const getReportedProfileFields = (
-  { isLaserModeOn: _isLaserModeOn, ...profileFields }: ReportedMachineProfileValues,
-): Partial<MachineProfile> => profileFields;
 
 function* storeMachineProfiles(): Generator {
   const profilesDocument: MachineProfilesDocument =

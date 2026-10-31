@@ -20,6 +20,7 @@ import {
 } from '../browser/browser.events.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
 import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
+import { getCanFireLaserPointer } from '../machine/get.can.fire.laser.pointer';
 import { getPointerOnCommands } from '../machine/get.pointer.on.commands';
 import { MAX_POINTER_HOLD_MS } from '../machine/machine.command.constants';
 import { MACHINE_COMMAND } from '../machine/machine.commands';
@@ -58,9 +59,6 @@ const newPointerFocusLossChannel = (): EventChannel<string> => eventChannel((emi
     document.removeEventListener(VISIBILITY_CHANGE_EVENT_NAME, emitHiddenTab);
   };
 });
-
-const canLaserPointerFire = (isConnected: boolean, status: GrblResolvedStatus | undefined): boolean =>
-  isConnected && status?.machineState === GRBL_MACHINE_STATE.IDLE;
 
 function* waitForConnectionEnd(): Generator {
   while (true) {
@@ -105,7 +103,7 @@ function* fireLaserPointer(): Generator {
   const isConnected: boolean = (yield select(selectIsConnected)) as boolean;
   const status: GrblResolvedStatus | undefined = (yield select(selectMachineStatus)) as GrblResolvedStatus | undefined;
 
-  if (!canLaserPointerFire(isConnected, status)) {
+  if (!getCanFireLaserPointer(isConnected, status?.machineState)) {
     return;
   }
 
