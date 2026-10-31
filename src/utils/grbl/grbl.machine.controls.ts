@@ -3,7 +3,6 @@ import { runGrblStopSequence } from './grbl.stop.sequence';
 import type { GrblRealtimeCommand } from './grbl.constants';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblMachineControlsHost } from './interfaces/GrblMachineControlsHost';
-import type { GrblResolvedStatus } from './interfaces/GrblResolvedStatus';
 import type { GrblStopSequenceContext } from './interfaces/GrblStopSequenceContext';
 
 /** Ends the hold wait of a running stop at once. */
@@ -143,11 +142,10 @@ export class GrblMachineControls {
   }
 
   private newStopSequenceContext(): GrblStopSequenceContext {
-    const { commandWriter, statusPoller, statusTracker } = this.host;
+    const { commandWriter, statusPoller } = this.host;
 
     return {
       clearPendingLines: (): void => commandWriter.clearPendingLines(),
-      getLatestStatus: (): GrblResolvedStatus | undefined => statusTracker.getLatestStatus(),
       writeRealtimeCommand: (command: GrblRealtimeCommand): void => void commandWriter.writeRealtimeCommand(command),
       getUnansweredStatusQueryCount: (): number => commandWriter.getUnansweredStatusQueryCount(),
       setStatusPollInterval: (intervalMs: number): void => {

@@ -103,7 +103,6 @@ export class GrblController {
     this.machineControls = new GrblMachineControls({
       commandWriter: this.commandWriter,
       statusPoller: this.statusPoller,
-      statusTracker: this.statusTracker,
       isConnected,
       addEventListener: (listener: GrblControllerEventListener): (() => void) => this.addEventListener(listener),
       handleMachineReset: (): void => this.programStreamer.handleMachineReset(),

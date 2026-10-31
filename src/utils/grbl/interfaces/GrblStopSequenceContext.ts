@@ -10,13 +10,10 @@
  */
 import type { GrblRealtimeCommand } from '../grbl.constants';
 import type { GrblControllerEvent } from './GrblControllerEvent';
-import type { GrblResolvedStatus } from './GrblResolvedStatus';
 
 export interface GrblStopSequenceContext {
   /** Drops the lines that are not sent yet; lines in flight stay counted until the reset. */
   clearPendingLines(): void;
-  /** The latest status report, which may be up to one poll interval old. */
-  getLatestStatus(): GrblResolvedStatus | undefined;
   /** Writes one realtime byte straight to the transport. */
   writeRealtimeCommand(command: GrblRealtimeCommand): void;
   /** Status queries already written whose report has not arrived yet. */

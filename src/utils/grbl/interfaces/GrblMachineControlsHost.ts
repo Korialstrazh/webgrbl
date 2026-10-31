@@ -10,7 +10,6 @@
  */
 import type { GrblCommandWriter } from '../grbl.command.writer';
 import type { GrblStatusPoller } from '../grbl.status.poller';
-import type { GrblStatusTracker } from '../grbl.status.tracker';
 import type { GrblControllerEvent } from './GrblControllerEvent';
 
 export interface GrblMachineControlsHost {
@@ -18,8 +17,6 @@ export interface GrblMachineControlsHost {
   commandWriter: GrblCommandWriter;
   /** Sends the status query at an interval. */
   statusPoller: GrblStatusPoller;
-  /** Holds the latest status report. */
-  statusTracker: GrblStatusTracker;
   /** True once the handshake is done and until the connection closes. */
   isConnected(): boolean;
   /** Adds a controller event listener and returns the function that removes it. */

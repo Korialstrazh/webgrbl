@@ -15,6 +15,7 @@ import { GRBL_SIMULATOR_BANNER, GRBL_SIMULATOR_FAULT_KIND } from './simulator/gr
 import { ANSWER_SETTLE_MS } from './test.support/grbl.answer.settle';
 import { getConsoleEntries } from './test.support/grbl.console.entries';
 import { newGrblControllerHarness } from './test.support/grbl.controller.harness';
+import { disconnectGrblHarness } from './test.support/grbl.harness.disconnect';
 import type { GrblControllerEventKind, GrblRealtimeCommand } from './grbl.constants';
 import type { GrblConsoleEntry } from './interfaces/GrblConsoleEntry';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
@@ -25,6 +26,14 @@ import type { GrblControllerHarness } from './test.support/GrblControllerHarness
 const LONG_MOVE = 'G1X300F600';
 const LONG_MOVE_END_X = 300;
 const JOG_MOVE = '$J=G91X50F1000';
+/** 2 mm at 600 mm/min takes 200 ms. */
+const SHORT_JOG_MOVE = '$J=G91X2F600';
+const SHORT_JOG_END_X = 2;
+/** The short jog starts 150 ms after a poll, so the next poll, 250 ms after the first, sees it. */
+const BEFORE_SHORT_JOG_MS = 150;
+const SHORT_JOG_SEEN_BY_POLL_MS = 150;
+/** The jog ends 200 ms after it started, well before the poll after the one that saw it. */
+const SHORT_JOG_FINISHED_MS = 80;
 /** Time for the move to start and a status poll to report it. */
 const MOVE_RUNNING_MS = 500;
 /** Time for the move to start, well before the next status poll. */
@@ -97,6 +106,19 @@ const getLatestStatus = (harness: GrblControllerHarness): GrblResolvedStatus => 
   }
 
   return status;
+};
+
+/** Advances fake time 1 ms at a time until the next status report arrives, so later steps know the poll phase. */
+const advanceToNextStatusReport = async (harness: GrblControllerHarness): Promise<void> => {
+  const statusReportCount: number = getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.STATUS_REPORT).length;
+
+  for (let elapsedMs = 0; elapsedMs <= GRBL_STATUS_POLL_INTERVAL_MS; elapsedMs++) {
+    await vi.advanceTimersByTimeAsync(1);
+
+    if (getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.STATUS_REPORT).length > statusReportCount) {
+      return;
+    }
+  }
 };
 
 const getMachineX = (status: GrblResolvedStatus): number => status.machinePosition?.x ?? Number.NaN;
@@ -173,7 +195,7 @@ describe(GrblController.name, () => {
     await harness.controller.disconnect();
   });
 
-  it('stop during a jog sends jog cancel instead of feed hold', async () => {
+  it('stop during a jog writes feed hold, which cancels the jog, then resets without an alarm', async () => {
     const harness: GrblControllerHarness = await newConnectedHarness();
     harness.controller.sendConsoleCommand(JOG_MOVE);
     await vi.advanceTimersByTimeAsync(MOVE_RUNNING_MS);
@@ -185,13 +207,39 @@ describe(GrblController.name, () => {
     await stop;
 
     expect(getSentRealtimeCommands(harness.events)).toEqual([
-      GRBL_REALTIME_COMMAND.JOG_CANCEL,
+      GRBL_REALTIME_COMMAND.FEED_HOLD,
       GRBL_REALTIME_COMMAND.SOFT_RESET,
     ]);
     expect(getAlarmEvents(harness.events)).toEqual([]);
     expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.IDLE);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
+  });
+
+  it('stop while the latest status still says Jog but a G1 move runs holds the move and raises no alarm', async () => {
+    const harness: GrblControllerHarness = await newConnectedHarness();
+    await advanceToNextStatusReport(harness);
+    await vi.advanceTimersByTimeAsync(BEFORE_SHORT_JOG_MS);
+    harness.controller.sendConsoleCommand(SHORT_JOG_MOVE);
+    await vi.advanceTimersByTimeAsync(SHORT_JOG_SEEN_BY_POLL_MS);
+
+    expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.JOG);
+
+    await vi.advanceTimersByTimeAsync(SHORT_JOG_FINISHED_MS);
+    harness.controller.sendConsoleCommand(LONG_MOVE);
+    await vi.advanceTimersByTimeAsync(MOVE_JUST_STARTED_MS);
+
+    expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.JOG);
+
+    const stop: Promise<void> = harness.controller.stopMachine();
+    await vi.advanceTimersByTimeAsync(STOP_SETTLE_MS);
+    await stop;
+
+    expect(getAlarmEvents(harness.events)).toEqual([]);
+    expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.IDLE);
+    expect(getMachineX(getLatestStatus(harness))).toBeGreaterThan(SHORT_JOG_END_X);
+
+    await disconnectGrblHarness(harness);
   });
 
   it('stop resets anyway after 2000 ms when hold never completes', async () => {

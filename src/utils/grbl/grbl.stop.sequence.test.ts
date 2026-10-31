@@ -39,16 +39,12 @@ const newStatus = (machineState: GrblMachineState, machineSubstate: number | und
   overrides: undefined,
 });
 
-const newStopSequenceHarness = (
-  latestState: GrblMachineState,
-  unansweredStatusQueryCount: number,
-): StopSequenceHarness => {
+const newStopSequenceHarness = (unansweredStatusQueryCount: number): StopSequenceHarness => {
   const listeners: Set<(event: GrblControllerEvent) => void> = new Set();
   const callLog: string[] = [];
   const pollIntervals: number[] = [];
   const context: GrblStopSequenceContext = {
     clearPendingLines: (): void => undefined,
-    getLatestStatus: (): GrblResolvedStatus => newStatus(latestState, undefined),
     writeRealtimeCommand: (command: string): void => {
       callLog.push(command);
     },
@@ -87,7 +83,7 @@ describe(runGrblStopSequence.name, () => {
   });
 
   it('skips reports to queries written before the stop byte, even when they say Idle', async () => {
-    const harness: StopSequenceHarness = newStopSequenceHarness(GRBL_MACHINE_STATE.IDLE, 1);
+    const harness: StopSequenceHarness = newStopSequenceHarness(1);
 
     const stop: Promise<void> = runGrblStopSequence(harness.context);
     harness.emitStatus(GRBL_MACHINE_STATE.IDLE);
@@ -104,7 +100,7 @@ describe(runGrblStopSequence.name, () => {
   });
 
   it('keeps waiting through Run, Jog and Hold:1 and resets on Alarm', async () => {
-    const harness: StopSequenceHarness = newStopSequenceHarness(GRBL_MACHINE_STATE.RUN, 0);
+    const harness: StopSequenceHarness = newStopSequenceHarness(0);
 
     const stop: Promise<void> = runGrblStopSequence(harness.context);
     harness.emitStatus(GRBL_MACHINE_STATE.RUN);
