@@ -35,6 +35,9 @@ import { Panel } from '../../../views/Panel';
 import { PointerFireButton } from './PointerFireButton';
 import styles from './styles.module.scss';
 
+const hasStaleAirAssistState = (isDisconnected: boolean, isAirAssistOn: boolean): boolean =>
+  isDisconnected && isAirAssistOn;
+
 export const LaserCard = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
@@ -43,9 +46,10 @@ export const LaserCard = (): ReactNode => {
   const powerPercent: number = useSelector(selectLaserPointerPowerPercent);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const [isAirAssistOn, setIsAirAssistOn] = useState<boolean>(false);
+  const isDisconnected: boolean = !isConnected;
 
   // The laser's own air assist state is unknown after the connection ends, so the switch starts over as off.
-  if (!isConnected && isAirAssistOn) {
+  if (hasStaleAirAssistState(isDisconnected, isAirAssistOn)) {
     setIsAirAssistOn(false);
   }
 
@@ -84,7 +88,7 @@ export const LaserCard = (): ReactNode => {
         </ComingSoon>
         {activeProfile?.hasAirAssist && (
           <label className={styles.switchField}>
-            <Switch checked={isAirAssistOn} disabled={!isConnected} onChange={changeAirAssist} />
+            <Switch checked={isAirAssistOn} disabled={isDisconnected} onChange={changeAirAssist} />
             {t(DEFAULT.MACHINE_LASER_AIR_ASSIST)}
           </label>
         )}

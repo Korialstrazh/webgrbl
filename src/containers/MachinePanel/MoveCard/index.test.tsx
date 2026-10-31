@@ -70,11 +70,17 @@ const activateProfile = (store: AppStore, overrides: Partial<MachineProfile> = {
   return profile;
 };
 
-const getRequestedLines = (dispatchSpy: ReturnType<typeof vi.spyOn>): string[] =>
-  dispatchSpy.mock.calls
-    .map((call: unknown[]): unknown => call[0])
-    .filter((dispatched: unknown): dispatched is MachineLineRequested => dispatched instanceof MachineLineRequested)
-    .map((dispatched: MachineLineRequested): string => dispatched.payload.line);
+const getRequestedLines = (dispatchSpy: ReturnType<typeof vi.spyOn>): string[] => {
+  const requestedLines: string[] = [];
+
+  for (const [dispatched] of dispatchSpy.mock.calls as unknown[][]) {
+    if (dispatched instanceof MachineLineRequested) {
+      requestedLines.push(dispatched.payload.line);
+    }
+  }
+
+  return requestedLines;
+};
 
 describe(MoveCard.name, () => {
   it('jogs north-east at step 1 with the default feed rate', () => {

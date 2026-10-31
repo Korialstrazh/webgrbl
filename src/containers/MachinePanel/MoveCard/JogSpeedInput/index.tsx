@@ -13,6 +13,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_INPUT_NUMBER_PRECISION_INTEGER } from '../../../../utils/antd.constants';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { getClampedJogFeedRate } from '../../../../utils/machine/get.clamped.jog.feed.rate';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
@@ -23,8 +24,6 @@ import {
 } from '../../../../utils/profiles/machine.profile.constants';
 import { MachineProfileSaved, selectActiveMachineProfile } from '../../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../../utils/states/new.store';
-
-const JOG_FEED_RATE_PRECISION = 0;
 
 export const JogSpeedInput = (): ReactNode => {
   const { t } = useTranslation();
@@ -53,7 +52,7 @@ export const JogSpeedInput = (): ReactNode => {
       disabled={!activeProfile}
       min={MACHINE_JOG_FEED_RATE_MIN}
       max={MACHINE_JOG_FEED_RATE_MAX}
-      precision={JOG_FEED_RATE_PRECISION}
+      precision={ANTD_INPUT_NUMBER_PRECISION_INTEGER}
       suffix={t(DEFAULT.MACHINE_MOVE_JOG_SPEED_UNIT)}
       value={draftFeedRate ?? savedFeedRate}
       onChange={(feedRate: number | null): void => setDraftFeedRate(feedRate || undefined)}

@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { AlertProps, ButtonProps, FormItemProps, FormProps, MenuProps, PopoverProps } from 'antd';
+import type { AlertProps, ButtonProps, FormItemProps, FormProps, InputNumberProps, MenuProps, PopoverProps } from 'antd';
 
 /** The compact button size, for actions inside a chip or a bar. */
 export const ANTD_BUTTON_SIZE_SMALL: ButtonProps['size'] = 'small';
@@ -45,3 +45,6 @@ export const ANTD_ALERT_TYPE_WARNING: AlertProps['type'] = 'warning';
 
 /** A menu that lists its items one below the other inside its container. */
 export const ANTD_MENU_MODE_INLINE: MenuProps['mode'] = 'inline';
+
+/** A number input that shows and accepts whole numbers only. */
+export const ANTD_INPUT_NUMBER_PRECISION_INTEGER: InputNumberProps['precision'] = 0;

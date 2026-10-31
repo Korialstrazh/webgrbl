@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { LaserCard } from '.';
+import { ENTER_KEY, SPACE_KEY } from '../../../utils/browser/browser.events.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus, GrblMachineState } from '../../../utils/grbl/grbl.constants';
 import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
@@ -25,13 +26,10 @@ const LASER_ON_LABEL = 'LASER ON';
 const AIR_ASSIST_LABEL = 'Air assist';
 const FRAME_LABEL = 'Frame job';
 const POWER_LABEL = 'Pointer power';
-const SPACE_KEY = ' ';
-const ENTER_KEY = 'Enter';
 const SECONDARY_POINTER_BUTTON = 2;
 const ARROW_RIGHT_KEY_CODE = 39;
 const MAX_POWER_WATTS = 10;
 const POWER_PERCENT = 3;
-const POWER_WATTS_TEXT = '0.30';
 const WATTS_PATTERN = /0\.30 W/;
 const ANY_WATTS_PATTERN = / W$/;
 
@@ -89,10 +87,17 @@ const activateProfile = (store: AppStore, overrides: Partial<MachineProfile> = {
 const getDispatched = <TAction extends object>(
   dispatchSpy: ReturnType<typeof vi.spyOn>,
   actionClass: new (...args: never[]) => TAction,
-): TAction[] =>
-  dispatchSpy.mock.calls
-    .map((call: unknown[]): unknown => call[0])
-    .filter((dispatched: unknown): dispatched is TAction => dispatched instanceof actionClass);
+): TAction[] => {
+  const dispatchedActions: TAction[] = [];
+
+  for (const [dispatched] of dispatchSpy.mock.calls as unknown[][]) {
+    if (dispatched instanceof actionClass) {
+      dispatchedActions.push(dispatched);
+    }
+  }
+
+  return dispatchedActions;
+};
 
 const getRequestedLines = (dispatchSpy: ReturnType<typeof vi.spyOn>): string[] =>
   getDispatched(dispatchSpy, MachineLineRequested).map(
@@ -239,7 +244,6 @@ describe(LaserCard.name, () => {
 
     expect(selectLaserPointerPowerPercent(store.getState())).toBe(POWER_PERCENT);
     expect(screen.getByText(WATTS_PATTERN)).toBeInTheDocument();
-    expect(POWER_WATTS_TEXT).toBe((MAX_POWER_WATTS * POWER_PERCENT / 100).toFixed(2));
     expect(screen.getByRole('slider', { name: POWER_LABEL })).toHaveAttribute('aria-valuenow', String(POWER_PERCENT));
   });
 
