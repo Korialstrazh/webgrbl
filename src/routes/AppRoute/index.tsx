@@ -1,6 +1,6 @@
 /**
- * Top-level page of the app: the header with the browser status and the connection controls, and the workspace with
- * the machine status, control buttons and console.
+ * Top-level page of the app: the workbench with the top bar, design panel, bed, machine panel and status strip,
+ * plus the overlays. In a narrow window the regions stack and STOP moves to a sticky bar.
  *
  * @author michael.morosov
  *
@@ -10,38 +10,37 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
-import { AppUpdatePrompt } from '../../containers/AppUpdatePrompt';
-import { BrowserStatusBar } from '../../containers/BrowserStatusBar';
-import { ConnectBar } from '../../containers/ConnectBar';
-import { ConsolePanel } from '../../containers/ConsolePanel';
+import { BedPanel } from '../../containers/BedPanel';
+import { DesignPanel } from '../../containers/DesignPanel';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
-import { MachineControlButtons } from '../../containers/MachineControlButtons';
-import { MachineStatusPanel } from '../../containers/MachineStatusPanel';
-import { ToastStack } from '../../containers/ToastStack';
-import { DEFAULT } from '../../utils/localization/default.locales';
+import { MachinePanel } from '../../containers/MachinePanel';
+import { StatusStrip } from '../../containers/StatusStrip';
+import { StickyStopBar } from '../../containers/StickyStopBar';
+import { TopBar } from '../../containers/TopBar';
+import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import styles from './styles.module.scss';
 
 export const AppRoute = (): ReactNode => {
-  const { t } = useTranslation();
+  const isWide: boolean = useIsWideLayout();
 
   return (
     <div className={styles.appRoute}>
-      <header className={styles.header}>
-        <div className={styles.heading}>
-          <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
-          <p className={styles.tagline}>{t(DEFAULT.APP_TAGLINE)}</p>
-        </div>
-        <BrowserStatusBar />
-        <ConnectBar />
-      </header>
-      <main className={styles.workspace}>
-        <MachineStatusPanel />
-        <MachineControlButtons />
-        <ConsolePanel />
-      </main>
-      <ToastStack />
-      <AppUpdatePrompt />
+      <div className={[styles.area, styles.topBarArea].join(' ')}>
+        <TopBar />
+      </div>
+      <div className={[styles.area, styles.designArea].join(' ')}>
+        <DesignPanel />
+      </div>
+      <div className={[styles.area, styles.bedArea].join(' ')}>
+        <BedPanel />
+      </div>
+      <div className={[styles.area, styles.machineArea].join(' ')}>
+        <MachinePanel isWide={isWide} />
+      </div>
+      <div className={[styles.area, styles.statusArea].join(' ')}>
+        <StatusStrip />
+      </div>
+      {!isWide && <StickyStopBar />}
       <LeavePageGuard />
     </div>
   );

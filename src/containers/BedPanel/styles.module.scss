@@ -1,0 +1,13 @@
+.bedPanel {
+  position: relative;
+  min-width: 0;
+  min-height: 20rem;
+  padding: var(--space-4);
+  background-color: var(--color-bed);
+  color: var(--color-text);
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+}

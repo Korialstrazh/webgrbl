@@ -1,0 +1,50 @@
+// The console overlay (z-index 30) is drawn over the bed; toasts use z-index 40 so they stay readable above it.
+.statusStrip {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface-1);
+}
+
+.consoleOverlay {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  left: 0;
+  z-index: 30;
+  display: flex;
+  height: 14rem;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface-2);
+}
+
+.readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+}
+
+.readout {
+  display: flex;
+  gap: var(--space-2);
+
+  dt {
+    color: var(--color-text-muted);
+  }
+
+  dd {
+    margin: 0;
+    font-family: var(--font-mono);
+  }
+}
