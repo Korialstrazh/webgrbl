@@ -18,7 +18,7 @@ import { configDefaults } from 'vitest/config';
 
 const APP_NAME = 'webgrbl';
 const APP_DESCRIPTION = 'Control a GRBL laser cutter or engraver straight from the browser.';
-const THEME_COLOR = '#111827';
+const THEME_COLOR = '#121417';
 const ICON_PATH = 'favicon.svg';
 
 export default defineConfig({
