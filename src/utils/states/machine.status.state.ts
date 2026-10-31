@@ -1,5 +1,5 @@
 /**
- * The latest status the laser reported, and the requests to stop, reset or unlock it.
+ * The latest status the laser reported, and the requests to stop, reset, unlock or send a line to it.
  *
  * @author michael.morosov
  *
@@ -47,6 +47,15 @@ export class MachineStopRequested extends Action {
 
 export class MachineResetRequested extends Action {
   public static readonly type: string = actionType('machine reset requested');
+}
+
+interface MachineLineRequestedPayload {
+  /** The G-code line to send to the laser without adding it to the console history. */
+  line: string;
+}
+
+export class MachineLineRequested extends Action<MachineLineRequestedPayload> {
+  public static readonly type: string = actionType('machine line requested');
 }
 
 export class MachineUnlockRequested extends Action {

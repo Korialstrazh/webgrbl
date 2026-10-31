@@ -44,11 +44,16 @@ import {
 import { submitGrblConsoleCommand } from './grbl.console.command.saga';
 import { ConsoleCommandSubmitted } from './grbl.console.state';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
+import { getPreferredPortId } from './grbl.preferred.port.id';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import type { GrblHandshakeRaceResult } from './interfaces/GrblHandshakeRaceResult';
-import type { StoredPortChoice } from './interfaces/StoredPortChoice';
-import { MachineResetRequested, MachineStopRequested, MachineUnlockRequested } from './machine.status.state';
+import {
+  MachineLineRequested,
+  MachineResetRequested,
+  MachineStopRequested,
+  MachineUnlockRequested,
+} from './machine.status.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
 
@@ -77,23 +82,6 @@ const getConnectionPreferences = (
       usbProductId: chosenPort?.usbProductId,
     },
   };
-};
-
-/** A stored port is found again by its USB ids; ports without them cannot be told apart between sessions. */
-const getPreferredPortId = (
-  portChoice: StoredPortChoice,
-  availablePorts: SerialPortDescriptor[],
-): string | undefined => {
-  if (portChoice.isSimulated) {
-    return SIMULATED_LASER_PORT_ID;
-  }
-
-  if (!portChoice.usbVendorId) {
-    return undefined;
-  }
-
-  return availablePorts.find((port: SerialPortDescriptor) =>
-    port.usbVendorId === portChoice.usbVendorId && port.usbProductId === portChoice.usbProductId)?.portId;
 };
 
 function* loadGrantedSerialPorts(dependencies: GrblControllerSagaDependencies): Generator {
@@ -160,12 +148,17 @@ function* runGrblMachineCommand(machineCommand: () => Promise<void> | void): Gen
   }
 }
 
+function* runGrblMachineCommandLine(controller: GrblController, action: MachineLineRequested): Generator {
+  yield call(runGrblMachineCommand, (): void => controller.sendConsoleCommand(action.payload.line));
+}
+
 function* handleGrblControllerCommands(controller: GrblController): Generator {
   yield all([
     takeEvery(ConsoleCommandSubmitted.type, submitGrblConsoleCommand, controller),
     takeEvery(MachineStopRequested.type, runGrblMachineCommand, (): Promise<void> => controller.stopMachine()),
     takeEvery(MachineResetRequested.type, runGrblMachineCommand, (): Promise<void> => controller.resetMachine()),
     takeEvery(MachineUnlockRequested.type, runGrblMachineCommand, (): void => controller.unlockMachine()),
+    takeEvery(MachineLineRequested.type, runGrblMachineCommandLine, controller),
   ]);
 }
 // #endregion
