@@ -25,6 +25,7 @@ import {
 import type { GrblConsoleViewEntry } from '../../utils/states/interfaces/GrblConsoleViewEntry';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ConsoleEntryList } from '../../views/ConsoleEntryList';
+import { EMPTY_INPUT_TEXT, NO_HISTORY_OFFSET } from './console.history.constants';
 import { getConsoleHistoryRecall } from './get.console.history.recall';
 import type { ConsoleHistoryRecall } from './interfaces/ConsoleHistoryRecall';
 import { isConsoleScrolledToBottom } from './is.console.scrolled.to.bottom';
@@ -35,8 +36,6 @@ const ARROW_UP_KEY = 'ArrowUp';
 const ARROW_DOWN_KEY = 'ArrowDown';
 const OLDER_COMMAND_STEP = 1;
 const NEWER_COMMAND_STEP = -1;
-const NO_HISTORY_OFFSET = 0;
-const EMPTY_INPUT_TEXT = '';
 
 const getHistoryStep = (key: string): number | undefined => {
   switch (key) {
@@ -88,6 +87,12 @@ export const ConsolePanel = (): ReactNode => {
     setInputText(recall.inputText);
   };
 
+  /** Typing edits the input, so the next ArrowUp starts again from the newest command. */
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    setInputText(event.target.value);
+    setHistoryOffset(NO_HISTORY_OFFSET);
+  };
+
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
     const historyStep: number | undefined = getHistoryStep(event.key);
 
@@ -132,7 +137,7 @@ export const ConsolePanel = (): ReactNode => {
         disabled={!isConnected}
         aria-label={t(DEFAULT.CONSOLE_INPUT_LABEL)}
         placeholder={t(DEFAULT.CONSOLE_INPUT_PLACEHOLDER)}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => setInputText(event.target.value)}
+        onChange={handleInputChange}
         onKeyDown={handleKeyDown}
       />
     </section>

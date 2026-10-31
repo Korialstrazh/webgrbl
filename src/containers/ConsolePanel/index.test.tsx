@@ -13,6 +13,7 @@ const INPUT_LABEL = 'Console command';
 const STATUS_REPORTS_LABEL = 'Show status reports';
 const SETTINGS_COMMAND = '$$';
 const UNLOCK_COMMAND = '$X';
+const EDITED_COMMAND = '$$ edited';
 const OK_TEXT = 'ok';
 const ENTER_KEY = 'Enter';
 const ARROW_UP_KEY = 'ArrowUp';
@@ -143,6 +144,21 @@ describe(ConsolePanel.name, () => {
     pressKey(ARROW_DOWN_KEY);
 
     expect(getInput().value).toBe(EMPTY_TEXT);
+  });
+
+  it('typing after a recall starts the history again from the newest command', async () => {
+    const store: AppStore = renderConsolePanel();
+
+    await connect(store);
+    await submitCommand(SETTINGS_COMMAND);
+    await submitCommand(UNLOCK_COMMAND);
+    pressKey(ARROW_UP_KEY);
+    pressKey(ARROW_UP_KEY);
+
+    typeCommand(EDITED_COMMAND);
+    pressKey(ARROW_UP_KEY);
+
+    expect(getInput().value).toBe(UNLOCK_COMMAND);
   });
 
   it('toggles the status report visibility', () => {

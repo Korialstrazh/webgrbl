@@ -9,10 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { EMPTY_INPUT_TEXT, NO_HISTORY_OFFSET } from './console.history.constants';
 import type { ConsoleHistoryRecall } from './interfaces/ConsoleHistoryRecall';
-
-const NO_HISTORY_OFFSET = 0;
-const EMPTY_INPUT_TEXT = '';
 
 export const getConsoleHistoryRecall = (
   commandHistory: string[],
