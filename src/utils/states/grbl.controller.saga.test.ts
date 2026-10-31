@@ -57,7 +57,7 @@ const SIMULATOR_FIRMWARE_NAME = 'Grbl';
 const SIMULATOR_FIRMWARE_VERSION = '1.1h';
 const CONSOLE_COMMAND = 'G0X1';
 /** U+00DA would reach GRBL as C3 9A, and 0x9A is a realtime laser power override. */
-const NON_ASCII_CONSOLE_COMMAND = 'G0XÚ';
+const NON_ASCII_CONSOLE_COMMAND = 'G0X\u00da';
 const OK_TEXT = 'ok';
 /** 300 mm at 600 mm/min takes 30 s, far longer than any test runs. */
 const LONG_MOVE = 'G1X300F600';

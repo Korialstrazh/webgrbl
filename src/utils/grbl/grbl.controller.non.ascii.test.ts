@@ -18,10 +18,10 @@ import type { GrblControllerHarness } from './test.support/GrblControllerHarness
 /** The handshake sends $I and $$, so the simulator counts the first line after it as line 3. */
 const HANDSHAKE_LINE_COUNT = 2;
 /** U+00DA is sent as UTF-8 C3 9A; 0x9A alone is GRBL's realtime "laser power override +10%". */
-const NON_ASCII_MOVE = 'G1XÚ';
+const NON_ASCII_MOVE = 'G1X\u00da';
 const NON_ASCII_MOVE_LINE_NUMBER = 3;
 /** Characters outside printable ASCII are fine inside a comment, which is never sent. */
-const COMMENTED_MOVE = 'G1 X1 F600 ; Grüße';
+const COMMENTED_MOVE = 'G1 X1 F600 ; Gr\u00fc\u00dfe';
 const PREPARED_COMMENTED_MOVE = 'G1X1F600';
 const TAB_SEPARATED_SYSTEM_COMMAND = '$J=G91\tX1F100';
 const NON_ASCII_PROGRAM: string[] = ['G21', 'G1X1F600', NON_ASCII_MOVE, 'G1X2F600'];

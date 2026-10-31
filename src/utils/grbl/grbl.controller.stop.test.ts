@@ -126,11 +126,17 @@ const advanceToNextStatusReport = async (harness: GrblControllerHarness): Promis
 
 const getMachineX = (status: GrblResolvedStatus): number => status.machinePosition?.x ?? Number.NaN;
 
-const newPromiseTracker = (promise: Promise<void>): { isResolved: () => boolean } => {
+interface PromiseResolutionTracker {
+  isResolved: () => boolean;
+}
+
+const newPromiseTracker = (promise: Promise<void>): PromiseResolutionTracker => {
   let isResolved = false;
-  void promise.then((): void => {
+  const trackResolution = async (): Promise<void> => {
+    await promise;
     isResolved = true;
-  });
+  };
+  void trackResolution();
 
   return { isResolved: (): boolean => isResolved };
 };
