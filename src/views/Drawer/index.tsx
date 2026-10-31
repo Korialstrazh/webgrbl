@@ -12,6 +12,7 @@
 import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useOverlayFocus } from '../../utils/hooks/use.overlay.focus';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
 import styles from './styles.module.scss';
 
 interface DrawerProps {
@@ -36,7 +37,7 @@ export const Drawer = ({ isOpen, title, onClose, children }: DrawerProps): React
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      tabIndex={-1}
+      tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
       onKeyDown={handleOverlayKeyDown}
     >
       <h2 id={titleId} className={styles.title}>{title}</h2>

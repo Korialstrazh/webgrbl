@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { useTranslation } from 'react-i18next';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import styles from './styles.module.scss';
 
@@ -20,9 +20,9 @@ interface ComingSoonProps {
 }
 
 // jsdom does not enforce `inert`, so the wrapper also stops these events itself.
-const stopBlockedEvent = (event: MouseEvent | KeyboardEvent): void => {
-  event.stopPropagation();
-  event.preventDefault();
+const stopBlockedEvent = (blockedEvent: MouseEvent | KeyboardEvent): void => {
+  blockedEvent.stopPropagation();
+  blockedEvent.preventDefault();
 };
 
 export const ComingSoon = ({ description, children }: ComingSoonProps): ReactNode => {

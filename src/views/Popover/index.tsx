@@ -10,6 +10,7 @@
  */
 import type { ReactNode } from 'react';
 import { useOverlayFocus } from '../../utils/hooks/use.overlay.focus';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
 import styles from './styles.module.scss';
 
 interface PopoverProps {
@@ -33,7 +34,7 @@ export const Popover = ({ isOpen, onClose, anchorLabel, children }: PopoverProps
       className={styles.popover}
       role="dialog"
       aria-label={anchorLabel}
-      tabIndex={-1}
+      tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
       onKeyDown={handleOverlayKeyDown}
     >
       {children}

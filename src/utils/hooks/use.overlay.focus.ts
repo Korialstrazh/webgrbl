@@ -21,22 +21,27 @@ interface OverlayFocusResult {
   /** Goes on the overlay element so it can take focus and be searched for focusable controls. */
   overlayRef: RefObject<HTMLDivElement | null>;
   /** Goes on the overlay element's onKeyDown. */
-  handleOverlayKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
+  handleOverlayKeyDown: (keyEvent: KeyboardEvent<HTMLElement>) => void;
 }
 
-const isEscapeToHandle = (event: { key: string; repeat: boolean; isComposing: boolean }): boolean =>
-  event.key === OVERLAY_KEY.ESCAPE && !event.repeat && !event.isComposing;
+type EscapeCandidateKeyEvent = Pick<globalThis.KeyboardEvent, 'key' | 'repeat' | 'isComposing'>;
+
+const isEscapeToHandle = (keyEvent: EscapeCandidateKeyEvent): boolean =>
+  keyEvent.key === OVERLAY_KEY.ESCAPE && !keyEvent.repeat && !keyEvent.isComposing;
+
+const canTrapTabKey = (keyEvent: KeyboardEvent<HTMLElement>, isFocusTrapped: boolean): boolean =>
+  keyEvent.key === OVERLAY_KEY.TAB && isFocusTrapped;
 
 const getFocusableElements = (overlayElement: HTMLElement): HTMLElement[] =>
   Array.from(overlayElement.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
 
-const moveFocusInsideTrap = (event: KeyboardEvent<HTMLElement>, overlayElement: HTMLElement): void => {
+const moveFocusInsideTrap = (tabKeyEvent: KeyboardEvent<HTMLElement>, overlayElement: HTMLElement): void => {
   const focusableElements: HTMLElement[] = getFocusableElements(overlayElement);
   const firstElement: HTMLElement | undefined = focusableElements[0];
   const lastElement: HTMLElement | undefined = focusableElements[focusableElements.length - 1];
 
   if (!firstElement || !lastElement) {
-    event.preventDefault();
+    tabKeyEvent.preventDefault();
     overlayElement.focus();
 
     return;
@@ -44,14 +49,14 @@ const moveFocusInsideTrap = (event: KeyboardEvent<HTMLElement>, overlayElement: 
 
   const activeElement: Element | null = document.activeElement;
   const isLeavingBackwards: boolean =
-    event.shiftKey && (activeElement === firstElement || activeElement === overlayElement);
-  const isLeavingForwards: boolean = !event.shiftKey && activeElement === lastElement;
+    tabKeyEvent.shiftKey && (activeElement === firstElement || activeElement === overlayElement);
+  const isLeavingForwards: boolean = !tabKeyEvent.shiftKey && activeElement === lastElement;
 
   if (isLeavingBackwards) {
-    event.preventDefault();
+    tabKeyEvent.preventDefault();
     lastElement.focus();
   } else if (isLeavingForwards) {
-    event.preventDefault();
+    tabKeyEvent.preventDefault();
     firstElement.focus();
   }
 };
@@ -101,9 +106,9 @@ export const useOverlayFocus = (
     }
 
     // Focus can leave the overlay (a click on the bed), and Escape must still close it.
-    const handleDocumentKeyDown = (event: globalThis.KeyboardEvent): void => {
-      if (isEscapeToHandle(event)) {
-        event.stopImmediatePropagation();
+    const handleDocumentKeyDown = (documentKeyEvent: globalThis.KeyboardEvent): void => {
+      if (isEscapeToHandle(documentKeyEvent)) {
+        documentKeyEvent.stopImmediatePropagation();
         onCloseRef.current();
       }
     };
@@ -115,14 +120,14 @@ export const useOverlayFocus = (
     };
   }, [isOpen]);
 
-  const handleOverlayKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
-    if (isEscapeToHandle(event.nativeEvent)) {
+  const handleOverlayKeyDown = (keyEvent: KeyboardEvent<HTMLElement>): void => {
+    if (isEscapeToHandle(keyEvent.nativeEvent)) {
       // The global STOP hotkey must never see an Escape that closed an overlay.
-      event.stopPropagation();
-      event.nativeEvent.stopImmediatePropagation();
+      keyEvent.stopPropagation();
+      keyEvent.nativeEvent.stopImmediatePropagation();
       onClose();
-    } else if (event.key === OVERLAY_KEY.TAB && isFocusTrapped && overlayRef.current) {
-      moveFocusInsideTrap(event, overlayRef.current);
+    } else if (canTrapTabKey(keyEvent, isFocusTrapped) && overlayRef.current) {
+      moveFocusInsideTrap(keyEvent, overlayRef.current);
     }
   };
 

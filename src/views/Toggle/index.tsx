@@ -25,7 +25,7 @@ export const Toggle = ({ label, isChecked, onChange, isDisabled = false }: Toggl
       className={styles.input}
       checked={isChecked}
       disabled={isDisabled}
-      onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.checked)}
+      onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => onChange(changeEvent.target.checked)}
     />
     <span className={styles.label}>{label}</span>
   </label>

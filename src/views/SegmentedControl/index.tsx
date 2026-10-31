@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { KeyboardEvent, ReactNode } from 'react';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX, TAB_STOP_INDEX } from '../../utils/tab.index.constants';
 import type { SegmentedOption } from './interfaces/SegmentedOption';
 import styles from './styles.module.scss';
 
@@ -30,8 +31,6 @@ const PREVIOUS_KEYS: readonly string[] = [ARROW_LEFT_KEY, ARROW_UP_KEY];
 const NEXT_STEP = 1;
 const PREVIOUS_STEP = -1;
 const NO_STEP = 0;
-const FOCUSABLE_TAB_INDEX = 0;
-const NOT_FOCUSABLE_TAB_INDEX = -1;
 
 const getKeyStep = (key: string): number => {
   if (NEXT_KEYS.includes(key)) {
@@ -41,6 +40,11 @@ const getKeyStep = (key: string): number => {
   return PREVIOUS_KEYS.includes(key) ? PREVIOUS_STEP : NO_STEP;
 };
 
+const canMoveSelection = (isDisabled: boolean, step: number): boolean => !isDisabled && !!step;
+
+const getOptionClassName = (isSelected: boolean): string | undefined =>
+  isSelected ? [styles.option, styles.selected].join(' ') : styles.option;
+
 export const SegmentedControl = ({
   label,
   options,
@@ -48,17 +52,17 @@ export const SegmentedControl = ({
   onSelect,
   isDisabled = false,
 }: SegmentedControlProps): ReactNode => {
-  const handleOptionKeyDown = (event: KeyboardEvent<HTMLButtonElement>, optionIndex: number): void => {
-    const step: number = getKeyStep(event.key);
+  const handleOptionKeyDown = (keyboardEvent: KeyboardEvent<HTMLButtonElement>, optionIndex: number): void => {
+    const step: number = getKeyStep(keyboardEvent.key);
 
-    if (isDisabled || !step) {
+    if (!canMoveSelection(isDisabled, step)) {
       return;
     }
 
-    event.preventDefault();
+    keyboardEvent.preventDefault();
     const nextIndex: number = (optionIndex + step + options.length) % options.length;
     const nextOption: SegmentedOption | undefined = options[nextIndex];
-    const nextButton: Element | undefined = event.currentTarget.parentElement?.children[nextIndex];
+    const nextButton: Element | undefined = keyboardEvent.currentTarget.parentElement?.children[nextIndex];
 
     if (!nextOption) {
       return;
@@ -71,10 +75,15 @@ export const SegmentedControl = ({
     }
   };
 
+  // Without a selected option the group would have no tab stop, so the first option takes it.
+  const hasSelectedOption: boolean = options.some((option: SegmentedOption) => option.value === selectedValue);
+
   return (
     <div className={styles.segmentedControl} role="radiogroup" aria-label={label}>
       {options.map((option: SegmentedOption, optionIndex: number) => {
         const isSelected: boolean = option.value === selectedValue;
+        const isFirstOptionWithoutSelection: boolean = !hasSelectedOption && !optionIndex;
+        const isTabStop: boolean = isSelected || isFirstOptionWithoutSelection;
 
         return (
           <button
@@ -82,11 +91,13 @@ export const SegmentedControl = ({
             type="button"
             role="radio"
             aria-checked={isSelected}
-            className={[styles.option, isSelected ? styles.selected : ''].join(' ')}
-            tabIndex={isSelected ? FOCUSABLE_TAB_INDEX : NOT_FOCUSABLE_TAB_INDEX}
+            className={getOptionClassName(isSelected)}
+            tabIndex={isTabStop ? TAB_STOP_INDEX : SCRIPT_FOCUS_ONLY_TAB_INDEX}
             disabled={isDisabled}
             onClick={() => onSelect(option.value)}
-            onKeyDown={(event: KeyboardEvent<HTMLButtonElement>) => handleOptionKeyDown(event, optionIndex)}
+            onKeyDown={(keyboardEvent: KeyboardEvent<HTMLButtonElement>) => {
+              handleOptionKeyDown(keyboardEvent, optionIndex);
+            }}
           >
             {option.label}
           </button>

@@ -75,5 +75,5 @@ export const uiOverlayReducer = (
 type RootState = { [UI_OVERLAY_STATE_NAME]: UiOverlayState };
 
 export const selectIsAnyOverlayOpen = (state: RootState): boolean =>
-  state[UI_OVERLAY_STATE_NAME].openOverlayIds.length > 0;
+  !!state[UI_OVERLAY_STATE_NAME].openOverlayIds.length;
 // #endregion
