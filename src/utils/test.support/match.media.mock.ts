@@ -38,3 +38,9 @@ export const setMatchMediaMatches = (isWide: boolean): void => {
     }
   });
 };
+
+/** Forgets the answer and every subscriber, so one test cannot leak its layout into the next. */
+export const resetMatchMediaMock = (): void => {
+  isWideMatch = false;
+  listeners.clear();
+};

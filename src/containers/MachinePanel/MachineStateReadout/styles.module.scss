@@ -1,0 +1,62 @@
+.machineStateReadout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.state {
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid currentcolor;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-2);
+  font-family: var(--font-ui);
+  font-weight: 700;
+}
+
+.Idle {
+  color: var(--color-success);
+}
+
+.Run,
+.Jog,
+.Home {
+  color: var(--color-info);
+}
+
+.Hold,
+.Door,
+.Check,
+.Sleep {
+  color: var(--color-warning);
+}
+
+.Alarm {
+  color: var(--color-danger);
+}
+
+.unknown {
+  color: var(--color-text-muted);
+}
+
+.values {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+
+  dt {
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}

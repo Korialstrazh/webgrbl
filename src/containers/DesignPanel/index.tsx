@@ -1,5 +1,5 @@
 /**
- * The left region that will hold the design tools.
+ * The left region for the design tools: layers, objects and material. Shown but inert for now.
  *
  * @author michael.morosov
  *
@@ -11,6 +11,8 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { ComingSoon } from '../../views/ComingSoon';
+import { Panel } from '../../views/Panel';
 import styles from './styles.module.scss';
 
 export const DesignPanel = (): ReactNode => {
@@ -18,7 +20,21 @@ export const DesignPanel = (): ReactNode => {
 
   return (
     <aside className={styles.designPanel} aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}>
-      <h2 className={styles.title}>{t(DEFAULT.DESIGN_PANEL_TITLE)}</h2>
+      <Panel title={t(DEFAULT.DESIGN_LAYERS_TITLE)}>
+        <ComingSoon description={t(DEFAULT.DESIGN_LAYERS_DESCRIPTION)}>
+          <div className={styles.placeholder} />
+        </ComingSoon>
+      </Panel>
+      <Panel title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>
+        <ComingSoon description={t(DEFAULT.DESIGN_OBJECTS_DESCRIPTION)}>
+          <div className={styles.placeholder} />
+        </ComingSoon>
+      </Panel>
+      <Panel title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
+        <ComingSoon description={t(DEFAULT.DESIGN_MATERIAL_DESCRIPTION)}>
+          <div className={styles.placeholder} />
+        </ComingSoon>
+      </Panel>
     </aside>
   );
 };

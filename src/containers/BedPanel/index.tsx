@@ -1,5 +1,5 @@
 /**
- * The central region that will show the work bed.
+ * The central region that will show the work bed; the toasts are anchored to its top right.
  *
  * @author michael.morosov
  *
@@ -11,6 +11,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { ToastStack } from '../ToastStack';
 import styles from './styles.module.scss';
 
 export const BedPanel = (): ReactNode => {
@@ -19,6 +20,7 @@ export const BedPanel = (): ReactNode => {
   return (
     <main className={styles.bedPanel}>
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
+      <ToastStack />
     </main>
   );
 };

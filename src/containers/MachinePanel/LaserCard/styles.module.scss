@@ -1,0 +1,20 @@
+.laserCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.powerField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+}
+
+.powerSlider {
+  width: 100%;
+  min-height: var(--target-min);
+  accent-color: var(--color-accent);
+}

@@ -1,5 +1,5 @@
 /**
- * The right region with the machine status and controls; STOP sits at its bottom in a wide window.
+ * The right region: machine status, reset and unlock, the coming-soon cards and, in a wide window, STOP at the bottom.
  *
  * @author michael.morosov
  *
@@ -10,22 +10,37 @@
  */
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { MachineControlButtons } from '../MachineControlButtons';
-import { MachineStatusPanel } from '../MachineStatusPanel';
+import { Panel } from '../../views/Panel';
 import { StopButton } from '../StopButton';
+import { LaserCard } from './LaserCard';
+import { MachineResetUnlock } from './MachineResetUnlock';
+import { MachineStateReadout } from './MachineStateReadout';
+import { MoveCard } from './MoveCard';
+import { PreflightCard } from './PreflightCard';
+import { StartJobCard } from './StartJobCard';
 import styles from './styles.module.scss';
 
-export const MachinePanel = (): ReactNode => {
+interface MachinePanelProps {
+  /** Whether the window is wide; STOP lives here only then, otherwise in the sticky bar. */
+  isWide: boolean;
+}
+
+export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
   const { t } = useTranslation();
-  const isWide: boolean = useIsWideLayout();
 
   return (
     <aside className={styles.machinePanel} aria-label={t(DEFAULT.MACHINE_PANEL_TITLE)}>
-      <h2 className={styles.title}>{t(DEFAULT.MACHINE_PANEL_TITLE)}</h2>
-      <MachineStatusPanel />
-      <MachineControlButtons />
+      <div className={styles.cards}>
+        <Panel title={t(DEFAULT.MACHINE_STATUS_TITLE)}>
+          <MachineStateReadout />
+          <MachineResetUnlock />
+        </Panel>
+        <MoveCard />
+        <LaserCard />
+        <PreflightCard />
+        <StartJobCard />
+      </div>
       {isWide && (
         <div className={styles.stopArea}>
           <StopButton />

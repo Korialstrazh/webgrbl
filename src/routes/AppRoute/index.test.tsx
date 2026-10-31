@@ -1,13 +1,14 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { AppRoute } from '.';
-import { installMatchMediaMock, setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
+import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 import { newStore } from '../../utils/states/new.store';
 
 const APP_TITLE = 'webgrbl';
 const CONNECTION_PILL_PATTERN = /Disconnected/;
 const STOP_LABEL = 'Stop';
 const CONSOLE_TITLE = 'Console';
+const CONSOLE_TOGGLE_LABEL = 'Console';
 const DESIGN_PANEL_LABEL = 'Design';
 const MACHINE_PANEL_LABEL = 'Machine';
 const ONLY_STOP_COUNT = 1;
@@ -28,7 +29,6 @@ const getStopButtons = (): HTMLElement[] => screen.getAllByRole('button', { name
 
 describe(AppRoute.name, () => {
   beforeEach(() => {
-    installMatchMediaMock();
     setMatchMediaMatches(true);
   });
 
@@ -50,6 +50,7 @@ describe(AppRoute.name, () => {
 
   it('keeps the connection pill and the console working inside their regions', () => {
     renderAppRoute();
+    fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(within(getTopBar()).getByRole('button', { name: CONNECTION_PILL_PATTERN })).toBeInTheDocument();
     expect(within(screen.getByRole('contentinfo')).getByRole('heading', { name: CONSOLE_TITLE })).toBeInTheDocument();

@@ -1,0 +1,17 @@
+.moveCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.homeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.jogPad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}

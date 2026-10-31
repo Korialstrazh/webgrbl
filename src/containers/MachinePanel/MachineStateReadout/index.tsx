@@ -12,12 +12,12 @@ import type { TFunction } from 'i18next';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
-import type { GrblMachineState } from '../../utils/grbl/grbl.constants';
-import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
-import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
-import { DEFAULT } from '../../utils/localization/default.locales';
-import { selectMachineStatus } from '../../utils/states/machine.status.state';
+import { GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
+import type { GrblMachineState } from '../../../utils/grbl/grbl.constants';
+import type { GrblAxisPosition } from '../../../utils/grbl/interfaces/GrblAxisPosition';
+import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
+import { DEFAULT } from '../../../utils/localization/default.locales';
+import { selectMachineStatus } from '../../../utils/states/machine.status.state';
 import styles from './styles.module.scss';
 
 const MISSING_VALUE_TEXT = '-';
@@ -61,12 +61,12 @@ const getStateText = (status: GrblResolvedStatus | undefined, t: TFunction): str
 const getStateClassName = (status: GrblResolvedStatus | undefined): string =>
   [styles.state, status ? styles[status.machineState] : styles.unknown].join(' ');
 
-export const MachineStatusPanel = (): ReactNode => {
+export const MachineStateReadout = (): ReactNode => {
   const { t } = useTranslation();
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
 
   return (
-    <section className={styles.machineStatusPanel}>
+    <div className={styles.machineStateReadout}>
       <div className={getStateClassName(status)}>{getStateText(status, t)}</div>
       <dl className={styles.values}>
         <dt>{t(DEFAULT.MACHINE_STATUS_WORK_POSITION)}</dt>
@@ -78,6 +78,6 @@ export const MachineStatusPanel = (): ReactNode => {
         <dt>{t(DEFAULT.MACHINE_STATUS_POWER)}</dt>
         <dd>{getNumberText(status?.spindleSpeed)}</dd>
       </dl>
-    </section>
+    </div>
   );
 };

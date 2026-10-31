@@ -16,7 +16,6 @@ import { LeavePageGuard } from '../../containers/LeavePageGuard';
 import { MachinePanel } from '../../containers/MachinePanel';
 import { StatusStrip } from '../../containers/StatusStrip';
 import { StickyStopBar } from '../../containers/StickyStopBar';
-import { ToastStack } from '../../containers/ToastStack';
 import { TopBar } from '../../containers/TopBar';
 import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import styles from './styles.module.scss';
@@ -36,13 +35,12 @@ export const AppRoute = (): ReactNode => {
         <BedPanel />
       </div>
       <div className={[styles.area, styles.machineArea].join(' ')}>
-        <MachinePanel />
+        <MachinePanel isWide={isWide} />
       </div>
       <div className={[styles.area, styles.statusArea].join(' ')}>
         <StatusStrip />
       </div>
       {!isWide && <StickyStopBar />}
-      <ToastStack />
       <LeavePageGuard />
     </div>
   );

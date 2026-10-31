@@ -38,6 +38,13 @@ CONSOLE_REALTIME_SOFT_RESET;Soft reset
 CONSOLE_REALTIME_STATUS_QUERY;Status query
 CONSOLE_SHOW_STATUS_REPORTS;Show status reports
 CONSOLE_TITLE;Console
+CONSOLE_TOGGLE;Console
+DESIGN_LAYERS_DESCRIPTION;The layers of the design, with colour, speed, power and visibility per layer.
+DESIGN_LAYERS_TITLE;Layers
+DESIGN_MATERIAL_DESCRIPTION;The material on the bed and its ready-made speed and power settings.
+DESIGN_MATERIAL_TITLE;Material
+DESIGN_OBJECTS_DESCRIPTION;The shapes, text and images of the design, with their position and size.
+DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Design
 GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again.
 GRBL_ALARM_10;Emergency stop asserted - clear it and reset.
@@ -93,7 +100,34 @@ GRBL_ERROR_UNKNOWN;Unknown error.
 MACHINE_CONTROL_RESET;Reset
 MACHINE_CONTROL_STOP;Stop
 MACHINE_CONTROL_UNLOCK;Unlock
+MACHINE_JOG_DOWN;Jog down
+MACHINE_JOG_DOWN_LEFT;Jog down and left
+MACHINE_JOG_DOWN_RIGHT;Jog down and right
+MACHINE_JOG_LEFT;Jog left
+MACHINE_JOG_ORIGIN;Origin
+MACHINE_JOG_RIGHT;Jog right
+MACHINE_JOG_UP;Jog up
+MACHINE_JOG_UP_LEFT;Jog up and left
+MACHINE_JOG_UP_RIGHT;Jog up and right
+MACHINE_LASER_AIR_ASSIST;Air assist
+MACHINE_LASER_DESCRIPTION;Show where the laser will cut with a low-power pointer, or trace the outline of the job.
+MACHINE_LASER_FIRE;Hold to fire
+MACHINE_LASER_FRAME;Frame job
+MACHINE_LASER_POWER;Pointer power
+MACHINE_LASER_TITLE;Laser pointer
+MACHINE_MOVE_DESCRIPTION;Send the head home, set zero here, or jog it in steps from 0.1 to 50 mm.
+MACHINE_MOVE_HOME;Home
+MACHINE_MOVE_SET_ZERO;Set zero
+MACHINE_MOVE_STEP_LABEL;Step size
+MACHINE_MOVE_STEP_OPTION;{{distance}} mm
+MACHINE_MOVE_TITLE;Move
 MACHINE_PANEL_TITLE;Machine
+MACHINE_PREFLIGHT_DESCRIPTION;Checks the machine, the job and the material before the job starts.
+MACHINE_PREFLIGHT_RUN;Run pre-flight check
+MACHINE_PREFLIGHT_TITLE;Pre-flight check
+MACHINE_START_JOB;Start job
+MACHINE_START_JOB_DESCRIPTION;Starts the job once the pre-flight check has passed.
+MACHINE_START_JOB_TITLE;Job
 MACHINE_STATE_ALARM;Alarm
 MACHINE_STATE_CHECK;Check
 MACHINE_STATE_DOOR;Door
@@ -106,7 +140,12 @@ MACHINE_STATE_SLEEP;Sleep
 MACHINE_STATUS_FEED;Feed
 MACHINE_STATUS_MACHINE_POSITION;Machine position
 MACHINE_STATUS_POWER;Power
+MACHINE_STATUS_TITLE;Status
 MACHINE_STATUS_WORK_POSITION;Work position
+STATUS_STRIP_CURSOR;Cursor
+STATUS_STRIP_ESTIMATE;Estimate
+STATUS_STRIP_JOB_SIZE;Job size
+STATUS_STRIP_READOUTS_DESCRIPTION;The cursor position, the job size and the time estimate.
 STATUS_STRIP_TITLE;Status
 TOAST_CONNECT_TIMEOUT;No response from the controller - check the baud rate and that the laser is powered.
 TOAST_CONNECTED;Connected to {{firmware}} {{version}}
