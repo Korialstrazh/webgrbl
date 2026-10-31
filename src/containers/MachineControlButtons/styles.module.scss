@@ -14,17 +14,3 @@
     cursor: not-allowed;
   }
 }
-
-.stopButton {
-  padding: 1rem 2.5rem;
-  border: 0;
-  border-radius: 0.5rem;
-  background-color: #b91c1c;
-  color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: 700;
-
-  &:disabled {
-    background-color: #6b7280;
-  }
-}

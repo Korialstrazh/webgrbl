@@ -4,11 +4,10 @@ import { MachineControlButtons } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
 import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
 import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
-import { MachineResetRequested, MachineStatusReceived, MachineStopRequested } from '../../utils/states/machine.status.state';
+import { MachineResetRequested, MachineStatusReceived } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 
-const STOP_LABEL = 'Stop';
 const RESET_LABEL = 'Reset';
 const UNLOCK_LABEL = 'Unlock';
 
@@ -51,18 +50,16 @@ describe(MachineControlButtons.name, () => {
   it('disables every button while disconnected', () => {
     renderMachineControlButtons();
 
-    expect(screen.getByRole('button', { name: STOP_LABEL })).toBeDisabled();
     expect(screen.getByRole('button', { name: RESET_LABEL })).toBeDisabled();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeDisabled();
   });
 
-  it('enables stop and reset when connected, and unlock only in alarm', () => {
+  it('enables reset when connected, and unlock only in alarm', () => {
     const store: AppStore = renderMachineControlButtons();
 
     connect(store);
     receiveState(store, GRBL_MACHINE_STATE.IDLE);
 
-    expect(screen.getByRole('button', { name: STOP_LABEL })).toBeEnabled();
     expect(screen.getByRole('button', { name: RESET_LABEL })).toBeEnabled();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeDisabled();
 
@@ -71,15 +68,14 @@ describe(MachineControlButtons.name, () => {
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeEnabled();
   });
 
-  it('dispatches the stop request when stop is clicked', () => {
+  it('dispatches the reset request when reset is clicked', () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
     renderMachineControlButtons(store);
     connect(store);
-    fireEvent.click(screen.getByRole('button', { name: STOP_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: RESET_LABEL }));
 
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(MachineStopRequested));
-    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(MachineResetRequested));
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(MachineResetRequested));
   });
 });

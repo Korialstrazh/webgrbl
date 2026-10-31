@@ -1,0 +1,14 @@
+.statusStrip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface-1);
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+}

@@ -1,0 +1,15 @@
+.stickyStopBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface-2);
+
+  > * {
+    flex: 1;
+    max-width: 30rem;
+  }
+}

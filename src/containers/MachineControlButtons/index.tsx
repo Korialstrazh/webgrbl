@@ -1,5 +1,5 @@
 /**
- * Stop, reset and unlock buttons for the connected laser. Stop is always within reach while connected.
+ * Reset and unlock buttons for the connected laser.
  *
  * @author michael.morosov
  *
@@ -15,7 +15,6 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsConnected } from '../../utils/states/grbl.connection.state';
 import {
   MachineResetRequested,
-  MachineStopRequested,
   MachineUnlockRequested,
   selectIsMachineInAlarm,
 } from '../../utils/states/machine.status.state';
@@ -31,14 +30,6 @@ export const MachineControlButtons = (): ReactNode => {
 
   return (
     <div className={styles.machineControlButtons}>
-      <button
-        type="button"
-        className={[styles.button, styles.stopButton].join(' ')}
-        disabled={!isConnected}
-        onClick={() => dispatch(new MachineStopRequested())}
-      >
-        {t(DEFAULT.MACHINE_CONTROL_STOP)}
-      </button>
       <button
         type="button"
         className={styles.button}

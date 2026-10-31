@@ -1,5 +1,4 @@
-// The machine panel sits at the right edge, so the drawer stops short of it and STOP stays visible.
-$machine-panel-width: 22rem;
+@use '../../styles/layout' as layout;
 
 .drawer {
   position: fixed;
@@ -23,7 +22,7 @@ $machine-panel-width: 22rem;
 }
 
 .bedSide {
-  right: $machine-panel-width;
+  right: layout.$machine-panel-width;
   border-radius: var(--radius-xl) 0 0 var(--radius-xl);
 }
 

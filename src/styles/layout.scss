@@ -1,0 +1,14 @@
+/**
+ * Layout values shared by the workbench regions and the overlays that avoid them.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-10-31
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+
+// The machine panel sits at the right edge; overlays stop short of it so STOP stays visible.
+$machine-panel-width: 22rem;
+$design-panel-width: 17.5rem;
