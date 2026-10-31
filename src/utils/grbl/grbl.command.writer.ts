@@ -160,11 +160,6 @@ export class GrblCommandWriter {
     return this.sendQueue.isHeldForBanner();
   }
 
-  /** True while a line waits to be sent or for its answer. */
-  public hasUnansweredLines(): boolean {
-    return this.sendQueue.hasInFlightLines() || this.sendQueue.hasPendingLines();
-  }
-
   public hasInFlightLines(): boolean {
     return this.sendQueue.hasInFlightLines();
   }

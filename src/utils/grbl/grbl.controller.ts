@@ -2,7 +2,6 @@ import {
   GRBL_CONTROLLER_EVENT_KIND,
   GRBL_CONTROLLER_PHASE,
   GRBL_LINE_ORIGIN,
-  GRBL_MACHINE_STATE,
   GRBL_REALTIME_COMMAND,
   GRBL_STATUS_POLL_INTERVAL_MS,
   GRBL_UNLOCK_COMMAND,
@@ -22,7 +21,7 @@ import { GrblProgramStreamer } from './grbl.program.streamer';
 import { GrblResponseRouter } from './grbl.response.router';
 import { GrblStatusPoller } from './grbl.status.poller';
 import { GrblStatusTracker } from './grbl.status.tracker';
-import type { GrblControllerPhase, GrblMachineState } from './grbl.constants';
+import type { GrblControllerPhase } from './grbl.constants';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblFirmwareIdentity } from './interfaces/GrblFirmwareIdentity';
@@ -40,9 +39,6 @@ type GrblBannerListener = (identity: GrblFirmwareIdentity) => void;
 
 /** Cancels the running handshake with the given error. */
 type GrblHandshakeCanceller = (error: Error) => void;
-
-/** States in which closing the port without a stop would leave the machine moving. */
-const MOVING_MACHINE_STATES: readonly GrblMachineState[] = [GRBL_MACHINE_STATE.RUN, GRBL_MACHINE_STATE.JOG];
 
 /**
  * Drives one GRBL controller over a serial transport: handshake, status polling, console commands, program streaming
@@ -177,11 +173,13 @@ export class GrblController {
   }
 
   /**
-   * Stops polling, drops queued lines and closes the transport. A machine that runs or jogs, or still holds lines of a
-   * program or the queue, is stopped first, so closing the port never leaves it moving with nobody able to stop it.
+   * Stops polling, drops queued lines and closes the transport. While connected the stop sequence always runs first,
+   * so closing the port never leaves the machine moving with nobody able to stop it: the latest status may be stale,
+   * and a console move is acknowledged as soon as it is planned, so nothing in flight shows that it still runs. When
+   * the machine is idle the stop costs about one fast poll (feed hold gives Hold:0 at once, then the reset).
    */
   public async disconnect(): Promise<void> {
-    if (this.isStopNeededBeforeClose()) {
+    if (this.phase === GRBL_CONTROLLER_PHASE.CONNECTED) {
       await this.stopMachine();
     }
 
@@ -298,15 +296,6 @@ export class GrblController {
     for (const lineText of this.lineFramer.getCompleteLines(chunk)) {
       this.responseRouter.routeReceivedLine(lineText);
     }
-  }
-
-  /** A program that just started may still show Idle, so queued and running work counts as well as the state. */
-  private isStopNeededBeforeClose(): boolean {
-    const machineState: GrblMachineState | undefined = this.statusTracker.getLatestStatus()?.machineState;
-    const isMachineMoving: boolean = !!machineState && MOVING_MACHINE_STATES.includes(machineState);
-    const hasPendingWork: boolean = this.programStreamer.isProgramActive() || this.commandWriter.hasUnansweredLines();
-
-    return this.phase === GRBL_CONTROLLER_PHASE.CONNECTED && (isMachineMoving || hasPendingWork);
   }
 
   private emitEvent(event: GrblControllerEvent): void {
