@@ -134,7 +134,7 @@ const newDocumentText = (profiles: MachineProfile[]): string => JSON.stringify({
 } satisfies MachineProfilesDocument);
 
 describe(MachineProfilesDialog.name, () => {
-  it('creates, edits, saves and activates a profile', () => {
+  it('creates and saves a profile without activating it', () => {
     const store: AppStore = newStore();
 
     renderDialog(store);
@@ -146,17 +146,29 @@ describe(MachineProfilesDialog.name, () => {
       expect.objectContaining({ name: WORKSHOP_NAME, workAreaXMm: EDITED_WORK_AREA_X_MM }),
     ]);
     expect(selectActiveMachineProfile(store.getState())).toBeUndefined();
+  });
 
+  it('sets the selected profile active', () => {
+    const store: AppStore = newStore();
+
+    saveProfile(store, { name: WORKSHOP_NAME });
+    renderDialog(store);
     clickButton(SET_ACTIVE_LABEL);
 
     expect(selectActiveMachineProfile(store.getState())?.name).toBe(WORKSHOP_NAME);
     expect(screen.getByRole('menuitem', { name: ACTIVE_PATTERN })).toHaveTextContent(WORKSHOP_NAME);
+  });
 
+  it('edits and saves an existing profile in place', () => {
+    const store: AppStore = newStore();
+    const workshopProfile: MachineProfile = saveProfile(store, { name: WORKSHOP_NAME });
+
+    renderDialog(store);
     changeField(MAX_POWER_LABEL, EDITED_MAX_POWER_WATTS);
     clickButton(SAVE_LABEL);
 
     expect(selectMachineProfiles(store.getState())).toEqual([
-      expect.objectContaining({ name: WORKSHOP_NAME, maxPowerWatts: EDITED_MAX_POWER_WATTS }),
+      { ...workshopProfile, maxPowerWatts: EDITED_MAX_POWER_WATTS },
     ]);
   });
 
