@@ -23,3 +23,4 @@ export const GRID_STEP_MM = 10;
 export const MAJOR_GRID_STEP_MM = 50;
 export const RULER_LABEL_STEP_MM = 50;
 export const COORDINATE_DECIMAL_PLACES = 2;
+export const BED_MAX_TRAVEL_MM = 5000;

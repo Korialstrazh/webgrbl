@@ -5,6 +5,7 @@ APP_UPDATE_NEED_REFRESH;A new version of webgrbl is available.
 APP_UPDATE_OFFLINE_READY;webgrbl is ready to work offline.
 APP_UPDATE_RELOAD;Reload
 BED_ARIA_HEAD;Laser head at X {{x}}, Y {{y}} (machine coordinates)
+BED_ARIA_HEAD_OUTSIDE;Laser head at X {{x}}, Y {{y}} (machine coordinates), outside the bed
 BED_ARIA_LABEL;Machine bed, {{width}} by {{height}} mm
 BED_ARIA_WORK_ORIGIN;Work zero at X {{x}}, Y {{y}} (machine coordinates)
 BED_NO_MACHINE;Connect a machine to see its bed

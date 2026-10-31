@@ -8,12 +8,15 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
+import { getBedHeadMarker } from '../../utils/bed/get.bed.head.marker';
 import { getCoordinateText } from '../../utils/bed/get.coordinate.text';
 import { getGridLinePath } from '../../utils/bed/get.grid.line.path';
 import { getRulerLabelPositions } from '../../utils/bed/get.ruler.label.positions';
+import type { BedHeadMarker } from '../../utils/bed/interfaces/BedHeadMarker';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
 import { DEFAULT } from '../../utils/localization/default.locales';
@@ -46,8 +49,13 @@ const getAriaLabel = (t: TFunction, props: BedViewProps): string => {
   ];
 
   if (headPosition) {
+    const isOutsideBed: boolean = getBedHeadMarker(headPosition, dimensions).isOutsideBed;
+
     sentences.push(
-      t(DEFAULT.BED_ARIA_HEAD, { x: getCoordinateText(headPosition.x), y: getCoordinateText(headPosition.y) }),
+      t(isOutsideBed ? DEFAULT.BED_ARIA_HEAD_OUTSIDE : DEFAULT.BED_ARIA_HEAD, {
+        x: getCoordinateText(headPosition.x),
+        y: getCoordinateText(headPosition.y),
+      }),
     );
   }
 
@@ -63,13 +71,18 @@ const getAriaLabel = (t: TFunction, props: BedViewProps): string => {
   return sentences.join(ARIA_SENTENCE_SEPARATOR);
 };
 
-const getScreenTransform = (position: GrblAxisPosition, heightMm: number): string =>
-  `translate(${position.x} ${heightMm - position.y})`;
+const getScreenTransform = (xMm: number, yMm: number, heightMm: number): string =>
+  `translate(${xMm} ${heightMm - yMm})`;
 
 export const BedView = (props: BedViewProps): ReactNode => {
   const { t } = useTranslation();
   const { dimensions, headPosition, workOriginPosition, placeholderLabel } = props;
   const { widthMm, heightMm } = dimensions;
+  const minorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, false), [widthMm, heightMm]);
+  const majorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, true), [widthMm, heightMm]);
+  const topLabelPositions: number[] = useMemo(() => getRulerLabelPositions(widthMm), [widthMm]);
+  const leftLabelPositions: number[] = useMemo(() => getRulerLabelPositions(heightMm), [heightMm]);
+  const headMarker: BedHeadMarker | undefined = headPosition && getBedHeadMarker(headPosition, dimensions);
 
   return (
     <svg
@@ -79,9 +92,9 @@ export const BedView = (props: BedViewProps): ReactNode => {
       aria-label={getAriaLabel(t, props)}
     >
       <rect className={styles.surface} x={0} y={0} width={widthMm} height={heightMm} />
-      <path className={styles.minorGrid} d={getGridLinePath(widthMm, heightMm, false)} />
-      <path className={styles.majorGrid} d={getGridLinePath(widthMm, heightMm, true)} />
-      {getRulerLabelPositions(widthMm).map((positionMm: number) => (
+      <path className={styles.minorGrid} d={minorGridPath} />
+      <path className={styles.majorGrid} d={majorGridPath} />
+      {topLabelPositions.map((positionMm: number) => (
         <text
           key={`top-${positionMm}`}
           className={styles.rulerLabel}
@@ -92,7 +105,7 @@ export const BedView = (props: BedViewProps): ReactNode => {
           {positionMm}
         </text>
       ))}
-      {getRulerLabelPositions(heightMm).map((positionMm: number) => (
+      {leftLabelPositions.map((positionMm: number) => (
         <text
           key={`left-${positionMm}`}
           className={styles.rulerLabel}
@@ -106,15 +119,16 @@ export const BedView = (props: BedViewProps): ReactNode => {
       {workOriginPosition && (
         <circle
           className={styles.workOrigin}
-          transform={getScreenTransform(workOriginPosition, heightMm)}
+          transform={getScreenTransform(workOriginPosition.x, workOriginPosition.y, heightMm)}
           r={WORK_ORIGIN_MARKER_RADIUS_MM}
         />
       )}
-      {headPosition && (
+      {headMarker && (
         <g
-          className={styles.head}
+          className={headMarker.isOutsideBed ? [styles.head, styles.outsideBed].join(' ') : styles.head}
           data-testid={BED_HEAD_TEST_ID}
-          transform={getScreenTransform(headPosition, heightMm)}
+          data-outside-bed={headMarker.isOutsideBed}
+          transform={getScreenTransform(headMarker.xMm, headMarker.yMm, heightMm)}
         >
           <path d={`M${-CROSSHAIR_ARM_MM} 0H${CROSSHAIR_ARM_MM}M0 ${-CROSSHAIR_ARM_MM}V${CROSSHAIR_ARM_MM}`} />
         </g>

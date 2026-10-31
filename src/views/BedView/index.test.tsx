@@ -51,4 +51,25 @@ describe(BedView.name, () => {
 
     expect(screen.getByText(PLACEHOLDER_TEXT)).toBeInTheDocument();
   });
+
+  it('keeps a head left of the bed visible at the edge in the outside style', () => {
+    renderBed({ headPosition: { x: -50, y: 20, z: 0 } });
+
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(0 280)');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('data-outside-bed', 'true');
+    expect(screen.getByRole('img', { name: /outside the bed/ })).toBeInTheDocument();
+  });
+
+  it('clamps a head beyond the far corner to the bed edge', () => {
+    renderBed({ headPosition: { x: 450, y: 350, z: 0 } });
+
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(400 0)');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('data-outside-bed', 'true');
+  });
+
+  it('uses the normal style for a head inside the bed', () => {
+    renderBed({ headPosition: HEAD_POSITION });
+
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('data-outside-bed', 'false');
+  });
 });

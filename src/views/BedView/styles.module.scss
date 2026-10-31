@@ -50,3 +50,7 @@
   text-anchor: middle;
   dominant-baseline: middle;
 }
+
+.outsideBed path {
+  stroke-dasharray: 3 3;
+}

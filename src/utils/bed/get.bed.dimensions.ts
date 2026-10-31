@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import {
+  BED_MAX_TRAVEL_MM,
   BED_PLACEHOLDER_KIND,
   DEFAULT_BED_SIZE_MM,
   GRBL_SETTING_X_MAX_TRAVEL,
@@ -16,7 +17,8 @@ import {
 } from './bed.constants';
 import type { BedDimensions } from './interfaces/BedDimensions';
 
-const isValidTravel = (travelMm: number): boolean => Number.isFinite(travelMm) && travelMm > 0;
+const isValidTravel = (travelMm: number): boolean =>
+  Number.isFinite(travelMm) && travelMm > 0 && travelMm <= BED_MAX_TRAVEL_MM;
 
 export const getBedDimensions = (settings: Record<number, string>, isConnected: boolean): BedDimensions => {
   if (!isConnected) {
