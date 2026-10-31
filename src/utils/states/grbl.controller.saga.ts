@@ -41,6 +41,7 @@ import {
   selectBaudRate,
   selectSelectedPortId,
 } from './grbl.connection.state';
+import { submitGrblConsoleCommand } from './grbl.console.command.saga';
 import { ConsoleCommandSubmitted } from './grbl.console.state';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
@@ -159,13 +160,9 @@ function* runGrblMachineCommand(machineCommand: () => Promise<void> | void): Gen
   }
 }
 
-function* submitConsoleCommand(controller: GrblController, action: ConsoleCommandSubmitted): Generator {
-  yield call(runGrblMachineCommand, (): void => controller.sendConsoleCommand(action.payload.commandText));
-}
-
 function* handleGrblControllerCommands(controller: GrblController): Generator {
   yield all([
-    takeEvery(ConsoleCommandSubmitted.type, submitConsoleCommand, controller),
+    takeEvery(ConsoleCommandSubmitted.type, submitGrblConsoleCommand, controller),
     takeEvery(MachineStopRequested.type, runGrblMachineCommand, (): Promise<void> => controller.stopMachine()),
     takeEvery(MachineResetRequested.type, runGrblMachineCommand, (): Promise<void> => controller.resetMachine()),
     takeEvery(MachineUnlockRequested.type, runGrblMachineCommand, (): void => controller.unlockMachine()),

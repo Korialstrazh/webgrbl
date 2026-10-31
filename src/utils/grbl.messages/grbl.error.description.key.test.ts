@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { describe, expect, it } from 'vitest';
+import { NON_ASCII_LINE_ERROR_CODE } from '../grbl/grbl.constants';
 import { DEFAULT } from '../localization/default.locales';
 import { getGrblErrorDescriptionKey } from './grbl.error.description.key';
 
@@ -18,7 +19,7 @@ const KNOWN_ERROR_CODES: number[] = Array.from(
   { length: LAST_ERROR_CODE - FIRST_ERROR_CODE + 1 },
   (_unused: unknown, index: number) => FIRST_ERROR_CODE + index,
 );
-const UNKNOWN_ERROR_CODES: number[] = [0, LAST_ERROR_CODE + 1, 99, -1];
+const UNKNOWN_ERROR_CODES: number[] = [0, LAST_ERROR_CODE + 1, 99, -2];
 const SAMPLE_ERROR_CODE = 20;
 
 describe(getGrblErrorDescriptionKey.name, () => {
@@ -32,5 +33,9 @@ describe(getGrblErrorDescriptionKey.name, () => {
 
   it.each(UNKNOWN_ERROR_CODES)('maps unknown code %i to the unknown key', (code: number) => {
     expect(getGrblErrorDescriptionKey(code)).toBe(DEFAULT.GRBL_ERROR_UNKNOWN);
+  });
+
+  it('maps the client-side non-ASCII line code to its own key', () => {
+    expect(getGrblErrorDescriptionKey(NON_ASCII_LINE_ERROR_CODE)).toBe(DEFAULT.GRBL_ERROR_NON_ASCII_LINE);
   });
 });

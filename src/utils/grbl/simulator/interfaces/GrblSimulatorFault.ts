@@ -10,9 +10,11 @@
  */
 import type { GrblSimulatorAlarmFault } from './GrblSimulatorAlarmFault';
 import type { GrblSimulatorErrorOnLineFault } from './GrblSimulatorErrorOnLineFault';
+import type { GrblSimulatorSelfResetFault } from './GrblSimulatorSelfResetFault';
 import type { GrblSimulatorStopRespondingFault } from './GrblSimulatorStopRespondingFault';
 
 export type GrblSimulatorFault =
   | GrblSimulatorErrorOnLineFault
   | GrblSimulatorAlarmFault
-  | GrblSimulatorStopRespondingFault;
+  | GrblSimulatorStopRespondingFault
+  | GrblSimulatorSelfResetFault;

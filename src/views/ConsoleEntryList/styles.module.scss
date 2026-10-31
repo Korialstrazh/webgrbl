@@ -1,0 +1,41 @@
+.consoleEntryList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+}
+
+.entry {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.time {
+  color: #6b7280;
+}
+
+.prefix {
+  min-width: 0.75rem;
+}
+
+.text {
+  overflow-wrap: anywhere;
+}
+
+.sent,
+.realtime {
+  color: #93c5fd;
+}
+
+.received {
+  color: #d1d5db;
+}
+
+.info {
+  color: #a7f3d0;
+}
+
+.error {
+  color: #fecaca;
+}

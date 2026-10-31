@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { GRBL_CONNECTION_STATUS, GRBL_HOLD_SUBSTATE, GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
+import type { GrblConnectionStatus } from '../grbl/grbl.constants';
 import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
@@ -53,6 +54,14 @@ export class MachineUnlockRequested extends Action {
 }
 // #endregion
 
+// #region Connection statuses
+/** Without a connection no status arrives, so the last one would show a stale state such as Run. */
+const CLEARED_STATUS_CONNECTION_STATUSES: readonly GrblConnectionStatus[] = [
+  GRBL_CONNECTION_STATUS.DISCONNECTED,
+  GRBL_CONNECTION_STATUS.LOST,
+];
+// #endregion
+
 // #region Initial state
 const INITIAL_MACHINE_STATUS_STATE: MachineStatusState = {
   status: undefined,
@@ -68,7 +77,7 @@ export const machineStatusReducer = (
   case MachineStatusReceived.type:
     return { ...state, status: (action as MachineStatusReceived).payload.status };
   case ConnectionStatusChanged.type:
-    return (action as ConnectionStatusChanged).payload.connectionStatus === GRBL_CONNECTION_STATUS.DISCONNECTED
+    return CLEARED_STATUS_CONNECTION_STATUSES.includes((action as ConnectionStatusChanged).payload.connectionStatus)
       ? { ...state, status: undefined }
       : state;
   default:

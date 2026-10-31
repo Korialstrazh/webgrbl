@@ -4,6 +4,7 @@ import { GrblCommandWipedError } from './grbl.command.wiped.error';
 import { GrblConnectionClosedError } from './grbl.connection.closed.error';
 import { GrblControlLineExchange } from './grbl.control.line.exchange';
 import { GrblControllerBusyError } from './grbl.controller.busy.error';
+import { getNonAsciiProgramLineErrors } from './grbl.program.non.ascii.line.errors';
 import { getProgramQueuedLines } from './grbl.program.queued.lines';
 import type { GrblCheckModeContext } from './interfaces/GrblCheckModeContext';
 import type { GrblProgramLineError } from './interfaces/GrblProgramLineError';
@@ -12,6 +13,19 @@ import type { GrblProgramRun } from './interfaces/GrblProgramRun';
 import type { GrblProgramStreamerHost } from './interfaces/GrblProgramStreamerHost';
 import type { GrblProgramStreamOptions } from './interfaces/GrblProgramStreamOptions';
 import type { GrblQueuedLine } from './interfaces/GrblQueuedLine';
+
+/** With stop-on-error on, a program with a line that may not be sent is refused before any line of it is sent. */
+const isProgramRefusedBeforeSending = (
+  isStopOnErrorEnabled: boolean,
+  firstUnsendableLineError: GrblProgramLineError | undefined,
+): firstUnsendableLineError is GrblProgramLineError => isStopOnErrorEnabled && !!firstUnsendableLineError;
+
+/** Line errors in the order of their lines, as the lines refused before sending join the errors GRBL answered. */
+const getLineErrorsInLineOrder = (lineErrors: GrblProgramLineError[]): GrblProgramLineError[] =>
+  [...lineErrors].sort(
+    (firstError: GrblProgramLineError, secondError: GrblProgramLineError): number =>
+      firstError.lineNumber - secondError.lineNumber,
+  );
 
 /**
  * Streams one program at a time through the shared send queue (console commands typed meanwhile share its buffer
@@ -63,11 +77,6 @@ export class GrblProgramStreamer {
     } finally {
       this.isProgramRunning = false;
     }
-  }
-
-  /** True from the start of a stream or check until its promise settles. */
-  public isProgramActive(): boolean {
-    return this.isProgramRunning;
   }
 
   /** Counts an ok for a program or check line; the program completes with the answer to its last line. */
@@ -192,17 +201,30 @@ export class GrblProgramStreamer {
     isStopOnErrorEnabled: boolean,
     isCheckRun: boolean,
   ): Promise<GrblProgramResult> {
+    const nonAsciiLineErrors: GrblProgramLineError[] = getNonAsciiProgramLineErrors(programLines);
+    const [firstNonAsciiLineError] = nonAsciiLineErrors;
+
+    if (isProgramRefusedBeforeSending(isStopOnErrorEnabled, firstNonAsciiLineError)) {
+      this.host.emitEvent({ kind: GRBL_CONTROLLER_EVENT_KIND.PROGRAM_STOPPED_ON_ERROR, ...firstNonAsciiLineError });
+
+      return Promise.resolve({ isCompleted: false, lineErrors: [firstNonAsciiLineError] });
+    }
+
+    if (!isCheckRun) {
+      this.emitProgramLineErrors(nonAsciiLineErrors);
+    }
+
     const queuedLines: GrblQueuedLine[] = getProgramQueuedLines(programLines);
 
     if (!queuedLines.length) {
-      return Promise.resolve({ isCompleted: true, lineErrors: [] });
+      return Promise.resolve({ isCompleted: true, lineErrors: nonAsciiLineErrors });
     }
 
     return new Promise((resolveRun: (result: GrblProgramResult) => void): void => {
       this.activeRun = {
         sentLineCount: queuedLines.length,
         answeredLineCount: 0,
-        lineErrors: [],
+        lineErrors: [...nonAsciiLineErrors],
         isStopOnErrorEnabled,
         isCheckRun,
         isStoppingOnError: false,
@@ -243,7 +265,19 @@ export class GrblProgramStreamer {
     }
 
     this.activeRun = undefined;
-    run.resolveRun({ isCompleted, lineErrors: run.lineErrors });
+    run.resolveRun({ isCompleted, lineErrors: getLineErrorsInLineOrder(run.lineErrors) });
+  }
+
+  /** Lines refused before sending are reported like the lines GRBL answered with an error. */
+  private emitProgramLineErrors(lineErrors: GrblProgramLineError[]): void {
+    for (const { lineText, errorCode } of lineErrors) {
+      this.host.emitEvent({
+        kind: GRBL_CONTROLLER_EVENT_KIND.GRBL_ERROR,
+        code: errorCode,
+        lineText,
+        origin: GRBL_LINE_ORIGIN.PROGRAM,
+      });
+    }
   }
 
   private newCheckModeContext(): GrblCheckModeContext {

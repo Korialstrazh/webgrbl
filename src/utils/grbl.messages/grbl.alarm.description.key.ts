@@ -10,20 +10,24 @@
  */
 import { DEFAULT } from '../localization/default.locales';
 
-const FIRST_KNOWN_ALARM_CODE = 1;
-const LAST_KNOWN_ALARM_CODE = 10;
+/** Description keys are named GRBL_ALARM_<code>, for example GRBL_ALARM_9. */
+const ALARM_DESCRIPTION_KEY_PATTERN = /^GRBL_ALARM_(\d+)$/;
 
-const buildAlarmDescriptionKeyByCode = (): ReadonlyMap<number, string> => {
-  const keyByCode = new Map<number, string>();
+const newAlarmDescriptionKeyByCode = (): ReadonlyMap<number, string> => {
+  const keyByCode: Map<number, string> = new Map<number, string>();
 
-  for (let code = FIRST_KNOWN_ALARM_CODE; code <= LAST_KNOWN_ALARM_CODE; code += 1) {
-    keyByCode.set(code, DEFAULT[`GRBL_ALARM_${code}` as keyof typeof DEFAULT]);
+  for (const [localisationKey, descriptionKey] of Object.entries(DEFAULT)) {
+    const codeMatch: RegExpExecArray | null = ALARM_DESCRIPTION_KEY_PATTERN.exec(localisationKey);
+
+    if (codeMatch) {
+      keyByCode.set(Number(codeMatch[1]), descriptionKey);
+    }
   }
 
   return keyByCode;
 };
 
-const ALARM_DESCRIPTION_KEY_BY_CODE: ReadonlyMap<number, string> = buildAlarmDescriptionKeyByCode();
+const ALARM_DESCRIPTION_KEY_BY_CODE: ReadonlyMap<number, string> = newAlarmDescriptionKeyByCode();
 
 export const getGrblAlarmDescriptionKey = (code: number): string =>
   ALARM_DESCRIPTION_KEY_BY_CODE.get(code) ?? DEFAULT.GRBL_ALARM_UNKNOWN;

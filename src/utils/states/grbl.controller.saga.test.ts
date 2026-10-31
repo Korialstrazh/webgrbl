@@ -56,6 +56,8 @@ import { selectToasts } from './toast.state';
 const SIMULATOR_FIRMWARE_NAME = 'Grbl';
 const SIMULATOR_FIRMWARE_VERSION = '1.1h';
 const CONSOLE_COMMAND = 'G0X1';
+/** U+00DA would reach GRBL as C3 9A, and 0x9A is a realtime laser power override. */
+const NON_ASCII_CONSOLE_COMMAND = 'G0X\u00da';
 const OK_TEXT = 'ok';
 /** 300 mm at 600 mm/min takes 30 s, far longer than any test runs. */
 const LONG_MOVE = 'G1X300F600';
@@ -228,6 +230,22 @@ describe(watchGrblController.name, () => {
     ]);
   });
 
+  it('a console command with a non-ASCII character is not sent and adds a console error entry', async () => {
+    store = newStore(newTestRig().dependencies);
+    await connectStore(store);
+
+    store.dispatch(new ConsoleCommandSubmitted({ commandText: NON_ASCII_CONSOLE_COMMAND }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+    expect(getLastConsoleEntries(store, 1)).toMatchObject([{
+      direction: GRBL_CONSOLE_VIEW_DIRECTION.ERROR,
+      messageKey: DEFAULT.CONSOLE_NON_ASCII_REJECTED,
+    }]);
+    expect(selectConsoleEntries(store.getState())).not.toContainEqual(
+      expect.objectContaining({ direction: GRBL_CONSOLE_VIEW_DIRECTION.SENT, text: NON_ASCII_CONSOLE_COMMAND }),
+    );
+  });
+
   it('stop request during a move ends without alarm', async () => {
     store = newStore(newTestRig().dependencies);
     await connectStore(store);
@@ -254,6 +272,20 @@ describe(watchGrblController.name, () => {
     expect(getToast(store, DEFAULT.TOAST_GRBL_ALARM)).toMatchObject({
       severity: TOAST_SEVERITY.ERROR,
       messageParameters: { code: ALARM_CODE, description: DEFAULT.GRBL_ALARM_1 },
+    });
+  });
+
+  it('a reset the controller did by itself shows the controller-reset warning toast', async () => {
+    const rig: GrblControllerSagaTestRig = newTestRig();
+    store = newStore(rig.dependencies);
+    await connectStore(store);
+
+    getLastTransport(rig).getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.SELF_RESET });
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+    expect(getToast(store, DEFAULT.TOAST_CONTROLLER_RESET)).toMatchObject({
+      severity: TOAST_SEVERITY.WARNING,
+      messageParameters: {},
     });
   });
 

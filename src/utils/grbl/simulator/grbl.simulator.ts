@@ -14,7 +14,7 @@ import {
   GRBL_SIMULATOR_LINE_ENDING,
   GRBL_SIMULATOR_LINE_FEED_BYTE,
   GRBL_SIMULATOR_MESSAGE,
-  GRBL_SIMULATOR_MOTION_PHASE,
+  GRBL_SIMULATOR_MOTION_ABORTING_PHASES,
   GRBL_SIMULATOR_ORIGIN,
   GRBL_SIMULATOR_RESPONSE_PREFIX,
 } from './grbl.simulator.constants';
@@ -32,14 +32,6 @@ import type { GrblSimulatorMotionPhase } from './grbl.simulator.constants';
 import type { GrblSimulatorFault } from './interfaces/GrblSimulatorFault';
 import type { GrblSimulatorLineExecutorHost } from './interfaces/GrblSimulatorLineExecutorHost';
 import type { GrblSimulatorModalState } from './interfaces/GrblSimulatorModalState';
-
-/** Motion phases in which a soft reset loses steps, so GRBL raises ALARM:3. */
-const MOTION_ABORTING_PHASES: readonly GrblSimulatorMotionPhase[] = [
-  GRBL_SIMULATOR_MOTION_PHASE.RUN,
-  GRBL_SIMULATOR_MOTION_PHASE.JOG,
-  GRBL_SIMULATOR_MOTION_PHASE.JOG_CANCELLING,
-  GRBL_SIMULATOR_MOTION_PHASE.HOLD_DECELERATING,
-];
 
 /**
  * GRBL 1.1 stand-in for tests and the "Simulated laser": a 127-byte receive buffer, realtime commands acted on at
@@ -122,6 +114,9 @@ export class GrblSimulator {
       this.isAlarmLocked = true;
       this.emitLines(`${GRBL_SIMULATOR_RESPONSE_PREFIX.ALARM}${fault.alarmCode}`);
       break;
+    case GRBL_SIMULATOR_FAULT_KIND.SELF_RESET:
+      this.executeSoftReset();
+      break;
     case GRBL_SIMULATOR_FAULT_KIND.STOP_RESPONDING:
       this.isOutputSilenced = true;
       break;
@@ -169,7 +164,7 @@ export class GrblSimulator {
 
   /** Soft reset: flushes planner and receive buffer, keeps the position, raises ALARM:3 if motion was cut off. */
   private executeSoftReset(): void {
-    const isMotionAborted: boolean = MOTION_ABORTING_PHASES.includes(this.motion.getMotionPhase());
+    const isMotionAborted: boolean = GRBL_SIMULATOR_MOTION_ABORTING_PHASES.includes(this.motion.getMotionPhase());
 
     this.motion.stopMotion();
     this.modalState = newGrblSimulatorModalState(this.motion.getPosition(), this.modalState.workCoordinateOffset);

@@ -1,9 +1,8 @@
-import { GRBL_REALTIME_COMMAND, GRBL_RESET_BANNER_TIMEOUT_MS } from './grbl.constants';
+import { GRBL_CONTROLLER_EVENT_KIND, GRBL_REALTIME_COMMAND, GRBL_RESET_BANNER_TIMEOUT_MS } from './grbl.constants';
 import { runGrblStopSequence } from './grbl.stop.sequence';
 import type { GrblRealtimeCommand } from './grbl.constants';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblMachineControlsHost } from './interfaces/GrblMachineControlsHost';
-import type { GrblResolvedStatus } from './interfaces/GrblResolvedStatus';
 import type { GrblStopSequenceContext } from './interfaces/GrblStopSequenceContext';
 
 /** Ends the hold wait of a running stop at once. */
@@ -69,17 +68,16 @@ export class GrblMachineControls {
     }
   }
 
-  /** Counts a banner the controller printed; the banner wait ends once no banner is expected any more. */
+  /**
+   * Counts a banner the controller printed while the queue waits for one; the banner wait ends once no banner is
+   * expected any more. Any other banner while connected means the controller reset itself (see
+   * handleControllerReset).
+   */
   public handleReceivedBanner(): void {
-    if (!this.host.commandWriter.isQueueHeldForBanner()) {
-      return;
-    }
-
-    this.host.commandWriter.releaseQueueAfterBanner();
-
-    if (!this.host.commandWriter.isQueueHeldForBanner()) {
-      this.clearBannerWaitTimer();
-      this.host.handleBannerWaitEnded();
+    if (this.host.commandWriter.isQueueHeldForBanner()) {
+      this.countAwaitedBanner();
+    } else if (this.host.isConnected()) {
+      this.handleControllerReset();
     }
   }
 
@@ -87,6 +85,33 @@ export class GrblMachineControls {
   public releaseMachineControls(): void {
     this.holdWaitCanceller?.();
     this.clearBannerWaitTimer();
+  }
+
+  /**
+   * GRBL prints its banner after every reset, also one the app did not cause (homing failure, its reset button, a
+   * brown-out). The reset flushed its receive buffer, so the lines in flight will never be answered: they are
+   * dropped, so later answers pair with later lines, and running work ends. A running stop skips the rest of its
+   * hold wait, as the machine no longer moves.
+   */
+  private handleControllerReset(): void {
+    this.holdWaitCanceller?.();
+    this.host.commandWriter.dropAllLines();
+    this.host.handleMachineReset();
+    this.host.emitEvent({ kind: GRBL_CONTROLLER_EVENT_KIND.CONTROLLER_RESET });
+  }
+
+  /**
+   * Banners cannot be told apart, so an unexpected banner during the wait counts as an expected one. That releases
+   * the queue at most one banner early, and the late banner then arrives while the queue is not held, so it is
+   * handled as a controller reset and drops whatever was sent meanwhile: answers never pair with the wrong line.
+   */
+  private countAwaitedBanner(): void {
+    this.host.commandWriter.releaseQueueAfterBanner();
+
+    if (!this.host.commandWriter.isQueueHeldForBanner()) {
+      this.clearBannerWaitTimer();
+      this.host.handleBannerWaitEnded();
+    }
   }
 
   /** Each reset restarts the wait, so the timeout counts from the latest reset. */
@@ -117,11 +142,10 @@ export class GrblMachineControls {
   }
 
   private newStopSequenceContext(): GrblStopSequenceContext {
-    const { commandWriter, statusPoller, statusTracker } = this.host;
+    const { commandWriter, statusPoller } = this.host;
 
     return {
       clearPendingLines: (): void => commandWriter.clearPendingLines(),
-      getLatestStatus: (): GrblResolvedStatus | undefined => statusTracker.getLatestStatus(),
       writeRealtimeCommand: (command: GrblRealtimeCommand): void => void commandWriter.writeRealtimeCommand(command),
       getUnansweredStatusQueryCount: (): number => commandWriter.getUnansweredStatusQueryCount(),
       setStatusPollInterval: (intervalMs: number): void => {

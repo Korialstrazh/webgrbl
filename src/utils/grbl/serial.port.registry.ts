@@ -27,7 +27,7 @@ export const SERIAL_PORT_REGISTRY = {
       return { portId: knownPortId, usbVendorId, usbProductId };
     }
 
-    const portId = `${SERIAL_PORT_ID_PREFIX}${portIdsByPort.size + 1}`;
+    const portId: string = `${SERIAL_PORT_ID_PREFIX}${portIdsByPort.size + 1}`;
 
     portIdsByPort.set(port, portId);
     portsById.set(portId, port);

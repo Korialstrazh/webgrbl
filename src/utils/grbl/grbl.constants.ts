@@ -61,8 +61,17 @@ export const GRBL_LINE_COMMENT_PATTERN = /;.*$|\([^)]*\)/g;
 export const GRBL_WHITESPACE_PATTERN = /\s+/g;
 /** First character of a GRBL system command such as a setting write. */
 export const GRBL_SYSTEM_COMMAND_PREFIX = '$';
-/** Commands that write the controller EEPROM and so must be sent one at a time (G10L2 also covers G10L20). */
-export const GRBL_EEPROM_COMMAND_PATTERN = /^(\$(\d+|N[01]|RST|I)=|G10L2|G28\.1|G30\.1)/i;
+/**
+ * Commands that write the controller EEPROM and so must be sent one at a time. System commands only count at the
+ * start of the line; G10L2 (which also covers G10L20), G28.1 and G30.1 count anywhere, as program lines often put
+ * other words or a line number before them.
+ */
+export const GRBL_EEPROM_COMMAND_PATTERN = /^\$(\d+|N[01]|RST|I)=|G10L2|G28\.1|G30\.1/i;
+/**
+ * Matches a prepared line made only of printable ASCII (0x20 to 0x7E). Any other character either takes more bytes
+ * than counted for the controller receive buffer (UTF-8) or is a GRBL realtime command (every byte from 0x80 on).
+ */
+export const GRBL_PRINTABLE_ASCII_LINE_PATTERN = /^[\x20-\x7E]*$/;
 /** Line break written after every queued line. */
 export const GRBL_LINE_TERMINATOR = '\n';
 /** System command that reports the firmware version and build options. */
@@ -73,6 +82,14 @@ export const GRBL_SETTINGS_COMMAND = '$$';
 export const GRBL_UNLOCK_COMMAND = '$X';
 /** System command that enters check mode, or leaves it with a reset. */
 export const GRBL_CHECK_MODE_COMMAND = '$C';
+// #endregion
+
+// #region Client-side line errors
+/**
+ * Error code of a program line the app refused to send because it holds a character outside printable ASCII. It is
+ * negative so that it never matches an error code of any firmware.
+ */
+export const NON_ASCII_LINE_ERROR_CODE = -1;
 // #endregion
 
 // #region Response patterns
@@ -228,6 +245,7 @@ export const GRBL_CONTROLLER_EVENT_KIND = {
   CONNECTION_LOST: 'connection-lost',
   NOT_RESPONDING: 'not-responding',
   PROGRAM_STOPPED_ON_ERROR: 'program-stopped-on-error',
+  CONTROLLER_RESET: 'controller-reset',
 } as const;
 
 export type GrblControllerEventKind = (typeof GRBL_CONTROLLER_EVENT_KIND)[keyof typeof GRBL_CONTROLLER_EVENT_KIND];

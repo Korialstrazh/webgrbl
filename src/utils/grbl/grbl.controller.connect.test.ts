@@ -20,6 +20,7 @@ import { GRBL_SIMULATOR_DEFAULT_SETTINGS } from './simulator/grbl.simulator.defa
 import { ANSWER_SETTLE_MS } from './test.support/grbl.answer.settle';
 import { getConsoleEntries } from './test.support/grbl.console.entries';
 import { newGrblControllerHarness } from './test.support/grbl.controller.harness';
+import { disconnectGrblHarness } from './test.support/grbl.harness.disconnect';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblConsoleEntry } from './interfaces/GrblConsoleEntry';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
@@ -135,7 +136,7 @@ describe(GrblController.name, () => {
       buildInfoLines: ['[VER:1.1h.20190825:]', OPTIONS_LINE],
     });
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('connect ignores a second banner and queries $I and $$ once', async () => {
@@ -150,7 +151,7 @@ describe(GrblController.name, () => {
     expect(writtenTexts.filter((text: string) => text === SETTINGS_LINE)).toHaveLength(1);
     expect(harness.transport.getSimulator().getReceivedLineCount()).toBe(2);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('connect emits the reset, private lines and their answers as console entries', async () => {
@@ -174,7 +175,7 @@ describe(GrblController.name, () => {
       expect.objectContaining({ direction: GRBL_CONSOLE_DIRECTION.RECEIVED, text: OPTIONS_LINE }),
     );
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('connect times out after 10000 ms with reason timeout when the controller is silent', async () => {
@@ -250,7 +251,7 @@ describe(GrblController.name, () => {
     const rejection: Promise<void> = expect(connection).rejects.toBeInstanceOf(GrblConnectionClosedError);
     await vi.advanceTimersByTimeAsync(BANNER_WAIT_ELAPSED_MS);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
 
     await rejection;
     expect(closeSpy).toHaveBeenCalledOnce();
@@ -278,7 +279,7 @@ describe(GrblController.name, () => {
     const closeSpy = vi.spyOn(harness.transport, 'close');
     const firstConnection: Promise<GrblConnectionInfo> = harness.controller.connect();
     const firstRejection: Promise<void> = expect(firstConnection).rejects.toBeInstanceOf(GrblConnectionClosedError);
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
     await firstRejection;
 
     await connectHarness(harness);
@@ -289,7 +290,7 @@ describe(GrblController.name, () => {
     expect(getStatusReports(harness.events).length).toBeGreaterThan(POLL_COUNT);
     expect(harness.events).not.toContainEqual({ kind: GRBL_CONTROLLER_EVENT_KIND.CONNECTION_LOST });
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('console command issued during the handshake is dropped, not written or queued', async () => {
@@ -304,7 +305,7 @@ describe(GrblController.name, () => {
 
     expect(getWrittenTexts(writeSpy)).not.toContain(EARLY_CONSOLE_LINE);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('connect while connecting or connected rejects with GrblControllerBusyError, port untouched', async () => {
@@ -326,7 +327,7 @@ describe(GrblController.name, () => {
 
     expect(getStatusReports(harness.events)).toHaveLength(1);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('polls status every 250 ms and emits resolved status reports', async () => {
@@ -356,7 +357,7 @@ describe(GrblController.name, () => {
     expect(statusEntries[1]).toMatchObject({ direction: GRBL_CONSOLE_DIRECTION.RECEIVED, realtimeCommand: undefined });
     expect(statusEntries).toHaveLength(POLL_COUNT * 2);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('disconnect stops polling, closes the transport and leaves no timer behind', async () => {
@@ -364,7 +365,7 @@ describe(GrblController.name, () => {
     const closeSpy = vi.spyOn(harness.transport, 'close');
     await connectHarness(harness);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
     harness.events.length = 0;
     await vi.advanceTimersByTimeAsync(GRBL_STATUS_POLL_INTERVAL_MS * POLL_COUNT);
 
@@ -411,7 +412,7 @@ describe(GrblController.name, () => {
       },
     ]);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('console command that is only a comment sends nothing', async () => {
@@ -426,7 +427,7 @@ describe(GrblController.name, () => {
     expect(writeSpy).not.toHaveBeenCalled();
     expect(harness.events).toEqual([]);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('error reply emits grbl-error with the line text', async () => {
@@ -444,7 +445,7 @@ describe(GrblController.name, () => {
       origin: GRBL_LINE_ORIGIN.CONSOLE,
     });
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('alarm line emits grbl-alarm with its code', async () => {
@@ -458,6 +459,6 @@ describe(GrblController.name, () => {
 
     expect(harness.events).toContainEqual({ kind: GRBL_CONTROLLER_EVENT_KIND.GRBL_ALARM, code: alarmCode });
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 });

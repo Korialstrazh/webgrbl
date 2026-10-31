@@ -71,17 +71,17 @@ Some features touch several areas. Their articles cross-link each other, and the
 
 | ID | Feature | Scope | Status |
 | --- | --- | --- | --- |
-| LG-CONN-01 | [[lg-connection#LG-CONN-01 Connection panel & protocol selection\|Connection panel & protocol selection]] | core | not started |
-| LG-CONN-02 | [[lg-connection#LG-CONN-02 Serial port selection & baud rate\|Serial port selection & baud rate]] | core | not started |
+| LG-CONN-01 | [[lg-connection#LG-CONN-01 Connection panel & protocol selection\|Connection panel & protocol selection]] | core | done |
+| LG-CONN-02 | [[lg-connection#LG-CONN-02 Serial port selection & baud rate\|Serial port selection & baud rate]] | core | done |
 | LG-CONN-03 | [[lg-connection#LG-CONN-03 Serial driver variants & CH340 read workaround\|Serial driver variants & CH340 read workaround]] | skip | not started |
 | LG-CONN-04 | [[lg-connection#LG-CONN-04 Telnet (raw TCP) transport\|Telnet (raw TCP) transport]] | later | not started |
 | LG-CONN-05 | [[lg-connection#LG-CONN-05 WebSocket transport (LaserWebESP8266)\|WebSocket transport (LaserWebESP8266)]] | later | not started |
-| LG-CONN-06 | [[lg-connection#LG-CONN-06 Built-in Grbl emulator\|Built-in Grbl emulator]] | core | not started |
-| LG-CONN-07 | [[lg-connection#LG-CONN-07 Connect / disconnect flow\|Connect / disconnect flow]] | core | not started |
-| LG-CONN-08 | [[lg-connection#LG-CONN-08 Reset on connect (soft / hard)\|Reset on connect (soft / hard)]] | core | not started |
-| LG-CONN-09 | [[lg-connection#LG-CONN-09 Handshake: welcome & vendor message parsing\|Handshake: welcome & vendor message parsing]] | core | not started |
-| LG-CONN-10 | [[lg-connection#LG-CONN-10 Post-connect configuration & machine-info query\|Post-connect configuration & machine-info query]] | core | not started |
-| LG-CONN-11 | [[lg-connection#LG-CONN-11 Connection timeout, failed-connection help & connection-lost behaviour\|Connection timeout, failed-connection help & connection-lost behaviour]] | core | not started |
+| LG-CONN-06 | [[lg-connection#LG-CONN-06 Built-in Grbl emulator\|Built-in Grbl emulator]] | core | done |
+| LG-CONN-07 | [[lg-connection#LG-CONN-07 Connect / disconnect flow\|Connect / disconnect flow]] | core | done |
+| LG-CONN-08 | [[lg-connection#LG-CONN-08 Reset on connect (soft / hard)\|Reset on connect (soft / hard)]] | core | done |
+| LG-CONN-09 | [[lg-connection#LG-CONN-09 Handshake: welcome & vendor message parsing\|Handshake: welcome & vendor message parsing]] | core | done |
+| LG-CONN-10 | [[lg-connection#LG-CONN-10 Post-connect configuration & machine-info query\|Post-connect configuration & machine-info query]] | core | done |
+| LG-CONN-11 | [[lg-connection#LG-CONN-11 Connection timeout, failed-connection help & connection-lost behaviour\|Connection timeout, failed-connection help & connection-lost behaviour]] | core | done |
 | LG-CONN-12 | [[lg-connection#LG-CONN-12 Firmware type (core) selection\|Firmware type (core) selection]] | core | not started |
 | LG-CONN-13 | [[lg-connection#LG-CONN-13 Smoothieware core\|Smoothieware core]] | later | not started |
 | LG-CONN-14 | [[lg-connection#LG-CONN-14 Marlin core\|Marlin core]] | later | not started |
@@ -98,14 +98,14 @@ Some features touch several areas. Their articles cross-link each other, and the
 
 | ID | Feature | Scope | Status |
 | --- | --- | --- | --- |
-| LG-STRM-01 | [[lg-streaming#LG-STRM-01 G-code line model (`GrblCommand`)\|G-code line model (`GrblCommand`)]] | core | not started |
-| LG-STRM-02 | [[lg-streaming#LG-STRM-02 Buffered streaming (character counting) & buffer size\|Buffered streaming (character counting) & buffer size]] | core | not started |
+| LG-STRM-01 | [[lg-streaming#LG-STRM-01 G-code line model (`GrblCommand`)\|G-code line model (`GrblCommand`)]] | core | done |
+| LG-STRM-02 | [[lg-streaming#LG-STRM-02 Buffered streaming (character counting) & buffer size\|Buffered streaming (character counting) & buffer size]] | core | done |
 | LG-STRM-03 | [[lg-streaming#LG-STRM-03 Synchronous & RepeatOnError streaming modes\|Synchronous & RepeatOnError streaming modes]] | core | not started |
-| LG-STRM-04 | [[lg-streaming#LG-STRM-04 EEPROM-write synchronisation\|EEPROM-write synchronisation]] | core | not started |
+| LG-STRM-04 | [[lg-streaming#LG-STRM-04 EEPROM-write synchronisation\|EEPROM-write synchronisation]] | core | done |
 | LG-STRM-05 | [[lg-streaming#LG-STRM-05 Threading mode (poll rate & loop timing)\|Threading mode (poll rate & loop timing)]] | core | not started |
-| LG-STRM-06 | [[lg-streaming#LG-STRM-06 Status polling & report parsing\|Status polling & report parsing]] | core | not started |
-| LG-STRM-07 | [[lg-streaming#LG-STRM-07 Machine states & status display\|Machine states & status display]] | core | not started |
-| LG-STRM-08 | [[lg-streaming#LG-STRM-08 Realtime commands: feed hold, resume, soft reset, safety door\|Realtime commands: feed hold, resume, soft reset, safety door]] | core | not started |
+| LG-STRM-06 | [[lg-streaming#LG-STRM-06 Status polling & report parsing\|Status polling & report parsing]] | core | done |
+| LG-STRM-07 | [[lg-streaming#LG-STRM-07 Machine states & status display\|Machine states & status display]] | core | done |
+| LG-STRM-08 | [[lg-streaming#LG-STRM-08 Realtime commands: feed hold, resume, soft reset, safety door\|Realtime commands: feed hold, resume, soft reset, safety door]] | core | improved |
 | LG-STRM-09 | [[lg-streaming#LG-STRM-09 Realtime overrides\|Realtime overrides]] | core | not started |
 | LG-STRM-10 | [[lg-streaming#LG-STRM-10 Job start (Send to machine)\|Job start (Send to machine)]] | core | not started |
 | LG-STRM-11 | [[lg-streaming#LG-STRM-11 Safety countdown\|Safety countdown]] | core | not started |
@@ -116,10 +116,10 @@ Some features touch several areas. Their articles cross-link each other, and the
 | LG-STRM-16 | [[lg-streaming#LG-STRM-16 Run from position\|Run from position]] | core | not started |
 | LG-STRM-17 | [[lg-streaming#LG-STRM-17 Resume interrupted job\|Resume interrupted job]] | core | not started |
 | LG-STRM-18 | [[lg-streaming#LG-STRM-18 Issue detector (job fault detection)\|Issue detector (job fault detection)]] | core | not started |
-| LG-STRM-19 | [[lg-streaming#LG-STRM-19 Error & alarm handling while streaming\|Error & alarm handling while streaming]] | core | not started |
+| LG-STRM-19 | [[lg-streaming#LG-STRM-19 Error & alarm handling while streaming\|Error & alarm handling while streaming]] | core | improved |
 | LG-STRM-20 | [[lg-streaming#LG-STRM-20 Buffer-stuck recovery & broken-ok handling\|Buffer-stuck recovery & broken-ok handling]] | core | not started |
-| LG-STRM-21 | [[lg-streaming#LG-STRM-21 Command log / console\|Command log / console]] | core | not started |
-| LG-STRM-22 | [[lg-streaming#LG-STRM-22 Manual command entry & history\|Manual command entry & history]] | core | not started |
+| LG-STRM-21 | [[lg-streaming#LG-STRM-21 Command log / console\|Command log / console]] | core | done |
+| LG-STRM-22 | [[lg-streaming#LG-STRM-22 Manual command entry & history\|Manual command entry & history]] | core | done |
 | LG-STRM-23 | [[lg-streaming#LG-STRM-23 Pending-queue model for side requests\|Pending-queue model for side requests]] | core | not started |
 | LG-STRM-24 | [[lg-streaming#LG-STRM-24 Automatic cooling cycles\|Automatic cooling cycles]] | later | not started |
 | LG-STRM-25 | [[lg-streaming#LG-STRM-25 Syncro start across instances\|Syncro start across instances]] | skip | not started |

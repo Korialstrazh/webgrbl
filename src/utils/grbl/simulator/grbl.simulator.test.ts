@@ -37,6 +37,7 @@ const FAULT_ALARM_CODE = 1;
 const HOLD_DECELERATING_STATE = 'Hold:1';
 const HOLD_COMPLETE_STATE = 'Hold:0';
 const ORIGIN_POSITION = '0.000,0.000,0.000';
+const IDLE_AT_X10_POSITION = '10.000,0.000,0.000';
 const RAPID_TO_X1 = 'G0X1';
 const IDLE_AT_ORIGIN = '<Idle|MPos:0.000,0.000,0.000|FS:0,0>';
 const IDLE_AT_X10 = '<Idle|MPos:10.000,0.000,0.000|FS:0,0>';
@@ -380,6 +381,20 @@ describe(GrblSimulator.name, () => {
 
     expect(takeOutputLines(harness)).toEqual([ERROR_LOCKED]);
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('self-reset fault flushes the RX buffer and prints the banner, keeping the position', async () => {
+    const harness: SimulatorHarness = newSimulatorHarness();
+    sendLine(harness.simulator, SHORT_MOVE);
+    await vi.advanceTimersByTimeAsync(SHORT_MOVE_MS + TICK_MS);
+    takeOutputLines(harness);
+
+    harness.simulator.injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.SELF_RESET });
+
+    expect(takeOutputLines(harness)).toEqual([BANNER]);
+    expect(harness.simulator.getReceivedLineCount()).toBe(0);
+    expect(getReportedState(harness)).toBe(GRBL_MACHINE_STATE.IDLE);
+    expect(getReportedMachinePosition(harness)).toBe(IDLE_AT_X10_POSITION);
   });
 
   it('stop-responding fault silences all output', () => {

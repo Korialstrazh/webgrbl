@@ -6,6 +6,7 @@
 
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -13,12 +14,26 @@
   border-bottom: 1px solid #1f2937;
 }
 
+.heading {
+  display: flex;
+  flex-direction: column;
+}
+
 .title {
   margin: 0;
   font-size: 1.25rem;
 }
 
+.tagline {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #9ca3af;
+}
+
 .workspace {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  gap: 1rem;
   padding: 1.5rem;
 }

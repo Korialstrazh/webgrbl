@@ -7,7 +7,6 @@ import {
   GRBL_STATUS_POLL_INTERVAL_MS,
   GRBL_STOP_STATUS_POLL_INTERVAL_MS,
 } from './grbl.constants';
-import type { GrblRealtimeCommand } from './grbl.constants';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblResolvedStatus } from './interfaces/GrblResolvedStatus';
 import type { GrblStopSequenceContext } from './interfaces/GrblStopSequenceContext';
@@ -20,13 +19,6 @@ const isMachineMoving = (status: GrblResolvedStatus): boolean =>
   status.machineState === GRBL_MACHINE_STATE.RUN ||
   status.machineState === GRBL_MACHINE_STATE.JOG ||
   isHoldDecelerating(status);
-
-/**
- * GRBL cancels a jog on a feed hold as well, but 0x85 is the jog's own stop. A feed hold is safe in every other
- * state: it holds a run, gives Hold:0 at once when idle, and is ignored in Alarm.
- */
-const getStopRealtimeCommand = (status: GrblResolvedStatus | undefined): GrblRealtimeCommand =>
-  status?.machineState === GRBL_MACHINE_STATE.JOG ? GRBL_REALTIME_COMMAND.JOG_CANCEL : GRBL_REALTIME_COMMAND.FEED_HOLD;
 
 /**
  * Resolves on the first status report answering a query written after the stop byte that shows the machine not
@@ -61,9 +53,12 @@ const waitForMachineAtRest = (context: GrblStopSequenceContext, earlierReportCou
 
 /**
  * Stops the machine as fast as possible without losing its position. The latest status may be up to one poll
- * interval old, so it is not trusted to say the machine stands still: unsent lines are dropped, a feed hold (or jog
- * cancel while jogging) is always written, and the sequence waits until a fresh status report shows the machine not
- * moving, polling faster meanwhile, at most 2000 ms. Then it soft-resets and resolves once the reset byte is written.
+ * interval old, so it is not trusted to say the machine stands still, nor what it does: unsent lines are dropped and a
+ * feed hold is always written. In GRBL 1.1 a feed hold holds a run, cancels a jog, gives Hold:0 at once when idle and
+ * is ignored in Alarm, so it is right whatever the machine really does; jog cancel (0x85) chosen from a stale Jog
+ * status would leave a G1 move that started meanwhile running. The sequence then waits until a fresh status report
+ * shows the machine not moving, polling faster meanwhile, at most 2000 ms. Then it soft-resets and resolves once the
+ * reset byte is written.
  *
  * @author michael.morosov
  *
@@ -74,7 +69,7 @@ const waitForMachineAtRest = (context: GrblStopSequenceContext, earlierReportCou
  */
 export const runGrblStopSequence = async (context: GrblStopSequenceContext): Promise<void> => {
   context.clearPendingLines();
-  context.writeRealtimeCommand(getStopRealtimeCommand(context.getLatestStatus()));
+  context.writeRealtimeCommand(GRBL_REALTIME_COMMAND.FEED_HOLD);
 
   const earlierReportCount: number = context.getUnansweredStatusQueryCount();
 

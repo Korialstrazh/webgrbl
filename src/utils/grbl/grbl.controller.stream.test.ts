@@ -20,6 +20,7 @@ import { GRBL_SIMULATOR_BANNER, GRBL_SIMULATOR_FAULT_KIND } from './simulator/gr
 import { ANSWER_SETTLE_MS } from './test.support/grbl.answer.settle';
 import { getConsoleEntries } from './test.support/grbl.console.entries';
 import { newGrblControllerHarness } from './test.support/grbl.controller.harness';
+import { disconnectGrblHarness } from './test.support/grbl.harness.disconnect';
 import type { GrblControllerEventKind } from './grbl.constants';
 import type { GrblConsoleEntry } from './interfaces/GrblConsoleEntry';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
@@ -127,13 +128,6 @@ const getSentTextsAfterReceived = (events: GrblControllerEvent[], receivedText: 
     .map((entry: GrblConsoleEntry) => entry.text);
 };
 
-/** The latest status may still say Run, so disconnect() stops the machine first; its stop needs fake time to finish. */
-const disconnectAfterStop = async (harness: GrblControllerHarness): Promise<void> => {
-  const disconnect: Promise<void> = harness.controller.disconnect();
-  await vi.advanceTimersByTimeAsync(STOP_SETTLE_MS);
-  await disconnect;
-};
-
 const getLastReceivedTimestamp = (events: GrblControllerEvent[]): number => {
   const receivedEntries: GrblConsoleEntry[] = getConsoleEntries(events).filter(
     (entry: GrblConsoleEntry) => entry.direction === GRBL_CONSOLE_DIRECTION.RECEIVED,
@@ -166,7 +160,7 @@ describe(GrblController.name, () => {
       HANDSHAKE_LINE_COUNT + STREAMED_PROGRAM_LINE_COUNT,
     );
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -187,7 +181,7 @@ describe(GrblController.name, () => {
       HANDSHAKE_LINE_COUNT + STREAMED_PROGRAM_LINE_COUNT + 1,
     );
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('eeprom write in a program waits for an empty buffer', async () => {
@@ -219,7 +213,7 @@ describe(GrblController.name, () => {
     await expect(stream).resolves.toEqual({ isCompleted: true, lineErrors: [] });
     expect(acknowledgedCountAtEepromWrite).toBe(earlierLines.length);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('stops on error line 5 and reports line number, text and code', async () => {
@@ -254,7 +248,7 @@ describe(GrblController.name, () => {
 
     expect(harness.transport.getSimulator().getReceivedLineCount()).toBe(0);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -307,7 +301,7 @@ describe(GrblController.name, () => {
     ]);
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.PROGRAM_STOPPED_ON_ERROR)).toEqual([]);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('checkProgram returns the errors of bad lines with original line numbers and leaves check mode', async () => {
@@ -333,7 +327,7 @@ describe(GrblController.name, () => {
     expect(harness.controller.getLatestStatus()?.machineState).toBe(GRBL_MACHINE_STATE.IDLE);
     expect(getReceivedTexts(harness.events)).toContain(OK_TEXT);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -355,7 +349,7 @@ describe(GrblController.name, () => {
 
     expect(harness.controller.getLatestStatus()?.machinePosition?.x).toBe(0);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('checkProgram while the machine runs rejects with GrblCheckModeRefusedError, no program line sent', async () => {
@@ -373,7 +367,7 @@ describe(GrblController.name, () => {
     expect(getSentTexts(harness.events)).toEqual([LONG_MOVE, CHECK_MODE_COMMAND]);
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.GRBL_ERROR)).toEqual([]);
 
-    await disconnectAfterStop(harness);
+    await disconnectGrblHarness(harness);
   });
 
   it('a reset during a check rejects it with GrblCommandWipedError and leaves no line queued', async () => {
@@ -393,7 +387,7 @@ describe(GrblController.name, () => {
     expect(harness.transport.getSimulator().getReceivedLineCount()).toBe(0);
     expect(harness.controller.getLatestStatus()?.machineState).toBe(GRBL_MACHINE_STATE.IDLE);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('a second program while one runs rejects with GrblControllerBusyError', async () => {
@@ -411,7 +405,7 @@ describe(GrblController.name, () => {
     await vi.advanceTimersByTimeAsync(PROGRAM_SETTLE_MS);
     await expect(stream).resolves.toEqual({ isCompleted: true, lineErrors: [] });
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('streaming while disconnected rejects with GrblConnectionClosedError', async () => {
@@ -430,7 +424,7 @@ describe(GrblController.name, () => {
     ).resolves.toEqual({ isCompleted: true, lineErrors: [] });
     expect(harness.transport.getSimulator().getReceivedLineCount()).toBe(HANDSHAKE_LINE_COUNT);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('a user stop during a program resolves it with isCompleted false', async () => {
@@ -447,7 +441,7 @@ describe(GrblController.name, () => {
     await expect(stream).resolves.toEqual({ isCompleted: false, lineErrors: [] });
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.GRBL_ALARM)).toEqual([]);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('an alarm during a program clears the queue and resolves it with isCompleted false', async () => {
@@ -468,7 +462,7 @@ describe(GrblController.name, () => {
     expect(getReceivedTexts(harness.events).slice(-1)).toEqual([OK_TEXT]);
     expect(harness.transport.getSimulator().getReceivedLineCount()).toBe(1);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('emits not-responding after 10000 ms of silence with lines in flight', async () => {
@@ -493,7 +487,7 @@ describe(GrblController.name, () => {
 
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.NOT_RESPONDING)).toHaveLength(1);
 
-    await disconnectAfterStop(harness);
+    await disconnectGrblHarness(harness);
     await expect(stream).resolves.toEqual({ isCompleted: false, lineErrors: [] });
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -514,7 +508,7 @@ describe(GrblController.name, () => {
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.NOT_RESPONDING)).toHaveLength(1);
     await expect(stream).resolves.toEqual({ isCompleted: false, lineErrors: [] });
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -532,7 +526,7 @@ describe(GrblController.name, () => {
 
     expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.NOT_RESPONDING)).toEqual([]);
 
-    await disconnectAfterStop(harness);
+    await disconnectGrblHarness(harness);
   });
 
   it('connection loss during a program emits connection-lost and resolves isCompleted false', async () => {

@@ -1,0 +1,41 @@
+.toastStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.info {
+  background-color: #1e3a5f;
+  color: #dbeafe;
+}
+
+.warning {
+  background-color: #78350f;
+  color: #fde68a;
+}
+
+.error {
+  background-color: #7f1d1d;
+  color: #fecaca;
+}
+
+.message {
+  flex: 1;
+}
+
+.repeatCount {
+  font-weight: 700;
+}
+
+.dismissButton {
+  cursor: pointer;
+}

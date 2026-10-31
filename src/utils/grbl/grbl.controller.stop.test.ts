@@ -3,10 +3,12 @@ import {
   GRBL_CONSOLE_DIRECTION,
   GRBL_CONTROLLER_EVENT_KIND,
   GRBL_DEFAULT_RX_BUFFER_BYTES,
+  GRBL_FEED_HOLD_BYTE,
   GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
   GRBL_MACHINE_STATE,
   GRBL_REALTIME_COMMAND,
   GRBL_RESET_BANNER_TIMEOUT_MS,
+  GRBL_SOFT_RESET_BYTE,
   GRBL_STATUS_POLL_INTERVAL_MS,
   GRBL_UNLOCK_COMMAND,
 } from './grbl.constants';
@@ -15,6 +17,7 @@ import { GRBL_SIMULATOR_BANNER, GRBL_SIMULATOR_FAULT_KIND } from './simulator/gr
 import { ANSWER_SETTLE_MS } from './test.support/grbl.answer.settle';
 import { getConsoleEntries } from './test.support/grbl.console.entries';
 import { newGrblControllerHarness } from './test.support/grbl.controller.harness';
+import { disconnectGrblHarness } from './test.support/grbl.harness.disconnect';
 import type { GrblControllerEventKind, GrblRealtimeCommand } from './grbl.constants';
 import type { GrblConsoleEntry } from './interfaces/GrblConsoleEntry';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
@@ -25,6 +28,14 @@ import type { GrblControllerHarness } from './test.support/GrblControllerHarness
 const LONG_MOVE = 'G1X300F600';
 const LONG_MOVE_END_X = 300;
 const JOG_MOVE = '$J=G91X50F1000';
+/** 2 mm at 600 mm/min takes 200 ms. */
+const SHORT_JOG_MOVE = '$J=G91X2F600';
+const SHORT_JOG_END_X = 2;
+/** The short jog starts 150 ms after a poll, so the next poll, 250 ms after the first, sees it. */
+const BEFORE_SHORT_JOG_MS = 150;
+const SHORT_JOG_SEEN_BY_POLL_MS = 150;
+/** The jog ends 200 ms after it started, well before the poll after the one that saw it. */
+const SHORT_JOG_FINISHED_MS = 80;
 /** Time for the move to start and a status poll to report it. */
 const MOVE_RUNNING_MS = 500;
 /** Time for the move to start, well before the next status poll. */
@@ -45,6 +56,7 @@ const STREAMED_MOVES: readonly string[] = [LONG_MOVE, 'G1X2F600', 'G1X3F600', 'G
 /** The handshake sends $I and $$, so the simulator counts the first console line as line 3. */
 const HANDSHAKE_LINE_COUNT = 2;
 const FAILING_LINE_ERROR_CODE = 20;
+const TRANSPORT_CLOSE_LOG_ENTRY = 'close';
 
 const newConnectedHarness = async (): Promise<GrblControllerHarness> => {
   const harness: GrblControllerHarness = newGrblControllerHarness();
@@ -99,20 +111,32 @@ const getLatestStatus = (harness: GrblControllerHarness): GrblResolvedStatus => 
   return status;
 };
 
-const getMachineX = (status: GrblResolvedStatus): number => status.machinePosition?.x ?? Number.NaN;
+/** Advances fake time 1 ms at a time until the next status report arrives, so later steps know the poll phase. */
+const advanceToNextStatusReport = async (harness: GrblControllerHarness): Promise<void> => {
+  const statusReportCount: number = getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.STATUS_REPORT).length;
 
-/** The latest status may still say Run, so disconnect() stops the machine first; its stop needs fake time to finish. */
-const disconnectAfterStop = async (harness: GrblControllerHarness): Promise<void> => {
-  const disconnect: Promise<void> = harness.controller.disconnect();
-  await vi.advanceTimersByTimeAsync(STOP_SETTLE_MS);
-  await disconnect;
+  for (let elapsedMs = 0; elapsedMs <= GRBL_STATUS_POLL_INTERVAL_MS; elapsedMs++) {
+    await vi.advanceTimersByTimeAsync(1);
+
+    if (getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.STATUS_REPORT).length > statusReportCount) {
+      return;
+    }
+  }
 };
 
-const newPromiseTracker = (promise: Promise<void>): { isResolved: () => boolean } => {
+const getMachineX = (status: GrblResolvedStatus): number => status.machinePosition?.x ?? Number.NaN;
+
+interface PromiseResolutionTracker {
+  isResolved: () => boolean;
+}
+
+const newPromiseTracker = (promise: Promise<void>): PromiseResolutionTracker => {
   let isResolved = false;
-  void promise.then((): void => {
+  const trackResolution = async (): Promise<void> => {
+    await promise;
     isResolved = true;
-  });
+  };
+  void trackResolution();
 
   return { isResolved: (): boolean => isResolved };
 };
@@ -150,7 +174,7 @@ describe(GrblController.name, () => {
     expect(getMachineX(finalStatus)).toBeGreaterThan(0);
     expect(getMachineX(finalStatus)).toBeLessThan(LONG_MOVE_END_X);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -170,10 +194,10 @@ describe(GrblController.name, () => {
     expect(holdWaitStatusQueryCount).toBeGreaterThanOrEqual(HOLD_WAIT_MIN_STATUS_QUERY_COUNT);
     expect(getStatusQueryCount(harness.events)).toBe(POLL_COUNT);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
-  it('stop during a jog sends jog cancel instead of feed hold', async () => {
+  it('stop during a jog writes feed hold, which cancels the jog, then resets without an alarm', async () => {
     const harness: GrblControllerHarness = await newConnectedHarness();
     harness.controller.sendConsoleCommand(JOG_MOVE);
     await vi.advanceTimersByTimeAsync(MOVE_RUNNING_MS);
@@ -185,13 +209,39 @@ describe(GrblController.name, () => {
     await stop;
 
     expect(getSentRealtimeCommands(harness.events)).toEqual([
-      GRBL_REALTIME_COMMAND.JOG_CANCEL,
+      GRBL_REALTIME_COMMAND.FEED_HOLD,
       GRBL_REALTIME_COMMAND.SOFT_RESET,
     ]);
     expect(getAlarmEvents(harness.events)).toEqual([]);
     expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.IDLE);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
+  });
+
+  it('stop while the latest status still says Jog but a G1 move runs holds the move and raises no alarm', async () => {
+    const harness: GrblControllerHarness = await newConnectedHarness();
+    await advanceToNextStatusReport(harness);
+    await vi.advanceTimersByTimeAsync(BEFORE_SHORT_JOG_MS);
+    harness.controller.sendConsoleCommand(SHORT_JOG_MOVE);
+    await vi.advanceTimersByTimeAsync(SHORT_JOG_SEEN_BY_POLL_MS);
+
+    expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.JOG);
+
+    await vi.advanceTimersByTimeAsync(SHORT_JOG_FINISHED_MS);
+    harness.controller.sendConsoleCommand(LONG_MOVE);
+    await vi.advanceTimersByTimeAsync(MOVE_JUST_STARTED_MS);
+
+    expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.JOG);
+
+    const stop: Promise<void> = harness.controller.stopMachine();
+    await vi.advanceTimersByTimeAsync(STOP_SETTLE_MS);
+    await stop;
+
+    expect(getAlarmEvents(harness.events)).toEqual([]);
+    expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.IDLE);
+    expect(getMachineX(getLatestStatus(harness))).toBeGreaterThan(SHORT_JOG_END_X);
+
+    await disconnectGrblHarness(harness);
   });
 
   it('stop resets anyway after 2000 ms when hold never completes', async () => {
@@ -214,7 +264,7 @@ describe(GrblController.name, () => {
     ]);
     expect(stopTracker.isResolved()).toBe(true);
 
-    await disconnectAfterStop(harness);
+    await disconnectGrblHarness(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -235,7 +285,7 @@ describe(GrblController.name, () => {
     expect(getAlarmEvents(harness.events)).toEqual([]);
     expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.IDLE);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('stop right after a move starts, before any poll saw it, holds first and raises no alarm', async () => {
@@ -257,7 +307,7 @@ describe(GrblController.name, () => {
     expect(getAlarmEvents(harness.events)).toEqual([]);
     expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.IDLE);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('stop during a stream of several lines emits no grbl-error', async () => {
@@ -276,7 +326,7 @@ describe(GrblController.name, () => {
     expect(getErrorEvents(harness.events)).toEqual([]);
     expect(getAlarmEvents(harness.events)).toEqual([]);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('a second stop during a running stop returns the same promise and sends one reset', async () => {
@@ -295,7 +345,7 @@ describe(GrblController.name, () => {
       GRBL_REALTIME_COMMAND.SOFT_RESET,
     ]);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('reset clears pending console lines', async () => {
@@ -316,7 +366,7 @@ describe(GrblController.name, () => {
 
     expect(sentTexts).toEqual(Array<string>(linesFittingRxBuffer).fill(SHORT_MOVE));
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('unlock sent right after a reset waits for the banner and gets its own ok', async () => {
@@ -333,7 +383,7 @@ describe(GrblController.name, () => {
     expect(unlockIndex).toBeGreaterThan(entryTexts.indexOf(GRBL_SIMULATOR_BANNER));
     expect(entryTexts.slice(unlockIndex)).toContain(OK_TEXT);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('answers to lines the reset wiped emit no grbl-error', async () => {
@@ -354,7 +404,7 @@ describe(GrblController.name, () => {
     expect(getConsoleTexts(harness.events)).toContain(`error:${FAILING_LINE_ERROR_CODE}`);
     expect(getErrorEvents(harness.events)).toEqual([]);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('two quick resets hold the queue until the second banner and keep later answers paired', async () => {
@@ -375,7 +425,7 @@ describe(GrblController.name, () => {
     expect(entryTexts.slice(-2)).toEqual([SHORT_MOVE, OK_TEXT]);
     expect(getErrorEvents(harness.events)).toEqual([]);
 
-    await harness.controller.disconnect();
+    await disconnectGrblHarness(harness);
   });
 
   it('reset without a banner releases the queue after 10000 ms and reports not-responding', async () => {
@@ -396,7 +446,7 @@ describe(GrblController.name, () => {
       { kind: GRBL_CONTROLLER_EVENT_KIND.NOT_RESPONDING },
     ]);
 
-    await disconnectAfterStop(harness);
+    await disconnectGrblHarness(harness);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -418,7 +468,7 @@ describe(GrblController.name, () => {
       GRBL_REALTIME_COMMAND.CYCLE_RESUME,
     ]);
 
-    await disconnectAfterStop(harness);
+    await disconnectGrblHarness(harness);
   });
 
   it('machine commands while disconnected write nothing', async () => {
@@ -433,6 +483,38 @@ describe(GrblController.name, () => {
 
     expect(writeSpy).not.toHaveBeenCalled();
     expect(harness.events).toEqual([]);
+  });
+
+  it('disconnect right after an acknowledged console move, nothing in flight, holds and resets first', async () => {
+    const harness: GrblControllerHarness = await newConnectedHarness();
+    await vi.advanceTimersByTimeAsync(GRBL_STATUS_POLL_INTERVAL_MS + ANSWER_SETTLE_MS);
+    const transportLog: (number | string)[] = [];
+    const originalWrite: (bytes: Uint8Array) => Promise<void> = harness.transport.write.bind(harness.transport);
+    const originalClose: () => Promise<void> = harness.transport.close.bind(harness.transport);
+    vi.spyOn(harness.transport, 'write').mockImplementation((bytes: Uint8Array): Promise<void> => {
+      transportLog.push(...bytes);
+
+      return originalWrite(bytes);
+    });
+    vi.spyOn(harness.transport, 'close').mockImplementation((): Promise<void> => {
+      transportLog.push(TRANSPORT_CLOSE_LOG_ENTRY);
+
+      return originalClose();
+    });
+    harness.controller.sendConsoleCommand(LONG_MOVE);
+    await vi.advanceTimersByTimeAsync(MOVE_JUST_STARTED_MS);
+
+    expect(getLatestStatus(harness).machineState).toBe(GRBL_MACHINE_STATE.IDLE);
+
+    await disconnectGrblHarness(harness);
+    const feedHoldIndex: number = transportLog.indexOf(GRBL_FEED_HOLD_BYTE);
+    const softResetIndex: number = transportLog.indexOf(GRBL_SOFT_RESET_BYTE);
+
+    expect(feedHoldIndex).toBeGreaterThanOrEqual(0);
+    expect(softResetIndex).toBeGreaterThan(feedHoldIndex);
+    expect(transportLog.indexOf(TRANSPORT_CLOSE_LOG_ENTRY)).toBeGreaterThan(softResetIndex);
+    expect(getAlarmEvents(harness.events)).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('connection loss during the hold wait ends the stop without a reset and leaves no timer behind', async () => {
