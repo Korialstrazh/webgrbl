@@ -11,6 +11,7 @@
 import type { GrblAlarmEvent } from './GrblAlarmEvent';
 import type { GrblConnectionLostEvent } from './GrblConnectionLostEvent';
 import type { GrblConsoleEntryEvent } from './GrblConsoleEntryEvent';
+import type { GrblControllerResetEvent } from './GrblControllerResetEvent';
 import type { GrblErrorEvent } from './GrblErrorEvent';
 import type { GrblNotRespondingEvent } from './GrblNotRespondingEvent';
 import type { GrblProgramStoppedOnErrorEvent } from './GrblProgramStoppedOnErrorEvent';
@@ -23,4 +24,5 @@ export type GrblControllerEvent =
   | GrblAlarmEvent
   | GrblConnectionLostEvent
   | GrblNotRespondingEvent
-  | GrblProgramStoppedOnErrorEvent;
+  | GrblProgramStoppedOnErrorEvent
+  | GrblControllerResetEvent;

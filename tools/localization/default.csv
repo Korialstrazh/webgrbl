@@ -99,6 +99,7 @@ MACHINE_STATUS_WORK_POSITION;Work position
 TOAST_CONNECT_TIMEOUT;No response from the controller - check the baud rate and that the laser is powered.
 TOAST_CONNECTED;Connected to {{firmware}} {{version}}
 TOAST_CONNECTION_LOST;Connection lost. The laser may still finish moves it had already received.
+TOAST_CONTROLLER_RESET;The controller reset itself - running work was stopped.
 TOAST_DISMISS;Dismiss
 TOAST_GRBL_ALARM;Alarm {{code}}: {{description}} - unlock or home the machine.
 TOAST_GRBL_ERROR;Error {{code}}: {{description}}

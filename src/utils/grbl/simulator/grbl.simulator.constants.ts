@@ -181,6 +181,14 @@ export const GRBL_SIMULATOR_MOTION_PHASE = {
 } as const;
 
 export type GrblSimulatorMotionPhase = (typeof GRBL_SIMULATOR_MOTION_PHASE)[keyof typeof GRBL_SIMULATOR_MOTION_PHASE];
+
+/** Motion phases in which a soft reset loses steps, so GRBL raises ALARM:3. */
+export const GRBL_SIMULATOR_MOTION_ABORTING_PHASES: readonly GrblSimulatorMotionPhase[] = [
+  GRBL_SIMULATOR_MOTION_PHASE.RUN,
+  GRBL_SIMULATOR_MOTION_PHASE.JOG,
+  GRBL_SIMULATOR_MOTION_PHASE.JOG_CANCELLING,
+  GRBL_SIMULATOR_MOTION_PHASE.HOLD_DECELERATING,
+];
 // #endregion
 
 // #region Faults
@@ -189,5 +197,6 @@ export const GRBL_SIMULATOR_FAULT_KIND = {
   ERROR_ON_LINE: 'error-on-line',
   ALARM: 'alarm',
   STOP_RESPONDING: 'stop-responding',
+  SELF_RESET: 'self-reset',
 } as const;
 // #endregion

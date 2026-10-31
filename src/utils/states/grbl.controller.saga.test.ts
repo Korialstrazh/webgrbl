@@ -257,6 +257,20 @@ describe(watchGrblController.name, () => {
     });
   });
 
+  it('a reset the controller did by itself shows the controller-reset warning toast', async () => {
+    const rig: GrblControllerSagaTestRig = newTestRig();
+    store = newStore(rig.dependencies);
+    await connectStore(store);
+
+    getLastTransport(rig).getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.SELF_RESET });
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+    expect(getToast(store, DEFAULT.TOAST_CONTROLLER_RESET)).toMatchObject({
+      severity: TOAST_SEVERITY.WARNING,
+      messageParameters: {},
+    });
+  });
+
   it('simulated connection loss sets status lost and shows the lost toast', async () => {
     const rig: GrblControllerSagaTestRig = newTestRig();
     store = newStore(rig.dependencies);

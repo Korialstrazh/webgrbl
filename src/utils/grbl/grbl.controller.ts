@@ -106,6 +106,7 @@ export class GrblController {
       addEventListener: (listener: GrblControllerEventListener): (() => void) => this.addEventListener(listener),
       handleMachineReset: (): void => this.programStreamer.handleMachineReset(),
       handleBannerWaitEnded: (): void => this.programStreamer.handleBannerWaitEnded(),
+      emitEvent,
       reportNotResponding: (): void => this.notRespondingWatchdog.reportNotResponding(),
     });
     this.programStreamer = new GrblProgramStreamer({

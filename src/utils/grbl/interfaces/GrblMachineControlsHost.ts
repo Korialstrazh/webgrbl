@@ -28,6 +28,8 @@ export interface GrblMachineControlsHost {
   handleMachineReset(): void;
   /** Told when the queue stops waiting for banners: the last expected banner arrived or the wait timed out. */
   handleBannerWaitEnded(): void;
+  /** Tells the controller's listeners about an event. */
+  emitEvent(event: GrblControllerEvent): void;
   /** Reports the controller as not responding, at most once per silence. */
   reportNotResponding(): void;
 }

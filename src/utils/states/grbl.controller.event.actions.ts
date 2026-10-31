@@ -60,6 +60,12 @@ export const getGrblControllerEventActions = (event: GrblControllerEvent): Actio
       messageKey: DEFAULT.TOAST_PROGRAM_STOPPED_ON_ERROR,
       messageParameters: { lineNumber: event.lineNumber, code: event.errorCode },
     })];
+  case GRBL_CONTROLLER_EVENT_KIND.CONTROLLER_RESET:
+    return [new ToastShown({
+      severity: TOAST_SEVERITY.WARNING,
+      messageKey: DEFAULT.TOAST_CONTROLLER_RESET,
+      messageParameters: NO_TOAST_PARAMETERS,
+    })];
   default: {
     const unknownEvent: never = event;
     throw new Error(`Unknown GRBL controller event ${JSON.stringify(unknownEvent)}`);

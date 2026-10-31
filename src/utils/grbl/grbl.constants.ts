@@ -228,6 +228,7 @@ export const GRBL_CONTROLLER_EVENT_KIND = {
   CONNECTION_LOST: 'connection-lost',
   NOT_RESPONDING: 'not-responding',
   PROGRAM_STOPPED_ON_ERROR: 'program-stopped-on-error',
+  CONTROLLER_RESET: 'controller-reset',
 } as const;
 
 export type GrblControllerEventKind = (typeof GRBL_CONTROLLER_EVENT_KIND)[keyof typeof GRBL_CONTROLLER_EVENT_KIND];
