@@ -1,5 +1,5 @@
 /**
- * The move card: home, set zero, the jog pad and the step sizes. Not built yet, so it is shown but inert.
+ * The move card: home, set zero, the jog pad, the step sizes and the jog speed.
  *
  * @author michael.morosov
  *
@@ -9,62 +9,97 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button, Segmented } from 'antd';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE } from '../../../utils/antd.constants';
-import { doNothing } from '../../../utils/do.nothing';
+import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
 import { DEFAULT } from '../../../utils/localization/default.locales';
-import { ComingSoon } from '../../../views/ComingSoon';
+import { getGoToWorkZeroCommand } from '../../../utils/machine/get.go.to.work.zero.command';
+import { getJogCommand } from '../../../utils/machine/get.jog.command';
+import { getMoveAvailability } from '../../../utils/machine/get.move.availability';
+import type { MoveAvailability } from '../../../utils/machine/interfaces/MoveAvailability';
+import { DEFAULT_JOG_STEP_MM, JOG_STEP_SIZES_MM } from '../../../utils/machine/machine.command.constants';
+import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
+import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
+import { DEFAULT_MACHINE_JOG_FEED_RATE } from '../../../utils/profiles/machine.profile.constants';
+import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
+import { selectActiveMachineProfile } from '../../../utils/states/machine.profile.state';
+import { MachineLineRequested, selectMachineStatus } from '../../../utils/states/machine.status.state';
+import type { AppDispatch } from '../../../utils/states/new.store';
 import { Panel } from '../../../views/Panel';
 import type { JogPadCell } from './interfaces/JogPadCell';
 import type { JogStepOption } from './interfaces/JogStepOption';
-import { DEFAULT_JOG_STEP_MM, JOG_PAD_CELLS, JOG_STEP_DISTANCES_MM } from './jog.pad.constants';
+import { JogSpeedInput } from './JogSpeedInput';
+import { JOG_PAD_CELLS } from './jog.pad.constants';
 import styles from './styles.module.scss';
 
 export const MoveCard = (): ReactNode => {
   const { t } = useTranslation();
-  const stepOptions: JogStepOption[] = JOG_STEP_DISTANCES_MM.map((distance: string) => ({
+  const dispatch: AppDispatch = useDispatch();
+  const isConnected: boolean = useSelector(selectIsConnected);
+  const machineStatus: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
+  const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const [stepMm, setStepMm] = useState<number>(DEFAULT_JOG_STEP_MM);
+  const feedRate: number = activeProfile?.jogFeedRate ?? DEFAULT_MACHINE_JOG_FEED_RATE;
+  const { canJog, canHome, canSetZero }: MoveAvailability = getMoveAvailability(
+    isConnected,
+    machineStatus?.machineState,
+    activeProfile?.hasHomingSwitches ?? false,
+  );
+  const stepOptions: JogStepOption[] = JOG_STEP_SIZES_MM.map((distance: number) => ({
     value: distance,
     label: t(DEFAULT.MACHINE_MOVE_STEP_OPTION, { distance }),
   }));
 
+  const requestLine = (line: string): void => {
+    dispatch(new MachineLineRequested({ line }));
+  };
+
+  const requestJogPadLine = (cell: JogPadCell): void => {
+    requestLine(cell.direction ? getJogCommand(cell.direction, stepMm, feedRate) : getGoToWorkZeroCommand(feedRate));
+  };
+
   return (
     <Panel title={t(DEFAULT.MACHINE_MOVE_TITLE)}>
-      <ComingSoon description={t(DEFAULT.MACHINE_MOVE_DESCRIPTION)}>
-        <div className={styles.moveCard}>
-          <div className={styles.homeRow}>
-            <Button size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
+      <div className={styles.moveCard}>
+        <div className={styles.homeRow}>
+          {activeProfile?.hasHomingSwitches && (
+            <Button size={ANTD_BUTTON_SIZE_LARGE} disabled={!canHome} onClick={() => requestLine(MACHINE_COMMAND.HOME)}>
               {t(DEFAULT.MACHINE_MOVE_HOME)}
             </Button>
-            <Button size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
-              {t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
-            </Button>
-          </div>
-          <div className={styles.jogPad}>
-            {JOG_PAD_CELLS.map((cell: JogPadCell) =>
-              cell.arrowGlyph ? (
-                <Button
-                  key={cell.labelKey}
-                  size={ANTD_BUTTON_SIZE_LARGE}
-                  icon={cell.arrowGlyph}
-                  aria-label={t(cell.labelKey)}
-                  onClick={doNothing}
-                />
-              ) : (
-                <Button key={cell.labelKey} size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
-                  {t(cell.labelKey)}
-                </Button>
-              ),
-            )}
-          </div>
-          <Segmented
-            aria-label={t(DEFAULT.MACHINE_MOVE_STEP_LABEL)}
-            options={stepOptions}
-            value={DEFAULT_JOG_STEP_MM}
-            onChange={doNothing}
-          />
+          )}
+          <Button
+            size={ANTD_BUTTON_SIZE_LARGE}
+            disabled={!canSetZero}
+            onClick={() => requestLine(MACHINE_COMMAND.SET_WORK_ZERO)}
+          >
+            {t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
+          </Button>
         </div>
-      </ComingSoon>
+        <div className={styles.jogPad}>
+          {JOG_PAD_CELLS.map((cell: JogPadCell) => (
+            <Button
+              key={cell.labelKey}
+              size={ANTD_BUTTON_SIZE_LARGE}
+              disabled={!canJog}
+              icon={cell.arrowGlyph}
+              aria-label={t(cell.labelKey)}
+              onClick={() => requestJogPadLine(cell)}
+            >
+              {cell.arrowGlyph ? undefined : t(cell.labelKey)}
+            </Button>
+          ))}
+        </div>
+        <Segmented
+          aria-label={t(DEFAULT.MACHINE_MOVE_STEP_LABEL)}
+          options={stepOptions}
+          value={stepMm}
+          onChange={setStepMm}
+        />
+        <JogSpeedInput />
+      </div>
     </Panel>
   );
 };

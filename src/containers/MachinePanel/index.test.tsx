@@ -24,7 +24,7 @@ const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
 const CONTROL_SELECTOR = 'button, input';
-const COMING_SOON_TITLES: readonly string[] = ['Move', 'Laser pointer', 'Pre-flight check', 'Job'];
+const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Pre-flight check', 'Job'];
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.RUN,
