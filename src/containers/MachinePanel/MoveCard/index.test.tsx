@@ -25,6 +25,7 @@ const DEFAULT_JOG_NORTH_EAST_LINE = '$J=G91 G21 X10 Y10 F1500';
 const NEW_JOG_FEED_RATE = 2400;
 const NEW_JOG_FEED_RATE_TEXT = String(NEW_JOG_FEED_RATE);
 const DEFAULT_JOG_FEED_RATE_TEXT = '1500';
+const EMPTY_INPUT_TEXT = '';
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -203,6 +204,25 @@ describe(MoveCard.name, () => {
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ payload: { profile: { ...profile, jogFeedRate: NEW_JOG_FEED_RATE } } }),
     );
+  });
+
+  it('keeps a cleared jog speed empty while typing and restores the saved value on blur', () => {
+    const store: AppStore = newStore();
+
+    renderMoveCard(store);
+    activateProfile(store, { jogFeedRate: NEW_JOG_FEED_RATE });
+
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const jogSpeedInput: HTMLElement = screen.getByRole('spinbutton', { name: JOG_SPEED_LABEL });
+
+    fireEvent.change(jogSpeedInput, { target: { value: EMPTY_INPUT_TEXT } });
+
+    expect(jogSpeedInput).toHaveValue(EMPTY_INPUT_TEXT);
+
+    fireEvent.blur(jogSpeedInput);
+
+    expect(jogSpeedInput).toHaveValue(NEW_JOG_FEED_RATE_TEXT);
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
   it('jogs with the saved jog speed of the active profile', () => {

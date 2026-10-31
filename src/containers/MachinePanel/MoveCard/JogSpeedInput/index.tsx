@@ -24,6 +24,7 @@ import {
 } from '../../../../utils/profiles/machine.profile.constants';
 import { MachineProfileSaved, selectActiveMachineProfile } from '../../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../../utils/states/new.store';
+import styles from './styles.module.scss';
 
 export const JogSpeedInput = (): ReactNode => {
   const { t } = useTranslation();
@@ -48,6 +49,7 @@ export const JogSpeedInput = (): ReactNode => {
 
   return (
     <InputNumber
+      className={styles.jogSpeedInput}
       aria-label={t(DEFAULT.MACHINE_MOVE_JOG_SPEED_LABEL)}
       disabled={!activeProfile}
       min={MACHINE_JOG_FEED_RATE_MIN}
