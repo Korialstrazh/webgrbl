@@ -1,11 +1,11 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { StrictMode } from 'react';
+import { Drawer, Modal } from 'antd';
+import { StrictMode, useState } from 'react';
 import { Provider } from 'react-redux';
 import { StopHotkey } from '.';
 import { ConnectionPill } from '../ConnectionPill';
 import { ConsolePanel } from '../ConsolePanel';
 import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
-import { Dialog } from '../../views/Dialog';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
 import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
@@ -13,20 +13,38 @@ import { MachineStopRequested } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
+import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const CONSOLE_INPUT_LABEL = 'Console command';
 const DISCONNECTED_PATTERN = /Disconnected|Connected/;
 const POPOVER_LABEL = 'Laser connection';
-const DIALOG_TITLE = 'Test dialog';
-const DIALOG_OVERLAY_ID = 'test-dialog';
+const PORT_LABEL = 'Port';
+const MODAL_TITLE = 'Test modal';
+const MODAL_OVERLAY_ID = 'test-modal';
+const DRAWER_TITLE = 'Test drawer';
+const DRAWER_OVERLAY_ID = 'test-drawer';
 
-const TestDialog = (): React.ReactNode => {
-  useOverlayRegistration(DIALOG_OVERLAY_ID, true);
+const TestModal = (): React.ReactNode => {
+  const [isOpen, setIsOpen] = useState<boolean>(true);
+
+  useOverlayRegistration(MODAL_OVERLAY_ID, isOpen);
 
   return (
-    <Dialog isOpen title={DIALOG_TITLE} onClose={vi.fn()}>
+    <Modal open={isOpen} title={MODAL_TITLE} onCancel={() => setIsOpen(false)} footer={null}>
       <p>body</p>
-    </Dialog>
+    </Modal>
+  );
+};
+
+const TestDrawer = (): React.ReactNode => {
+  const [isOpen, setIsOpen] = useState<boolean>(true);
+
+  useOverlayRegistration(DRAWER_OVERLAY_ID, isOpen);
+
+  return (
+    <Drawer open={isOpen} title={DRAWER_TITLE} onClose={() => setIsOpen(false)}>
+      <p>body</p>
+    </Drawer>
   );
 };
 
@@ -41,8 +59,10 @@ const renderHotkey = (isConnected: boolean, extraComponent: React.ReactNode = nu
 
   render(
     <Provider store={store}>
-      <StopHotkey />
-      {extraComponent}
+      <AntdTestProvider>
+        <StopHotkey />
+        {extraComponent}
+      </AntdTestProvider>
     </Provider>,
   );
 
@@ -113,12 +133,43 @@ describe(StopHotkey.name, () => {
     expect(screen.queryByRole('dialog', { name: POPOVER_LABEL })).not.toBeInTheDocument();
   });
 
-  it('Escape with a Dialog open does not stop', () => {
-    const { stopSpy } = renderHotkey(true, <TestDialog />);
+  it('Escape on a control inside the open connection popover closes it and does not stop', () => {
+    const { store, stopSpy } = renderHotkey(true, <ConnectionPill />);
 
-    fireEvent.keyDown(screen.getByRole('dialog'), { key: ESCAPE_KEY });
+    fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+    fireEvent.keyDown(screen.getByLabelText(PORT_LABEL), { key: ESCAPE_KEY });
 
     expect(stopSpy()).toBe(0);
+    expect(screen.queryByRole('dialog', { name: POPOVER_LABEL })).not.toBeInTheDocument();
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+  });
+
+  it('the next Escape after the popover closed stops', () => {
+    const { stopSpy } = renderHotkey(true, <ConnectionPill />);
+
+    fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+    fireEvent.keyDown(screen.getByLabelText(PORT_LABEL), { key: ESCAPE_KEY });
+    fireEvent.keyDown(document.body, { key: ESCAPE_KEY });
+
+    expect(stopSpy()).toBe(1);
+  });
+
+  it('Escape with an antd Modal open closes it and does not stop', () => {
+    const { store, stopSpy } = renderHotkey(true, <TestModal />);
+
+    fireEvent.keyDown(screen.getByRole('dialog', { name: MODAL_TITLE }), { key: ESCAPE_KEY });
+
+    expect(stopSpy()).toBe(0);
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+  });
+
+  it('Escape with an antd Drawer open closes it and does not stop', () => {
+    const { store, stopSpy } = renderHotkey(true, <TestDrawer />);
+
+    fireEvent.keyDown(screen.getByRole('dialog', { name: DRAWER_TITLE }), { key: ESCAPE_KEY });
+
+    expect(stopSpy()).toBe(0);
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
   });
 
   it('held Escape (repeat) stops only once', () => {

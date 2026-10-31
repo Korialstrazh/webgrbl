@@ -1,6 +1,6 @@
 /**
  * The connection status in the top bar: state, firmware, port, and whether the browser is online and can use Web
- * Serial. Clicking it opens the connection popover.
+ * Serial. Clicking it opens and closes the connection popover.
  *
  * @author michael.morosov
  *
@@ -50,13 +50,12 @@ export const ConnectionPill = (): ReactNode => {
   const firmwareIdentity: GrblFirmwareIdentity | undefined = useSelector(selectFirmwareIdentity);
 
   return (
-    <div className={styles.connectionPill}>
+    <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <button
         type="button"
         className={styles.pill}
         aria-haspopup={POPUP_KIND_DIALOG}
         aria-expanded={isPopoverOpen}
-        onClick={() => setIsPopoverOpen((wasOpen: boolean) => !wasOpen)}
       >
         <span className={[styles.dot, styles[connectionStatus]].join(' ')} aria-hidden="true" />
         <span className={styles.status}>{t(CONNECTION_PILL_STATUS_LABEL_KEY[connectionStatus])}</span>
@@ -76,7 +75,6 @@ export const ConnectionPill = (): ReactNode => {
           </span>
         )}
       </button>
-      <ConnectionPopover isOpen={isPopoverOpen} onClose={() => setIsPopoverOpen(false)} />
-    </div>
+    </ConnectionPopover>
   );
 };

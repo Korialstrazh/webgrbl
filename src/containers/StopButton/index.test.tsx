@@ -8,6 +8,12 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 
 const STOP_LABEL = 'Stop';
+// antd's classes for a solid danger button in the large size: the most prominent button on the page.
+const PROMINENT_DANGER_CLASS_NAMES: readonly string[] = [
+  'ant-btn-color-dangerous',
+  'ant-btn-variant-solid',
+  'ant-btn-lg',
+];
 
 const renderStopButton = (store: AppStore): void => {
   render(
@@ -22,6 +28,12 @@ describe(StopButton.name, () => {
     renderStopButton(newStore());
 
     expect(screen.getByRole('button', { name: STOP_LABEL })).toBeDisabled();
+  });
+
+  it('is drawn as a large solid danger button', () => {
+    renderStopButton(newStore());
+
+    expect(screen.getByRole('button', { name: STOP_LABEL })).toHaveClass(...PROMINENT_DANGER_CLASS_NAMES);
   });
 
   it('dispatches the stop request when clicked while connected', () => {

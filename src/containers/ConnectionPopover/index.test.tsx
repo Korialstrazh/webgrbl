@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import type { Mock } from 'vitest';
 import { ConnectionPopover } from '.';
 import { GRBL_BAUD_RATES } from '../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
@@ -23,13 +24,16 @@ const USB_PRODUCT_ID = 0x7523;
 const UNKNOWN_PORT_ID = 'serial-2';
 const UNKNOWN_PORT_LABEL = 'Serial port';
 const CHOSEN_BAUD_RATE = 230400;
+const ANCHOR_TEXT = 'Open connection';
 
 const renderConnectionPopover = (): AppStore => {
   const store: AppStore = newStore();
 
   render(
     <Provider store={store}>
-      <ConnectionPopover isOpen onClose={vi.fn()} />
+      <ConnectionPopover isOpen onOpenChange={vi.fn()}>
+        <button type="button">{ANCHOR_TEXT}</button>
+      </ConnectionPopover>
     </Provider>,
   );
 
@@ -74,10 +78,27 @@ describe(ConnectionPopover.name, () => {
     expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toBeInTheDocument();
   });
 
+  it('asks to open when its anchor is clicked', () => {
+    const onOpenChange: Mock<(isOpen: boolean) => void> = vi.fn<(isOpen: boolean) => void>();
+
+    render(
+      <Provider store={newStore()}>
+        <ConnectionPopover isOpen={false} onOpenChange={onOpenChange}>
+          <button type="button">{ANCHOR_TEXT}</button>
+        </ConnectionPopover>
+      </Provider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: ANCHOR_TEXT }));
+
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
   it('is not rendered while closed', () => {
     render(
       <Provider store={newStore()}>
-        <ConnectionPopover isOpen={false} onClose={vi.fn()} />
+        <ConnectionPopover isOpen={false} onOpenChange={vi.fn()}>
+          <button type="button">{ANCHOR_TEXT}</button>
+        </ConnectionPopover>
       </Provider>,
     );
 

@@ -18,3 +18,14 @@
   min-height: var(--target-min);
   accent-color: var(--color-accent);
 }
+
+.switchField {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  cursor: pointer;
+}

@@ -9,14 +9,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Layout } from 'antd';
+import { Layout, Switch } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../utils/missing.value.constants';
 import { ComingSoon } from '../../views/ComingSoon';
-import { Toggle } from '../../views/Toggle';
 import { ConsolePanel } from '../ConsolePanel';
 import styles from './styles.module.scss';
 
@@ -52,7 +51,10 @@ export const StatusStrip = (): ReactNode => {
           </dl>
         </ComingSoon>
       </div>
-      <Toggle label={t(DEFAULT.CONSOLE_TOGGLE)} isChecked={isConsoleOpen} onChange={setIsConsoleOpen} />
+      <label className={styles.consoleSwitch}>
+        <Switch checked={isConsoleOpen} onChange={setIsConsoleOpen} />
+        {t(DEFAULT.CONSOLE_TOGGLE)}
+      </label>
     </Layout.Footer>
   );
 };

@@ -8,15 +8,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Layout } from 'antd';
+import { Button, Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { REDO_ARROW, UNDO_ARROW } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { BUTTON_VARIANT } from '../../views/Button/button.constants';
-import { Button } from '../../views/Button';
 import { ComingSoon } from '../../views/ComingSoon';
-import { IconButton } from '../../views/IconButton';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
 import styles from './styles.module.scss';
@@ -35,14 +33,24 @@ export const TopBar = (): ReactNode => {
         <ComingSoon description={t(DEFAULT.TOP_BAR_MENUS_DESCRIPTION)}>
           <div className={styles.group}>
             {TOP_BAR_MENU_LABEL_KEYS.map((menuLabelKey: string) => (
-              <Button key={menuLabelKey} variant={BUTTON_VARIANT.GHOST}>{t(menuLabelKey)}</Button>
+              <Button key={menuLabelKey} type={ANTD_BUTTON_TYPE_TEXT}>{t(menuLabelKey)}</Button>
             ))}
           </div>
         </ComingSoon>
         <ComingSoon description={t(DEFAULT.TOP_BAR_HISTORY_DESCRIPTION)}>
           <div className={styles.group}>
-            <IconButton label={t(DEFAULT.TOP_BAR_UNDO)} iconComponent={UNDO_ARROW} />
-            <IconButton label={t(DEFAULT.TOP_BAR_REDO)} iconComponent={REDO_ARROW} />
+            <Button
+              type={ANTD_BUTTON_TYPE_TEXT}
+              size={ANTD_BUTTON_SIZE_LARGE}
+              icon={UNDO_ARROW}
+              aria-label={t(DEFAULT.TOP_BAR_UNDO)}
+            />
+            <Button
+              type={ANTD_BUTTON_TYPE_TEXT}
+              size={ANTD_BUTTON_SIZE_LARGE}
+              icon={REDO_ARROW}
+              aria-label={t(DEFAULT.TOP_BAR_REDO)}
+            />
           </div>
         </ComingSoon>
         <ComingSoon description={t(DEFAULT.TOP_BAR_AUTOSAVE_DESCRIPTION)}>

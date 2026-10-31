@@ -61,7 +61,7 @@ describe(AppRoute.name, () => {
 
   it('keeps the connection pill and the console working inside their regions', () => {
     renderAppRoute();
-    fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(within(getTopBar()).getByRole('button', { name: CONNECTION_PILL_PATTERN })).toBeInTheDocument();
     expect(within(screen.getByRole('contentinfo')).getByRole('heading', { name: CONSOLE_TITLE })).toBeInTheDocument();

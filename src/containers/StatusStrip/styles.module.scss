@@ -27,6 +27,18 @@
   overflow: hidden;
 }
 
+.consoleSwitch {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
 .consoleOverlay {
   position: absolute;
   right: 0;

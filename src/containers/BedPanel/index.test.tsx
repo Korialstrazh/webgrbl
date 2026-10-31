@@ -19,6 +19,8 @@ const NO_MACHINE_TEXT = 'Connect a machine to see its bed';
 const WORK_POSITION: GrblAxisPosition = { x: 10, y: 20, z: 0 };
 const WORK_COORDINATE_OFFSET: GrblAxisPosition = { x: 100, y: 30, z: 0 };
 const EXPECTED_HEAD_TRANSFORM = 'translate(110 350)';
+const VIEW_MODE_LABEL = 'Bed view';
+const DESIGN_VIEW_LABEL = 'Design';
 
 const renderPanel = (store: AppStore): void => {
   render(
@@ -73,6 +75,13 @@ describe(BedPanel.name, () => {
     });
 
     expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('transform', EXPECTED_HEAD_TRANSFORM);
+  });
+
+  it('names the view mode selector and shows Design as selected', () => {
+    renderPanel(newStore());
+
+    expect(screen.getByRole('radiogroup', { name: VIEW_MODE_LABEL, hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).toBeChecked();
   });
 
   it('dispatches nothing from the toolbar controls', () => {

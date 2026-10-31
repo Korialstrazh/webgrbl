@@ -15,7 +15,13 @@ const COLOR_TOKEN_SOURCES = [
   ['colorBorder', '--color-border'],
   ['colorText', '--color-text'],
   ['colorTextSecondary', '--color-text-muted'],
+  ['colorPrimaryHover', '--color-accent-hover'],
+  ['colorPrimaryActive', '--color-accent-active'],
   ['colorError', '--color-danger-button'],
+  ['colorErrorHover', '--color-danger-button-hover'],
+  ['colorErrorActive', '--color-danger-button-active'],
+  ['colorTextDisabled', '--color-disabled-text'],
+  ['colorBgContainerDisabled', '--color-disabled-bg'],
   ['colorWarning', '--color-warning'],
   ['colorSuccess', '--color-success'],
   ['colorInfo', '--color-info'],
@@ -26,6 +32,30 @@ const LAYOUT_TOKEN_SOURCES = [
   ['siderBg', '--color-surface-1'],
   ['footerBg', '--color-surface-1'],
 ] as const;
+const BUTTON_TOKEN_SOURCES = [
+  ['colorPrimary', '--color-accent'],
+  ['colorPrimaryHover', '--color-accent-hover'],
+  ['colorPrimaryActive', '--color-accent-active'],
+  ['colorError', '--color-danger-button'],
+  ['colorErrorHover', '--color-danger-button-hover'],
+  ['colorErrorActive', '--color-danger-button-active'],
+  ['primaryColor', '--color-bg'],
+  ['dangerColor', '--color-text'],
+  ['defaultBg', '--color-surface-2'],
+  ['defaultHoverBg', '--color-surface-hover'],
+  ['defaultActiveBg', '--color-surface-active'],
+] as const;
+const SWITCH_TOKEN_SOURCES = [
+  ['colorPrimary', '--color-accent'],
+  ['colorPrimaryHover', '--color-accent-hover'],
+] as const;
+const SEGMENTED_TOKEN_SOURCES = [
+  ['trackBg', '--color-surface-1'],
+  ['itemColor', '--color-text-muted'],
+  ['itemHoverBg', '--color-surface-hover'],
+  ['itemSelectedBg', '--color-surface-3'],
+  ['itemSelectedColor', '--color-text'],
+] as const;
 const REM_TOKEN_SOURCES = [
   ['borderRadius', '--radius-md'],
   ['controlHeight', '--control-height'],
@@ -34,6 +64,9 @@ const REM_TOKEN_SOURCES = [
 const source: string = readFileSync(TOKENS_PATH, 'utf8');
 const themeTokens: Record<string, unknown> = { ...ANTD_THEME.token };
 const layoutTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Layout };
+const buttonTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Button };
+const segmentedTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Segmented };
+const switchTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Switch };
 
 const requireScssToken = (name: string): string => {
   const value: string | undefined = getScssTokenValue(source, name);
@@ -74,5 +107,21 @@ describe('ANTD_THEME', () => {
 
   it.each(LAYOUT_TOKEN_SOURCES)('paints the layout %s from %s', (layoutToken: string, scssToken: string) => {
     expect(layoutTokens[layoutToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(BUTTON_TOKEN_SOURCES)('paints the button %s from %s', (buttonToken: string, scssToken: string) => {
+    expect(buttonTokens[buttonToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it('makes large buttons exactly as tall as --target-min', () => {
+    expect(buttonTokens.controlHeightLG).toBe(getRemTokenPixels('--target-min'));
+  });
+
+  it.each(SEGMENTED_TOKEN_SOURCES)('paints the segmented %s from %s', (segmentedToken: string, scssToken: string) => {
+    expect(segmentedTokens[segmentedToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(SWITCH_TOKEN_SOURCES)('paints the switch %s from %s', (switchToken: string, scssToken: string) => {
+    expect(switchTokens[switchToken]).toBe(requireScssToken(scssToken));
   });
 });

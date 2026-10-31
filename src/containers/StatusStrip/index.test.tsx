@@ -26,7 +26,7 @@ describe(StatusStrip.name, () => {
   it('keeps the console collapsed by default', () => {
     renderStatusStrip();
 
-    expect(screen.getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL })).not.toBeChecked();
+    expect(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL })).not.toBeChecked();
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });
 
@@ -41,11 +41,11 @@ describe(StatusStrip.name, () => {
   it('opens and closes the console with the toggle', () => {
     renderStatusStrip();
 
-    fireEvent.click(screen.getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(screen.getByLabelText(INPUT_LABEL)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });
@@ -58,7 +58,7 @@ describe(StatusStrip.name, () => {
     act(() => {
       store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
     });
-    fireEvent.click(screen.getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
 
     const input: HTMLElement = screen.getByLabelText(INPUT_LABEL);
 

@@ -1,5 +1,5 @@
 /**
- * One choice of a SegmentedControl: the value it reports and the text it shows.
+ * One bed view mode offered in the view mode selector: the mode it reports and the text it shows.
  *
  * @author michael.morosov
  *
@@ -9,8 +9,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 
-export interface SegmentedOption {
-  /** The value reported when the option is selected. */
+export interface BedViewModeOption {
+  /** The view mode id. */
   value: string;
   label: string;
 }
