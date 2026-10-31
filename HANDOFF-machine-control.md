@@ -1,5 +1,7 @@
 # Handoff: machine control (roadmap item 2), 2026-10-31
 
+> **Temporary file.** Delete `HANDOFF-machine-control.md` (repo root) once roadmap item 2 is finished — at the latest before `feature/machine-control` is merged into `develop` (PR #21). It sits at the repo root by explicit user request, as an exception to the output-file-placement rule.
+
 Continue on another machine from branch `feature/machine-control`. Everything needed is in git; the local SDD workspace (`.superpowers/`, git-ignored) and Claude's local memory do not travel, so their contents are copied below.
 
 ## Where things stand
@@ -41,7 +43,7 @@ Continue on another machine from branch `feature/machine-control`. Everything ne
 2. `git worktree add .claude/worktrees/machine-control feature/machine-control`, then `npm ci` in the worktree.
 3. Recreate `.gitea-local` (or set `use_gitea=false` if Gitea is not available there).
 4. Optional reference clone: `git clone --depth 1 https://github.com/arkypita/LaserGRBL.git .reference/LaserGRBL` (pinned commit in `docs/wiki/lasergrbl/_index.md`).
-5. Tell Claude: "continue the machine control plan from `.claude/various/2026-10-31_machine-control-handoff.md`".
+5. Tell Claude: "continue the machine control plan from `HANDOFF-machine-control.md`".
 
 ## Facts about the user's setup (from local memory)
 
