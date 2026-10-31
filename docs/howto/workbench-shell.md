@@ -46,7 +46,7 @@ return (
 ```
 
 - Escape rule: `StopHotkey` stops the machine only when connected **and** no overlay is registered open. antd closes the overlay on Escape after `StopHotkey` (capture phase) has already seen it registered, so one press never does both. A forgotten registration would make Escape stop the machine while the overlay is open.
-- antd `Popover` moves no focus: move focus into it on open and back to the opener on close, as `ConnectionPopover` does. The dialog and drawer wrappers handle focus themselves (antd `Modal` and `Drawer` trap it).
+- antd `Popover` moves no focus: move focus into it on open and back to the opener on close, as `ConnectionPopover` does. The dialog and drawer wrappers handle focus themselves: the dialog closes on Escape and returns focus to the opener but does not trap Tab (rc-dialog only locks focus when its wrap is `position: fixed`, and the wrapper makes it absolute), so STOP stays reachable by keyboard; the drawer traps focus while open, and STOP stays clickable with the mouse.
 - Tests that open antd overlays render inside `AntdTestProvider` (`src/utils/test.support/antd.test.provider.tsx`), which turns antd motion off for jsdom.
 
 ## One STOP
