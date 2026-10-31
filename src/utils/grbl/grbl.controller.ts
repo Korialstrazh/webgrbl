@@ -15,7 +15,9 @@ import { newGrblHandshakeContext } from './grbl.handshake.context';
 import { GrblLineFramer } from './grbl.line.framer';
 import { getPreparedGrblLine } from './grbl.line.preparer';
 import { GrblMachineControls } from './grbl.machine.controls';
+import { GrblNonAsciiLineError } from './grbl.non.ascii.line.error';
 import { GrblNotRespondingWatchdog } from './grbl.not.responding.watchdog';
+import { isPrintableAsciiGrblLine } from './grbl.printable.ascii.line';
 import { GrblProgramStreamer } from './grbl.program.streamer';
 import { GrblResponseRouter } from './grbl.response.router';
 import { GrblStatusPoller } from './grbl.status.poller';
@@ -191,13 +193,18 @@ export class GrblController {
   /**
    * Prepares a typed line and queues it. A line that is empty after preparation is ignored, and so is any line
    * before the handshake is done: the reset would wipe it while it still counted as in flight, so $I's ok would
-   * acknowledge it.
+   * acknowledge it. Throws GrblNonAsciiLineError, sending nothing, for a line with a character outside printable
+   * ASCII.
    */
   public sendConsoleCommand(commandText: string): void {
     const preparedLine: string | undefined = getPreparedGrblLine(commandText);
 
     if (!preparedLine) {
       return;
+    }
+
+    if (!isPrintableAsciiGrblLine(preparedLine)) {
+      throw new GrblNonAsciiLineError();
     }
 
     if (this.phase === GRBL_CONTROLLER_PHASE.CONNECTED) {

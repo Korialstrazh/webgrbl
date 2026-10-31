@@ -22,6 +22,7 @@ CONNECT_BAR_USB_PORT;USB {{vendorId}}:{{productId}}
 CONSOLE_INPUT_LABEL;Console command
 CONSOLE_INPUT_PLACEHOLDER;Type a command, for example $$
 CONSOLE_LOG_LABEL;Console output
+CONSOLE_NON_ASCII_REJECTED;Not sent: the command contains characters the controller cannot receive. Use plain ASCII letters, digits and symbols only.
 CONSOLE_RAW_ERROR;{{detail}}
 CONSOLE_REALTIME_CYCLE_RESUME;Cycle resume
 CONSOLE_REALTIME_FEED_HOLD;Feed hold
@@ -79,6 +80,7 @@ GRBL_ERROR_6;Step pulse time must be at least 3 microseconds.
 GRBL_ERROR_7;Reading the settings failed - defaults were restored.
 GRBL_ERROR_8;This $ command only works while the machine is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
+GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
 MACHINE_CONTROL_RESET;Reset
 MACHINE_CONTROL_STOP;Stop

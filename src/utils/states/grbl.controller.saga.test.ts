@@ -56,6 +56,8 @@ import { selectToasts } from './toast.state';
 const SIMULATOR_FIRMWARE_NAME = 'Grbl';
 const SIMULATOR_FIRMWARE_VERSION = '1.1h';
 const CONSOLE_COMMAND = 'G0X1';
+/** U+00DA would reach GRBL as C3 9A, and 0x9A is a realtime laser power override. */
+const NON_ASCII_CONSOLE_COMMAND = 'G0XÚ';
 const OK_TEXT = 'ok';
 /** 300 mm at 600 mm/min takes 30 s, far longer than any test runs. */
 const LONG_MOVE = 'G1X300F600';
@@ -226,6 +228,22 @@ describe(watchGrblController.name, () => {
       { direction: GRBL_CONSOLE_VIEW_DIRECTION.SENT, text: CONSOLE_COMMAND },
       { direction: GRBL_CONSOLE_VIEW_DIRECTION.RECEIVED, text: OK_TEXT },
     ]);
+  });
+
+  it('a console command with a non-ASCII character is not sent and adds a console error entry', async () => {
+    store = newStore(newTestRig().dependencies);
+    await connectStore(store);
+
+    store.dispatch(new ConsoleCommandSubmitted({ commandText: NON_ASCII_CONSOLE_COMMAND }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+    expect(getLastConsoleEntries(store, 1)).toMatchObject([{
+      direction: GRBL_CONSOLE_VIEW_DIRECTION.ERROR,
+      messageKey: DEFAULT.CONSOLE_NON_ASCII_REJECTED,
+    }]);
+    expect(selectConsoleEntries(store.getState())).not.toContainEqual(
+      expect.objectContaining({ direction: GRBL_CONSOLE_VIEW_DIRECTION.SENT, text: NON_ASCII_CONSOLE_COMMAND }),
+    );
   });
 
   it('stop request during a move ends without alarm', async () => {
