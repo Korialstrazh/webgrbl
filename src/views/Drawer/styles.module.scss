@@ -1,0 +1,40 @@
+// The machine panel sits at the right edge, so the drawer stops short of it and STOP stays visible.
+$machine-panel-width: 22rem;
+
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 26rem;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: -2px;
+  }
+}
+
+.bedSide {
+  right: $machine-panel-width;
+  border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+}

@@ -14,6 +14,7 @@ import { GRBL_CONNECTION_STATE_NAME, grblConnectionReducer } from './grbl.connec
 import { GRBL_CONSOLE_STATE_NAME, grblConsoleReducer } from './grbl.console.state';
 import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
 import { TOAST_STATE_NAME, toastReducer } from './toast.state';
+import { UI_OVERLAY_STATE_NAME, uiOverlayReducer } from './ui.overlay.state';
 
 export const rootReducer = combineReducers({
   [BROWSER_ENVIRONMENT_STATE_NAME]: browserEnvironmentReducer,
@@ -21,4 +22,5 @@ export const rootReducer = combineReducers({
   [MACHINE_STATUS_STATE_NAME]: machineStatusReducer,
   [GRBL_CONSOLE_STATE_NAME]: grblConsoleReducer,
   [TOAST_STATE_NAME]: toastReducer,
+  [UI_OVERLAY_STATE_NAME]: uiOverlayReducer,
 });
