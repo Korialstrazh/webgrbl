@@ -9,9 +9,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Popover } from 'antd';
-import { useRef } from 'react';
-import type { ChangeEvent, ReactElement, ReactNode, RefObject } from 'react';
+import { Button, Popover, Select } from 'antd';
+import type { SelectProps } from 'antd';
+import { useId, useRef } from 'react';
+import type { ReactElement, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -50,12 +51,12 @@ interface ConnectionPopoverProps {
   onOpenChange: (isOpen: boolean) => void;
   /** The control the popover opens from; antd attaches the click handling to it. */
   children: ReactElement;
+  /** The same control as a ref: focus returns to it when the popover closes with focus inside. */
+  anchorRef: RefObject<HTMLElement | null>;
 }
 
-const FOCUSABLE_CONTROL_SELECTOR = 'button:not([disabled]), select:not([disabled])';
-
-const getFocusedHtmlElement = (): HTMLElement | undefined =>
-  document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
+// antd Select takes focus on its combobox input.
+const FOCUSABLE_CONTROL_SELECTOR = 'button:not([disabled]), input[role="combobox"]:not([disabled])';
 
 const isFocusInsideElement = (element: HTMLElement | null): boolean =>
   !!element && element.contains(document.activeElement);
@@ -76,7 +77,7 @@ const getConnectButtonKey = (isConnected: boolean, isConnecting: boolean): strin
   return isConnected ? DEFAULT.CONNECTION_POPOVER_DISCONNECT : DEFAULT.CONNECTION_POPOVER_CONNECT;
 };
 
-export const ConnectionPopover = ({ isOpen, onOpenChange, children }: ConnectionPopoverProps): ReactNode => {
+export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }: ConnectionPopoverProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const connectionStatus: GrblConnectionStatus = useSelector(selectConnectionStatus);
@@ -88,16 +89,23 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children }: Connection
   const isConnecting: boolean = connectionStatus === GRBL_CONNECTION_STATUS.CONNECTING;
   const isLinkLocked: boolean = isConnected || isConnecting;
   const contentRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
-  const openerRef: RefObject<HTMLElement | undefined> = useRef<HTMLElement | undefined>(undefined);
+  const portSelectId: string = useId();
+  const baudSelectId: string = useId();
+  const portOptions: SelectProps<string>['options'] = [
+    { value: SIMULATED_LASER_PORT_ID, label: t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER) },
+    ...availablePorts.map((port: SerialPortDescriptor) => ({ value: port.portId, label: getPortOptionLabel(port, t) })),
+  ];
+  const baudOptions: SelectProps<number>['options'] = GRBL_BAUD_RATES.map((rate: number) => ({
+    value: rate,
+    label: String(rate),
+  }));
 
   useOverlayRegistration(CONNECTION_POPOVER_OVERLAY_ID, isOpen);
 
   const handleOpenChange = (isNextOpen: boolean): void => {
-    if (isNextOpen) {
-      openerRef.current = getFocusedHtmlElement();
-    } else if (isFocusInsideElement(contentRef.current)) {
-      // antd hides the popover without moving focus, which would leave keyboard users on the page body.
-      openerRef.current?.focus();
+    // antd hides the popover without moving focus, which would leave keyboard users on the page body.
+    if (!isNextOpen && isFocusInsideElement(contentRef.current)) {
+      anchorRef.current?.focus();
     }
 
     onOpenChange(isNextOpen);
@@ -121,21 +129,18 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children }: Connection
       aria-label={t(DEFAULT.CONNECTION_POPOVER_LABEL)}
       tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
     >
-      <label className={styles.field}>
-        <span>{t(DEFAULT.CONNECTION_POPOVER_PORT)}</span>
-        <select
+      <div className={styles.field}>
+        <label htmlFor={portSelectId}>{t(DEFAULT.CONNECTION_POPOVER_PORT)}</label>
+        <Select<string>
+          id={portSelectId}
           className={styles.select}
           value={selectedPortId}
+          options={portOptions}
           disabled={isLinkLocked}
-          onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-            dispatch(new SerialPortSelected({ portId: event.target.value }))}
-        >
-          <option value={SIMULATED_LASER_PORT_ID}>{t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER)}</option>
-          {availablePorts.map((port: SerialPortDescriptor) => (
-            <option key={port.portId} value={port.portId}>{getPortOptionLabel(port, t)}</option>
-          ))}
-        </select>
-      </label>
+          virtual={false}
+          onChange={(portId: string) => dispatch(new SerialPortSelected({ portId }))}
+        />
+      </div>
       <Button
         disabled={!isWebSerialSupported || isLinkLocked}
         onClick={() => dispatch(new SerialPortPickerRequested())}
@@ -145,20 +150,18 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children }: Connection
       {!isWebSerialSupported && (
         <p className={styles.unsupportedNotice}>{t(DEFAULT.CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED)}</p>
       )}
-      <label className={styles.field}>
-        <span>{t(DEFAULT.CONNECTION_POPOVER_BAUD)}</span>
-        <select
+      <div className={styles.field}>
+        <label htmlFor={baudSelectId}>{t(DEFAULT.CONNECTION_POPOVER_BAUD)}</label>
+        <Select<number>
+          id={baudSelectId}
           className={styles.select}
           value={baudRate}
+          options={baudOptions}
           disabled={isLinkLocked}
-          onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-            dispatch(new BaudRateSelected({ baudRate: Number(event.target.value) }))}
-        >
-          {GRBL_BAUD_RATES.map((rate: number) => (
-            <option key={rate} value={rate}>{rate}</option>
-          ))}
-        </select>
-      </label>
+          virtual={false}
+          onChange={(nextBaudRate: number) => dispatch(new BaudRateSelected({ baudRate: nextBaudRate }))}
+        />
+      </div>
       <Button
         type={isConnected ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
         disabled={isConnecting}

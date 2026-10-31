@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { useState } from 'react';
-import type { ReactNode } from 'react';
+import { useRef, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
@@ -41,6 +41,7 @@ const getOnlineLabelKey = (isOnline: boolean): string =>
 export const ConnectionPill = (): ReactNode => {
   const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const pillRef: RefObject<HTMLButtonElement | null> = useRef<HTMLButtonElement | null>(null);
   const connectionStatus: GrblConnectionStatus = useSelector(selectConnectionStatus);
   const isConnected: boolean = useSelector(selectIsConnected);
   const isOnline: boolean = useSelector(selectIsOnline);
@@ -50,8 +51,9 @@ export const ConnectionPill = (): ReactNode => {
   const firmwareIdentity: GrblFirmwareIdentity | undefined = useSelector(selectFirmwareIdentity);
 
   return (
-    <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+    <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen} anchorRef={pillRef}>
       <button
+        ref={pillRef}
         type="button"
         className={styles.pill}
         aria-haspopup={POPUP_KIND_DIALOG}

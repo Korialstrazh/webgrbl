@@ -111,7 +111,7 @@ describe(ConnectionPill.name, () => {
 
     const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
 
-    pillButton.focus();
+    // Not focused first: Safari and Firefox on macOS do not focus a clicked button.
     fireEvent.click(pillButton);
 
     await waitFor(() => {

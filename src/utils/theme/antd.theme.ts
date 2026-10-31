@@ -97,6 +97,18 @@ export const ANTD_THEME: ThemeConfig = {
       colorPrimary: COLOR_ACCENT,
       colorPrimaryHover: COLOR_ACCENT_HOVER,
     },
+    Slider: {
+      trackBg: COLOR_ACCENT,
+      trackHoverBg: COLOR_ACCENT_HOVER,
+      handleColor: COLOR_ACCENT,
+      handleActiveColor: COLOR_ACCENT_HOVER,
+      railBg: COLOR_SURFACE_3,
+    },
+    Select: {
+      hoverBorderColor: COLOR_ACCENT_HOVER,
+      activeBorderColor: COLOR_ACCENT,
+      optionSelectedBg: COLOR_SURFACE_3,
+    },
     Segmented: {
       trackBg: COLOR_SURFACE_1,
       itemColor: COLOR_TEXT_MUTED,

@@ -9,6 +9,7 @@ import type { AppStore } from '../../utils/states/new.store';
 
 const STOP_LABEL = 'Stop';
 // antd's classes for a solid danger button in the large size: the most prominent button on the page.
+// After an antd upgrade, check these class names in the rendered button if this test fails.
 const PROMINENT_DANGER_CLASS_NAMES: readonly string[] = [
   'ant-btn-color-dangerous',
   'ant-btn-variant-solid',

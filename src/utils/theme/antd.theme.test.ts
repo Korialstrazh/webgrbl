@@ -49,6 +49,18 @@ const SWITCH_TOKEN_SOURCES = [
   ['colorPrimary', '--color-accent'],
   ['colorPrimaryHover', '--color-accent-hover'],
 ] as const;
+const SLIDER_TOKEN_SOURCES = [
+  ['trackBg', '--color-accent'],
+  ['trackHoverBg', '--color-accent-hover'],
+  ['handleColor', '--color-accent'],
+  ['handleActiveColor', '--color-accent-hover'],
+  ['railBg', '--color-surface-3'],
+] as const;
+const SELECT_TOKEN_SOURCES = [
+  ['hoverBorderColor', '--color-accent-hover'],
+  ['activeBorderColor', '--color-accent'],
+  ['optionSelectedBg', '--color-surface-3'],
+] as const;
 const SEGMENTED_TOKEN_SOURCES = [
   ['trackBg', '--color-surface-1'],
   ['itemColor', '--color-text-muted'],
@@ -67,6 +79,8 @@ const layoutTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Layout
 const buttonTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Button };
 const segmentedTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Segmented };
 const switchTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Switch };
+const sliderTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Slider };
+const selectTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Select };
 
 const requireScssToken = (name: string): string => {
   const value: string | undefined = getScssTokenValue(source, name);
@@ -123,5 +137,13 @@ describe('ANTD_THEME', () => {
 
   it.each(SWITCH_TOKEN_SOURCES)('paints the switch %s from %s', (switchToken: string, scssToken: string) => {
     expect(switchTokens[switchToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(SLIDER_TOKEN_SOURCES)('paints the slider %s from %s', (sliderToken: string, scssToken: string) => {
+    expect(sliderTokens[sliderToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(SELECT_TOKEN_SOURCES)('paints the select %s from %s', (selectToken: string, scssToken: string) => {
+    expect(selectTokens[selectToken]).toBe(requireScssToken(scssToken));
   });
 });
