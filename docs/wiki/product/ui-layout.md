@@ -26,7 +26,7 @@ The approved screen layout of webgrbl and the order in which features get built.
   - fonts Inter and JetBrains Mono, self-hosted;
   - 44 px targets for machine controls.
 - **Roadmap:**
-  1. App shell and design system.
+  1. ~~App shell and design system.~~ Done: see [[app-shell]] and [[ui-components]].
   2. Machine control and machine profiles.
   3. Projects and SVG import (Dexie autosave, undo/redo).
   4. Layers and power mapping, G-code, toolpath preview.

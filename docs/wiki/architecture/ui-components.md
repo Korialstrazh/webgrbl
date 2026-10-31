@@ -9,8 +9,9 @@ The design tokens, the shared presentational components in `src/views/`, and the
 
 ## Key Takeaways
 
-- **Tokens.** `src/styles/tokens.scss` defines every colour, radius (6 / 8 / 10 / 14 px, written in rem), spacing step, font family and the 2.75 rem machine-control target (`--target-min`) as CSS custom properties on `:root`. Components use `var(--...)` only. Text contrast is held at 4.5:1 or better, checked by `tokens.contrast.test.ts`; danger buttons use `--color-danger-button` because the plain danger colour is too light under light text. `--color-focus-ring` is the shared keyboard focus outline. Fonts (Inter, JetBrains Mono) are self-hosted in `src/styles/fonts/`.
+- **Tokens.** `src/styles/tokens.scss` defines every colour, radius (6 / 8 / 10 / 14 px, written in rem), spacing step, font family and the 2.75 rem machine-control target (`--target-min`) as CSS custom properties on `:root`. Components use `var(--...)` only. Text contrast is held at 4.5:1 or better, checked by `tokens.contrast.test.ts`; danger buttons use `--color-danger-button` (with hover and active steps) because the plain danger colour is too light under light text. `--color-focus-ring`, `--focus-outline-width` and `--focus-outline-offset` make up the shared keyboard focus outline. `--control-height` (2.25 rem) is the height of compact controls, `--radius-pill` the fully rounded pill radius (connection pill, toggles). Fonts (Inter, JetBrains Mono) are self-hosted in `src/styles/fonts/`.
 - **Base views.** `Button` (variants, sizes, types from `button.constants.ts`; large buttons meet the touch target), `IconButton` (icon only, label is the accessible name), `Toggle`, `SegmentedControl` and `Panel` (titled section with an optional header action). All are Redux-free and take values and callbacks as props.
+- **Other views.** `BedView` (the bed drawn to scale as SVG, see [[app-shell]]) and `ConsoleEntryList` (console lines) are also Redux-free views.
 - **ComingSoon.** Wraps a not-yet-built region: shows a "Coming soon" badge and description, renders the children `inert` with `aria-disabled="true"`, and stops click and key events in the capture phase, so nothing inside can dispatch an action.
 - **Overlays are views.** `Popover` (`{ isOpen, onClose, anchorLabel, children }`, non-modal), `Dialog` (`{ isOpen, title, onClose, children, footerComponent? }`, modal) and `Drawer` (`{ isOpen, title, onClose, children }`, modal) render nothing while closed and never touch Redux. Dialog and Drawer have `role="dialog"`, `aria-modal="true"` and `aria-labelledby` the title; the Popover is labelled by `anchorLabel`.
 - **Drawer position.** The Drawer carries the `bedSide` class: it is fixed to the left of the right machine panel (`right` equals the panel width), so it never covers STOP.
@@ -22,7 +23,7 @@ The design tokens, the shared presentational components in `src/views/`, and the
 
 - `src/styles/tokens.scss`, `src/styles/fonts.scss`, `src/styles/fonts/`, `src/styles/tokens.contrast.test.ts`
 - `src/views/Button/`, `src/views/IconButton/`, `src/views/Toggle/`, `src/views/SegmentedControl/`, `src/views/Panel/`
-- `src/views/ComingSoon/`
+- `src/views/ComingSoon/`, `src/views/BedView/`, `src/views/ConsoleEntryList/`
 - `src/views/Popover/`, `src/views/Dialog/`, `src/views/Drawer/`
 - `src/utils/states/ui.overlay.state.ts`, `src/utils/states/interfaces/OverlayRegistryPayload.ts`
 - `src/utils/hooks/use.overlay.registration.ts`, `src/utils/hooks/use.overlay.focus.ts`
