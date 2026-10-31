@@ -12,6 +12,8 @@ import { combineReducers } from '@reduxjs/toolkit';
 import { BROWSER_ENVIRONMENT_STATE_NAME, browserEnvironmentReducer } from './browser.environment.state';
 import { GRBL_CONNECTION_STATE_NAME, grblConnectionReducer } from './grbl.connection.state';
 import { GRBL_CONSOLE_STATE_NAME, grblConsoleReducer } from './grbl.console.state';
+import { LASER_POINTER_STATE_NAME, laserPointerReducer } from './laser.pointer.state';
+import { MACHINE_PROFILE_STATE_NAME, machineProfileReducer } from './machine.profile.state';
 import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
 import { TOAST_STATE_NAME, toastReducer } from './toast.state';
 import { UI_OVERLAY_STATE_NAME, uiOverlayReducer } from './ui.overlay.state';
@@ -20,6 +22,8 @@ export const rootReducer = combineReducers({
   [BROWSER_ENVIRONMENT_STATE_NAME]: browserEnvironmentReducer,
   [GRBL_CONNECTION_STATE_NAME]: grblConnectionReducer,
   [MACHINE_STATUS_STATE_NAME]: machineStatusReducer,
+  [MACHINE_PROFILE_STATE_NAME]: machineProfileReducer,
+  [LASER_POINTER_STATE_NAME]: laserPointerReducer,
   [GRBL_CONSOLE_STATE_NAME]: grblConsoleReducer,
   [TOAST_STATE_NAME]: toastReducer,
   [UI_OVERLAY_STATE_NAME]: uiOverlayReducer,

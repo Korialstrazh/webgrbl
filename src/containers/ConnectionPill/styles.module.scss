@@ -50,6 +50,13 @@
   color: var(--color-text-muted);
 }
 
+.profile {
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .indicator {
   padding: 0.125rem var(--space-2);
   border-radius: var(--radius-sm);

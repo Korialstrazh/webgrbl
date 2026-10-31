@@ -128,29 +128,29 @@ Some features touch several areas. Their articles cross-link each other, and the
 
 | ID | Feature | Scope | Status |
 | --- | --- | --- | --- |
-| LG-CTRL-01 | [[lg-machine-control#LG-CTRL-01 Jog panel (directional pad, step and speed)\|Jog panel (directional pad, step and speed)]] | core | not started |
-| LG-CTRL-02 | [[lg-machine-control#LG-CTRL-02 Step jog command generation\|Step jog command generation]] | core | not started |
+| LG-CTRL-01 | [[lg-machine-control#LG-CTRL-01 Jog panel (directional pad, step and speed)\|Jog panel (directional pad, step and speed)]] | core | done |
+| LG-CTRL-02 | [[lg-machine-control#LG-CTRL-02 Step jog command generation\|Step jog command generation]] | core | done |
 | LG-CTRL-03 | [[lg-machine-control#LG-CTRL-03 Continuous jog\|Continuous jog]] | core | not started |
 | LG-CTRL-04 | [[lg-machine-control#LG-CTRL-04 Z jog\|Z jog]] | core | not started |
 | LG-CTRL-05 | [[lg-machine-control#LG-CTRL-05 Click-to-jog on the preview\|Click-to-jog on the preview]] | core | not started |
-| LG-CTRL-06 | [[lg-machine-control#LG-CTRL-06 Go to work origin ("Home" jog button)\|Go to work origin ("Home" jog button)]] | core | not started |
-| LG-CTRL-07 | [[lg-machine-control#LG-CTRL-07 Homing cycle\|Homing cycle]] | core | not started |
-| LG-CTRL-08 | [[lg-machine-control#LG-CTRL-08 Unlock / kill alarm\|Unlock / kill alarm]] | core | not started |
+| LG-CTRL-06 | [[lg-machine-control#LG-CTRL-06 Go to work origin ("Home" jog button)\|Go to work origin ("Home" jog button)]] | core | done |
+| LG-CTRL-07 | [[lg-machine-control#LG-CTRL-07 Homing cycle\|Homing cycle]] | core | done |
+| LG-CTRL-08 | [[lg-machine-control#LG-CTRL-08 Unlock / kill alarm\|Unlock / kill alarm]] | core | done |
 | LG-CTRL-09 | [[lg-machine-control#LG-CTRL-09 Soft reset\|Soft reset]] | core | not started |
 | LG-CTRL-10 | [[lg-machine-control#LG-CTRL-10 Feed hold / resume\|Feed hold / resume]] | core | not started |
-| LG-CTRL-11 | [[lg-machine-control#LG-CTRL-11 Set work zero\|Set work zero]] | core | not started |
+| LG-CTRL-11 | [[lg-machine-control#LG-CTRL-11 Set work zero\|Set work zero]] | core | done |
 | LG-CTRL-12 | [[lg-machine-control#LG-CTRL-12 Realtime overrides (feed, rapid, power)\|Realtime overrides (feed, rapid, power)]] | core | not started |
 | LG-CTRL-13 | [[lg-machine-control#LG-CTRL-13 Machine status display\|Machine status display]] | core | not started |
 | LG-CTRL-14 | [[lg-machine-control#LG-CTRL-14 Position display (machine vs work coordinates)\|Position display (machine vs work coordinates)]] | core | not started |
 | LG-CTRL-15 | [[lg-machine-control#LG-CTRL-15 Custom buttons: types and enable conditions\|Custom buttons: types and enable conditions]] | core | not started |
 | LG-CTRL-16 | [[lg-machine-control#LG-CTRL-16 Custom button code language (placeholders, expressions, realtime bytes)\|Custom button code language (placeholders, expressions, realtime bytes)]] | core | not started |
 | LG-CTRL-17 | [[lg-machine-control#LG-CTRL-17 Custom button management: storage, import/export, reorder\|Custom button management: storage, import/export, reorder]] | core | not started |
-| LG-CTRL-18 | [[lg-machine-control#LG-CTRL-18 Default button set: framing and laser test fire\|Default button set: framing and laser test fire]] | core | not started |
+| LG-CTRL-18 | [[lg-machine-control#LG-CTRL-18 Default button set: framing and laser test fire\|Default button set: framing and laser test fire]] | core | in progress |
 | LG-CTRL-19 | [[lg-machine-control#LG-CTRL-19 Hotkeys: actions and default bindings\|Hotkeys: actions and default bindings]] | core | not started |
 | LG-CTRL-20 | [[lg-machine-control#LG-CTRL-20 Hotkey editor\|Hotkey editor]] | core | not started |
 | LG-CTRL-21 | [[lg-machine-control#LG-CTRL-21 Laser head selection (laser life counter)\|Laser head selection (laser life counter)]] | later | not started |
 | LG-CTRL-22 | [[lg-machine-control#LG-CTRL-22 Firmware-specific control differences\|Firmware-specific control differences]] | core | not started |
-| LG-CTRL-23 | [[lg-machine-control#LG-CTRL-23 Command availability gates\|Command availability gates]] | core | not started |
+| LG-CTRL-23 | [[lg-machine-control#LG-CTRL-23 Command availability gates\|Command availability gates]] | core | in progress |
 
 ### GRBL configuration - [[lg-grbl-configuration]]
 

@@ -63,8 +63,9 @@ Exactly one STOP is rendered: `StopButton`, an antd `Button` with `type="primary
 
 ## Bed sizing
 
-`getBedDimensions` (`src/utils/bed/`) sizes the bed from GRBL `$130` (X) and `$131` (Y) max travel in mm:
+`getBedDimensions` (`src/utils/bed/`) sizes the bed from the active machine profile (`selectActiveMachineProfile`), or else from GRBL `$130` (X) and `$131` (Y) max travel in mm:
 
+- An active profile with a work area above 0 and at most 5000 mm sets the size, connected or not, with no placeholder.
 - Each value must be a finite number above 0 and at most 5000 mm; otherwise a 400 mm square is drawn.
 - Disconnected: the 400 mm square with the "no machine" placeholder. Connected without usable `$130`/`$131`: the square with the "size unknown" placeholder.
 - `BedView` draws the head crosshair at the machine position and the work zero marker from the work coordinate offset. A head outside the bed is clamped to the nearest edge and the aria label says it is outside the bed.

@@ -1,5 +1,6 @@
 /**
- * The top region: app name, project placeholder, menus that are not built yet, the connection pill and update notice.
+ * The top region: app name, project placeholder, the machine profiles dialog, menus that are not built yet, the
+ * connection pill and update notice.
  *
  * @author michael.morosov
  *
@@ -9,6 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button, Layout } from 'antd';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
@@ -17,11 +19,13 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import { ComingSoon } from '../../views/ComingSoon';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
+import { MachineProfilesDialog } from '../MachineProfilesDialog';
 import styles from './styles.module.scss';
 import { TOP_BAR_MENU_LABEL_KEYS } from './top.bar.constants';
 
 export const TopBar = (): ReactNode => {
   const { t } = useTranslation();
+  const [isProfilesDialogOpen, setIsProfilesDialogOpen] = useState<boolean>(false);
 
   return (
     <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
@@ -29,6 +33,11 @@ export const TopBar = (): ReactNode => {
       <div className={styles.heading}>
         <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
         <p className={styles.project}>{t(DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER)}</p>
+      </div>
+      <div className={[styles.group, styles.activeMenus].join(' ')}>
+        <Button type={ANTD_BUTTON_TYPE_TEXT} onClick={() => setIsProfilesDialogOpen(true)}>
+          {t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
+        </Button>
       </div>
       <div className={styles.comingSoonGroups}>
         <ComingSoon description={t(DEFAULT.TOP_BAR_MENUS_DESCRIPTION)}>
@@ -62,6 +71,7 @@ export const TopBar = (): ReactNode => {
         <AppUpdatePrompt />
         <ConnectionPill />
       </div>
+      <MachineProfilesDialog isOpen={isProfilesDialogOpen} onClose={() => setIsProfilesDialogOpen(false)} />
     </Layout.Header>
   );
 };

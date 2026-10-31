@@ -23,3 +23,8 @@ beforeEach(resetMatchMediaMock);
 
 // jsdom has no ResizeObserver, and antd needs one to place popovers.
 installResizeObserverMock();
+
+// jsdom keeps localStorage for the whole test file, and stores persist what sagas write, so every test starts empty.
+afterEach(() => {
+  localStorage.clear();
+});

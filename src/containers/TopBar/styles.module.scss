@@ -15,8 +15,9 @@
   @include layout.fixed-height-bar(layout.$top-bar-height);
 }
 
-// The title and the connection pill always stay visible; the coming-soon groups give up space first.
+// The title, the built menus and the connection pill always stay visible; the coming-soon groups give up space first.
 .heading,
+.activeMenus,
 .trailing {
   flex-shrink: 0;
 }

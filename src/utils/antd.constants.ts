@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { ButtonProps, PopoverProps } from 'antd';
+import type { AlertProps, ButtonProps, FormItemProps, FormProps, InputNumberProps, MenuProps, PopoverProps } from 'antd';
 
 /** The compact button size, for actions inside a chip or a bar. */
 export const ANTD_BUTTON_SIZE_SMALL: ButtonProps['size'] = 'small';
@@ -30,3 +30,21 @@ export const ANTD_POPOVER_TRIGGER_CLICK: PopoverProps['trigger'] = 'click';
 
 /** The popover opens below its anchor, aligned to the anchor's right edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT: PopoverProps['placement'] = 'bottomRight';
+
+/** Form labels sit above their fields. */
+export const ANTD_FORM_LAYOUT_VERTICAL: FormProps['layout'] = 'vertical';
+
+/** A form field drawn in the error colour, with its help text as the error message. */
+export const ANTD_FORM_ITEM_STATUS_ERROR: FormItemProps['validateStatus'] = 'error';
+
+/** An alert in the neutral information colour. */
+export const ANTD_ALERT_TYPE_INFO: AlertProps['type'] = 'info';
+
+/** An alert in the warning colour, for something the user should fix. */
+export const ANTD_ALERT_TYPE_WARNING: AlertProps['type'] = 'warning';
+
+/** A menu that lists its items one below the other inside its container. */
+export const ANTD_MENU_MODE_INLINE: MenuProps['mode'] = 'inline';
+
+/** A number input that shows and accepts whole numbers only. */
+export const ANTD_INPUT_NUMBER_PRECISION_INTEGER: InputNumberProps['precision'] = 0;

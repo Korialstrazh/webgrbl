@@ -5,7 +5,10 @@ import { ESCAPE_KEY, OFFLINE_EVENT_NAME } from '../../utils/browser/browser.even
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
+import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
+import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
@@ -20,6 +23,8 @@ const POPOVER_LABEL = 'Laser connection';
 const NO_WEB_SERIAL_LABEL = 'No Web Serial';
 const SIMULATED_LASER_LABEL = 'Simulated laser';
 const PORT_LABEL = 'Port';
+const PROFILE_NAME = 'Workshop laser';
+const PILL_WITH_PROFILE_PATTERN = /Disconnected.*Workshop laser/;
 const STATUS_LABELS: Record<GrblConnectionStatus, string> = {
   [GRBL_CONNECTION_STATUS.DISCONNECTED]: 'Disconnected',
   [GRBL_CONNECTION_STATUS.CONNECTING]: 'Connecting',
@@ -120,6 +125,20 @@ describe(ConnectionPill.name, () => {
     fireEvent.keyDown(screen.getByLabelText(PORT_LABEL), { key: ESCAPE_KEY });
 
     expect(pillButton).toHaveFocus();
+  });
+
+  it('shows the name of the active machine profile', () => {
+    const store: AppStore = renderConnectionPill();
+    const profile: MachineProfile = newMachineProfile({ name: PROFILE_NAME });
+
+    expect(screen.queryByText(PROFILE_NAME)).not.toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new MachineProfileSaved({ profile }));
+      store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    });
+
+    expect(screen.getByRole('button', { name: PILL_WITH_PROFILE_PATTERN })).toBeInTheDocument();
   });
 
   it('switches to offline when the browser loses its connection', () => {
