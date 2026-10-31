@@ -25,6 +25,7 @@ import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { DEFAULT_MACHINE_JOG_FEED_RATE } from '../../../utils/profiles/machine.profile.constants';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
+import { selectIsLaserPointerFiring } from '../../../utils/states/laser.pointer.state';
 import { selectActiveMachineProfile } from '../../../utils/states/machine.profile.state';
 import { MachineLineRequested, selectMachineStatus } from '../../../utils/states/machine.status.state';
 import type { AppDispatch } from '../../../utils/states/new.store';
@@ -41,13 +42,15 @@ export const MoveCard = (): ReactNode => {
   const isConnected: boolean = useSelector(selectIsConnected);
   const machineStatus: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const isPointerFiring: boolean = useSelector(selectIsLaserPointerFiring);
   const [stepMm, setStepMm] = useState<number>(DEFAULT_JOG_STEP_MM);
   const feedRate: number = activeProfile?.jogFeedRate ?? DEFAULT_MACHINE_JOG_FEED_RATE;
-  const { canJog, canHome, canSetZero }: MoveAvailability = getMoveAvailability(
+  const { canJog, canHome, canSetZero }: MoveAvailability = getMoveAvailability({
     isConnected,
-    machineStatus?.machineState,
-    activeProfile?.hasHomingSwitches ?? false,
-  );
+    machineState: machineStatus?.machineState,
+    hasHomingSwitches: activeProfile?.hasHomingSwitches ?? false,
+    isPointerFiring,
+  });
   const stepOptions: JogStepOption[] = JOG_STEP_SIZES_MM.map((distance: number) => ({
     value: distance,
     label: t(DEFAULT.MACHINE_MOVE_STEP_OPTION, { distance }),

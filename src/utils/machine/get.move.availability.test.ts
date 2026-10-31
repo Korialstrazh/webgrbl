@@ -1,18 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
-import type { GrblMachineState } from '../grbl/grbl.constants';
 import { getMoveAvailability } from './get.move.availability';
 import type { MoveAvailability } from './interfaces/MoveAvailability';
+import type { MoveAvailabilityConditions } from './interfaces/MoveAvailabilityConditions';
 
-interface MoveAvailabilityCase {
+interface MoveAvailabilityCase extends MoveAvailabilityConditions {
   /** What the row checks, shown as the test name. */
   caseName: string;
-  /** Whether the laser is connected. */
-  isConnected: boolean;
-  /** The last reported machine state. */
-  machineState: GrblMachineState | undefined;
-  /** Whether the active profile has homing switches. */
-  hasHomingSwitches: boolean;
   /** The controls expected to be enabled. */
   expectedAvailability: MoveAvailability;
 }
@@ -25,6 +19,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: GRBL_MACHINE_STATE.IDLE,
     hasHomingSwitches: true,
+    isPointerFiring: false,
     expectedAvailability: { canJog: true, canHome: true, canSetZero: true },
   },
   {
@@ -32,6 +27,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: GRBL_MACHINE_STATE.IDLE,
     hasHomingSwitches: false,
+    isPointerFiring: false,
     expectedAvailability: { canJog: true, canHome: false, canSetZero: true },
   },
   {
@@ -39,6 +35,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: GRBL_MACHINE_STATE.JOG,
     hasHomingSwitches: true,
+    isPointerFiring: false,
     expectedAvailability: { canJog: true, canHome: false, canSetZero: false },
   },
   {
@@ -46,6 +43,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: GRBL_MACHINE_STATE.ALARM,
     hasHomingSwitches: true,
+    isPointerFiring: false,
     expectedAvailability: { canJog: false, canHome: true, canSetZero: false },
   },
   {
@@ -53,6 +51,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: GRBL_MACHINE_STATE.ALARM,
     hasHomingSwitches: false,
+    isPointerFiring: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -60,6 +59,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: GRBL_MACHINE_STATE.RUN,
     hasHomingSwitches: true,
+    isPointerFiring: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -67,6 +67,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: GRBL_MACHINE_STATE.HOLD,
     hasHomingSwitches: true,
+    isPointerFiring: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -74,6 +75,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: GRBL_MACHINE_STATE.DOOR,
     hasHomingSwitches: true,
+    isPointerFiring: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -81,6 +83,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: true,
     machineState: undefined,
     hasHomingSwitches: true,
+    isPointerFiring: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -88,15 +91,29 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isConnected: false,
     machineState: GRBL_MACHINE_STATE.IDLE,
     hasHomingSwitches: true,
+    isPointerFiring: false,
+    expectedAvailability: NOTHING_AVAILABLE,
+  },
+  {
+    caseName: 'Idle with homing allows nothing while the pointer fires',
+    isConnected: true,
+    machineState: GRBL_MACHINE_STATE.IDLE,
+    hasHomingSwitches: true,
+    isPointerFiring: true,
+    expectedAvailability: NOTHING_AVAILABLE,
+  },
+  {
+    caseName: 'Alarm with homing allows nothing while the pointer fires',
+    isConnected: true,
+    machineState: GRBL_MACHINE_STATE.ALARM,
+    hasHomingSwitches: true,
+    isPointerFiring: true,
     expectedAvailability: NOTHING_AVAILABLE,
   },
 ];
 
 describe(getMoveAvailability.name, () => {
-  it.each(MOVE_AVAILABILITY_CASES)(
-    '$caseName',
-    ({ isConnected, machineState, hasHomingSwitches, expectedAvailability }: MoveAvailabilityCase) => {
-      expect(getMoveAvailability(isConnected, machineState, hasHomingSwitches)).toEqual(expectedAvailability);
-    },
-  );
+  it.each(MOVE_AVAILABILITY_CASES)('$caseName', ({ caseName, expectedAvailability, ...conditions }: MoveAvailabilityCase) => {
+    expect(getMoveAvailability(conditions), caseName).toEqual(expectedAvailability);
+  });
 });
