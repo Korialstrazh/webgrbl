@@ -6,8 +6,12 @@ import { Action } from './action';
 import { ConnectionStatusChanged } from './grbl.connection.state';
 import {
   MACHINE_STATUS_STATE_NAME,
+  MachineAirAssistChanged,
+  MachineResetRequested,
   MachineStatusReceived,
+  MachineStopRequested,
   machineStatusReducer,
+  selectIsAirAssistOn,
   selectIsMachineInAlarm,
   selectIsMachineMoving,
   selectMachineStatus,
@@ -35,8 +39,11 @@ const getStatus = (machineState: GrblMachineState, machineSubstate?: number): Gr
 });
 
 const getRootState = (status: GrblResolvedStatus | undefined): { [MACHINE_STATUS_STATE_NAME]: MachineStatusState } => ({
-  [MACHINE_STATUS_STATE_NAME]: { status },
+  [MACHINE_STATUS_STATE_NAME]: { status, isAirAssistOn: false },
 });
+
+const AIR_ASSIST_ON_STATE: MachineStatusState =
+  machineStatusReducer(undefined, new MachineAirAssistChanged({ isAirAssistOn: true }));
 
 describe(machineStatusReducer.name, () => {
   it('stores a received status', () => {
@@ -77,6 +84,33 @@ describe(machineStatusReducer.name, () => {
     const previous: MachineStatusState = machineStatusReducer(undefined, new UnknownAction());
 
     expect(machineStatusReducer(previous, new UnknownAction())).toBe(previous);
+  });
+});
+
+describe('air assist tracking', () => {
+  it('starts off and follows the requested air assist', () => {
+    expect(selectIsAirAssistOn({ [MACHINE_STATUS_STATE_NAME]: machineStatusReducer(undefined, new UnknownAction()) }))
+      .toBe(false);
+    expect(selectIsAirAssistOn({ [MACHINE_STATUS_STATE_NAME]: AIR_ASSIST_ON_STATE })).toBe(true);
+    expect(machineStatusReducer(AIR_ASSIST_ON_STATE, new MachineAirAssistChanged({ isAirAssistOn: false }))
+      .isAirAssistOn).toBe(false);
+  });
+
+  it.each([
+    ['Stop', new MachineStopRequested()],
+    ['Reset', new MachineResetRequested()],
+    ['a disconnect', new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED })],
+    ['a lost connection', new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.LOST })],
+  ])('turns off on %s', (_resetName: string, resetAction: Action<unknown>) => {
+    expect(machineStatusReducer(AIR_ASSIST_ON_STATE, resetAction).isAirAssistOn).toBe(false);
+  });
+
+  it('keeps air assist for a status report', () => {
+    const statusReceived: MachineStatusReceived =
+      new MachineStatusReceived({ status: getStatus(GRBL_MACHINE_STATE.IDLE) });
+    const state: MachineStatusState = machineStatusReducer(AIR_ASSIST_ON_STATE, statusReceived);
+
+    expect(state.isAirAssistOn).toBe(true);
   });
 });
 

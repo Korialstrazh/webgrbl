@@ -8,6 +8,7 @@ import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
+import { LaserPointerFiringStarted, LaserPointerFiringStopped } from '../../../utils/states/laser.pointer.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
 import { MachineLineRequested, MachineStatusReceived } from '../../../utils/states/machine.status.state';
 import { newStore } from '../../../utils/states/new.store';
@@ -132,6 +133,31 @@ describe(MoveCard.name, () => {
     receiveState(store, GRBL_MACHINE_STATE.JOG);
 
     expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeEnabled();
+  });
+
+  it('locks jog, go-to-zero, Home and Set zero while the pointer fires', () => {
+    const store: AppStore = newStore();
+    const moveButtonLabels: string[] = [JOG_NORTH_EAST_LABEL, JOG_ORIGIN_LABEL, HOME_LABEL, SET_ZERO_LABEL];
+
+    renderMoveCard(store);
+    activateProfile(store, { hasHomingSwitches: true });
+    connect(store);
+    receiveState(store, GRBL_MACHINE_STATE.IDLE);
+    act(() => {
+      store.dispatch(new LaserPointerFiringStarted());
+    });
+
+    for (const label of moveButtonLabels) {
+      expect(screen.getByRole('button', { name: label })).toBeDisabled();
+    }
+
+    act(() => {
+      store.dispatch(new LaserPointerFiringStopped());
+    });
+
+    for (const label of moveButtonLabels) {
+      expect(screen.getByRole('button', { name: label })).toBeEnabled();
+    }
   });
 
   it('hides Home without homing switches', () => {

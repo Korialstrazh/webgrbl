@@ -71,7 +71,9 @@ const READ_HOMING_ON_TEXT = 'Homing switches: yes';
 const READ_NOTHING_TEXT = 'The laser reported none of these settings, so the form was not changed.';
 const PARTIAL_WORK_AREA_Y_MM = 200;
 const DRAFT_WORK_AREA_X_MM = 300;
-const LASER_MODE_OFF_PATTERN = /Laser mode is off/;
+const LASER_MODE_OFF_PATTERN = /reports laser mode off/;
+const LASER_MODE_OFF_TEXT = 'This laser reports laser mode off ($32=0), so it may burn spots where it slows down. Send '
+  + '$32=1 in the console to turn it on.';
 const STOP_SETTLE_MS = GRBL_HOLD_COMPLETE_MAX_WAIT_MS + GRBL_STATUS_POLL_INTERVAL_MS + ANSWER_SETTLE_MS;
 const EXPORT_FILE_NAME = 'webgrbl-machine-profiles.json';
 const EXPORT_OBJECT_URL = 'blob:machine-profiles';
@@ -132,7 +134,7 @@ const newDocumentText = (profiles: MachineProfile[]): string => JSON.stringify({
 } satisfies MachineProfilesDocument);
 
 describe(MachineProfilesDialog.name, () => {
-  it('creates, edits, saves and activates a profile', () => {
+  it('creates and saves a profile without activating it', () => {
     const store: AppStore = newStore();
 
     renderDialog(store);
@@ -144,17 +146,29 @@ describe(MachineProfilesDialog.name, () => {
       expect.objectContaining({ name: WORKSHOP_NAME, workAreaXMm: EDITED_WORK_AREA_X_MM }),
     ]);
     expect(selectActiveMachineProfile(store.getState())).toBeUndefined();
+  });
 
+  it('sets the selected profile active', () => {
+    const store: AppStore = newStore();
+
+    saveProfile(store, { name: WORKSHOP_NAME });
+    renderDialog(store);
     clickButton(SET_ACTIVE_LABEL);
 
     expect(selectActiveMachineProfile(store.getState())?.name).toBe(WORKSHOP_NAME);
     expect(screen.getByRole('menuitem', { name: ACTIVE_PATTERN })).toHaveTextContent(WORKSHOP_NAME);
+  });
 
+  it('edits and saves an existing profile in place', () => {
+    const store: AppStore = newStore();
+    const workshopProfile: MachineProfile = saveProfile(store, { name: WORKSHOP_NAME });
+
+    renderDialog(store);
     changeField(MAX_POWER_LABEL, EDITED_MAX_POWER_WATTS);
     clickButton(SAVE_LABEL);
 
     expect(selectMachineProfiles(store.getState())).toEqual([
-      expect.objectContaining({ name: WORKSHOP_NAME, maxPowerWatts: EDITED_MAX_POWER_WATTS }),
+      { ...workshopProfile, maxPowerWatts: EDITED_MAX_POWER_WATTS },
     ]);
   });
 
@@ -293,7 +307,7 @@ describe(MachineProfilesDialog.name, () => {
       connectWithSettings(store, LASER_MODE_OFF_SETTINGS);
       clickButton(READ_FROM_LASER_LABEL);
 
-      expect(screen.getByText(LASER_MODE_OFF_PATTERN)).toBeInTheDocument();
+      expect(screen.getByText(LASER_MODE_OFF_TEXT)).toBeInTheDocument();
     });
 
     it('reads only the reported values and gives no laser mode warning without $32', () => {

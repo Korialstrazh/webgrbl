@@ -10,7 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button, Slider, Switch } from 'antd';
-import { useId, useState } from 'react';
+import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,7 +19,9 @@ import { doNothing } from '../../../utils/do.nothing';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getPointerApproximateWatts } from '../../../utils/machine/get.pointer.approximate.watts';
 import {
+  MAX_POINTER_HOLD_MS,
   MAX_POINTER_POWER_PERCENT,
+  MILLISECONDS_PER_SECOND,
   MIN_POINTER_POWER_PERCENT,
   POINTER_POWER_STEP_PERCENT,
 } from '../../../utils/machine/machine.command.constants';
@@ -28,15 +30,16 @@ import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineP
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
 import { LaserPointerPowerChanged, selectLaserPointerPowerPercent } from '../../../utils/states/laser.pointer.state';
 import { selectActiveMachineProfile } from '../../../utils/states/machine.profile.state';
-import { MachineLineRequested } from '../../../utils/states/machine.status.state';
+import {
+  MachineAirAssistChanged,
+  MachineLineRequested,
+  selectIsAirAssistOn,
+} from '../../../utils/states/machine.status.state';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { ComingSoon } from '../../../views/ComingSoon';
 import { Panel } from '../../../views/Panel';
 import { PointerFireButton } from './PointerFireButton';
 import styles from './styles.module.scss';
-
-const hasStaleAirAssistState = (isDisconnected: boolean, isAirAssistOn: boolean): boolean =>
-  isDisconnected && isAirAssistOn;
 
 export const LaserCard = (): ReactNode => {
   const { t } = useTranslation();
@@ -45,16 +48,11 @@ export const LaserCard = (): ReactNode => {
   const isConnected: boolean = useSelector(selectIsConnected);
   const powerPercent: number = useSelector(selectLaserPointerPowerPercent);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const [isAirAssistOn, setIsAirAssistOn] = useState<boolean>(false);
+  const isAirAssistOn: boolean = useSelector(selectIsAirAssistOn);
   const isDisconnected: boolean = !isConnected;
 
-  // The laser's own air assist state is unknown after the connection ends, so the switch starts over as off.
-  if (hasStaleAirAssistState(isDisconnected, isAirAssistOn)) {
-    setIsAirAssistOn(false);
-  }
-
   const changeAirAssist = (isOn: boolean): void => {
-    setIsAirAssistOn(isOn);
+    dispatch(new MachineAirAssistChanged({ isAirAssistOn: isOn }));
     dispatch(new MachineLineRequested({ line: isOn ? MACHINE_COMMAND.AIR_ON : MACHINE_COMMAND.AIR_OFF }));
   };
 
@@ -80,7 +78,9 @@ export const LaserCard = (): ReactNode => {
           )}
         </div>
         <PointerFireButton />
-        <p className={styles.firmwareNote}>{t(DEFAULT.MACHINE_LASER_FIRMWARE_NOTE)}</p>
+        <p className={styles.firmwareNote}>
+          {t(DEFAULT.MACHINE_LASER_FIRMWARE_NOTE, { seconds: MAX_POINTER_HOLD_MS / MILLISECONDS_PER_SECOND })}
+        </p>
         <ComingSoon description={t(DEFAULT.MACHINE_LASER_FRAME_DESCRIPTION)}>
           <Button size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
             {t(DEFAULT.MACHINE_LASER_FRAME)}

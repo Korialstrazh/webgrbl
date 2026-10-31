@@ -8,6 +8,7 @@ import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblReso
 import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
+import type { Action } from '../../../utils/states/action';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
 import {
   LaserPointerFireRequested,
@@ -17,7 +18,12 @@ import {
   selectLaserPointerPowerPercent,
 } from '../../../utils/states/laser.pointer.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
-import { MachineLineRequested, MachineStatusReceived } from '../../../utils/states/machine.status.state';
+import {
+  MachineLineRequested,
+  MachineResetRequested,
+  MachineStatusReceived,
+  MachineStopRequested,
+} from '../../../utils/states/machine.status.state';
 import { newStore } from '../../../utils/states/new.store';
 import type { AppStore } from '../../../utils/states/new.store';
 
@@ -28,10 +34,13 @@ const FRAME_LABEL = 'Frame job';
 const POWER_LABEL = 'Pointer power';
 const SECONDARY_POINTER_BUTTON = 2;
 const ARROW_RIGHT_KEY_CODE = 39;
+const UNMAPPED_KEY = 'a';
 const MAX_POWER_WATTS = 10;
 const POWER_PERCENT = 3;
 const WATTS_PATTERN = /0\.30 W/;
 const ANY_WATTS_PATTERN = / W$/;
+const FIRMWARE_NOTE_TEXT = 'Some firmwares keep the laser off while the head stands still. It switches off when you '
+  + 'let go, when the window loses focus, after 10 seconds, or on any stop or alarm.';
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -194,8 +203,8 @@ describe(LaserCard.name, () => {
     connectIdle(store);
     const fireButton: HTMLElement = screen.getByRole('button', { name: FIRE_LABEL });
 
-    fireEvent.keyDown(fireButton, { key: 'a' });
-    fireEvent.keyUp(fireButton, { key: 'a' });
+    fireEvent.keyDown(fireButton, { key: UNMAPPED_KEY });
+    fireEvent.keyUp(fireButton, { key: UNMAPPED_KEY });
 
     expect(getDispatched(dispatchSpy, LaserPointerFireRequested)).toHaveLength(0);
     expect(getDispatched(dispatchSpy, LaserPointerReleaseRequested)).toHaveLength(0);
@@ -231,6 +240,25 @@ describe(LaserCard.name, () => {
     receiveState(store, GRBL_MACHINE_STATE.IDLE);
 
     expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeEnabled();
+  });
+
+  it('keeps the fire button enabled while firing when the state leaves Idle, so release still works', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    renderLaserCard(store);
+    connectIdle(store);
+    act(() => {
+      store.dispatch(new LaserPointerFiringStarted());
+    });
+    receiveState(store, GRBL_MACHINE_STATE.RUN);
+    const laserOnButton: HTMLElement = screen.getByRole('button', { name: LASER_ON_LABEL });
+
+    expect(laserOnButton).toBeEnabled();
+
+    fireEvent.pointerUp(laserOnButton);
+
+    expect(getDispatched(dispatchSpy, LaserPointerReleaseRequested)).toHaveLength(1);
   });
 
   it('stores the slider power in the state and shows the approximate watts', () => {
@@ -299,6 +327,29 @@ describe(LaserCard.name, () => {
     expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).not.toBeChecked();
   });
 
+  it.each([
+    ['Stop', (): Action<unknown> => new MachineStopRequested()],
+    ['Reset', (): Action<unknown> => new MachineResetRequested()],
+  ])('resets air assist on %s, since the soft reset turns the coolant off', (
+    _requestName: string,
+    newRequest: () => Action<unknown>,
+  ) => {
+    const store: AppStore = newStore();
+
+    renderLaserCard(store);
+    activateProfile(store, { hasAirAssist: true });
+    connectIdle(store);
+    fireEvent.click(screen.getByRole('switch', { name: AIR_ASSIST_LABEL }));
+
+    expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).toBeChecked();
+
+    act(() => {
+      store.dispatch(newRequest());
+    });
+
+    expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).not.toBeChecked();
+  });
+
   it('keeps Frame job inert', () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
@@ -308,5 +359,11 @@ describe(LaserCard.name, () => {
     fireEvent.click(screen.getByText(FRAME_LABEL));
 
     expect(getRequestedLines(dispatchSpy)).toEqual([]);
+  });
+
+  it('shows the firmware note with the maximum hold time', () => {
+    renderLaserCard(newStore());
+
+    expect(screen.getByText(FIRMWARE_NOTE_TEXT)).toBeInTheDocument();
   });
 });

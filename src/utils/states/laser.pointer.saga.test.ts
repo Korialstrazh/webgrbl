@@ -23,6 +23,7 @@ import {
 } from '../grbl/grbl.constants';
 import type { SerialTransport } from '../grbl/interfaces/SerialTransport';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
+import { GrblSimulator } from '../grbl/simulator/grbl.simulator';
 import { GRBL_SIMULATOR_FAULT_KIND } from '../grbl/simulator/grbl.simulator.constants';
 import { ANSWER_SETTLE_MS } from '../grbl/test.support/grbl.answer.settle';
 import { MAX_POINTER_HOLD_MS } from '../machine/machine.command.constants';
@@ -37,10 +38,15 @@ import type { GrblControllerSagaDependencies } from './interfaces/GrblController
 import { watchLaserPointer } from './laser.pointer.saga';
 import {
   LaserPointerFireRequested,
+  LaserPointerPowerChanged,
   LaserPointerReleaseRequested,
   selectIsLaserPointerFiring,
 } from './laser.pointer.state';
-import { ActiveMachineProfileSelected, MachineProfileSaved } from './machine.profile.state';
+import {
+  ActiveMachineProfileSelected,
+  MachineProfileSaved,
+  selectActiveMachineProfile,
+} from './machine.profile.state';
 import { MachineLineRequested, MachineStopRequested, selectMachineStatus } from './machine.status.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
@@ -49,13 +55,21 @@ const STOP_SETTLE_MS = GRBL_HOLD_COMPLETE_MAX_WAIT_MS + GRBL_STATUS_POLL_INTERVA
 /** Long enough after connecting for a status poll to report Idle. */
 const IDLE_REPORTED_MS = GRBL_STATUS_POLL_INTERVAL_MS + ANSWER_SETTLE_MS;
 const POINTER_ON_LINES: string[] = ['M3 S10', 'G1 F100'];
-const PROFILE_S_VALUE_MAX = 255;
-const PROFILE_POINTER_ON_LINE = 'M3 S3';
+const LOW_S_VALUE_MAX = 255;
+/** 1 % of S max 255. */
+const LOW_S_VALUE_MAX_POINTER_ON_LINE = 'M3 S3';
 /** 300 mm at 600 mm/min takes 30 s, far longer than any test runs. */
 const LONG_MOVE = 'G1X300F600';
 const MOVE_RUNNING_MS = 500;
 const ALARM_CODE = 1;
 const MILLISECOND = 1;
+const SETTING_LINE_END = '\n';
+const LASER_S_VALUE_MAX_SETTING_LINES: string[] = [`$30=${LOW_S_VALUE_MAX}`];
+const INVALID_S_VALUE_MAX_SETTING_LINES: string[] = ['$30=0'];
+const PROFILE_DEFAULT_S_VALUE_MAX = 1000;
+const POWER_CAP_PERCENT = 5;
+/** 5 % of S max 255. */
+const LASER_CAPPED_POINTER_ON_LINE = 'M3 S13';
 
 interface LaserPointerTestRig {
   dependencies: GrblControllerSagaDependencies;
@@ -63,14 +77,31 @@ interface LaserPointerTestRig {
   transports: SimulatedLaserTransport[];
 }
 
-const newTestRig = (): LaserPointerTestRig => {
+/** A simulated laser whose settings were changed before the app connects; settings survive power cycles. */
+const newConfiguredSimulator = (settingLines: string[]): GrblSimulator => {
+  const simulator: GrblSimulator = new GrblSimulator(() => undefined);
+  const encoder: TextEncoder = new TextEncoder();
+
+  simulator.powerOn();
+
+  for (const settingLine of settingLines) {
+    simulator.receiveBytes(encoder.encode(`${settingLine}${SETTING_LINE_END}`));
+  }
+
+  simulator.powerOff();
+
+  return simulator;
+};
+
+/** Without a simulator, every transport creates its own default one. */
+const newTestRig = (simulator?: GrblSimulator): LaserPointerTestRig => {
   const transports: SimulatedLaserTransport[] = [];
 
   return {
     transports,
     dependencies: {
       newTransport: (): SerialTransport => {
-        const transport: SimulatedLaserTransport = new SimulatedLaserTransport();
+        const transport: SimulatedLaserTransport = new SimulatedLaserTransport(simulator);
 
         transports.push(transport);
 
@@ -275,14 +306,44 @@ describe(watchLaserPointer.name, () => {
     expect(selectIsLaserPointerFiring(store.getState())).toBe(true);
   });
 
-  it('uses the active profile sValueMax', async () => {
-    const profile: MachineProfile = newMachineProfile({ sValueMax: PROFILE_S_VALUE_MAX });
+  it('uses the active profile sValueMax when the laser reports no valid $30', async () => {
+    const profile: MachineProfile = newMachineProfile({ sValueMax: LOW_S_VALUE_MAX });
+    rig = newTestRig(newConfiguredSimulator(INVALID_S_VALUE_MAX_SETTING_LINES));
+    store = newStore(rig.dependencies);
     await connectStoreIdle(store);
     store.dispatch(new MachineProfileSaved({ profile }));
     store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
 
     await fireLaserPointer(store);
 
-    expect(getRequestedMachineLines(toPlainObjectSpy)[0]).toBe(PROFILE_POINTER_ON_LINE);
+    expect(getRequestedMachineLines(toPlainObjectSpy)[0]).toBe(LOW_S_VALUE_MAX_POINTER_ON_LINE);
+  });
+
+  it('caps the power by the reported $30 over the active profile S max', async () => {
+    const profile: MachineProfile = newMachineProfile({ sValueMax: PROFILE_DEFAULT_S_VALUE_MAX });
+    rig = newTestRig(newConfiguredSimulator(LASER_S_VALUE_MAX_SETTING_LINES));
+    store = newStore(rig.dependencies);
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    store.dispatch(new LaserPointerPowerChanged({ percent: POWER_CAP_PERCENT }));
+    await connectStoreIdle(store);
+
+    await fireLaserPointer(store);
+
+    expect(getRequestedMachineLines(toPlainObjectSpy)[0]).toBe(LASER_CAPPED_POINTER_ON_LINE);
+  });
+
+  it('uses the reported $30 without an active profile', async () => {
+    // A stored profile that is not active keeps the connect from creating and activating one.
+    const profile: MachineProfile = newMachineProfile({ sValueMax: PROFILE_DEFAULT_S_VALUE_MAX });
+    rig = newTestRig(newConfiguredSimulator(LASER_S_VALUE_MAX_SETTING_LINES));
+    store = newStore(rig.dependencies);
+    store.dispatch(new MachineProfileSaved({ profile }));
+    await connectStoreIdle(store);
+
+    await fireLaserPointer(store);
+
+    expect(selectActiveMachineProfile(store.getState())).toBeUndefined();
+    expect(getRequestedMachineLines(toPlainObjectSpy)[0]).toBe(LOW_S_VALUE_MAX_POINTER_ON_LINE);
   });
 });
