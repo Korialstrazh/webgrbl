@@ -16,6 +16,7 @@ import { LeavePageGuard } from '../../containers/LeavePageGuard';
 import { MachinePanel } from '../../containers/MachinePanel';
 import { StatusStrip } from '../../containers/StatusStrip';
 import { StickyStopBar } from '../../containers/StickyStopBar';
+import { StopHotkey } from '../../containers/StopHotkey';
 import { TopBar } from '../../containers/TopBar';
 import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import styles from './styles.module.scss';
@@ -42,6 +43,7 @@ export const AppRoute = (): ReactNode => {
       </div>
       {!isWide && <StickyStopBar />}
       <LeavePageGuard />
+      <StopHotkey />
     </div>
   );
 };
