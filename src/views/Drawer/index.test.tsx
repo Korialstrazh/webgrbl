@@ -91,3 +91,34 @@ describe(Drawer.name, () => {
     expect(opener).toHaveFocus();
   });
 });
+
+describe(`${Drawer.name} Escape handling`, () => {
+  it('closes on Escape pressed outside the drawer', () => {
+    const onClose = vi.fn();
+    render(
+      <>
+        <button type="button">Outside</button>
+        <Drawer isOpen title={DRAWER_TITLE} onClose={onClose}>body</Drawer>
+      </>,
+    );
+    const outside: HTMLElement = screen.getByRole('button', { name: 'Outside' });
+
+    outside.focus();
+    fireEvent.keyDown(outside, { key: 'Escape' });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores repeated and composing Escape presses', () => {
+    const onClose = vi.fn();
+    render(<Drawer isOpen title={DRAWER_TITLE} onClose={onClose}>body</Drawer>);
+    const drawer: HTMLElement = screen.getByRole('dialog');
+
+    fireEvent.keyDown(drawer, { key: 'Escape', repeat: true });
+    fireEvent.keyDown(drawer, { key: 'Escape', isComposing: true });
+    fireEvent.keyDown(document.body, { key: 'Escape', repeat: true });
+    fireEvent.keyDown(document.body, { key: 'Escape', isComposing: true });
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+});

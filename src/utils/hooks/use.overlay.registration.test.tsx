@@ -17,14 +17,14 @@ import type { AppStore } from '../states/new.store';
 import { selectIsAnyOverlayOpen } from '../states/ui.overlay.state';
 import { useOverlayRegistration } from './use.overlay.registration';
 
-const OVERLAY_ID = 'test-overlay';
+const OVERLAY_ID_PREFIX = 'test-overlay';
 
 interface RegisteredOverlayProps {
   isOpen: boolean;
 }
 
 const RegisteredOverlay = ({ isOpen }: RegisteredOverlayProps): ReactNode => {
-  useOverlayRegistration(OVERLAY_ID, isOpen);
+  useOverlayRegistration(OVERLAY_ID_PREFIX, isOpen);
 
   return null;
 };
@@ -63,6 +63,22 @@ describe(useOverlayRegistration.name, () => {
         <RegisteredOverlay isOpen={false} />
       </Provider>,
     );
+
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+  });
+});
+
+describe('useOverlayRegistration with a shared prefix', () => {
+  it('stays open while another overlay with the same prefix is still open', () => {
+    const store: AppStore = newStore();
+    const first = renderRegisteredOverlay(store, true);
+    const second = renderRegisteredOverlay(store, true);
+
+    first.unmount();
+
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
+
+    second.unmount();
 
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
   });

@@ -1,6 +1,6 @@
 /**
  * Registers an overlay in the overlay registry while it is open, so the Escape-to-STOP hotkey knows the user is
- * not in the main view.
+ * not in the main view. Every registration gets its own id, so two overlays sharing a prefix never close each other.
  *
  * @author michael.morosov
  *
@@ -9,13 +9,17 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../states/new.store';
 import { OverlayClosed, OverlayOpened } from '../states/ui.overlay.state';
 
-export const useOverlayRegistration = (overlayId: string, isOpen: boolean): void => {
+const OVERLAY_ID_SEPARATOR = ':';
+
+export const useOverlayRegistration = (overlayIdPrefix: string, isOpen: boolean): void => {
   const dispatch: AppDispatch = useDispatch<AppDispatch>();
+  const uniqueSuffix: string = useId();
+  const overlayId: string = [overlayIdPrefix, uniqueSuffix].join(OVERLAY_ID_SEPARATOR);
 
   useEffect(() => {
     if (!isOpen) {

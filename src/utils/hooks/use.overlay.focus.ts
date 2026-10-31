@@ -24,6 +24,9 @@ interface OverlayFocusResult {
   handleOverlayKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
+const isEscapeToHandle = (event: { key: string; repeat: boolean; isComposing: boolean }): boolean =>
+  event.key === OVERLAY_KEY.ESCAPE && !event.repeat && !event.isComposing;
+
 const getFocusableElements = (overlayElement: HTMLElement): HTMLElement[] =>
   Array.from(overlayElement.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
 
@@ -86,8 +89,34 @@ export const useOverlayFocus = (
     };
   }, [isOpen]);
 
+  const onCloseRef: RefObject<() => void> = useRef<() => void>(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    // Focus can leave the overlay (a click on the bed), and Escape must still close it.
+    const handleDocumentKeyDown = (event: globalThis.KeyboardEvent): void => {
+      if (isEscapeToHandle(event)) {
+        event.stopImmediatePropagation();
+        onCloseRef.current();
+      }
+    };
+
+    document.addEventListener('keydown', handleDocumentKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleDocumentKeyDown);
+    };
+  }, [isOpen]);
+
   const handleOverlayKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
-    if (event.key === OVERLAY_KEY.ESCAPE) {
+    if (isEscapeToHandle(event.nativeEvent)) {
       // The global STOP hotkey must never see an Escape that closed an overlay.
       event.stopPropagation();
       event.nativeEvent.stopImmediatePropagation();
