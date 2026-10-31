@@ -12,6 +12,7 @@ import { all, fork } from 'redux-saga/effects';
 import { watchOnlineStatus } from './browser.environment.state';
 import { watchGrblController } from './grbl.controller.saga';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
+import { watchLaserPointer } from './laser.pointer.saga';
 import { watchMachineProfiles } from './machine.profile.saga';
 import { watchInfoToastExpiry } from './toast.state';
 
@@ -20,6 +21,7 @@ export function* rootSaga(grblControllerSagaDependencies: GrblControllerSagaDepe
     fork(watchOnlineStatus),
     fork(watchInfoToastExpiry),
     fork(watchMachineProfiles),
+    fork(watchLaserPointer),
     fork(watchGrblController, grblControllerSagaDependencies),
   ]);
 }

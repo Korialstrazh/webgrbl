@@ -42,12 +42,12 @@ import {
   selectSelectedPortId,
 } from './grbl.connection.state';
 import { watchGrblController } from './grbl.controller.saga';
-import { ConsoleCommandSubmitted, selectConsoleEntries } from './grbl.console.state';
+import { ConsoleCommandSubmitted, selectCommandHistory, selectConsoleEntries } from './grbl.console.state';
 import { GRBL_CONSOLE_VIEW_DIRECTION } from './grbl.console.view.direction';
 import type { GrblConsoleViewEntry } from './interfaces/GrblConsoleViewEntry';
 import type { AppToast } from './interfaces/AppToast';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
-import { MachineStopRequested, selectMachineStatus } from './machine.status.state';
+import { MachineLineRequested, MachineStopRequested, selectMachineStatus } from './machine.status.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
 import { TOAST_SEVERITY } from './toast.constants';
@@ -59,6 +59,7 @@ const CONSOLE_COMMAND = 'G0X1';
 /** U+00DA would reach GRBL as C3 9A, and 0x9A is a realtime laser power override. */
 const NON_ASCII_CONSOLE_COMMAND = 'G0X\u00da';
 const OK_TEXT = 'ok';
+const MACHINE_LINE = 'G0X2';
 /** 300 mm at 600 mm/min takes 30 s, far longer than any test runs. */
 const LONG_MOVE = 'G1X300F600';
 /** Time for the move to start and a status poll to report it. */
@@ -228,6 +229,19 @@ describe(watchGrblController.name, () => {
       { direction: GRBL_CONSOLE_VIEW_DIRECTION.SENT, text: CONSOLE_COMMAND },
       { direction: GRBL_CONSOLE_VIEW_DIRECTION.RECEIVED, text: OK_TEXT },
     ]);
+  });
+
+  it('a machine line request reaches the simulator and adds no console history', async () => {
+    const rig: GrblControllerSagaTestRig = newTestRig();
+    store = newStore(rig.dependencies);
+    await connectStore(store);
+    const receivedLineCountBefore: number = getLastTransport(rig).getSimulator().getReceivedLineCount();
+
+    store.dispatch(new MachineLineRequested({ line: MACHINE_LINE }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+    expect(getLastTransport(rig).getSimulator().getReceivedLineCount()).toBe(receivedLineCountBefore + 1);
+    expect(selectCommandHistory(store.getState())).toEqual([]);
   });
 
   it('a console command with a non-ASCII character is not sent and adds a console error entry', async () => {
