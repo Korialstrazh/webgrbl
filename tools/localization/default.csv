@@ -150,6 +150,36 @@ MACHINE_PROFILE_ERROR_NAME_REQUIRED;Enter a name for the machine
 MACHINE_PROFILE_ERROR_S_VALUE_MAX_INVALID;Maximum S value must be a whole number from {{min}} to {{max}}
 MACHINE_PROFILE_ERROR_WORK_AREA_X_INVALID;Work area width must be greater than 0 and at most {{max}} mm
 MACHINE_PROFILE_ERROR_WORK_AREA_Y_INVALID;Work area height must be greater than 0 and at most {{max}} mm
+MACHINE_PROFILES_ACTIVE;Active
+MACHINE_PROFILES_DELETE;Delete
+MACHINE_PROFILES_DELETE_CANCEL;Cancel
+MACHINE_PROFILES_DELETE_CONFIRM;Delete the profile {{name}}?
+MACHINE_PROFILES_DELETE_OK;Yes, delete
+MACHINE_PROFILES_EXPORT;Export
+MACHINE_PROFILES_FIELD_AIR_ASSIST;Air assist
+MACHINE_PROFILES_FIELD_HOMING;Homing switches
+MACHINE_PROFILES_FIELD_JOG_FEED_RATE;Jog feed (mm/min)
+MACHINE_PROFILES_FIELD_MAX_POWER;Laser power (W)
+MACHINE_PROFILES_FIELD_NAME;Name
+MACHINE_PROFILES_FIELD_ORIGIN_CORNER;Origin corner
+MACHINE_PROFILES_FIELD_S_VALUE_MAX;Maximum S value ($30)
+MACHINE_PROFILES_FIELD_WORK_AREA_X;Work area width (mm)
+MACHINE_PROFILES_FIELD_WORK_AREA_Y;Work area height (mm)
+MACHINE_PROFILES_GRBL_SETTINGS;GRBL settings ($$)...
+MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION;View and change the settings stored in the laser.
+MACHINE_PROFILES_IMPORT;Import...
+MACHINE_PROFILES_IMPORT_FILE;Import profiles file
+MACHINE_PROFILES_LIST;Profiles
+MACHINE_PROFILES_NEW;+ New profile
+MACHINE_PROFILES_ORIGIN_BACK_LEFT;Back left
+MACHINE_PROFILES_ORIGIN_BACK_RIGHT;Back right
+MACHINE_PROFILES_ORIGIN_FRONT_LEFT;Front left
+MACHINE_PROFILES_ORIGIN_FRONT_RIGHT;Front right
+MACHINE_PROFILES_READ_FROM_LASER;Read from connected laser
+MACHINE_PROFILES_READ_SUMMARY;Read from the laser: work area {{width}} x {{height}} mm, maximum S value {{sValueMax}}. Press Save to keep these values.
+MACHINE_PROFILES_SAVE;Save
+MACHINE_PROFILES_SET_ACTIVE;Set active
+MACHINE_PROFILES_TITLE;Machine profiles
 MACHINE_START_JOB;Start job
 MACHINE_START_JOB_DESCRIPTION;Starts the job once the pre-flight check has passed.
 MACHINE_START_JOB_TITLE;Job
@@ -186,6 +216,7 @@ TOAST_PORT_NOT_FOUND;The port is gone - check the USB cable.
 TOAST_PORT_OPEN_FAILED;Could not open the port.
 TOAST_PROFILE_CREATED;Created the machine profile {{name}} from the laser's settings.
 TOAST_PROFILE_DIFFERS;The laser reports a work area of {{laserWidth}} x {{laserHeight}} mm, but the profile {{name}} has {{profileWidth}} x {{profileHeight}} mm. Nothing was changed - you can update the profile from the laser in the Machine profiles dialog.
+TOAST_PROFILE_IMPORT_INVALID;The file is not a machine profiles file. Nothing was imported.
 TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}} - {{description}}
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
 TOP_BAR_AUTOSAVE_DESCRIPTION;Your design will be saved automatically.
@@ -195,7 +226,7 @@ TOP_BAR_MENU_IMPORT_SVG;Import SVG
 TOP_BAR_MENU_MACHINE_PROFILES;Machine profiles
 TOP_BAR_MENU_MATERIALS;Materials
 TOP_BAR_MENU_PROJECT;Project
-TOP_BAR_MENUS_DESCRIPTION;Project files, SVG import, materials and machine profiles.
+TOP_BAR_MENUS_DESCRIPTION;Project files, SVG import and materials.
 TOP_BAR_PROJECT_PLACEHOLDER;Untitled project
 TOP_BAR_REDO;Redo
 TOP_BAR_UNDO;Undo

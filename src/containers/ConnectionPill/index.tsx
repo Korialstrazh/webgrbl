@@ -1,6 +1,6 @@
 /**
- * The connection status in the top bar: state, firmware, port, and whether the browser is online and can use Web
- * Serial. Clicking it opens and closes the connection popover.
+ * The connection status in the top bar: state, firmware, active machine profile, port, and whether the browser is
+ * online and can use Web Serial. Clicking it opens and closes the connection popover.
  *
  * @author michael.morosov
  *
@@ -17,6 +17,7 @@ import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectIsOnline, selectIsWebSerialSupported } from '../../utils/states/browser.environment.state';
 import {
   selectAvailablePorts,
@@ -25,6 +26,7 @@ import {
   selectIsConnected,
   selectSelectedPortId,
 } from '../../utils/states/grbl.connection.state';
+import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { ConnectionPopover } from '../ConnectionPopover';
 import { CONNECTION_PILL_STATUS_LABEL_KEY } from './connection.pill.constants';
 import { getSelectedPortLabel } from './get.selected.port.label';
@@ -49,6 +51,7 @@ export const ConnectionPill = (): ReactNode => {
   const availablePorts: SerialPortDescriptor[] = useSelector(selectAvailablePorts);
   const selectedPortId: string = useSelector(selectSelectedPortId);
   const firmwareIdentity: GrblFirmwareIdentity | undefined = useSelector(selectFirmwareIdentity);
+  const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
 
   return (
     <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen} anchorRef={pillRef}>
@@ -70,6 +73,7 @@ export const ConnectionPill = (): ReactNode => {
             })}
           </span>
         )}
+        {activeProfile && <span className={styles.profile}>{activeProfile.name}</span>}
         <span className={styles.port}>{getSelectedPortLabel(selectedPortId, availablePorts, t)}</span>
         <span className={getIndicatorClassName(isOnline)}>{t(getOnlineLabelKey(isOnline))}</span>
         {!isWebSerialSupported && (
