@@ -125,10 +125,13 @@ MACHINE_JOG_UP;Jog up
 MACHINE_JOG_UP_LEFT;Jog up and left
 MACHINE_JOG_UP_RIGHT;Jog up and right
 MACHINE_LASER_AIR_ASSIST;Air assist
-MACHINE_LASER_DESCRIPTION;Show where the laser will cut with a low-power pointer, or trace the outline of the job.
 MACHINE_LASER_FIRE;Hold to fire
+MACHINE_LASER_FIRMWARE_NOTE;The pointer needs laser mode ($32=1). It switches off when you let go, when the window loses focus, after 10 seconds, or on any stop or alarm.
 MACHINE_LASER_FRAME;Frame job
+MACHINE_LASER_FRAME_DESCRIPTION;Trace the outline of the job with the pointer.
+MACHINE_LASER_ON;LASER ON
 MACHINE_LASER_POWER;Pointer power
+MACHINE_LASER_POWER_WATTS;About {{watts}} W
 MACHINE_LASER_TITLE;Laser pointer
 MACHINE_MOVE_HOME;Home
 MACHINE_MOVE_JOG_SPEED_LABEL;Jog speed
