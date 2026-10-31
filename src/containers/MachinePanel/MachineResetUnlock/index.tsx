@@ -8,9 +8,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_BUTTON_SIZE_LARGE } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
 import {
@@ -19,8 +21,6 @@ import {
   selectIsMachineInAlarm,
 } from '../../../utils/states/machine.status.state';
 import type { AppDispatch } from '../../../utils/states/new.store';
-import { Button } from '../../../views/Button';
-import { BUTTON_SIZE, BUTTON_VARIANT } from '../../../views/Button/button.constants';
 import styles from './styles.module.scss';
 
 export const MachineResetUnlock = (): ReactNode => {
@@ -33,17 +33,15 @@ export const MachineResetUnlock = (): ReactNode => {
   return (
     <div className={styles.machineResetUnlock}>
       <Button
-        variant={BUTTON_VARIANT.SECONDARY}
-        size={BUTTON_SIZE.LARGE}
-        isDisabled={!isConnected}
+        size={ANTD_BUTTON_SIZE_LARGE}
+        disabled={!isConnected}
         onClick={() => dispatch(new MachineResetRequested())}
       >
         {t(DEFAULT.MACHINE_CONTROL_RESET)}
       </Button>
       <Button
-        variant={BUTTON_VARIANT.SECONDARY}
-        size={BUTTON_SIZE.LARGE}
-        isDisabled={!canUnlock}
+        size={ANTD_BUTTON_SIZE_LARGE}
+        disabled={!canUnlock}
         onClick={() => dispatch(new MachineUnlockRequested())}
       >
         {t(DEFAULT.MACHINE_CONTROL_UNLOCK)}

@@ -12,3 +12,15 @@
 // The machine panel sits at the right edge; overlays stop short of it so STOP stays visible.
 $machine-panel-width: 22rem;
 $design-panel-width: 17.5rem;
+
+// The top bar and the status strip keep these heights at any width, so the regions between them get a known space.
+$top-bar-height: 6rem;
+$status-strip-height: 4.75rem;
+
+// A bar of fixed height that keeps its items on one row and never shrinks; items that do not fit are clipped inside.
+@mixin fixed-height-bar($height) {
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  height: $height;
+  overflow: hidden;
+}

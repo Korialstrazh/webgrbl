@@ -8,6 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Button, Layout, Segmented } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -19,14 +20,11 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectGrblSettings, selectIsConnected } from '../../utils/states/grbl.connection.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { BedView } from '../../views/BedView';
-import { Button } from '../../views/Button';
-import { BUTTON_VARIANT } from '../../views/Button/button.constants';
 import { ComingSoon } from '../../views/ComingSoon';
-import { SegmentedControl } from '../../views/SegmentedControl';
-import type { SegmentedOption } from '../../views/SegmentedControl/interfaces/SegmentedOption';
 import { ToastStack } from '../ToastStack';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
 import { BED_TOOL_LABEL_KEYS, BED_VIEW_MODE_DESIGN, BED_VIEW_MODE_OPTION_KEYS } from './bed.toolbar.constants';
+import type { BedViewModeOption } from './interfaces/BedViewModeOption';
 import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
 import styles from './styles.module.scss';
 
@@ -37,26 +35,27 @@ export const BedPanel = (): ReactNode => {
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
   const dimensions: BedDimensions = getBedDimensions(settings, isConnected);
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
-  const viewModeOptions: SegmentedOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option: BedViewModeOptionKey) => ({
+  const viewModeOptions: BedViewModeOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option: BedViewModeOptionKey) => ({
     value: option.value,
     label: t(option.labelKey),
   }));
 
   return (
-    <main className={styles.bedPanel}>
+    <Layout.Content className={styles.bedPanel}>
+      {/* A plain heading: antd Typography.Title would add its own margins and colours. */}
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       <ComingSoon description={t(DEFAULT.BED_TOOLBAR_DESCRIPTION)}>
         <div className={styles.toolbar}>
           {BED_TOOL_LABEL_KEYS.map((labelKey: string) => (
-            <Button key={labelKey} variant={BUTTON_VARIANT.SECONDARY} onClick={doNothing}>
+            <Button key={labelKey} onClick={doNothing}>
               {t(labelKey)}
             </Button>
           ))}
-          <SegmentedControl
-            label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
+          <Segmented
+            aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
             options={viewModeOptions}
-            selectedValue={BED_VIEW_MODE_DESIGN}
-            onSelect={doNothing}
+            value={BED_VIEW_MODE_DESIGN}
+            onChange={doNothing}
           />
         </div>
       </ComingSoon>
@@ -69,6 +68,6 @@ export const BedPanel = (): ReactNode => {
         />
       </div>
       <ToastStack />
-    </main>
+    </Layout.Content>
   );
 };

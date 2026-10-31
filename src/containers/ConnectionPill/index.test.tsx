@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ConnectionPill } from '.';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
@@ -8,6 +8,7 @@ import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.stat
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
+import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const OFFLINE_EVENT_NAME = 'offline';
 const OFFLINE_LABEL = 'Offline';
@@ -19,6 +20,7 @@ const POPOVER_LABEL = 'Laser connection';
 const NO_WEB_SERIAL_LABEL = 'No Web Serial';
 const ESCAPE_KEY = 'Escape';
 const SIMULATED_LASER_LABEL = 'Simulated laser';
+const PORT_LABEL = 'Port';
 const STATUS_LABELS: Record<GrblConnectionStatus, string> = {
   [GRBL_CONNECTION_STATUS.DISCONNECTED]: 'Disconnected',
   [GRBL_CONNECTION_STATUS.CONNECTING]: 'Connecting',
@@ -31,7 +33,9 @@ const renderConnectionPill = (): AppStore => {
 
   render(
     <Provider store={store}>
-      <ConnectionPill />
+      <AntdTestProvider>
+        <ConnectionPill />
+      </AntdTestProvider>
     </Provider>,
   );
 
@@ -100,6 +104,23 @@ describe(ConnectionPill.name, () => {
 
     expect(screen.queryByRole('dialog', { name: POPOVER_LABEL })).not.toBeInTheDocument();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+  });
+
+  it('moves focus into the opened popover and back to the pill when Escape closes it', async () => {
+    renderConnectionPill();
+
+    const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    // Not focused first: Safari and Firefox on macOS do not focus a clicked button.
+    fireEvent.click(pillButton);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(PORT_LABEL)).toHaveFocus();
+    });
+
+    fireEvent.keyDown(screen.getByLabelText(PORT_LABEL), { key: ESCAPE_KEY });
+
+    expect(pillButton).toHaveFocus();
   });
 
   it('switches to offline when the browser loses its connection', () => {

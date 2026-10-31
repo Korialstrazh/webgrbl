@@ -11,6 +11,7 @@ const CONSOLE_TOGGLE_LABEL = 'Console';
 const INPUT_LABEL = 'Console command';
 const SETTINGS_COMMAND = '$$';
 const ENTER_KEY = 'Enter';
+const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const READOUT_LABELS: readonly string[] = ['Cursor', 'Job size', 'Estimate'];
 
 const renderStatusStrip = (store: AppStore = newStore()): void => {
@@ -25,7 +26,7 @@ describe(StatusStrip.name, () => {
   it('keeps the console collapsed by default', () => {
     renderStatusStrip();
 
-    expect(screen.getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL })).not.toBeChecked();
+    expect(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL })).not.toBeChecked();
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });
 
@@ -40,11 +41,11 @@ describe(StatusStrip.name, () => {
   it('opens and closes the console with the toggle', () => {
     renderStatusStrip();
 
-    fireEvent.click(screen.getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(screen.getByLabelText(INPUT_LABEL)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });
@@ -57,7 +58,7 @@ describe(StatusStrip.name, () => {
     act(() => {
       store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
     });
-    fireEvent.click(screen.getByRole('checkbox', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
 
     const input: HTMLElement = screen.getByLabelText(INPUT_LABEL);
 
@@ -65,5 +66,11 @@ describe(StatusStrip.name, () => {
     fireEvent.keyDown(input, { key: ENTER_KEY });
 
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ConsoleCommandSubmitted));
+  });
+
+  it('keeps a fixed height on one row', () => {
+    renderStatusStrip();
+
+    expect(screen.getByRole('contentinfo').className).toContain(FIXED_HEIGHT_CLASS_NAME);
   });
 });

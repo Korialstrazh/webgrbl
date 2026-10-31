@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { getScssTokenValue } from '../utils/test.support/get.scss.token.value';
 
 const TOKENS_PATH = resolve(__dirname, 'tokens.scss');
 const MIN_TEXT_CONTRAST = 4.5;
@@ -37,12 +38,6 @@ const BG_TOKEN = '--color-bg';
 const ACCENT_BUTTON_TOKEN = '--color-accent';
 const DARK_TEXT_ON_ACCENT = '#121417';
 
-const getTokenValue = (source: string, name: string): string | undefined => {
-  const match: RegExpMatchArray | null = source.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})\\s*;`));
-
-  return match?.[1];
-};
-
 const getChannelLuminance = (channelHex: string): number => {
   const channel: number = parseInt(channelHex, HEX_RADIX) / CHANNEL_MAX;
 
@@ -74,7 +69,7 @@ const getContrastRatio = (hexA: string, hexB: string): number => {
 describe('design token contrast', () => {
   const source: string = readFileSync(TOKENS_PATH, 'utf8');
   const requireToken = (name: string): string => {
-    const value: string | undefined = getTokenValue(source, name);
+    const value: string | undefined = getScssTokenValue(source, name);
 
     if (!value) {
       throw new Error(`Token ${name} is missing`);
@@ -96,7 +91,7 @@ describe('design token contrast', () => {
   });
 
   it.each(SURFACE_TOKENS)('keeps the muted text readable on %s', (surfaceToken: string) => {
-    const mutedHex: string = getTokenValue(source, MUTED_STRONG_TOKEN) ?? requireToken(MUTED_TOKEN);
+    const mutedHex: string = getScssTokenValue(source, MUTED_STRONG_TOKEN) ?? requireToken(MUTED_TOKEN);
 
     expect(getContrastRatio(mutedHex, requireToken(surfaceToken))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
   });

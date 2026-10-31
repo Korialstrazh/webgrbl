@@ -8,24 +8,22 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Button, Segmented } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ANTD_BUTTON_SIZE_LARGE } from '../../../utils/antd.constants';
 import { doNothing } from '../../../utils/do.nothing';
 import { DEFAULT } from '../../../utils/localization/default.locales';
-import { Button } from '../../../views/Button';
-import { BUTTON_SIZE, BUTTON_VARIANT } from '../../../views/Button/button.constants';
 import { ComingSoon } from '../../../views/ComingSoon';
-import { IconButton } from '../../../views/IconButton';
 import { Panel } from '../../../views/Panel';
-import { SegmentedControl } from '../../../views/SegmentedControl';
-import type { SegmentedOption } from '../../../views/SegmentedControl/interfaces/SegmentedOption';
 import type { JogPadCell } from './interfaces/JogPadCell';
+import type { JogStepOption } from './interfaces/JogStepOption';
 import { DEFAULT_JOG_STEP_MM, JOG_PAD_CELLS, JOG_STEP_DISTANCES_MM } from './jog.pad.constants';
 import styles from './styles.module.scss';
 
 export const MoveCard = (): ReactNode => {
   const { t } = useTranslation();
-  const stepOptions: SegmentedOption[] = JOG_STEP_DISTANCES_MM.map((distance: string) => ({
+  const stepOptions: JogStepOption[] = JOG_STEP_DISTANCES_MM.map((distance: string) => ({
     value: distance,
     label: t(DEFAULT.MACHINE_MOVE_STEP_OPTION, { distance }),
   }));
@@ -35,34 +33,35 @@ export const MoveCard = (): ReactNode => {
       <ComingSoon description={t(DEFAULT.MACHINE_MOVE_DESCRIPTION)}>
         <div className={styles.moveCard}>
           <div className={styles.homeRow}>
-            <Button variant={BUTTON_VARIANT.SECONDARY} size={BUTTON_SIZE.LARGE} onClick={doNothing}>
+            <Button size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
               {t(DEFAULT.MACHINE_MOVE_HOME)}
             </Button>
-            <Button variant={BUTTON_VARIANT.SECONDARY} size={BUTTON_SIZE.LARGE} onClick={doNothing}>
+            <Button size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
               {t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
             </Button>
           </div>
           <div className={styles.jogPad}>
             {JOG_PAD_CELLS.map((cell: JogPadCell) =>
               cell.arrowGlyph ? (
-                <IconButton
+                <Button
                   key={cell.labelKey}
-                  label={t(cell.labelKey)}
-                  iconComponent={cell.arrowGlyph}
+                  size={ANTD_BUTTON_SIZE_LARGE}
+                  icon={cell.arrowGlyph}
+                  aria-label={t(cell.labelKey)}
                   onClick={doNothing}
                 />
               ) : (
-                <Button key={cell.labelKey} variant={BUTTON_VARIANT.SECONDARY} onClick={doNothing}>
+                <Button key={cell.labelKey} size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
                   {t(cell.labelKey)}
                 </Button>
               ),
             )}
           </div>
-          <SegmentedControl
-            label={t(DEFAULT.MACHINE_MOVE_STEP_LABEL)}
+          <Segmented
+            aria-label={t(DEFAULT.MACHINE_MOVE_STEP_LABEL)}
             options={stepOptions}
-            selectedValue={DEFAULT_JOG_STEP_MM}
-            onSelect={doNothing}
+            value={DEFAULT_JOG_STEP_MM}
+            onChange={doNothing}
           />
         </div>
       </ComingSoon>

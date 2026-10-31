@@ -15,6 +15,7 @@ const COMING_SOON_CONTROL_LABELS: readonly string[] = [
 const APP_TITLE = 'webgrbl';
 const AUTOSAVE_TEXT = 'Autosave: off';
 const DISCONNECTED_PATTERN = /Disconnected/;
+const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 
 describe(TopBar.name, () => {
   it('shows the app name, the autosave readout and the connection pill', () => {
@@ -41,5 +42,15 @@ describe(TopBar.name, () => {
     fireEvent.click(screen.getByRole('button', { name: label, hidden: true }));
 
     expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps a fixed height on one row', () => {
+    render(
+      <Provider store={newStore()}>
+        <TopBar />
+      </Provider>,
+    );
+
+    expect(screen.getByRole('banner').className).toContain(FIXED_HEIGHT_CLASS_NAME);
   });
 });

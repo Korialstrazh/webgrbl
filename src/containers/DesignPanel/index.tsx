@@ -8,8 +8,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { ComingSoon } from '../../views/ComingSoon';
 import { Panel } from '../../views/Panel';
@@ -19,7 +21,12 @@ export const DesignPanel = (): ReactNode => {
   const { t } = useTranslation();
 
   return (
-    <aside className={styles.designPanel} aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}>
+    <Layout.Sider
+      className={styles.region}
+      classNames={{ body: styles.designPanel }}
+      width={DESIGN_PANEL_WIDTH}
+      aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}
+    >
       <Panel title={t(DEFAULT.DESIGN_LAYERS_TITLE)}>
         <ComingSoon description={t(DEFAULT.DESIGN_LAYERS_DESCRIPTION)}>
           <div className={styles.placeholder} />
@@ -35,6 +42,6 @@ export const DesignPanel = (): ReactNode => {
           <div className={styles.placeholder} />
         </ComingSoon>
       </Panel>
-    </aside>
+    </Layout.Sider>
   );
 };

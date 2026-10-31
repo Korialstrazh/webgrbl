@@ -1,5 +1,5 @@
 /**
- * Frontend entry point. Builds the store and mounts the application root into the page.
+ * Frontend entry point. Builds the store and mounts the application root, inside the antd theme, into the page.
  *
  * @author michael.morosov
  *
@@ -8,6 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { App, ConfigProvider } from 'antd';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -16,6 +17,7 @@ import './utils/localization/default.locales';
 import { AppRoute } from './routes/AppRoute';
 import { newStore } from './utils/states/new.store';
 import type { AppStore } from './utils/states/new.store';
+import { ANTD_THEME } from './utils/theme/antd.theme';
 import './global.styles.scss';
 
 const ROOT_ELEMENT_ID = 'root';
@@ -31,7 +33,11 @@ const store: AppStore = newStore();
 createRoot(rootElement).render(
   <StrictMode>
     <Provider store={store}>
-      <AppRoute />
+      <ConfigProvider theme={ANTD_THEME}>
+        <App>
+          <AppRoute />
+        </App>
+      </ConfigProvider>
     </Provider>
   </StrictMode>,
 );

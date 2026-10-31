@@ -1,50 +1,31 @@
 @use '../../styles/layout' as layout;
 
-// Below the wide breakpoint the regions stack; 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+// The workbench fills the window and never scrolls as a page; the panels and the console scroll on their own.
 .appRoute {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  --design-panel-width: #{layout.$design-panel-width};
+  --machine-panel-width: #{layout.$machine-panel-width};
+
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  // antd App sets its own line height for everything inside it; our text keeps the browser default it was designed for.
+  line-height: normal;
 }
 
-@media (min-width: 80rem) {
+// A window too short for the regions scrolls them here, never the page.
+.regions {
+  min-height: 0;
+  overflow: auto;
+}
+
+// Below the wide breakpoint the regions stack and scroll together; 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width < 80rem) {
   .appRoute {
-    display: grid;
-    grid-template-columns: layout.$design-panel-width minmax(0, 1fr) layout.$machine-panel-width;
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-areas:
-      'top top top'
-      'design bed machine'
-      'status status machine';
-  }
+    --design-panel-width: auto;
+    --machine-panel-width: auto;
 
-  .topBarArea {
-    grid-area: top;
-  }
-
-  .designArea {
-    grid-area: design;
-  }
-
-  .bedArea {
-    grid-area: bed;
-  }
-
-  .machineArea {
-    grid-area: machine;
-  }
-
-  .statusArea {
-    grid-area: status;
-  }
-}
-
-.area {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-
-  > * {
-    flex: 1;
+    .regions {
+      display: block;
+    }
   }
 }

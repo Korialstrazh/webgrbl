@@ -13,8 +13,13 @@
   font-size: 0.875rem;
 }
 
-.powerSlider {
-  width: 100%;
+.switchField {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
   min-height: var(--target-min);
-  accent-color: var(--color-accent);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  cursor: pointer;
 }
