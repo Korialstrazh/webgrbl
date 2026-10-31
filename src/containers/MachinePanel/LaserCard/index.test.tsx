@@ -17,7 +17,12 @@ import {
   selectLaserPointerPowerPercent,
 } from '../../../utils/states/laser.pointer.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
-import { MachineLineRequested, MachineStatusReceived } from '../../../utils/states/machine.status.state';
+import {
+  MachineLineRequested,
+  MachineResetRequested,
+  MachineStatusReceived,
+  MachineStopRequested,
+} from '../../../utils/states/machine.status.state';
 import { newStore } from '../../../utils/states/new.store';
 import type { AppStore } from '../../../utils/states/new.store';
 
@@ -235,6 +240,25 @@ describe(LaserCard.name, () => {
     expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeEnabled();
   });
 
+  it('keeps the fire button enabled while firing when the state leaves Idle, so release still works', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    renderLaserCard(store);
+    connectIdle(store);
+    act(() => {
+      store.dispatch(new LaserPointerFiringStarted());
+    });
+    receiveState(store, GRBL_MACHINE_STATE.RUN);
+    const laserOnButton: HTMLElement = screen.getByRole('button', { name: LASER_ON_LABEL });
+
+    expect(laserOnButton).toBeEnabled();
+
+    fireEvent.pointerUp(laserOnButton);
+
+    expect(getDispatched(dispatchSpy, LaserPointerReleaseRequested)).toHaveLength(1);
+  });
+
   it('stores the slider power in the state and shows the approximate watts', () => {
     const store: AppStore = newStore();
 
@@ -297,6 +321,26 @@ describe(LaserCard.name, () => {
 
     fireEvent.click(screen.getByRole('switch', { name: AIR_ASSIST_LABEL }));
     changeConnection(store, GRBL_CONNECTION_STATUS.DISCONNECTED);
+
+    expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).not.toBeChecked();
+  });
+
+  it.each([
+    ['Stop', (): MachineStopRequested => new MachineStopRequested()],
+    ['Reset', (): MachineResetRequested => new MachineResetRequested()],
+  ])('resets air assist on %s, since the soft reset turns the coolant off', (_name: string, newRequest: () => object) => {
+    const store: AppStore = newStore();
+
+    renderLaserCard(store);
+    activateProfile(store, { hasAirAssist: true });
+    connectIdle(store);
+    fireEvent.click(screen.getByRole('switch', { name: AIR_ASSIST_LABEL }));
+
+    expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).toBeChecked();
+
+    act(() => {
+      store.dispatch(newRequest());
+    });
 
     expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).not.toBeChecked();
   });

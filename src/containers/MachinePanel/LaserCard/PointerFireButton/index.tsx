@@ -38,6 +38,8 @@ export const PointerFireButton = (): ReactNode => {
   const machineStatus: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
   const isFiring: boolean = useSelector(selectIsLaserPointerFiring);
   const canFire: boolean = getCanFireLaserPointer(isConnected, machineStatus?.machineState);
+  // A disabled button may never get the pointer up or leave, so a held pointer keeps the button usable to let go.
+  const isButtonUsable: boolean = canFire || isFiring;
 
   const requestFire = (): void => {
     dispatch(new LaserPointerFireRequested());
@@ -82,7 +84,7 @@ export const PointerFireButton = (): ReactNode => {
     <Button
       className={isFiring ? styles.firing : undefined}
       size={ANTD_BUTTON_SIZE_LARGE}
-      disabled={!canFire}
+      disabled={!isButtonUsable}
       onPointerDown={handlePointerDown}
       onPointerUp={requestRelease}
       onPointerLeave={requestRelease}

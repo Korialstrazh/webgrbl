@@ -1,5 +1,6 @@
 /**
- * The latest status the laser reported, and the requests to stop, reset, unlock or send a line to it.
+ * The latest status the laser reported, whether the app has switched air assist on, and the requests to stop, reset,
+ * unlock or send a line to it.
  *
  * @author michael.morosov
  *
@@ -20,6 +21,8 @@ import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 export interface MachineStatusState {
   /** The latest status report; undefined while not connected. */
   status: GrblResolvedStatus | undefined;
+  /** True after the app switched air assist on (`M8`) and before anything switched it off again. */
+  isAirAssistOn: boolean;
 }
 // #endregion
 
@@ -61,6 +64,15 @@ export class MachineLineRequested extends Action<MachineLineRequestedPayload> {
 export class MachineUnlockRequested extends Action {
   public static readonly type: string = actionType('machine unlock requested');
 }
+
+interface MachineAirAssistChangedPayload {
+  /** True when air assist was switched on, false when it was switched off. */
+  isAirAssistOn: boolean;
+}
+
+export class MachineAirAssistChanged extends Action<MachineAirAssistChangedPayload> {
+  public static readonly type: string = actionType('machine air assist changed');
+}
 // #endregion
 
 // #region Connection statuses
@@ -74,6 +86,7 @@ const CLEARED_STATUS_CONNECTION_STATUSES: readonly GrblConnectionStatus[] = [
 // #region Initial state
 const INITIAL_MACHINE_STATUS_STATE: MachineStatusState = {
   status: undefined,
+  isAirAssistOn: false,
 };
 // #endregion
 
@@ -85,9 +98,16 @@ export const machineStatusReducer = (
   switch (action.type) {
   case MachineStatusReceived.type:
     return { ...state, status: (action as MachineStatusReceived).payload.status };
+  case MachineAirAssistChanged.type:
+    return { ...state, isAirAssistOn: (action as MachineAirAssistChanged).payload.isAirAssistOn };
+  // Stop and Reset end in a soft reset, which switches the coolant outputs off.
+  case MachineStopRequested.type:
+  case MachineResetRequested.type:
+    return { ...state, isAirAssistOn: false };
   case ConnectionStatusChanged.type:
+    // Without a connection the laser's own air assist state is unknown, so the switch starts over as off.
     return CLEARED_STATUS_CONNECTION_STATUSES.includes((action as ConnectionStatusChanged).payload.connectionStatus)
-      ? { ...state, status: undefined }
+      ? { ...state, status: undefined, isAirAssistOn: false }
       : state;
   default:
     return state;
@@ -118,4 +138,6 @@ export const selectIsMachineMoving = (state: RootState): boolean => {
 
 export const selectIsMachineInAlarm = (state: RootState): boolean =>
   state[MACHINE_STATUS_STATE_NAME].status?.machineState === GRBL_MACHINE_STATE.ALARM;
+
+export const selectIsAirAssistOn = (state: RootState): boolean => state[MACHINE_STATUS_STATE_NAME].isAirAssistOn;
 // #endregion
