@@ -1,0 +1,5 @@
+// antd sizes InputNumber to a fixed narrow default; the unit suffix and the step handles would leave no room for the
+// number itself, so the field takes the card's full width.
+.jogSpeedInput {
+  width: 100%;
+}
