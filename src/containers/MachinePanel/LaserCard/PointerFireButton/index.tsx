@@ -10,11 +10,12 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button } from 'antd';
-import type { KeyboardEvent, ReactNode } from 'react';
+import { useEffect } from 'react';
+import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE } from '../../../../utils/antd.constants';
-import { ENTER_KEY, SPACE_KEY } from '../../../../utils/browser/browser.events.constants';
+import { ENTER_KEY, PRIMARY_POINTER_BUTTON, SPACE_KEY } from '../../../../utils/browser/browser.events.constants';
 import type { GrblResolvedStatus } from '../../../../utils/grbl/interfaces/GrblResolvedStatus';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { getCanFireLaserPointer } from '../../../../utils/machine/get.can.fire.laser.pointer';
@@ -46,6 +47,12 @@ export const PointerFireButton = (): ReactNode => {
     dispatch(new LaserPointerReleaseRequested());
   };
 
+  const handlePointerDown = (pointerEvent: PointerEvent): void => {
+    if (pointerEvent.button === PRIMARY_POINTER_BUTTON) {
+      requestFire();
+    }
+  };
+
   const handleKeyDown = (keyboardEvent: KeyboardEvent): void => {
     if (!FIRE_KEYS.includes(keyboardEvent.key)) {
       return;
@@ -66,15 +73,21 @@ export const PointerFireButton = (): ReactNode => {
     }
   };
 
+  // A release while not firing is harmless, so unmounting always asks for one.
+  useEffect(() => () => {
+    dispatch(new LaserPointerReleaseRequested());
+  }, [dispatch]);
+
   return (
     <Button
       className={isFiring ? styles.firing : undefined}
       size={ANTD_BUTTON_SIZE_LARGE}
       disabled={!canFire}
-      onPointerDown={requestFire}
+      onPointerDown={handlePointerDown}
       onPointerUp={requestRelease}
       onPointerLeave={requestRelease}
       onPointerCancel={requestRelease}
+      onBlur={requestRelease}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
     >

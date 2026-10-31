@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { LaserCard } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
@@ -27,6 +27,7 @@ const FRAME_LABEL = 'Frame job';
 const POWER_LABEL = 'Pointer power';
 const SPACE_KEY = ' ';
 const ENTER_KEY = 'Enter';
+const SECONDARY_POINTER_BUTTON = 2;
 const ARROW_RIGHT_KEY_CODE = 39;
 const MAX_POWER_WATTS = 10;
 const POWER_PERCENT = 3;
@@ -108,6 +109,43 @@ describe(LaserCard.name, () => {
     fireEvent.pointerDown(screen.getByRole('button', { name: FIRE_LABEL }));
 
     expect(getDispatched(dispatchSpy, LaserPointerFireRequested)).toHaveLength(1);
+  });
+
+  it('ignores a pointer down from a non-primary button', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    renderLaserCard(store);
+    connectIdle(store);
+    fireEvent.pointerDown(screen.getByRole('button', { name: FIRE_LABEL }), { button: SECONDARY_POINTER_BUTTON });
+
+    expect(getDispatched(dispatchSpy, LaserPointerFireRequested)).toHaveLength(0);
+  });
+
+  it('requests release when focus leaves the button during a key hold', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    renderLaserCard(store);
+    connectIdle(store);
+    const fireButton: HTMLElement = screen.getByRole('button', { name: FIRE_LABEL });
+
+    fireEvent.keyDown(fireButton, { key: SPACE_KEY });
+    fireEvent.blur(fireButton);
+
+    expect(getDispatched(dispatchSpy, LaserPointerReleaseRequested)).toHaveLength(1);
+  });
+
+  it('requests release when the card unmounts during a hold', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    renderLaserCard(store);
+    connectIdle(store);
+    fireEvent.pointerDown(screen.getByRole('button', { name: FIRE_LABEL }));
+    cleanup();
+
+    expect(getDispatched(dispatchSpy, LaserPointerReleaseRequested)).toHaveLength(1);
   });
 
   it.each(['pointerUp', 'pointerLeave', 'pointerCancel'] as const)('requests release on %s', (eventName) => {
