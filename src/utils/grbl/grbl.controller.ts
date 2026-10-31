@@ -155,6 +155,11 @@ export class GrblController {
         },
       }));
 
+      // A disconnect or loss can land after the handshake result and before this line; it released everything.
+      if (this.phase !== GRBL_CONTROLLER_PHASE.CONNECTING) {
+        throw new GrblConnectionClosedError();
+      }
+
       this.commandWriter.setRxBufferSize(connectionInfo.rxBufferSize);
       this.phase = GRBL_CONTROLLER_PHASE.CONNECTED;
       this.statusPoller.startPolling(GRBL_STATUS_POLL_INTERVAL_MS);
