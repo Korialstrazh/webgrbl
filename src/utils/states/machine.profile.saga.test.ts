@@ -10,6 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { GrblFirmwareIdentity } from '../grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialTransport } from '../grbl/interfaces/SerialTransport';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
 import { GrblSimulator } from '../grbl/simulator/grbl.simulator';
@@ -25,7 +26,7 @@ import {
 import { MACHINE_PROFILES_STORAGE } from '../profiles/machine.profiles.storage';
 import { newMachineProfile } from '../profiles/new.machine.profile';
 import type { ConnectionPreferences } from '../storage/interfaces/ConnectionPreferences';
-import { ConnectRequested, DisconnectRequested } from './grbl.connection.state';
+import { ConnectRequested, ConnectionEstablished, DisconnectRequested } from './grbl.connection.state';
 import type { AppToast } from './interfaces/AppToast';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import { watchMachineProfiles } from './machine.profile.saga';
@@ -35,6 +36,7 @@ import {
   MachineProfileReadFromLaserRequested,
   MachineProfileSaved,
   MachineProfileUpdateFromLaserAccepted,
+  MachineProfilesImported,
   selectActiveMachineProfile,
   selectMachineProfiles,
 } from './machine.profile.state';
@@ -57,6 +59,11 @@ const CUSTOM_LASER_SETTING_LINES: string[] = ['$130=300', '$131=200', '$30=255',
 const LASER_MODE_OFF_SETTING_LINES: string[] = ['$32=0'];
 const SETTING_LINE_END = '\n';
 const CONNECT_AND_READ_WARNING_COUNT = 2;
+const INVALID_WORK_AREA_SETTING_LINES: string[] = ['$130=0'];
+const INVALID_S_VALUE_MAX_SETTING_LINES: string[] = ['$30=0'];
+const SETTINGS_WITHOUT_LASER_MODE: Record<number, string> = { 130: '400', 131: '400', 30: '1000', 22: '0' };
+const FIRMWARE_IDENTITY: GrblFirmwareIdentity = { firmwareName: 'Grbl', version: '1.1h', vendorText: '' };
+const RX_BUFFER_SIZE = 127;
 
 /** A simulated laser whose settings were changed before the app connects; settings survive power cycles. */
 const newConfiguredSimulator = (settingLines: string[]): GrblSimulator => {
@@ -95,6 +102,12 @@ const newStoredProfile = (): MachineProfile => newMachineProfile({
   workAreaXMm: PROFILE_WORK_AREA_X_MM,
   workAreaYMm: PROFILE_WORK_AREA_Y_MM,
   sValueMax: PROFILE_S_VALUE_MAX,
+});
+
+const newUnselectedDocument = (profile: MachineProfile): MachineProfilesDocument => ({
+  version: MACHINE_PROFILES_DOCUMENT_VERSION,
+  activeProfileId: undefined,
+  profiles: [profile],
 });
 
 const getToast = (store: AppStore, messageKey: string): AppToast | undefined =>
@@ -270,5 +283,91 @@ describe(watchMachineProfiles.name, () => {
       severity: TOAST_SEVERITY.WARNING,
       repeatCount: CONNECT_AND_READ_WARNING_COUNT,
     });
+  });
+
+  it('connect without a valid $130 shows no differs toast against the active profile', async () => {
+    const profile: MachineProfile = newStoredProfile();
+    MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
+    store = newStore(newTestDependencies(newConfiguredSimulator(INVALID_WORK_AREA_SETTING_LINES)));
+
+    await connectStore(store);
+
+    expect(getToast(store, DEFAULT.TOAST_PROFILE_DIFFERS)).toBeUndefined();
+  });
+
+  it('an accepted update from a laser without a valid $130 keeps the work area of the profile', async () => {
+    const profile: MachineProfile = newStoredProfile();
+    MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
+    store = newStore(newTestDependencies(newConfiguredSimulator(INVALID_WORK_AREA_SETTING_LINES)));
+    await connectStore(store);
+
+    store.dispatch(new MachineProfileUpdateFromLaserAccepted({ profileId: profile.id }));
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(selectActiveMachineProfile(store.getState())).toMatchObject({
+      workAreaXMm: PROFILE_WORK_AREA_X_MM,
+      workAreaYMm: SIMULATOR_WORK_AREA_MM,
+    });
+  });
+
+  it('an accepted update from a laser without a valid $30 keeps the S max of the profile', async () => {
+    const profile: MachineProfile = newStoredProfile();
+    MACHINE_PROFILES_STORAGE.storeDocument(newStoredDocument(profile));
+    store = newStore(newTestDependencies(newConfiguredSimulator(INVALID_S_VALUE_MAX_SETTING_LINES)));
+    await connectStore(store);
+
+    store.dispatch(new MachineProfileUpdateFromLaserAccepted({ profileId: profile.id }));
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(selectActiveMachineProfile(store.getState())).toMatchObject({
+      workAreaXMm: SIMULATOR_WORK_AREA_MM,
+      sValueMax: PROFILE_S_VALUE_MAX,
+    });
+  });
+
+  it('first connect without a valid $130 creates no profile', async () => {
+    store = newStore(newTestDependencies(newConfiguredSimulator(INVALID_WORK_AREA_SETTING_LINES)));
+
+    await connectStore(store);
+
+    expect(selectMachineProfiles(store.getState())).toEqual([]);
+    expect(getToast(store, DEFAULT.TOAST_PROFILE_CREATED)).toBeUndefined();
+  });
+
+  it('connect with profiles but none active creates no new profile', async () => {
+    const profile: MachineProfile = newStoredProfile();
+    MACHINE_PROFILES_STORAGE.storeDocument(newUnselectedDocument(profile));
+    store = newStore(newTestDependencies(new GrblSimulator(() => undefined)));
+
+    await connectStore(store);
+
+    expect(selectMachineProfiles(store.getState())).toEqual([profile]);
+    expect(getToast(store, DEFAULT.TOAST_PROFILE_CREATED)).toBeUndefined();
+  });
+
+  it('a laser that does not report $32 gets no laser mode warning', async () => {
+    store = newStore(newTestDependencies(new GrblSimulator(() => undefined)));
+
+    store.dispatch(new ConnectionEstablished({
+      connectionInfo: {
+        identity: FIRMWARE_IDENTITY,
+        rxBufferSize: RX_BUFFER_SIZE,
+        settings: SETTINGS_WITHOUT_LASER_MODE,
+        buildInfoLines: [],
+      },
+    }));
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(getToast(store, DEFAULT.TOAST_LASER_MODE_OFF)).toBeUndefined();
+  });
+
+  it('an imported document is persisted', async () => {
+    const profile: MachineProfile = newStoredProfile();
+    store = newStore(newTestDependencies(new GrblSimulator(() => undefined)));
+
+    store.dispatch(new MachineProfilesImported({ document: newStoredDocument(profile) }));
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(MACHINE_PROFILES_STORAGE.getStoredDocument()).toEqual(newStoredDocument(profile));
   });
 });

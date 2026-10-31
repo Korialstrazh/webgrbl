@@ -12,12 +12,15 @@
  */
 import { call, put, select, takeEvery } from 'redux-saga/effects';
 import { DEFAULT } from '../localization/default.locales';
-import { getProfileValuesFromSettings } from '../profiles/get.profile.values.from.settings';
+import { getValidlyReportedProfileValues } from '../profiles/get.validly.reported.profile.values';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { MachineProfilesDocument } from '../profiles/interfaces/MachineProfilesDocument';
-import type { MachineProfileValuesFromSettings } from '../profiles/interfaces/MachineProfileValuesFromSettings';
+import type { ReportedMachineProfileValues } from '../profiles/interfaces/ReportedMachineProfileValues';
+import type { ReportedMachineWorkArea } from '../profiles/interfaces/ReportedMachineWorkArea';
 import { MACHINE_PROFILES_STORAGE } from '../profiles/machine.profiles.storage';
 import { newMachineProfile } from '../profiles/new.machine.profile';
+import { isBoolean } from '../type.guards/is.boolean';
+import { isFiniteNumber } from '../type.guards/is.finite.number';
 import { ConnectionEstablished, selectGrblSettings, selectIsConnected } from './grbl.connection.state';
 import {
   ActiveMachineProfileSelected,
@@ -29,6 +32,7 @@ import {
   MachineProfilesLoaded,
   selectActiveMachineProfile,
   selectMachineProfile,
+  selectMachineProfiles,
   selectMachineProfilesDocument,
 } from './machine.profile.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
@@ -42,11 +46,24 @@ const PROFILE_CHANGE_ACTION_TYPES: string[] = [
   MachineProfilesImported.type,
 ];
 
-const isWorkAreaDifferent = (profile: MachineProfile, laserValues: MachineProfileValuesFromSettings): boolean =>
-  profile.workAreaXMm !== laserValues.workAreaXMm || profile.workAreaYMm !== laserValues.workAreaYMm;
+const hasReportedWorkArea = (laserValues: ReportedMachineProfileValues): laserValues is ReportedMachineWorkArea =>
+  isFiniteNumber(laserValues.workAreaXMm) && isFiniteNumber(laserValues.workAreaYMm);
 
-const isLaserModeReportedOff = (laserValues: MachineProfileValuesFromSettings | undefined): boolean =>
-  !!laserValues && !laserValues.isLaserModeOn;
+const isActiveWorkAreaDifferent = (
+  activeProfile: MachineProfile | undefined,
+  laserValues: ReportedMachineWorkArea,
+): activeProfile is MachineProfile =>
+  !!activeProfile
+  && (activeProfile.workAreaXMm !== laserValues.workAreaXMm || activeProfile.workAreaYMm !== laserValues.workAreaYMm);
+
+/** True only when the laser reports `$32` and it is off; a laser that does not report it gets no warning. */
+const isLaserModeReportedOff = (laserValues: ReportedMachineProfileValues | undefined): boolean =>
+  isBoolean(laserValues?.isLaserModeOn) && !laserValues.isLaserModeOn;
+
+/** The reported values that are profile fields; laser mode is not stored in a profile. */
+const getReportedProfileFields = (
+  { isLaserModeOn: _isLaserModeOn, ...profileFields }: ReportedMachineProfileValues,
+): Partial<MachineProfile> => profileFields;
 
 function* storeMachineProfiles(): Generator {
   const profilesDocument: MachineProfilesDocument =
@@ -63,9 +80,8 @@ function* showLaserModeOffWarning(): Generator {
   }));
 }
 
-function* createMachineProfileFromLaser(laserValues: MachineProfileValuesFromSettings): Generator {
-  const { workAreaXMm, workAreaYMm, sValueMax, hasHomingSwitches }: MachineProfileValuesFromSettings = laserValues;
-  const profile: MachineProfile = newMachineProfile({ workAreaXMm, workAreaYMm, sValueMax, hasHomingSwitches });
+function* createMachineProfileFromLaser(laserValues: ReportedMachineWorkArea): Generator {
+  const profile: MachineProfile = newMachineProfile(getReportedProfileFields(laserValues));
 
   yield put(new MachineProfileSaved({ profile }));
   yield put(new ActiveMachineProfileSelected({ profileId: profile.id }));
@@ -76,10 +92,7 @@ function* createMachineProfileFromLaser(laserValues: MachineProfileValuesFromSet
   }));
 }
 
-function* showProfileDiffersWarning(
-  profile: MachineProfile,
-  laserValues: MachineProfileValuesFromSettings,
-): Generator {
+function* showProfileDiffersWarning(profile: MachineProfile, laserValues: ReportedMachineWorkArea): Generator {
   yield put(new ToastShown({
     severity: TOAST_SEVERITY.WARNING,
     messageKey: DEFAULT.TOAST_PROFILE_DIFFERS,
@@ -94,29 +107,35 @@ function* showProfileDiffersWarning(
 }
 
 function* checkMachineProfileOnConnect(action: ConnectionEstablished): Generator {
-  const laserValues: MachineProfileValuesFromSettings =
-    getProfileValuesFromSettings(action.payload.connectionInfo.settings);
+  const laserValues: ReportedMachineProfileValues =
+    getValidlyReportedProfileValues(action.payload.connectionInfo.settings);
+  const profiles: MachineProfile[] = (yield select(selectMachineProfiles)) as MachineProfile[];
   const activeProfile: MachineProfile | undefined =
     (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
 
-  if (!activeProfile) {
-    yield call(createMachineProfileFromLaser, laserValues);
-  } else if (isWorkAreaDifferent(activeProfile, laserValues)) {
-    yield call(showProfileDiffersWarning, activeProfile, laserValues);
+  // Without a valid work area there is nothing to create a profile from or to compare against.
+  if (hasReportedWorkArea(laserValues)) {
+    if (!profiles.length) {
+      yield call(createMachineProfileFromLaser, laserValues);
+    } else if (isActiveWorkAreaDifferent(activeProfile, laserValues)) {
+      yield call(showProfileDiffersWarning, activeProfile, laserValues);
+    }
   }
 
-  if (!laserValues.isLaserModeOn) {
+  if (isLaserModeReportedOff(laserValues)) {
     yield call(showLaserModeOffWarning);
   }
 }
 
-/** Applies the connected laser's settings to a profile; returns the laser values, or undefined when nothing changed. */
+/**
+ * Applies the values the connected laser reports validly to a profile and keeps the profile's own value for every
+ * other field; returns the reported values, or undefined when nothing changed.
+ */
 function* updateMachineProfileFromLaser(profileId: string): Generator {
   const isConnected: boolean = (yield select(selectIsConnected)) as boolean;
   const profile: MachineProfile | undefined =
     (yield select(selectMachineProfile(profileId))) as MachineProfile | undefined;
 
-  // Without a connection the settings are empty and would reset the profile to the defaults.
   if (!isConnected) {
     return undefined;
   }
@@ -126,10 +145,8 @@ function* updateMachineProfileFromLaser(profileId: string): Generator {
   }
 
   const settings: Record<number, string> = (yield select(selectGrblSettings)) as Record<number, string>;
-  const laserValues: MachineProfileValuesFromSettings = getProfileValuesFromSettings(settings);
-  const { workAreaXMm, workAreaYMm, sValueMax, hasHomingSwitches }: MachineProfileValuesFromSettings = laserValues;
-
-  const updatedProfile: MachineProfile = { ...profile, workAreaXMm, workAreaYMm, sValueMax, hasHomingSwitches };
+  const laserValues: ReportedMachineProfileValues = getValidlyReportedProfileValues(settings);
+  const updatedProfile: MachineProfile = { ...profile, ...getReportedProfileFields(laserValues) };
 
   yield put(new MachineProfileSaved({ profile: updatedProfile }));
 
@@ -141,9 +158,9 @@ function* acceptMachineProfileUpdateFromLaser(action: MachineProfileUpdateFromLa
 }
 
 function* readMachineProfileFromLaser(action: MachineProfileReadFromLaserRequested): Generator {
-  const laserValues: MachineProfileValuesFromSettings | undefined = (
+  const laserValues: ReportedMachineProfileValues | undefined = (
     yield call(updateMachineProfileFromLaser, action.payload.profileId)
-  ) as MachineProfileValuesFromSettings | undefined;
+  ) as ReportedMachineProfileValues | undefined;
 
   if (isLaserModeReportedOff(laserValues)) {
     yield call(showLaserModeOffWarning);
