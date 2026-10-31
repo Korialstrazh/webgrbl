@@ -34,6 +34,31 @@ describe('MACHINE_PROFILES_STORAGE', () => {
     expect(MACHINE_PROFILES_STORAGE.getStoredDocument()).toEqual(EMPTY_DOCUMENT);
   });
 
+  it('drops stored profiles with values out of range and keeps the valid ones', () => {
+    const validProfile: MachineProfile = newMachineProfile();
+    const hugeProfile: MachineProfile = newMachineProfile({ workAreaXMm: 1e9 });
+    localStorage.setItem(
+      MACHINE_PROFILES_STORAGE_KEY,
+      JSON.stringify({ version: 1, activeProfileId: validProfile.id, profiles: [hugeProfile, validProfile] }),
+    );
+
+    expect(MACHINE_PROFILES_STORAGE.getStoredDocument()).toEqual({
+      version: 1,
+      activeProfileId: validProfile.id,
+      profiles: [validProfile],
+    });
+  });
+
+  it.each([['missing-id'], ['']])('clears the dangling active profile id %j', (activeProfileId: string) => {
+    const validProfile: MachineProfile = newMachineProfile();
+    localStorage.setItem(
+      MACHINE_PROFILES_STORAGE_KEY,
+      JSON.stringify({ version: 1, activeProfileId, profiles: [validProfile] }),
+    );
+
+    expect(MACHINE_PROFILES_STORAGE.getStoredDocument().activeProfileId).toBeUndefined();
+  });
+
   it('does not throw when localStorage throws', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation((): never => {
       throw new Error(BLOCKED_MESSAGE);

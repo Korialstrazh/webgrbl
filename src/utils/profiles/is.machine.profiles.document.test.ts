@@ -18,6 +18,7 @@ const INVALID_VALUES: unknown[] = [
   { ...VALID_DOCUMENT, activeProfileId: 5 },
   { ...VALID_DOCUMENT, profiles: 'none' },
   { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), originCorner: 'middle' }] },
+  { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), id: '' }] },
   { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), jogFeedRate: '1500' }] },
 ];
 

@@ -15,4 +15,6 @@ export interface MachineProfileFieldError {
   field: keyof MachineProfile;
   /** Localization key of the message to show. */
   messageKey: string;
+  /** Values for the placeholders of the message, such as the allowed limits. */
+  messageParameters?: Record<string, number>;
 }

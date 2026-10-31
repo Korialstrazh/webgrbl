@@ -1,4 +1,6 @@
+import type { MachineProfile } from './interfaces/MachineProfile';
 import type { MachineProfilesDocument } from './interfaces/MachineProfilesDocument';
+import { getMachineProfileErrors } from './get.machine.profile.errors';
 import { isMachineProfilesDocument } from './is.machine.profiles.document';
 import { MACHINE_PROFILES_DOCUMENT_VERSION, MACHINE_PROFILES_STORAGE_KEY } from './machine.profile.constants';
 
@@ -7,6 +9,21 @@ const newEmptyDocument = (): MachineProfilesDocument => ({
   activeProfileId: undefined,
   profiles: [],
 });
+
+const isProfileValid = (profile: MachineProfile): boolean => !getMachineProfileErrors(profile).length;
+
+const getCleanedDocument = (storedDocument: MachineProfilesDocument): MachineProfilesDocument => {
+  const profiles: MachineProfile[] = storedDocument.profiles.filter(isProfileValid);
+  const hasActiveProfile: boolean = profiles.some(
+    (profile: MachineProfile): boolean => profile.id === storedDocument.activeProfileId,
+  );
+
+  return {
+    version: storedDocument.version,
+    activeProfileId: hasActiveProfile ? storedDocument.activeProfileId : undefined,
+    profiles,
+  };
+};
 
 /**
  * Keeps the machine profiles in localStorage. Storage can be blocked or full, so every access is guarded and a
@@ -30,7 +47,7 @@ export const MACHINE_PROFILES_STORAGE = {
 
       const parsedValue: unknown = JSON.parse(storedText);
 
-      return isMachineProfilesDocument(parsedValue) ? parsedValue : newEmptyDocument();
+      return isMachineProfilesDocument(parsedValue) ? getCleanedDocument(parsedValue) : newEmptyDocument();
     } catch {
       return newEmptyDocument();
     }

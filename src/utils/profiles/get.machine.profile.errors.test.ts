@@ -16,22 +16,27 @@ const NAME_ERROR: MachineProfileFieldError = { field: 'name', messageKey: MACHIN
 const POWER_ERROR: MachineProfileFieldError = {
   field: 'maxPowerWatts',
   messageKey: MACHINE_PROFILE_ERROR_KEY.MAX_POWER_INVALID,
+  messageParameters: { max: 500 },
 };
 const WORK_X_ERROR: MachineProfileFieldError = {
   field: 'workAreaXMm',
   messageKey: MACHINE_PROFILE_ERROR_KEY.WORK_AREA_X_INVALID,
+  messageParameters: { max: 5000 },
 };
 const WORK_Y_ERROR: MachineProfileFieldError = {
   field: 'workAreaYMm',
   messageKey: MACHINE_PROFILE_ERROR_KEY.WORK_AREA_Y_INVALID,
+  messageParameters: { max: 5000 },
 };
 const S_VALUE_ERROR: MachineProfileFieldError = {
   field: 'sValueMax',
   messageKey: MACHINE_PROFILE_ERROR_KEY.S_VALUE_MAX_INVALID,
+  messageParameters: { min: 1, max: 100000 },
 };
 const JOG_FEED_ERROR: MachineProfileFieldError = {
   field: 'jogFeedRate',
   messageKey: MACHINE_PROFILE_ERROR_KEY.JOG_FEED_RATE_INVALID,
+  messageParameters: { min: 100, max: 10000 },
 };
 
 const INVALID_CASES: Array<[string, Partial<MachineProfile>, MachineProfileFieldError]> = [
@@ -44,6 +49,12 @@ const INVALID_CASES: Array<[string, Partial<MachineProfile>, MachineProfileField
   ['a negative work height', { workAreaYMm: -1 }, WORK_Y_ERROR],
   ['a work height over the cap', { workAreaYMm: OVER_LIMIT_WORK_AREA_MM }, WORK_Y_ERROR],
   ['a negative S value', { sValueMax: -5 }, S_VALUE_ERROR],
+  ['a fractional S value below 1', { sValueMax: 0.5 }, S_VALUE_ERROR],
+  ['a fractional S value', { sValueMax: 1.5 }, S_VALUE_ERROR],
+  ['an S value over the limit', { sValueMax: 100001 }, S_VALUE_ERROR],
+  ['a huge S value', { sValueMax: 1e308 }, S_VALUE_ERROR],
+  ['power over the limit', { maxPowerWatts: 501 }, POWER_ERROR],
+  ['infinite power', { maxPowerWatts: Infinity }, POWER_ERROR],
   ['a jog feed below the range', { jogFeedRate: JOG_FEED_BELOW_RANGE }, JOG_FEED_ERROR],
   ['a jog feed above the range', { jogFeedRate: JOG_FEED_ABOVE_RANGE }, JOG_FEED_ERROR],
   ['a NaN jog feed', { jogFeedRate: NaN }, JOG_FEED_ERROR],
@@ -70,6 +81,14 @@ describe(getMachineProfileErrors.name, () => {
 
     expect(getMachineProfileErrors(profile)).toEqual([]);
     expect(getMachineProfileErrors(newMachineProfile({ jogFeedRate: JOG_FEED_RANGE_MAX }))).toEqual([]);
+  });
+
+  it.each([[255], [1000], [10000]])('accepts S value %d', (sValueMax: number) => {
+    expect(getMachineProfileErrors(newMachineProfile({ sValueMax }))).toEqual([]);
+  });
+
+  it('accepts 12 W power', () => {
+    expect(getMachineProfileErrors(newMachineProfile({ maxPowerWatts: 12 }))).toEqual([]);
   });
 
   it('reports every invalid field', () => {

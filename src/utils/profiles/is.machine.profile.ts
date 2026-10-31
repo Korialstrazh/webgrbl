@@ -19,6 +19,7 @@ import { isMachineOriginCorner } from './is.machine.origin.corner';
 export const isMachineProfile = (value: unknown): value is MachineProfile =>
   isRecord(value) &&
   isString(value.id) &&
+  !!value.id &&
   isString(value.name) &&
   isFiniteNumber(value.maxPowerWatts) &&
   isFiniteNumber(value.workAreaXMm) &&
