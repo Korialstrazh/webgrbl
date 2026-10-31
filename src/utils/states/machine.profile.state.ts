@@ -54,14 +54,6 @@ export class ActiveMachineProfileSelected extends Action<MachineProfileIdPayload
 export class MachineProfilesImported extends Action<MachineProfilesDocumentPayload> {
   public static readonly type: string = actionType('machine profiles imported');
 }
-
-export class MachineProfileReadFromLaserRequested extends Action<MachineProfileIdPayload> {
-  public static readonly type: string = actionType('machine profile read from laser requested');
-}
-
-export class MachineProfileUpdateFromLaserAccepted extends Action<MachineProfileIdPayload> {
-  public static readonly type: string = actionType('machine profile update from laser accepted');
-}
 // #endregion
 
 // #region Initial state
