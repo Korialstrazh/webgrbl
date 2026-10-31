@@ -34,6 +34,7 @@ const FRAME_LABEL = 'Frame job';
 const POWER_LABEL = 'Pointer power';
 const SECONDARY_POINTER_BUTTON = 2;
 const ARROW_RIGHT_KEY_CODE = 39;
+const UNMAPPED_KEY = 'a';
 const MAX_POWER_WATTS = 10;
 const POWER_PERCENT = 3;
 const WATTS_PATTERN = /0\.30 W/;
@@ -202,8 +203,8 @@ describe(LaserCard.name, () => {
     connectIdle(store);
     const fireButton: HTMLElement = screen.getByRole('button', { name: FIRE_LABEL });
 
-    fireEvent.keyDown(fireButton, { key: 'a' });
-    fireEvent.keyUp(fireButton, { key: 'a' });
+    fireEvent.keyDown(fireButton, { key: UNMAPPED_KEY });
+    fireEvent.keyUp(fireButton, { key: UNMAPPED_KEY });
 
     expect(getDispatched(dispatchSpy, LaserPointerFireRequested)).toHaveLength(0);
     expect(getDispatched(dispatchSpy, LaserPointerReleaseRequested)).toHaveLength(0);
