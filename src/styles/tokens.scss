@@ -17,13 +17,14 @@
   --color-danger: #e5383b;
   // The danger colour under light text is only 3.45:1, so buttons use this darker shade (5.13:1).
   --color-danger-button: #b52a2d;
-  --color-danger-button-hover: #c9302f;
+  --color-danger-button-hover: #a82629;
   --color-danger-button-active: #9d2326;
   --color-info: #4aa3ff;
   --color-laser-head: #ff3b3b;
   --color-focus-ring: #4aa3ff;
-  --color-surface-hover: #292d33;
-  --color-surface-active: #30353b;
+  // Hover and active surfaces stay dark enough for muted text (4.84:1 and 4.67:1).
+  --color-surface-hover: #212429;
+  --color-surface-active: #23272c;
   --color-disabled-bg: #1a1d21;
   --color-disabled-text: #8b9097;
 

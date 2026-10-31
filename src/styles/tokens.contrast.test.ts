@@ -16,12 +16,24 @@ const LUMINANCE_RED = 0.2126;
 const LUMINANCE_GREEN = 0.7152;
 const LUMINANCE_BLUE = 0.0722;
 const LUMINANCE_OFFSET = 0.05;
-const SURFACE_TOKENS = ['--color-surface-1', '--color-surface-2', '--color-surface-3'] as const;
+const SURFACE_TOKENS = [
+  '--color-surface-1',
+  '--color-surface-2',
+  '--color-surface-3',
+  '--color-surface-hover',
+  '--color-surface-active',
+] as const;
+const DANGER_BUTTON_TOKENS = [
+  '--color-danger-button',
+  '--color-danger-button-hover',
+  '--color-danger-button-active',
+] as const;
+const GREEN_START_INDEX = 1;
+const BLUE_START_INDEX = 2;
 const TEXT_TOKEN = '--color-text';
 const MUTED_TOKEN = '--color-text-muted';
 const MUTED_STRONG_TOKEN = '--color-text-muted-strong';
 const BG_TOKEN = '--color-bg';
-const DANGER_BUTTON_TOKEN = '--color-danger-button';
 const ACCENT_BUTTON_TOKEN = '--color-accent';
 const DARK_TEXT_ON_ACCENT = '#121417';
 
@@ -42,8 +54,10 @@ const getChannelLuminance = (channelHex: string): number => {
 const getRelativeLuminance = (hex: string): number => {
   const digits: string = hex.replace('#', '');
   const red: number = getChannelLuminance(digits.slice(0, HEX_DIGITS_PER_CHANNEL));
-  const green: number = getChannelLuminance(digits.slice(HEX_DIGITS_PER_CHANNEL, 2 * HEX_DIGITS_PER_CHANNEL));
-  const blue: number = getChannelLuminance(digits.slice(2 * HEX_DIGITS_PER_CHANNEL));
+  const greenStart: number = GREEN_START_INDEX * HEX_DIGITS_PER_CHANNEL;
+  const blueStart: number = BLUE_START_INDEX * HEX_DIGITS_PER_CHANNEL;
+  const green: number = getChannelLuminance(digits.slice(greenStart, blueStart));
+  const blue: number = getChannelLuminance(digits.slice(blueStart));
 
   return LUMINANCE_RED * red + LUMINANCE_GREEN * green + LUMINANCE_BLUE * blue;
 };
@@ -87,10 +101,10 @@ describe('design token contrast', () => {
     expect(getContrastRatio(mutedHex, requireToken(surfaceToken))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
   });
 
-  it('keeps the text readable on the danger button', () => {
-    expect(getContrastRatio(requireToken(TEXT_TOKEN), requireToken(DANGER_BUTTON_TOKEN))).toBeGreaterThanOrEqual(
-      MIN_TEXT_CONTRAST,
-    );
+  it.each(DANGER_BUTTON_TOKENS)('keeps the text readable on %s', (buttonToken: string) => {
+    const ratio: number = getContrastRatio(requireToken(TEXT_TOKEN), requireToken(buttonToken));
+
+    expect(ratio).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
   });
 
   it('keeps the dark text readable on the accent button', () => {
