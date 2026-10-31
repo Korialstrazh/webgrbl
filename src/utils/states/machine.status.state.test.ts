@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GRBL_CONNECTION_STATUS, GRBL_HOLD_SUBSTATE, GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
-import type { GrblMachineState } from '../grbl/grbl.constants';
+import type { GrblConnectionStatus, GrblMachineState } from '../grbl/grbl.constants';
 import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
 import { Action } from './action';
 import { ConnectionStatusChanged } from './grbl.connection.state';
@@ -46,18 +46,19 @@ describe(machineStatusReducer.name, () => {
     expect(state.status).toEqual(status);
   });
 
-  it('clears the status when the connection becomes disconnected', () => {
-    const received: MachineStatusState = machineStatusReducer(
-      undefined,
-      new MachineStatusReceived({ status: getStatus(GRBL_MACHINE_STATE.RUN) }),
-    );
-    const state: MachineStatusState = machineStatusReducer(
-      received,
-      new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }),
-    );
+  it.each([GRBL_CONNECTION_STATUS.DISCONNECTED, GRBL_CONNECTION_STATUS.LOST])(
+    'clears the status when the connection becomes %s',
+    (connectionStatus: GrblConnectionStatus) => {
+      const received: MachineStatusState = machineStatusReducer(
+        undefined,
+        new MachineStatusReceived({ status: getStatus(GRBL_MACHINE_STATE.RUN) }),
+      );
+      const state: MachineStatusState =
+        machineStatusReducer(received, new ConnectionStatusChanged({ connectionStatus }));
 
-    expect(state.status).toBeUndefined();
-  });
+      expect(state.status).toBeUndefined();
+    },
+  );
 
   it('keeps the status for other connection status changes', () => {
     const received: MachineStatusState = machineStatusReducer(
