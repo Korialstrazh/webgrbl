@@ -26,6 +26,8 @@ import {
 import type { LaserPointerState } from './laser.pointer.state';
 
 const IN_RANGE_PERCENT = 2.5;
+const ABOVE_CAP_PERCENT = 50;
+const ZERO_PERCENT = 0;
 
 class UnknownAction extends Action {
   public static readonly type: string = 'unknown action';
@@ -50,14 +52,14 @@ describe(laserPointerReducer.name, () => {
 
   it('clamps a power above the cap to the cap', () => {
     const state: LaserPointerState =
-      laserPointerReducer(getInitialState(), new LaserPointerPowerChanged({ percent: 50 }));
+      laserPointerReducer(getInitialState(), new LaserPointerPowerChanged({ percent: ABOVE_CAP_PERCENT }));
 
     expect(state.powerPercent).toBe(MAX_POINTER_POWER_PERCENT);
   });
 
   it('clamps a power below the minimum to the minimum', () => {
     const state: LaserPointerState =
-      laserPointerReducer(getInitialState(), new LaserPointerPowerChanged({ percent: 0 }));
+      laserPointerReducer(getInitialState(), new LaserPointerPowerChanged({ percent: ZERO_PERCENT }));
 
     expect(state.powerPercent).toBe(MIN_POINTER_POWER_PERCENT);
   });

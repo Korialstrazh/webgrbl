@@ -3,6 +3,8 @@ import { getClampedPointerPowerPercent } from './get.clamped.pointer.power.perce
 import { MAX_POINTER_POWER_PERCENT, MIN_POINTER_POWER_PERCENT } from './machine.command.constants';
 
 const IN_RANGE_PERCENT = 2;
+const BELOW_MINIMUM_PERCENT = 0;
+const ABOVE_CAP_PERCENT = 100;
 
 describe(getClampedPointerPowerPercent.name, () => {
   it('keeps a percent inside the range', () => {
@@ -10,10 +12,10 @@ describe(getClampedPointerPowerPercent.name, () => {
   });
 
   it('raises a percent below the minimum to the minimum', () => {
-    expect(getClampedPointerPowerPercent(0)).toBe(MIN_POINTER_POWER_PERCENT);
+    expect(getClampedPointerPowerPercent(BELOW_MINIMUM_PERCENT)).toBe(MIN_POINTER_POWER_PERCENT);
   });
 
   it('lowers a percent above the cap to the cap', () => {
-    expect(getClampedPointerPowerPercent(100)).toBe(MAX_POINTER_POWER_PERCENT);
+    expect(getClampedPointerPowerPercent(ABOVE_CAP_PERCENT)).toBe(MAX_POINTER_POWER_PERCENT);
   });
 });

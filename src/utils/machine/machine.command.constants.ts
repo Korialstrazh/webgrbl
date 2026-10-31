@@ -36,8 +36,12 @@ export const JOG_DIRECTION_AXIS_SIGNS: Record<JogDirection, JogAxisSigns> = {
   [JOG_DIRECTION.NORTH_WEST]: { xSign: -1, ySign: 1 },
 };
 
-export const JOG_STEP_SIZES_MM: readonly number[] = [0.1, 1, 10, 50];
-export const DEFAULT_JOG_STEP_MM = 10;
+export const JOG_STEP_MM_FINE = 0.1;
+export const JOG_STEP_MM_SMALL = 1;
+export const JOG_STEP_MM_MEDIUM = 10;
+export const JOG_STEP_MM_LARGE = 50;
+export const JOG_STEP_SIZES_MM = [JOG_STEP_MM_FINE, JOG_STEP_MM_SMALL, JOG_STEP_MM_MEDIUM, JOG_STEP_MM_LARGE] as const;
+export const DEFAULT_JOG_STEP_MM = JOG_STEP_MM_MEDIUM;
 
 export const GCODE_MAX_DECIMALS = 3;
 
