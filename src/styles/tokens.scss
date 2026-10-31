@@ -19,6 +19,8 @@
   --color-danger-button: #b52a2d;
   --color-danger-button-hover: #a82629;
   --color-danger-button-active: #9d2326;
+  // Error text on the background and every surface needs a lighter red than the danger colour (5.41:1 on surface-3).
+  --color-danger-text: #ff6b6b;
   --color-info: #4aa3ff;
   --color-laser-head: #ff3b3b;
   --color-focus-ring: #4aa3ff;
