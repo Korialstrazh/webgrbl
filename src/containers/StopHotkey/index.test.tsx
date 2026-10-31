@@ -1,8 +1,10 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { StrictMode } from 'react';
 import { Provider } from 'react-redux';
 import { StopHotkey } from '.';
 import { ConnectionPill } from '../ConnectionPill';
 import { ConsolePanel } from '../ConsolePanel';
+import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
 import { Dialog } from '../../views/Dialog';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
@@ -12,7 +14,6 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 
-const ESCAPE_KEY = 'Escape';
 const CONSOLE_INPUT_LABEL = 'Console command';
 const DISCONNECTED_PATTERN = /Disconnected|Connected/;
 const POPOVER_LABEL = 'Laser connection';
@@ -58,6 +59,32 @@ const renderHotkey = (isConnected: boolean, extraComponent: React.ReactNode = nu
 };
 
 describe(StopHotkey.name, () => {
+  it('under StrictMode stops once per Escape press and not after unmount', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const countStopRequests = (): number =>
+      dispatchSpy.mock.calls.filter(([action]) => action instanceof MachineStopRequested).length;
+    const { unmount } = render(
+      <StrictMode>
+        <Provider store={store}>
+          <StopHotkey />
+        </Provider>
+      </StrictMode>,
+    );
+
+    act(() => {
+      store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
+    });
+    fireEvent.keyDown(document.body, { key: ESCAPE_KEY });
+
+    expect(countStopRequests()).toBe(1);
+
+    unmount();
+    fireEvent.keyDown(document.body, { key: ESCAPE_KEY });
+
+    expect(countStopRequests()).toBe(1);
+  });
+
   it('Escape stops when connected and nothing is open', () => {
     const { stopSpy } = renderHotkey(true);
 

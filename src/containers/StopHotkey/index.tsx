@@ -12,20 +12,23 @@
  */
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { useStore } from 'react-redux';
 import { ESCAPE_KEY, KEYDOWN_EVENT_NAME } from '../../utils/browser/browser.events.constants';
 import { selectIsConnected } from '../../utils/states/grbl.connection.state';
 import { MachineStopRequested } from '../../utils/states/machine.status.state';
-import type { AppStore } from '../../utils/states/new.store';
+import type { AppRootState, AppStore } from '../../utils/states/new.store';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
+import { useAppStore } from '../../utils/states/use.app.store';
 
 const USE_CAPTURE_PHASE = true;
 
 const isFreshEscapePress = (event: KeyboardEvent): boolean =>
   event.key === ESCAPE_KEY && !event.repeat && !event.isComposing;
 
+const canStopMachine = (state: AppRootState): boolean =>
+  selectIsConnected(state) && !selectIsAnyOverlayOpen(state);
+
 export const StopHotkey = (): ReactNode => {
-  const store: AppStore = useStore() as AppStore;
+  const store: AppStore = useAppStore();
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
@@ -33,9 +36,9 @@ export const StopHotkey = (): ReactNode => {
         return;
       }
 
-      const state: ReturnType<AppStore['getState']> = store.getState();
+      const state: AppRootState = store.getState();
 
-      if (!selectIsConnected(state) || selectIsAnyOverlayOpen(state)) {
+      if (!canStopMachine(state)) {
         return;
       }
 

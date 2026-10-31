@@ -9,15 +9,18 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { GrblAxisPosition } from '../grbl/interfaces/GrblAxisPosition';
-import type { BedHeadMarker } from './interfaces/BedHeadMarker';
 import type { BedDimensions } from './interfaces/BedDimensions';
+import type { BedHeadMarker } from './interfaces/BedHeadMarker';
 
 const getClampedCoordinate = (coordinateMm: number, lengthMm: number): number =>
   Math.min(Math.max(coordinateMm, 0), lengthMm);
+
+const isHeadOutsideBed = (head: GrblAxisPosition, markerXMm: number, markerYMm: number): boolean =>
+  markerXMm !== head.x || markerYMm !== head.y;
 
 export const getBedHeadMarker = (head: GrblAxisPosition, dimensions: BedDimensions): BedHeadMarker => {
   const xMm: number = getClampedCoordinate(head.x, dimensions.widthMm);
   const yMm: number = getClampedCoordinate(head.y, dimensions.heightMm);
 
-  return { xMm, yMm, isOutsideBed: xMm !== head.x || yMm !== head.y };
+  return { xMm, yMm, isOutsideBed: isHeadOutsideBed(head, xMm, yMm) };
 };

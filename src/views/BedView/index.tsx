@@ -17,30 +17,19 @@ import { getCoordinateText } from '../../utils/bed/get.coordinate.text';
 import { getGridLinePath } from '../../utils/bed/get.grid.line.path';
 import { getRulerLabelPositions } from '../../utils/bed/get.ruler.label.positions';
 import type { BedHeadMarker } from '../../utils/bed/interfaces/BedHeadMarker';
-import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
-import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import {
   ARIA_SENTENCE_SEPARATOR,
   BED_HEAD_TEST_ID,
-  CENTER_DIVISOR,
+  CENTER_FRACTION,
   CROSSHAIR_ARM_MM,
   PLACEHOLDER_FONT_SIZE_MM,
   RULER_FONT_SIZE_MM,
   RULER_LABEL_OFFSET_MM,
   WORK_ORIGIN_MARKER_RADIUS_MM,
 } from './bed.view.constants';
+import type { BedViewProps } from './interfaces/BedViewProps';
 import styles from './styles.module.scss';
-
-interface BedViewProps {
-  dimensions: BedDimensions;
-  /** The laser head in machine coordinates; undefined until a position is known. */
-  headPosition: GrblAxisPosition | undefined;
-  /** The work zero as a machine coordinate. */
-  workOriginPosition: GrblAxisPosition | undefined;
-  /** Text centred on the bed, for example when there is no machine yet. */
-  placeholderLabel: string | undefined;
-}
 
 const getAriaLabel = (t: TFunction, props: BedViewProps): string => {
   const { dimensions, headPosition, workOriginPosition } = props;
@@ -136,8 +125,8 @@ export const BedView = (props: BedViewProps): ReactNode => {
       {placeholderLabel && (
         <text
           className={styles.placeholder}
-          x={widthMm / CENTER_DIVISOR}
-          y={heightMm / CENTER_DIVISOR}
+          x={widthMm * CENTER_FRACTION}
+          y={heightMm * CENTER_FRACTION}
           fontSize={PLACEHOLDER_FONT_SIZE_MM}
         >
           {placeholderLabel}

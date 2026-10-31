@@ -1,10 +1,16 @@
-import { BED_MAX_TRAVEL_MM, BED_PLACEHOLDER_KIND, DEFAULT_BED_SIZE_MM } from './bed.constants';
+import {
+  BED_MAX_TRAVEL_MM,
+  BED_PLACEHOLDER_KIND,
+  DEFAULT_BED_SIZE_MM,
+  GRBL_SETTING_X_MAX_TRAVEL,
+  GRBL_SETTING_Y_MAX_TRAVEL,
+} from './bed.constants';
 import { getBedDimensions } from './get.bed.dimensions';
 
 const CONNECTED = true;
 const DISCONNECTED = false;
-const WIDTH_SETTING = 130;
-const HEIGHT_SETTING = 131;
+const WIDTH_SETTING = GRBL_SETTING_X_MAX_TRAVEL;
+const HEIGHT_SETTING = GRBL_SETTING_Y_MAX_TRAVEL;
 
 const UNKNOWN_SIZE = {
   widthMm: DEFAULT_BED_SIZE_MM,

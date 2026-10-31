@@ -15,4 +15,4 @@ export const RULER_FONT_SIZE_MM = 8;
 export const PLACEHOLDER_FONT_SIZE_MM = 14;
 export const RULER_LABEL_OFFSET_MM = 2;
 export const ARIA_SENTENCE_SEPARATOR = '. ';
-export const CENTER_DIVISOR = 2;
+export const CENTER_FRACTION = 0.5;

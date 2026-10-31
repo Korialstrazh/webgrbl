@@ -17,7 +17,7 @@ import {
 } from './bed.constants';
 import type { BedDimensions } from './interfaces/BedDimensions';
 
-const isValidTravel = (travelMm: number): boolean =>
+const isValidBedTravel = (travelMm: number): boolean =>
   Number.isFinite(travelMm) && travelMm > 0 && travelMm <= BED_MAX_TRAVEL_MM;
 
 export const getBedDimensions = (settings: Record<number, string>, isConnected: boolean): BedDimensions => {
@@ -32,7 +32,7 @@ export const getBedDimensions = (settings: Record<number, string>, isConnected: 
   const widthMm: number = Number(settings[GRBL_SETTING_X_MAX_TRAVEL]);
   const heightMm: number = Number(settings[GRBL_SETTING_Y_MAX_TRAVEL]);
 
-  if (!isValidTravel(widthMm) || !isValidTravel(heightMm)) {
+  if (!isValidBedTravel(widthMm) || !isValidBedTravel(heightMm)) {
     return {
       widthMm: DEFAULT_BED_SIZE_MM,
       heightMm: DEFAULT_BED_SIZE_MM,

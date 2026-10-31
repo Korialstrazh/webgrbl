@@ -11,8 +11,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { BED_PLACEHOLDER_KIND } from '../../utils/bed/bed.constants';
-import type { BedPlaceholderKind } from '../../utils/bed/bed.constants';
 import { getBedDimensions } from '../../utils/bed/get.bed.dimensions';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { doNothing } from '../../utils/do.nothing';
@@ -27,16 +25,10 @@ import { ComingSoon } from '../../views/ComingSoon';
 import { SegmentedControl } from '../../views/SegmentedControl';
 import type { SegmentedOption } from '../../views/SegmentedControl/interfaces/SegmentedOption';
 import { ToastStack } from '../ToastStack';
-import { BED_VIEW_MODE_DESIGN, BED_VIEW_MODE_OPTION_KEYS, BED_TOOL_LABEL_KEYS } from './bed.toolbar.constants';
+import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
+import { BED_TOOL_LABEL_KEYS, BED_VIEW_MODE_DESIGN, BED_VIEW_MODE_OPTION_KEYS } from './bed.toolbar.constants';
+import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
 import styles from './styles.module.scss';
-
-const getPlaceholderKey = (kind: BedPlaceholderKind): string | undefined => {
-  if (kind === BED_PLACEHOLDER_KIND.NO_MACHINE) {
-    return DEFAULT.BED_NO_MACHINE;
-  }
-
-  return kind === BED_PLACEHOLDER_KIND.SIZE_UNKNOWN ? DEFAULT.BED_SIZE_UNKNOWN : undefined;
-};
 
 export const BedPanel = (): ReactNode => {
   const { t } = useTranslation();
@@ -44,8 +36,8 @@ export const BedPanel = (): ReactNode => {
   const isConnected: boolean = useSelector(selectIsConnected);
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
   const dimensions: BedDimensions = getBedDimensions(settings, isConnected);
-  const placeholderKey: string | undefined = getPlaceholderKey(dimensions.placeholderKind);
-  const viewModeOptions: SegmentedOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option) => ({
+  const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
+  const viewModeOptions: SegmentedOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option: BedViewModeOptionKey) => ({
     value: option.value,
     label: t(option.labelKey),
   }));
