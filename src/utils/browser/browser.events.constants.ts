@@ -15,3 +15,7 @@ export const BEFORE_UNLOAD_EVENT_NAME = 'beforeunload';
 export const ONLINE_EVENT_NAME = 'online';
 /** Fired when the browser loses network access. */
 export const OFFLINE_EVENT_NAME = 'offline';
+/** Fired when a key goes down; the Escape-to-STOP hotkey listens for it. */
+export const KEYDOWN_EVENT_NAME = 'keydown';
+/** The `key` value of the Escape key. */
+export const ESCAPE_KEY = 'Escape';

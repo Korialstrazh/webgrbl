@@ -11,9 +11,9 @@ webgrbl talks to a GRBL laser over the Web Serial API. This page covers using it
 
 ## Connect
 
-1. Open the connect bar and pick a baud rate (115200 by default).
-2. Press **Choose port...** to pick a real USB serial port in the browser dialog, or **Simulated laser** to use the built-in fake machine (no hardware needed).
-3. When the handshake succeeds the status panel shows the machine state and position.
+1. Click the connection pill in the top bar to open its popover and pick a baud rate (115200 by default).
+2. In the popover press **Choose port...** to pick a real USB serial port in the browser dialog, or **Simulated laser** to use the built-in fake machine (no hardware needed), then press **Connect**.
+3. When the handshake succeeds the pill shows the firmware, and the machine panel shows the machine state and position.
 
 Chrome and Edge are required (Web Serial). A connection that gets no banner within 10 s fails with a toast.
 
@@ -29,6 +29,7 @@ Then log out and back in. Only one application or browser tab can hold a port at
 
 ## Console
 
+- Open the console with the **Console** toggle in the status strip at the bottom; it opens over the bed.
 - Type a command and press **Enter** to send it (for example `$$`, `$I` or `$J=G91X10F1000`).
 - **ArrowUp** / **ArrowDown** step through the command history (last 100 entries). Typing after a recall starts the history again from the newest command.
 - Commands may only contain plain ASCII letters, digits and symbols. A command with any other character (for example an umlaut or an accented letter) is not sent and the console shows an error: such bytes would reach GRBL as realtime commands, for example a laser power override. Characters inside a `;` or `( )` comment are fine, as comments are never sent.
@@ -37,6 +38,7 @@ Then log out and back in. Only one application or browser tab can hold a port at
 
 ## Stop, Reset, Unlock
 
+- Pressing **Escape** in the main view stops the machine like the STOP button, but only while connected and no popover, dialog or drawer is open (Escape then just closes it). See [workbench-shell.md](workbench-shell.md).
 - **Stop** sends a feed hold (which also cancels a jog), waits until the machine has come to rest (at most 2 s), then soft-resets. The position is kept and no alarm is raised.
 - **Reset** soft-resets at once. Moving machines lose steps and raise `ALARM:3`, so home again afterwards.
 - **Unlock** sends `$X` to clear an Alarm lock.

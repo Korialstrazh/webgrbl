@@ -1,0 +1,137 @@
+/**
+ * The machine bed drawn to scale: grid, rulers, the laser-head crosshair and the work zero marker.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-10-31
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+import { useMemo } from 'react';
+import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { getBedHeadMarker } from '../../utils/bed/get.bed.head.marker';
+import { getCoordinateText } from '../../utils/bed/get.coordinate.text';
+import { getGridLinePath } from '../../utils/bed/get.grid.line.path';
+import { getRulerLabelPositions } from '../../utils/bed/get.ruler.label.positions';
+import type { BedHeadMarker } from '../../utils/bed/interfaces/BedHeadMarker';
+import { DEFAULT } from '../../utils/localization/default.locales';
+import {
+  ARIA_SENTENCE_SEPARATOR,
+  BED_HEAD_TEST_ID,
+  CENTER_FRACTION,
+  CROSSHAIR_ARM_MM,
+  PLACEHOLDER_FONT_SIZE_MM,
+  RULER_FONT_SIZE_MM,
+  RULER_LABEL_OFFSET_MM,
+  WORK_ORIGIN_MARKER_RADIUS_MM,
+} from './bed.view.constants';
+import type { BedViewProps } from './interfaces/BedViewProps';
+import styles from './styles.module.scss';
+
+const getAriaLabel = (t: TFunction, props: BedViewProps): string => {
+  const { dimensions, headPosition, workOriginPosition } = props;
+  const sentences: string[] = [
+    t(DEFAULT.BED_ARIA_LABEL, { width: dimensions.widthMm, height: dimensions.heightMm }),
+  ];
+
+  if (headPosition) {
+    const isOutsideBed: boolean = getBedHeadMarker(headPosition, dimensions).isOutsideBed;
+
+    sentences.push(
+      t(isOutsideBed ? DEFAULT.BED_ARIA_HEAD_OUTSIDE : DEFAULT.BED_ARIA_HEAD, {
+        x: getCoordinateText(headPosition.x),
+        y: getCoordinateText(headPosition.y),
+      }),
+    );
+  }
+
+  if (workOriginPosition) {
+    sentences.push(
+      t(DEFAULT.BED_ARIA_WORK_ORIGIN, {
+        x: getCoordinateText(workOriginPosition.x),
+        y: getCoordinateText(workOriginPosition.y),
+      }),
+    );
+  }
+
+  return sentences.join(ARIA_SENTENCE_SEPARATOR);
+};
+
+const getScreenTransform = (xMm: number, yMm: number, heightMm: number): string =>
+  `translate(${xMm} ${heightMm - yMm})`;
+
+export const BedView = (props: BedViewProps): ReactNode => {
+  const { t } = useTranslation();
+  const { dimensions, headPosition, workOriginPosition, placeholderLabel } = props;
+  const { widthMm, heightMm } = dimensions;
+  const minorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, false), [widthMm, heightMm]);
+  const majorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, true), [widthMm, heightMm]);
+  const topLabelPositions: number[] = useMemo(() => getRulerLabelPositions(widthMm), [widthMm]);
+  const leftLabelPositions: number[] = useMemo(() => getRulerLabelPositions(heightMm), [heightMm]);
+  const headMarker: BedHeadMarker | undefined = headPosition && getBedHeadMarker(headPosition, dimensions);
+
+  return (
+    <svg
+      className={styles.bedView}
+      viewBox={`0 0 ${widthMm} ${heightMm}`}
+      role="img"
+      aria-label={getAriaLabel(t, props)}
+    >
+      <rect className={styles.surface} x={0} y={0} width={widthMm} height={heightMm} />
+      <path className={styles.minorGrid} d={minorGridPath} />
+      <path className={styles.majorGrid} d={majorGridPath} />
+      {topLabelPositions.map((positionMm: number) => (
+        <text
+          key={`top-${positionMm}`}
+          className={styles.rulerLabel}
+          x={positionMm + RULER_LABEL_OFFSET_MM}
+          y={RULER_FONT_SIZE_MM}
+          fontSize={RULER_FONT_SIZE_MM}
+        >
+          {positionMm}
+        </text>
+      ))}
+      {leftLabelPositions.map((positionMm: number) => (
+        <text
+          key={`left-${positionMm}`}
+          className={styles.rulerLabel}
+          x={RULER_LABEL_OFFSET_MM}
+          y={heightMm - positionMm - RULER_LABEL_OFFSET_MM}
+          fontSize={RULER_FONT_SIZE_MM}
+        >
+          {positionMm}
+        </text>
+      ))}
+      {workOriginPosition && (
+        <circle
+          className={styles.workOrigin}
+          transform={getScreenTransform(workOriginPosition.x, workOriginPosition.y, heightMm)}
+          r={WORK_ORIGIN_MARKER_RADIUS_MM}
+        />
+      )}
+      {headMarker && (
+        <g
+          className={headMarker.isOutsideBed ? [styles.head, styles.outsideBed].join(' ') : styles.head}
+          data-testid={BED_HEAD_TEST_ID}
+          data-outside-bed={headMarker.isOutsideBed}
+          transform={getScreenTransform(headMarker.xMm, headMarker.yMm, heightMm)}
+        >
+          <path d={`M${-CROSSHAIR_ARM_MM} 0H${CROSSHAIR_ARM_MM}M0 ${-CROSSHAIR_ARM_MM}V${CROSSHAIR_ARM_MM}`} />
+        </g>
+      )}
+      {placeholderLabel && (
+        <text
+          className={styles.placeholder}
+          x={widthMm * CENTER_FRACTION}
+          y={heightMm * CENTER_FRACTION}
+          fontSize={PLACEHOLDER_FONT_SIZE_MM}
+        >
+          {placeholderLabel}
+        </text>
+      )}
+    </svg>
+  );
+};
