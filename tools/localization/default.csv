@@ -140,6 +140,12 @@ MACHINE_PANEL_TITLE;Machine
 MACHINE_PREFLIGHT_DESCRIPTION;Checks the machine, the job and the material before the job starts.
 MACHINE_PREFLIGHT_RUN;Run pre-flight check
 MACHINE_PREFLIGHT_TITLE;Pre-flight check
+MACHINE_PROFILE_ERROR_JOG_FEED_RATE_INVALID;Jog feed must be between 100 and 10000 mm/min
+MACHINE_PROFILE_ERROR_MAX_POWER_INVALID;Laser power must be greater than 0 W
+MACHINE_PROFILE_ERROR_NAME_REQUIRED;Enter a name for the machine
+MACHINE_PROFILE_ERROR_S_VALUE_MAX_INVALID;Maximum S value must be greater than 0
+MACHINE_PROFILE_ERROR_WORK_AREA_X_INVALID;Work area width must be greater than 0 and at most 5000 mm
+MACHINE_PROFILE_ERROR_WORK_AREA_Y_INVALID;Work area height must be greater than 0 and at most 5000 mm
 MACHINE_START_JOB;Start job
 MACHINE_START_JOB_DESCRIPTION;Starts the job once the pre-flight check has passed.
 MACHINE_START_JOB_TITLE;Job
