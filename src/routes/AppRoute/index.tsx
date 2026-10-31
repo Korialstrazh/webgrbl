@@ -1,6 +1,7 @@
 /**
  * Top-level page of the app: the workbench with the top bar, design panel, bed, machine panel and status strip,
- * plus the overlays. In a narrow window the regions stack and STOP moves to a sticky bar.
+ * plus the overlays. It fills the window as an antd Layout; in a narrow window the regions stack and STOP moves to a
+ * sticky bar.
  *
  * @author michael.morosov
  *
@@ -9,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { BedPanel } from '../../containers/BedPanel';
 import { DesignPanel } from '../../containers/DesignPanel';
@@ -25,25 +27,17 @@ export const AppRoute = (): ReactNode => {
   const isWide: boolean = useIsWideLayout();
 
   return (
-    <div className={styles.appRoute}>
-      <div className={[styles.area, styles.topBarArea].join(' ')}>
-        <TopBar />
-      </div>
-      <div className={[styles.area, styles.designArea].join(' ')}>
+    <Layout className={styles.appRoute}>
+      <TopBar />
+      <Layout className={styles.regions} hasSider={isWide}>
         <DesignPanel />
-      </div>
-      <div className={[styles.area, styles.bedArea].join(' ')}>
         <BedPanel />
-      </div>
-      <div className={[styles.area, styles.machineArea].join(' ')}>
         <MachinePanel isWide={isWide} />
-      </div>
-      <div className={[styles.area, styles.statusArea].join(' ')}>
-        <StatusStrip />
-      </div>
+      </Layout>
+      <StatusStrip />
       {!isWide && <StickyStopBar />}
       <LeavePageGuard />
       <StopHotkey />
-    </div>
+    </Layout>
   );
 };

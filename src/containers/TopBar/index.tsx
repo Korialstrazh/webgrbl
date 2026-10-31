@@ -8,6 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { REDO_ARROW, UNDO_ARROW } from '../../utils/characters.constants';
@@ -25,7 +26,7 @@ export const TopBar = (): ReactNode => {
   const { t } = useTranslation();
 
   return (
-    <header className={styles.topBar}>
+    <Layout.Header className={styles.topBar}>
       <div className={styles.heading}>
         <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
         <p className={styles.project}>{t(DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER)}</p>
@@ -50,6 +51,6 @@ export const TopBar = (): ReactNode => {
         <AppUpdatePrompt />
         <ConnectionPill />
       </div>
-    </header>
+    </Layout.Header>
   );
 };

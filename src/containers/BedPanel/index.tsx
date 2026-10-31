@@ -8,6 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -43,7 +44,7 @@ export const BedPanel = (): ReactNode => {
   }));
 
   return (
-    <main className={styles.bedPanel}>
+    <Layout.Content className={styles.bedPanel}>
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       <ComingSoon description={t(DEFAULT.BED_TOOLBAR_DESCRIPTION)}>
         <div className={styles.toolbar}>
@@ -69,6 +70,6 @@ export const BedPanel = (): ReactNode => {
         />
       </div>
       <ToastStack />
-    </main>
+    </Layout.Content>
   );
 };

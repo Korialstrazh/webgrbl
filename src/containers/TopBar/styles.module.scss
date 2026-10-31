@@ -6,6 +6,9 @@
   padding: var(--space-3) var(--space-6);
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-surface-1);
+  // antd gives the header a fixed 72 px height and line height; the top bar sizes itself to its content.
+  height: auto;
+  line-height: normal;
 }
 
 .heading {

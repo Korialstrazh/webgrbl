@@ -1,3 +1,5 @@
+@use '../../styles/layout' as layout;
+
 // The console overlay (z-index 30) is drawn over the bed; toasts use z-index 40 so they stay readable above it.
 .statusStrip {
   position: relative;
@@ -20,9 +22,18 @@
   z-index: 30;
   display: flex;
   height: 14rem;
+  overflow: auto;
   padding: var(--space-3) var(--space-4);
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface-2);
+}
+
+// The status strip spans the full width, so in a wide window the console stops short of the machine panel and STOP.
+// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (min-width: 80rem) {
+  .consoleOverlay {
+    right: layout.$machine-panel-width;
+  }
 }
 
 .readouts {

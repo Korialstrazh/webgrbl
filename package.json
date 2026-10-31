@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "2.13.0",
+    "antd": "6.6.8",
     "i18next": "26.5.3",
     "react": "19.3.1",
     "react-dom": "19.3.1",
@@ -49,5 +50,13 @@
     "vite-plugin-pwa": "2.0.0",
     "vitest": "5.0.5",
     "workbox-window": "7.4.1"
+  },
+  "overrides": {
+    "@rc-component/segmented": {
+      "@babel/runtime": "8.0.8"
+    },
+    "@rc-component/virtual-list": {
+      "@babel/runtime": "8.0.8"
+    }
   }
 }

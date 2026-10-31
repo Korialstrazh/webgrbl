@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +25,7 @@ export const StatusStrip = (): ReactNode => {
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
 
   return (
-    <footer className={styles.statusStrip} aria-label={t(DEFAULT.STATUS_STRIP_TITLE)}>
+    <Layout.Footer className={styles.statusStrip} aria-label={t(DEFAULT.STATUS_STRIP_TITLE)}>
       {isConsoleOpen && (
         <div className={styles.consoleOverlay}>
           <ConsolePanel />
@@ -47,6 +48,6 @@ export const StatusStrip = (): ReactNode => {
         </dl>
       </ComingSoon>
       <Toggle label={t(DEFAULT.CONSOLE_TOGGLE)} isChecked={isConsoleOpen} onChange={setIsConsoleOpen} />
-    </footer>
+    </Layout.Footer>
   );
 };
