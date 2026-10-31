@@ -8,7 +8,13 @@ const isBannerSupported = (banner: string): boolean => {
   return identity ? isSupportedGrblFirmware(identity) : false;
 };
 
+const ACMER_S2_BANNER = "Grbl 1.1h ['$' for help]";
+
 describe(isSupportedGrblFirmware.name, () => {
+  it('accepts the banner recorded from a real ACMER S2', () => {
+    expect(isBannerSupported(ACMER_S2_BANNER)).toBe(true);
+  });
+
   it('accepts 1.1', () => {
     expect(isBannerSupported("Grbl 1.1h ['$' for help]")).toBe(true);
   });

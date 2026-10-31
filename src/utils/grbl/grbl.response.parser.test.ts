@@ -5,6 +5,9 @@ import { getParsedGrblResponse } from './grbl.response.parser';
 const BANNER_LINE = "Grbl 1.1h ['$' for help]";
 const STATUS_LINE = '<Idle|MPos:1.000,2.000,3.000|FS:0,0>';
 const MESSAGE_LINE = '[MSG:Caution: Unlocked]';
+const ACMER_S2_BOARD_NAME_LINE = '[MSG:board name:ACMER S2 V1.0]';
+const ACMER_S2_MACHINE_LINE = '[MSG:mechine:ACMER_S2]';
+const ACMER_S2_BLUETOOTH_LINE = '[BT_VER:]';
 const UNKNOWN_LINE = 'something odd';
 const ERROR_CODE = 20;
 const ALARM_CODE = 3;
@@ -34,6 +37,13 @@ describe(getParsedGrblResponse.name, () => {
   it('parses a bracketed line as feedback', () => {
     expect(getParsedGrblResponse(MESSAGE_LINE)).toEqual({ kind: GRBL_RESPONSE_KIND.FEEDBACK, text: MESSAGE_LINE });
   });
+
+  it.each([ACMER_S2_BOARD_NAME_LINE, ACMER_S2_MACHINE_LINE, ACMER_S2_BLUETOOTH_LINE])(
+    'classifies the line recorded from a real ACMER S2 as feedback: %s',
+    (line) => {
+      expect(getParsedGrblResponse(line)).toEqual({ kind: GRBL_RESPONSE_KIND.FEEDBACK, text: line });
+    },
+  );
 
   it('parses the welcome banner', () => {
     expect(getParsedGrblResponse(BANNER_LINE)).toMatchObject({

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getParsedGrblFirmwareIdentity } from './grbl.firmware.banner.parser';
 
 const FIRMWARE_NAME_GRBL = 'Grbl';
+const ACMER_S2_BANNER = "Grbl 1.1h ['$' for help]";
 
 describe(getParsedGrblFirmwareIdentity.name, () => {
   it('parses a Grbl banner and keeps the letter suffix', () => {
@@ -9,6 +10,13 @@ describe(getParsedGrblFirmwareIdentity.name, () => {
       firmwareName: FIRMWARE_NAME_GRBL,
       version: '1.1h',
       vendorText: "['$' for help]",
+    });
+  });
+
+  it('parses the banner recorded from a real ACMER S2', () => {
+    expect(getParsedGrblFirmwareIdentity(ACMER_S2_BANNER)).toMatchObject({
+      firmwareName: FIRMWARE_NAME_GRBL,
+      version: '1.1h',
     });
   });
 
