@@ -101,13 +101,14 @@ describe('air assist tracking', () => {
     ['Reset', new MachineResetRequested()],
     ['a disconnect', new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED })],
     ['a lost connection', new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.LOST })],
-  ])('turns off on %s', (_name: string, resetAction: Action<unknown>) => {
+  ])('turns off on %s', (_resetName: string, resetAction: Action<unknown>) => {
     expect(machineStatusReducer(AIR_ASSIST_ON_STATE, resetAction).isAirAssistOn).toBe(false);
   });
 
   it('keeps air assist for a status report', () => {
-    const state: MachineStatusState =
-      machineStatusReducer(AIR_ASSIST_ON_STATE, new MachineStatusReceived({ status: getStatus(GRBL_MACHINE_STATE.IDLE) }));
+    const statusReceived: MachineStatusReceived =
+      new MachineStatusReceived({ status: getStatus(GRBL_MACHINE_STATE.IDLE) });
+    const state: MachineStatusState = machineStatusReducer(AIR_ASSIST_ON_STATE, statusReceived);
 
     expect(state.isAirAssistOn).toBe(true);
   });

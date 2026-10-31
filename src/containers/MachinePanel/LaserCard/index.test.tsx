@@ -8,6 +8,7 @@ import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblReso
 import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
+import type { Action } from '../../../utils/states/action';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
 import {
   LaserPointerFireRequested,
@@ -326,9 +327,12 @@ describe(LaserCard.name, () => {
   });
 
   it.each([
-    ['Stop', (): MachineStopRequested => new MachineStopRequested()],
-    ['Reset', (): MachineResetRequested => new MachineResetRequested()],
-  ])('resets air assist on %s, since the soft reset turns the coolant off', (_name: string, newRequest: () => object) => {
+    ['Stop', (): Action<unknown> => new MachineStopRequested()],
+    ['Reset', (): Action<unknown> => new MachineResetRequested()],
+  ])('resets air assist on %s, since the soft reset turns the coolant off', (
+    _requestName: string,
+    newRequest: () => Action<unknown>,
+  ) => {
     const store: AppStore = newStore();
 
     renderLaserCard(store);

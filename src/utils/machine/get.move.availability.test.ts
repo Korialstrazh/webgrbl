@@ -113,7 +113,10 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
 ];
 
 describe(getMoveAvailability.name, () => {
-  it.each(MOVE_AVAILABILITY_CASES)('$caseName', ({ caseName, expectedAvailability, ...conditions }: MoveAvailabilityCase) => {
-    expect(getMoveAvailability(conditions), caseName).toEqual(expectedAvailability);
-  });
+  it.each(MOVE_AVAILABILITY_CASES)(
+    '$caseName',
+    ({ caseName, expectedAvailability, ...conditions }: MoveAvailabilityCase) => {
+      expect(getMoveAvailability(conditions), caseName).toEqual(expectedAvailability);
+    },
+  );
 });

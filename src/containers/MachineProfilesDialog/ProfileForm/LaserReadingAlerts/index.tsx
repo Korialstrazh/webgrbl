@@ -65,7 +65,9 @@ export const LaserReadingAlerts = ({ reportedValues }: LaserReadingAlertsProps):
       ) : (
         <Alert type={ANTD_ALERT_TYPE_INFO} title={t(DEFAULT.MACHINE_PROFILES_READ_NOTHING)} />
       )}
-      {isLaserModeReportedOff && <Alert type={ANTD_ALERT_TYPE_WARNING} title={t(DEFAULT.MACHINE_PROFILES_LASER_MODE_OFF)} />}
+      {isLaserModeReportedOff && (
+        <Alert type={ANTD_ALERT_TYPE_WARNING} title={t(DEFAULT.MACHINE_PROFILES_LASER_MODE_OFF)} />
+      )}
     </>
   );
 };
