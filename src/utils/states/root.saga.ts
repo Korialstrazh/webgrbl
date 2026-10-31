@@ -10,7 +10,14 @@
  */
 import { all, fork } from 'redux-saga/effects';
 import { watchOnlineStatus } from './browser.environment.state';
+import { watchGrblController } from './grbl.controller.saga';
+import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
+import { watchInfoToastExpiry } from './toast.state';
 
-export function* rootSaga(): Generator {
-  yield all([fork(watchOnlineStatus)]);
+export function* rootSaga(grblControllerSagaDependencies: GrblControllerSagaDependencies): Generator {
+  yield all([
+    fork(watchOnlineStatus),
+    fork(watchInfoToastExpiry),
+    fork(watchGrblController, grblControllerSagaDependencies),
+  ]);
 }

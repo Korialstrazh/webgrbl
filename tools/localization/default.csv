@@ -9,3 +9,105 @@ BROWSER_STATUS_OFFLINE;Offline
 BROWSER_STATUS_ONLINE;Online
 BROWSER_STATUS_WEB_SERIAL_SUPPORTED;Web Serial ready
 BROWSER_STATUS_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
+CONNECT_BAR_BAUD;Baud rate
+CONNECT_BAR_CHOOSE_PORT;Choose port...
+CONNECT_BAR_CONNECT;Connect
+CONNECT_BAR_CONNECTING;Connecting...
+CONNECT_BAR_DISCONNECT;Disconnect
+CONNECT_BAR_FIRMWARE;{{firmwareName}} {{version}}
+CONNECT_BAR_PORT;Port
+CONNECT_BAR_SERIAL_PORT;Serial port
+CONNECT_BAR_SIMULATED_LASER;Simulated laser
+CONNECT_BAR_USB_PORT;USB {{vendorId}}:{{productId}}
+CONSOLE_INPUT_LABEL;Console command
+CONSOLE_INPUT_PLACEHOLDER;Type a command, for example $$
+CONSOLE_LOG_LABEL;Console output
+CONSOLE_NON_ASCII_REJECTED;Not sent: the command contains characters the controller cannot receive. Use plain ASCII letters, digits and symbols only.
+CONSOLE_RAW_ERROR;{{detail}}
+CONSOLE_REALTIME_CYCLE_RESUME;Cycle resume
+CONSOLE_REALTIME_FEED_HOLD;Feed hold
+CONSOLE_REALTIME_JOG_CANCEL;Jog cancel
+CONSOLE_REALTIME_SOFT_RESET;Soft reset
+CONSOLE_REALTIME_STATUS_QUERY;Status query
+CONSOLE_SHOW_STATUS_REPORTS;Show status reports
+CONSOLE_TITLE;Console
+GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again.
+GRBL_ALARM_10;Emergency stop asserted - clear it and reset.
+GRBL_ALARM_2;Soft limit alarm - the G-code target is beyond the machine travel. The position is kept and it is safe to unlock.
+GRBL_ALARM_3;Reset during a move - the machine position is probably lost so home again.
+GRBL_ALARM_4;Probe fail - the probe was not in its expected start state.
+GRBL_ALARM_5;Probe fail - the probe did not touch the workpiece within the travel.
+GRBL_ALARM_6;Homing fail - the homing cycle was reset.
+GRBL_ALARM_7;Homing fail - the safety door was opened during homing.
+GRBL_ALARM_8;Homing fail - pull-off did not clear the limit switch. Raise the pull-off setting or check the wiring.
+GRBL_ALARM_9;Homing fail - no limit switch found within the search distance. Raise the max travel or lower the pull-off or check the wiring.
+GRBL_ALARM_UNKNOWN;Unknown alarm.
+GRBL_ERROR_1;Expected a G-code command letter but none was found.
+GRBL_ERROR_10;Soft limits cannot be enabled without homing.
+GRBL_ERROR_11;Line too long - the command was not executed.
+GRBL_ERROR_12;A setting makes the step rate exceed the 30 kHz maximum.
+GRBL_ERROR_13;The safety door is open.
+GRBL_ERROR_14;The startup or build info line is too long to store.
+GRBL_ERROR_15;The jog target is beyond the machine travel.
+GRBL_ERROR_16;Invalid jog command.
+GRBL_ERROR_17;Laser mode requires PWM output.
+GRBL_ERROR_18;Emergency stop engaged - release the button.
+GRBL_ERROR_19;A value that must be greater than zero was not.
+GRBL_ERROR_2;Missing or badly formatted number in a G-code word.
+GRBL_ERROR_20;Unsupported or invalid G-code command.
+GRBL_ERROR_21;More than one command from the same modal group in one line.
+GRBL_ERROR_22;Feed rate has not been set.
+GRBL_ERROR_23;A G-code command needs a whole number value.
+GRBL_ERROR_24;More than one command that needs axis words in one line.
+GRBL_ERROR_25;A G-code word is repeated in one line.
+GRBL_ERROR_26;Axis words are missing for this command.
+GRBL_ERROR_27;The line number is invalid.
+GRBL_ERROR_28;A required value word is missing.
+GRBL_ERROR_29;G59.x work coordinate systems are not supported.
+GRBL_ERROR_3;Unknown or unsupported $ system command.
+GRBL_ERROR_30;G53 is only allowed with G0 and G1.
+GRBL_ERROR_31;Axis words found but no command uses them.
+GRBL_ERROR_32;Arcs need at least one axis word in the arc plane.
+GRBL_ERROR_33;The motion target is invalid.
+GRBL_ERROR_34;The arc radius is invalid.
+GRBL_ERROR_35;Arcs need at least one offset word in the arc plane.
+GRBL_ERROR_36;Unused value words found in the line.
+GRBL_ERROR_37;The G43.1 tool length offset is not assigned to the tool length axis.
+GRBL_ERROR_38;A G-code value is out of range (for example the tool number).
+GRBL_ERROR_4;Negative value received where a positive one is expected.
+GRBL_ERROR_5;Homing is not enabled in the settings.
+GRBL_ERROR_6;Step pulse time must be at least 3 microseconds.
+GRBL_ERROR_7;Reading the settings failed - defaults were restored.
+GRBL_ERROR_8;This $ command only works while the machine is idle.
+GRBL_ERROR_9;G-code is locked during an alarm or jog.
+GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
+GRBL_ERROR_UNKNOWN;Unknown error.
+MACHINE_CONTROL_RESET;Reset
+MACHINE_CONTROL_STOP;Stop
+MACHINE_CONTROL_UNLOCK;Unlock
+MACHINE_STATE_ALARM;Alarm
+MACHINE_STATE_CHECK;Check
+MACHINE_STATE_DOOR;Door
+MACHINE_STATE_HOLD;Hold
+MACHINE_STATE_HOME;Homing
+MACHINE_STATE_IDLE;Idle
+MACHINE_STATE_JOG;Jog
+MACHINE_STATE_RUN;Run
+MACHINE_STATE_SLEEP;Sleep
+MACHINE_STATUS_FEED;Feed
+MACHINE_STATUS_MACHINE_POSITION;Machine position
+MACHINE_STATUS_POWER;Power
+MACHINE_STATUS_WORK_POSITION;Work position
+TOAST_CONNECT_TIMEOUT;No response from the controller - check the baud rate and that the laser is powered.
+TOAST_CONNECTED;Connected to {{firmware}} {{version}}
+TOAST_CONNECTION_LOST;Connection lost. The laser may still finish moves it had already received.
+TOAST_CONTROLLER_RESET;The controller reset itself - running work was stopped.
+TOAST_DISMISS;Dismiss
+TOAST_GRBL_ALARM;Alarm {{code}}: {{description}} - unlock or home the machine.
+TOAST_GRBL_ERROR;Error {{code}}: {{description}}
+TOAST_NOT_RESPONDING;The controller is not responding.
+TOAST_PORT_ACCESS_DENIED_OR_BUSY;Could not open the port. On Linux, add your user to the dialout group. On any system, close other apps or tabs using the port.
+TOAST_PORT_NOT_FOUND;The port is gone - check the USB cable.
+TOAST_PORT_OPEN_FAILED;Could not open the port.
+TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}} - {{description}}
+TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).

@@ -12,6 +12,8 @@
 import { eventChannel } from 'redux-saga';
 import type { EventChannel } from 'redux-saga';
 import { call, put, take } from 'redux-saga/effects';
+import { OFFLINE_EVENT_NAME, ONLINE_EVENT_NAME } from '../browser/browser.events.constants';
+import { isWebSerialAvailable } from '../browser/is.web.serial.available';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
@@ -45,8 +47,6 @@ export class OnlineStatusChangeReceived extends Action<OnlineStatusPayload> {
 // #endregion
 
 // #region Initial state
-const isWebSerialAvailable = (): boolean => 'serial' in navigator;
-
 const getInitialBrowserEnvironmentState = (): BrowserEnvironmentState => ({
   isOnline: navigator.onLine,
   isWebSerialSupported: isWebSerialAvailable(),
@@ -68,9 +68,6 @@ export const browserEnvironmentReducer = (
 // #endregion
 
 // #region Sagas
-const ONLINE_EVENT_NAME = 'online';
-const OFFLINE_EVENT_NAME = 'offline';
-
 const newOnlineStatusChannel = (): EventChannel<boolean> => eventChannel((emit: (isOnline: boolean) => void) => {
   const emitOnline = (): void => emit(true);
   const emitOffline = (): void => emit(false);

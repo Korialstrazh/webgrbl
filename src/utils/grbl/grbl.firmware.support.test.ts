@@ -1,0 +1,33 @@
+import { describe, expect, it } from 'vitest';
+import { getParsedGrblFirmwareIdentity } from './grbl.firmware.banner.parser';
+import { isSupportedGrblFirmware } from './grbl.firmware.support';
+
+const isBannerSupported = (banner: string): boolean => {
+  const identity = getParsedGrblFirmwareIdentity(banner);
+
+  return identity ? isSupportedGrblFirmware(identity) : false;
+};
+
+const ACMER_S2_BANNER = "Grbl 1.1h ['$' for help]";
+
+describe(isSupportedGrblFirmware.name, () => {
+  it('accepts the banner recorded from a real ACMER S2', () => {
+    expect(isBannerSupported(ACMER_S2_BANNER)).toBe(true);
+  });
+
+  it('accepts 1.1', () => {
+    expect(isBannerSupported("Grbl 1.1h ['$' for help]")).toBe(true);
+  });
+
+  it('accepts a 1.2 clone', () => {
+    expect(isBannerSupported('Grbl 1.2h')).toBe(true);
+  });
+
+  it('accepts FluidNC reporting 3.x', () => {
+    expect(isBannerSupported('Grbl 3.7 [FluidNC v3.7.8 (wifi) ...]')).toBe(true);
+  });
+
+  it('rejects 0.9', () => {
+    expect(isBannerSupported('Grbl 0.9j')).toBe(false);
+  });
+});

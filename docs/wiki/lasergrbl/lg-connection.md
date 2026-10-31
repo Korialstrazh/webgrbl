@@ -28,7 +28,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
 - **Options & defaults:** `ComWrapper Protocol` = `UsbSerial` (choices: `UsbSerial`, `UsbSerial2`, `RJCPSerial`, `Telnet`, `LaserWebESP8266`, `Emulator`). `Telnet Address` = `127.0.0.1:23`. `Websocket URL` = `ws://127.0.0.1:81/`. `Serial Speed` = `115200`.
 - **Behaviour & gotchas:** Changing the protocol in Settings takes effect on the next UI tick while disconnected (the panel polls the setting and re-applies). Every edit of port/baud/address is persisted immediately and pushed to the core via `Core.Configure(wrapper, params)`. A new wrapper instance is created only when the type changes. All inputs are disabled while connected. A small "info" button next to the combo opens `https://lasergrbl.com/configuration/#protocol`.
 - **Upstream source:** [`LaserGRBL/ConnectLogForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ConnectLogForm.cs) (`UpdateConf`, `ApplyConfig`, `RestoreConf`), [`LaserGRBL/SettingsForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/SettingsForm.cs) (`InitProtocolCB`), [`LaserGRBL/ComWrapper/IComWrapper.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ComWrapper/IComWrapper.cs) (`WrapperType`)
-- **webgrbl notes:** Status: not started. Collapse the three serial variants into one "USB Serial (Web Serial)" choice and keep "WebSocket", "Emulator" and "Telnet via bridge". Put the protocol picker in the connection panel itself rather than buried in Settings. Persist per-protocol last values (IndexedDB/localStorage). Consider named connection profiles (machine + transport + baud) so users with several lasers switch in one click.
+- **webgrbl notes:** Status: done — see [[grbl-engine]]. Collapse the three serial variants into one "USB Serial (Web Serial)" choice and keep "WebSocket", "Emulator" and "Telnet via bridge". Put the protocol picker in the connection panel itself rather than buried in Settings. Persist per-protocol last values (IndexedDB/localStorage). Consider named connection profiles (machine + transport + baud) so users with several lasers switch in one click.
 
 ### LG-CONN-02 Serial port selection & baud rate
 
@@ -41,7 +41,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
   - If opening fails with an IO error on a two-digit port (`COM23`), it retries once with the last digit removed, then rethrows the original error.
   - After opening, the in/out buffers are discarded.
 - **Upstream source:** [`LaserGRBL/ConnectLogForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ConnectLogForm.cs) (`InitPortCB`, `InitSpeedCB`, `TimerUpdate`), [`LaserGRBL/ComWrapper/UsbSerial.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ComWrapper/UsbSerial.cs) (`Open`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Web Serial has no port enumeration before a user gesture. Use `navigator.serial.requestPort()` (optionally with USB vendor filters for CH340 `0x1a86`, CP210x `0x10c4`, FTDI `0x0403`) and `getPorts()` for previously granted ports. Listen to `connect`/`disconnect` events instead of polling.
   - Ports have no COM names. Show USB VID/PID plus a user-assigned nickname.
   - `port.open({ baudRate, dataBits: 8, parity: 'none', stopBits: 1, flowControl: 'none', bufferSize })`. Raise `bufferSize` above the default 255 so long status bursts are not dropped.
@@ -99,7 +99,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
   - Motion time is accumulated and slept in chunks over 15 ms, so `ok`s pace like a real machine. Lines `version\n` and `{fb:n}\n` are swallowed.
   - Compile-time switches can inject random `error:2` or missing `ok`s (both off).
 - **Upstream source:** [`LaserGRBL/GrblEmulator/Grblv11Emulator.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblEmulator/Grblv11Emulator.cs), [`LaserGRBL/GrblEmulator/WebsocketEmulator.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblEmulator/WebsocketEmulator.cs), [`LaserGRBL/GrblEmulator/EmulatorUI.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblEmulator/EmulatorUI.cs), [`LaserGRBL/ComWrapper/Emulator.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ComWrapper/Emulator.cs)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - High value for a PWA. Implement the emulator in TS, in a Web Worker behind the same transport interface, so demos, onboarding, e2e tests and offline trials work with zero hardware.
   - Model the real RX buffer (127 B) and the 15/16-block planner, so flow control is actually exercised, and add fault injection (drop `ok`, random `error:N`, `ALARM:1`, unexpected reset, disconnect) as a dev panel.
   - Persist the emulated config in IndexedDB.
@@ -125,7 +125,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
   - App exit (with a job running) asks "exit anyway?", then `Exiting()` closes the connection.
   - The window title shows `LaserGRBL vX.Y.Z (for <Core>)` for non-Grbl cores.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`OpenCom`, `CloseCom`, `StartTX`, `InternalReset`, `SetStatus`, `HKConnectDisconnect`, `Exiting`), [`LaserGRBL/ConnectLogForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ConnectLogForm.cs) (`BtnConnectDisconnectClick`), [`LaserGRBL/MainForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/MainForm.cs) (`MnConnect_Click`, `MnDisconnect_Click`, `MainFormFormClosing`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Model the connection as an explicit state machine (`disconnected → opening → handshaking → connected → closing`) in a worker, with the UI subscribing to it.
   - Web Serial `requestPort()` must run inside a user gesture, so connect is always click-initiated. Auto-reconnect to a previously granted port is possible via `getPorts()`.
   - Block tab close with `beforeunload` while a job runs, and suggest the Screen Wake Lock API to keep the device awake (LaserGRBL uses a Windows "awake" API).
@@ -143,7 +143,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
   - The open log line lists what was used, e.g. `Open COM3 @ 115200 baud DTR, RTS, Ctrl-X (UsbSerial)`.
   - Note the soft reset happens before `?`, so the welcome banner normally arrives right after connect and triggers version detection ([[#LG-CONN-09 Handshake: welcome & vendor message parsing|LG-CONN-09]]).
 - **Upstream source:** [`LaserGRBL/ComWrapper/UsbSerial.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ComWrapper/UsbSerial.cs) (`Open`, `GetResetDiagnosticString`), [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`StartTX`, `SendBoardResetCommand`), [`LaserGRBL/SettingsForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/SettingsForm.cs)
-- **webgrbl notes:** Status: not started. Web Serial supports `port.setSignals({ dataTerminalReady, requestToSend })`. Note that most boards auto-reset on open anyway because the OS raises DTR, and Web Serial cannot prevent the initial DTR edge on all platforms. Document "position is lost on connect" for Arduino boards. Offer a "reset now" button separately from the connect option.
+- **webgrbl notes:** Status: done — see [[grbl-engine]]. Web Serial supports `port.setSignals({ dataTerminalReady, requestToSend })`. Note that most boards auto-reset on open anyway because the OS raises DTR, and Web Serial cannot prevent the initial DTR edge on all platforms. Document "position is lost on connect" for Arduino boards. Offer a "reset now" button separately from the connect option.
 
 ### LG-CONN-09 Handshake: welcome & vendor message parsing
 
@@ -169,7 +169,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
 
   Every welcome line also runs `DetectUnexpectedReset` (issue `UnexpectedReset` if a job was running) and `OnStartupMessage`: it clears the queue and pending lists (the log is kept), zeroes the buffer counter, ends the job timer and resets overrides to 100. This also covers a spontaneous board reset. Derived flags: `IsOrtur`, `IsLonger` (vendor contains "Longer" or "NanoDuo"), `IsHAL`, `IsLuckyWiFi` (Ortur Laser Master 3, Longer Nano, NanoDuo), `VendorName` (Ortur, Emulator for build `#`, Unknown). If no welcome was seen, the version is guessed from the first status report: `|` without `Pin:` means 1.1, `|` with `Pin:` means 1.0c, otherwise 0.9.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`ManageReceivedLine`, `Manage*WelcomeMessage`, `ManageOrturModelMessage`, `ManageLonger*Message`, `OnStartupMessage`, `StatusReportVersion`, `GrblVersionInfo`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Port as a pure, unit-tested `classifyLine(line) → event` function with a fixture corpus of real banners (Grbl 0.9/1.1, grblHAL, FluidNC `Grbl 3.x [FluidNC ...]`, Ortur, Longer, Vigo, SimpleLaser, Smoothie, Marlin).
   - Use regexes instead of fixed char offsets so multi-digit versions (`Grbl 1.10`, grblHAL `1.1f.20240101`) work.
   - Persist the last machine identity per connection profile, not globally.
@@ -186,7 +186,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
   - Marlin and Smoothie: Marlin overrides both refreshes to no-ops. Smoothie keeps them, but `$$` usually fails harmlessly.
   - Errors are only logged, never shown.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`RefreshConfigOnConnect`, `RefreshConfig`, `RefreshMachineInfo`, `ManageOptMessage`, `EnlargeBuffer`, `GrblConfST.ExpectedCount`)
-- **webgrbl notes:** Status: not started. Implement as an async `request(cmd, {collectUntil, timeoutMs})` helper on the protocol layer that resolves on the `ok`. That is cleaner than queue swapping, and it can also serve [[lg-grbl-configuration]]. Also parse `$I` `[VER:]` for build date/name and `[OPT:]` letters (e.g. `V` variable spindle, `M` mist, `L` homing init lock) to gate UI. Run `$#` and `$G` too for WCO/modal state if useful.
+- **webgrbl notes:** Status: done — see [[grbl-engine]]. Implement as an async `request(cmd, {collectUntil, timeoutMs})` helper on the protocol layer that resolves on the `ok`. That is cleaner than queue swapping, and it can also serve [[lg-grbl-configuration]]. Also parse `$I` `[VER:]` for build date/name and `[OPT:]` letters (e.g. `V` variable spindle, `M` mist, `L` homing init lock) to gate UI. Run `$#` and `$G` too for WCO/modal state if useful.
 
 ### LG-CONN-11 Connection timeout, failed-connection help & connection-lost behaviour
 
@@ -199,7 +199,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
   - A read exception (other than CH340-style IO errors), a socket close or the emulator closing triggers `CloseCom(false)`. That raises issue `UnexpectedDisconnect` if a job was running (plus Telegram notification and "Fatal" sound) and shows the Issue Detector dialog.
   - No automatic reconnect or retry. The user reconnects manually, and the next "Send" offers the Resume Job dialog with "Resume from last command sent" preselected.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`ThreadTX`, `OnConnectTimeout`, `SetStatus`, `WaitComLineOrDisconnect`, `HasIncomingData`), [`LaserGRBL/MainForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/MainForm.cs) (`OnMachineStatus`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done — see [[grbl-engine]].
   - Web Serial fires `navigator.serial` `disconnect` on unplug. Use it for an immediate "connection lost" banner.
   - Add opt-in auto-reconnect for previously granted ports (`getPorts()` + `connect` event), but never auto-resume a job.
   - Show the troubleshooting help inline (non-modal) with platform-specific hints: Linux `dialout` group, Chromium flags, CH340 on macOS. Make the 10 s handshake timeout configurable for slow-booting ESP32 boards.
