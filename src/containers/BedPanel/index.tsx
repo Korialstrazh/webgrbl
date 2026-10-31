@@ -1,5 +1,6 @@
 /**
  * The central region: a toolbar (not built yet) above the bed drawn to scale; the toasts are anchored to its top right.
+ * Its element is the host that dialogs and drawers render into.
  *
  * @author michael.morosov
  *
@@ -24,11 +25,12 @@ import { ComingSoon } from '../../views/ComingSoon';
 import { ToastStack } from '../ToastStack';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
 import { BED_TOOL_LABEL_KEYS, BED_VIEW_MODE_DESIGN, BED_VIEW_MODE_OPTION_KEYS } from './bed.toolbar.constants';
+import type { BedPanelProps } from './interfaces/BedPanelProps';
 import type { BedViewModeOption } from './interfaces/BedViewModeOption';
 import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
 import styles from './styles.module.scss';
 
-export const BedPanel = (): ReactNode => {
+export const BedPanel = ({ hostRef }: BedPanelProps): ReactNode => {
   const { t } = useTranslation();
   const settings: Record<number, string> = useSelector(selectGrblSettings);
   const isConnected: boolean = useSelector(selectIsConnected);
@@ -41,7 +43,7 @@ export const BedPanel = (): ReactNode => {
   }));
 
   return (
-    <Layout.Content className={styles.bedPanel}>
+    <Layout.Content ref={hostRef} className={styles.bedPanel}>
       {/* A plain heading: antd Typography.Title would add its own margins and colours. */}
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       <ComingSoon description={t(DEFAULT.BED_TOOLBAR_DESCRIPTION)}>

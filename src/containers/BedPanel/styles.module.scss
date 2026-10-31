@@ -1,5 +1,8 @@
+// The dialogs and drawers rendered in here stack inside the bed region only (isolation), so their z-index never lifts
+// them over the sticky stop bar or the machine panel.
 .bedPanel {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
