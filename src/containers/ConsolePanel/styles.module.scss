@@ -25,11 +25,6 @@
 }
 
 .statusReports {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text);
-  font-family: var(--font-ui);
   font-size: 0.8125rem;
 }
 
@@ -46,23 +41,7 @@
   font-size: 0.8125rem;
 }
 
-.input {
-  min-height: var(--control-height);
-  padding: 0 var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface-3);
-  color: var(--color-text);
+// antd Input brings its own border, focus ring and disabled look; the console keeps its monospace commands.
+.commandInput {
   font-family: var(--font-mono);
-
-  &:focus-visible {
-    outline: var(--focus-outline-width) solid var(--color-focus-ring);
-    outline-offset: var(--focus-outline-offset);
-  }
-}
-
-.input:disabled {
-  background-color: var(--color-disabled-bg);
-  color: var(--color-disabled-text);
-  cursor: not-allowed;
 }

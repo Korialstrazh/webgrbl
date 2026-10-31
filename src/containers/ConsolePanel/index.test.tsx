@@ -25,6 +25,8 @@ const RAW_ERROR_DETAIL = 'port exploded';
 const FEED_HOLD_LABEL = 'Feed hold';
 const FEED_HOLD_TEXT = '!';
 const ENTRY_TIMESTAMP = 1_000;
+const ANTD_INPUT_CLASS_NAME = 'ant-input';
+const ANTD_CHECKBOX_CLASS_NAME = 'ant-checkbox-input';
 
 const renderConsolePanel = (): AppStore => {
   const store: AppStore = newStore();
@@ -159,6 +161,13 @@ describe(ConsolePanel.name, () => {
     pressKey(ARROW_UP_KEY);
 
     expect(getInput().value).toBe(UNLOCK_COMMAND);
+  });
+
+  it('builds the command input and the status reports checkbox from antd', () => {
+    renderConsolePanel();
+
+    expect(getInput()).toHaveClass(ANTD_INPUT_CLASS_NAME);
+    expect(screen.getByRole('checkbox', { name: STATUS_REPORTS_LABEL })).toHaveClass(ANTD_CHECKBOX_CLASS_NAME);
   });
 
   it('toggles the status report visibility', () => {

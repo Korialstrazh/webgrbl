@@ -8,10 +8,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Button } from 'antd';
 import type { TFunction } from 'i18next';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_BUTTON_SIZE_SMALL } from '../../utils/antd.constants';
 import { MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppToast } from '../../utils/states/interfaces/AppToast';
@@ -55,14 +57,13 @@ export const ToastStack = (): ReactNode => {
           {toast.repeatCount > FIRST_REPEAT_COUNT && (
             <span className={styles.repeatCount}>{`${MULTIPLICATION_SIGN}${toast.repeatCount}`}</span>
           )}
-          <button
-            type="button"
-            className={styles.dismissButton}
+          <Button
+            size={ANTD_BUTTON_SIZE_SMALL}
             aria-label={t(DEFAULT.TOAST_DISMISS)}
             onClick={() => dispatch(new ToastDismissed({ toastId: toast.toastId }))}
           >
             {t(DEFAULT.TOAST_DISMISS)}
-          </button>
+          </Button>
         </div>
       ))}
     </div>

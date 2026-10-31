@@ -14,6 +14,8 @@ const STOPPED_ON_ERROR_TEXT = 'Job stopped at line 5: error 9 - G-code is locked
 const NOT_RESPONDING_TEXT = 'The controller is not responding.';
 const CONNECTED_TEXT = 'Connected to Grbl 1.1h';
 const DISMISS_LABEL = 'Dismiss';
+const ANTD_BUTTON_CLASS_NAME = 'ant-btn';
+const ANTD_SMALL_BUTTON_CLASS_NAME = 'ant-btn-sm';
 const TWICE_LABEL = '\u00D72';
 
 const renderToastStack = (): AppStore => {
@@ -89,6 +91,15 @@ describe(ToastStack.name, () => {
 
     expect(screen.getAllByRole('alert')).toHaveLength(1);
     expect(screen.getByText(TWICE_LABEL)).toBeInTheDocument();
+  });
+
+  it('builds the dismiss button from a small antd button', () => {
+    const store: AppStore = renderToastStack();
+
+    showErrorToast(store);
+
+    expect(screen.getByRole('button', { name: DISMISS_LABEL })).toHaveClass(ANTD_BUTTON_CLASS_NAME);
+    expect(screen.getByRole('button', { name: DISMISS_LABEL })).toHaveClass(ANTD_SMALL_BUTTON_CLASS_NAME);
   });
 
   it('removes a toast when it is dismissed', () => {
