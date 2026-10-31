@@ -1,5 +1,3 @@
-import type { MachineProfile } from './MachineProfile';
-
 /**
  * All stored machine profiles and which one is active.
  *
@@ -10,6 +8,8 @@ import type { MachineProfile } from './MachineProfile';
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { MachineProfile } from './MachineProfile';
+
 export interface MachineProfilesDocument {
   /** Format version of the document. */
   version: number;

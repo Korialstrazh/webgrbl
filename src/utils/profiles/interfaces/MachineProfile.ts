@@ -1,5 +1,3 @@
-import type { MachineOriginCorner } from '../machine.profile.constants';
-
 /**
  * One laser machine the user works with; everything machine specific lives here so any GRBL laser can be driven.
  *
@@ -10,6 +8,8 @@ import type { MachineOriginCorner } from '../machine.profile.constants';
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { MachineOriginCorner } from '../machine.profile.constants';
+
 export interface MachineProfile {
   /** Unique id of the profile. */
   id: string;

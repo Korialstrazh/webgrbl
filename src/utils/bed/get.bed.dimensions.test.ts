@@ -1,11 +1,10 @@
+import { GRBL_SETTING_X_MAX_TRAVEL, GRBL_SETTING_Y_MAX_TRAVEL } from '../grbl/grbl.constants';
+import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import {
   BED_MAX_TRAVEL_MM,
   BED_PLACEHOLDER_KIND,
   DEFAULT_BED_SIZE_MM,
-  GRBL_SETTING_X_MAX_TRAVEL,
-  GRBL_SETTING_Y_MAX_TRAVEL,
 } from './bed.constants';
-import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../profiles/new.machine.profile';
 import { getBedDimensions } from './get.bed.dimensions';
 

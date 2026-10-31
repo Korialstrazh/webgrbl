@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { GRBL_SETTING_X_MAX_TRAVEL, GRBL_SETTING_Y_MAX_TRAVEL } from '../bed/bed.constants';
 import {
   GRBL_SETTING_HOMING_ENABLED,
   GRBL_SETTING_LASER_MODE,
   GRBL_SETTING_S_VALUE_MAX,
+  GRBL_SETTING_X_MAX_TRAVEL,
+  GRBL_SETTING_Y_MAX_TRAVEL,
 } from '../grbl/grbl.constants';
 import { getProfileValuesFromSettings } from './get.profile.values.from.settings';
 import type { MachineProfileValuesFromSettings } from './interfaces/MachineProfileValuesFromSettings';

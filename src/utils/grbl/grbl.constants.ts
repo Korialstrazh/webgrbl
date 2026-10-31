@@ -118,6 +118,10 @@ export const GRBL_BUILD_OPTION_PATTERN = /^\[OPT:[^,\]]*,\d+,(\d+)\]$/i;
 // #region Setting numbers
 /** `$30`: the spindle value that means full laser power. */
 export const GRBL_SETTING_S_VALUE_MAX = 30;
+/** `$130`: maximum travel of the X axis in mm. */
+export const GRBL_SETTING_X_MAX_TRAVEL = 130;
+/** `$131`: maximum travel of the Y axis in mm. */
+export const GRBL_SETTING_Y_MAX_TRAVEL = 131;
 /** `$22`: homing cycle enabled. */
 export const GRBL_SETTING_HOMING_ENABLED = 22;
 /** `$32`: laser mode enabled. */

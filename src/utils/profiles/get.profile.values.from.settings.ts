@@ -1,9 +1,3 @@
-import { getValidlyReportedProfileValues } from './get.validly.reported.profile.values';
-import type { MachineProfile } from './interfaces/MachineProfile';
-import type { MachineProfileValuesFromSettings } from './interfaces/MachineProfileValuesFromSettings';
-import type { ReportedMachineProfileValues } from './interfaces/ReportedMachineProfileValues';
-import { newMachineProfile } from './new.machine.profile';
-
 /**
  * Reads the profile values a laser reports: work area from `$130`/`$131`, S max from `$30`, homing from `$22` and
  * laser mode from `$32`. A value the laser does not report validly falls back to the profile default (laser mode
@@ -16,6 +10,12 @@ import { newMachineProfile } from './new.machine.profile';
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getValidlyReportedProfileValues } from './get.validly.reported.profile.values';
+import type { MachineProfile } from './interfaces/MachineProfile';
+import type { MachineProfileValuesFromSettings } from './interfaces/MachineProfileValuesFromSettings';
+import type { ReportedMachineProfileValues } from './interfaces/ReportedMachineProfileValues';
+import { newMachineProfile } from './new.machine.profile';
+
 export const getProfileValuesFromSettings = (settings: Record<number, string>): MachineProfileValuesFromSettings => {
   const defaultProfile: MachineProfile = newMachineProfile();
   const {

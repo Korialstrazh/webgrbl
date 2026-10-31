@@ -1,5 +1,3 @@
-import { BED_MAX_TRAVEL_MM } from '../bed/bed.constants';
-
 /**
  * Closed set of machine corners where the work origin can sit, with its derived type, plus the defaults, ranges
  * and storage key of a machine profile.
@@ -11,6 +9,8 @@ import { BED_MAX_TRAVEL_MM } from '../bed/bed.constants';
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { BED_MAX_TRAVEL_MM } from '../bed/bed.constants';
+
 export const MACHINE_ORIGIN_CORNER = {
   FRONT_LEFT: 'front-left',
   BACK_LEFT: 'back-left',

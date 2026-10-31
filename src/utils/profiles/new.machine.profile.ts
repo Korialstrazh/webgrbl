@@ -1,3 +1,13 @@
+/**
+ * Creates a machine profile with the default values and a new id; overrides replace single fields.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-10-31
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
 import type { MachineProfile } from './interfaces/MachineProfile';
 import {
   DEFAULT_MACHINE_HAS_AIR_ASSIST,
@@ -10,16 +20,6 @@ import {
   DEFAULT_MACHINE_WORK_AREA_MM,
 } from './machine.profile.constants';
 
-/**
- * Creates a machine profile with the default values and a new id; overrides replace single fields.
- *
- * @author michael.morosov
- *
- * @since 2026-10-31
- *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
- */
 export const newMachineProfile = (overrides: Partial<MachineProfile> = {}): MachineProfile => ({
   id: crypto.randomUUID(),
   name: DEFAULT_MACHINE_PROFILE_NAME,

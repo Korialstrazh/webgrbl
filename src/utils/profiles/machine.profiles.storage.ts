@@ -1,6 +1,6 @@
+import { getMachineProfileErrors } from './get.machine.profile.errors';
 import type { MachineProfile } from './interfaces/MachineProfile';
 import type { MachineProfilesDocument } from './interfaces/MachineProfilesDocument';
-import { getMachineProfileErrors } from './get.machine.profile.errors';
 import { isMachineProfilesDocument } from './is.machine.profiles.document';
 import { MACHINE_PROFILES_DOCUMENT_VERSION, MACHINE_PROFILES_STORAGE_KEY } from './machine.profile.constants';
 
