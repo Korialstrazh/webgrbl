@@ -42,6 +42,7 @@ export const BedPanel = (): ReactNode => {
 
   return (
     <Layout.Content className={styles.bedPanel}>
+      {/* A plain heading: antd Typography.Title would add its own margins and colours. */}
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       <ComingSoon description={t(DEFAULT.BED_TOOLBAR_DESCRIPTION)}>
         <div className={styles.toolbar}>

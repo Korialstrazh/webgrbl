@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { Button, Switch } from 'antd';
+import { Button, Slider, Switch } from 'antd';
 import type { Mock } from 'vitest';
 import { ComingSoon } from '.';
 import { ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
@@ -9,6 +9,10 @@ const BADGE_TEXT = 'Coming soon';
 const BUTTON_LABEL = 'Frame';
 const WRAPPED_TEST_ID = 'wrapped';
 const ENTER_KEY = 'Enter';
+const ARROW_RIGHT_KEY = 'ArrowRight';
+const SLIDER_ROLE = 'slider';
+const SLIDER_LABEL = 'Power';
+const SLIDER_MAX_VALUE = 100;
 
 describe(ComingSoon.name, () => {
   it('blocks clicks and keyboard on a wrapped antd button', () => {
@@ -42,6 +46,25 @@ describe(ComingSoon.name, () => {
     fireEvent.click(wrappedSwitch);
     fireEvent.keyDown(wrappedSwitch, { key: ENTER_KEY });
     fireEvent.keyUp(wrappedSwitch, { key: ENTER_KEY });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('blocks mouse and keyboard on a wrapped antd slider', () => {
+    const onChange: Mock<(value: number) => void> = vi.fn<(value: number) => void>();
+
+    render(
+      <ComingSoon description={DESCRIPTION_TEXT}>
+        <Slider max={SLIDER_MAX_VALUE} defaultValue={0} ariaLabelledByForHandle={SLIDER_LABEL} onChange={onChange} />
+      </ComingSoon>,
+    );
+    const wrappedHandle: HTMLElement = screen.getByRole(SLIDER_ROLE, { hidden: true });
+
+    wrappedHandle.focus();
+    fireEvent.mouseDown(wrappedHandle);
+    fireEvent.click(wrappedHandle);
+    fireEvent.keyDown(wrappedHandle, { key: ARROW_RIGHT_KEY });
+    fireEvent.keyUp(wrappedHandle, { key: ARROW_RIGHT_KEY });
 
     expect(onChange).not.toHaveBeenCalled();
   });

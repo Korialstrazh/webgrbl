@@ -52,6 +52,7 @@ export const ConnectionPill = (): ReactNode => {
 
   return (
     <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen} anchorRef={pillRef}>
+      {/* A raw button: the pill is a custom status chip and antd Button would restyle its inner parts. */}
       <button
         ref={pillRef}
         type="button"

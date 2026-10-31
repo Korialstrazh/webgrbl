@@ -25,6 +25,7 @@ export const TopBar = (): ReactNode => {
 
   return (
     <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
+      {/* Plain text elements: antd Typography would add its own margins and colours. */}
       <div className={styles.heading}>
         <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
         <p className={styles.project}>{t(DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER)}</p>

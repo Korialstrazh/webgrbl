@@ -26,8 +26,9 @@ const ControlledSegmented = (): ReactNode => {
   return <Segmented aria-label={GROUP_LABEL} options={OPTIONS} value={selectedValue} onChange={setSelectedValue} />;
 };
 
-// The antd Segmented replaced the self-built SegmentedControl; these tests pin the keyboard behaviour the app needs.
-describe('antd Segmented', () => {
+// Upgrade guard with no subject in src: antd Segmented replaced the self-built SegmentedControl, and these tests fail
+// when an antd upgrade changes the radio-group keyboard behaviour the app relies on.
+describe('antd upgrade guard: Segmented keyboard behaviour', () => {
   it('is a radio group named by aria-label, with one tab stop for its options', () => {
     render(<ControlledSegmented />);
 

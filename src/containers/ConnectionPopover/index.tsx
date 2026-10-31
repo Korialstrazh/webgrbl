@@ -129,6 +129,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       aria-label={t(DEFAULT.CONNECTION_POPOVER_LABEL)}
       tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
     >
+      {/* Plain labels: antd has no standalone label component outside Form, which this popover does not use. */}
       <div className={styles.field}>
         <label htmlFor={portSelectId}>{t(DEFAULT.CONNECTION_POPOVER_PORT)}</label>
         <Select<string>

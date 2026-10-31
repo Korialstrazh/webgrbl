@@ -35,6 +35,7 @@ export const StatusStrip = (): ReactNode => {
       )}
       <div className={styles.readoutsArea}>
         <ComingSoon description={t(DEFAULT.STATUS_STRIP_READOUTS_DESCRIPTION)}>
+          {/* A description list keeps the term and value pairing; antd Descriptions renders a table instead. */}
           <dl className={styles.readouts}>
             <div className={styles.readout}>
               <dt>{t(DEFAULT.STATUS_STRIP_CURSOR)}</dt>
