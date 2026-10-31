@@ -1,0 +1,176 @@
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { createRef } from 'react';
+import type { RefObject } from 'react';
+import { Provider } from 'react-redux';
+import type { Mock } from 'vitest';
+import { ConnectionPopover } from '.';
+import { GRBL_BAUD_RATES } from '../../utils/grbl/grbl.constants';
+import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
+import { AvailableSerialPortsReceived, selectBaudRate, selectSelectedPortId } from '../../utils/states/grbl.connection.state';
+import { newStore } from '../../utils/states/new.store';
+import type { AppStore } from '../../utils/states/new.store';
+import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
+
+const CONNECT_LABEL = 'Connect';
+const DISCONNECT_LABEL = 'Disconnect';
+const CHOOSE_PORT_LABEL = 'Choose port...';
+const PORT_LABEL = 'Port';
+const BAUD_LABEL = 'Baud rate';
+const SIMULATED_LASER_LABEL = 'Simulated laser';
+const WEB_SERIAL_UNAVAILABLE_PATTERN = /Web Serial unavailable/;
+const ANCHOR_LABEL = 'Laser connection';
+const USB_PORT_ID = 'serial-1';
+const USB_PORT_LABEL = 'USB 1a86:7523';
+const USB_VENDOR_ID = 0x1a86;
+const USB_PRODUCT_ID = 0x7523;
+const UNKNOWN_PORT_ID = 'serial-2';
+const UNKNOWN_PORT_LABEL = 'Serial port';
+const CHOSEN_BAUD_RATE = 230400;
+const ANCHOR_TEXT = 'Open connection';
+// antd renders each dropdown option with this class and the option label as its title.
+const SELECT_OPTION_SELECTOR = '.ant-select-item-option';
+const TITLE_ATTRIBUTE = 'title';
+
+const newAnchorRef = (): RefObject<HTMLButtonElement | null> => createRef<HTMLButtonElement>();
+
+const openSelect = (label: string): void => {
+  fireEvent.mouseDown(screen.getByRole('combobox', { name: label }));
+};
+
+const getSelectOptionLabels = (): string[] =>
+  Array.from(document.querySelectorAll(SELECT_OPTION_SELECTOR), (option: Element) =>
+    option.getAttribute(TITLE_ATTRIBUTE) ?? '');
+
+const pickSelectOption = (optionLabel: string): void => {
+  const option: Element | null = document.querySelector(`${SELECT_OPTION_SELECTOR}[title="${optionLabel}"]`);
+
+  if (!option) {
+    throw new Error(`Option ${optionLabel} is not open`);
+  }
+
+  fireEvent.click(option);
+};
+
+const renderConnectionPopover = (): AppStore => {
+  const store: AppStore = newStore();
+
+  render(
+    <Provider store={store}>
+      <AntdTestProvider>
+        <ConnectionPopover isOpen onOpenChange={vi.fn()} anchorRef={newAnchorRef()}>
+          <button type="button">{ANCHOR_TEXT}</button>
+        </ConnectionPopover>
+      </AntdTestProvider>
+    </Provider>,
+  );
+
+  return store;
+};
+
+const settle = async (): Promise<void> => {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+  });
+};
+
+describe(ConnectionPopover.name, () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('connecting to the simulated laser turns the button into Disconnect', async () => {
+    renderConnectionPopover();
+
+    fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+    await settle();
+
+    expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toBeEnabled();
+  });
+
+  it('Choose port is disabled without Web Serial but the simulated laser still connects', async () => {
+    renderConnectionPopover();
+
+    const choosePortButton: HTMLElement = screen.getByRole('button', { name: CHOOSE_PORT_LABEL });
+
+    expect(choosePortButton).toBeDisabled();
+    expect(screen.getByText(WEB_SERIAL_UNAVAILABLE_PATTERN)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+    await settle();
+
+    expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toBeInTheDocument();
+  });
+
+  it('asks to open when its anchor is clicked', () => {
+    const onOpenChange: Mock<(isOpen: boolean) => void> = vi.fn<(isOpen: boolean) => void>();
+
+    render(
+      <Provider store={newStore()}>
+        <ConnectionPopover isOpen={false} onOpenChange={onOpenChange} anchorRef={newAnchorRef()}>
+          <button type="button">{ANCHOR_TEXT}</button>
+        </ConnectionPopover>
+      </Provider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: ANCHOR_TEXT }));
+
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it('is not rendered while closed', () => {
+    render(
+      <Provider store={newStore()}>
+        <ConnectionPopover isOpen={false} onOpenChange={vi.fn()} anchorRef={newAnchorRef()}>
+          <button type="button">{ANCHOR_TEXT}</button>
+        </ConnectionPopover>
+      </Provider>,
+    );
+
+    expect(screen.queryByRole('dialog', { name: ANCHOR_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('lists the simulated laser and granted ports with their USB ids', () => {
+    const store: AppStore = renderConnectionPopover();
+
+    act(() => {
+      store.dispatch(new AvailableSerialPortsReceived({
+        ports: [
+          { portId: USB_PORT_ID, usbVendorId: USB_VENDOR_ID, usbProductId: USB_PRODUCT_ID },
+          { portId: UNKNOWN_PORT_ID, usbVendorId: undefined, usbProductId: undefined },
+        ],
+      }));
+    });
+    openSelect(PORT_LABEL);
+
+    expect(getSelectOptionLabels()).toEqual([SIMULATED_LASER_LABEL, USB_PORT_LABEL, UNKNOWN_PORT_LABEL]);
+
+    pickSelectOption(USB_PORT_LABEL);
+
+    expect(selectSelectedPortId(store.getState())).toBe(USB_PORT_ID);
+  });
+
+  it('offers every baud rate and stores the chosen one', () => {
+    const store: AppStore = renderConnectionPopover();
+
+    openSelect(BAUD_LABEL);
+
+    expect(getSelectOptionLabels()).toEqual(GRBL_BAUD_RATES.map(String));
+
+    pickSelectOption(String(CHOSEN_BAUD_RATE));
+
+    expect(selectBaudRate(store.getState())).toBe(CHOSEN_BAUD_RATE);
+  });
+
+  it('locks the port and baud selects while connected', async () => {
+    renderConnectionPopover();
+
+    fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+    await settle();
+
+    expect(screen.getByRole('combobox', { name: PORT_LABEL })).toBeDisabled();
+    expect(screen.getByRole('combobox', { name: BAUD_LABEL })).toBeDisabled();
+  });
+});

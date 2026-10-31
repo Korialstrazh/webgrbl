@@ -2,6 +2,8 @@ import '@testing-library/jest-dom/vitest';
 import { FALLBACK_LANGUAGE } from './src/utils/localization/constants';
 import './src/utils/localization/default.locales';
 import { i18n } from './src/utils/localization/localization';
+import { installMatchMediaMock, resetMatchMediaMock } from './src/utils/test.support/match.media.mock';
+import { installResizeObserverMock } from './src/utils/test.support/resize.observer.mock';
 
 // Awaited so the language switch cannot race i18next's own init.
 await i18n.changeLanguage(FALLBACK_LANGUAGE);
@@ -14,3 +16,10 @@ vi.mock('virtual:pwa-register/react', () => ({
     updateServiceWorker: async () => undefined,
   }),
 }));
+
+// jsdom has no matchMedia, so every test gets one that starts narrow and forgets its listeners afterwards.
+installMatchMediaMock();
+beforeEach(resetMatchMediaMock);
+
+// jsdom has no ResizeObserver, and antd needs one to place popovers.
+installResizeObserverMock();

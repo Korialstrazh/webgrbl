@@ -1,0 +1,33 @@
+// The sider scrolls on its own; its body grows with the content so STOP can stick to the bottom while scrolling.
+.region {
+  overflow: auto;
+  border-left: 1px solid var(--color-border);
+  background-color: var(--color-surface-1);
+
+  .machinePanel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+    height: auto;
+    min-height: 100%;
+    padding: var(--space-4);
+  }
+}
+
+.cards {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stopArea {
+  position: sticky;
+  bottom: var(--space-4);
+  margin-top: auto;
+
+  > * {
+    width: 100%;
+  }
+}

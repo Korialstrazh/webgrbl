@@ -18,10 +18,32 @@ import { configDefaults } from 'vitest/config';
 
 const APP_NAME = 'webgrbl';
 const APP_DESCRIPTION = 'Control a GRBL laser cutter or engraver straight from the browser.';
-const THEME_COLOR = '#111827';
+const THEME_COLOR = '#121417';
 const ICON_PATH = 'favicon.svg';
+// antd and the packages it is built from go into chunks of their own, so the app chunk stays small and caches apart.
+// The components and their building blocks (styling engine, icons, rc components) are split so each chunk stays under
+// the size limit.
+const ANTD_CHUNK_NAME = 'antd';
+const ANTD_MODULE_PATTERN = /[\\/]node_modules[\\/]antd[\\/]/;
+const ANTD_BASE_CHUNK_NAME = 'antd-base';
+const ANTD_BASE_MODULE_PATTERN = /[\\/]node_modules[\\/](?:@ant-design|@rc-component)[\\/]/;
+// A group also takes in the modules its matches import, so the building blocks must claim theirs first.
+const ANTD_BASE_CHUNK_PRIORITY = 20;
+const ANTD_CHUNK_PRIORITY = 10;
 
 export default defineConfig({
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: ANTD_BASE_CHUNK_NAME, test: ANTD_BASE_MODULE_PATTERN, priority: ANTD_BASE_CHUNK_PRIORITY },
+            { name: ANTD_CHUNK_NAME, test: ANTD_MODULE_PATTERN, priority: ANTD_CHUNK_PRIORITY },
+          ],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

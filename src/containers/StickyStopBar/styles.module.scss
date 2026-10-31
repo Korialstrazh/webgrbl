@@ -1,0 +1,20 @@
+@use '../../styles/layout' as layout;
+
+.stickyStopBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: layout.$sticky-stop-bar-height;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface-2);
+
+  > * {
+    flex: 1;
+    max-width: 30rem;
+  }
+}

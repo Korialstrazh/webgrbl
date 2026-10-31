@@ -25,6 +25,8 @@ The user wants to "upload required drivers" if a laser needs them. A web page **
 
 ## Feature backlog (to brainstorm)
 
+The approved layout and build order are in [[ui-layout]].
+
 Starting points from LaserGRBL's feature set, to be refined in brainstorm sessions. The full upstream feature catalog with stable feature IDs and the parity checklist lives in [[lasergrbl/_index|the LaserGRBL feature reference]].
 
 - Connection: port picker, baud rate, auto-detect GRBL version, live status (`?` polling), alarm/unlock, homing.

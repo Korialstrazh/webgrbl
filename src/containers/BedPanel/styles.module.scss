@@ -1,0 +1,37 @@
+// Dialogs and drawers render in here, absolutely positioned, so they fill this box only; the regions container clips
+// them, so they never reach the machine panel or the sticky stop bar.
+.bedPanel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  background-color: var(--color-bed);
+  color: var(--color-text);
+}
+
+// Stacked in a narrow window the bed needs its own height; side by side it fills the space between the bars.
+// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width < 80rem) {
+  .bedPanel {
+    min-height: 20rem;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.bed {
+  flex: 1;
+  min-height: 0;
+}

@@ -1,0 +1,5 @@
+// antd places the drawer root, which holds the mask, fixed over the whole window; inside the bed region it fills only
+// the bed, so the machine panel and STOP stay uncovered. The extra class outranks antd's own selector.
+.bedRegionDrawer:global(.ant-drawer) {
+  position: absolute;
+}

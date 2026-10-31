@@ -1,0 +1,4 @@
+// The theme already makes large buttons as tall as --target-min; the floor keeps STOP there if the theme changes.
+.stopButton {
+  min-height: var(--target-min);
+}

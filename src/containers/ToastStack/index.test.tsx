@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ToastStack } from '.';
+import { TOAST_STACK_TEST_ID } from './toast.stack.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
@@ -14,14 +15,18 @@ const STOPPED_ON_ERROR_TEXT = 'Job stopped at line 5: error 9 - G-code is locked
 const NOT_RESPONDING_TEXT = 'The controller is not responding.';
 const CONNECTED_TEXT = 'Connected to Grbl 1.1h';
 const DISMISS_LABEL = 'Dismiss';
+const ANTD_BUTTON_CLASS_NAME = 'ant-btn';
+const ANTD_SMALL_BUTTON_CLASS_NAME = 'ant-btn-sm';
 const TWICE_LABEL = '\u00D72';
 
-const renderToastStack = (): AppStore => {
+const PINNED_TO_WINDOW_CLASS_NAME = 'pinnedToWindow';
+
+const renderToastStack = (isWide: boolean = true): AppStore => {
   const store: AppStore = newStore();
 
   render(
     <Provider store={store}>
-      <ToastStack />
+      <ToastStack isWide={isWide} />
     </Provider>,
   );
 
@@ -91,6 +96,15 @@ describe(ToastStack.name, () => {
     expect(screen.getByText(TWICE_LABEL)).toBeInTheDocument();
   });
 
+  it('builds the dismiss button from a small antd button', () => {
+    const store: AppStore = renderToastStack();
+
+    showErrorToast(store);
+
+    expect(screen.getByRole('button', { name: DISMISS_LABEL })).toHaveClass(ANTD_BUTTON_CLASS_NAME);
+    expect(screen.getByRole('button', { name: DISMISS_LABEL })).toHaveClass(ANTD_SMALL_BUTTON_CLASS_NAME);
+  });
+
   it('removes a toast when it is dismissed', () => {
     const store: AppStore = renderToastStack();
 
@@ -98,5 +112,17 @@ describe(ToastStack.name, () => {
     fireEvent.click(screen.getByRole('button', { name: DISMISS_LABEL }));
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('pins the stack to the window in a narrow window, so it stays visible while the regions scroll', () => {
+    renderToastStack(false);
+
+    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).toContain(PINNED_TO_WINDOW_CLASS_NAME);
+  });
+
+  it('keeps the stack in the bed region in a wide window', () => {
+    renderToastStack(true);
+
+    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).not.toContain(PINNED_TO_WINDOW_CLASS_NAME);
   });
 });

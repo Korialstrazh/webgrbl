@@ -1,6 +1,7 @@
 /**
- * Top-level page of the app: the header with the browser status and the connection controls, and the workspace with
- * the machine status, control buttons and console.
+ * Top-level page of the app: the workbench with the top bar, design panel, bed, machine panel and status strip,
+ * plus the overlays. It fills the window as an antd Layout; in a narrow window the regions stack and STOP moves to a
+ * sticky bar. It shares the bed region element, which dialogs and drawers render into.
  *
  * @author michael.morosov
  *
@@ -9,40 +10,39 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Layout } from 'antd';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
-import { AppUpdatePrompt } from '../../containers/AppUpdatePrompt';
-import { BrowserStatusBar } from '../../containers/BrowserStatusBar';
-import { ConnectBar } from '../../containers/ConnectBar';
-import { ConsolePanel } from '../../containers/ConsolePanel';
+import { BedPanel } from '../../containers/BedPanel';
+import { DesignPanel } from '../../containers/DesignPanel';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
-import { MachineControlButtons } from '../../containers/MachineControlButtons';
-import { MachineStatusPanel } from '../../containers/MachineStatusPanel';
-import { ToastStack } from '../../containers/ToastStack';
-import { DEFAULT } from '../../utils/localization/default.locales';
+import { MachinePanel } from '../../containers/MachinePanel';
+import { StatusStrip } from '../../containers/StatusStrip';
+import { StickyStopBar } from '../../containers/StickyStopBar';
+import { StopHotkey } from '../../containers/StopHotkey';
+import { TopBar } from '../../containers/TopBar';
+import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
+import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import styles from './styles.module.scss';
 
 export const AppRoute = (): ReactNode => {
-  const { t } = useTranslation();
+  const isWide: boolean = useIsWideLayout();
+  const [bedRegionHost, setBedRegionHost] = useState<HTMLElement | null>(null);
 
   return (
-    <div className={styles.appRoute}>
-      <header className={styles.header}>
-        <div className={styles.heading}>
-          <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
-          <p className={styles.tagline}>{t(DEFAULT.APP_TAGLINE)}</p>
-        </div>
-        <BrowserStatusBar />
-        <ConnectBar />
-      </header>
-      <main className={styles.workspace}>
-        <MachineStatusPanel />
-        <MachineControlButtons />
-        <ConsolePanel />
-      </main>
-      <ToastStack />
-      <AppUpdatePrompt />
-      <LeavePageGuard />
-    </div>
+    <BedRegionHostContext value={bedRegionHost}>
+      <Layout className={styles.appRoute}>
+        <TopBar />
+        <Layout className={styles.regions} hasSider={isWide}>
+          <DesignPanel />
+          <BedPanel hostRef={setBedRegionHost} isWide={isWide} />
+          <MachinePanel isWide={isWide} />
+        </Layout>
+        <StatusStrip />
+        {!isWide && <StickyStopBar />}
+        <LeavePageGuard />
+        <StopHotkey />
+      </Layout>
+    </BedRegionHostContext>
   );
 };

@@ -1,15 +1,28 @@
+@use './styles/fonts';
+@use './styles/tokens';
+
 :root {
   color-scheme: dark;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background-color: #111827;
-  color: #e5e7eb;
+  font-family: var(--font-ui);
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 * {
   box-sizing: border-box;
 }
 
+// The page matches the workbench height exactly, so mobile browsers never show a page scrollbar.
+html,
+body {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ui);
 }

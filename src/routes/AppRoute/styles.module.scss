@@ -1,39 +1,31 @@
+@use '../../styles/layout' as layout;
+
+// The workbench fills the window and never scrolls as a page; the panels and the console scroll on their own.
 .appRoute {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  --design-panel-width: #{layout.$design-panel-width};
+  --machine-panel-width: #{layout.$machine-panel-width};
+
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  // antd App sets its own line height for everything inside it; our text keeps the browser default it was designed for.
+  line-height: normal;
 }
 
-.header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #1f2937;
+// A window too short for the regions scrolls them here, never the page.
+.regions {
+  min-height: 0;
+  overflow: auto;
 }
 
-.heading {
-  display: flex;
-  flex-direction: column;
-}
+// Below the wide breakpoint the regions stack and scroll together; 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width < 80rem) {
+  .appRoute {
+    --design-panel-width: auto;
+    --machine-panel-width: auto;
 
-.title {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.tagline {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: #9ca3af;
-}
-
-.workspace {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
+    .regions {
+      display: block;
+    }
+  }
 }

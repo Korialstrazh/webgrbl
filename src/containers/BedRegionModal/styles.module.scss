@@ -1,0 +1,8 @@
+// antd places the mask and the dialog wrapper fixed over the whole window; inside the bed region they fill only the
+// bed, so the machine panel and STOP stay uncovered. The extra class outranks antd's own selector.
+.bedRegionModal:global(.ant-modal-root) {
+  :global(.ant-modal-mask),
+  :global(.ant-modal-wrap) {
+    position: absolute;
+  }
+}
