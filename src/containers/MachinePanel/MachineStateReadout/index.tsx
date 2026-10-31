@@ -17,10 +17,10 @@ import type { GrblMachineState } from '../../../utils/grbl/grbl.constants';
 import type { GrblAxisPosition } from '../../../utils/grbl/interfaces/GrblAxisPosition';
 import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { selectMachineStatus } from '../../../utils/states/machine.status.state';
 import styles from './styles.module.scss';
 
-const MISSING_VALUE_TEXT = '-';
 const POSITION_DECIMALS = 3;
 const POSITION_SEPARATOR = ' / ';
 const STATE_SUBSTATE_SEPARATOR = ' ';

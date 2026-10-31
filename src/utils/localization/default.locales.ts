@@ -14,7 +14,6 @@ import { registerLocales } from './localization';
 
 // #region DEFAULT
 export const DEFAULT = {
-  APP_TAGLINE: 'APP_TAGLINE',
   APP_TITLE: 'APP_TITLE',
   APP_UPDATE_DISMISS: 'APP_UPDATE_DISMISS',
   APP_UPDATE_NEED_REFRESH: 'APP_UPDATE_NEED_REFRESH',
@@ -194,7 +193,6 @@ registerLocales({
   en: {
     code: 'en',
     translation: {
-      [DEFAULT.APP_TAGLINE]: "GRBL laser control in your browser - works offline.",
       [DEFAULT.APP_TITLE]: "webgrbl",
       [DEFAULT.APP_UPDATE_DISMISS]: "Dismiss",
       [DEFAULT.APP_UPDATE_NEED_REFRESH]: "A new version of webgrbl is available.",

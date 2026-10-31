@@ -13,12 +13,11 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { MISSING_VALUE_TEXT } from '../../utils/missing.value.constants';
 import { ComingSoon } from '../../views/ComingSoon';
 import { Toggle } from '../../views/Toggle';
 import { ConsolePanel } from '../ConsolePanel';
 import styles from './styles.module.scss';
-
-const MISSING_READOUT_TEXT = '-';
 
 export const StatusStrip = (): ReactNode => {
   const { t } = useTranslation();
@@ -35,15 +34,15 @@ export const StatusStrip = (): ReactNode => {
         <dl className={styles.readouts}>
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_CURSOR)}</dt>
-            <dd>{MISSING_READOUT_TEXT}</dd>
+            <dd>{MISSING_VALUE_TEXT}</dd>
           </div>
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
-            <dd>{MISSING_READOUT_TEXT}</dd>
+            <dd>{MISSING_VALUE_TEXT}</dd>
           </div>
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>
-            <dd>{MISSING_READOUT_TEXT}</dd>
+            <dd>{MISSING_VALUE_TEXT}</dd>
           </div>
         </dl>
       </ComingSoon>

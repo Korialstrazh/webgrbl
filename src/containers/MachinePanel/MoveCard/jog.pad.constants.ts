@@ -33,10 +33,10 @@ export const JOG_PAD_CELLS: readonly JogPadCell[] = [
   { labelKey: DEFAULT.MACHINE_JOG_DOWN_RIGHT, arrowGlyph: ARROW_DOWN_RIGHT },
 ];
 
-export const FINE_STEP_MM = '0.1';
-export const SMALL_STEP_MM = '1';
-export const MEDIUM_STEP_MM = '10';
-export const LARGE_STEP_MM = '50';
+const FINE_STEP_MM = '0.1';
+const SMALL_STEP_MM = '1';
+const MEDIUM_STEP_MM = '10';
+const LARGE_STEP_MM = '50';
 
-export const JOG_STEP_DISTANCES_MM: readonly string[] = [FINE_STEP_MM, SMALL_STEP_MM, MEDIUM_STEP_MM, LARGE_STEP_MM];
+export const JOG_STEP_DISTANCES_MM = [FINE_STEP_MM, SMALL_STEP_MM, MEDIUM_STEP_MM, LARGE_STEP_MM] as const;
 export const DEFAULT_JOG_STEP_MM: string = SMALL_STEP_MM;

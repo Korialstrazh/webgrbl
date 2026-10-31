@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { Panel } from '../../views/Panel';
 import { StopButton } from '../StopButton';
+import type { MachinePanelProps } from './interfaces/MachinePanelProps';
 import { LaserCard } from './LaserCard';
 import { MachineResetUnlock } from './MachineResetUnlock';
 import { MachineStateReadout } from './MachineStateReadout';
@@ -20,11 +21,6 @@ import { MoveCard } from './MoveCard';
 import { PreflightCard } from './PreflightCard';
 import { StartJobCard } from './StartJobCard';
 import styles from './styles.module.scss';
-
-interface MachinePanelProps {
-  /** Whether the window is wide; STOP lives here only then, otherwise in the sticky bar. */
-  isWide: boolean;
-}
 
 export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
   const { t } = useTranslation();
