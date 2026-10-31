@@ -25,7 +25,7 @@ const DESIGN_VIEW_LABEL = 'Design';
 const renderPanel = (store: AppStore): void => {
   render(
     <Provider store={store}>
-      <BedPanel />
+      <BedPanel hostRef={null} isWide />
     </Provider>,
   );
 };

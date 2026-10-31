@@ -1,5 +1,6 @@
 /**
- * The machine bed drawn to scale: grid, rulers, the laser-head crosshair and the work zero marker.
+ * The machine bed drawn to scale: grid, rulers, the laser-head crosshair and the work zero marker. A head or work zero
+ * outside the bed is drawn at the nearest bed edge in a dashed outside style.
  *
  * @author michael.morosov
  *
@@ -12,18 +13,20 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { getBedHeadMarker } from '../../utils/bed/get.bed.head.marker';
+import { getBedMarker } from '../../utils/bed/get.bed.marker';
 import { getCoordinateText } from '../../utils/bed/get.coordinate.text';
 import { getGridLinePath } from '../../utils/bed/get.grid.line.path';
 import { getRulerLabelPositions } from '../../utils/bed/get.ruler.label.positions';
-import type { BedHeadMarker } from '../../utils/bed/interfaces/BedHeadMarker';
+import type { BedMarker } from '../../utils/bed/interfaces/BedMarker';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import {
   ARIA_SENTENCE_SEPARATOR,
   BED_HEAD_TEST_ID,
+  BED_WORK_ORIGIN_TEST_ID,
   CENTER_FRACTION,
   CROSSHAIR_ARM_MM,
   PLACEHOLDER_FONT_SIZE_MM,
+  RULER_DIGIT_WIDTH_FRACTION,
   RULER_FONT_SIZE_MM,
   RULER_LABEL_OFFSET_MM,
   WORK_ORIGIN_MARKER_RADIUS_MM,
@@ -38,7 +41,7 @@ const getAriaLabel = (t: TFunction, props: BedViewProps): string => {
   ];
 
   if (headPosition) {
-    const isOutsideBed: boolean = getBedHeadMarker(headPosition, dimensions).isOutsideBed;
+    const isOutsideBed: boolean = getBedMarker(headPosition, dimensions).isOutsideBed;
 
     sentences.push(
       t(isOutsideBed ? DEFAULT.BED_ARIA_HEAD_OUTSIDE : DEFAULT.BED_ARIA_HEAD, {
@@ -49,8 +52,10 @@ const getAriaLabel = (t: TFunction, props: BedViewProps): string => {
   }
 
   if (workOriginPosition) {
+    const isOutsideBed: boolean = getBedMarker(workOriginPosition, dimensions).isOutsideBed;
+
     sentences.push(
-      t(DEFAULT.BED_ARIA_WORK_ORIGIN, {
+      t(isOutsideBed ? DEFAULT.BED_ARIA_WORK_ORIGIN_OUTSIDE : DEFAULT.BED_ARIA_WORK_ORIGIN, {
         x: getCoordinateText(workOriginPosition.x),
         y: getCoordinateText(workOriginPosition.y),
       }),
@@ -59,6 +64,16 @@ const getAriaLabel = (t: TFunction, props: BedViewProps): string => {
 
   return sentences.join(ARIA_SENTENCE_SEPARATOR);
 };
+
+/** A top label is written to the right of its position, so it needs the offset plus its widest text. */
+const getTopLabelClearanceMm = (widthMm: number): number =>
+  RULER_LABEL_OFFSET_MM + String(Math.floor(widthMm)).length * RULER_DIGIT_WIDTH_FRACTION * RULER_FONT_SIZE_MM;
+
+/** A left label is written above its position, so it needs the offset plus one line of text. */
+const LEFT_LABEL_CLEARANCE_MM: number = RULER_LABEL_OFFSET_MM + RULER_FONT_SIZE_MM;
+
+const getMarkerClassName = (markerClassName: string | undefined, marker: BedMarker): string =>
+  (marker.isOutsideBed ? [markerClassName, styles.outsideBed] : [markerClassName]).join(' ');
 
 const getScreenTransform = (xMm: number, yMm: number, heightMm: number): string =>
   `translate(${xMm} ${heightMm - yMm})`;
@@ -69,9 +84,16 @@ export const BedView = (props: BedViewProps): ReactNode => {
   const { widthMm, heightMm } = dimensions;
   const minorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, false), [widthMm, heightMm]);
   const majorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, true), [widthMm, heightMm]);
-  const topLabelPositions: number[] = useMemo(() => getRulerLabelPositions(widthMm), [widthMm]);
-  const leftLabelPositions: number[] = useMemo(() => getRulerLabelPositions(heightMm), [heightMm]);
-  const headMarker: BedHeadMarker | undefined = headPosition && getBedHeadMarker(headPosition, dimensions);
+  const topLabelPositions: number[] = useMemo(
+    () => getRulerLabelPositions(widthMm, getTopLabelClearanceMm(widthMm)),
+    [widthMm],
+  );
+  const leftLabelPositions: number[] = useMemo(
+    () => getRulerLabelPositions(heightMm, LEFT_LABEL_CLEARANCE_MM),
+    [heightMm],
+  );
+  const headMarker: BedMarker | undefined = headPosition && getBedMarker(headPosition, dimensions);
+  const workOriginMarker: BedMarker | undefined = workOriginPosition && getBedMarker(workOriginPosition, dimensions);
 
   return (
     <svg
@@ -105,16 +127,18 @@ export const BedView = (props: BedViewProps): ReactNode => {
           {positionMm}
         </text>
       ))}
-      {workOriginPosition && (
+      {workOriginMarker && (
         <circle
-          className={styles.workOrigin}
-          transform={getScreenTransform(workOriginPosition.x, workOriginPosition.y, heightMm)}
+          className={getMarkerClassName(styles.workOrigin, workOriginMarker)}
+          data-testid={BED_WORK_ORIGIN_TEST_ID}
+          data-outside-bed={workOriginMarker.isOutsideBed}
+          transform={getScreenTransform(workOriginMarker.xMm, workOriginMarker.yMm, heightMm)}
           r={WORK_ORIGIN_MARKER_RADIUS_MM}
         />
       )}
       {headMarker && (
         <g
-          className={headMarker.isOutsideBed ? [styles.head, styles.outsideBed].join(' ') : styles.head}
+          className={getMarkerClassName(styles.head, headMarker)}
           data-testid={BED_HEAD_TEST_ID}
           data-outside-bed={headMarker.isOutsideBed}
           transform={getScreenTransform(headMarker.xMm, headMarker.yMm, heightMm)}

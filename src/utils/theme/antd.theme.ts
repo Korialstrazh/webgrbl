@@ -28,6 +28,8 @@ const COLOR_ACCENT_ACTIVE = '#e67a14';
 const COLOR_DANGER_BUTTON = '#b52a2d';
 const COLOR_DANGER_BUTTON_HOVER = '#a82629';
 const COLOR_DANGER_BUTTON_ACTIVE = '#9d2326';
+// Error text (form messages, error alerts) needs a lighter red than the buttons to stay above 4.5:1 on every surface.
+const COLOR_DANGER_TEXT = '#ff6b6b';
 const COLOR_DISABLED_BG = '#1a1d21';
 const COLOR_DISABLED_TEXT = '#8b9097';
 const COLOR_WARNING = '#ffb547';
@@ -42,6 +44,7 @@ const TARGET_MIN_PIXELS = 44;
 /** The button label weight of the approved design. */
 const BUTTON_FONT_WEIGHT = 600;
 const FONT_FAMILY_UI = '\'Inter\', system-ui, -apple-system, \'Segoe UI\', Roboto, sans-serif';
+const FONT_FAMILY_CODE = '\'JetBrains Mono\', ui-monospace, \'SFMono-Regular\', Consolas, monospace';
 
 export const ANTD_THEME: ThemeConfig = {
   algorithm: theme.darkAlgorithm,
@@ -58,6 +61,7 @@ export const ANTD_THEME: ThemeConfig = {
     colorError: COLOR_DANGER_BUTTON,
     colorErrorHover: COLOR_DANGER_BUTTON_HOVER,
     colorErrorActive: COLOR_DANGER_BUTTON_ACTIVE,
+    colorErrorText: COLOR_DANGER_TEXT,
     colorTextDisabled: COLOR_DISABLED_TEXT,
     colorBgContainerDisabled: COLOR_DISABLED_BG,
     colorWarning: COLOR_WARNING,
@@ -65,6 +69,7 @@ export const ANTD_THEME: ThemeConfig = {
     colorInfo: COLOR_INFO,
     borderRadius: BORDER_RADIUS_PIXELS,
     fontFamily: FONT_FAMILY_UI,
+    fontFamilyCode: FONT_FAMILY_CODE,
     controlHeight: CONTROL_HEIGHT_PIXELS,
   },
   components: {

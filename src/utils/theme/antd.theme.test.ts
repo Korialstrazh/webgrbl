@@ -20,6 +20,7 @@ const COLOR_TOKEN_SOURCES = [
   ['colorError', '--color-danger-button'],
   ['colorErrorHover', '--color-danger-button-hover'],
   ['colorErrorActive', '--color-danger-button-active'],
+  ['colorErrorText', '--color-danger-text'],
   ['colorTextDisabled', '--color-disabled-text'],
   ['colorBgContainerDisabled', '--color-disabled-bg'],
   ['colorWarning', '--color-warning'],
@@ -117,6 +118,10 @@ describe('ANTD_THEME', () => {
 
   it('takes the font family from --font-ui', () => {
     expect(themeTokens.fontFamily).toBe(requireScssToken('--font-ui'));
+  });
+
+  it('takes the code font family from --font-mono', () => {
+    expect(themeTokens.fontFamilyCode).toBe(requireScssToken('--font-mono'));
   });
 
   it.each(LAYOUT_TOKEN_SOURCES)('paints the layout %s from %s', (layoutToken: string, scssToken: string) => {

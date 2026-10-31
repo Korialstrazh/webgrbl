@@ -36,6 +36,7 @@ const MUTED_TOKEN = '--color-text-muted';
 const MUTED_STRONG_TOKEN = '--color-text-muted-strong';
 const BG_TOKEN = '--color-bg';
 const ACCENT_BUTTON_TOKEN = '--color-accent';
+const DANGER_TEXT_TOKEN = '--color-danger-text';
 const DARK_TEXT_ON_ACCENT = '#121417';
 
 const getChannelLuminance = (channelHex: string): number => {
@@ -100,6 +101,18 @@ describe('design token contrast', () => {
     const ratio: number = getContrastRatio(requireToken(TEXT_TOKEN), requireToken(buttonToken));
 
     expect(ratio).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+  });
+
+  it('keeps the danger text readable on the page background', () => {
+    expect(getContrastRatio(requireToken(DANGER_TEXT_TOKEN), requireToken(BG_TOKEN))).toBeGreaterThanOrEqual(
+      MIN_TEXT_CONTRAST,
+    );
+  });
+
+  it.each(SURFACE_TOKENS)('keeps the danger text readable on %s', (surfaceToken: string) => {
+    expect(getContrastRatio(requireToken(DANGER_TEXT_TOKEN), requireToken(surfaceToken))).toBeGreaterThanOrEqual(
+      MIN_TEXT_CONTRAST,
+    );
   });
 
   it('keeps the dark text readable on the accent button', () => {

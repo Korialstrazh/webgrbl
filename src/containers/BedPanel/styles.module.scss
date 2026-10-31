@@ -1,3 +1,5 @@
+// Dialogs and drawers render in here, absolutely positioned, so they fill this box only; the regions container clips
+// them, so they never reach the machine panel or the sticky stop bar.
 .bedPanel {
   position: relative;
   display: flex;

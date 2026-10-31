@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Checkbox, Input } from 'antd';
 import type { ChangeEvent, KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -108,14 +109,13 @@ export const ConsolePanel = (): ReactNode => {
     <section className={styles.consolePanel}>
       <header className={styles.header}>
         <h2 className={styles.title}>{t(DEFAULT.CONSOLE_TITLE)}</h2>
-        <label className={styles.statusReports}>
-          <input
-            type="checkbox"
-            checked={isStatusReportVisible}
-            onChange={() => dispatch(new StatusReportVisibilityToggled())}
-          />
+        <Checkbox
+          className={styles.statusReports}
+          checked={isStatusReportVisible}
+          onChange={() => dispatch(new StatusReportVisibilityToggled())}
+        >
           {t(DEFAULT.CONSOLE_SHOW_STATUS_REPORTS)}
-        </label>
+        </Checkbox>
       </header>
       <div
         ref={scrollElementRef}
@@ -130,9 +130,8 @@ export const ConsolePanel = (): ReactNode => {
       >
         <ConsoleEntryList entries={entries} />
       </div>
-      <input
-        type="text"
-        className={styles.input}
+      <Input
+        className={styles.commandInput}
         value={inputText}
         disabled={!isConnected}
         aria-label={t(DEFAULT.CONSOLE_INPUT_LABEL)}

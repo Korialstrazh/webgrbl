@@ -1,3 +1,5 @@
+@use '../../styles/layout' as layout;
+
 // Anchored to the top right of the bed area, above the console overlay (z-index 30).
 .toastStack {
   position: absolute;
@@ -9,6 +11,17 @@
   gap: var(--space-2);
   max-width: calc(100% - 2 * var(--space-4));
   pointer-events: none;
+}
+
+// Narrow, the regions stack and scroll, so the stack is pinned to the window just below the top bar; z-index 40 keeps it
+// above the console overlay and the sticky stop bar. Its height is capped so it ends above the sticky stop bar (never
+// over it, so STOP stays clickable); toasts beyond the cap scroll inside the stack.
+.pinnedToWindow {
+  position: fixed;
+  top: calc(#{layout.$top-bar-height} + var(--space-4));
+  max-width: calc(100vw - 2 * var(--space-4));
+  max-height: calc(100dvh - #{layout.$top-bar-height} - #{layout.$sticky-stop-bar-height} - 2 * var(--space-4));
+  overflow-y: auto;
 }
 
 .toast {
@@ -45,23 +58,4 @@
 .repeatCount {
   color: var(--color-text-muted);
   font-weight: 700;
-}
-
-.dismissButton {
-  min-height: var(--target-min);
-  padding: 0 var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background-color: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--color-surface-hover);
-  }
-
-  &:focus-visible {
-    outline: var(--focus-outline-width) solid var(--color-focus-ring);
-    outline-offset: var(--focus-outline-offset);
-  }
 }

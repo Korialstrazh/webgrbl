@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ConnectionPill } from '.';
+import { ESCAPE_KEY, OFFLINE_EVENT_NAME } from '../../utils/browser/browser.events.constants';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
@@ -10,7 +11,6 @@ import type { AppStore } from '../../utils/states/new.store';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
-const OFFLINE_EVENT_NAME = 'offline';
 const OFFLINE_LABEL = 'Offline';
 const DISCONNECTED_PATTERN = /Disconnected/;
 const CONNECT_LABEL = 'Connect';
@@ -18,7 +18,6 @@ const FIRMWARE_TEXT = 'Grbl 1.1h';
 const CONNECTED_WITH_FIRMWARE_PATTERN = /Connected.*Grbl 1\.1h/;
 const POPOVER_LABEL = 'Laser connection';
 const NO_WEB_SERIAL_LABEL = 'No Web Serial';
-const ESCAPE_KEY = 'Escape';
 const SIMULATED_LASER_LABEL = 'Simulated laser';
 const PORT_LABEL = 'Port';
 const STATUS_LABELS: Record<GrblConnectionStatus, string> = {
