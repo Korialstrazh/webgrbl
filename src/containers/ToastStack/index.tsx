@@ -1,6 +1,7 @@
 /**
  * The toasts on screen, newest last. Each one can be dismissed; warnings and errors are announced as alerts. In a
- * narrow window the stack is pinned to the window, so it stays visible while the stacked regions scroll.
+ * narrow window the stack is pinned to the window, so it stays visible while the stacked regions scroll; it never
+ * overlaps the sticky STOP bar, and extra toasts scroll inside it.
  *
  * @author michael.morosov
  *
