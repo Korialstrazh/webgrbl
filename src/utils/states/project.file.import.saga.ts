@@ -14,12 +14,17 @@ import { DEFAULT } from '../localization/default.locales';
 import { getImportedProjectFile } from '../project/get.imported.project.file';
 import type { ImportedProjectFile } from '../project/interfaces/ImportedProjectFile';
 import type { StoredProject } from '../project/interfaces/StoredProject';
+import { MAX_PROJECT_FILE_BYTES } from '../project/project.constants';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import type { ProjectFileImportRequested } from './project.state';
 import { switchToCreatedProject } from './project.switch.to.created.saga';
 
 const readProjectFile = async (projectFile: File): Promise<ImportedProjectFile | undefined> => {
+  if (projectFile.size > MAX_PROJECT_FILE_BYTES) {
+    return undefined;
+  }
+
   try {
     return getImportedProjectFile(await projectFile.text());
   } catch {

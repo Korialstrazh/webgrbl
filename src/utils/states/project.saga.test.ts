@@ -29,6 +29,7 @@ import { newProjectObject } from '../project/new.project.object';
 import {
   AUTOSAVE_DEBOUNCE_MS,
   AUTOSAVE_MAX_WAIT_MS,
+  MAX_PROJECT_FILE_BYTES,
   MAX_PROJECT_NAME_LENGTH,
   PROJECT_FILE_EXTENSION,
   PROJECT_FILE_MIME_TYPE,
@@ -567,6 +568,35 @@ describe(watchProjects.name, () => {
       expect(selectProjectId(store.getState())).toBe(projectId);
       expect(selectProjectObjects(store.getState())).toEqual([projectObject]);
       expect(await getStoredProjectIds()).toEqual([projectId]);
+    });
+
+    it('rejects a project file over the size limit before reading it', async () => {
+      const store: AppStore = await newStartedStore();
+      const projectId: string = selectProjectId(store.getState()) ?? '';
+      const oversizedFile: File = newProjectFile(getProjectFileText(IMPORTED_PROJECT_NAME, { objects: [] }));
+      Object.defineProperty(oversizedFile, 'size', { value: MAX_PROJECT_FILE_BYTES + 1 });
+      const readSpy: MockInstance<File['text']> = vi.spyOn(oversizedFile, 'text');
+
+      store.dispatch(new ProjectFileImportRequested({ file: oversizedFile }));
+
+      await vi.waitFor((): void => {
+        expect(getToastsOf(store, DEFAULT.TOAST_PROJECT_FILE_INVALID)).toHaveLength(1);
+      });
+      expect(readSpy).not.toHaveBeenCalled();
+      expect(selectProjectId(store.getState())).toBe(projectId);
+      expect(await getStoredProjectIds()).toEqual([projectId]);
+    });
+
+    it('opens a project file of exactly the size limit', async () => {
+      const store: AppStore = await newStartedStore();
+      const oldProjectId: string = selectProjectId(store.getState()) ?? '';
+      const limitSizedFile: File = newProjectFile(getProjectFileText(IMPORTED_PROJECT_NAME, { objects: [] }));
+      Object.defineProperty(limitSizedFile, 'size', { value: MAX_PROJECT_FILE_BYTES });
+
+      store.dispatch(new ProjectFileImportRequested({ file: limitSizedFile }));
+      await waitForNewProject(store, oldProjectId);
+
+      expect(selectProjectName(store.getState())).toBe(IMPORTED_PROJECT_NAME);
     });
 
     it('deleting the open project opens the most recent remaining one', async () => {
