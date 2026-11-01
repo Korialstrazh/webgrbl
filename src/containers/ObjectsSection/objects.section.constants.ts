@@ -15,6 +15,11 @@ import type { ObjectTransformFieldConfig } from './interfaces/ObjectTransformFie
 export const OBJECT_MILLIMETRE_DECIMALS = 1;
 /** Rotation is shown in whole degrees. */
 export const OBJECT_ROTATION_DECIMALS = 0;
+/**
+ * Joins the object id and the field name into the key of a placement field, so a field starts fresh, without a
+ * leftover draft, whenever another object is selected.
+ */
+export const OBJECT_FIELD_KEY_SEPARATOR = ':';
 
 export const OBJECT_TRANSFORM_FIELDS: readonly ObjectTransformFieldConfig[] = [
   { field: 'xMm', labelKey: DEFAULT.OBJECTS_FIELD_X, decimals: OBJECT_MILLIMETRE_DECIMALS },

@@ -17,20 +17,23 @@ import type { ObjectFieldDraft } from '../../interfaces/ObjectFieldDraft';
 import type { ObjectTransformFieldProps } from '../../interfaces/ObjectTransformFieldProps';
 import styles from './styles.module.scss';
 
+const isDraftValueChanged = (draftValue: number | null | undefined, storedValue: number): draftValue is number =>
+  isFiniteNumber(draftValue) && draftValue !== storedValue;
+
 export const ObjectTransformField = ({ label, value, decimals, onCommit }: ObjectTransformFieldProps): ReactNode => {
   const inputId: string = useId();
   // No draft means the user is not editing, so the stored value is shown. A cleared field is a draft with no value.
   const [draft, setDraft] = useState<ObjectFieldDraft | undefined>(undefined);
 
   const commitDraft = (): void => {
-    if (!draft) {
-      return;
-    }
-
+    // Cleared even with no draft: on Enter the input reports its rounded text as a change just before this runs,
+    // and that change must not survive as a draft the user never typed.
     setDraft(undefined);
 
-    if (isFiniteNumber(draft.fieldValue) && draft.fieldValue !== value) {
-      onCommit(draft.fieldValue);
+    const draftValue: number | null | undefined = draft?.fieldValue;
+
+    if (isDraftValueChanged(draftValue, value)) {
+      onCommit(draftValue);
     }
   };
 
@@ -43,6 +46,7 @@ export const ObjectTransformField = ({ label, value, decimals, onCommit }: Objec
         value={draft ? draft.fieldValue : value}
         precision={decimals}
         controls={false}
+        changeOnBlur={false}
         onChange={(fieldValue: number | null) => setDraft({ fieldValue })}
         onBlur={commitDraft}
         onPressEnter={commitDraft}
