@@ -13,8 +13,8 @@
 import { call, put, select } from 'redux-saga/effects';
 import { getBedDimensions } from '../bed/get.bed.dimensions';
 import type { BedDimensions } from '../bed/interfaces/BedDimensions';
-import { DEFAULT } from '../localization/default.locales';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';

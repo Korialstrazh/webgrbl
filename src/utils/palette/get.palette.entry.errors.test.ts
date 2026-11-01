@@ -5,6 +5,8 @@ import type { PaletteEntryFieldError } from './interfaces/PaletteEntryFieldError
 import { newPaletteEntry } from './new.palette.entry';
 import { PALETTE_ENTRY_ERROR_KEY, POWER_PERCENT_MAX, POWER_PERCENT_MIN } from './palette.constants';
 
+const OTHER_ENTRY_COLOUR = '#ff0000';
+
 const getErrorFields = (entry: PaletteEntry): Array<keyof PaletteEntry> =>
   getPaletteEntryErrors(entry).map((error: PaletteEntryFieldError): keyof PaletteEntry => error.field);
 
@@ -47,7 +49,7 @@ describe(getPaletteEntryErrors.name, () => {
   });
 
   it('reports a colour another entry already uses', () => {
-    const otherEntry: PaletteEntry = newPaletteEntry({ colour: '#ff0000' });
+    const otherEntry: PaletteEntry = newPaletteEntry({ colour: OTHER_ENTRY_COLOUR });
 
     expect(getPaletteEntryErrors(newPaletteEntry({ colour: '#FF0000' }), [otherEntry])).toEqual([
       { field: 'colour', messageKey: PALETTE_ENTRY_ERROR_KEY.COLOUR_DUPLICATE },
@@ -55,7 +57,7 @@ describe(getPaletteEntryErrors.name, () => {
   });
 
   it('accepts a colour that no other entry uses', () => {
-    const otherEntry: PaletteEntry = newPaletteEntry({ colour: '#ff0000' });
+    const otherEntry: PaletteEntry = newPaletteEntry({ colour: OTHER_ENTRY_COLOUR });
 
     expect(getPaletteEntryErrors(newPaletteEntry({ colour: '#00ff00' }), [otherEntry])).toEqual([]);
   });

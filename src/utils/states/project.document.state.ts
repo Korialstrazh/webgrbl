@@ -36,8 +36,8 @@ import type { LayerSettingsChangedPayload } from './interfaces/LayerSettingsChan
 import type { LayerToggledPayload } from './interfaces/LayerToggledPayload';
 import type { ProjectDocumentPayload } from './interfaces/ProjectDocumentPayload';
 import type { ProjectObjectIdsPayload } from './interfaces/ProjectObjectIdsPayload';
-import type { ProjectObjectTransformsPayload } from './interfaces/ProjectObjectTransformsPayload';
 import type { ProjectObjectsPayload } from './interfaces/ProjectObjectsPayload';
+import type { ProjectObjectTransformsPayload } from './interfaces/ProjectObjectTransformsPayload';
 import type { SvgFilesPayload } from './interfaces/SvgFilesPayload';
 
 // #region State

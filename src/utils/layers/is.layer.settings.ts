@@ -8,11 +8,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { LayerSettings } from './interfaces/LayerSettings';
 import { isLayerMode } from '../palette/is.layer.mode';
 import { isBoolean } from '../type.guards/is.boolean';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
 import { isRecord } from '../type.guards/is.record';
+import type { LayerSettings } from './interfaces/LayerSettings';
 
 export const isLayerSettings = (value: unknown): value is LayerSettings =>
   isRecord(value) &&

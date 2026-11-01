@@ -13,8 +13,8 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntry';
 import { getUnusedPaletteColour } from '../../../utils/palette/get.unused.palette.colour';
+import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntry';
 import { newPaletteEntry } from '../../../utils/palette/new.palette.entry';
 import { DEFAULT_PALETTE } from '../../../utils/palette/palette.constants';
 import type { AppDispatch } from '../../../utils/states/new.store';

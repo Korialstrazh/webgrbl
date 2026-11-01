@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { PROJECT_FILE_FORMAT, PROJECT_FILE_VERSION } from '../project.constants';
 import type { ProjectLayer } from '../../layers/interfaces/ProjectLayer';
+import type { PROJECT_FILE_FORMAT, PROJECT_FILE_VERSION } from '../project.constants';
 import type { ProjectObject } from './ProjectObject';
 
 export interface ProjectFile {

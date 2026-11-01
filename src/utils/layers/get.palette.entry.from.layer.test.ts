@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_CUT_ENTRY } from '../palette/palette.constants';
 import { getPaletteEntryFromLayer } from './get.palette.entry.from.layer';
 import type { ProjectLayer } from './interfaces/ProjectLayer';
-import { DEFAULT_CUT_ENTRY } from '../palette/palette.constants';
 
 const UNKNOWN_COLOUR = '#123456';
 const CHANGED_SPEED = 777;

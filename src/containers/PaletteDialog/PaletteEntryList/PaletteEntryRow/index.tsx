@@ -39,7 +39,7 @@ export const PaletteEntryRow = ({
   onDrop,
 }: PaletteEntryRowProps): ReactNode => {
   const { t } = useTranslation();
-  const { name } = entry;
+  const { name: entryName } = entry;
   const isShading: boolean = entry.id === SHADING_ENTRY_ID;
 
   return (
@@ -61,7 +61,7 @@ export const PaletteEntryRow = ({
         <span className={styles.swatch}>
           <LayerSwatch colour={entry.colour} isShading={isShading} />
         </span>
-        <span className={styles.name}>{name}</span>
+        <span className={styles.name}>{entryName}</span>
         <span className={styles.summary}>
           {t(DEFAULT.LAYERS_SUMMARY, {
             mode: t(LAYER_MODE_LABEL_KEY[entry.mode]),
@@ -76,7 +76,7 @@ export const PaletteEntryRow = ({
         size={ANTD_BUTTON_SIZE_SMALL}
         icon={ARROW_UP}
         disabled={isFirst}
-        aria-label={t(DEFAULT.PALETTE_MOVE_UP, { name })}
+        aria-label={t(DEFAULT.PALETTE_MOVE_UP, { name: entryName })}
         onClick={onMoveUp}
       />
       <Button
@@ -84,12 +84,12 @@ export const PaletteEntryRow = ({
         size={ANTD_BUTTON_SIZE_SMALL}
         icon={ARROW_DOWN}
         disabled={isLast}
-        aria-label={t(DEFAULT.PALETTE_MOVE_DOWN, { name })}
+        aria-label={t(DEFAULT.PALETTE_MOVE_DOWN, { name: entryName })}
         onClick={onMoveDown}
       />
       {!isShading && (
         <Popconfirm
-          title={t(DEFAULT.PALETTE_DELETE_CONFIRM, { name })}
+          title={t(DEFAULT.PALETTE_DELETE_CONFIRM, { name: entryName })}
           okText={t(DEFAULT.PALETTE_DELETE_OK)}
           cancelText={t(DEFAULT.PALETTE_DELETE_CANCEL)}
           okButtonProps={{ danger: true }}
@@ -100,7 +100,7 @@ export const PaletteEntryRow = ({
             type={ANTD_BUTTON_TYPE_TEXT}
             size={ANTD_BUTTON_SIZE_SMALL}
             icon={DELETE_CROSS}
-            aria-label={t(DEFAULT.PALETTE_DELETE, { name })}
+            aria-label={t(DEFAULT.PALETTE_DELETE, { name: entryName })}
           />
         </Popconfirm>
       )}

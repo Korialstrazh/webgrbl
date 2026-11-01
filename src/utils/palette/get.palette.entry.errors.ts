@@ -47,12 +47,8 @@ const isColourUsedByOtherEntry = (entry: PaletteEntry, otherEntries: PaletteEntr
   );
 };
 
-export const getPaletteEntryErrors = (
-  entry: PaletteEntry,
-  otherEntries: PaletteEntry[] = [],
-): PaletteEntryFieldError[] => {
+const getTextErrors = (entry: PaletteEntry, otherEntries: PaletteEntry[]): PaletteEntryFieldError[] => {
   const errors: PaletteEntryFieldError[] = [];
-  const powerParameters: Record<string, number> = { min: POWER_PERCENT_MIN, max: POWER_PERCENT_MAX };
 
   if (!entry.name.trim()) {
     errors.push({ field: 'name', messageKey: PALETTE_ENTRY_ERROR_KEY.NAME_REQUIRED });
@@ -63,6 +59,13 @@ export const getPaletteEntryErrors = (
   } else if (isColourUsedByOtherEntry(entry, otherEntries)) {
     errors.push({ field: 'colour', messageKey: PALETTE_ENTRY_ERROR_KEY.COLOUR_DUPLICATE });
   }
+
+  return errors;
+};
+
+const getPowerErrors = (entry: PaletteEntry): PaletteEntryFieldError[] => {
+  const errors: PaletteEntryFieldError[] = [];
+  const powerParameters: Record<string, number> = { min: POWER_PERCENT_MIN, max: POWER_PERCENT_MAX };
 
   if (!isPowerValid(entry.maxPowerPercent)) {
     errors.push({
@@ -83,6 +86,12 @@ export const getPaletteEntryErrors = (
   if (hasMinPowerAboveMax(entry)) {
     errors.push({ field: 'minPowerPercent', messageKey: PALETTE_ENTRY_ERROR_KEY.MIN_POWER_ABOVE_MAX });
   }
+
+  return errors;
+};
+
+const getMovementErrors = (entry: PaletteEntry): PaletteEntryFieldError[] => {
+  const errors: PaletteEntryFieldError[] = [];
 
   if (!isInRange(entry.speedMmPerMin, SPEED_MM_PER_MIN_MIN, SPEED_MM_PER_MIN_MAX)) {
     errors.push({
@@ -110,3 +119,12 @@ export const getPaletteEntryErrors = (
 
   return errors;
 };
+
+export const getPaletteEntryErrors = (
+  entry: PaletteEntry,
+  otherEntries: PaletteEntry[] = [],
+): PaletteEntryFieldError[] => [
+  ...getTextErrors(entry, otherEntries),
+  ...getPowerErrors(entry),
+  ...getMovementErrors(entry),
+];

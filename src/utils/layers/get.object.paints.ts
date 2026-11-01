@@ -9,9 +9,9 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { OBJECT_PAINTS_CACHE_SIZE } from './layer.constants';
 import { getSvgPaints } from '../svg/geometry/get.svg.paints';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
+import { OBJECT_PAINTS_CACHE_SIZE } from './layer.constants';
 
 const PAINTS_BY_SVG_TEXT: Map<string, SvgPaint[]> = new Map<string, SvgPaint[]>();
 

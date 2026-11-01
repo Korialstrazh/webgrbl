@@ -6,8 +6,11 @@ import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import { newPaletteEntry } from '../../utils/palette/new.palette.entry';
 import {
   CUT_ENTRY_ID,
+  DEFAULT_CUT_ENTRY,
   DEFAULT_PALETTE,
+  DEFAULT_SCORE_ENTRY,
   NEW_PALETTE_ENTRY_COLOUR_CANDIDATES,
+  NEW_PALETTE_ENTRY_NAME,
   SCORE_ENTRY_ID,
 } from '../../utils/palette/palette.constants';
 import { newStore } from '../../utils/states/new.store';
@@ -23,6 +26,7 @@ import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
+import { PALETTE_DRAG_DATA_TYPE } from './palette.dialog.constants';
 
 const NAME_LABEL = 'Name';
 const MAX_POWER_LABEL = 'Max power (%)';
@@ -49,11 +53,11 @@ const COLOUR_PICKER_SELECTOR = '.ant-color-picker-trigger';
 const CUT_NAME_PATTERN = /^Cut/;
 const SHADING_NAME_PATTERN = /^Shading/;
 const SCORE_NAME_PATTERN = /^Score/;
-const DRAG_DATA_TYPE = 'text/plain';
 const NEW_ENTRY_COLOUR = '#12ab34';
 const FIRST_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[0] ?? '';
 const SECOND_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[1] ?? '';
-const CUT_COLOUR = '#ff0000';
+const CUT_COLOUR = DEFAULT_CUT_ENTRY.colour;
+const DELETE_NAME_PATTERN = /^Delete/;
 const CUSTOM_ENTRY_NAME = 'Custom etch';
 const CUSTOM_NAME_PATTERN = /^Custom etch/;
 const COLOUR_HEX_INPUT_SELECTOR = '.ant-color-picker-hex-input input';
@@ -88,8 +92,8 @@ const changeColour = (colour: string): void => {
 const getEntryIds = (store: AppStore): string[] =>
   selectPaletteEntries(store.getState()).map((entry: PaletteEntry): string => entry.id);
 
-const getRow = (name: RegExp): HTMLElement => {
-  const row: HTMLElement | null = screen.getByRole('button', { name }).closest('li');
+const getRow = (namePattern: RegExp): HTMLElement => {
+  const row: HTMLElement | null = screen.getByRole('button', { name: namePattern }).closest('li');
 
   if (!row) {
     throw new Error('The palette entry button is not inside a list row');
@@ -187,7 +191,7 @@ describe(PaletteDialog.name, () => {
     clickButton(RESET_LABEL);
     clickButton(RESET_CONFIRM_LABEL);
 
-    expect(screen.getByLabelText(NAME_LABEL)).toHaveValue('Cut');
+    expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(DEFAULT_CUT_ENTRY.name);
 
     clickButton(SAVE_LABEL);
 
@@ -198,7 +202,7 @@ describe(PaletteDialog.name, () => {
     renderDialog(newStore());
     clickButton(NEW_COLOUR_LABEL);
 
-    expect(screen.getByLabelText(NAME_LABEL)).toHaveValue('New colour');
+    expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(NEW_PALETTE_ENTRY_NAME);
   });
 
   it('saves an edited entry in place', () => {
@@ -244,14 +248,15 @@ describe(PaletteDialog.name, () => {
     changeField(NAME_LABEL, NEW_ENTRY_NAME);
     fireEvent.click(screen.getByRole('button', { name: SCORE_NAME_PATTERN }));
 
-    expect(screen.getByLabelText(NAME_LABEL)).toHaveValue('Score');
+    expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(DEFAULT_SCORE_ENTRY.name);
   });
 
   it('gives the shading entry no delete button and a locked colour', () => {
     renderDialog(newStore());
 
-    expect(within(getRow(SHADING_NAME_PATTERN)).queryByRole('button', { name: /^Delete/ })).not.toBeInTheDocument();
-    expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: /^Delete/ })).toBeInTheDocument();
+    expect(within(getRow(SHADING_NAME_PATTERN)).queryByRole('button', { name: DELETE_NAME_PATTERN }))
+      .not.toBeInTheDocument();
+    expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: SHADING_NAME_PATTERN }));
@@ -270,7 +275,7 @@ describe(PaletteDialog.name, () => {
     const store: AppStore = newStore();
 
     renderDialog(store);
-    fireEvent.click(within(getRow(SCORE_NAME_PATTERN)).getByRole('button', { name: /^Delete/ }));
+    fireEvent.click(within(getRow(SCORE_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN }));
 
     expect(getEntryIds(store)).toContain(SCORE_ENTRY_ID);
 
@@ -300,7 +305,7 @@ describe(PaletteDialog.name, () => {
     fireEvent.dragStart(getRow(CUT_NAME_PATTERN), { dataTransfer });
     fireEvent.drop(getRow(SCORE_NAME_PATTERN));
 
-    expect(dataTransfer.setData).toHaveBeenCalledWith(DRAG_DATA_TYPE, CUT_ENTRY_ID);
+    expect(dataTransfer.setData).toHaveBeenCalledWith(PALETTE_DRAG_DATA_TYPE, CUT_ENTRY_ID);
     expect(getEntryIds(store).slice(0, 2)).toEqual([SCORE_ENTRY_ID, CUT_ENTRY_ID]);
   });
 

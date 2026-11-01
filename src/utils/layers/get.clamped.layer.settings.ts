@@ -9,7 +9,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { LayerSettings } from './interfaces/LayerSettings';
 import {
   LINE_INTERVAL_MM_MAX,
   LINE_INTERVAL_MM_MIN,
@@ -20,6 +19,7 @@ import {
   SPEED_MM_PER_MIN_MAX,
   SPEED_MM_PER_MIN_MIN,
 } from '../palette/palette.constants';
+import type { LayerSettings } from './interfaces/LayerSettings';
 
 const getNumberInRange = (value: number, lowerLimit: number, upperLimit: number): number =>
   Math.min(Math.max(value, lowerLimit), upperLimit);

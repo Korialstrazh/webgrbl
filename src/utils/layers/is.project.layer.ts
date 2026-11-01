@@ -8,13 +8,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { isLayerSettings } from './is.layer.settings';
-import type { ProjectLayer } from './interfaces/ProjectLayer';
 import { isBoolean } from '../type.guards/is.boolean';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
 import { isOptionalString } from '../type.guards/is.optional.string';
 import { isRecord } from '../type.guards/is.record';
 import { isString } from '../type.guards/is.string';
+import type { ProjectLayer } from './interfaces/ProjectLayer';
+import { isLayerSettings } from './is.layer.settings';
 
 export const isProjectLayer = (value: unknown): value is ProjectLayer =>
   isRecord(value) &&

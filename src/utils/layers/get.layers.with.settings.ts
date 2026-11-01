@@ -11,10 +11,10 @@
  */
 import { getClampedLayerSettings } from './get.clamped.layer.settings';
 import { getLayerKey } from './get.layer.key';
-import { isLayerSettings } from './is.layer.settings';
 import type { LayerSettings } from './interfaces/LayerSettings';
 import type { LayerSettingsChange } from './interfaces/LayerSettingsChange';
 import type { ProjectLayer } from './interfaces/ProjectLayer';
+import { isLayerSettings } from './is.layer.settings';
 
 const areLayerSettingsEqual = (firstSettings: LayerSettings, secondSettings: LayerSettings): boolean =>
   firstSettings.mode === secondSettings.mode &&

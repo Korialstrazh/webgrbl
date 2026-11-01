@@ -3,14 +3,14 @@ import { getLayerKey } from '../layers/get.layer.key';
 import { getLayerSettings } from '../layers/get.layer.settings';
 import { getObjectsDerivedLayers } from '../layers/get.objects.derived.layers';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import type { Palette } from '../palette/interfaces/Palette';
+import type { PaletteEntry } from '../palette/interfaces/PaletteEntry';
 import {
   DEFAULT_CUT_ENTRY,
   DEFAULT_PALETTE,
   DEFAULT_SCORE_ENTRY,
   POWER_PERCENT_MAX,
 } from '../palette/palette.constants';
-import type { Palette } from '../palette/interfaces/Palette';
-import type { PaletteEntry } from '../palette/interfaces/PaletteEntry';
 import { getSanitizedSvg } from '../svg/get.sanitized.svg';
 import type { SanitizedSvg } from '../svg/interfaces/SanitizedSvg';
 import type { SvgImportFailure } from '../svg/interfaces/SvgImportFailure';

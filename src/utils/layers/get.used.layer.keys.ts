@@ -8,9 +8,9 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { getObjectPaints } from './get.object.paints';
 import { getPaintLayerKey } from './get.paint.layer.key';
-import type { ProjectObject } from '../project/interfaces/ProjectObject';
 
 export const getUsedLayerKeys = (objects: ProjectObject[]): Set<string> => {
   const usedLayerKeys: Set<string> = new Set<string>();

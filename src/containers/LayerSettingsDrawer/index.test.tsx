@@ -8,13 +8,11 @@ import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../../utils/layers/layer.constants';
-import {
-  DEFAULT_CUT_ENTRY,
-  DEFAULT_FILL_ENTRY,
-  DEFAULT_PALETTE,
-} from '../../utils/palette/palette.constants';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
+import { DEFAULT_CUT_ENTRY, DEFAULT_FILL_ENTRY, DEFAULT_PALETTE } from '../../utils/palette/palette.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
@@ -27,12 +25,11 @@ import {
 } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
-import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
-import { newProjectObject } from '../../utils/project/new.project.object';
 
 const CUT_COLOUR = DEFAULT_CUT_ENTRY.colour;
 const FILL_COLOUR = DEFAULT_FILL_ENTRY.colour;
 const UNKNOWN_COLOUR = '#123456';
+const GREY_COLOUR = '#808080';
 const PROFILE_ID = 'ten-watt';
 const TEN_WATTS = 10;
 const SIXTY_PERCENT = 60;
@@ -229,7 +226,7 @@ describe(LayerSettingsDrawer.name, () => {
 
   it('shows the black to white bar with the power at both ends for the shading layer', () => {
     const store: AppStore = newStore();
-    loadColours(store, ['#808080']);
+    loadColours(store, [GREY_COLOUR]);
     loadProfile(store, false);
     renderDrawer(store, SHADING_LAYER_COLOUR);
 
@@ -239,7 +236,7 @@ describe(LayerSettingsDrawer.name, () => {
 
   it('shows the bar ends in percent without a profile, and no bar for a colour layer', () => {
     const store: AppStore = newStore();
-    loadColours(store, ['#808080', CUT_COLOUR]);
+    loadColours(store, [GREY_COLOUR, CUT_COLOUR]);
     renderDrawer(store, SHADING_LAYER_COLOUR);
 
     expect(screen.getByText(BLACK_END_PERCENT_TEXT)).toBeInTheDocument();

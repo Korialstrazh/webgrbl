@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { SHADING_ENTRY_ID } from '../palette/palette.constants';
 import type { PaletteEntry } from '../palette/interfaces/PaletteEntry';
+import { SHADING_ENTRY_ID } from '../palette/palette.constants';
 import type { ProjectLayer } from './interfaces/ProjectLayer';
 
 export const getLayerPaletteEntry = (layer: ProjectLayer, entries: PaletteEntry[]): PaletteEntry | undefined => {

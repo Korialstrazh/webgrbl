@@ -11,6 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button, Checkbox } from 'antd';
+import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
@@ -40,7 +41,7 @@ export const LayerRow = ({
   onDrop,
 }: LayerRowProps): ReactNode => {
   const { t } = useTranslation();
-  const name: string = getLayerDisplayName(layer, layerEntry);
+  const layerName: string = getLayerDisplayName(layer, layerEntry);
   const { settings } = layer;
   const hasNoPaletteEntry: boolean = !layerEntry;
 
@@ -56,14 +57,14 @@ export const LayerRow = ({
       <span className={styles.handle} aria-hidden="true">{DRAG_HANDLE_GRIP}</span>
       <Checkbox
         checked={layer.enabled}
-        aria-label={t(DEFAULT.LAYERS_TOGGLE, { name })}
-        onChange={(changeEvent) => onToggle(changeEvent.target.checked)}
+        aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
+        onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
       />
       <Button className={styles.openButton} type={ANTD_BUTTON_TYPE_TEXT} onClick={onOpen}>
         <span className={styles.swatch}>
           <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
         </span>
-        <span className={styles.name}>{name}</span>
+        <span className={styles.name}>{layerName}</span>
         <span className={styles.summary}>
           {t(DEFAULT.LAYERS_SUMMARY, {
             mode: t(LAYER_MODE_LABEL_KEY[settings.mode]),
@@ -79,7 +80,7 @@ export const LayerRow = ({
         size={ANTD_BUTTON_SIZE_SMALL}
         icon={ARROW_UP}
         disabled={isFirst}
-        aria-label={t(DEFAULT.LAYERS_MOVE_UP, { name })}
+        aria-label={t(DEFAULT.LAYERS_MOVE_UP, { name: layerName })}
         onClick={onMoveUp}
       />
       <Button
@@ -87,7 +88,7 @@ export const LayerRow = ({
         size={ANTD_BUTTON_SIZE_SMALL}
         icon={ARROW_DOWN}
         disabled={isLast}
-        aria-label={t(DEFAULT.LAYERS_MOVE_DOWN, { name })}
+        aria-label={t(DEFAULT.LAYERS_MOVE_DOWN, { name: layerName })}
         onClick={onMoveDown}
       />
     </li>

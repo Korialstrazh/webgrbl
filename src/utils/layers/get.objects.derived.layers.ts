@@ -9,12 +9,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { getDerivedLayers } from './get.derived.layers';
-import { getObjectPaints } from './get.object.paints';
-import type { ProjectLayer } from './interfaces/ProjectLayer';
 import type { Palette } from '../palette/interfaces/Palette';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
+import { getDerivedLayers } from './get.derived.layers';
+import { getObjectPaints } from './get.object.paints';
+import type { ProjectLayer } from './interfaces/ProjectLayer';
 
 export const getObjectsDerivedLayers = (
   objects: ProjectObject[],
