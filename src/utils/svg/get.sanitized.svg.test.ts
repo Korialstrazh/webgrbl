@@ -124,4 +124,68 @@ describe(getSanitizedSvg.name, () => {
       errorKind: SVG_IMPORT_ERROR_KIND.TOO_LARGE,
     });
   });
+
+  it('sanitises the root element attributes but keeps the root', () => {
+    const result = getSanitizedSvg(
+      `<svg ${XMLNS} ${SIZE} onload="alert(1)" style="background:url(https://e.x/a)"/>`,
+    );
+
+    expect(isSvgImportFailure(result)).toBe(false);
+
+    if (!isSvgImportFailure(result)) {
+      expect(result.svgText).toContain('<svg');
+      expect(result.svgText).not.toContain('onload');
+      expect(result.svgText).not.toContain('e.x');
+      expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
+    }
+  });
+
+  it('removes animations that set an href', () => {
+    const { svgText } = getSanitized(
+      '<image href="#a"><set attributeName="href" to="https://e.x/a.png"/>' +
+        '<animate attributeName=" XLink:href " values="#a;javascript:alert(1)"/>' +
+        '<animateMotion attributeName="href" to="x.png"/></image>',
+    );
+
+    expect(svgText).not.toMatch(/<set|<animate|e\.x|javascript/i);
+  });
+
+  it('removes animation value attributes that contain javascript urls', () => {
+    const { svgText } = getSanitized(
+      '<a><animate attributeName="fill" values="red;javascript:alert(1)" to="x javascript:y" dur="1s"/></a>',
+    );
+
+    expect(svgText).not.toMatch(/javascript/i);
+    expect(svgText).toContain('dur="1s"');
+  });
+
+  it('fails with not-svg for a root without the svg namespace', () => {
+    expect(getSanitizedSvg(`<svg ${SIZE}/>`)).toEqual({ errorKind: SVG_IMPORT_ERROR_KIND.NOT_SVG });
+  });
+
+  it('keeps the svg namespace in the output', () => {
+    expect(getSanitized('').svgText).toContain('xmlns="http://www.w3.org/2000/svg"');
+  });
+
+  it('removes style content with css escapes and image functions', () => {
+    const payloads = ['a{fill:u\\72l(https://e.x/a)}', '@im\\port "https://e.x/a";', 'a{fill:image-set("https://e.x/a" 1x)}'];
+
+    for (const payload of payloads) {
+      const result = getSanitized(`<style>${payload}</style><rect style="${payload.replace(/"/g, "'")}"/>`);
+
+      expect(result.svgText).not.toContain('e.x');
+      expect(result.svgText).not.toContain('<style');
+      expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
+    }
+  });
+
+  it('removes elements in a foreign namespace with their subtree and reports foreign-object', () => {
+    const result = getSanitized(
+      '<h:img xmlns:h="http://www.w3.org/1999/xhtml" src="https://e.x/a.png"/>' +
+        '<h:iframe xmlns:h="http://www.w3.org/1999/xhtml" src="https://e.x"><rect/></h:iframe>',
+    );
+
+    expect(result.svgText).not.toMatch(/img|iframe|e\.x|<rect/);
+    expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT]);
+  });
 });

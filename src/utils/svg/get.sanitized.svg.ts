@@ -12,11 +12,13 @@ import { getSvgPhysicalSize } from './get.svg.physical.size';
 import type { SanitizedSvg } from './interfaces/SanitizedSvg';
 import type { SvgImportFailure } from './interfaces/SvgImportFailure';
 import type { SvgPhysicalSize } from './interfaces/SvgPhysicalSize';
+import { sanitizeSvgAttributes } from './sanitize.svg.attributes';
 import { sanitizeSvgElement } from './sanitize.svg.element';
 import {
   MAX_SVG_FILE_BYTES,
   SVG_ALL_ELEMENTS_SELECTOR,
   SVG_IMPORT_ERROR_KIND,
+  SVG_NAMESPACE_URI,
   SVG_MIME_TYPE,
   SVG_PARSER_ERROR_ELEMENT_NAME,
   SVG_REMOVED_CONTENT_KIND,
@@ -28,13 +30,14 @@ const getFailure = (errorKind: SvgImportErrorKind): SvgImportFailure => ({ error
 
 const isSvgDocument = (svgDocument: Document): boolean =>
   !svgDocument.getElementsByTagName(SVG_PARSER_ERROR_ELEMENT_NAME).length &&
-  svgDocument.documentElement.localName === SVG_ROOT_ELEMENT_NAME;
+  svgDocument.documentElement.localName === SVG_ROOT_ELEMENT_NAME &&
+  svgDocument.documentElement.namespaceURI === SVG_NAMESPACE_URI;
 
 const getRemovedKindsInOrder = (foundKinds: Set<SvgRemovedContentKind>): SvgRemovedContentKind[] =>
   Object.values(SVG_REMOVED_CONTENT_KIND).filter((kind: SvgRemovedContentKind): boolean => foundKinds.has(kind));
 
 const sanitizeSvgTree = (rootElement: Element): SvgRemovedContentKind[] => {
-  const foundKinds: Set<SvgRemovedContentKind> = new Set<SvgRemovedContentKind>();
+  const foundKinds: Set<SvgRemovedContentKind> = new Set<SvgRemovedContentKind>(sanitizeSvgAttributes(rootElement));
 
   for (const element of Array.from(rootElement.querySelectorAll(SVG_ALL_ELEMENTS_SELECTOR))) {
     if (!rootElement.contains(element)) {
@@ -50,6 +53,7 @@ const sanitizeSvgTree = (rootElement: Element): SvgRemovedContentKind[] => {
 };
 
 export const getSanitizedSvg = (text: string): SanitizedSvg | SvgImportFailure => {
+  // A character-count backstop only; the caller checks the real byte size with File.size.
   if (text.length > MAX_SVG_FILE_BYTES) {
     return getFailure(SVG_IMPORT_ERROR_KIND.TOO_LARGE);
   }

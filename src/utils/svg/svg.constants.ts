@@ -55,12 +55,24 @@ export const SVG_IMPORT_ERROR_KIND = {
 
 export type SvgImportErrorKind = (typeof SVG_IMPORT_ERROR_KIND)[keyof typeof SVG_IMPORT_ERROR_KIND];
 
+export const SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg';
 export const SVG_MIME_TYPE = 'image/svg+xml';
 export const SVG_ROOT_ELEMENT_NAME = 'svg';
 export const SVG_PARSER_ERROR_ELEMENT_NAME = 'parsererror';
 export const SVG_SCRIPT_ELEMENT_NAME = 'script';
 export const SVG_FOREIGN_OBJECT_ELEMENT_NAME = 'foreignobject';
 export const SVG_STYLE_ELEMENT_NAME = 'style';
+export const SVG_ANIMATE_ELEMENT_NAME = 'animate';
+export const SVG_SET_ELEMENT_NAME = 'set';
+export const SVG_ANIMATE_MOTION_ELEMENT_NAME = 'animatemotion';
+export const SVG_ANIMATION_ELEMENT_NAMES: readonly string[] = [
+  SVG_ANIMATE_ELEMENT_NAME,
+  SVG_SET_ELEMENT_NAME,
+  SVG_ANIMATE_MOTION_ELEMENT_NAME,
+];
+export const SVG_ATTRIBUTE_NAME_ATTRIBUTE = 'attributeName';
+export const SVG_XLINK_HREF_ATTRIBUTE_NAME = 'xlink:href';
+export const SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES: readonly string[] = ['to', 'from', 'by', 'values'];
 export const SVG_ANCHOR_ELEMENT_NAME = 'a';
 export const SVG_ALL_ELEMENTS_SELECTOR = '*';
 export const SVG_WIDTH_ATTRIBUTE = 'width';
@@ -75,6 +87,7 @@ export const SVG_LENGTH_PATTERN = /^\s*(\d*\.?\d+(?:e[+-]?\d+)?)\s*([a-z%]*)\s*$
 export const SVG_VIEW_BOX_SEPARATOR_PATTERN = /[\s,]+/;
 export const SVG_SAFE_DATA_IMAGE_PATTERN = /^data:image\/(?:png|jpeg|gif|webp)[;,]/;
 export const SVG_IMPORT_RULE_PATTERN = /@import/i;
+export const SVG_CSS_ESCAPE_OR_IMAGE_FUNCTION_PATTERN = /\\|(?:image-set|image|src)\(/i;
 export const SVG_REMOTE_URL_PATTERN = /url\(\s*["']?\s*(?![\s"']|data:|#)/i;
 export const SVG_VIEW_BOX_VALUE_COUNT = 4;
 export const SVG_VIEW_BOX_WIDTH_INDEX = 2;

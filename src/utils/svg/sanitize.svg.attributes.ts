@@ -12,6 +12,7 @@ import { hasRemoteStyleReference } from './has.remote.style.reference';
 import { isSafeSvgHref } from './is.safe.svg.href';
 import {
   SVG_ANCHOR_ELEMENT_NAME,
+  SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES,
   SVG_EVENT_ATTRIBUTE_PREFIX,
   SVG_HREF_ATTRIBUTE_NAME,
   SVG_JAVASCRIPT_URL_PREFIX,
@@ -19,9 +20,14 @@ import {
 } from './svg.constants';
 import type { SvgRemovedContentKind } from './svg.constants';
 
+const hasJavascriptInAnimationValue = (attribute: Attr): boolean =>
+  SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES.includes(attribute.localName.toLowerCase()) &&
+  attribute.value.toLowerCase().includes(SVG_JAVASCRIPT_URL_PREFIX);
+
 const hasUnsafeAttributeValue = (attribute: Attr): boolean =>
   attribute.name.toLowerCase().startsWith(SVG_EVENT_ATTRIBUTE_PREFIX) ||
-  attribute.value.trim().toLowerCase().startsWith(SVG_JAVASCRIPT_URL_PREFIX);
+  attribute.value.trim().toLowerCase().startsWith(SVG_JAVASCRIPT_URL_PREFIX) ||
+  hasJavascriptInAnimationValue(attribute);
 
 const hasUnsafeHref = (attribute: Attr): boolean =>
   attribute.localName.toLowerCase() === SVG_HREF_ATTRIBUTE_NAME && !isSafeSvgHref(attribute.value);
