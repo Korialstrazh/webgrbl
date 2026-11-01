@@ -19,7 +19,12 @@ import type { ToolpathProgressListener } from './interfaces/ToolpathProgressList
 import type { ToolpathWorkerClient } from './interfaces/ToolpathWorkerClient';
 import type { ToolpathWorkerMessage } from './interfaces/ToolpathWorkerMessage';
 import type { ToolpathWorkerRequest } from './interfaces/ToolpathWorkerRequest';
-import { WORKER_ERROR_EVENT_NAME, WORKER_MESSAGE_EVENT_NAME } from './toolpath.worker.constants';
+import {
+  WORKER_ERROR_EVENT_NAME,
+  WORKER_MESSAGE_ERROR_EVENT_NAME,
+  WORKER_MESSAGE_EVENT_NAME,
+  WORKER_MESSAGE_UNREADABLE_TEXT,
+} from './toolpath.worker.constants';
 import { ToolpathWorkerError } from './toolpath.worker.error';
 
 export class BrowserToolpathWorkerClient implements ToolpathWorkerClient {
@@ -60,10 +65,14 @@ export class BrowserToolpathWorkerClient implements ToolpathWorkerClient {
         };
 
         toolpathWorker.addEventListener(WORKER_MESSAGE_EVENT_NAME, handleMessageEvent, { signal });
-        // A failing worker script can no longer answer, so it is dropped and the next generation starts a fresh one.
+        // A failing worker, or one whose answer cannot be read, is dropped; the next generation starts a fresh one.
         toolpathWorker.addEventListener(WORKER_ERROR_EVENT_NAME, (errorEvent: ErrorEvent) => {
           this.terminateToolpathWorker();
           reject(new ToolpathWorkerError(errorEvent.message));
+        }, { signal });
+        toolpathWorker.addEventListener(WORKER_MESSAGE_ERROR_EVENT_NAME, () => {
+          this.terminateToolpathWorker();
+          reject(new ToolpathWorkerError(WORKER_MESSAGE_UNREADABLE_TEXT));
         }, { signal });
         toolpathWorker.postMessage(request);
       });
@@ -71,6 +80,11 @@ export class BrowserToolpathWorkerClient implements ToolpathWorkerClient {
       this.runningRequestIds.delete(request.requestId);
       listenerController.abort();
     }
+  }
+
+  public dispose(): void {
+    this.runningRequestIds.clear();
+    this.terminateToolpathWorker();
   }
 
   /** Terminating stops every request still running in the worker; none of them settles afterwards. */

@@ -11,6 +11,7 @@ import { ToolpathWorkerError } from './toolpath.worker.error';
 
 const MESSAGE_EVENT_NAME = 'message';
 const ERROR_EVENT_NAME = 'error';
+const MESSAGE_ERROR_EVENT_NAME = 'messageerror';
 const HALF_DONE = 0.5;
 const WORKER_ERROR_TEXT = 'out of memory';
 const OTHER_REQUEST_ID = -1;
@@ -134,5 +135,32 @@ describe(BrowserToolpathWorkerClient.name, () => {
 
     await expect(generation.promise).rejects.toBeInstanceOf(ToolpathWorkerError);
     expect(worker.isTerminated).toBe(true);
+  });
+
+  it('rejects and drops the worker when a message cannot be read', async () => {
+    const generation: ToolpathGeneration = client.generate(EMPTY_INPUT, vi.fn());
+    const worker: FakeWorker = getOnlyWorker();
+
+    worker.dispatchEvent(new MessageEvent(MESSAGE_ERROR_EVENT_NAME));
+
+    await expect(generation.promise).rejects.toBeInstanceOf(ToolpathWorkerError);
+    expect(worker.isTerminated).toBe(true);
+  });
+
+  it('terminates the idle worker on dispose and starts a new one afterwards', async () => {
+    const generation: ToolpathGeneration = client.generate(EMPTY_INPUT, vi.fn());
+    const worker: FakeWorker = getOnlyWorker();
+
+    worker.answer({
+      kind: TOOLPATH_WORKER_MESSAGE_KIND.RESULT,
+      requestId: worker.getLastRequestId(),
+      toolpath: EMPTY_TOOLPATH,
+    });
+    await generation.promise;
+    client.dispose();
+    client.generate(EMPTY_INPUT, vi.fn());
+
+    expect(FakeWorker.createdWorkers.map((createdWorker: FakeWorker) => createdWorker.isTerminated))
+      .toEqual([true, false]);
   });
 });

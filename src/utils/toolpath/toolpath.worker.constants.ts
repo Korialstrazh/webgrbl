@@ -21,3 +21,7 @@ export type ToolpathWorkerMessageKind =
 export const WORKER_MESSAGE_EVENT_NAME = 'message';
 /** The worker event fired when the worker script itself fails. */
 export const WORKER_ERROR_EVENT_NAME = 'error';
+/** The worker event fired when a message from the worker cannot be read. */
+export const WORKER_MESSAGE_ERROR_EVENT_NAME = 'messageerror';
+/** Developer-facing text of a toolpath worker message that could not be read. */
+export const WORKER_MESSAGE_UNREADABLE_TEXT = 'A toolpath worker message could not be read';

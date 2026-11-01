@@ -1,5 +1,6 @@
 /**
- * What the G-code export saga got while it waited for a ready toolpath: the result, or the generation stopped.
+ * What the G-code export saga got while it waited for a ready toolpath: the result, the generation stopped, or a
+ * project was opened.
  *
  * @author michael.morosov
  *
@@ -16,4 +17,6 @@ export interface ToolpathWaitResult {
   ready?: ToolpathReady;
   /** The failure or cancel, when the generation stopped without a result. */
   stopped?: Action<unknown>;
+  /** The document load or project open, when a project was opened meanwhile. */
+  projectChange?: Action<unknown>;
 }

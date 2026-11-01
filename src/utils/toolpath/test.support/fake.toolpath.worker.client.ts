@@ -28,6 +28,9 @@ export class FakeToolpathWorkerClient implements ToolpathWorkerClient {
   // How many generations were cancelled while they were still running.
   public cancelledGenerationCount = 0;
 
+  // How many times the client was disposed.
+  public disposeCount = 0;
+
   // Whether generations wait for the test instead of finishing at once.
   private readonly isHeld: boolean;
 
@@ -49,6 +52,10 @@ export class FakeToolpathWorkerClient implements ToolpathWorkerClient {
     }
 
     return this.getHeldGeneration(input, onProgress);
+  }
+
+  public dispose(): void {
+    this.disposeCount++;
   }
 
   /** Finishes a held generation with the toolpath of its input. */

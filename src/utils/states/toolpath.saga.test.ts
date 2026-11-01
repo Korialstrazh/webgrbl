@@ -1,7 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as downloadModule from '../browser/download.text.file';
+import type { ProjectObject } from '../project/interfaces/ProjectObject';
+import * as expandedDocumentModule from '../svg/geometry/get.svg.expanded.document';
+import { useStorageSafeFakeTimers } from '../test.support/use.storage.safe.fake.timers';
+import { BrowserToolpathWorkerClient } from '../toolpath/browser.toolpath.worker.client';
+import { AnsweringToolpathWorker } from '../toolpath/test.support/answering.toolpath.worker';
+import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
+import { ProjectOpened } from './project.state';
+import { selectToasts } from './toast.state';
 import { getLayerKey } from '../layers/get.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { DEFAULT } from '../localization/default.locales';
 import { newMachineProfile } from '../profiles/new.machine.profile';
 import { newProjectObject } from '../project/new.project.object';
 import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
@@ -12,8 +21,16 @@ import { GCODE_LASER_MODE_ON, GCODE_MIME_TYPE } from '../toolpath/gcode.constant
 import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
 import type { AppStore } from './new.store';
-import { LayerToggled, selectProjectDocument, selectProjectLayers } from './project.document.state';
+import {
+  LayerToggled,
+  ProjectDocumentLoaded,
+  ProjectObjectsTransformed,
+  selectProjectDocument,
+  selectProjectLayers,
+  selectProjectObjects,
+} from './project.document.state';
 import { watchToolpath } from './toolpath.saga';
+import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import {
   GcodeExportRequested,
   ToolpathCancelled,
@@ -34,6 +51,30 @@ const FIRST_GENERATION = 0;
 const SECOND_GENERATION = 1;
 const FULL_PROGRESS = 1;
 const GENERATION_ERROR = new Error('worker crashed');
+const OTHER_PROJECT_ID = 'other-project';
+const OTHER_PROJECT_NAME = 'Other project';
+const NUDGE_COUNT = 3;
+const NUDGE_STEP_MM = 1;
+const SECOND_SQUARE_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
+  + '<rect fill="none" stroke="#0000ff" width="10" height="10"/></svg>';
+
+const getFirstObject = (store: AppStore): ProjectObject => {
+  const [firstObject] = selectProjectObjects(store.getState());
+
+  if (!firstObject) {
+    throw new Error('The test project has no object');
+  }
+
+  return firstObject;
+};
+
+const nudgeFirstObject = (store: AppStore, stepIndex: number): void => {
+  const firstObject: ProjectObject = getFirstObject(store);
+
+  store.dispatch(new ProjectObjectsTransformed({
+    transforms: { [firstObject.id]: { ...firstObject, xMm: firstObject.xMm + NUDGE_STEP_MM * (stepIndex + 1) } },
+  }));
+};
 
 const getFirstLayer = (store: AppStore): ProjectLayer => {
   const [firstLayer] = selectProjectLayers(store.getState());
@@ -65,6 +106,7 @@ const flushSagas = async (): Promise<void> => {
 describe(watchToolpath.name, () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('sets generating on a request, then ready with the toolpath of the document', async () => {
@@ -129,6 +171,9 @@ describe(watchToolpath.name, () => {
 
     store.dispatch(new ToolpathRequested());
     store.dispatch(new LayerToggled({ layerKey: getLayerKey(getFirstLayer(store)), enabled: false }));
+    await vi.waitFor((): void => {
+      expect(toolpathWorkerClient.generationInputs).toHaveLength(2);
+    });
 
     expect(toolpathWorkerClient.cancelledGenerationCount).toBe(1);
     expect(toolpathWorkerClient.generationInputs[SECOND_GENERATION]?.layers).toEqual(
@@ -214,5 +259,89 @@ describe(watchToolpath.name, () => {
 
     expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.IDLE);
     expect(downloadSpy).not.toHaveBeenCalled();
+  });
+
+  it('reuses the parsed drawables of unchanged objects, so a layer change parses no SVG again', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+
+    const parseSpy = vi.spyOn(expandedDocumentModule, 'getSvgExpandedDocument');
+
+    store.dispatch(new LayerToggled({ layerKey: getLayerKey(getFirstLayer(store)), enabled: false }));
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+
+    expect(parseSpy).not.toHaveBeenCalled();
+  });
+
+  it('parses only the moved object again after a nudge', async () => {
+    const store: AppStore = await newGcodeExportTestStore({
+      objects: [
+        newProjectObject({ svgText: TEXT_SVG_TEXT }),
+        newProjectObject({ svgText: SECOND_SQUARE_SVG_TEXT }),
+      ],
+    });
+
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+
+    const parseSpy = vi.spyOn(expandedDocumentModule, 'getSvgExpandedDocument');
+
+    nudgeFirstObject(store, 0);
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+
+    expect(parseSpy.mock.calls).toEqual([[getFirstObject(store).svgText]]);
+  });
+
+  it('restarts a running generation once for several nudges within the debounce time', async () => {
+    useStorageSafeFakeTimers();
+    const toolpathWorkerClient: FakeToolpathWorkerClient = new FakeToolpathWorkerClient(true);
+    const store: AppStore = await newGcodeExportTestStore({ toolpathWorkerClient });
+
+    store.dispatch(new ToolpathRequested());
+
+    for (let nudgeIndex = 0; nudgeIndex < NUDGE_COUNT; nudgeIndex++) {
+      nudgeFirstObject(store, nudgeIndex);
+    }
+
+    await vi.advanceTimersByTimeAsync(TOOLPATH_RESTART_DEBOUNCE_MS);
+    vi.useRealTimers();
+
+    expect(toolpathWorkerClient.generationInputs).toHaveLength(2);
+  });
+
+  it('terminates the idle worker when the store stops', async () => {
+    AnsweringToolpathWorker.createdWorkers.length = 0;
+    vi.stubGlobal('Worker', AnsweringToolpathWorker);
+    const store: AppStore = await newGcodeExportTestStore({ toolpathWorkerClient: new BrowserToolpathWorkerClient() });
+
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+    LIVE_STORE_TASK_REGISTRY.cancelLiveStoreTasks();
+
+    expect(AnsweringToolpathWorker.createdWorkers.map((worker) => worker.isTerminated)).toEqual([true]);
+  });
+
+  it('drops a pending export when another project opens, and says so', async () => {
+    const downloadSpy = spyOnDownload();
+    const toolpathWorkerClient: FakeToolpathWorkerClient = new FakeToolpathWorkerClient(true);
+    const store: AppStore = await newGcodeExportTestStore({ toolpathWorkerClient });
+
+    store.dispatch(new GcodeExportRequested({ isWarningConfirmed: false }));
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [], layers: [] } }));
+    store.dispatch(new ProjectOpened({ projectId: OTHER_PROJECT_ID, name: OTHER_PROJECT_NAME }));
+    toolpathWorkerClient.resolveHeldGeneration(FIRST_GENERATION);
+    await vi.waitFor((): void => {
+      expect(toolpathWorkerClient.generationInputs).toHaveLength(2);
+    });
+    toolpathWorkerClient.resolveHeldGeneration(SECOND_GENERATION);
+    await flushSagas();
+
+    expect(downloadSpy).not.toHaveBeenCalled();
+    expect(selectToasts(store.getState()).map((toast) => toast.messageKey))
+      .toContain(DEFAULT.TOAST_GCODE_EXPORT_DROPPED);
   });
 });

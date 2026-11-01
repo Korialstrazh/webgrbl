@@ -1,10 +1,14 @@
 /**
  * Generates the project's toolpath through the injected worker client and exports it as G-code.
  *
- * - A request reads the drawables with getBedDrawables on the main thread (it needs DOMParser) and hands only plain
+ * - A request reads the drawables on the main thread (parsing needs DOMParser) and hands only plain
  *   data to the worker. takeLatest cancels the running generation on a new request or a cancel, and the generation's
  *   finally block cancels the worker.
- * - A document change during a generation restarts it, so the result always matches the current document.
+ * - Parsed drawables are cached per object (BedDrawablesCache), so a layer change parses no SVG again.
+ * - A document change during a generation restarts it, debounced by TOOLPATH_RESTART_DEBOUNCE_MS, so the result
+ *   always matches the current document.
+ * - An export started for one project is dropped, with an info toast, when another project opens before it downloads.
+ * - When the store's sagas stop, the worker client is disposed.
  * - An export waits for a ready toolpath, generating it when needed. A toolpath with warnings opens the confirmation
  *   instead of downloading, until the user confirms; the dialog that asks lives in the UI, not here.
  *
@@ -16,14 +20,14 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { buffers, channel } from 'redux-saga';
-import type { Channel } from 'redux-saga';
-import { all, call, fork, put, race, select, take, takeEvery, takeLatest, takeLeading } from 'redux-saga/effects';
+import type { Channel, Task } from 'redux-saga';
+import { all, call, debounce, fork, join, put, race, select, take, takeLatest, takeLeading } from 'redux-saga/effects';
 import { downloadTextFile } from '../browser/download.text.file';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
-import { getBedDrawables } from '../toolpath/get.bed.drawables';
+import { BedDrawablesCache } from '../toolpath/bed.drawables.cache';
 import { getGcodeExportContext } from '../toolpath/get.gcode.export.context';
 import { getGcodeFileName } from '../toolpath/get.gcode.file.name';
 import { getGcodeText } from '../toolpath/get.gcode.text';
@@ -38,9 +42,11 @@ import { selectGrblSettings } from './grbl.connection.state';
 import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
 import { selectActiveMachineProfile } from './machine.profile.state';
 import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
-import { selectProjectDocument, selectProjectLayers } from './project.document.state';
-import { selectProjectName } from './project.state';
+import { ProjectDocumentLoaded, selectProjectDocument, selectProjectLayers } from './project.document.state';
+import { ProjectOpened, selectProjectId, selectProjectName } from './project.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
+import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
+import { ToastShown } from './toast.state';
 import {
   GcodeExportConfirmationRequested,
   GcodeExportRequested,
@@ -54,6 +60,7 @@ import {
   selectToolpathStatus,
 } from './toolpath.state';
 import { TOOLPATH_STATUS } from './toolpath.status.constants';
+import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import type { ToolpathStatus } from './toolpath.status.constants';
 
 // Only the newest progress matters, so older ones the saga has not put yet are dropped.
@@ -67,7 +74,7 @@ function* putToolpathProgress(progressChannel: Channel<number>): Generator {
   }
 }
 
-function* generateToolpath(toolpathWorkerClient: ToolpathWorkerClient): Generator {
+function* generateToolpath(toolpathWorkerClient: ToolpathWorkerClient, drawablesCache: BedDrawablesCache): Generator {
   const documentVersion: number = (yield select(selectToolpathDocumentVersion)) as number;
   const projectDocument: ProjectDocument = (yield select(selectProjectDocument)) as ProjectDocument;
   const layers: ProjectLayer[] = (yield select(selectProjectLayers)) as ProjectLayer[];
@@ -75,7 +82,10 @@ function* generateToolpath(toolpathWorkerClient: ToolpathWorkerClient): Generato
   let generation: ToolpathGeneration | undefined;
 
   try {
-    const drawableSet: BedDrawableSet = (yield call(getBedDrawables, projectDocument)) as BedDrawableSet;
+    const drawableSet: BedDrawableSet = (yield call(
+      [drawablesCache, drawablesCache.getBedDrawableSet],
+      projectDocument,
+    )) as BedDrawableSet;
 
     generation = toolpathWorkerClient.generate({ ...drawableSet, layers }, (progress: number): void => {
       progressChannel.put(progress);
@@ -96,9 +106,13 @@ function* generateToolpath(toolpathWorkerClient: ToolpathWorkerClient): Generato
 }
 
 /** A cancel only has to stop the running generation, which takeLatest has already done. */
-function* runToolpathAction(toolpathWorkerClient: ToolpathWorkerClient, action: Action<unknown>): Generator {
+function* runToolpathAction(
+  toolpathWorkerClient: ToolpathWorkerClient,
+  drawablesCache: BedDrawablesCache,
+  action: Action<unknown>,
+): Generator {
   if (action.type === ToolpathRequested.type) {
-    yield call(generateToolpath, toolpathWorkerClient);
+    yield call(generateToolpath, toolpathWorkerClient, drawablesCache);
   }
 }
 
@@ -110,8 +124,18 @@ function* restartRunningGeneration(): Generator {
   }
 }
 
-/** The ready toolpath, generated first when needed; undefined when the generation failed or was cancelled. */
-function* waitForReadyToolpath(): Generator {
+/** Whether the open project is no longer the one the export was started for. */
+function* hasProjectChanged(exportProjectId: string | undefined, projectChange: Action<unknown>): Generator {
+  const projectId: string | undefined = (yield select(selectProjectId)) as string | undefined;
+
+  return projectChange.type === ProjectDocumentLoaded.type || projectId !== exportProjectId;
+}
+
+/**
+ * The ready toolpath of the project the export was started for, generated first when needed; undefined when the
+ * generation failed, was cancelled, or another project was opened meanwhile.
+ */
+function* waitForReadyToolpath(exportProjectId: string | undefined): Generator {
   while (true) {
     const status: ToolpathStatus = (yield select(selectToolpathStatus)) as ToolpathStatus;
 
@@ -126,9 +150,20 @@ function* waitForReadyToolpath(): Generator {
     const waitResult: ToolpathWaitResult = (yield race({
       ready: take(ToolpathReady.type),
       stopped: take([ToolpathFailed.type, ToolpathCancelled.type]),
+      projectChange: take([ProjectDocumentLoaded.type, ProjectOpened.type]),
     })) as ToolpathWaitResult;
 
     if (waitResult.stopped) {
+      return undefined;
+    }
+
+    if (waitResult.projectChange && (yield call(hasProjectChanged, exportProjectId, waitResult.projectChange))) {
+      yield put(new ToastShown({
+        severity: TOAST_SEVERITY.INFO,
+        messageKey: DEFAULT.TOAST_GCODE_EXPORT_DROPPED,
+        messageParameters: NO_TOAST_PARAMETERS,
+      }));
+
       return undefined;
     }
   }
@@ -153,7 +188,8 @@ function* exportGcode(action: GcodeExportRequested): Generator {
     return;
   }
 
-  const toolpath: Toolpath | undefined = (yield call(waitForReadyToolpath)) as Toolpath | undefined;
+  const exportProjectId: string | undefined = (yield select(selectProjectId)) as string | undefined;
+  const toolpath: Toolpath | undefined = (yield call(waitForReadyToolpath, exportProjectId)) as Toolpath | undefined;
 
   if (!toolpath) {
     return;
@@ -169,9 +205,23 @@ function* exportGcode(action: GcodeExportRequested): Generator {
 }
 
 export function* watchToolpath(toolpathWorkerClient: ToolpathWorkerClient): Generator {
-  yield all([
-    takeLatest([ToolpathRequested.type, ToolpathCancelled.type], runToolpathAction, toolpathWorkerClient),
-    takeEvery([...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES], restartRunningGeneration),
-    takeLeading(GcodeExportRequested.type, exportGcode),
-  ]);
+  const drawablesCache: BedDrawablesCache = new BedDrawablesCache();
+
+  try {
+    const watcherTasks: Task[] = (yield all([
+      takeLatest(
+        [ToolpathRequested.type, ToolpathCancelled.type],
+        runToolpathAction,
+        toolpathWorkerClient,
+        drawablesCache,
+      ),
+      debounce(TOOLPATH_RESTART_DEBOUNCE_MS, [...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES], restartRunningGeneration),
+      takeLeading(GcodeExportRequested.type, exportGcode),
+    ])) as Task[];
+
+    // The watchers run as forks, so the saga waits on them here; its finally then runs only when the store stops.
+    yield join(watcherTasks);
+  } finally {
+    toolpathWorkerClient.dispose();
+  }
 }
