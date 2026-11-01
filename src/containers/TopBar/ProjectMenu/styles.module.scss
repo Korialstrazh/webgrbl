@@ -1,0 +1,17 @@
+.menuEntry {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-6);
+  // A menu with a shortcut hint should not be narrower than its hint.
+  min-width: 11rem;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.caret {
+  margin-left: var(--space-1);
+}

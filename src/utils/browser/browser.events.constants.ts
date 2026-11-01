@@ -52,3 +52,5 @@ export const DATA_TRANSFER_FILES_TYPE = 'Files';
 export const UNDO_KEY = 'z';
 /** The `key` value of the Y key, lowercased: Ctrl or Cmd plus Y redoes. */
 export const REDO_KEY = 'y';
+/** The `key` value of the S key, lowercased: Ctrl or Cmd plus S saves the project. */
+export const SAVE_KEY = 's';

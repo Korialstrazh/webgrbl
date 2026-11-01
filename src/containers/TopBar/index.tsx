@@ -1,6 +1,6 @@
 /**
- * The top region: app name, project placeholder, the machine profiles dialog, SVG import, undo and redo, menus that are
- * not built yet, the connection pill and update notice.
+ * The top region: app name, the project name, the Project menu and autosave readout, the machine profiles dialog,
+ * SVG import, undo and redo, the Materials menu that is not built yet, the connection pill and update notice.
  *
  * @author michael.morosov
  *
@@ -24,8 +24,10 @@ import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
 import { MachineProfilesDialog } from '../MachineProfilesDialog';
 import { SvgImportButton } from '../SvgImportButton';
+import { AutosaveReadout } from './AutosaveReadout';
+import { ProjectMenu } from './ProjectMenu';
+import { ProjectNameButton } from './ProjectNameButton';
 import styles from './styles.module.scss';
-import { TOP_BAR_MENU_LABEL_KEYS } from './top.bar.constants';
 
 export const TopBar = (): ReactNode => {
   const { t } = useTranslation();
@@ -39,9 +41,11 @@ export const TopBar = (): ReactNode => {
       {/* Plain text elements: antd Typography would add its own margins and colours. */}
       <div className={styles.heading}>
         <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
-        <p className={styles.project}>{t(DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER)}</p>
+        <ProjectNameButton />
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
+        <ProjectMenu />
+        <AutosaveReadout />
         <Button type={ANTD_BUTTON_TYPE_TEXT} onClick={() => setIsProfilesDialogOpen(true)}>
           {t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
         </Button>
@@ -66,15 +70,8 @@ export const TopBar = (): ReactNode => {
         />
       </div>
       <div className={styles.comingSoonGroups}>
-        <ComingSoon description={t(DEFAULT.TOP_BAR_MENUS_DESCRIPTION)}>
-          <div className={styles.group}>
-            {TOP_BAR_MENU_LABEL_KEYS.map((menuLabelKey: string) => (
-              <Button key={menuLabelKey} type={ANTD_BUTTON_TYPE_TEXT}>{t(menuLabelKey)}</Button>
-            ))}
-          </div>
-        </ComingSoon>
-        <ComingSoon description={t(DEFAULT.TOP_BAR_AUTOSAVE_DESCRIPTION)}>
-          <p className={styles.autosave}>{t(DEFAULT.TOP_BAR_AUTOSAVE_READOUT)}</p>
+        <ComingSoon description={t(DEFAULT.TOP_BAR_MATERIALS_DESCRIPTION)}>
+          <Button type={ANTD_BUTTON_TYPE_TEXT}>{t(DEFAULT.TOP_BAR_MENU_MATERIALS)}</Button>
         </ComingSoon>
       </div>
       <div className={styles.trailing}>

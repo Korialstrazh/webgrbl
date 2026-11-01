@@ -1,0 +1,19 @@
+.nameButton {
+  max-width: 16rem;
+  height: auto;
+  padding: 0 var(--space-1);
+  line-height: 1.5;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+
+  // The button label is the project name, so a long one is cut instead of widening the top bar.
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.renameBox {
+  width: 14rem;
+}
