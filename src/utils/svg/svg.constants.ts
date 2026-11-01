@@ -61,6 +61,8 @@ export const XML_NAMESPACE_URI = 'http://www.w3.org/XML/1998/namespace';
 export const XMLNS_NAMESPACE_URI = 'http://www.w3.org/2000/xmlns/';
 export const XHTML_NAMESPACE_URI = 'http://www.w3.org/1999/xhtml';
 export const SVG_MIME_TYPE = 'image/svg+xml';
+/** The file name ending of an SVG file, in lower case. */
+export const SVG_FILE_EXTENSION = '.svg';
 export const SVG_ROOT_ELEMENT_NAME = 'svg';
 export const SVG_PARSER_ERROR_ELEMENT_NAME = 'parsererror';
 export const SVG_SCRIPT_ELEMENT_NAME = 'script';

@@ -35,3 +35,9 @@
   flex: 1;
   min-height: 0;
 }
+
+// Shown while files are dragged over the bed, so the user can see it takes the drop.
+.dropTarget {
+  outline: 0.125rem dashed var(--color-accent);
+  outline-offset: -0.125rem;
+}

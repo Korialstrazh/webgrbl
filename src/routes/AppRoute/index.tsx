@@ -15,6 +15,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { BedPanel } from '../../containers/BedPanel';
 import { DesignPanel } from '../../containers/DesignPanel';
+import { HistoryHotkeys } from '../../containers/HistoryHotkeys';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
 import { MachinePanel } from '../../containers/MachinePanel';
 import { StatusStrip } from '../../containers/StatusStrip';
@@ -42,6 +43,7 @@ export const AppRoute = (): ReactNode => {
         {!isWide && <StickyStopBar />}
         <LeavePageGuard />
         <StopHotkey />
+        <HistoryHotkeys />
       </Layout>
     </BedRegionHostContext>
   );
