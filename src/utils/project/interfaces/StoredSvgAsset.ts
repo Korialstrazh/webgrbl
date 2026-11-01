@@ -9,7 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 export interface StoredSvgAsset {
-  /** Id of the object the SVG belongs to; the primary key. */
+  /** Id of the object the SVG belongs to; with the project id it forms the primary key. */
   objectId: string;
   /** Id of the project that holds the object. */
   projectId: string;

@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { getSanitizedSvg } from '../svg/get.sanitized.svg';
 import { isSvgImportFailure } from '../svg/is.svg.import.failure';
 import { getImportedProjectFile } from './get.imported.project.file';
+import { getObjectCorners } from './get.object.corners';
 import { getProjectFileText } from './get.project.file.text';
 import type { ImportedProjectFile } from './interfaces/ImportedProjectFile';
+import type { ObjectCornerPoint } from './interfaces/ObjectCornerPoint';
 import type { ProjectDocument } from './interfaces/ProjectDocument';
 import type { ProjectObject } from './interfaces/ProjectObject';
 import { newProjectObject } from './new.project.object';
 import {
+  FULL_TURN_DEG,
   MAX_OBJECT_SIZE_MM,
   MAX_PROJECT_NAME_LENGTH,
   MAX_PROJECT_OBJECTS,
@@ -24,7 +27,11 @@ const SCRIPT_TAG_NAME = '<script';
 const OVERSIZED_MM = 9000;
 const UNDERSIZED_MM = 0.01;
 const UNKNOWN_FIELD_NAME = 'injected';
-const INTRINSIC_WIDTH_MM = 0.01;
+const SVG_WIDTH_MM = 10;
+const SVG_HEIGHT_MM = 20;
+const HUGE_ROTATION_DEG = 1e306;
+const NEGATIVE_ROTATION_DEG = -30;
+const NORMALIZED_NEGATIVE_ROTATION_DEG = 330;
 
 const getSanitizedSvgText = (svgText: string): string => {
   const sanitizeResult = getSanitizedSvg(svgText);
@@ -35,7 +42,8 @@ const getSanitizedSvgText = (svgText: string): string => {
 const SANITIZED_SVG_TEXT: string = getSanitizedSvgText(RAW_SVG_TEXT);
 
 const newFileObject = (overrides: Partial<ProjectObject> = {}): ProjectObject =>
-  newProjectObject({ name: 'Leaf', svgText: SANITIZED_SVG_TEXT, xMm: 5, yMm: 6, widthMm: 30, heightMm: 40,
+  newProjectObject({ name: 'Leaf', svgText: SANITIZED_SVG_TEXT, intrinsicWidthMm: SVG_WIDTH_MM,
+    intrinsicHeightMm: SVG_HEIGHT_MM, xMm: 5, yMm: 6, widthMm: 30, heightMm: 40,
     rotationDeg: 15, ...overrides });
 
 /** The file of one object as a plain value a test can break field by field. */
@@ -94,15 +102,43 @@ describe(getImportedProjectFile.name, () => {
     expect(getImportedValue({ ...getFileValue(), name: `  ${PROJECT_NAME} ` })?.name).toBe(PROJECT_NAME);
   });
 
-  it('limits the box size to the allowed range but keeps the intrinsic size as written', () => {
+  it('limits the box size to the allowed range', () => {
     const importedFile = getImportedValue(getFileValue([
-      newFileObject({ widthMm: OVERSIZED_MM, heightMm: UNDERSIZED_MM, intrinsicWidthMm: INTRINSIC_WIDTH_MM }),
+      newFileObject({ widthMm: OVERSIZED_MM, heightMm: UNDERSIZED_MM }),
     ]));
     const importedObject: ProjectObject | undefined = importedFile?.document.objects[0];
 
     expect(importedObject?.widthMm).toBe(MAX_OBJECT_SIZE_MM);
     expect(importedObject?.heightMm).toBe(MIN_OBJECT_SIZE_MM);
-    expect(importedObject?.intrinsicWidthMm).toBe(INTRINSIC_WIDTH_MM);
+  });
+
+  it('takes the intrinsic size from the SVG, not from the file', () => {
+    const importedFile = getImportedValue(
+      getFileValue([newFileObject({ intrinsicWidthMm: 0, intrinsicHeightMm: -5 })]),
+    );
+    const importedObject: ProjectObject | undefined = importedFile?.document.objects[0];
+
+    expect(importedObject?.intrinsicWidthMm).toBe(SVG_WIDTH_MM);
+    expect(importedObject?.intrinsicHeightMm).toBe(SVG_HEIGHT_MM);
+  });
+
+  it('brings a huge rotation into one turn, so the corners stay finite', () => {
+    const importedFile = getImportedValue(getFileValue([newFileObject({ rotationDeg: HUGE_ROTATION_DEG })]));
+    const importedObject: ProjectObject | undefined = importedFile?.document.objects[0];
+    const rotationDeg: number = importedObject?.rotationDeg ?? Number.NaN;
+    const cornerValues: number[] = importedObject
+      ? getObjectCorners(importedObject).flatMap((corner: ObjectCornerPoint): number[] => [corner.x, corner.y])
+      : [];
+
+    expect(rotationDeg >= 0 && rotationDeg < FULL_TURN_DEG).toBe(true);
+    expect(cornerValues).toHaveLength(8);
+    expect(cornerValues.every(Number.isFinite)).toBe(true);
+  });
+
+  it('turns a negative rotation into the same angle within one turn', () => {
+    const importedFile = getImportedValue(getFileValue([newFileObject({ rotationDeg: NEGATIVE_ROTATION_DEG })]));
+
+    expect(importedFile?.document.objects[0]?.rotationDeg).toBe(NORMALIZED_NEGATIVE_ROTATION_DEG);
   });
 
   it('drops fields the file format does not know', () => {

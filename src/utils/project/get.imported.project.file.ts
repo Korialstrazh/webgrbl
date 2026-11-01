@@ -15,6 +15,7 @@ import type { SanitizedSvg } from '../svg/interfaces/SanitizedSvg';
 import type { SvgImportFailure } from '../svg/interfaces/SvgImportFailure';
 import { isSvgImportFailure } from '../svg/is.svg.import.failure';
 import { getClampedObjectSizeMm } from './get.clamped.object.size.mm';
+import { getNormalizedRotationDeg } from './get.normalized.rotation.deg';
 import { getValidProjectName } from './get.valid.project.name';
 import type { ImportedProjectFile } from './interfaces/ImportedProjectFile';
 import type { ProjectFile } from './interfaces/ProjectFile';
@@ -33,7 +34,10 @@ const getParsedJsonValue = (jsonText: string): unknown => {
 const isImportableProjectFile = (value: unknown): value is ProjectFile =>
   isProjectFile(value) && value.objects.length <= MAX_PROJECT_OBJECTS;
 
-/** Copies only the known fields, so an extra field in the file never reaches the database. */
+/**
+ * Copies only the known fields, so an extra field in the file never reaches the database. The intrinsic size is
+ * measured from the SVG again, and the rotation is brought into one turn, because a huge angle breaks the geometry.
+ */
 const getImportedProjectObject = (fileObject: ProjectObject): ProjectObject | undefined => {
   const sanitizeResult: SanitizedSvg | SvgImportFailure = getSanitizedSvg(fileObject.svgText);
 
@@ -45,13 +49,13 @@ const getImportedProjectObject = (fileObject: ProjectObject): ProjectObject | un
     id: crypto.randomUUID(),
     name: fileObject.name,
     svgText: sanitizeResult.svgText,
-    intrinsicWidthMm: fileObject.intrinsicWidthMm,
-    intrinsicHeightMm: fileObject.intrinsicHeightMm,
+    intrinsicWidthMm: sanitizeResult.widthMm,
+    intrinsicHeightMm: sanitizeResult.heightMm,
     xMm: fileObject.xMm,
     yMm: fileObject.yMm,
     widthMm: getClampedObjectSizeMm(fileObject.widthMm),
     heightMm: getClampedObjectSizeMm(fileObject.heightMm),
-    rotationDeg: fileObject.rotationDeg,
+    rotationDeg: getNormalizedRotationDeg(fileObject.rotationDeg),
   };
 };
 

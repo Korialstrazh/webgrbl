@@ -1,7 +1,9 @@
+import type { Collection } from 'dexie';
 import { describe, expect, it } from 'vitest';
 import type { ProjectDocument } from './interfaces/ProjectDocument';
 import type { ProjectObject } from './interfaces/ProjectObject';
 import type { StoredProject } from './interfaces/StoredProject';
+import type { StoredSvgAsset } from './interfaces/StoredSvgAsset';
 import { InvalidProjectNameError } from './invalid.project.name.error';
 import { newProjectObject } from './new.project.object';
 import { MAX_PROJECT_NAME_LENGTH } from './project.constants';
@@ -25,6 +27,11 @@ const getDocument = (objects: ProjectObject[]): ProjectDocument => ({ objects })
 
 const getAssetCount = async (projectId: string): Promise<number> =>
   WEBGRBL_DATABASE.svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX).equals(projectId).count();
+
+/** The asset rows of one object in one project, found without relying on the shape of the primary key. */
+const getProjectObjectAssets = (projectId: string, objectId: string): Collection<StoredSvgAsset> =>
+  WEBGRBL_DATABASE.svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX).equals(projectId)
+    .filter((assetRow: StoredSvgAsset): boolean => assetRow.objectId === objectId);
 
 /** Makes the next timestamp differ from the previous one, so newest-first order is not a tie. */
 const waitForNextMillisecond = async (): Promise<void> => {
@@ -86,7 +93,7 @@ describe(PROJECT_REPOSITORY.getProject.name, () => {
     const intactObject: ProjectObject = newProjectObject({ svgText: OTHER_SVG_TEXT });
 
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([brokenObject, intactObject]));
-    await WEBGRBL_DATABASE.svgAssets.delete(brokenObject.id);
+    await getProjectObjectAssets(createdProject.id, brokenObject.id).delete();
 
     const loadedProject = await PROJECT_REPOSITORY.getProject(createdProject.id);
 
@@ -141,10 +148,11 @@ describe(PROJECT_REPOSITORY.saveDocument.name, () => {
 
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([projectObject]));
     // A second save that rewrote the row would replace this marker with the document's SVG text.
-    await WEBGRBL_DATABASE.svgAssets.update(projectObject.id, { svgText: MARKER_SVG_TEXT });
+    await getProjectObjectAssets(createdProject.id, projectObject.id).modify({ svgText: MARKER_SVG_TEXT });
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([{ ...projectObject, xMm: MOVED_X_MM }]));
 
-    expect((await WEBGRBL_DATABASE.svgAssets.get(projectObject.id))?.svgText).toBe(MARKER_SVG_TEXT);
+    expect((await getProjectObjectAssets(createdProject.id, projectObject.id).first())?.svgText)
+      .toBe(MARKER_SVG_TEXT);
     expect((await WEBGRBL_DATABASE.projects.get(createdProject.id))?.objects[0]?.xMm).toBe(MOVED_X_MM);
     expect(await getAssetCount(createdProject.id)).toBe(1);
   });
@@ -157,7 +165,7 @@ describe(PROJECT_REPOSITORY.saveDocument.name, () => {
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([firstObject]));
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([firstObject, addedObject]));
 
-    expect(await WEBGRBL_DATABASE.svgAssets.get(addedObject.id)).toEqual({
+    expect(await getProjectObjectAssets(createdProject.id, addedObject.id).first()).toEqual({
       objectId: addedObject.id,
       projectId: createdProject.id,
       svgText: OTHER_SVG_TEXT,
@@ -172,6 +180,19 @@ describe(PROJECT_REPOSITORY.saveDocument.name, () => {
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([]));
 
     expect(await getAssetCount(createdProject.id)).toBe(1);
+  });
+
+  it('gives an object id that also appears in another project its own SVG row', async () => {
+    const firstProject: StoredProject = await PROJECT_REPOSITORY.createProject(PROJECT_NAME);
+    const secondProject: StoredProject = await PROJECT_REPOSITORY.createProject(OTHER_PROJECT_NAME);
+    const firstObject: ProjectObject = newProjectObject({ svgText: SVG_TEXT });
+    const sameIdObject: ProjectObject = newProjectObject({ id: firstObject.id, svgText: OTHER_SVG_TEXT });
+
+    await PROJECT_REPOSITORY.saveDocument(firstProject.id, getDocument([firstObject]));
+    await PROJECT_REPOSITORY.saveDocument(secondProject.id, getDocument([sameIdObject]));
+
+    expect((await PROJECT_REPOSITORY.getProject(secondProject.id))?.document).toEqual(getDocument([sameIdObject]));
+    expect((await PROJECT_REPOSITORY.getProject(firstProject.id))?.document).toEqual(getDocument([firstObject]));
   });
 
   it('rejects a save for an unknown project and writes nothing', async () => {
@@ -246,9 +267,10 @@ describe(PROJECT_REPOSITORY.pruneAssets.name, () => {
     await PROJECT_REPOSITORY.saveDocument(otherProject.id, getDocument([newProjectObject({ svgText: SVG_TEXT })]));
     await PROJECT_REPOSITORY.pruneAssets(prunedProject.id, [keptObject.id]);
 
-    const remainingObjectIds: string[] = await WEBGRBL_DATABASE.svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX)
+    const remainingAssets: StoredSvgAsset[] = await WEBGRBL_DATABASE.svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX)
       .equals(prunedProject.id)
-      .primaryKeys();
+      .toArray();
+    const remainingObjectIds: string[] = remainingAssets.map((assetRow: StoredSvgAsset): string => assetRow.objectId);
 
     expect(remainingObjectIds).toEqual([keptObject.id]);
     expect(await getAssetCount(otherProject.id)).toBe(1);

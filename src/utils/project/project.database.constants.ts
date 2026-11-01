@@ -21,13 +21,15 @@ export const WEBGRBL_DATABASE_TABLE = {
 } as const;
 
 export const PROJECT_UPDATED_AT_INDEX: keyof StoredProject = 'updatedAt';
-export const SVG_ASSET_OBJECT_ID_KEY: keyof StoredSvgAsset = 'objectId';
 export const SVG_ASSET_PROJECT_ID_INDEX: keyof StoredSvgAsset = 'projectId';
 
-/** Dexie schema: the first entry of each table is its primary key, the others are indexes. */
+/**
+ * Dexie schema: the first entry of each table is its primary key, the others are indexes. An SVG row is keyed by
+ * project and object together, so the same object id in two projects never shares one row.
+ */
 export const WEBGRBL_DATABASE_SCHEMA: Record<string, string> = {
   [WEBGRBL_DATABASE_TABLE.PROJECTS]: 'id, updatedAt',
-  [WEBGRBL_DATABASE_TABLE.SVG_ASSETS]: 'objectId, projectId',
+  [WEBGRBL_DATABASE_TABLE.SVG_ASSETS]: '[projectId+objectId], projectId',
   [WEBGRBL_DATABASE_TABLE.APP_STATE]: 'key',
 };
 

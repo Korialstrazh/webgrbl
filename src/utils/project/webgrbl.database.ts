@@ -14,6 +14,7 @@ import type { Table } from 'dexie';
 import type { AppStateEntry } from './interfaces/AppStateEntry';
 import type { StoredProject } from './interfaces/StoredProject';
 import type { StoredSvgAsset } from './interfaces/StoredSvgAsset';
+import type { SvgAssetKey } from './interfaces/SvgAssetKey';
 import {
   WEBGRBL_DATABASE_NAME,
   WEBGRBL_DATABASE_SCHEMA,
@@ -25,8 +26,8 @@ import type { AppStateKey } from './project.database.constants';
 class WebgrblDatabase extends Dexie {
   /** Every project with its objects' transforms, keyed by project id. */
   public readonly projects: Table<StoredProject, string>;
-  /** The SVG text of every object, keyed by object id. */
-  public readonly svgAssets: Table<StoredSvgAsset, string>;
+  /** The SVG text of every object, keyed by project id and object id. */
+  public readonly svgAssets: Table<StoredSvgAsset, SvgAssetKey>;
   /** App-wide values such as the last opened project id. */
   public readonly appState: Table<AppStateEntry, AppStateKey>;
 
@@ -36,7 +37,7 @@ class WebgrblDatabase extends Dexie {
     this.version(WEBGRBL_DATABASE_VERSION).stores(WEBGRBL_DATABASE_SCHEMA);
 
     this.projects = this.table<StoredProject, string>(WEBGRBL_DATABASE_TABLE.PROJECTS);
-    this.svgAssets = this.table<StoredSvgAsset, string>(WEBGRBL_DATABASE_TABLE.SVG_ASSETS);
+    this.svgAssets = this.table<StoredSvgAsset, SvgAssetKey>(WEBGRBL_DATABASE_TABLE.SVG_ASSETS);
     this.appState = this.table<AppStateEntry, AppStateKey>(WEBGRBL_DATABASE_TABLE.APP_STATE);
   }
 }

@@ -28,11 +28,11 @@ import type { ProjectSummary } from './interfaces/ProjectSummary';
 import type { StoredProject } from './interfaces/StoredProject';
 import type { StoredProjectObject } from './interfaces/StoredProjectObject';
 import type { StoredSvgAsset } from './interfaces/StoredSvgAsset';
+import type { SvgAssetKey } from './interfaces/SvgAssetKey';
 import { InvalidProjectNameError } from './invalid.project.name.error';
 import {
   APP_STATE_KEY,
   PROJECT_UPDATED_AT_INDEX,
-  SVG_ASSET_OBJECT_ID_KEY,
   SVG_ASSET_PROJECT_ID_INDEX,
 } from './project.database.constants';
 import { ProjectNotFoundError } from './project.not.found.error';
@@ -94,19 +94,27 @@ const getRequiredStoredProject = async (projectId: string): Promise<StoredProjec
   return storedProject;
 };
 
-/** SVG rows for the objects of the document that have none yet; existing rows are never rewritten. */
+const getProjectAssetKeys = async (projectId: string): Promise<SvgAssetKey[]> =>
+  WEBGRBL_DATABASE.svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX).equals(projectId).primaryKeys();
+
+/**
+ * SVG rows for the objects of the document that have no row in this project yet; existing rows are never rewritten.
+ * Only keys are read, so no stored SVG text is loaded.
+ */
 const getMissingSvgAssetRows = async (
   projectId: string,
   projectDocument: ProjectDocument,
 ): Promise<StoredSvgAsset[]> => {
-  const objectIds: string[] = projectDocument.objects.map((projectObject: ProjectObject): string => projectObject.id);
-  const storedAssetIds: Set<string> = new Set<string>(
-    await WEBGRBL_DATABASE.svgAssets.where(SVG_ASSET_OBJECT_ID_KEY).anyOf(objectIds).primaryKeys(),
-  );
+  const storedObjectIds: Set<string> = new Set<string>();
+
+  for (const [, objectId] of await getProjectAssetKeys(projectId)) {
+    storedObjectIds.add(objectId);
+  }
+
   const missingAssetRows: StoredSvgAsset[] = [];
 
   for (const projectObject of projectDocument.objects) {
-    if (!storedAssetIds.has(projectObject.id)) {
+    if (!storedObjectIds.has(projectObject.id)) {
       missingAssetRows.push({ objectId: projectObject.id, projectId, svgText: projectObject.svgText });
     }
   }
@@ -203,13 +211,12 @@ export const PROJECT_REPOSITORY = {
     const { svgAssets } = WEBGRBL_DATABASE;
 
     await WEBGRBL_DATABASE.transaction(DEXIE_TRANSACTION_MODE_READ_WRITE, svgAssets, async () => {
-      const projectAssetIds: string[] = await svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX).equals(projectId)
-        .primaryKeys();
-      const prunedAssetIds: string[] = projectAssetIds.filter(
-        (assetId: string): boolean => !keptObjectIds.has(assetId),
+      const projectAssetKeys: SvgAssetKey[] = await getProjectAssetKeys(projectId);
+      const prunedAssetKeys: SvgAssetKey[] = projectAssetKeys.filter(
+        ([, objectId]: SvgAssetKey): boolean => !keptObjectIds.has(objectId),
       );
 
-      await svgAssets.bulkDelete(prunedAssetIds);
+      await svgAssets.bulkDelete(prunedAssetKeys);
     });
   },
 
