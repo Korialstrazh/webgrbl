@@ -10,6 +10,7 @@ import {
   BACKSPACE_KEY,
   DELETE_KEY,
   ESCAPE_KEY,
+  UNDO_KEY,
 } from '../../utils/browser/browser.events.constants';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
@@ -28,6 +29,7 @@ import { OverlayOpened } from '../../utils/states/ui.overlay.state';
 import type { SvgScreenMatrixMock } from '../../utils/test.support/interfaces/SvgScreenMatrixMock';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
 import { BED_TOOL } from '../BedPanel/bed.toolbar.constants';
+import { HistoryHotkeys } from '../HistoryHotkeys';
 import type { BedTool } from '../BedPanel/bed.toolbar.constants';
 import {
   BED_OBJECT_HANDLE,
@@ -141,6 +143,30 @@ const renderSelectedObjects = (projectObjects: ProjectObject[], activeTool: BedT
   });
 
   return store;
+};
+
+/** The objects with the undo and redo hotkeys mounted, as in the app, and the selection set to all of them. */
+const renderObjectsWithHistoryHotkeys = (projectObjects: ProjectObject[]): AppStore => {
+  const store: AppStore = newStore();
+
+  store.dispatch(new ProjectDocumentLoaded({ document: { objects: projectObjects } }));
+  store.dispatch(new ProjectSelectionChanged({
+    objectIds: projectObjects.map((projectObject: ProjectObject): string => projectObject.id),
+  }));
+  render(
+    <Provider store={store}>
+      <HistoryHotkeys />
+      <svg>
+        <BedObjects dimensions={BED} activeTool={BED_TOOL.SELECT} />
+      </svg>
+    </Provider>,
+  );
+
+  return store;
+};
+
+const pressUndoHotkey = (): void => {
+  fireEvent.keyDown(window, { key: UNDO_KEY, ctrlKey: true });
 };
 
 const getObjectsLayer = (): HTMLElement => screen.getByRole('group', { name: OBJECTS_LAYER_NAME });
@@ -350,6 +376,35 @@ describe(BedObjects.name, () => {
     expect(getObjectElement(FIRST_NAME)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(40 270) rotate(0)');
   });
 
+  it('ignores the undo hotkey while a drag runs, so the drag lands on the document it started from', () => {
+    const store: AppStore = renderObjectsWithHistoryHotkeys([firstObject]);
+    pressKey(ARROW_RIGHT_KEY);
+    const objectElement: HTMLElement = getObjectElement(FIRST_NAME);
+    const dragEnd: PointerEventInit = {
+      pointerId: POINTER_ID,
+      clientX: FIRST_GRAB_X + NUDGE_MM + DRAG_RIGHT_MM,
+      clientY: FIRST_GRAB_Y - DRAG_UP_MM,
+    };
+
+    fireEvent.pointerDown(objectElement, {
+      pointerId: POINTER_ID,
+      clientX: FIRST_GRAB_X + NUDGE_MM,
+      clientY: FIRST_GRAB_Y,
+    });
+    fireEvent.pointerMove(objectElement, dragEnd);
+    pressUndoHotkey();
+    fireEvent.pointerUp(objectElement, dragEnd);
+
+    expect(getStoredObject(store, firstObject.id)).toMatchObject({
+      xMm: FIRST_X_MM + NUDGE_MM + DRAG_RIGHT_MM,
+      yMm: FIRST_Y_MM + DRAG_UP_MM,
+    });
+
+    pressUndoHotkey();
+
+    expect(getStoredObject(store, firstObject.id)).toMatchObject({ xMm: FIRST_X_MM + NUDGE_MM, yMm: FIRST_Y_MM });
+  });
+
   it('drops a cancelled drag without moving anything', () => {
     const store: AppStore = renderObjects([firstObject]);
 
@@ -529,6 +584,41 @@ describe(BedObjects.name, () => {
       );
 
       expect(selectSelectedObjectIds(store.getState())).toEqual([wideObject.id]);
+    });
+
+    it('ignores the undo hotkey while a handle gesture runs', () => {
+      const store: AppStore = renderObjectsWithHistoryHotkeys([wideObject]);
+      pressKey(ARROW_UP_KEY);
+      const handleElement: HTMLElement = getHandleElement(BED_OBJECT_HANDLE.TOP_RIGHT);
+      const gestureEnd: PointerEventInit = {
+        pointerId: POINTER_ID,
+        clientX: TOP_RIGHT_HANDLE_X + HANDLE_DRAG_RIGHT_MM,
+        clientY: TOP_RIGHT_HANDLE_Y - NUDGE_MM,
+      };
+
+      fireEvent.pointerDown(handleElement, {
+        pointerId: POINTER_ID,
+        clientX: TOP_RIGHT_HANDLE_X,
+        clientY: TOP_RIGHT_HANDLE_Y - NUDGE_MM,
+      });
+      fireEvent.pointerMove(handleElement, gestureEnd);
+      pressUndoHotkey();
+      fireEvent.pointerUp(handleElement, gestureEnd);
+
+      expect(getStoredObject(store, wideObject.id)).toMatchObject({
+        xMm: WIDE_X_MM,
+        yMm: WIDE_Y_MM + NUDGE_MM,
+        widthMm: 150,
+        heightMm: 75,
+      });
+
+      pressUndoHotkey();
+
+      expect(getStoredObject(store, wideObject.id)).toMatchObject({
+        yMm: WIDE_Y_MM + NUDGE_MM,
+        widthMm: WIDE_WIDTH_MM,
+        heightMm: WIDE_HEIGHT_MM,
+      });
     });
 
     it('drops a cancelled scale without changing the object', () => {

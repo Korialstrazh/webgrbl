@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { combineReducers } from '@reduxjs/toolkit';
+import { BED_GESTURE_STATE_NAME, bedGestureReducer } from './bed.gesture.state';
 import { BROWSER_ENVIRONMENT_STATE_NAME, browserEnvironmentReducer } from './browser.environment.state';
 import { GRBL_CONNECTION_STATE_NAME, grblConnectionReducer } from './grbl.connection.state';
 import { GRBL_CONSOLE_STATE_NAME, grblConsoleReducer } from './grbl.console.state';
@@ -33,4 +34,5 @@ export const rootReducer = combineReducers({
   [GRBL_CONSOLE_STATE_NAME]: grblConsoleReducer,
   [TOAST_STATE_NAME]: toastReducer,
   [UI_OVERLAY_STATE_NAME]: uiOverlayReducer,
+  [BED_GESTURE_STATE_NAME]: bedGestureReducer,
 });
