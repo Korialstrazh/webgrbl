@@ -56,6 +56,10 @@ export const SVG_IMPORT_ERROR_KIND = {
 export type SvgImportErrorKind = (typeof SVG_IMPORT_ERROR_KIND)[keyof typeof SVG_IMPORT_ERROR_KIND];
 
 export const SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg';
+export const XLINK_NAMESPACE_URI = 'http://www.w3.org/1999/xlink';
+export const XML_NAMESPACE_URI = 'http://www.w3.org/XML/1998/namespace';
+export const XMLNS_NAMESPACE_URI = 'http://www.w3.org/2000/xmlns/';
+export const XHTML_NAMESPACE_URI = 'http://www.w3.org/1999/xhtml';
 export const SVG_MIME_TYPE = 'image/svg+xml';
 export const SVG_ROOT_ELEMENT_NAME = 'svg';
 export const SVG_PARSER_ERROR_ELEMENT_NAME = 'parsererror';
@@ -71,7 +75,29 @@ export const SVG_ANIMATION_ELEMENT_NAMES: readonly string[] = [
   SVG_ANIMATE_MOTION_ELEMENT_NAME,
 ];
 export const SVG_ATTRIBUTE_NAME_ATTRIBUTE = 'attributeName';
-export const SVG_XLINK_HREF_ATTRIBUTE_NAME = 'xlink:href';
+export const SVG_QUALIFIED_NAME_SEPARATOR = ':';
+export const SVG_STYLE_ATTRIBUTE_NAME = 'style';
+const SVG_FILL_ATTRIBUTE_NAME = 'fill';
+const SVG_STROKE_ATTRIBUTE_NAME = 'stroke';
+const SVG_FILTER_ATTRIBUTE_NAME = 'filter';
+const SVG_CLIP_PATH_ATTRIBUTE_NAME = 'clip-path';
+const SVG_MASK_ATTRIBUTE_NAME = 'mask';
+const SVG_MARKER_START_ATTRIBUTE_NAME = 'marker-start';
+const SVG_MARKER_MID_ATTRIBUTE_NAME = 'marker-mid';
+const SVG_MARKER_END_ATTRIBUTE_NAME = 'marker-end';
+const SVG_CURSOR_ATTRIBUTE_NAME = 'cursor';
+export const SVG_CSS_VALUE_ATTRIBUTE_NAMES: readonly string[] = [
+  SVG_STYLE_ATTRIBUTE_NAME,
+  SVG_FILL_ATTRIBUTE_NAME,
+  SVG_STROKE_ATTRIBUTE_NAME,
+  SVG_FILTER_ATTRIBUTE_NAME,
+  SVG_CLIP_PATH_ATTRIBUTE_NAME,
+  SVG_MASK_ATTRIBUTE_NAME,
+  SVG_MARKER_START_ATTRIBUTE_NAME,
+  SVG_MARKER_MID_ATTRIBUTE_NAME,
+  SVG_MARKER_END_ATTRIBUTE_NAME,
+  SVG_CURSOR_ATTRIBUTE_NAME,
+];
 export const SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES: readonly string[] = ['to', 'from', 'by', 'values'];
 export const SVG_ANCHOR_ELEMENT_NAME = 'a';
 export const SVG_ALL_ELEMENTS_SELECTOR = '*';

@@ -188,4 +188,49 @@ describe(getSanitizedSvg.name, () => {
     expect(result.svgText).not.toMatch(/img|iframe|e\.x|<rect/);
     expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT]);
   });
+
+  it('removes an href animation that uses a custom xlink prefix', () => {
+    const result = getSanitizedSvg(
+      `<svg xmlns="http://www.w3.org/2000/svg" xmlns:x="http://www.w3.org/1999/xlink" ${SIZE}>` +
+        '<image href="#a"><set attributeName="x:href" to="https://e.x/a.png"/></image></svg>',
+    );
+
+    expect(isSvgImportFailure(result)).toBe(false);
+
+    if (!isSvgImportFailure(result)) {
+      expect(result.svgText).not.toMatch(/<set|e\.x/);
+    }
+  });
+
+  it('reports no removed content for a realistic Inkscape header', () => {
+    const result = getSanitizedSvg(
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" ' +
+        'xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" ' +
+        'xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cc="http://creativecommons.org/ns#" ' +
+        `${SIZE} inkscape:version="1.3" inkscape:export-filename="C:\\Users\\me\\a.png">` +
+        '<sodipodi:namedview id="base"/><metadata><rdf:RDF><cc:Work/></rdf:RDF></metadata><rect width="1"/></svg>',
+    );
+
+    expect(isSvgImportFailure(result)).toBe(false);
+
+    if (!isSvgImportFailure(result)) {
+      expect(result.removedContentKinds).toEqual([]);
+      expect(result.svgText).not.toMatch(/sodipodi:namedview|rdf:RDF|export-filename/);
+      expect(result.svgText).toContain('<rect');
+    }
+  });
+
+  it('removes a css escape in a presentation attribute and reports it', () => {
+    const result = getSanitized('<rect fill="u\\72l(https://e.x)"/>');
+
+    expect(result.svgText).not.toContain('e.x');
+    expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
+  });
+
+  it('does not treat a backslash in a non-css attribute as remote content', () => {
+    const result = getSanitized('<rect id="a\\b" width="1"/>');
+
+    expect(result.removedContentKinds).toEqual([]);
+    expect(result.svgText).toContain('id="a\\b"');
+  });
 });

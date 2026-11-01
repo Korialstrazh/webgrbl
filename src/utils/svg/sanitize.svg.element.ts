@@ -16,22 +16,27 @@ import {
   SVG_FOREIGN_OBJECT_ELEMENT_NAME,
   SVG_HREF_ATTRIBUTE_NAME,
   SVG_NAMESPACE_URI,
+  SVG_QUALIFIED_NAME_SEPARATOR,
   SVG_REMOVED_CONTENT_KIND,
   SVG_SCRIPT_ELEMENT_NAME,
   SVG_STYLE_ELEMENT_NAME,
-  SVG_XLINK_HREF_ATTRIBUTE_NAME,
+  XHTML_NAMESPACE_URI,
 } from './svg.constants';
 import type { SvgRemovedContentKind } from './svg.constants';
 
 const isInForeignNamespace = (element: Element): boolean =>
   !!element.namespaceURI && element.namespaceURI !== SVG_NAMESPACE_URI;
 
+const getForeignElementKinds = (element: Element): SvgRemovedContentKind[] =>
+  element.namespaceURI === XHTML_NAMESPACE_URI ? [SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT] : [];
+
 const isHrefAnimation = (element: Element): boolean => {
-  const targetName: string = (element.getAttribute(SVG_ATTRIBUTE_NAME_ATTRIBUTE) ?? '').trim().toLowerCase();
+  const qualifiedName: string = (element.getAttribute(SVG_ATTRIBUTE_NAME_ATTRIBUTE) ?? '').trim().toLowerCase();
+  const targetName: string | undefined = qualifiedName.split(SVG_QUALIFIED_NAME_SEPARATOR).pop();
 
   return (
     SVG_ANIMATION_ELEMENT_NAMES.includes(element.localName.toLowerCase()) &&
-    (targetName === SVG_HREF_ATTRIBUTE_NAME || targetName === SVG_XLINK_HREF_ATTRIBUTE_NAME)
+    targetName === SVG_HREF_ATTRIBUTE_NAME
   );
 };
 
@@ -39,7 +44,7 @@ export const sanitizeSvgElement = (element: Element): SvgRemovedContentKind[] =>
   if (isInForeignNamespace(element)) {
     element.remove();
 
-    return [SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT];
+    return getForeignElementKinds(element);
   }
 
   if (isHrefAnimation(element)) {

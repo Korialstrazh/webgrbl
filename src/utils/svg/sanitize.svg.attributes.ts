@@ -9,10 +9,12 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { hasRemoteStyleReference } from './has.remote.style.reference';
+import { isEditorDataAttribute } from './is.editor.data.attribute';
 import { isSafeSvgHref } from './is.safe.svg.href';
 import {
   SVG_ANCHOR_ELEMENT_NAME,
   SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES,
+  SVG_CSS_VALUE_ATTRIBUTE_NAMES,
   SVG_EVENT_ATTRIBUTE_PREFIX,
   SVG_HREF_ATTRIBUTE_NAME,
   SVG_JAVASCRIPT_URL_PREFIX,
@@ -32,6 +34,12 @@ const hasUnsafeAttributeValue = (attribute: Attr): boolean =>
 const hasUnsafeHref = (attribute: Attr): boolean =>
   attribute.localName.toLowerCase() === SVG_HREF_ATTRIBUTE_NAME && !isSafeSvgHref(attribute.value);
 
+const hasRemoteCssValue = (attribute: Attr): boolean =>
+  SVG_CSS_VALUE_ATTRIBUTE_NAMES.includes(attribute.name.toLowerCase()) && hasRemoteStyleReference(attribute.value);
+
+const isSilentlyRemoved = (attribute: Attr): boolean =>
+  hasUnsafeAttributeValue(attribute) || isEditorDataAttribute(attribute);
+
 const getRemovedAttributeKind = (element: Element, attribute: Attr): SvgRemovedContentKind | undefined => {
   if (hasUnsafeHref(attribute)) {
     const isAnchor: boolean = element.localName.toLowerCase() === SVG_ANCHOR_ELEMENT_NAME;
@@ -39,15 +47,11 @@ const getRemovedAttributeKind = (element: Element, attribute: Attr): SvgRemovedC
     return isAnchor ? undefined : SVG_REMOVED_CONTENT_KIND.LINKED_IMAGE;
   }
 
-  if (hasRemoteStyleReference(attribute.value)) {
-    return SVG_REMOVED_CONTENT_KIND.STYLE_URL;
-  }
-
-  return undefined;
+  return SVG_REMOVED_CONTENT_KIND.STYLE_URL;
 };
 
 const isAttributeRemoved = (attribute: Attr): boolean =>
-  hasUnsafeAttributeValue(attribute) || hasUnsafeHref(attribute) || hasRemoteStyleReference(attribute.value);
+  isSilentlyRemoved(attribute) || hasUnsafeHref(attribute) || hasRemoteCssValue(attribute);
 
 export const sanitizeSvgAttributes = (element: Element): SvgRemovedContentKind[] => {
   const removedKinds: SvgRemovedContentKind[] = [];
@@ -57,7 +61,9 @@ export const sanitizeSvgAttributes = (element: Element): SvgRemovedContentKind[]
       continue;
     }
 
-    const removedKind: SvgRemovedContentKind | undefined = getRemovedAttributeKind(element, attribute);
+    const removedKind: SvgRemovedContentKind | undefined = isSilentlyRemoved(attribute)
+      ? undefined
+      : getRemovedAttributeKind(element, attribute);
 
     if (removedKind) {
       removedKinds.push(removedKind);
