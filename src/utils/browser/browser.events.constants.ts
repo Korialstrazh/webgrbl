@@ -42,6 +42,8 @@ export const ARROW_RIGHT_KEY = 'ArrowRight';
 export const DELETE_KEY = 'Delete';
 /** The `key` value of the Backspace key. */
 export const BACKSPACE_KEY = 'Backspace';
+/** Fired on window when the page is left: closed, reloaded or navigated away from. */
+export const PAGE_HIDE_EVENT_NAME = 'pagehide';
 /** Matches an element inside a region the user can edit as text; `contenteditable="false"` switches a region off. */
 export const CONTENT_EDITABLE_REGION_SELECTOR = '[contenteditable]:not([contenteditable="false"])';
 /** The `dataTransfer.types` entry of a drag that carries files, as opposed to text or links. */
