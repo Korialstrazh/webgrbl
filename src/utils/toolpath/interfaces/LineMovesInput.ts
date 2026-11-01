@@ -1,5 +1,5 @@
 /**
- * What line mode needs to burn one pass of a layer.
+ * What line mode needs to burn all passes of a layer.
  *
  * @author michael.morosov
  *
@@ -17,6 +17,6 @@ export interface LineMovesInput {
   drawables: BedDrawable[];
   /** The layer to burn. */
   layer: ProjectLayer;
-  /** Where the head is before the pass. */
+  /** Where the head is before the layer starts. */
   startPoint: GeometryPoint;
 }

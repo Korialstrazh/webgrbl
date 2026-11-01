@@ -10,6 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { getSvgElementPaints } from './get.svg.element.paints';
+import { getSvgGradientMatrix } from './get.svg.gradient.matrix';
 import { getSvgMatrixAreaScale } from './get.svg.matrix.area.scale';
 import { getSvgShapeSubpaths } from './get.svg.shape.subpaths';
 import type { SvgDrawableContext } from './interfaces/SvgDrawableContext';
@@ -48,5 +49,28 @@ export const getSvgElementDrawable = (
     return undefined;
   }
 
-  return { subpaths, paint: { ...paints, strokeWidth: style.strokeWidth * getSvgMatrixAreaScale(matrix) } };
+  const { elementsById } = context.paintLookup;
+
+  return {
+    subpaths,
+    paint: {
+      ...paints,
+      strokeWidth: style.strokeWidth * getSvgMatrixAreaScale(matrix),
+      fillRule: style.fillRule,
+      fillGradientMatrix: getSvgGradientMatrix({
+        paint: paints.fill,
+        paintValue: style.fill,
+        elementMatrix: matrix,
+        subpaths,
+        elementsById,
+      }),
+      strokeGradientMatrix: getSvgGradientMatrix({
+        paint: paints.stroke,
+        paintValue: style.stroke,
+        elementMatrix: matrix,
+        subpaths,
+        elementsById,
+      }),
+    },
+  };
 };

@@ -11,9 +11,15 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { getPolylineContainmentDepths } from './get.polyline.containment.depths';
+import { getSubpathsBounds } from './get.subpaths.bounds';
+import type { BoxedPolyline } from './interfaces/BoxedPolyline';
 import type { LinePolyline } from './interfaces/LinePolyline';
 import type { PolylineEntry } from './interfaces/PolylineEntry';
+import type { ToolpathBounds } from './interfaces/ToolpathBounds';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
+
+/** The box of an outline without points; such outlines are filtered out before ordering. */
+const EMPTY_BOX: ToolpathBounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
 
 const getPointDistance = (firstPoint: GeometryPoint, secondPoint: GeometryPoint): number =>
   Math.hypot(secondPoint.x - firstPoint.x, secondPoint.y - firstPoint.y);
@@ -24,17 +30,68 @@ const getEntryPointIndexes = (polyline: LinePolyline): number[] =>
     ? polyline.points.map((_point: GeometryPoint, pointIndex: number): number => pointIndex)
     : [0, polyline.points.length - 1]);
 
-const getNearestEntry = (polylines: LinePolyline[], position: GeometryPoint): PolylineEntry | undefined => {
+/** The entry point of one outline nearest the head. */
+const isNearerEntry = (
+  candidateEntry: PolylineEntry | undefined,
+  nearestEntry: PolylineEntry | undefined,
+): candidateEntry is PolylineEntry =>
+  !!candidateEntry && (!nearestEntry || candidateEntry.distanceMm < nearestEntry.distanceMm);
+
+const getPolylineNearestEntry = (
+  polyline: LinePolyline,
+  polylineIndex: number,
+  position: GeometryPoint,
+): PolylineEntry | undefined => {
   let nearestEntry: PolylineEntry | undefined;
 
-  polylines.forEach((polyline: LinePolyline, polylineIndex: number) => {
-    for (const pointIndex of getEntryPointIndexes(polyline)) {
-      const entryPoint: GeometryPoint | undefined = polyline.points[pointIndex];
-      const distanceMm: number = entryPoint ? getPointDistance(position, entryPoint) : Infinity;
+  for (const pointIndex of getEntryPointIndexes(polyline)) {
+    const entryPoint: GeometryPoint | undefined = polyline.points[pointIndex];
+    const distanceMm: number = entryPoint ? getPointDistance(position, entryPoint) : Infinity;
 
-      if (!nearestEntry || distanceMm < nearestEntry.distanceMm) {
-        nearestEntry = { polylineIndex, pointIndex, distanceMm };
-      }
+    if (!nearestEntry || distanceMm < nearestEntry.distanceMm) {
+      nearestEntry = { polylineIndex, pointIndex, distanceMm };
+    }
+  }
+
+  return nearestEntry;
+};
+
+/** The distance from the point to the box, 0 inside it; no entry point of the outline is nearer. */
+const getBoxDistance = (box: ToolpathBounds, point: GeometryPoint): number =>
+  Math.hypot(Math.max(box.minX - point.x, 0, point.x - box.maxX), Math.max(box.minY - point.y, 0, point.y - box.maxY));
+
+/**
+ * The distance to the nearest first point of any outline; a first point is always an entry, so no nearest entry is
+ * farther.
+ */
+const getFirstPointDistanceLimit = (candidates: BoxedPolyline[], position: GeometryPoint): number => {
+  let distanceLimit = Infinity;
+
+  for (const { polyline } of candidates) {
+    const firstPoint: GeometryPoint | undefined = polyline.points[0];
+
+    distanceLimit = firstPoint ? Math.min(distanceLimit, getPointDistance(position, firstPoint)) : distanceLimit;
+  }
+
+  return distanceLimit;
+};
+
+/**
+ * The entry nearest the head over all outlines. Only outlines whose box is nearer than the best distance known so far
+ * have their points scanned, which keeps a large job from scanning every point of every outline at each step.
+ */
+const getNearestEntry = (candidates: BoxedPolyline[], position: GeometryPoint): PolylineEntry | undefined => {
+  const distanceLimit: number = getFirstPointDistanceLimit(candidates, position);
+  let nearestEntry: PolylineEntry | undefined;
+
+  candidates.forEach((candidate: BoxedPolyline, polylineIndex: number) => {
+    const bestDistance: number = Math.min(distanceLimit, nearestEntry?.distanceMm ?? Infinity);
+    const candidateEntry: PolylineEntry | undefined = getBoxDistance(candidate.box, position) <= bestDistance
+      ? getPolylineNearestEntry(candidate.polyline, polylineIndex, position)
+      : undefined;
+
+    if (isNearerEntry(candidateEntry, nearestEntry)) {
+      nearestEntry = candidateEntry;
     }
   });
 
@@ -55,13 +112,17 @@ const getPolylineEndPoint = (polyline: LinePolyline): GeometryPoint | undefined 
   polyline.isClosed ? polyline.points[0] : polyline.points.at(-1);
 
 const getNearestNeighbourOrder = (polylines: LinePolyline[], startPoint: GeometryPoint): LinePolyline[] => {
-  const remainingPolylines: LinePolyline[] = [...polylines];
+  const remainingPolylines: BoxedPolyline[] = polylines.map((polyline: LinePolyline): BoxedPolyline => ({
+    polyline,
+    box: getSubpathsBounds([polyline]) ?? EMPTY_BOX,
+  }));
   const orderedPolylines: LinePolyline[] = [];
   let position: GeometryPoint = startPoint;
   let nearestEntry: PolylineEntry | undefined = getNearestEntry(remainingPolylines, position);
 
   while (nearestEntry) {
-    const [nearestPolyline] = remainingPolylines.splice(nearestEntry.polylineIndex, 1);
+    const [nearestCandidate] = remainingPolylines.splice(nearestEntry.polylineIndex, 1);
+    const nearestPolyline: LinePolyline | undefined = nearestCandidate?.polyline;
     const turnedPolyline: LinePolyline | undefined = nearestPolyline
       ? getPolylineFromEntry(nearestPolyline, nearestEntry.pointIndex)
       : undefined;

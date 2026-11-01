@@ -20,13 +20,13 @@ import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 
 const getGradientRunSegments = (run: ScanlineRun, layer: ProjectLayer, y: number): FillSegment[] => {
-  const { paint, shapeBounds } = run.paintArea;
+  const { paint, gradientMatrix } = run.paintArea;
   const sampleStepMm: number = layer.settings.lineIntervalMm;
   const samplePoint: GeometryPoint = { x: run.x0, y };
   const getSamplePower = (x: number): number => {
     samplePoint.x = x;
 
-    return getLayerPowerPercent(getGradientLightness(paint, shapeBounds, samplePoint), layer);
+    return getLayerPowerPercent(getGradientLightness(paint, gradientMatrix, samplePoint), layer);
   };
   const segments: FillSegment[] = [];
   let segmentStartX: number = run.x0;

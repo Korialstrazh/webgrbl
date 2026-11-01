@@ -1,5 +1,5 @@
 /**
- * A closed line-mode outline with its box, ready for the test whether it lies inside another outline.
+ * A line-mode outline with its box, ready for the test whether it lies inside a closed outline.
  *
  * @author michael.morosov
  *
@@ -12,8 +12,10 @@ import type { ToolpathBounds } from './ToolpathBounds';
 import type { GeometryPoint } from '../../svg/geometry/interfaces/GeometryPoint';
 
 export interface BoxedOutline {
-  /** The outline points; the outline closes from the last point to the first. */
+  /** The outline points; a closed outline closes from the last point to the first. */
   points: GeometryPoint[];
   /** The box around the points. */
   box: ToolpathBounds;
+  /** Whether the outline closes; only a closed outline can lie around others. */
+  isClosed: boolean;
 }

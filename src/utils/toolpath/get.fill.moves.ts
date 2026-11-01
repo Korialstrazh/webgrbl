@@ -1,7 +1,8 @@
 /**
- * Gets the moves of one pass of a fill layer. Lines are scanned in alternating direction, starting left to right, with
- * 2 mm of overscan travel at power 0 before and after the burnt pieces, so the head is at speed while it burns. A gap
- * longer than 5 mm becomes a travel; a shorter gap is crossed at power 0 at the burn feed.
+ * Gets the moves of all passes of a fill layer, each pass repeating every line. Lines are scanned in alternating
+ * direction, starting left to right, with 2 mm of overscan before and after the burnt pieces, burnt at power 0 and the
+ * layer feed so the head is at speed while it burns. A gap longer than 5 mm becomes a travel; a shorter gap is crossed
+ * at power 0 at the layer feed.
  *
  * @author michael.morosov
  *
@@ -54,23 +55,25 @@ const addFillLineMoves = (moveList: ToolpathMoveList, fillLine: FillLine, direct
   const lineStartX: number = getEntryX(firstSegment, direction);
 
   moveList.addTravelMove({ x: lineStartX - direction * FILL_OVERSCAN_MM, y });
-  moveList.addTravelMove({ x: lineStartX, y });
+  moveList.addBurnMove({ x: lineStartX, y }, TRAVEL_POWER_PERCENT);
 
   for (const segment of orderedSegments) {
     addSegmentMoves(moveList, segment, { y, direction });
   }
 
-  moveList.addTravelMove({ x: getExitX(lastSegment, direction) + direction * FILL_OVERSCAN_MM, y });
+  moveList.addBurnMove({ x: getExitX(lastSegment, direction) + direction * FILL_OVERSCAN_MM, y }, TRAVEL_POWER_PERCENT);
 };
 
 export const getFillMoves = ({ fillLines, layer, startPoint }: FillMovesInput): ToolpathMove[] => {
   const moveList: ToolpathMoveList = new ToolpathMoveList(startPoint, getToolpathMoveStyle(layer));
 
-  fillLines.forEach((fillLine: FillLine, lineIndex: number) => {
-    const isLeftToRight: boolean = lineIndex % LINES_PER_DIRECTION_CYCLE === 0;
+  for (let passIndex = 0; passIndex < layer.settings.passes; passIndex++) {
+    fillLines.forEach((fillLine: FillLine, lineIndex: number) => {
+      const isLeftToRight: boolean = lineIndex % LINES_PER_DIRECTION_CYCLE === 0;
 
-    addFillLineMoves(moveList, fillLine, isLeftToRight ? LEFT_TO_RIGHT_DIRECTION : RIGHT_TO_LEFT_DIRECTION);
-  });
+      addFillLineMoves(moveList, fillLine, isLeftToRight ? LEFT_TO_RIGHT_DIRECTION : RIGHT_TO_LEFT_DIRECTION);
+    });
+  }
 
   return moveList.getMoves();
 };

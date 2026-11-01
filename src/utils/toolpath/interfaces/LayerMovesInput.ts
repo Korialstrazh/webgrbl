@@ -20,6 +20,6 @@ export interface LayerMovesInput {
   drawables: BedDrawable[];
   /** Every paint area of the project in paint order, for fill mode. */
   paintAreas: ToolpathPaintArea[];
-  /** Where the head is before the first pass. */
+  /** Where the head is before the layer starts. */
   startPoint: GeometryPoint;
 }

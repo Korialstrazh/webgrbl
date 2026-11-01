@@ -5,14 +5,16 @@ import type { FillLine } from './interfaces/FillLine';
 import type { FillSegment } from './interfaces/FillSegment';
 import { getBoxSubpath } from './test.support/get.box.subpath';
 import { newBedDrawable } from './test.support/new.bed.drawable';
+import { newDrawablePaint } from './test.support/new.drawable.paint';
 import { newSvgPaint } from './test.support/new.svg.paint';
 import { SHADING_POWER_QUANTUM_PERCENT } from './toolpath.constants';
 import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
 import { DEFAULT_PALETTE } from '../palette/palette.constants';
+import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
-import { SVG_GRADIENT_KIND, SVG_GRADIENT_UNITS } from '../svg/geometry/svg.geometry.constants';
+import { SVG_FILL_RULE, SVG_GRADIENT_KIND, SVG_GRADIENT_UNITS } from '../svg/geometry/svg.geometry.constants';
 
 const GREEN = '#00a000';
 const WHITE = '#ffffff';
@@ -21,9 +23,12 @@ const BOX_SIZE_MM = 10;
 const FILL_POWER_PERCENT = 50;
 const SHADING_MAX_PERCENT = 60;
 
+/** Maps object-box gradient fractions (y down) onto the box at the bed origin (y up). */
+const BOX_GRADIENT_MATRIX: SvgMatrix = { a: BOX_SIZE_MM, b: 0, c: 0, d: -BOX_SIZE_MM, e: 0, f: BOX_SIZE_MM };
+
 const getFilledBox = (paint: SvgPaint, maxY: number, paintOrder: number): BedDrawable => newBedDrawable({
   subpaths: [getBoxSubpath({ minX: 0, minY: 0, maxX: BOX_SIZE_MM, maxY })],
-  paint: { fill: paint, stroke: undefined, strokeWidth: 1 },
+  paint: newDrawablePaint({ fill: paint, stroke: undefined, strokeWidth: 1 }),
   paintOrder,
 });
 
@@ -71,7 +76,10 @@ describe(getFillLines.name, () => {
     });
 
     const segments: FillSegment[] = getLines(
-      [getFilledBox(gradientPaint, BOX_SIZE_MM, 0)],
+      [newBedDrawable({
+        subpaths: [getBoxSubpath({ minX: 0, minY: 0, maxX: BOX_SIZE_MM, maxY: BOX_SIZE_MM })],
+        paint: newDrawablePaint({ fill: gradientPaint, fillGradientMatrix: BOX_GRADIENT_MATRIX }),
+      })],
       getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0),
     )[0]?.segments ?? [];
 
@@ -92,5 +100,22 @@ describe(getFillLines.name, () => {
     const whiteBox: BedDrawable = getFilledBox(newSvgPaint({ colour: WHITE }), BOX_SIZE_MM, 0);
 
     expect(getLines([whiteBox], getNewLayer(GREEN, DEFAULT_PALETTE, 0))).toEqual([]);
+  });
+
+  it('fills an evenodd shape with a hole where its subpaths overlap, even when they run the same way', () => {
+    const ringBox: BedDrawable = newBedDrawable({
+      subpaths: [
+        getBoxSubpath({ minX: 0, minY: 0, maxX: BOX_SIZE_MM, maxY: BOX_SIZE_MM }),
+        getBoxSubpath({ minX: 3, minY: 3, maxX: 7, maxY: 7 }),
+      ],
+      paint: newDrawablePaint({ fill: newSvgPaint({ colour: GREEN }), fillRule: SVG_FILL_RULE.EVENODD }),
+    });
+
+    const middleLine: FillLine | undefined = getLines([ringBox], getNewLayer(GREEN, DEFAULT_PALETTE, 0))[50];
+
+    expect(middleLine?.segments).toEqual([
+      { x0: 0, x1: 3, powerPercent: FILL_POWER_PERCENT },
+      { x0: 7, x1: BOX_SIZE_MM, powerPercent: FILL_POWER_PERCENT },
+    ]);
   });
 });

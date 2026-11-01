@@ -13,11 +13,12 @@ import { getGradientOffset } from './get.gradient.offset';
 import { getPaintLightness } from './get.paint.lightness';
 import type { GradientLightnessStop } from './interfaces/GradientLightnessStop';
 import type { GradientLightnessValue } from './interfaces/GradientLightnessValue';
-import type { ToolpathBounds } from './interfaces/ToolpathBounds';
 import { WHITE_LIGHTNESS } from './toolpath.constants';
 import { getColourLightness } from '../layers/get.colour.lightness';
+import { getSvgMatrixPoint } from '../svg/geometry/get.svg.matrix.point';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { SvgGradientStop } from '../svg/geometry/interfaces/SvgGradientStop';
+import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
 
 const STOPS_CACHE: WeakMap<SvgGradientStop[], GradientLightnessStop[]> = new WeakMap();
@@ -63,12 +64,17 @@ const getStopAt = (stops: GradientLightnessStop[], offset: number): GradientLigh
   };
 };
 
-export const getGradientLightness = (paint: SvgPaint, shapeBounds: ToolpathBounds, point: GeometryPoint): number => {
-  if (!paint.gradient) {
+export const getGradientLightness = (
+  paint: SvgPaint,
+  bedToGradientMatrix: SvgMatrix | undefined,
+  point: GeometryPoint,
+): number => {
+  if (!paint.gradient || !bedToGradientMatrix) {
     return getPaintLightness(paint.colour, paint.opacity);
   }
 
-  const offset: number = Math.min(1, Math.max(0, getGradientOffset(paint.gradient, shapeBounds, point)));
+  const gradientOffset: number = getGradientOffset(paint.gradient, getSvgMatrixPoint(bedToGradientMatrix, point));
+  const offset: number = Math.min(1, Math.max(0, gradientOffset));
   const { lightness, opacity } = getStopAt(getLightnessStops(paint.gradient.stops), offset);
 
   return WHITE_LIGHTNESS - paint.opacity * opacity * (WHITE_LIGHTNESS - lightness);

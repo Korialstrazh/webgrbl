@@ -16,9 +16,13 @@ import type { ScanlineSpan } from './interfaces/ScanlineSpan';
 import type { ToolpathEdgeIndex } from './interfaces/ToolpathEdgeIndex';
 import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
 import { EDGE_VALUE_COUNT, EDGE_X0_OFFSET, EDGE_X1_OFFSET, EDGE_Y0_OFFSET, EDGE_Y1_OFFSET } from './toolpath.constants';
+import { SVG_FILL_RULE } from '../svg/geometry/svg.geometry.constants';
+import type { SvgFillRule } from '../svg/geometry/svg.geometry.constants';
 
 const NO_EDGES: Float64Array = new Float64Array(0);
 const UPWARD_WINDING = 1;
+/** Under the evenodd rule a point is inside after an odd number of crossings. */
+const EVENODD_WINDING_PERIOD = 2;
 const DOWNWARD_WINDING = -1;
 
 /** Whether the scanline crosses the edge, counting the lower end of the edge but not the upper one. */
@@ -53,19 +57,25 @@ const getScanlineCrossings = (edges: Float64Array, y: number): ScanlineCrossing[
 const getScanlineBandEdges = (edgeIndex: ToolpathEdgeIndex, y: number): Float64Array =>
   edgeIndex.bands[getEdgeBandIndex(edgeIndex, y)] ?? NO_EDGES;
 
+/** Whether a winding sum lies inside the area: nonzero for the nonzero rule, odd for the evenodd rule. */
+const isInsideWinding = (windingSum: number, fillRule: SvgFillRule): boolean =>
+  (fillRule === SVG_FILL_RULE.EVENODD ? windingSum % EVENODD_WINDING_PERIOD !== 0 : windingSum !== 0);
+
 export const getPaintAreaScanlineSpans = (paintArea: ToolpathPaintArea, y: number): ScanlineSpan[] => {
   const spans: ScanlineSpan[] = [];
   let windingSum = 0;
   let spanStartX = 0;
 
   for (const crossing of getScanlineCrossings(getScanlineBandEdges(paintArea.edgeIndex, y), y)) {
-    const wasInside: boolean = windingSum !== 0;
+    const wasInside: boolean = isInsideWinding(windingSum, paintArea.fillRule);
 
     windingSum += crossing.winding;
 
-    if (!wasInside) {
+    const isInside: boolean = isInsideWinding(windingSum, paintArea.fillRule);
+
+    if (!wasInside && isInside) {
       spanStartX = crossing.x;
-    } else if (!windingSum && crossing.x > spanStartX) {
+    } else if (wasInside && !isInside && crossing.x > spanStartX) {
       spans.push({ x0: spanStartX, x1: crossing.x });
     }
   }

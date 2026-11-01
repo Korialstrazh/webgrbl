@@ -25,6 +25,7 @@ import { getSvgExpandedDocument } from '../svg/geometry/get.svg.expanded.documen
 import { getSvgMatrixAreaScale } from '../svg/geometry/get.svg.matrix.area.scale';
 import { getSvgMatrixMaxScale } from '../svg/geometry/get.svg.matrix.max.scale';
 import { getSvgMatrixPoint } from '../svg/geometry/get.svg.matrix.point';
+import { getSvgMatrixProduct } from '../svg/geometry/get.svg.matrix.product';
 import { hasDrawableOutsideBounds } from '../svg/geometry/has.drawable.outside.bounds';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { SvgDrawable } from '../svg/geometry/interfaces/SvgDrawable';
@@ -38,12 +39,21 @@ import { getSvgViewBox } from '../svg/get.svg.view.box';
 import type { SvgViewBox } from '../svg/interfaces/SvgViewBox';
 import type { SvgViewportBounds } from '../svg/interfaces/SvgViewportBounds';
 
+/** The gradient matrix carried on from root user units to bed millimetres. */
+const getBedGradientMatrix = (gradientMatrix: SvgMatrix | undefined, matrix: SvgMatrix): SvgMatrix | undefined =>
+  (gradientMatrix ? getSvgMatrixProduct(matrix, gradientMatrix) : undefined);
+
 const getBedDrawable = (svgDrawable: SvgDrawable, matrix: SvgMatrix): SvgDrawable => ({
   subpaths: svgDrawable.subpaths.map((subpath: SvgSubpath): SvgSubpath => ({
     points: subpath.points.map((point: GeometryPoint): GeometryPoint => getSvgMatrixPoint(matrix, point)),
     isClosed: subpath.isClosed,
   })),
-  paint: { ...svgDrawable.paint, strokeWidth: svgDrawable.paint.strokeWidth * getSvgMatrixAreaScale(matrix) },
+  paint: {
+    ...svgDrawable.paint,
+    strokeWidth: svgDrawable.paint.strokeWidth * getSvgMatrixAreaScale(matrix),
+    fillGradientMatrix: getBedGradientMatrix(svgDrawable.paint.fillGradientMatrix, matrix),
+    strokeGradientMatrix: getBedGradientMatrix(svgDrawable.paint.strokeGradientMatrix, matrix),
+  },
   paintOrder: svgDrawable.paintOrder,
 });
 

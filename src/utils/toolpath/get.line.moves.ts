@@ -38,8 +38,12 @@ const addPolylineMoves = (moveList: ToolpathMoveList, polyline: LinePolyline): v
 export const getLineMoves = ({ drawables, layer, startPoint }: LineMovesInput): ToolpathMove[] => {
   const moveList: ToolpathMoveList = new ToolpathMoveList(startPoint, getToolpathMoveStyle(layer));
 
-  for (const polyline of getPolylinesInBurnOrder(getLinePolylines(drawables, layer), startPoint)) {
-    addPolylineMoves(moveList, polyline);
+  const orderedPolylines: LinePolyline[] = getPolylinesInBurnOrder(getLinePolylines(drawables, layer), startPoint);
+
+  for (let passIndex = 0; passIndex < layer.settings.passes; passIndex++) {
+    for (const polyline of orderedPolylines) {
+      addPolylineMoves(moveList, polyline);
+    }
   }
 
   return moveList.getMoves();

@@ -17,7 +17,6 @@ import { getLineMoves } from './get.line.moves';
 import { getToolpathBounds } from './get.toolpath.bounds';
 import { getToolpathPaintAreas } from './get.toolpath.paint.areas';
 import type { BedDrawable } from './interfaces/BedDrawable';
-import type { FillLine } from './interfaces/FillLine';
 import type { LayerMovesInput } from './interfaces/LayerMovesInput';
 import type { ObjectWarning } from './interfaces/ObjectWarning';
 import type { Toolpath } from './interfaces/Toolpath';
@@ -42,23 +41,10 @@ const addMoves = (moves: ToolpathMove[], newMoves: ToolpathMove[]): void => {
   }
 };
 
-const getLayerMoves = ({ layer, drawables, paintAreas, startPoint }: LayerMovesInput): ToolpathMove[] => {
-  const isFillLayer: boolean = layer.settings.mode === LAYER_MODE.FILL;
-  const fillLines: FillLine[] = isFillLayer ? getFillLines({ paintAreas, layer }) : [];
-  const layerMoves: ToolpathMove[] = [];
-  let position: GeometryPoint = startPoint;
-
-  for (let passIndex = 0; passIndex < layer.settings.passes; passIndex++) {
-    const passMoves: ToolpathMove[] = isFillLayer
-      ? getFillMoves({ fillLines, layer, startPoint: position })
-      : getLineMoves({ drawables, layer, startPoint: position });
-
-    addMoves(layerMoves, passMoves);
-    position = passMoves.at(-1)?.to ?? position;
-  }
-
-  return layerMoves;
-};
+const getLayerMoves = ({ layer, drawables, paintAreas, startPoint }: LayerMovesInput): ToolpathMove[] =>
+  (layer.settings.mode === LAYER_MODE.FILL
+    ? getFillMoves({ fillLines: getFillLines({ paintAreas, layer }), layer, startPoint })
+    : getLineMoves({ drawables, layer, startPoint }));
 
 export const getToolpath = (drawables: BedDrawable[], warnings: ObjectWarning[], layers: ProjectLayer[]): Toolpath => {
   const enabledLayers: ProjectLayer[] = getEnabledLayersInOrder(layers);

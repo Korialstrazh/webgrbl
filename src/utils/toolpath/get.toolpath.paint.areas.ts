@@ -16,6 +16,7 @@ import { getPolygonEdges } from './get.polygon.edges';
 import { getStrokeOutlineSubpaths } from './get.stroke.outline.subpaths';
 import { getSubpathsBounds } from './get.subpaths.bounds';
 import type { BedDrawable } from './interfaces/BedDrawable';
+import type { PaintAreaInput } from './interfaces/PaintAreaInput';
 import type { ToolpathBounds } from './interfaces/ToolpathBounds';
 import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
 import { getLayerKey } from '../layers/get.layer.key';
@@ -23,14 +24,11 @@ import { getPaintLayerKey } from '../layers/get.paint.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { LAYER_MODE } from '../palette/palette.constants';
 import type { LayerMode } from '../palette/palette.constants';
+import { getSvgMatrixInverse } from '../svg/geometry/get.svg.matrix.inverse';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
-import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
+import { SVG_FILL_RULE } from '../svg/geometry/svg.geometry.constants';
 
-const getPaintArea = (
-  subpaths: SvgSubpath[],
-  paint: SvgPaint,
-  shapeBounds: ToolpathBounds,
-): ToolpathPaintArea | undefined => {
+const getPaintArea = ({ subpaths, paint, gradientMatrix, fillRule }: PaintAreaInput): ToolpathPaintArea | undefined => {
   const bounds: ToolpathBounds | undefined = getSubpathsBounds(subpaths);
   const edges: Float64Array = getPolygonEdges(subpaths);
 
@@ -41,7 +39,8 @@ const getPaintArea = (
   return {
     edgeIndex: getPaintAreaEdgeIndex(edges, bounds),
     bounds,
-    shapeBounds,
+    gradientMatrix: gradientMatrix ? getSvgMatrixInverse(gradientMatrix) : undefined,
+    fillRule,
     paint,
     layerKey: getPaintLayerKey(paint),
   };
@@ -52,20 +51,25 @@ const isFillLayerStroke = (stroke: SvgPaint | undefined, layerModes: Map<string,
   !!stroke && layerModes.get(getPaintLayerKey(stroke)) === LAYER_MODE.FILL;
 
 const getDrawablePaintAreas = (drawable: BedDrawable, layerModes: Map<string, LayerMode>): ToolpathPaintArea[] => {
-  const { fill, stroke, strokeWidth } = drawable.paint;
-  const shapeBounds: ToolpathBounds | undefined = getSubpathsBounds(drawable.subpaths);
+  const { fill, stroke, strokeWidth, fillRule, fillGradientMatrix, strokeGradientMatrix } = drawable.paint;
   const paintAreas: (ToolpathPaintArea | undefined)[] = [];
 
-  if (!shapeBounds) {
-    return [];
-  }
-
   if (fill) {
-    paintAreas.push(getPaintArea(drawable.subpaths, fill, shapeBounds));
+    paintAreas.push(getPaintArea({
+      subpaths: drawable.subpaths,
+      paint: fill,
+      gradientMatrix: fillGradientMatrix,
+      fillRule,
+    }));
   }
 
   if (isFillLayerStroke(stroke, layerModes)) {
-    paintAreas.push(getPaintArea(getStrokeOutlineSubpaths(drawable.subpaths, strokeWidth), stroke, shapeBounds));
+    paintAreas.push(getPaintArea({
+      subpaths: getStrokeOutlineSubpaths(drawable.subpaths, strokeWidth),
+      paint: stroke,
+      gradientMatrix: strokeGradientMatrix,
+      fillRule: SVG_FILL_RULE.NONZERO,
+    }));
   }
 
   return paintAreas.filter(

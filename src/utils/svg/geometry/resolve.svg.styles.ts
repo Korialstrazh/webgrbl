@@ -24,6 +24,7 @@ import {
   SVG_DEFAULT_OPACITY,
   SVG_DEFAULT_STOP_COLOUR,
   SVG_DISPLAY_NONE,
+  SVG_FILL_RULES,
   SVG_ID_ATTRIBUTE_NAME,
   SVG_LINEAR_GRADIENT_ELEMENT_NAME,
   SVG_RADIAL_GRADIENT_ELEMENT_NAME,
@@ -32,6 +33,7 @@ import {
   SVG_VISIBILITY_HIDDEN,
   SVG_VISIBILITY_VISIBLE,
 } from './svg.geometry.constants';
+import type { SvgFillRule } from './svg.geometry.constants';
 import { getParsedColour } from '../../palette/get.parsed.colour';
 import type { ParsedColour } from '../../palette/interfaces/ParsedColour';
 import { SVG_ALL_ELEMENTS_SELECTOR } from '../svg.constants';
@@ -42,6 +44,15 @@ const getVisibility = (visibilityValue: string | undefined, parentIsVisible: boo
   }
 
   return visibilityValue === SVG_VISIBILITY_VISIBLE ? true : parentIsVisible;
+};
+
+const isSvgFillRule = (fillRuleValue: string | undefined): fillRuleValue is SvgFillRule =>
+  !!fillRuleValue && SVG_FILL_RULES.includes(fillRuleValue);
+
+const getFillRule = (fillRuleValue: string | undefined, parentFillRule: SvgFillRule): SvgFillRule => {
+  const normalizedValue: string | undefined = fillRuleValue?.trim().toLowerCase();
+
+  return isSvgFillRule(normalizedValue) ? normalizedValue : parentFillRule;
 };
 
 const getStrokeWidth = (strokeWidthValue: string | undefined, parentStrokeWidth: number): number => {
@@ -101,6 +112,7 @@ const getResolvedElementStyle = (
     strokeOpacity: getSvgFraction(declarations[SVG_PROPERTY.STROKE_OPACITY], parentStyle.strokeOpacity),
     isDisplayed: parentStyle.isDisplayed && declarations[SVG_PROPERTY.DISPLAY] !== SVG_DISPLAY_NONE,
     isVisible: getVisibility(declarations[SVG_PROPERTY.VISIBILITY], parentStyle.isVisible),
+    fillRule: getFillRule(declarations[SVG_PROPERTY.FILL_RULE], parentStyle.fillRule),
     ...getResolvedStop(declarations[SVG_PROPERTY.STOP_COLOR], declarations[SVG_PROPERTY.STOP_OPACITY], colour),
   };
 };

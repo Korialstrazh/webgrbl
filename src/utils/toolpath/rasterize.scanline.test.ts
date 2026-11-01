@@ -5,6 +5,7 @@ import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
 import { getScanlineRuns } from './rasterize.scanline';
 import { getBoxSubpath } from './test.support/get.box.subpath';
 import { newBedDrawable } from './test.support/new.bed.drawable';
+import { newDrawablePaint } from './test.support/new.drawable.paint';
 import { newSvgPaint } from './test.support/new.svg.paint';
 import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
@@ -18,7 +19,7 @@ const WHITE = '#ffffff';
 const MIDDLE_Y = 5;
 
 const getFilledDrawable = (subpaths: SvgSubpath[], colour: string, paintOrder: number): BedDrawable =>
-  newBedDrawable({ subpaths, paint: { fill: newSvgPaint({ colour }), stroke: undefined, strokeWidth: 1 }, paintOrder });
+  newBedDrawable({ subpaths, paint: newDrawablePaint({ fill: newSvgPaint({ colour }) }), paintOrder });
 
 const getReversedSubpath = (subpath: SvgSubpath): SvgSubpath => ({ ...subpath, points: [...subpath.points].reverse() });
 
@@ -78,7 +79,7 @@ describe(getScanlineRuns.name, () => {
     const horizontalStroke: SvgSubpath = { points: [{ x: 0, y: 5 }, { x: 10, y: 5 }], isClosed: false };
     const greenStroke: BedDrawable = newBedDrawable({
       subpaths: [horizontalStroke],
-      paint: { fill: undefined, stroke: newSvgPaint({ colour: GREEN }), strokeWidth: 2 },
+      paint: newDrawablePaint({ fill: undefined, stroke: newSvgPaint({ colour: GREEN }), strokeWidth: 2 }),
     });
     const redStroke: BedDrawable = {
       ...greenStroke,

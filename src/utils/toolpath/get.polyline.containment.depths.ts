@@ -59,15 +59,15 @@ const isOutlineInside = (innerOutline: BoxedOutline, outerOutline: BoxedOutline)
 };
 
 const getBoxedOutline = (polyline: LinePolyline): BoxedOutline | undefined => {
-  const box: ToolpathBounds | undefined = polyline.isClosed ? getSubpathsBounds([polyline]) : undefined;
+  const box: ToolpathBounds | undefined = getSubpathsBounds([polyline]);
 
-  return box ? { points: polyline.points, box } : undefined;
+  return box ? { points: polyline.points, box, isClosed: polyline.isClosed } : undefined;
 };
 
 export const getPolylineContainmentDepths = (polylines: LinePolyline[]): number[] => {
   const boxedOutlines: (BoxedOutline | undefined)[] = polylines.map(getBoxedOutline);
   const closedOutlines: BoxedOutline[] = boxedOutlines.filter(
-    (boxedOutline: BoxedOutline | undefined): boxedOutline is BoxedOutline => !!boxedOutline,
+    (boxedOutline: BoxedOutline | undefined): boxedOutline is BoxedOutline => !!boxedOutline?.isClosed,
   );
 
   return boxedOutlines.map((innerOutline: BoxedOutline | undefined): number => {

@@ -65,6 +65,7 @@ export const SVG_GRADIENT_ATTRIBUTE = {
   R: 'r',
 } as const;
 export const SVG_GRADIENT_UNITS_ATTRIBUTE_NAME = 'gradientUnits';
+export const SVG_GRADIENT_TRANSFORM_ATTRIBUTE_NAME = 'gradientTransform';
 export const SVG_OFFSET_ATTRIBUTE_NAME = 'offset';
 
 export const SVG_PROPERTY = {
@@ -80,8 +81,18 @@ export const SVG_PROPERTY = {
   STOP_OPACITY: 'stop-opacity',
   COLOR: 'color',
   CLIP_PATH: 'clip-path',
+  FILL_RULE: 'fill-rule',
   MASK: 'mask',
 } as const;
+
+export const SVG_FILL_RULE = {
+  NONZERO: 'nonzero',
+  EVENODD: 'evenodd',
+} as const;
+
+export type SvgFillRule = (typeof SVG_FILL_RULE)[keyof typeof SVG_FILL_RULE];
+
+export const SVG_FILL_RULES: readonly string[] = Object.values(SVG_FILL_RULE);
 
 export const SVG_PAINT_NONE = 'none';
 export const SVG_DISPLAY_NONE = 'none';
@@ -128,4 +139,5 @@ export const SVG_ROOT_DEFAULT_STYLE: SvgResolvedStyle = {
   isVisible: true,
   stopColour: SVG_DEFAULT_STOP_COLOUR,
   stopOpacity: SVG_DEFAULT_OPACITY,
+  fillRule: SVG_FILL_RULE.NONZERO,
 };

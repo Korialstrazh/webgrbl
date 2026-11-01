@@ -1,6 +1,7 @@
 import { getSvgDrawables } from './get.svg.drawables';
 import type { SvgDrawable } from './interfaces/SvgDrawable';
 import type { SvgDrawableSet } from './interfaces/SvgDrawableSet';
+import { SVG_FILL_RULE } from './svg.geometry.constants';
 import { SVG_UNSUPPORTED_KIND, SVG_USE_MAX_COPIED_ELEMENTS } from './svg.shape.constants';
 import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 
@@ -275,10 +276,36 @@ describe(getSvgDrawables.name, () => {
       fill: undefined,
       stroke: { colour: RED, opacity: 1, gradient: undefined },
       strokeWidth: 6,
+      fillRule: SVG_FILL_RULE.NONZERO,
+      fillGradientMatrix: undefined,
+      strokeGradientMatrix: undefined,
     });
   });
 
   it('gives nothing for text that is not an SVG', () => {
     expect(getSvgDrawables('not svg', TOLERANCE)).toEqual({ drawables: [], unsupported: [] });
+  });
+
+  it('maps an object-box gradient from the box of the element in its own user space', () => {
+    const drawable: SvgDrawable = getOnlyDrawable(
+      '<defs><linearGradient id="g"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/>'
+      + '</linearGradient></defs><rect transform="translate(10 20)" x="1" y="2" width="4" height="8" fill="url(#g)"/>',
+    );
+
+    expect(drawable.paint.fillGradientMatrix).toEqual({ a: 4, b: 0, c: 0, d: 8, e: 11, f: 22 });
+  });
+
+  it('applies the gradientTransform after the element transform for a user space gradient', () => {
+    const drawable: SvgDrawable = getOnlyDrawable(
+      '<defs><linearGradient id="g" gradientUnits="userSpaceOnUse" gradientTransform="translate(3 0)">'
+      + '<stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>'
+      + '<rect transform="scale(2)" width="4" height="8" fill="url(#g)"/>',
+    );
+
+    expect(drawable.paint.fillGradientMatrix).toEqual({ a: 2, b: 0, c: 0, d: 2, e: 6, f: 0 });
+  });
+
+  it('carries the fill rule of the element', () => {
+    expect(getOnlyDrawable(`<rect fill-rule="evenodd" ${UNIT_SQUARE}/>`).paint.fillRule).toBe(SVG_FILL_RULE.EVENODD);
   });
 });

@@ -1,7 +1,8 @@
 /**
- * Gets the outlines a line layer burns: every subpath of a stroke of the layer, open ones included, and the closed
- * outline of a filled shape of the layer that has no stroke. Each burns at its power: the layer maximum, or the power
- * of its grey in the shading layer. White outlines burn nothing and are left out.
+ * Gets the outlines a line layer burns: every subpath of a shape whose stroke belongs to the layer, open ones included,
+ * and the closed outline of a shape whose fill belongs to the layer, whatever layer its stroke is on. A shape whose
+ * fill and stroke both belong to the layer is burnt once, at the higher of their powers. Each burns at its power: the
+ * layer maximum, or the power of its grey in the shading layer. White outlines burn nothing and are left out.
  *
  * @author michael.morosov
  *
@@ -21,21 +22,17 @@ import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 
 const MIN_POLYLINE_POINT_COUNT = 2;
 
-/** The paint whose outline the layer burns: the stroke, or the fill of a shape without a stroke. */
-const getOutlinePaint = (drawable: BedDrawable): SvgPaint | undefined => drawable.paint.stroke ?? drawable.paint.fill;
-
 const isLayerPaint = (paint: SvgPaint | undefined, layer: ProjectLayer): paint is SvgPaint =>
   !!paint && getPaintLayerKey(paint) === getLayerKey(layer);
 
+/** The power of a paint when it belongs to the layer, otherwise 0. */
+const getLayerPaintPower = (paint: SvgPaint | undefined, layer: ProjectLayer): number =>
+  (isLayerPaint(paint, layer) ? getPaintPowerPercent(paint, layer) : 0);
+
 const getDrawablePolylines = (drawable: BedDrawable, layer: ProjectLayer): LinePolyline[] => {
-  const outlinePaint: SvgPaint | undefined = getOutlinePaint(drawable);
-  const isFillOutline: boolean = !drawable.paint.stroke;
-
-  if (!isLayerPaint(outlinePaint, layer)) {
-    return [];
-  }
-
-  const powerPercent: number = getPaintPowerPercent(outlinePaint, layer);
+  const { fill, stroke } = drawable.paint;
+  const isFillOutline: boolean = isLayerPaint(fill, layer);
+  const powerPercent: number = Math.max(getLayerPaintPower(fill, layer), getLayerPaintPower(stroke, layer));
 
   if (powerPercent <= 0) {
     return [];

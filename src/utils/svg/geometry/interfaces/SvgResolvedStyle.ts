@@ -8,6 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { SvgFillRule } from '../svg.geometry.constants';
+
 export interface SvgResolvedStyle {
   /** Lowercase #rrggbb, none, or a url(#id) reference. */
   fill: string;
@@ -35,4 +37,6 @@ export interface SvgResolvedStyle {
   stopColour: string;
   /** Stop opacity from 0 to 1; only meaningful on a gradient stop. */
   stopOpacity: number;
+  /** Which points of a fill are inside where its subpaths overlap, inherited. */
+  fillRule: SvgFillRule;
 }
