@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_PALETTE } from '../palette/palette.constants';
 import { getSanitizedSvg } from '../svg/get.sanitized.svg';
 import type { SanitizedSvg } from '../svg/interfaces/SanitizedSvg';
 import type { SvgImportFailure } from '../svg/interfaces/SvgImportFailure';
@@ -55,22 +56,22 @@ const newFileObject = (overrides: Partial<ProjectObject> = {}): ProjectObject =>
 
 /** The file of one object as a plain value a test can break field by field. */
 const getFileValue = (objects: ProjectObject[] = [newFileObject()]): Record<string, unknown> =>
-  JSON.parse(getProjectFileText(PROJECT_NAME, { objects }));
+  JSON.parse(getProjectFileText(PROJECT_NAME, { objects, layers: [] }));
 
 const getImportedValue = (fileValue: unknown): ImportedProjectFile | undefined =>
-  getImportedProjectFile(JSON.stringify(fileValue));
+  getImportedProjectFile(JSON.stringify(fileValue), DEFAULT_PALETTE);
 
 const getObjectWithoutId = ({ id: _id, ...objectFields }: ProjectObject): Omit<ProjectObject, 'id'> => objectFields;
 
 describe(getProjectFileText.name, () => {
   it('writes pretty JSON with the format fields first and a stable field order per object', () => {
-    const fileText: string = getProjectFileText(PROJECT_NAME, { objects: [newFileObject()] });
+    const fileText: string = getProjectFileText(PROJECT_NAME, { objects: [newFileObject()], layers: [] });
     const fileValue: Record<string, unknown> = JSON.parse(fileText);
     const fileObjects: object[] = fileValue.objects as object[];
 
     expect(fileText.startsWith(`{\n  "format": "${PROJECT_FILE_FORMAT}",\n  "version": ${PROJECT_FILE_VERSION},`))
       .toBe(true);
-    expect(Object.keys(fileValue)).toEqual(['format', 'version', 'name', 'objects']);
+    expect(Object.keys(fileValue)).toEqual(['format', 'version', 'name', 'objects', 'layers']);
     expect(Object.keys(fileObjects[0] ?? {})).toEqual([
       'id', 'name', 'svgText', 'intrinsicWidthMm', 'intrinsicHeightMm', 'xMm', 'yMm', 'widthMm', 'heightMm',
       'rotationDeg',
@@ -82,10 +83,11 @@ describe(getImportedProjectFile.name, () => {
   it('reads back an equal document with new ids', () => {
     const firstObject: ProjectObject = newFileObject();
     const secondObject: ProjectObject = newFileObject({ name: 'Stem', xMm: 50 });
-    const projectDocument: ProjectDocument = { objects: [firstObject, secondObject] };
+    const projectDocument: ProjectDocument = { objects: [firstObject, secondObject], layers: [] };
 
     const importedFile: ImportedProjectFile | undefined = getImportedProjectFile(
       getProjectFileText(PROJECT_NAME, projectDocument),
+      DEFAULT_PALETTE,
     );
 
     expect(importedFile?.name).toBe(PROJECT_NAME);
@@ -97,7 +99,7 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('reads a file with no objects', () => {
-    expect(getImportedValue(getFileValue([]))).toEqual({ name: PROJECT_NAME, document: { objects: [] } });
+    expect(getImportedValue(getFileValue([]))).toEqual({ name: PROJECT_NAME, document: { objects: [], layers: [] } });
   });
 
   it('cleans a script out of an object SVG', () => {
@@ -190,7 +192,7 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('rejects malformed JSON', () => {
-    expect(getImportedProjectFile('{"format": ')).toBeUndefined();
+    expect(getImportedProjectFile('{"format": ', DEFAULT_PALETTE)).toBeUndefined();
   });
 
   it('rejects another format or another version', () => {
@@ -209,9 +211,13 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('rejects a number too large to be finite', () => {
-    const fileText: string = getProjectFileText(PROJECT_NAME, { objects: [newFileObject({ xMm: LARGE_X_MM })] });
+    const fileText: string = getProjectFileText(PROJECT_NAME, {
+      objects: [newFileObject({ xMm: LARGE_X_MM })],
+      layers: [],
+    });
+    const brokenFileText: string = fileText.replace(String(LARGE_X_MM), INFINITE_NUMBER_TEXT);
 
-    expect(getImportedProjectFile(fileText.replace(String(LARGE_X_MM), INFINITE_NUMBER_TEXT))).toBeUndefined();
+    expect(getImportedProjectFile(brokenFileText, DEFAULT_PALETTE)).toBeUndefined();
   });
 
   it('rejects an empty or too long name', () => {

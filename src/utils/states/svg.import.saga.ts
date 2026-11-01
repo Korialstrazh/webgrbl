@@ -14,7 +14,9 @@ import { call, put, select } from 'redux-saga/effects';
 import { getBedDimensions } from '../bed/get.bed.dimensions';
 import type { BedDimensions } from '../bed/interfaces/BedDimensions';
 import { DEFAULT } from '../localization/default.locales';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
+import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
 import {
@@ -30,8 +32,9 @@ import { readSvgFile } from '../svg/read.svg.file';
 import { selectGrblSettings, selectIsConnected } from './grbl.connection.state';
 import type { AcceptedSvgFile } from './interfaces/AcceptedSvgFile';
 import { selectActiveMachineProfile } from './machine.profile.state';
-import { ProjectObjectsAdded, selectProjectObjects } from './project.document.state';
+import { ProjectObjectsAdded, selectProjectDocument, selectProjectObjects } from './project.document.state';
 import type { SvgFilesImportRequested } from './project.document.state';
+import { deriveProjectLayers } from './project.layers.derive.saga';
 import { ProjectSelectionChanged } from './project.selection.state';
 import { SVG_IMPORT_FAILURE_TOAST_KEY } from './svg.import.constants';
 import { TOAST_SEVERITY } from './toast.constants';
@@ -85,7 +88,8 @@ function* getCurrentBed(): Generator<unknown, BedDimensions> {
 
 function* addAcceptedFiles(acceptedFiles: AcceptedSvgFile[]): Generator<unknown, boolean> {
   // Read again after the awaited file reads: other imports, deletes or undo may have changed the count meanwhile.
-  const existingObjects: ProjectObject[] = (yield select(selectProjectObjects)) as ProjectObject[];
+  const projectDocument: ProjectDocument = (yield select(selectProjectDocument)) as ProjectDocument;
+  const existingObjects: ProjectObject[] = projectDocument.objects;
   const roomCount: number = Math.max(MAX_PROJECT_OBJECTS - existingObjects.length, 0);
   const fittingFiles: AcceptedSvgFile[] = acceptedFiles.slice(0, roomCount);
   const importedObjects: ProjectObject[] = fittingFiles.map(
@@ -94,7 +98,13 @@ function* addAcceptedFiles(acceptedFiles: AcceptedSvgFile[]): Generator<unknown,
   );
 
   if (importedObjects.length) {
-    yield put(new ProjectObjectsAdded({ objects: importedObjects }));
+    const derivedLayers: ProjectLayer[] = (yield call(
+      deriveProjectLayers,
+      [...existingObjects, ...importedObjects],
+      projectDocument.layers,
+    )) as ProjectLayer[];
+
+    yield put(new ProjectObjectsAdded({ objects: importedObjects, layers: derivedLayers }));
     yield put(new ProjectSelectionChanged({
       objectIds: importedObjects.map((projectObject: ProjectObject): string => projectObject.id),
     }));

@@ -24,3 +24,5 @@ export const FILL_MODE_RANK = 0;
 export const LINE_MODE_RANK = 1;
 /** The order value before the first layer, so the first layer gets 0. */
 export const NO_LAYER_ORDER = -1;
+/** How many SVG texts keep their read paints; enough for a full project and its undo history. */
+export const OBJECT_PAINTS_CACHE_SIZE = 200;

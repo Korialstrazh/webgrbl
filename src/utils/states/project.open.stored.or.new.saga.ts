@@ -20,7 +20,7 @@ function* openNewDefaultProject(): Generator {
   const createdProject: StoredProject =
     (yield call([PROJECT_REPOSITORY, PROJECT_REPOSITORY.createProject], getDefaultProjectName())) as StoredProject;
 
-  yield call(openLoadedProject, { project: createdProject, document: { objects: [] } });
+  yield call(openLoadedProject, { project: createdProject, document: { objects: [], layers: [] } });
 }
 
 export function* openStoredOrNewProject(projectId: string | undefined): Generator {

@@ -187,7 +187,7 @@ describe(BedPanel.name, () => {
     mockSvgScreenMatrix(IDENTITY_SVG_MATRIX, IDENTITY_SVG_MATRIX);
     renderPanel(store);
     act(() => {
-      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [projectObject] } }));
+      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [projectObject], layers: [] } }));
       store.dispatch(new ProjectSelectionChanged({ objectIds: [projectObject.id] }));
     });
     fireEvent.click(screen.getByRole('radio', { name: MOVE_TOOL_LABEL }));
@@ -298,7 +298,9 @@ describe(BedPanel.name, () => {
 
     renderPanel(store);
     act(() => {
-      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [newProjectObject({ name: OBJECT_NAME })] } }));
+      store.dispatch(new ProjectDocumentLoaded({
+        document: { objects: [newProjectObject({ name: OBJECT_NAME })], layers: [] },
+      }));
     });
 
     expect(screen.getByRole('img', { name: OBJECT_NAME })).toBeInTheDocument();

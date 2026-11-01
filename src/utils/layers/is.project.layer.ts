@@ -1,0 +1,26 @@
+/**
+ * Tells whether a value has every field of a project layer with the right type; the palette entry id may be missing.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-11-01
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+import { isLayerSettings } from './is.layer.settings';
+import type { ProjectLayer } from './interfaces/ProjectLayer';
+import { isBoolean } from '../type.guards/is.boolean';
+import { isFiniteNumber } from '../type.guards/is.finite.number';
+import { isOptionalString } from '../type.guards/is.optional.string';
+import { isRecord } from '../type.guards/is.record';
+import { isString } from '../type.guards/is.string';
+
+export const isProjectLayer = (value: unknown): value is ProjectLayer =>
+  isRecord(value) &&
+  isString(value.colour) &&
+  isBoolean(value.enabled) &&
+  isFiniteNumber(value.order) &&
+  isLayerSettings(value.settings) &&
+  isOptionalString(value.paletteEntryId) &&
+  isBoolean(value.isShading);

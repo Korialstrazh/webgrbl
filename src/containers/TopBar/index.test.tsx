@@ -188,7 +188,7 @@ describe(TopBar.name, () => {
     expect(screen.getByRole('button', { name: REDO_LABEL })).toBeDisabled();
 
     act(() => {
-      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()] }));
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
     });
 
     expect(screen.getByRole('button', { name: UNDO_LABEL })).toBeEnabled();
@@ -209,7 +209,7 @@ describe(TopBar.name, () => {
 
     renderWorkbenchTopBar(store);
     act(() => {
-      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()] }));
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
     });
     fireEvent.click(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL }));
     fireEvent.keyDown(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL }), { key: UNDO_KEY, ctrlKey: true });

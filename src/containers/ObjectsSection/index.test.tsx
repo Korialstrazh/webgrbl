@@ -61,6 +61,7 @@ const loadObjects = (store: AppStore): void => {
           newProjectObject({ id: FIRST_ID, name: FIRST_NAME, widthMm: WIDE_WIDTH_MM, heightMm: WIDE_HEIGHT_MM }),
           newProjectObject({ id: SECOND_ID, name: SECOND_NAME, widthMm: SECOND_SIZE_MM, heightMm: SECOND_SIZE_MM }),
         ],
+        layers: [],
       },
     }));
   });
@@ -97,6 +98,7 @@ const loadFractionalObjects = (store: AppStore): void => {
           newProjectObject({ id: FIRST_ID, name: FIRST_NAME, xMm: FRACTIONAL_X_MM }),
           newProjectObject({ id: SECOND_ID, name: SECOND_NAME, xMm: SECOND_X_MM }),
         ],
+        layers: [],
       },
     }));
   });

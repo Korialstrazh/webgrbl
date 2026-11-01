@@ -3,6 +3,11 @@
  * type-checked and every object's SVG is sanitised again like a fresh import, because a file can come from anywhere.
  * Imported objects get new ids, so a file never overwrites or shares rows with an existing project.
  *
+ * Version 2 files carry their layers: each one is type-checked, its settings are clamped to the palette ranges, and a
+ * layer whose colour no object draws is kept. Version 1 files have no layers. Either way, every colour the objects
+ * draw that has no layer yet gets one from the given palette, so the function stays pure and the caller passes the
+ * current palette in. Any other version is rejected.
+ *
  * @author michael.morosov
  *
  * @since 2026-11-01
@@ -10,6 +15,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getClampedLayerSettings } from '../layers/get.clamped.layer.settings';
+import { getLayerKey } from '../layers/get.layer.key';
+import { getObjectsDerivedLayers } from '../layers/get.objects.derived.layers';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import type { Palette } from '../palette/interfaces/Palette';
+import { getNormalizedColour } from '../palette/normalize.colour';
 import { getSanitizedSvg } from '../svg/get.sanitized.svg';
 import type { SanitizedSvg } from '../svg/interfaces/SanitizedSvg';
 import type { SvgImportFailure } from '../svg/interfaces/SvgImportFailure';
@@ -19,9 +30,11 @@ import { getNormalizedRotationDeg } from './get.normalized.rotation.deg';
 import { getValidProjectName } from './get.valid.project.name';
 import type { ImportedProjectFile } from './interfaces/ImportedProjectFile';
 import type { ProjectFile } from './interfaces/ProjectFile';
+import type { ProjectFileWithoutLayers } from './interfaces/ProjectFileWithoutLayers';
 import type { ProjectObject } from './interfaces/ProjectObject';
 import { isProjectFile } from './is.project.file';
-import { MAX_OBJECT_NAME_LENGTH, MAX_PROJECT_OBJECTS } from './project.constants';
+import { isProjectFileWithoutLayers } from './is.project.file.without.layers';
+import { MAX_OBJECT_NAME_LENGTH, MAX_PROJECT_OBJECTS, PROJECT_FILE_VERSION } from './project.constants';
 
 const getParsedJsonValue = (jsonText: string): unknown => {
   try {
@@ -31,8 +44,13 @@ const getParsedJsonValue = (jsonText: string): unknown => {
   }
 };
 
-const isImportableProjectFile = (value: unknown): value is ProjectFile =>
-  isProjectFile(value) && value.objects.length <= MAX_PROJECT_OBJECTS;
+type ReadableProjectFile = ProjectFile | ProjectFileWithoutLayers;
+
+const isReadableProjectFile = (value: unknown): value is ReadableProjectFile =>
+  isProjectFile(value) || isProjectFileWithoutLayers(value);
+
+const isImportableProjectFile = (value: unknown): value is ReadableProjectFile =>
+  isReadableProjectFile(value) && value.objects.length <= MAX_PROJECT_OBJECTS;
 
 /**
  * Copies only the known fields, so an extra field in the file never reaches the database. The intrinsic size is
@@ -60,7 +78,68 @@ const getImportedProjectObject = (fileObject: ProjectObject): ProjectObject | un
   };
 };
 
-export const getImportedProjectFile = (fileText: string): ImportedProjectFile | undefined => {
+/**
+ * Copies only the known fields and clamps the settings. The colour is normalised, so it matches the colours read from
+ * the objects; a colour that cannot be read gives undefined.
+ */
+const getImportedProjectLayer = (fileLayer: ProjectLayer): ProjectLayer | undefined => {
+  const layerColour: string | undefined = getNormalizedColour(fileLayer.colour);
+
+  if (!layerColour) {
+    return undefined;
+  }
+
+  return {
+    colour: layerColour,
+    enabled: fileLayer.enabled,
+    order: fileLayer.order,
+    settings: getClampedLayerSettings(fileLayer.settings),
+    paletteEntryId: fileLayer.paletteEntryId,
+    isShading: fileLayer.isShading,
+  };
+};
+
+/** Gives undefined when a layer cannot be read; a second layer with a key already taken is left out. */
+const getImportedProjectLayers = (fileLayers: ProjectLayer[]): ProjectLayer[] | undefined => {
+  const importedLayers: ProjectLayer[] = [];
+  const takenKeys: Set<string> = new Set<string>();
+
+  for (const fileLayer of fileLayers) {
+    const importedLayer: ProjectLayer | undefined = getImportedProjectLayer(fileLayer);
+
+    if (!importedLayer) {
+      return undefined;
+    }
+
+    if (!takenKeys.has(getLayerKey(importedLayer))) {
+      takenKeys.add(getLayerKey(importedLayer));
+      importedLayers.push(importedLayer);
+    }
+  }
+
+  return importedLayers;
+};
+
+const getFileLayers = (fileValue: ReadableProjectFile): ProjectLayer[] | undefined =>
+  fileValue.version === PROJECT_FILE_VERSION ? getImportedProjectLayers(fileValue.layers) : [];
+
+const getImportedProjectObjects = (fileObjects: ProjectObject[]): ProjectObject[] | undefined => {
+  const importedObjects: ProjectObject[] = [];
+
+  for (const fileObject of fileObjects) {
+    const importedObject: ProjectObject | undefined = getImportedProjectObject(fileObject);
+
+    if (!importedObject) {
+      return undefined;
+    }
+
+    importedObjects.push(importedObject);
+  }
+
+  return importedObjects;
+};
+
+export const getImportedProjectFile = (fileText: string, palette: Palette): ImportedProjectFile | undefined => {
   const fileValue: unknown = getParsedJsonValue(fileText);
 
   if (!isImportableProjectFile(fileValue)) {
@@ -73,17 +152,20 @@ export const getImportedProjectFile = (fileText: string): ImportedProjectFile | 
     return undefined;
   }
 
-  const importedObjects: ProjectObject[] = [];
+  const importedObjects: ProjectObject[] | undefined = getImportedProjectObjects(fileValue.objects);
 
-  for (const fileObject of fileValue.objects) {
-    const importedObject: ProjectObject | undefined = getImportedProjectObject(fileObject);
-
-    if (!importedObject) {
-      return undefined;
-    }
-
-    importedObjects.push(importedObject);
+  if (!importedObjects) {
+    return undefined;
   }
 
-  return { name: projectName, document: { objects: importedObjects } };
+  const fileLayers: ProjectLayer[] | undefined = getFileLayers(fileValue);
+
+  if (!fileLayers) {
+    return undefined;
+  }
+
+  return {
+    name: projectName,
+    document: { objects: importedObjects, layers: getObjectsDerivedLayers(importedObjects, palette, fileLayers) },
+  };
 };
