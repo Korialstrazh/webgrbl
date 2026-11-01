@@ -1,7 +1,7 @@
 import { getSvgDrawables } from './get.svg.drawables';
 import type { SvgDrawable } from './interfaces/SvgDrawable';
 import type { SvgDrawableSet } from './interfaces/SvgDrawableSet';
-import { SVG_UNSUPPORTED_KIND } from './svg.shape.constants';
+import { SVG_UNSUPPORTED_KIND, SVG_USE_MAX_COPIED_ELEMENTS } from './svg.shape.constants';
 import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 
 const TOLERANCE = 0.05;
@@ -199,6 +199,18 @@ describe(getSvgDrawables.name, () => {
     expect(performance.now() - manyUsesStartTime - oneUseTime).toBeLessThan(QUICK_RUN_LIMIT_MS);
     expect(unsupported).toEqual([SVG_UNSUPPORTED_KIND.USE_LIMIT]);
     expect(drawables).toEqual([]);
+  }, USE_LIMIT_TEST_TIMEOUT_MS);
+
+  it('charges a copy by its real size when the referenced content grew after it was first counted', () => {
+    const groupSize = 9000;
+    const useCount = 300;
+    const { drawables, unsupported }: SvgDrawableSet = getDrawableSet(`
+      <defs><g id="b">${`<rect ${UNIT_SQUARE}/>`.repeat(groupSize)}</g></defs>
+      <use href="#a"/><g id="a"><use href="#b"/></g>${'<use href="#a"/>'.repeat(useCount)}
+    `);
+
+    expect(drawables.length).toBeLessThanOrEqual(SVG_USE_MAX_COPIED_ELEMENTS);
+    expect(unsupported).toEqual([SVG_UNSUPPORTED_KIND.USE_LIMIT]);
   }, USE_LIMIT_TEST_TIMEOUT_MS);
 
   it('does not expand uses inside copied defs, so undrawn content costs no budget', () => {

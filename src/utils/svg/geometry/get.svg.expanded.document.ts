@@ -109,7 +109,7 @@ const copyUseViewportSize = (useElement: Element, viewportElement: Element): voi
  * A copy of the referenced element. A symbol becomes a nested svg, since it is drawn as one: its viewBox is fitted
  * into the use's width and height.
  */
-const getReferenceCopy = (referencedElement: Element, useElement: Element): Node => {
+const getReferenceCopy = (referencedElement: Element, useElement: Element): Element | undefined => {
   const elementCopy: Node = referencedElement.cloneNode(true);
   const isSymbol: boolean = referencedElement.localName === SVG_SYMBOL_ELEMENT_NAME;
   const viewportElement: Element | undefined = isSymbol
@@ -123,7 +123,11 @@ const getReferenceCopy = (referencedElement: Element, useElement: Element): Node
     return viewportElement;
   }
 
-  if (elementCopy instanceof Element && elementCopy.localName === SVG_ROOT_ELEMENT_NAME) {
+  if (!(elementCopy instanceof Element)) {
+    return undefined;
+  }
+
+  if (elementCopy.localName === SVG_ROOT_ELEMENT_NAME) {
     copyUseViewportSize(useElement, elementCopy);
   }
 
@@ -132,6 +136,12 @@ const getReferenceCopy = (referencedElement: Element, useElement: Element): Node
 
 /** A use is drawn unless it sits in defs, a symbol, a clip path, a mask or another reference-only container. */
 const isDrawnUse = (useElement: Element): boolean => !useElement.closest(SVG_NOT_RENDERED_ANCESTOR_SELECTOR);
+
+const isCopyWithinBudget = (
+  referenceCopy: Element | undefined,
+  copySize: number,
+  remainingElements: number,
+): referenceCopy is Element => Boolean(referenceCopy) && copySize <= remainingElements;
 
 /** A zero width or height on a use stops it from being drawn. */
 const hasZeroUseSize = (useElement: Element): boolean =>
@@ -142,23 +152,20 @@ const hasZeroUseSize = (useElement: Element): boolean =>
  * Changes the document in place; it is only called on a document this module has just parsed. Only drawn uses are
  * expanded: uses inside defs, symbols, clip paths and masks stay as they are, also inside copies, so no budget goes
  * to content that is never drawn. A copy's own drawn uses are expanded inside the copy, so no copy is ever made of
- * content that is itself already expanded. Copy sizes are counted once per referenced element.
+ * content that is itself already expanded. Each copy is charged by its real size, counted after cloning.
  */
 const expandSvgUseElements = (svgDocument: Document): boolean => {
   const elementsById: Map<string, Element> = getSvgElementsById(svgDocument);
-  // Copy sizes per referenced element; a size above the budget left at the time is a lower bound, which stays above
-  // the budget, since the budget only shrinks.
-  const copiedElementCounts: Map<Element, number> = new Map<Element, number>();
+  // The size of the last copy of each referenced element. A referenced subtree only grows (its own drawn uses are
+  // expanded in place), so this is a lower bound of the next copy's size: above the budget left, the next copy is
+  // rejected without cloning. A copy is always charged by its own count, taken after cloning.
+  const knownCopySizes: Map<Element, number> = new Map<Element, number>();
   let remainingElements: number = SVG_USE_MAX_COPIED_ELEMENTS;
   let isUseLimitReached = false;
 
-  const getCopiedElementCount = (referencedElement: Element): number => {
-    const knownCount: number = copiedElementCounts.get(referencedElement)
-      ?? getSvgElementCountUpTo(referencedElement, remainingElements);
-
-    copiedElementCounts.set(referencedElement, knownCount);
-
-    return knownCount;
+  const dropUseOverBudget = (useElement: Element): void => {
+    isUseLimitReached = true;
+    useElement.remove();
   };
 
   const expandUse = (useElement: Element, referenceChain: Element[]): void => {
@@ -172,14 +179,6 @@ const expandSvgUseElements = (svgDocument: Document): boolean => {
     const referencedElement: Element | undefined = reference?.startsWith(SVG_SAME_DOCUMENT_REFERENCE_PREFIX)
       ? elementsById.get(reference.slice(1))
       : undefined;
-    const copiedElementCount: number = referencedElement ? getCopiedElementCount(referencedElement) : 0;
-
-    if (copiedElementCount > remainingElements) {
-      isUseLimitReached = true;
-      useElement.remove();
-
-      return;
-    }
 
     if (!isReferenceCopyable(useElement, referencedElement, referenceChain)) {
       useElement.remove();
@@ -187,10 +186,27 @@ const expandSvgUseElements = (svgDocument: Document): boolean => {
       return;
     }
 
+    if ((knownCopySizes.get(referencedElement) ?? 0) > remainingElements) {
+      dropUseOverBudget(useElement);
+
+      return;
+    }
+
+    const referenceCopy: Element | undefined = getReferenceCopy(referencedElement, useElement);
+    const copySize: number = referenceCopy ? getSvgElementCountUpTo(referenceCopy, remainingElements) : 0;
+
+    knownCopySizes.set(referencedElement, copySize);
+
+    if (!isCopyWithinBudget(referenceCopy, copySize, remainingElements)) {
+      dropUseOverBudget(useElement);
+
+      return;
+    }
+
     const groupElement: Element = getUseStandInGroup(useElement);
 
-    remainingElements -= copiedElementCount;
-    groupElement.append(getReferenceCopy(referencedElement, useElement));
+    remainingElements -= copySize;
+    groupElement.append(referenceCopy);
     useElement.replaceWith(groupElement);
 
     for (const innerUseElement of Array.from(groupElement.querySelectorAll(SVG_USE_ELEMENT_NAME))) {
