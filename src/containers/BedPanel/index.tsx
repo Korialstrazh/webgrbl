@@ -16,14 +16,11 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { getBedDimensions } from '../../utils/bed/get.bed.dimensions';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { doNothing } from '../../utils/do.nothing';
 import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
+import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
-import { selectGrblSettings, selectIsConnected } from '../../utils/states/grbl.connection.state';
-import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { BedView } from '../../views/BedView';
 import { ComingSoon } from '../../views/ComingSoon';
@@ -50,11 +47,8 @@ import { useSvgFileDrop } from './use.svg.file.drop';
 
 export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const { t } = useTranslation();
-  const settings: Record<number, string> = useSelector(selectGrblSettings);
-  const isConnected: boolean = useSelector(selectIsConnected);
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
-  const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const dimensions: BedDimensions = getBedDimensions(settings, isConnected, activeProfile);
+  const dimensions: BedDimensions = useBedDimensions();
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
   const [activeTool, setActiveTool] = useState<BedTool>(BED_TOOL.SELECT);
   const dropArea: SvgFileDropArea = useSvgFileDrop();

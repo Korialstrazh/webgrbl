@@ -46,3 +46,7 @@ export const BACKSPACE_KEY = 'Backspace';
 export const CONTENT_EDITABLE_REGION_SELECTOR = '[contenteditable]:not([contenteditable="false"])';
 /** The `dataTransfer.types` entry of a drag that carries files, as opposed to text or links. */
 export const DATA_TRANSFER_FILES_TYPE = 'Files';
+/** The `key` value of the Z key, lowercased: Ctrl or Cmd plus Z undoes, with Shift it redoes. */
+export const UNDO_KEY = 'z';
+/** The `key` value of the Y key, lowercased: Ctrl or Cmd plus Y redoes. */
+export const REDO_KEY = 'y';

@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { FULL_TURN_DEG } from '../../utils/project/project.constants';
+import { FULL_TURN_DEG } from './project.constants';
 
 // Adding a full turn before the second remainder lifts a negative angle into range, and it also turns -0 into 0.
 export const getNormalizedRotationDeg = (rotationDeg: number): number =>

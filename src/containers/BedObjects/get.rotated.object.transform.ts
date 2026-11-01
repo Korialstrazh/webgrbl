@@ -12,7 +12,7 @@
  */
 import type { ProjectObjectTransform } from '../../utils/project/interfaces/ProjectObjectTransform';
 import { HALF_BOX_FACTOR, HALF_TURN_DEG, ROTATION_SNAP_DEG } from '../../utils/project/project.constants';
-import { getNormalizedRotationDeg } from './get.normalized.rotation.deg';
+import { getNormalizedRotationDeg } from '../../utils/project/get.normalized.rotation.deg';
 import type { BedMachinePoint } from './interfaces/BedMachinePoint';
 import type { ObjectRotateInput } from './interfaces/ObjectRotateInput';
 

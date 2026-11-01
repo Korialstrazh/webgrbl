@@ -7,6 +7,8 @@ import type { AppStore } from '../../utils/states/new.store';
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
 const CONTROL_SELECTOR = 'button, input';
 const PANEL_TITLES: readonly string[] = ['Layers', 'Objects', 'Material'];
+const COMING_SOON_PANEL_COUNT = 2;
+const IMPORT_SVG_LABEL = 'Import SVG';
 
 const renderDesignPanel = (store: AppStore): void => {
   render(
@@ -17,14 +19,14 @@ const renderDesignPanel = (store: AppStore): void => {
 };
 
 describe(DesignPanel.name, () => {
-  it('shows the layers, objects and material panels as coming soon', () => {
+  it('shows the three panels, with layers and material as coming soon', () => {
     renderDesignPanel(newStore());
 
     for (const panelTitle of PANEL_TITLES) {
       expect(screen.getByRole('heading', { name: panelTitle })).toBeInTheDocument();
     }
 
-    expect(document.querySelectorAll(DISABLED_REGION_SELECTOR)).toHaveLength(PANEL_TITLES.length);
+    expect(document.querySelectorAll(DISABLED_REGION_SELECTOR)).toHaveLength(COMING_SOON_PANEL_COUNT);
   });
 
   it('every coming-soon control in the design panel dispatches nothing', () => {
@@ -40,5 +42,12 @@ describe(DesignPanel.name, () => {
     }
 
     expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('shows the objects section with an import button as an active control', () => {
+    renderDesignPanel(newStore());
+
+    expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toBeEnabled();
+    expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL }).closest(DISABLED_REGION_SELECTOR)).toBeNull();
   });
 });

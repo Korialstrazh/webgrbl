@@ -12,6 +12,5 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 
 export const TOP_BAR_MENU_LABEL_KEYS: readonly string[] = [
   DEFAULT.TOP_BAR_MENU_PROJECT,
-  DEFAULT.TOP_BAR_MENU_IMPORT_SVG,
   DEFAULT.TOP_BAR_MENU_MATERIALS,
 ];
