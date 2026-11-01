@@ -202,7 +202,7 @@ describe(importSvgFiles.name, () => {
       (): ProjectObject => newProjectObject(),
     );
 
-    store.dispatch(new ProjectObjectsAdded({ objects: preloadedObjects }));
+    store.dispatch(new ProjectObjectsAdded({ objects: preloadedObjects, layers: [] }));
     requestImport(store, [
       newSvgFile(FIRST_FILE_NAME),
       newSvgFile(SECOND_FILE_NAME),
@@ -226,7 +226,7 @@ describe(importSvgFiles.name, () => {
       (): ProjectObject => newProjectObject(),
     );
 
-    store.dispatch(new ProjectObjectsAdded({ objects: preloadedObjects }));
+    store.dispatch(new ProjectObjectsAdded({ objects: preloadedObjects, layers: [] }));
     requestImport(store, [newSvgFile(FIRST_FILE_NAME)]);
     requestImport(store, [newSvgFile(SECOND_FILE_NAME)]);
     await waitForToast(store, DEFAULT.TOAST_SVG_IMPORT_LIMIT_REACHED);

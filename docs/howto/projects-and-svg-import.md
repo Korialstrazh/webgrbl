@@ -43,7 +43,7 @@ The toast names the file and shows once per file, however many things were remov
 
 | What | Where | Written |
 | --- | --- | --- |
-| Project name, times, object transforms | IndexedDB database `webgrbl`, table `projects` | every autosave |
+| Project name, times, object transforms, layers | IndexedDB database `webgrbl`, table `projects` | every autosave |
 | SVG text of each object | table `svgAssets`, key `[projectId+objectId]` | once, the first save that holds the object |
 | Id of the last opened project | table `appState` | when a project opens |
 | Machine profiles | `localStorage` (see `docs/howto/machine-control.md`) | not part of a project |
@@ -59,7 +59,7 @@ The split keeps an autosave after a nudge small: only the project row is rewritt
 ```json
 {
   "format": "webgrbl-project",
-  "version": 1,
+  "version": 2,
   "name": "Coaster",
   "objects": [
     {
@@ -67,11 +67,29 @@ The split keeps an autosave after a nudge small: only the project row is rewritt
       "intrinsicWidthMm": 40, "intrinsicHeightMm": 40,
       "xMm": 10, "yMm": 10, "widthMm": 40, "heightMm": 40, "rotationDeg": 0
     }
+  ],
+  "layers": [
+    {
+      "colour": "#ff0000", "enabled": true, "order": 0,
+      "settings": { "mode": "line", "maxPowerPercent": 100, "minPowerPercent": 0, "speedMmPerMin": 300,
+        "passes": 3, "airAssist": false, "lineIntervalMm": 0.1 },
+      "paletteEntryId": "palette-cut", "isShading": false
+    }
   ]
 }
 ```
 
 "Open file..." (also in the Open dialog) always creates a **new** project with new ids, so a file never overwrites a stored project. A file over `MAX_PROJECT_FILE_BYTES` (50 objects of 10 MB plus 50 MB for the JSON around them) is rejected before it is read. Import (`getImportedProjectFile`) rejects the whole file when the format or version is wrong, there are more than 50 objects, a field has the wrong type, or any SVG fails sanitising; it sanitises every SVG again, re-measures the size, clamps the box, brings the rotation into [0, 360) and trims each object name and cuts it to 100 characters. An invalid file shows "The file is not a webgrbl project file. Nothing was opened." and changes nothing. A new file version needs `PROJECT_FILE_VERSION` raised and a reader for the old one.
+
+Layers in a file: a version 2 file carries `layers`; each one is type-checked (`isProjectLayer`), its settings are clamped to the palette ranges, and a layer whose colour no object draws is kept. A version 1 file (written before layers) opens with its layers derived from the current palette. Any other version is rejected. Either way, a colour the objects draw that has no layer gets one from the palette.
+
+## Layers in the document
+
+`ProjectDocument` is `{ objects, layers }`. Layers are derived from the palette in the sagas, before the action is put, never in the reducer: the SVG import saga derives them before `ProjectObjectsAdded {objects, layers}`, and `openLoadedProject` (start, Open, New, switching, file import) before `ProjectDocumentLoaded`. So an import and its layers are one undo step, and undo and redo restore the layers exactly without deriving again. A project stored before layers existed (no `layers` in its row) gets its layers derived when it opens.
+
+- `selectProjectLayers` gives only the layers some object draws with, sorted by `order`. A layer whose colour is gone stays in the document, hidden, so undo brings it back with its settings.
+- `LayerSettingsChanged {layerKey, settings}` (settings clamped to the palette ranges, a non-finite value ignored), `LayerToggled {layerKey, enabled}` and `LayersReordered {layerKeys}` (the visible keys in the new order; hidden layers keep their relative order after them) are each one undo step; a change that changes nothing makes no step. All three trigger the autosave.
+- Paints of an object are read once per SVG text (`getObjectPaints`, a cache of the 200 most recently used texts).
 
 ## Use it from code
 

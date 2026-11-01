@@ -1,0 +1,54 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-left: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+}
+
+// A decoration only: the Move buttons are the keyboard path.
+.handle {
+  padding: 0 var(--space-1);
+  color: var(--color-text-muted);
+  cursor: grab;
+}
+
+// The button grows to the row width: the swatch beside the name, the summary and the note below.
+.openButton {
+  display: grid;
+  flex: 1;
+  grid-template-columns: auto 1fr;
+  gap: 0 var(--space-2);
+  align-items: center;
+  height: auto;
+  min-width: 0;
+  padding: var(--space-2);
+  text-align: left;
+}
+
+.swatch {
+  grid-row: 1 / span 2;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary {
+  grid-column: 2;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.note {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--color-danger-text);
+}

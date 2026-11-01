@@ -23,6 +23,9 @@ import {
 import { AUTOSAVE_DEBOUNCE_MS, AUTOSAVE_MAX_WAIT_MS } from '../project/project.constants';
 import type { ProjectAutosaveWaitResult } from './interfaces/ProjectAutosaveWaitResult';
 import {
+  LayerSettingsChanged,
+  LayerToggled,
+  LayersReordered,
   ProjectObjectsAdded,
   ProjectObjectsDeleted,
   ProjectObjectsTransformed,
@@ -40,6 +43,9 @@ const PROJECT_DOCUMENT_CHANGE_ACTION_TYPES: string[] = [
   ProjectObjectsDeleted.type,
   ProjectUndoRequested.type,
   ProjectRedoRequested.type,
+  LayerSettingsChanged.type,
+  LayerToggled.type,
+  LayersReordered.type,
 ];
 
 /** Emits the name of the browser event after which the page may be gone before the next autosave. */

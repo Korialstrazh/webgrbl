@@ -99,7 +99,7 @@ function* createNewProject(): Generator {
   const createdProject: StoredProject =
     (yield call([PROJECT_REPOSITORY, PROJECT_REPOSITORY.createProject], getDefaultProjectName())) as StoredProject;
 
-  yield call(switchToCreatedProject, { project: createdProject, document: { objects: [] } });
+  yield call(switchToCreatedProject, { project: createdProject, document: { objects: [], layers: [] } });
 }
 
 /** The requested project is read before the open one closes, so a project that is gone closes nothing. */

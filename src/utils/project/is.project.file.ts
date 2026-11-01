@@ -1,5 +1,6 @@
 /**
- * Tells whether a parsed value is a project file of the supported format and version, with well-typed objects.
+ * Tells whether a parsed value is a project file of the current format and version, with well-typed objects
+ * and layers.
  *
  * @author michael.morosov
  *
@@ -8,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { isProjectLayer } from '../layers/is.project.layer';
 import { isRecord } from '../type.guards/is.record';
 import { isString } from '../type.guards/is.string';
 import type { ProjectFile } from './interfaces/ProjectFile';
@@ -20,4 +22,6 @@ export const isProjectFile = (value: unknown): value is ProjectFile =>
   value.version === PROJECT_FILE_VERSION &&
   isString(value.name) &&
   Array.isArray(value.objects) &&
-  value.objects.every(isProjectObject);
+  value.objects.every(isProjectObject) &&
+  Array.isArray(value.layers) &&
+  value.layers.every(isProjectLayer);

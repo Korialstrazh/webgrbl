@@ -23,7 +23,7 @@ const renderHotkeys = (store: AppStore): void => {
 
 const addObject = (store: AppStore): void => {
   act(() => {
-    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()] }));
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
   });
 };
 

@@ -47,3 +47,12 @@ export const DELETE_CROSS = '\u2715';
 
 /** The small triangle that marks a button as opening a dropdown menu. */
 export const DROPDOWN_CARET = '\u25BE';
+
+/** The grip that marks the handle a layer row is dragged by. */
+export const DRAG_HANDLE_GRIP = '\u2630';
+
+/** The middle dot that separates the parts of a one-line summary. */
+export const MIDDLE_DOT = '\u00B7';
+
+/** The three dots that show a button opens a dialog. */
+export const HORIZONTAL_ELLIPSIS = '\u2026';
