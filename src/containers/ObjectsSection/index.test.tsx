@@ -1,10 +1,14 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { act } from 'react';
 import { Provider } from 'react-redux';
+import type { MockInstance } from 'vitest';
 import { ObjectsSection } from '.';
+import { ENTER_KEY } from '../../utils/browser/browser.events.constants';
+import { MULTIPLICATION_SIGN } from '../../utils/characters.constants';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import { newStore } from '../../utils/states/new.store';
-import type { AppStore } from '../../utils/states/new.store';
+import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import {
   ProjectDocumentLoaded,
   ProjectObjectsTransformed,
@@ -34,14 +38,15 @@ const ROTATION_LABEL = 'Rotation';
 const X_LABEL = 'X';
 const LOCK_LABEL = 'Lock aspect ratio';
 const OUTSIDE_NOTE = 'Outside the bed';
-const FIRST_SIZE_TEXT = '100.0 × 50.0 mm';
-const SECOND_SIZE_TEXT = '20.0 × 20.0 mm';
+const FIRST_SIZE_TEXT = `100.0 ${MULTIPLICATION_SIGN} 50.0 mm`;
+const SECOND_SIZE_TEXT = `20.0 ${MULTIPLICATION_SIGN} 20.0 mm`;
 const SECOND_SIZE_MM = 20;
 const OBJECTS_LIST_NAME = 'Project objects';
 const IMPORT_LABEL = 'Import SVG';
 const EMPTY_HINT_PATTERN = /No objects yet/;
 const SECOND_ROW_NAME_PATTERN = /^Moon/;
 const PRESSED_ATTRIBUTE = 'aria-pressed';
+const TRUE_TEXT = 'true';
 
 const loadObjects = (store: AppStore): void => {
   act(() => {
@@ -79,8 +84,10 @@ const commitField = (label: string, text: string): void => {
   fireEvent.blur(input);
 };
 
-const getObjectById = (store: AppStore, objectId: string) =>
-  selectProjectObjects(store.getState()).find((projectObject) => projectObject.id === objectId);
+const getObjectById = (store: AppStore, objectId: string): ProjectObject | undefined =>
+  selectProjectObjects(store.getState()).find(
+    (projectObject: ProjectObject): boolean => projectObject.id === objectId,
+  );
 
 describe(ObjectsSection.name, () => {
   it('shows a hint and an import button when there are no objects', () => {
@@ -113,7 +120,7 @@ describe(ObjectsSection.name, () => {
     fireEvent.click(screen.getByRole('button', { name: SECOND_ROW_NAME_PATTERN }));
 
     expect(selectSelectedObjectIds(store.getState())).toEqual([SECOND_ID]);
-    expect(screen.getByRole('button', { name: SECOND_ROW_NAME_PATTERN })).toHaveAttribute(PRESSED_ATTRIBUTE, 'true');
+    expect(screen.getByRole('button', { name: SECOND_ROW_NAME_PATTERN })).toHaveAttribute(PRESSED_ATTRIBUTE, TRUE_TEXT);
   });
 
   it('deletes an object with its delete button', () => {
@@ -123,7 +130,11 @@ describe(ObjectsSection.name, () => {
     renderSection(store);
     fireEvent.click(screen.getByRole('button', { name: `Delete ${FIRST_NAME}` }));
 
-    expect(selectProjectObjects(store.getState()).map((projectObject) => projectObject.id)).toEqual([SECOND_ID]);
+    const remainingIds: string[] = selectProjectObjects(store.getState()).map(
+      (projectObject: ProjectObject): string => projectObject.id,
+    );
+
+    expect(remainingIds).toEqual([SECOND_ID]);
   });
 
   it('shows the outside note only for an object outside the bed', () => {
@@ -218,7 +229,7 @@ describe(ObjectsSection.name, () => {
     loadObjects(store);
     selectFirst(store);
 
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderSection(store);
 
@@ -227,7 +238,7 @@ describe(ObjectsSection.name, () => {
     fireEvent.change(xInput, { target: { value: '0' } });
     fireEvent.blur(xInput);
     fireEvent.change(xInput, { target: { value: '12' } });
-    fireEvent.keyDown(xInput, { key: 'Enter' });
+    fireEvent.keyDown(xInput, { key: ENTER_KEY });
 
     expect(dispatchSpy).toHaveBeenCalledTimes(1);
     expect(getObjectById(store, FIRST_ID)?.xMm).toBe(12);

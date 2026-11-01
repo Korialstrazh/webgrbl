@@ -10,10 +10,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
 import { getBedMarker } from '../../utils/bed/get.bed.marker';
 import { getCoordinateText } from '../../utils/bed/get.coordinate.text';
 import { getGridLinePath } from '../../utils/bed/get.grid.line.path';

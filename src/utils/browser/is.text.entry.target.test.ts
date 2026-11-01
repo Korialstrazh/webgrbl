@@ -1,11 +1,12 @@
 import { isTextEntryTarget } from './is.text.entry.target';
 
 const CONTENT_EDITABLE_ATTRIBUTE = 'contenteditable';
+const DIV_TAG = 'div';
 
 const newElement = (tagName: string): HTMLElement => document.createElement(tagName);
 
 const newContentEditableElement = (editableValue: string): HTMLElement => {
-  const editableElement: HTMLElement = newElement('div');
+  const editableElement: HTMLElement = newElement(DIV_TAG);
 
   editableElement.setAttribute(CONTENT_EDITABLE_ATTRIBUTE, editableValue);
 
@@ -37,7 +38,7 @@ describe(isTextEntryTarget.name, () => {
 
   it('is false for a button, a plain element and an SVG element', () => {
     expect(isTextEntryTarget(newElement('button'))).toBe(false);
-    expect(isTextEntryTarget(newElement('div'))).toBe(false);
+    expect(isTextEntryTarget(newElement(DIV_TAG))).toBe(false);
     expect(isTextEntryTarget(document.createElementNS('http://www.w3.org/2000/svg', 'g'))).toBe(false);
   });
 

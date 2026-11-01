@@ -15,8 +15,8 @@ import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DELETE_CROSS } from '../../../utils/characters.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
-import { OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
 import type { ObjectRowProps } from '../interfaces/ObjectRowProps';
+import { OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
 import styles from './styles.module.scss';
 
 export const ObjectRow = ({
@@ -27,7 +27,7 @@ export const ObjectRow = ({
   onDelete,
 }: ObjectRowProps): ReactNode => {
   const { t } = useTranslation();
-  const rowClassName: string = [styles.row, isSelected ? styles.selectedRow : ''].join(' ');
+  const rowClassName: string | undefined = isSelected ? [styles.row, styles.selectedRow].join(' ') : styles.row;
 
   return (
     <li className={rowClassName}>

@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import type { MockInstance } from 'vitest';
 import { DesignPanel } from '.';
 import { newStore } from '../../utils/states/new.store';
-import type { AppStore } from '../../utils/states/new.store';
+import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
 const CONTROL_SELECTOR = 'button, input';
@@ -31,7 +32,7 @@ describe(DesignPanel.name, () => {
 
   it('every coming-soon control in the design panel dispatches nothing', () => {
     const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderDesignPanel(store);
 

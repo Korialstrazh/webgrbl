@@ -12,11 +12,11 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { isObjectOutsideBed } from '../../utils/project/is.object.outside.bed';
-import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectObjectsDeleted, selectProjectObjects } from '../../utils/states/project.document.state';
 import {

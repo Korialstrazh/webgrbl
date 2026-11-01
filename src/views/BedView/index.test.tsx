@@ -10,10 +10,14 @@ const HEAD_POSITION = { x: 100, y: 50, z: 0 };
 const PLACEHOLDER_TEXT = 'Nothing here yet';
 const WIDTH_LABEL_TEXT = '400';
 const HEIGHT_LABEL_TEXT = '300';
-const OUTSIDE_WORK_ORIGIN = { x: -50, y: 20, z: 0 };
+const OUTSIDE_POSITION = { x: -50, y: 20, z: 0 };
 const OUTSIDE_SCREEN_TRANSFORM = 'translate(0 280)';
 const CHILD_TEST_ID = 'bed-child';
 const CHILD_NAME = 'Logo';
+const TRANSFORM_ATTRIBUTE = 'transform';
+const OUTSIDE_ATTRIBUTE = 'data-outside-bed';
+const TRUE_TEXT = 'true';
+const FALSE_TEXT = 'false';
 
 const renderBed = (overrides: Partial<ComponentProps<typeof BedView>>): HTMLElement => {
   const { container } = render(
@@ -58,7 +62,7 @@ describe(BedView.name, () => {
   it('puts the crosshair at the head position with the Y axis flipped', () => {
     renderBed({ headPosition: HEAD_POSITION });
 
-    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(100 250)');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(100 250)');
   });
 
   it('names the size and head position in the accessible label', () => {
@@ -80,24 +84,24 @@ describe(BedView.name, () => {
   });
 
   it('keeps a head left of the bed visible at the edge in the outside style', () => {
-    renderBed({ headPosition: { x: -50, y: 20, z: 0 } });
+    renderBed({ headPosition: OUTSIDE_POSITION });
 
-    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(0 280)');
-    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('data-outside-bed', 'true');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, OUTSIDE_SCREEN_TRANSFORM);
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(OUTSIDE_ATTRIBUTE, TRUE_TEXT);
     expect(screen.getByRole('group', { name: /outside the bed/ })).toBeInTheDocument();
   });
 
   it('clamps a head beyond the far corner to the bed edge', () => {
     renderBed({ headPosition: { x: 450, y: 350, z: 0 } });
 
-    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(400 0)');
-    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('data-outside-bed', 'true');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(400 0)');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(OUTSIDE_ATTRIBUTE, TRUE_TEXT);
   });
 
   it('uses the normal style for a head inside the bed', () => {
     renderBed({ headPosition: HEAD_POSITION });
 
-    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('data-outside-bed', 'false');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(OUTSIDE_ATTRIBUTE, FALSE_TEXT);
   });
 
   it('skips the ruler labels at the far edges that would sit outside the view box', () => {
@@ -109,10 +113,10 @@ describe(BedView.name, () => {
   });
 
   it('keeps a work zero outside the bed visible at the edge in the outside style', () => {
-    renderBed({ workOriginPosition: OUTSIDE_WORK_ORIGIN });
+    renderBed({ workOriginPosition: OUTSIDE_POSITION });
 
-    expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute('transform', OUTSIDE_SCREEN_TRANSFORM);
-    expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute('data-outside-bed', 'true');
+    expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, OUTSIDE_SCREEN_TRANSFORM);
+    expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute(OUTSIDE_ATTRIBUTE, TRUE_TEXT);
     expect(screen.getByRole('group', { name: /Work zero at X -50\.00, Y 20\.00.*outside the bed/ }))
       .toBeInTheDocument();
   });
@@ -120,7 +124,7 @@ describe(BedView.name, () => {
   it('uses the normal style for a work zero inside the bed', () => {
     renderBed({ workOriginPosition: HEAD_POSITION });
 
-    expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute('data-outside-bed', 'false');
+    expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute(OUTSIDE_ATTRIBUTE, FALSE_TEXT);
   });
 
   it('draws its children above the grid and below the head and work zero markers', () => {

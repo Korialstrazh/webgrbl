@@ -1,13 +1,14 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import type { MockInstance } from 'vitest';
 import { TopBar } from '.';
-import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
+import { ESCAPE_KEY, UNDO_KEY } from '../../utils/browser/browser.events.constants';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
-import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
 import { newProjectObject } from '../../utils/project/new.project.object';
+import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
 import { MachineStopRequested } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
-import type { AppStore } from '../../utils/states/new.store';
+import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import {
   ProjectObjectsAdded,
   selectCanRedo,
@@ -15,10 +16,12 @@ import {
   SvgFilesImportRequested,
 } from '../../utils/states/project.document.state';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
+import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 import { HistoryHotkeys } from '../HistoryHotkeys';
 import { StopHotkey } from '../StopHotkey';
+import { SVG_FILE_PICKER_ACCEPT } from '../SvgImportButton/svg.import.button.constants';
 
 const COMING_SOON_CONTROL_LABELS: readonly string[] = [
   'Project',
@@ -28,7 +31,6 @@ const UNDO_LABEL = 'Undo';
 const REDO_LABEL = 'Redo';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PICKED_FILE_NAME = 'star.svg';
-const SVG_FILE_TYPE = 'image/svg+xml';
 const SVG_INPUT_SELECTOR = 'input[type="file"]';
 const APP_TITLE = 'webgrbl';
 const AUTOSAVE_TEXT = 'Autosave: off';
@@ -65,7 +67,7 @@ describe(TopBar.name, () => {
 
   it.each(COMING_SOON_CONTROL_LABELS)('clicking the coming-soon control %s dispatches nothing', (label: string) => {
     const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     render(
       <Provider store={store}>
@@ -99,7 +101,7 @@ describe(TopBar.name, () => {
 
   it('closes the machine profiles dialog on Escape without stopping the machine', () => {
     const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderWorkbenchTopBar(store);
     act(() => {
@@ -110,20 +112,24 @@ describe(TopBar.name, () => {
 
     expect(screen.queryByRole('dialog', { name: MACHINE_PROFILES_LABEL })).not.toBeInTheDocument();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
-    expect(dispatchSpy.mock.calls.filter(([action]) => action instanceof MachineStopRequested)).toEqual([]);
+    const stopCalls: unknown[][] = dispatchSpy.mock.calls.filter(
+      (callArguments: unknown[]): boolean => callArguments[0] instanceof MachineStopRequested,
+    );
+
+    expect(stopCalls).toEqual([]);
   });
 
   it('dispatches an SVG import request with the picked files and resets the picker', () => {
     const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
-    const pickedFile: File = new File(['<svg/>'], PICKED_FILE_NAME, { type: SVG_FILE_TYPE });
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+    const pickedFile: File = new File(['<svg/>'], PICKED_FILE_NAME, { type: SVG_MIME_TYPE });
 
     renderWorkbenchTopBar(store);
 
     const input: HTMLInputElement | null = document.querySelector(SVG_INPUT_SELECTOR);
 
     expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toBeEnabled();
-    expect(input).toHaveAttribute('accept', '.svg,image/svg+xml');
+    expect(input).toHaveAttribute('accept', SVG_FILE_PICKER_ACCEPT);
     expect(input).toHaveAttribute('multiple');
 
     if (!input) {
@@ -132,7 +138,9 @@ describe(TopBar.name, () => {
 
     fireEvent.change(input, { target: { files: [pickedFile] } });
 
-    const importCalls = dispatchSpy.mock.calls.filter(([action]) => action instanceof SvgFilesImportRequested);
+    const importCalls: unknown[][] = dispatchSpy.mock.calls.filter(
+      (callArguments: unknown[]): boolean => callArguments[0] instanceof SvgFilesImportRequested,
+    );
 
     expect(importCalls).toHaveLength(1);
     expect(importCalls[0]?.[0]).toMatchObject({ payload: { files: [pickedFile] } });
@@ -172,7 +180,7 @@ describe(TopBar.name, () => {
       store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()] }));
     });
     fireEvent.click(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL }));
-    fireEvent.keyDown(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL }), { key: 'z', ctrlKey: true });
+    fireEvent.keyDown(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL }), { key: UNDO_KEY, ctrlKey: true });
 
     expect(selectProjectObjects(store.getState())).toHaveLength(1);
   });

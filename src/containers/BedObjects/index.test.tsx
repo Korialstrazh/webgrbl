@@ -4,7 +4,13 @@ import type { MockInstance } from 'vitest';
 import { BedObjects } from '.';
 import { BED_PLACEHOLDER_KIND } from '../../utils/bed/bed.constants';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
-import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
+import {
+  ARROW_RIGHT_KEY,
+  ARROW_UP_KEY,
+  BACKSPACE_KEY,
+  DELETE_KEY,
+  ESCAPE_KEY,
+} from '../../utils/browser/browser.events.constants';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import { newStore } from '../../utils/states/new.store';
@@ -83,10 +89,6 @@ const UNSNAPPED_TURN_DEG = 37;
 const DEGREES_PER_HALF_TURN = 180;
 const NUDGE_MM = 1;
 const SHIFT_NUDGE_MM = 10;
-const ARROW_RIGHT_KEY = 'ArrowRight';
-const ARROW_UP_KEY = 'ArrowUp';
-const DELETE_KEY = 'Delete';
-const BACKSPACE_KEY = 'Backspace';
 const OVERLAY_ID = 'test-overlay';
 const INPUT_LABEL = 'Project name';
 
@@ -276,7 +278,7 @@ describe(BedObjects.name, () => {
 
   it('does not move an object on a click', () => {
     const store: AppStore = renderObjects([firstObject]);
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     clickElement(getObjectElement(FIRST_NAME), FIRST_GRAB_X, FIRST_GRAB_Y);
 
@@ -290,7 +292,7 @@ describe(BedObjects.name, () => {
     clickElement(getObjectElement(FIRST_NAME), FIRST_GRAB_X, FIRST_GRAB_Y);
     clickElement(getObjectElement(SECOND_NAME), SECOND_GRAB_X, SECOND_GRAB_Y, true);
 
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     dragElement(getObjectElement(FIRST_NAME), FIRST_GRAB_X, FIRST_GRAB_Y);
 
@@ -446,6 +448,7 @@ describe(BedObjects.name, () => {
     expect(getObjectElement(SECOND_NAME)).toHaveAttribute(OUTSIDE_ATTRIBUTE, FALSE_TEXT);
     expect(screen.getAllByTestId(BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID)).toHaveLength(1);
   });
+
   describe('handles', () => {
     it('draws four corner handles and a rotate handle only for a single selection', () => {
       renderSelectedObjects([firstObject, secondObject]);

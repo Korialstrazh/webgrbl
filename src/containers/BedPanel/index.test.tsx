@@ -1,35 +1,36 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import type { MockInstance } from 'vitest';
 import { BedPanel } from '.';
 import { DATA_TRANSFER_FILES_TYPE } from '../../utils/browser/browser.events.constants';
 import { GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
 import { getResolvedGrblPositions } from '../../utils/grbl/grbl.position.resolver';
 import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
-import type { GrblStatusReport } from '../../utils/grbl/interfaces/GrblStatusReport';
 import type { GrblResolvedPositions } from '../../utils/grbl/interfaces/GrblResolvedPositions';
+import type { GrblStatusReport } from '../../utils/grbl/interfaces/GrblStatusReport';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.profile.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
-import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
 import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../utils/states/machine.status.state';
+import { newStore } from '../../utils/states/new.store';
+import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import {
   ProjectDocumentLoaded,
   selectProjectObjects,
   SvgFilesImportRequested,
 } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged } from '../../utils/states/project.selection.state';
-import { newStore } from '../../utils/states/new.store';
-import type { AppStore } from '../../utils/states/new.store';
-import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
-import { BED_OBJECTS_SURFACE_TEST_ID } from '../BedObjects/bed.objects.constants';
-import { BED_DROP_AREA_TEST_ID } from './bed.panel.constants';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import { ToastShown } from '../../utils/states/toast.state';
+import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
+import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
 import { BED_HEAD_TEST_ID } from '../../views/BedView/bed.view.constants';
+import { BED_OBJECTS_SURFACE_TEST_ID } from '../BedObjects/bed.objects.constants';
+import { BED_DROP_AREA_TEST_ID } from './bed.panel.constants';
 
 const NOT_RESPONDING_TEXT = 'The controller is not responding.';
 const NO_MACHINE_TEXT = 'Connect a machine to see its bed';
@@ -143,7 +144,7 @@ describe(BedPanel.name, () => {
 
   it('dispatches nothing from the coming-soon toolbar controls', () => {
     const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderPanel(store);
     fireEvent.click(screen.getByRole('button', { name: EDIT_NODES_LABEL, hidden: true }));
@@ -198,7 +199,7 @@ describe(BedPanel.name, () => {
 
   it('imports the dropped SVG files and ignores the rest', () => {
     const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
     const firstSvgFile: File = new File([SVG_TEXT], 'logo.svg');
     const secondSvgFile: File = new File([SVG_TEXT], 'badge', { type: SVG_MIME_TYPE });
     const photoFile: File = newPhotoFile();
@@ -215,7 +216,7 @@ describe(BedPanel.name, () => {
 
   it('dispatches nothing when no dropped file is an SVG', () => {
     const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderPanel(store);
     fireEvent.drop(screen.getByTestId(BED_DROP_AREA_TEST_ID), {
