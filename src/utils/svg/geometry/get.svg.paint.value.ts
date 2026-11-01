@@ -12,13 +12,17 @@
  */
 import type { SvgPaintContext } from './interfaces/SvgPaintContext';
 import type { SvgResolvedPaint } from './interfaces/SvgResolvedPaint';
-import { SVG_CURRENT_COLOUR_KEYWORD, SVG_DEFAULT_OPACITY, SVG_PAINT_NONE, SVG_PAINT_URL_PATTERN } from './svg.geometry.constants';
+import { SVG_CURRENT_COLOUR_KEYWORD, SVG_INHERITING_KEYWORDS, SVG_DEFAULT_OPACITY, SVG_PAINT_NONE, SVG_PAINT_URL_PATTERN } from './svg.geometry.constants';
 import { getParsedColour } from '../../palette/get.parsed.colour';
 import type { ParsedColour } from '../../palette/interfaces/ParsedColour';
 
 const NO_PAINT: SvgResolvedPaint = { value: SVG_PAINT_NONE, alpha: SVG_DEFAULT_OPACITY };
 
 const getColourPaint = (colourText: string, context: SvgPaintContext): SvgResolvedPaint => {
+  if (SVG_INHERITING_KEYWORDS.includes(colourText.toLowerCase())) {
+    return context.parentPaint;
+  }
+
   if (colourText.toLowerCase() === SVG_CURRENT_COLOUR_KEYWORD) {
     return { value: context.currentColour, alpha: SVG_DEFAULT_OPACITY };
   }

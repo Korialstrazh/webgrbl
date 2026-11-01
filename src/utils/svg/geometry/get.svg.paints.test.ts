@@ -177,6 +177,25 @@ describe(getSvgPaints.name, () => {
     expect(getColours(paints)).toEqual([RED]);
   });
 
+  it.each([
+    ['fill attribute', 'fill="inherit"'],
+    ['unset fill attribute', 'fill="unset"'],
+    ['fill style', 'style="fill:inherit"'],
+    ['fill with a missing reference', 'fill="url(#missing) inherit"'],
+  ])('inherits the parent fill for the %s', (_caseName: string, attributes: string) => {
+    const paints: SvgPaint[] = getSvgPaints(getSvgText(`<g fill="${RED}"><path ${attributes} d="M0 0L1 1"/></g>`));
+
+    expect(getColours(paints)).toEqual([RED]);
+  });
+
+  it.each(['stroke="inherit"', 'style="stroke:inherit"'])('inherits the parent stroke for %s', (attributes: string) => {
+    const paints: SvgPaint[] = getSvgPaints(
+      getSvgText(`<g fill="none" stroke="${BLUE}"><path ${attributes} d="M0 0L1 1"/></g>`),
+    );
+
+    expect(getColours(paints)).toEqual([BLUE]);
+  });
+
   it('gives no paints for text that is not an svg', () => {
     expect(getSvgPaints('<not-xml')).toEqual([]);
   });
