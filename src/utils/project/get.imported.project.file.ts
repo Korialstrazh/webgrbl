@@ -21,7 +21,7 @@ import type { ImportedProjectFile } from './interfaces/ImportedProjectFile';
 import type { ProjectFile } from './interfaces/ProjectFile';
 import type { ProjectObject } from './interfaces/ProjectObject';
 import { isProjectFile } from './is.project.file';
-import { MAX_PROJECT_OBJECTS } from './project.constants';
+import { MAX_OBJECT_NAME_LENGTH, MAX_PROJECT_OBJECTS } from './project.constants';
 
 const getParsedJsonValue = (jsonText: string): unknown => {
   try {
@@ -36,7 +36,8 @@ const isImportableProjectFile = (value: unknown): value is ProjectFile =>
 
 /**
  * Copies only the known fields, so an extra field in the file never reaches the database. The intrinsic size is
- * measured from the SVG again, and the rotation is brought into one turn, because a huge angle breaks the geometry.
+ * measured from the SVG again, the rotation is brought into one turn, because a huge angle breaks the geometry, and
+ * the name is trimmed and cut to the object name limit, so a huge name cannot stretch the object list.
  */
 const getImportedProjectObject = (fileObject: ProjectObject): ProjectObject | undefined => {
   const sanitizeResult: SanitizedSvg | SvgImportFailure = getSanitizedSvg(fileObject.svgText);
@@ -47,7 +48,7 @@ const getImportedProjectObject = (fileObject: ProjectObject): ProjectObject | un
 
   return {
     id: crypto.randomUUID(),
-    name: fileObject.name,
+    name: fileObject.name.trim().slice(0, MAX_OBJECT_NAME_LENGTH),
     svgText: sanitizeResult.svgText,
     intrinsicWidthMm: sanitizeResult.widthMm,
     intrinsicHeightMm: sanitizeResult.heightMm,

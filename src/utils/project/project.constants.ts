@@ -25,6 +25,8 @@ export const AUTOSAVE_DEBOUNCE_MS = 1000;
 export const AUTOSAVE_MAX_WAIT_MS = 3000;
 export const MIN_PROJECT_NAME_LENGTH = 1;
 export const MAX_PROJECT_NAME_LENGTH = 100;
+/** An object name read from a project file is cut to this many characters after trimming. */
+export const MAX_OBJECT_NAME_LENGTH = 100;
 export const DEFAULT_PROJECT_NAME_KEY = DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER;
 
 export const PROJECT_FILE_FORMAT = 'webgrbl-project';

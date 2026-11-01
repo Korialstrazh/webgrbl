@@ -14,6 +14,7 @@ import { newProjectObject } from './new.project.object';
 import {
   DEFAULT_OBJECT_SVG_TEXT,
   FULL_TURN_DEG,
+  MAX_OBJECT_NAME_LENGTH,
   MAX_OBJECT_SIZE_MM,
   MAX_PROJECT_NAME_LENGTH,
   MAX_PROJECT_OBJECTS,
@@ -23,6 +24,7 @@ import {
 } from './project.constants';
 
 const PROJECT_NAME = 'Coasters';
+const OBJECT_NAME = 'Leaf';
 const RAW_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="20mm"><rect width="5" height="5"/></svg>';
 const SCRIPT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="20mm">'
   + '<script>alert(1)</script><rect width="5" height="5"/></svg>';
@@ -47,7 +49,7 @@ const getSanitizedSvgText = (svgText: string): string => {
 const SANITIZED_SVG_TEXT: string = getSanitizedSvgText(RAW_SVG_TEXT);
 
 const newFileObject = (overrides: Partial<ProjectObject> = {}): ProjectObject =>
-  newProjectObject({ name: 'Leaf', svgText: SANITIZED_SVG_TEXT, intrinsicWidthMm: SVG_WIDTH_MM,
+  newProjectObject({ name: OBJECT_NAME, svgText: SANITIZED_SVG_TEXT, intrinsicWidthMm: SVG_WIDTH_MM,
     intrinsicHeightMm: SVG_HEIGHT_MM, xMm: 5, yMm: 6, widthMm: 30, heightMm: 40,
     rotationDeg: 15, ...overrides });
 
@@ -110,6 +112,27 @@ describe(getImportedProjectFile.name, () => {
 
   it('trims the name', () => {
     expect(getImportedValue({ ...getFileValue(), name: `  ${PROJECT_NAME} ` })?.name).toBe(PROJECT_NAME);
+  });
+
+  it('trims an object name and cuts it to the object name limit', () => {
+    const paddedName: string = `  ${'n'.repeat(MAX_OBJECT_NAME_LENGTH + 1)}  `;
+    const imported: ImportedProjectFile | undefined = getImportedValue(
+      getFileValue([newFileObject({ name: paddedName })]),
+    );
+
+    expect(imported?.document.objects[0]?.name).toBe('n'.repeat(MAX_OBJECT_NAME_LENGTH));
+  });
+
+  it('keeps an object name of exactly the limit and trims a short one', () => {
+    const limitName: string = 'm'.repeat(MAX_OBJECT_NAME_LENGTH);
+    const imported: ImportedProjectFile | undefined = getImportedValue(
+      getFileValue([newFileObject({ name: limitName }), newFileObject({ name: ` ${OBJECT_NAME} ` })]),
+    );
+
+    expect(imported?.document.objects.map((projectObject: ProjectObject): string => projectObject.name)).toEqual([
+      limitName,
+      OBJECT_NAME,
+    ]);
   });
 
   it('limits the box size to the allowed range', () => {

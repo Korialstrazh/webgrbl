@@ -71,7 +71,7 @@ The split keeps an autosave after a nudge small: only the project row is rewritt
 }
 ```
 
-"Open file..." (also in the Open dialog) always creates a **new** project with new ids, so a file never overwrites a stored project. A file over `MAX_PROJECT_FILE_BYTES` (50 objects of 10 MB plus 50 MB for the JSON around them) is rejected before it is read. Import (`getImportedProjectFile`) rejects the whole file when the format or version is wrong, there are more than 50 objects, a field has the wrong type, or any SVG fails sanitising; it sanitises every SVG again, re-measures the size, clamps the box and brings the rotation into [0, 360). An invalid file shows "The file is not a webgrbl project file. Nothing was opened." and changes nothing. A new file version needs `PROJECT_FILE_VERSION` raised and a reader for the old one.
+"Open file..." (also in the Open dialog) always creates a **new** project with new ids, so a file never overwrites a stored project. A file over `MAX_PROJECT_FILE_BYTES` (50 objects of 10 MB plus 50 MB for the JSON around them) is rejected before it is read. Import (`getImportedProjectFile`) rejects the whole file when the format or version is wrong, there are more than 50 objects, a field has the wrong type, or any SVG fails sanitising; it sanitises every SVG again, re-measures the size, clamps the box, brings the rotation into [0, 360) and trims each object name and cuts it to 100 characters. An invalid file shows "The file is not a webgrbl project file. Nothing was opened." and changes nothing. A new file version needs `PROJECT_FILE_VERSION` raised and a reader for the old one.
 
 ## Use it from code
 
