@@ -5,6 +5,7 @@ import { TopBar } from '.';
 import { ENTER_KEY, ESCAPE_KEY, UNDO_KEY } from '../../utils/browser/browser.events.constants';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
+import { PROJECT_FILE_MIME_TYPE } from '../../utils/project/project.constants';
 import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
 import { MachineStopRequested } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
@@ -15,6 +16,8 @@ import {
   selectProjectObjects,
   SvgFilesImportRequested,
 } from '../../utils/states/project.document.state';
+import { PROJECT_SAVE_STATUS } from '../../utils/states/project.save.status.constants';
+import type { ProjectSaveStatus } from '../../utils/states/project.save.status.constants';
 import {
   NewProjectRequested,
   ProjectFileExportRequested,
@@ -24,14 +27,13 @@ import {
   ProjectSaveRequested,
   ProjectSaveStatusChanged,
 } from '../../utils/states/project.state';
-import { PROJECT_SAVE_STATUS } from '../../utils/states/project.save.status.constants';
-import type { ProjectSaveStatus } from '../../utils/states/project.save.status.constants';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
-import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
+import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
 import { HistoryHotkeys } from '../HistoryHotkeys';
+import { PROJECT_FILE_PICKER_ACCEPT } from '../ProjectFileInput/project.file.input.constants';
 import { StopHotkey } from '../StopHotkey';
 import { SVG_FILE_PICKER_ACCEPT, SVG_IMPORT_INPUT_TEST_ID } from '../SvgImportButton/svg.import.button.constants';
 
@@ -150,9 +152,7 @@ describe(TopBar.name, () => {
 
     expect(screen.queryByRole('dialog', { name: MACHINE_PROFILES_LABEL })).not.toBeInTheDocument();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
-    const stopCalls: unknown[][] = dispatchSpy.mock.calls.filter(
-      (callArguments: unknown[]): boolean => callArguments[0] instanceof MachineStopRequested,
-    );
+    const stopCalls: unknown[][] = getDispatchedActionCalls(dispatchSpy, MachineStopRequested);
 
     expect(stopCalls).toEqual([]);
   });
@@ -172,9 +172,7 @@ describe(TopBar.name, () => {
 
     fireEvent.change(input, { target: { files: [pickedFile] } });
 
-    const importCalls: unknown[][] = dispatchSpy.mock.calls.filter(
-      (callArguments: unknown[]): boolean => callArguments[0] instanceof SvgFilesImportRequested,
-    );
+    const importCalls: unknown[][] = getDispatchedActionCalls(dispatchSpy, SvgFilesImportRequested);
 
     expect(importCalls).toHaveLength(1);
     expect(importCalls[0]?.[0]).toMatchObject({ payload: { files: [pickedFile] } });
@@ -277,14 +275,14 @@ describe(TopBar.name, () => {
     it('opens the file picker from Open file and sends the picked file, then resets the picker', () => {
       const store: AppStore = newStore();
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
-      const pickedFile: File = new File(['{}'], PROJECT_FILE_NAME, { type: 'application/json' });
+      const pickedFile: File = new File(['{}'], PROJECT_FILE_NAME, { type: PROJECT_FILE_MIME_TYPE });
 
       renderWorkbenchTopBar(store);
 
       const input: HTMLElement = screen.getByLabelText(PROJECT_FILE_INPUT_LABEL);
       const clickSpy: MockInstance<() => void> = vi.spyOn(HTMLInputElement.prototype, 'click');
 
-      expect(input).toHaveAttribute('accept', '.json,application/json');
+      expect(input).toHaveAttribute('accept', PROJECT_FILE_PICKER_ACCEPT);
 
       openProjectMenu();
       fireEvent.click(screen.getByRole('menuitem', { name: OPEN_FILE_LABEL }));

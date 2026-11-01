@@ -7,6 +7,7 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import { ProjectSaveRequested } from '../../utils/states/project.state';
 import { OverlayOpened } from '../../utils/states/ui.overlay.state';
+import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
 
 const FIELD_LABEL = 'Field';
 const OVERLAY_ID = 'test-overlay';
@@ -25,8 +26,7 @@ const renderHotkey = (store: AppStore): MockInstance<AppDispatch> => {
 };
 
 const getSaveCallCount = (dispatchSpy: MockInstance<AppDispatch>): number =>
-  dispatchSpy.mock.calls.filter((callArguments: unknown[]): boolean => callArguments[0] instanceof ProjectSaveRequested)
-    .length;
+  getDispatchedActionCalls(dispatchSpy, ProjectSaveRequested).length;
 
 describe(SaveHotkey.name, () => {
   it('saves on Ctrl+S and prevents the browser default', () => {

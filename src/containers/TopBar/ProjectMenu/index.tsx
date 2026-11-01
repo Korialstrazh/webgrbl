@@ -25,9 +25,9 @@ import {
 } from '../../../utils/states/project.state';
 import { OpenProjectDialog } from '../../OpenProjectDialog';
 import { ProjectFileInput } from '../../ProjectFileInput';
+import type { ProjectMenuClickInfo } from '../interfaces/ProjectMenuClickInfo';
 import { getProjectMenuItems } from './get.project.menu.items';
 import { PROJECT_MENU_KEY } from './project.menu.constants';
-import type { ProjectMenuClickInfo } from '../interfaces/ProjectMenuClickInfo';
 import styles from './styles.module.scss';
 
 export const ProjectMenu = (): ReactNode => {

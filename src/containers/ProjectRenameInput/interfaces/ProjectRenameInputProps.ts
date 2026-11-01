@@ -14,7 +14,7 @@ export interface ProjectRenameInputProps {
   /** Accessible name of the box. */
   ariaLabel: string;
   /** Called with the trimmed new name when the user commits a name that is not empty and not the current one. */
-  onCommit: (name: string) => void;
+  onCommit: (newName: string) => void;
   /** Called when the rename ends without a new name: Escape, an empty name or an unchanged one. */
   onCancel: () => void;
 }

@@ -20,8 +20,8 @@ import {
 } from '../../utils/states/project.state';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
-import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
+import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
 import { StopHotkey } from '../StopHotkey';
 
 const DIALOG_LABEL = 'Open project';
@@ -39,7 +39,7 @@ const OPEN_LABEL = 'Open';
 const RENAME_LABEL = 'Rename';
 const DELETE_LABEL = 'Delete';
 const DELETE_OK_LABEL = 'Yes, delete';
-const OPEN_FILE_LABEL = 'Open file…';
+const OPEN_FILE_LABEL = 'Open file\u2026';
 const FILE_INPUT_LABEL = 'Open a project file';
 const RENAME_INPUT_LABEL = `New name for ${OLDEST_NAME}`;
 const RENAMED_NAME = 'Plates';
@@ -63,11 +63,11 @@ const renderDialog = (store: AppStore, onClose: () => void = vi.fn()): void => {
   );
 };
 
-const getRow = (name: string): HTMLElement => {
-  const row: HTMLElement | null = screen.getByText(name).closest('li');
+const getRow = (projectName: string): HTMLElement => {
+  const row: HTMLElement | null = screen.getByText(projectName).closest('li');
 
   if (!row) {
-    throw new Error(`No row for ${name}.`);
+    throw new Error(`No row for ${projectName}.`);
   }
 
   return row;

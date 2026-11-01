@@ -17,7 +17,7 @@ import {
 } from '../browser/browser.events.constants';
 import { downloadTextFile } from '../browser/download.text.file';
 import { DEFAULT } from '../localization/default.locales';
-import { i18n } from '../localization/localization';
+import { getDefaultProjectName } from '../project/get.default.project.name';
 import { getProjectFileText } from '../project/get.project.file.text';
 import type { LoadedProject } from '../project/interfaces/LoadedProject';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
@@ -29,7 +29,6 @@ import { newProjectObject } from '../project/new.project.object';
 import {
   AUTOSAVE_DEBOUNCE_MS,
   AUTOSAVE_MAX_WAIT_MS,
-  DEFAULT_PROJECT_NAME_KEY,
   MAX_PROJECT_NAME_LENGTH,
   PROJECT_FILE_EXTENSION,
   PROJECT_FILE_MIME_TYPE,
@@ -87,8 +86,6 @@ type SaveDocument = typeof PROJECT_REPOSITORY.saveDocument;
 type SaveDocumentSpy = MockInstance<SaveDocument>;
 
 type RenameProjectSpy = MockInstance<typeof PROJECT_REPOSITORY.renameProject>;
-
-const getDefaultProjectName = (): string => i18n.t(DEFAULT_PROJECT_NAME_KEY);
 
 const waitForOpenProject = async (store: AppStore): Promise<string> => {
   await vi.waitFor((): void => {
@@ -173,7 +170,8 @@ const keepMovingObjectUntilMaximumWait = async (store: AppStore, projectObject: 
   }
 };
 
-const newProjectFile = (fileText: string): File => new File([fileText], `${IMPORTED_PROJECT_NAME}.webgrbl.json`);
+const newProjectFile = (fileText: string): File =>
+  new File([fileText], `${IMPORTED_PROJECT_NAME}${PROJECT_FILE_EXTENSION}`);
 
 const hideTab = (): void => {
   vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(HIDDEN_VISIBILITY_STATE);

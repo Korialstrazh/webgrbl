@@ -1,5 +1,6 @@
 import type { Collection } from 'dexie';
 import { describe, expect, it } from 'vitest';
+import type { LoadedProject } from './interfaces/LoadedProject';
 import type { ProjectDocument } from './interfaces/ProjectDocument';
 import type { ProjectObject } from './interfaces/ProjectObject';
 import type { StoredProject } from './interfaces/StoredProject';
@@ -77,7 +78,7 @@ describe(PROJECT_REPOSITORY.getProject.name, () => {
 
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([firstObject, secondObject]));
 
-    const loadedProject = await PROJECT_REPOSITORY.getProject(createdProject.id);
+    const loadedProject: LoadedProject | undefined = await PROJECT_REPOSITORY.getProject(createdProject.id);
 
     expect(loadedProject?.document).toEqual(getDocument([firstObject, secondObject]));
     expect(loadedProject?.project.name).toBe(PROJECT_NAME);
@@ -95,7 +96,7 @@ describe(PROJECT_REPOSITORY.getProject.name, () => {
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([brokenObject, intactObject]));
     await getProjectObjectAssets(createdProject.id, brokenObject.id).delete();
 
-    const loadedProject = await PROJECT_REPOSITORY.getProject(createdProject.id);
+    const loadedProject: LoadedProject | undefined = await PROJECT_REPOSITORY.getProject(createdProject.id);
 
     expect(loadedProject?.document).toEqual(getDocument([intactObject]));
   });
@@ -112,7 +113,7 @@ describe(PROJECT_REPOSITORY.listProjects.name, () => {
     await waitForNextMillisecond();
     await PROJECT_REPOSITORY.saveDocument(olderProject.id, getDocument([newProjectObject({ svgText: SVG_TEXT })]));
 
-    const savedOlderProject = await WEBGRBL_DATABASE.projects.get(olderProject.id);
+    const savedOlderProject: StoredProject | undefined = await WEBGRBL_DATABASE.projects.get(olderProject.id);
 
     expect(await PROJECT_REPOSITORY.listProjects()).toEqual([
       { id: olderProject.id, name: PROJECT_NAME, updatedAt: savedOlderProject?.updatedAt, objectCount: 1 },
@@ -133,7 +134,7 @@ describe(PROJECT_REPOSITORY.saveDocument.name, () => {
     await waitForNextMillisecond();
     await PROJECT_REPOSITORY.saveDocument(createdProject.id, getDocument([projectObject]));
 
-    const storedProject = await WEBGRBL_DATABASE.projects.get(createdProject.id);
+    const storedProject: StoredProject | undefined = await WEBGRBL_DATABASE.projects.get(createdProject.id);
     const { svgText: _svgText, ...storedObject } = projectObject;
 
     expect(storedProject?.objects).toEqual([storedObject]);

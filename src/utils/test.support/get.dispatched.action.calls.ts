@@ -1,7 +1,16 @@
+/**
+ * Finds the dispatch calls of a spied store that carried an action of the given class.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-11-01
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
 import type { MockInstance } from 'vitest';
 import type { AppDispatch } from '../states/new.store';
 
-/** The dispatch calls of a spied store that carried an action of the given class. */
 export const getDispatchedActionCalls = (
   dispatchSpy: MockInstance<AppDispatch>,
   actionClass: new (...constructorArguments: never[]) => unknown,

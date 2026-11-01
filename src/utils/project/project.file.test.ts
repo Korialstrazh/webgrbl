@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getSanitizedSvg } from '../svg/get.sanitized.svg';
+import type { SanitizedSvg } from '../svg/interfaces/SanitizedSvg';
+import type { SvgImportFailure } from '../svg/interfaces/SvgImportFailure';
 import { isSvgImportFailure } from '../svg/is.svg.import.failure';
 import { getImportedProjectFile } from './get.imported.project.file';
 import { getObjectCorners } from './get.object.corners';
@@ -10,6 +12,7 @@ import type { ProjectDocument } from './interfaces/ProjectDocument';
 import type { ProjectObject } from './interfaces/ProjectObject';
 import { newProjectObject } from './new.project.object';
 import {
+  DEFAULT_OBJECT_SVG_TEXT,
   FULL_TURN_DEG,
   MAX_OBJECT_SIZE_MM,
   MAX_PROJECT_NAME_LENGTH,
@@ -32,9 +35,11 @@ const SVG_HEIGHT_MM = 20;
 const HUGE_ROTATION_DEG = 1e306;
 const NEGATIVE_ROTATION_DEG = -30;
 const NORMALIZED_NEGATIVE_ROTATION_DEG = 330;
+const LARGE_X_MM = 123456;
+const INFINITE_NUMBER_TEXT = '1e999';
 
 const getSanitizedSvgText = (svgText: string): string => {
-  const sanitizeResult = getSanitizedSvg(svgText);
+  const sanitizeResult: SanitizedSvg | SvgImportFailure = getSanitizedSvg(svgText);
 
   return isSvgImportFailure(sanitizeResult) ? '' : sanitizeResult.svgText;
 };
@@ -58,12 +63,13 @@ const getObjectWithoutId = ({ id: _id, ...objectFields }: ProjectObject): Omit<P
 describe(getProjectFileText.name, () => {
   it('writes pretty JSON with the format fields first and a stable field order per object', () => {
     const fileText: string = getProjectFileText(PROJECT_NAME, { objects: [newFileObject()] });
-    const fileValue = JSON.parse(fileText);
+    const fileValue: Record<string, unknown> = JSON.parse(fileText);
+    const fileObjects: object[] = fileValue.objects as object[];
 
     expect(fileText.startsWith(`{\n  "format": "${PROJECT_FILE_FORMAT}",\n  "version": ${PROJECT_FILE_VERSION},`))
       .toBe(true);
     expect(Object.keys(fileValue)).toEqual(['format', 'version', 'name', 'objects']);
-    expect(Object.keys(fileValue.objects[0])).toEqual([
+    expect(Object.keys(fileObjects[0] ?? {})).toEqual([
       'id', 'name', 'svgText', 'intrinsicWidthMm', 'intrinsicHeightMm', 'xMm', 'yMm', 'widthMm', 'heightMm',
       'rotationDeg',
     ]);
@@ -76,7 +82,9 @@ describe(getImportedProjectFile.name, () => {
     const secondObject: ProjectObject = newFileObject({ name: 'Stem', xMm: 50 });
     const projectDocument: ProjectDocument = { objects: [firstObject, secondObject] };
 
-    const importedFile = getImportedProjectFile(getProjectFileText(PROJECT_NAME, projectDocument));
+    const importedFile: ImportedProjectFile | undefined = getImportedProjectFile(
+      getProjectFileText(PROJECT_NAME, projectDocument),
+    );
 
     expect(importedFile?.name).toBe(PROJECT_NAME);
     expect(importedFile?.document.objects.map(getObjectWithoutId))
@@ -91,7 +99,9 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('cleans a script out of an object SVG', () => {
-    const importedFile = getImportedValue(getFileValue([newFileObject({ svgText: SCRIPT_SVG_TEXT })]));
+    const importedFile: ImportedProjectFile | undefined = getImportedValue(
+      getFileValue([newFileObject({ svgText: SCRIPT_SVG_TEXT })]),
+    );
     const importedSvgText: string = importedFile?.document.objects[0]?.svgText ?? SCRIPT_TAG_NAME;
 
     expect(importedSvgText).not.toContain(SCRIPT_TAG_NAME);
@@ -103,7 +113,7 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('limits the box size to the allowed range', () => {
-    const importedFile = getImportedValue(getFileValue([
+    const importedFile: ImportedProjectFile | undefined = getImportedValue(getFileValue([
       newFileObject({ widthMm: OVERSIZED_MM, heightMm: UNDERSIZED_MM }),
     ]));
     const importedObject: ProjectObject | undefined = importedFile?.document.objects[0];
@@ -113,7 +123,7 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('takes the intrinsic size from the SVG, not from the file', () => {
-    const importedFile = getImportedValue(
+    const importedFile: ImportedProjectFile | undefined = getImportedValue(
       getFileValue([newFileObject({ intrinsicWidthMm: 0, intrinsicHeightMm: -5 })]),
     );
     const importedObject: ProjectObject | undefined = importedFile?.document.objects[0];
@@ -123,7 +133,9 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('brings a huge rotation into one turn, so the corners stay finite', () => {
-    const importedFile = getImportedValue(getFileValue([newFileObject({ rotationDeg: HUGE_ROTATION_DEG })]));
+    const importedFile: ImportedProjectFile | undefined = getImportedValue(
+      getFileValue([newFileObject({ rotationDeg: HUGE_ROTATION_DEG })]),
+    );
     const importedObject: ProjectObject | undefined = importedFile?.document.objects[0];
     const rotationDeg: number = importedObject?.rotationDeg ?? Number.NaN;
     const cornerValues: number[] = importedObject
@@ -136,15 +148,17 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('turns a negative rotation into the same angle within one turn', () => {
-    const importedFile = getImportedValue(getFileValue([newFileObject({ rotationDeg: NEGATIVE_ROTATION_DEG })]));
+    const importedFile: ImportedProjectFile | undefined = getImportedValue(
+      getFileValue([newFileObject({ rotationDeg: NEGATIVE_ROTATION_DEG })]),
+    );
 
     expect(importedFile?.document.objects[0]?.rotationDeg).toBe(NORMALIZED_NEGATIVE_ROTATION_DEG);
   });
 
   it('drops fields the file format does not know', () => {
-    const fileValue = getFileValue();
+    const fileValue: Record<string, unknown> = getFileValue();
     const fileObjects: unknown[] = Array.isArray(fileValue.objects) ? fileValue.objects : [];
-    const importedFile = getImportedValue({
+    const importedFile: ImportedProjectFile | undefined = getImportedValue({
       ...fileValue,
       objects: [{ ...Object(fileObjects[0]), [UNKNOWN_FIELD_NAME]: true }],
     });
@@ -172,9 +186,9 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('rejects a number too large to be finite', () => {
-    const fileText: string = getProjectFileText(PROJECT_NAME, { objects: [newFileObject({ xMm: 123456 })] });
+    const fileText: string = getProjectFileText(PROJECT_NAME, { objects: [newFileObject({ xMm: LARGE_X_MM })] });
 
-    expect(getImportedProjectFile(fileText.replace('123456', '1e999'))).toBeUndefined();
+    expect(getImportedProjectFile(fileText.replace(String(LARGE_X_MM), INFINITE_NUMBER_TEXT))).toBeUndefined();
   });
 
   it('rejects an empty or too long name', () => {
@@ -190,9 +204,7 @@ describe(getImportedProjectFile.name, () => {
   });
 
   it('rejects the whole file when one object SVG is not a usable SVG', () => {
-    const sizelessSvgText = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
-
-    expect(getImportedValue(getFileValue([newFileObject(), newFileObject({ svgText: sizelessSvgText })])))
+    expect(getImportedValue(getFileValue([newFileObject(), newFileObject({ svgText: DEFAULT_OBJECT_SVG_TEXT })])))
       .toBeUndefined();
     expect(getImportedValue(getFileValue([newFileObject({ svgText: '<html></html>' })]))).toBeUndefined();
   });

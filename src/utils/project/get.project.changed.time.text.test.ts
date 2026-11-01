@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { INTL_MEDIUM_DATE_SHORT_TIME_FORMAT } from '../intl.constants';
 import { getProjectChangedTimeText } from './get.project.changed.time.text';
 
 const UPDATED_AT = '2026-03-04T12:30:00.000Z';
@@ -7,7 +8,7 @@ const GERMAN = 'de';
 
 describe(getProjectChangedTimeText.name, () => {
   it('writes the date and the time in the given language', () => {
-    const expectedText: string = new Intl.DateTimeFormat(ENGLISH, { dateStyle: 'medium', timeStyle: 'short' })
+    const expectedText: string = new Intl.DateTimeFormat(ENGLISH, INTL_MEDIUM_DATE_SHORT_TIME_FORMAT)
       .format(new Date(UPDATED_AT));
 
     expect(getProjectChangedTimeText(UPDATED_AT, ENGLISH)).toBe(expectedText);

@@ -29,11 +29,11 @@ export const ProjectNameButton = (): ReactNode => {
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const shownName: string = projectName || t(DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER);
 
-  const commitName = (name: string): void => {
+  const commitName = (newName: string): void => {
     setIsRenaming(false);
 
     if (projectId) {
-      dispatch(new ProjectRenameRequested({ projectId, name }));
+      dispatch(new ProjectRenameRequested({ projectId, name: newName }));
     }
   };
 

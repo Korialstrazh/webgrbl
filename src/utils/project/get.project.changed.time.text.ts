@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-const CHANGED_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { dateStyle: 'medium', timeStyle: 'short' };
+import { INTL_MEDIUM_DATE_SHORT_TIME_FORMAT } from '../intl.constants';
 
 export const getProjectChangedTimeText = (updatedAt: string, language: string): string =>
-  new Intl.DateTimeFormat(language, CHANGED_TIME_FORMAT_OPTIONS).format(new Date(updatedAt));
+  new Intl.DateTimeFormat(language, INTL_MEDIUM_DATE_SHORT_TIME_FORMAT).format(new Date(updatedAt));

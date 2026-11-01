@@ -31,16 +31,16 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
   const { t, i18n } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
-  const { id, name, updatedAt, objectCount } = summary;
+  const { id: projectId, name: projectName, updatedAt, objectCount } = summary;
 
   const openProject = (): void => {
-    dispatch(new ProjectOpenRequested({ projectId: id }));
+    dispatch(new ProjectOpenRequested({ projectId }));
     onOpened();
   };
 
   const commitName = (newName: string): void => {
     setIsRenaming(false);
-    dispatch(new ProjectRenameRequested({ projectId: id, name: newName }));
+    dispatch(new ProjectRenameRequested({ projectId, name: newName }));
   };
 
   return (
@@ -48,14 +48,14 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
       <div className={styles.details}>
         {isRenaming ? (
           <ProjectRenameInput
-            initialName={name}
-            ariaLabel={t(DEFAULT.OPEN_PROJECT_RENAME_INPUT, { name })}
+            initialName={projectName}
+            ariaLabel={t(DEFAULT.OPEN_PROJECT_RENAME_INPUT, { name: projectName })}
             onCommit={commitName}
             onCancel={() => setIsRenaming(false)}
           />
         ) : (
           <span className={styles.name}>
-            {name}
+            {projectName}
             {isOpenProject && <Tag className={styles.openNow}>{t(DEFAULT.OPEN_PROJECT_NOW)}</Tag>}
           </span>
         )}
@@ -74,11 +74,11 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
           {t(DEFAULT.OPEN_PROJECT_RENAME)}
         </Button>
         <Popconfirm
-          title={t(DEFAULT.OPEN_PROJECT_DELETE_CONFIRM, { name })}
+          title={t(DEFAULT.OPEN_PROJECT_DELETE_CONFIRM, { name: projectName })}
           okText={t(DEFAULT.OPEN_PROJECT_DELETE_OK)}
           cancelText={t(DEFAULT.OPEN_PROJECT_DELETE_CANCEL)}
           okButtonProps={{ danger: true }}
-          onConfirm={() => dispatch(new ProjectDeleteRequested({ projectId: id }))}
+          onConfirm={() => dispatch(new ProjectDeleteRequested({ projectId }))}
         >
           <Button size={ANTD_BUTTON_SIZE_SMALL} type={ANTD_BUTTON_TYPE_TEXT} danger>
             {t(DEFAULT.OPEN_PROJECT_DELETE)}
