@@ -89,6 +89,22 @@ describe(getBedDrawables.name, () => {
     expect(drawables[0]?.paint.strokeWidth).toBeCloseTo(1, 9);
   });
 
+  it('warns about geometry outside the root viewport but still keeps it', () => {
+    const { drawables, warnings }: BedDrawableSet = getBedDrawables(getDocument([
+      getSquareObject({
+        id: FIRST_OBJECT_ID,
+        svgText: getSvgText(OBJECT_SIZE_MM, OBJECT_SIZE_MM, '<rect x="8" width="5" height="5"/>'),
+      }),
+      getSquareObject({
+        id: SECOND_OBJECT_ID,
+        svgText: getSvgText(OBJECT_SIZE_MM, 2, '<circle cx="1" cy="1" r="1"/>'),
+      }),
+    ]));
+
+    expect(warnings).toEqual([{ objectId: FIRST_OBJECT_ID, kind: SVG_UNSUPPORTED_KIND.OFF_PAGE }]);
+    expect(drawables).toHaveLength(2);
+  });
+
   it('warns about unsupported content per object and skips objects whose SVG cannot be read', () => {
     expect(getBedDrawables(getDocument([
       getSquareObject({ id: FIRST_OBJECT_ID, svgText: 'not svg' }),

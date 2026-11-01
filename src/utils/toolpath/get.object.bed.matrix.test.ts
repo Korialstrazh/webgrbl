@@ -58,30 +58,21 @@ describe(getObjectBedMatrix.name, () => {
     });
   });
 
-  it('fits a viewBox of another shape into the intrinsic size centred and uniform by default', () => {
-    const matrix: SvgMatrix = getObjectBedMatrix(intrinsicObject, getRootViewBox('viewBox="10 10 100 100"'));
-
-    expectPointCloseTo(getSvgMatrixPoint(matrix, { x: 10, y: 10 }), { x: 25, y: INTRINSIC_HEIGHT_MM });
-    expectPointCloseTo(getSvgMatrixPoint(matrix, { x: 110, y: 110 }), { x: 75, y: 0 });
-  });
-
-  it('stretches the viewBox to the intrinsic size when preserveAspectRatio is none', () => {
-    const matrix: SvgMatrix = getObjectBedMatrix(
-      intrinsicObject,
-      getRootViewBox('viewBox="0 0 100 100" preserveAspectRatio="none"'),
-    );
+  it('stretches the root viewBox to the intrinsic box, as the bed image does', () => {
+    const matrix: SvgMatrix = getObjectBedMatrix(intrinsicObject, getRootViewBox('viewBox="0 0 100 100"'));
 
     expectPointCloseTo(getSvgMatrixPoint(matrix, { x: 100, y: 100 }), { x: INTRINSIC_WIDTH_MM, y: 0 });
+    expectPointCloseTo(getSvgMatrixPoint(matrix, { x: 0, y: 0 }), { x: 0, y: INTRINSIC_HEIGHT_MM });
   });
 
-  it('aligns a sliced viewBox to its maximum corner', () => {
+  it('ignores the root preserveAspectRatio, which the bed image overrides', () => {
     const matrix: SvgMatrix = getObjectBedMatrix(
       intrinsicObject,
-      getRootViewBox('viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax slice"'),
+      getRootViewBox('viewBox="10 10 100 100" preserveAspectRatio="xMaxYMax slice"'),
     );
 
-    expectPointCloseTo(getSvgMatrixPoint(matrix, { x: 100, y: 100 }), { x: INTRINSIC_WIDTH_MM, y: 0 });
-    expectPointCloseTo(getSvgMatrixPoint(matrix, { x: 0, y: 0 }), { x: 0, y: INTRINSIC_HEIGHT_MM * 2 });
+    expectPointCloseTo(getSvgMatrixPoint(matrix, { x: 110, y: 110 }), { x: INTRINSIC_WIDTH_MM, y: 0 });
+    expectPointCloseTo(getSvgMatrixPoint(matrix, { x: 10, y: 10 }), { x: 0, y: INTRINSIC_HEIGHT_MM });
   });
 
   it('reads user units as CSS pixels when there is no viewBox', () => {

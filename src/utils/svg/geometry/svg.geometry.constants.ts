@@ -70,6 +70,8 @@ export const SVG_PROPERTY = {
   STOP_COLOR: 'stop-color',
   STOP_OPACITY: 'stop-opacity',
   COLOR: 'color',
+  CLIP_PATH: 'clip-path',
+  MASK: 'mask',
 } as const;
 
 export const SVG_PAINT_NONE = 'none';

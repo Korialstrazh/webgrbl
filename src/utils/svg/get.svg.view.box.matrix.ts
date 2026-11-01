@@ -1,6 +1,7 @@
 /**
- * Gets the matrix from an SVG's user units to its intrinsic millimetres, Y down. With a viewBox, the viewBox is fitted
- * into the intrinsic size by its preserveAspectRatio; without one, a user unit is a CSS pixel.
+ * Gets the matrix from an SVG's user units to its viewport, Y down. With a viewBox, the viewBox is fitted into the
+ * viewport size by its preserveAspectRatio; without one, a user unit is a CSS pixel and the size is in millimetres.
+ * A nested viewport passes its size in its parent's user units.
  *
  * @author michael.morosov
  *
@@ -12,9 +13,9 @@
 import type { SvgMatrix } from './geometry/interfaces/SvgMatrix';
 import type { SvgPhysicalSize } from './interfaces/SvgPhysicalSize';
 import type { SvgViewBox } from './interfaces/SvgViewBox';
-import { MM_PER_INCH, SVG_PX_PER_INCH } from './svg.constants';
+import { SVG_LENGTH_UNIT, SVG_LENGTH_UNIT_MM } from './svg.constants';
 
-const MM_PER_CSS_PIXEL: number = MM_PER_INCH / SVG_PX_PER_INCH;
+const MM_PER_CSS_PIXEL: number = SVG_LENGTH_UNIT_MM[SVG_LENGTH_UNIT.PIXEL];
 
 export const getSvgViewBoxMatrix = (viewBox: SvgViewBox | undefined, intrinsicSize: SvgPhysicalSize): SvgMatrix => {
   if (!viewBox) {

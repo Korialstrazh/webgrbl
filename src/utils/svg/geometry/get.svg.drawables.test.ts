@@ -8,6 +8,8 @@ const TOLERANCE = 0.05;
 const RED = '#ff0000';
 const BLUE = '#0000ff';
 const UNIT_SQUARE = 'width="1" height="1"';
+// The budget allows 20,000 copied elements, which jsdom styles and walks in a few seconds.
+const USE_LIMIT_TEST_TIMEOUT_MS = 20_000;
 
 const getSvgText = (content: string): string =>
   `<svg xmlns="${SVG_NAMESPACE_URI}" xmlns:xlink="${XLINK_NAMESPACE_URI}" width="10mm" height="10mm">${content}</svg>`;
@@ -82,6 +84,53 @@ describe(getSvgDrawables.name, () => {
     );
 
     expect(drawable.subpaths[0]?.points[0]).toEqual({ x: 3, y: 0 });
+  });
+
+  it('stops copying nested uses at the element budget and reports the use limit', () => {
+    const nestingLevels = 6;
+    const usesPerLevel = 10;
+    const levelDefinitions: string[] = ['<path id="a0" d="M0 0 L1 1" stroke="#000000"/>'];
+
+    for (let level = 1; level <= nestingLevels; level++) {
+      levelDefinitions.push(`<g id="a${level}">${`<use href="#a${level - 1}"/>`.repeat(usesPerLevel)}</g>`);
+    }
+
+    const { drawables, unsupported }: SvgDrawableSet = getDrawableSet(
+      `<defs>${levelDefinitions.join('')}</defs><use href="#a${nestingLevels}"/>`,
+    );
+
+    expect(unsupported).toEqual([SVG_UNSUPPORTED_KIND.USE_LIMIT]);
+    expect(drawables.length).toBeGreaterThan(0);
+    expect(drawables.length).toBeLessThan(usesPerLevel ** nestingLevels);
+  }, USE_LIMIT_TEST_TIMEOUT_MS);
+
+  it('fits a symbol viewBox into the size of the use that draws it', () => {
+    const drawable: SvgDrawable = getOnlyDrawable(
+      `<symbol id="s" viewBox="-5 -5 10 10"><line x1="-5" x2="5" stroke="${RED}"/></symbol>
+       <use href="#s" width="20" height="20"/>`,
+    );
+
+    expect(drawable.subpaths[0]?.points).toEqual([{ x: 0, y: 10 }, { x: 20, y: 10 }]);
+  });
+
+  it('places a nested svg at its x and y and fits its viewBox into its size', () => {
+    const drawable: SvgDrawable = getOnlyDrawable(
+      `<svg x="50" y="50" viewBox="0 0 10 10" width="20"><line x2="10" stroke="${RED}"/></svg>`,
+    );
+
+    expect(drawable.subpaths[0]?.points).toEqual([{ x: 50, y: 50 }, { x: 70, y: 50 }]);
+  });
+
+  it('reports clipped content for a clip-path or a mask but still draws it in full', () => {
+    const { drawables, unsupported }: SvgDrawableSet = getDrawableSet(`
+      <defs><clipPath id="c"><rect ${UNIT_SQUARE}/></clipPath><mask id="m"><rect ${UNIT_SQUARE}/></mask></defs>
+      <rect width="5" height="5" clip-path="url(#c)"/>
+      <rect width="5" height="5" style="mask:url(#m)"/>
+    `);
+
+    expect(unsupported).toEqual([SVG_UNSUPPORTED_KIND.CLIPPED]);
+    expect(drawables[0]?.subpaths[0]?.points[2]).toEqual({ x: 5, y: 5 });
+    expect(drawables).toHaveLength(2);
   });
 
   it('skips undisplayed, hidden, fully transparent and unpainted shapes', () => {

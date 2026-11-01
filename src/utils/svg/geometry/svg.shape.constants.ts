@@ -9,9 +9,16 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+/** Content that the job leaves out or that burns differently from how the bed shows it. */
 export const SVG_UNSUPPORTED_KIND = {
   TEXT: 'text',
   IMAGE: 'image',
+  /** Nested uses copied more elements than the budget allows; the rest is left out. */
+  USE_LIMIT: 'use-limit',
+  /** Some geometry lies outside the root viewport, so the bed does not show it but it still burns. */
+  OFF_PAGE: 'off-page',
+  /** An element has a clip-path or mask; it still burns in full. */
+  CLIPPED: 'clipped',
 } as const;
 
 export type SvgUnsupportedKind = (typeof SVG_UNSUPPORTED_KIND)[keyof typeof SVG_UNSUPPORTED_KIND];
@@ -50,19 +57,14 @@ export const SVG_GROUP_ELEMENT_NAME = 'g';
 export const SVG_SYMBOL_ELEMENT_NAME = 'symbol';
 /** Attributes of a use element that place or point to the content, so they are not copied to its stand-in group. */
 export const SVG_USE_OWN_ATTRIBUTE_NAMES: readonly string[] = ['x', 'y', 'width', 'height', 'href', 'transform'];
-/** Attributes of a symbol that only make sense on a viewport, so they are not copied to its stand-in group. */
-export const SVG_SYMBOL_OWN_ATTRIBUTE_NAMES: readonly string[] = [
-  'viewBox',
-  'preserveAspectRatio',
-  'x',
-  'y',
-  'width',
-  'height',
-  'refX',
-  'refY',
-];
+/** Use attributes that set the size of the symbol or svg it draws. */
+export const SVG_USE_VIEWPORT_ATTRIBUTE_NAMES: readonly string[] = ['width', 'height'];
+/** Symbol attributes with no meaning on the nested svg that stands in for a used symbol. */
+export const SVG_SYMBOL_OWN_ATTRIBUTE_NAMES: readonly string[] = ['refX', 'refY'];
 /**
- * Use elements are drawn by copying what they point to. A file that nests uses inside uses could grow without end, so
- * at most this many copies are made per SVG.
+ * Use elements are drawn by copying what they point to. A file that nests uses inside uses grows exponentially, so at
+ * most this many elements are copied per SVG.
  */
-export const SVG_USE_MAX_COPIES = 2000;
+export const SVG_USE_MAX_COPIED_ELEMENTS = 20_000;
+/** Elements that clip or mask other content; without them in the document a clip-path or mask has no effect. */
+export const SVG_CLIPPING_ELEMENT_SELECTOR = 'clipPath, mask';

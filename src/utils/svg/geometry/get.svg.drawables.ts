@@ -13,11 +13,12 @@
 import { getSvgDocumentDrawables } from './get.svg.document.drawables';
 import { getSvgExpandedDocument } from './get.svg.expanded.document';
 import type { SvgDrawableSet } from './interfaces/SvgDrawableSet';
+import type { SvgExpandedDocument } from './interfaces/SvgExpandedDocument';
 
 export const getSvgDrawables = (svgText: string, toleranceUserUnits: number): SvgDrawableSet => {
-  const svgDocument: Document | undefined = getSvgExpandedDocument(svgText);
+  const expandedDocument: SvgExpandedDocument | undefined = getSvgExpandedDocument(svgText);
 
-  return svgDocument
-    ? getSvgDocumentDrawables(svgDocument, toleranceUserUnits)
+  return expandedDocument
+    ? getSvgDocumentDrawables(expandedDocument, toleranceUserUnits)
     : { drawables: [], unsupported: [] };
 };

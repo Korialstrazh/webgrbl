@@ -1,9 +1,10 @@
 /**
  * Gets the matrix from a project object's SVG user units to bed millimetres (front-left origin, Y up). In order: the
- * viewBox to intrinsic millimetres, the scale to the object's width and height, the flip from SVG Y down to bed Y up
- * about the box centre, the counter-clockwise rotation about that centre and the move to the object's position. The
- * corners land exactly where getObjectCorners puts them. With a bed height, the result is in the bed drawing frame
- * instead (Y down from the back edge), as the bed view draws it.
+ * viewBox stretched to intrinsic millimetres (the root preserveAspectRatio is ignored, as in the bed image), the scale
+ * to the object's width and height, the flip from SVG Y down to bed Y up about the box centre, the counter-clockwise
+ * rotation about that centre and the move to the object's position. The corners land exactly where getObjectCorners
+ * puts them. With a bed height, the result is in the bed drawing frame instead (Y down from the back edge), as the bed
+ * view draws it.
  *
  * @author michael.morosov
  *
@@ -18,6 +19,7 @@ import { getSvgMatrixProduct } from '../svg/geometry/get.svg.matrix.product';
 import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
 import { getSvgViewBoxMatrix } from '../svg/get.svg.view.box.matrix';
 import type { SvgViewBox } from '../svg/interfaces/SvgViewBox';
+import { SVG_STRETCH_ASPECT_RATIO_FIT } from '../svg/svg.constants';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
 
 const getSizeRatio = (sizeMm: number, intrinsicSizeMm: number): number =>
@@ -48,7 +50,12 @@ export const getObjectBedMatrix = (
   svgViewBox: SvgViewBox | undefined,
   bedHeightMm?: number,
 ): SvgMatrix => {
-  const viewBoxMatrix: SvgMatrix = getSvgViewBoxMatrix(svgViewBox, {
+  // The bed draws the SVG through an image with preserveAspectRatio none, which overrides the root's own fit.
+  const stretchedViewBox: SvgViewBox | undefined = svgViewBox && {
+    ...svgViewBox,
+    aspectRatioFit: SVG_STRETCH_ASPECT_RATIO_FIT,
+  };
+  const viewBoxMatrix: SvgMatrix = getSvgViewBoxMatrix(stretchedViewBox, {
     widthMm: projectObject.intrinsicWidthMm,
     heightMm: projectObject.intrinsicHeightMm,
   });

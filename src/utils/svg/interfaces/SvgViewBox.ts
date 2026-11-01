@@ -9,16 +9,9 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { SvgAspectRatioFit } from './SvgAspectRatioFit';
+import type { SvgViewportBounds } from './SvgViewportBounds';
 
-export interface SvgViewBox {
-  /** User unit x at the left edge of the viewBox. */
-  minX: number;
-  /** User unit y at the top edge of the viewBox. */
-  minY: number;
-  /** Width in user units, always above 0. */
-  width: number;
-  /** Height in user units, always above 0. */
-  height: number;
+export interface SvgViewBox extends SvgViewportBounds {
   /** The fit read from the root's preserveAspectRatio. */
   aspectRatioFit: SvgAspectRatioFit;
 }

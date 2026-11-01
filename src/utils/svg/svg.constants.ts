@@ -123,6 +123,13 @@ export const SVG_ASPECT_RATIO_ALIGN_NONE = 'none';
 export const SVG_ASPECT_RATIO_SLICE = 'slice';
 /** Where each alignment keyword puts the content in the spare room of its axis. */
 export const SVG_ASPECT_RATIO_ALIGN_FRACTIONS: Readonly<Record<string, number>> = { Min: 0, Mid: 0.5, Max: 1 };
+/** preserveAspectRatio none: each axis stretched on its own to fill the viewport. */
+export const SVG_STRETCH_ASPECT_RATIO_FIT: SvgAspectRatioFit = {
+  isUniform: false,
+  isSlice: false,
+  alignX: 0,
+  alignY: 0,
+};
 /** The fit of a root without preserveAspectRatio: xMidYMid meet. */
 export const SVG_DEFAULT_ASPECT_RATIO_FIT: SvgAspectRatioFit = {
   isUniform: true,
