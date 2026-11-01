@@ -66,5 +66,11 @@ export const SVG_SYMBOL_OWN_ATTRIBUTE_NAMES: readonly string[] = ['refX', 'refY'
  * most this many elements are copied per SVG.
  */
 export const SVG_USE_MAX_COPIED_ELEMENTS = 20_000;
+/**
+ * Elements counted while sizing use copies, across one whole SVG, whether the copy is then accepted or rejected. Many
+ * distinct large references would otherwise each cost a count up to the copy budget; once this is spent, every further
+ * use is left out.
+ */
+export const SVG_USE_INSPECTION_BUDGET = 200_000;
 /** Elements that clip or mask other content; without them in the document a clip-path or mask has no effect. */
 export const SVG_CLIPPING_ELEMENT_SELECTOR = 'clipPath, mask';
