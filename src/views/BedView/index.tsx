@@ -100,7 +100,9 @@ export const BedView = (props: BedViewProps): ReactNode => {
     <svg
       className={styles.bedView}
       viewBox={`0 0 ${widthMm} ${heightMm}`}
-      role="img"
+      // A group, not an img: an img hides its children from assistive technology, and the objects on the bed carry
+      // their own names.
+      role="group"
       aria-label={getAriaLabel(t, props)}
     >
       <rect className={styles.surface} x={0} y={0} width={widthMm} height={heightMm} />

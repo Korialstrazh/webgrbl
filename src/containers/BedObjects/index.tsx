@@ -2,7 +2,7 @@
  * The project objects on the bed and the pointer editing of them. With the Select tool a click selects, Shift-click
  * adds or removes, a click on empty bed clears, and a drag moves the selection. The drag lives in local state while
  * the pointer is down and becomes one transform action, so one undo step, when it comes up. The pointer is captured so
- * a drag keeps going when it leaves the bed.
+ * a drag keeps going when it leaves the bed; a cancelled pointer or a lost capture drops the drag without a change.
  *
  * @author michael.morosov
  *
@@ -127,8 +127,24 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
       currentDrag && getDragAtPointer(currentDrag, { clientX, clientY, point }));
   };
 
+  // The drag is finished from where the pointer comes up, so a fast flick that never rendered a move still counts.
+  const getFinishedDrag = (pointerEvent: PointerEvent): BedObjectDrag | undefined => {
+    const draggedSoFar: BedObjectDrag | undefined = getDragOfPointer(pointerEvent);
+    const point: BedSvgPoint | undefined = getPointerBedPoint(pointerEvent);
+
+    if (!point) {
+      return draggedSoFar;
+    }
+
+    return draggedSoFar && getDragAtPointer(draggedSoFar, {
+      clientX: pointerEvent.clientX,
+      clientY: pointerEvent.clientY,
+      point,
+    });
+  };
+
   const handlePointerUp = (pointerEvent: PointerEvent<SVGGElement>): void => {
-    const finishedDrag: BedObjectDrag | undefined = getDragOfPointer(pointerEvent);
+    const finishedDrag: BedObjectDrag | undefined = getFinishedDrag(pointerEvent);
 
     if (!finishedDrag) {
       return;
@@ -160,6 +176,7 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
+      onLostPointerCapture={handlePointerCancel}
     >
       <rect
         className={styles.surface}

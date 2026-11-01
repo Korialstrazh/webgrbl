@@ -13,6 +13,7 @@ const HEIGHT_LABEL_TEXT = '300';
 const OUTSIDE_WORK_ORIGIN = { x: -50, y: 20, z: 0 };
 const OUTSIDE_SCREEN_TRANSFORM = 'translate(0 280)';
 const CHILD_TEST_ID = 'bed-child';
+const CHILD_NAME = 'Logo';
 
 const renderBed = (overrides: Partial<ComponentProps<typeof BedView>>): HTMLElement => {
   const { container } = render(
@@ -41,10 +42,17 @@ const getRulerLabelCount = (container: HTMLElement, labelText: string): number =
 };
 
 describe(BedView.name, () => {
+  it('exposes the bed as a labelled group, so the objects drawn on it keep their own names', () => {
+    renderBed({ children: <g role="img" aria-label={CHILD_NAME} /> });
+
+    expect(screen.getByRole('group', { name: /400 by 300 mm/ })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: CHILD_NAME })).toBeInTheDocument();
+  });
+
   it('sizes the view box in millimetres', () => {
     renderBed({});
 
-    expect(screen.getByRole('img')).toHaveAttribute('viewBox', '0 0 400 300');
+    expect(screen.getByRole('group')).toHaveAttribute('viewBox', '0 0 400 300');
   });
 
   it('puts the crosshair at the head position with the Y axis flipped', () => {
@@ -56,7 +64,7 @@ describe(BedView.name, () => {
   it('names the size and head position in the accessible label', () => {
     renderBed({ headPosition: HEAD_POSITION });
 
-    expect(screen.getByRole('img', { name: /400 by 300 mm.*X 100\.00, Y 50\.00/ })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: /400 by 300 mm.*X 100\.00, Y 50\.00/ })).toBeInTheDocument();
   });
 
   it('shows no crosshair without a head position', () => {
@@ -76,7 +84,7 @@ describe(BedView.name, () => {
 
     expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(0 280)');
     expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('data-outside-bed', 'true');
-    expect(screen.getByRole('img', { name: /outside the bed/ })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: /outside the bed/ })).toBeInTheDocument();
   });
 
   it('clamps a head beyond the far corner to the bed edge', () => {
@@ -105,7 +113,8 @@ describe(BedView.name, () => {
 
     expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute('transform', OUTSIDE_SCREEN_TRANSFORM);
     expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute('data-outside-bed', 'true');
-    expect(screen.getByRole('img', { name: /Work zero at X -50\.00, Y 20\.00.*outside the bed/ })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: /Work zero at X -50\.00, Y 20\.00.*outside the bed/ }))
+      .toBeInTheDocument();
   });
 
   it('uses the normal style for a work zero inside the bed', () => {

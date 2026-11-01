@@ -37,6 +37,9 @@ const SECOND_GRAB_Y = 240;
 const POINTER_ID = 1;
 const SECONDARY_BUTTON = 2;
 const IDENTITY_MATRIX = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+// What DOMMatrix.inverse() gives for a matrix that cannot be inverted, such as a bed drawn with zero size.
+const SINGULAR_INVERSE_MATRIX = { a: NaN, b: NaN, c: NaN, d: NaN, e: NaN, f: NaN };
+const RESTING_TRANSFORM = 'translate(20 280) rotate(0)';
 const SELECTED_ATTRIBUTE = 'data-selected';
 const TRANSFORM_ATTRIBUTE = 'transform';
 const TRUE_TEXT = 'true';
@@ -97,12 +100,19 @@ const getTransformedDispatchCount = (dispatchSpy: MockInstance<AppDispatch>): nu
 const getStoredObject = (store: AppStore, objectId: string): ProjectObject | undefined =>
   selectProjectObjects(store.getState()).find((projectObject: ProjectObject): boolean => projectObject.id === objectId);
 
-beforeAll(() => {
+const mockScreenToSvgMatrix = (screenToSvgMatrix: typeof IDENTITY_MATRIX): void => {
   Object.defineProperty(SVGSVGElement.prototype, 'getScreenCTM', {
     configurable: true,
-    value: () => ({ inverse: () => IDENTITY_MATRIX }),
+    value: () => ({ inverse: () => screenToSvgMatrix }),
   });
+};
+
+beforeAll(() => {
   Object.defineProperty(Element.prototype, 'setPointerCapture', { configurable: true, value: vi.fn() });
+});
+
+beforeEach(() => {
+  mockScreenToSvgMatrix(IDENTITY_MATRIX);
 });
 
 describe(BedObjects.name, () => {
@@ -256,7 +266,66 @@ describe(BedObjects.name, () => {
     fireEvent.pointerCancel(getObjectElement(FIRST_NAME), { pointerId: POINTER_ID });
 
     expect(getStoredObject(store, firstObject.id)).toMatchObject({ xMm: FIRST_X_MM, yMm: FIRST_Y_MM });
-    expect(getObjectElement(FIRST_NAME)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(20 280) rotate(0)');
+    expect(getObjectElement(FIRST_NAME)).toHaveAttribute(TRANSFORM_ATTRIBUTE, RESTING_TRANSFORM);
+  });
+
+  it('drops the drag without moving anything when the pointer capture is lost', () => {
+    const store: AppStore = renderObjects([firstObject]);
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    fireEvent.pointerDown(getObjectElement(FIRST_NAME), {
+      pointerId: POINTER_ID,
+      clientX: FIRST_GRAB_X,
+      clientY: FIRST_GRAB_Y,
+    });
+    fireEvent.pointerMove(getObjectElement(FIRST_NAME), {
+      pointerId: POINTER_ID,
+      clientX: FIRST_GRAB_X + DRAG_RIGHT_MM,
+      clientY: FIRST_GRAB_Y,
+    });
+    fireEvent.lostPointerCapture(getObjectElement(FIRST_NAME), { pointerId: POINTER_ID });
+
+    expect(getObjectElement(FIRST_NAME)).toHaveAttribute(TRANSFORM_ATTRIBUTE, RESTING_TRANSFORM);
+
+    fireEvent.pointerUp(getObjectElement(FIRST_NAME), {
+      pointerId: POINTER_ID,
+      clientX: FIRST_GRAB_X + DRAG_RIGHT_MM,
+      clientY: FIRST_GRAB_Y,
+    });
+
+    expect(getTransformedDispatchCount(dispatchSpy)).toBe(0);
+    expect(getStoredObject(store, firstObject.id)).toMatchObject({ xMm: FIRST_X_MM, yMm: FIRST_Y_MM });
+  });
+
+  it('commits a fast flick from where the pointer comes up, with no move in between', () => {
+    const store: AppStore = renderObjects([firstObject]);
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    fireEvent.pointerDown(getObjectElement(FIRST_NAME), {
+      pointerId: POINTER_ID,
+      clientX: FIRST_GRAB_X,
+      clientY: FIRST_GRAB_Y,
+    });
+    fireEvent.pointerUp(getObjectElement(FIRST_NAME), {
+      pointerId: POINTER_ID,
+      clientX: FIRST_GRAB_X + DRAG_RIGHT_MM,
+      clientY: FIRST_GRAB_Y,
+    });
+
+    expect(getTransformedDispatchCount(dispatchSpy)).toBe(1);
+    expect(getStoredObject(store, firstObject.id)).toMatchObject({ xMm: FIRST_X_MM + DRAG_RIGHT_MM, yMm: FIRST_Y_MM });
+  });
+
+  it('starts no drag when the screen matrix cannot be inverted', () => {
+    const store: AppStore = renderObjects([firstObject]);
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    mockScreenToSvgMatrix(SINGULAR_INVERSE_MATRIX);
+    dragElement(getObjectElement(FIRST_NAME), FIRST_GRAB_X, FIRST_GRAB_Y);
+
+    expect(getTransformedDispatchCount(dispatchSpy)).toBe(0);
+    expect(getStoredObject(store, firstObject.id)).toMatchObject({ xMm: FIRST_X_MM, yMm: FIRST_Y_MM });
+    expect(getObjectElement(FIRST_NAME)).toHaveAttribute(TRANSFORM_ATTRIBUTE, RESTING_TRANSFORM);
   });
 
   it('ignores a press of the secondary mouse button', () => {
