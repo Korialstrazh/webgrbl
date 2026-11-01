@@ -25,7 +25,7 @@ import {
   selectProjectObjects,
 } from './project.document.state';
 import { selectSelectedObjectIds } from './project.selection.state';
-import { watchSvgImport } from './svg.import.saga';
+import { importSvgFiles } from './svg.import.saga';
 import { TOAST_SEVERITY } from './toast.constants';
 import { selectToasts } from './toast.state';
 
@@ -66,7 +66,7 @@ const waitForToast = async (store: AppStore, messageKey: string): Promise<void> 
 const getToastsOf = (store: AppStore, messageKey: string): AppToast[] =>
   selectToasts(store.getState()).filter((toast: AppToast): boolean => toast.messageKey === messageKey);
 
-describe(watchSvgImport.name, () => {
+describe(importSvgFiles.name, () => {
   it('adds two valid files at stepped positions, selects both and records one undo step', async () => {
     const store: AppStore = newStore();
 

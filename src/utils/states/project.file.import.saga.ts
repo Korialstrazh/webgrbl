@@ -15,10 +15,9 @@ import { getImportedProjectFile } from '../project/get.imported.project.file';
 import type { ImportedProjectFile } from '../project/interfaces/ImportedProjectFile';
 import type { StoredProject } from '../project/interfaces/StoredProject';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
-import { closeOpenProject } from './project.close.saga';
 import { showProjectErrorToast } from './project.error.toast.saga';
-import { openLoadedProject } from './project.open.saga';
 import type { ProjectFileImportRequested } from './project.state';
+import { switchToCreatedProject } from './project.switch.to.created.saga';
 
 const readProjectFile = async (projectFile: File): Promise<ImportedProjectFile | undefined> => {
   try {
@@ -29,12 +28,13 @@ const readProjectFile = async (projectFile: File): Promise<ImportedProjectFile |
   }
 };
 
-function* storeImportedProject(importedFile: ImportedProjectFile): Generator {
+/** The new project is stored before the open one closes, so no edit waits on storage between the close and the load. */
+function* storeAndOpenImportedProject(importedFile: ImportedProjectFile): Generator {
   const createdProject: StoredProject =
     (yield call([PROJECT_REPOSITORY, PROJECT_REPOSITORY.createProject], importedFile.name)) as StoredProject;
 
   yield call([PROJECT_REPOSITORY, PROJECT_REPOSITORY.saveDocument], createdProject.id, importedFile.document);
-  yield call(openLoadedProject, { project: createdProject, document: importedFile.document });
+  yield call(switchToCreatedProject, { project: createdProject, document: importedFile.document });
 }
 
 export function* importProjectFile(action: ProjectFileImportRequested): Generator {
@@ -47,9 +47,5 @@ export function* importProjectFile(action: ProjectFileImportRequested): Generato
     return;
   }
 
-  const isClosed: boolean = (yield call(closeOpenProject)) as boolean;
-
-  if (isClosed) {
-    yield call(storeImportedProject, importedFile);
-  }
+  yield call(storeAndOpenImportedProject, importedFile);
 }

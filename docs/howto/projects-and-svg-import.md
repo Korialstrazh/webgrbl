@@ -48,7 +48,7 @@ The toast names the file and shows once per file, however many things were remov
 | Id of the last opened project | table `appState` | when a project opens |
 | Machine profiles | `localStorage` (see `docs/howto/machine-control.md`) | not part of a project |
 
-The split keeps an autosave after a nudge small: only the project row is rewritten. A save never deletes SVG rows, because undo can bring a removed object back. Unused rows are deleted when a project opens and when it closes (the history is empty or gone then).
+The split keeps an autosave after a nudge small: only the project row is rewritten. A save never deletes SVG rows, because undo can bring a removed object back. Unused rows are deleted when a project opens and, for the project that was closed, right after the next one is on screen (the history is empty or gone then).
 
 **Autosave timing** (`project.constants.ts`, `project.autosave.saga.ts`): a change marks the project "Not saved"; the save runs 1000 ms after the last change, at the latest 3000 ms after the first unsaved change, and at once when the tab is hidden or the page is left (`visibilitychange`, `pagehide`). A failed save keeps the changes on screen, shows one toast until a save works again, and the next change tries again. If the project was deleted in another tab, the next save stores the document in a new project.
 
@@ -85,7 +85,7 @@ dispatch(new SvgFilesImportRequested({ files }));
 dispatch(new ProjectObjectsTransformed({ transforms: [{ id, xMm: 20, yMm: 20, widthMm: 40, heightMm: 40, rotationDeg: 0 }] }));
 dispatch(new ProjectUndoRequested());
 
-// Project commands go into one queue, so they never run at the same time as an autosave.
+// Project commands and SVG imports go into one queue, so they never run at the same time as an autosave or a switch.
 dispatch(new ProjectSaveRequested());
 dispatch(new ProjectOpenRequested({ projectId }));
 ```

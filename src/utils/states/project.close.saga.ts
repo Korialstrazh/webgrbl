@@ -1,7 +1,8 @@
 /**
- * Closes the open project before another one opens: saves every pending change, then deletes the SVG rows of objects
- * its current document no longer holds. The next document load clears the undo history, so no undo can bring such an
- * object back. When a save fails the project stays open with its changes on screen, and the caller does not go on.
+ * Closes the open project before another one opens: saves every pending change and gives back the project with the
+ * document that was saved last. Nothing that can wait on storage runs after that last save, so the caller can load
+ * the next document before any further edit lands in a document that is never saved. When a save fails the project
+ * stays open with its changes on screen, and the caller does not go on.
  *
  * @author michael.morosov
  *
@@ -11,9 +12,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { call, select } from 'redux-saga/effects';
-import { getProjectObjectIds } from '../project/get.project.object.ids';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
-import { PROJECT_REPOSITORY } from '../project/project.repository';
+import type { ProjectCloseResult } from './interfaces/ProjectCloseResult';
 import { selectProjectDocument } from './project.document.state';
 import { saveOpenProjectDocument } from './project.save.saga';
 import { PROJECT_SAVE_STATUS } from './project.save.status.constants';
@@ -37,27 +37,22 @@ function* savePendingProjectChanges(): Generator<unknown, boolean> {
   }
 }
 
-/** Gives true when the project is closed, or none was open; false when its changes could not be saved. */
-export function* closeOpenProject(): Generator<unknown, boolean> {
+export function* closeOpenProject(): Generator<unknown, ProjectCloseResult> {
   const openProjectId: string | undefined = (yield select(selectProjectId)) as string | undefined;
 
   if (!openProjectId) {
-    return true;
+    return { isClosed: true };
   }
 
   const isSaved: boolean = (yield call(savePendingProjectChanges)) as boolean;
 
   if (!isSaved) {
-    return false;
+    return { isClosed: false };
   }
 
   // Read after the save: storing into a new project, when the old one was deleted elsewhere, changes the id.
   const projectId: string | undefined = (yield select(selectProjectId)) as string | undefined;
   const projectDocument: ProjectDocument = (yield select(selectProjectDocument)) as ProjectDocument;
 
-  if (projectId) {
-    yield call([PROJECT_REPOSITORY, PROJECT_REPOSITORY.pruneAssets], projectId, getProjectObjectIds(projectDocument));
-  }
-
-  return true;
+  return { isClosed: true, closedProject: projectId ? { projectId, document: projectDocument } : undefined };
 }
