@@ -1,7 +1,7 @@
 /**
  * Makes the bed area a drop target for SVG files. A drag over it shows a highlight, and a drop asks for an import of
- * the dropped files whose name ends in .svg or whose type is SVG. A drop with no SVG file asks for nothing, and a drag
- * of anything but files is not accepted.
+ * every dropped file; the import names each file that is not a usable SVG in an error toast. A drop with no file asks
+ * for nothing, and a drag of anything but files is not accepted.
  *
  * @author michael.morosov
  *
@@ -14,7 +14,6 @@ import { useState } from 'react';
 import type { DragEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import { DATA_TRANSFER_FILES_TYPE } from '../../utils/browser/browser.events.constants';
-import { isSvgFile } from '../../utils/svg/is.svg.file';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { SvgFilesImportRequested } from '../../utils/states/project.document.state';
 import type { SvgFileDropArea } from './interfaces/SvgFileDropArea';
@@ -50,10 +49,11 @@ export const useSvgFileDrop = (): SvgFileDropArea => {
     dragEvent.preventDefault();
     setIsDropTarget(false);
 
-    const svgFiles: File[] = Array.from(dragEvent.dataTransfer.files).filter(isSvgFile);
+    // Every file goes to the import, which names each one that is not a usable SVG in an error toast.
+    const droppedFiles: File[] = Array.from(dragEvent.dataTransfer.files);
 
-    if (svgFiles.length) {
-      dispatch(new SvgFilesImportRequested({ files: svgFiles }));
+    if (droppedFiles.length) {
+      dispatch(new SvgFilesImportRequested({ files: droppedFiles }));
     }
   };
 
