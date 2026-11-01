@@ -1,6 +1,5 @@
 import { getSvgLengthMm } from './get.svg.length.mm';
-
-const MM_PER_INCH = 25.4;
+import { MM_PER_INCH } from './svg.constants';
 
 describe(getSvgLengthMm.name, () => {
   it('reads millimetres as they are', () => {

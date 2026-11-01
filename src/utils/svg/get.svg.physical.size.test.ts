@@ -1,7 +1,9 @@
 import { getSvgPhysicalSize } from './get.svg.physical.size';
+import type { SvgPhysicalSize } from './interfaces/SvgPhysicalSize';
+import { SVG_MIME_TYPE } from './svg.constants';
 
 const getRootElement = (attributes: string): Element =>
-  new DOMParser().parseFromString(`<svg xmlns="http://www.w3.org/2000/svg" ${attributes}/>`, 'image/svg+xml')
+  new DOMParser().parseFromString(`<svg xmlns="http://www.w3.org/2000/svg" ${attributes}/>`, SVG_MIME_TYPE)
     .documentElement;
 
 describe(getSvgPhysicalSize.name, () => {
@@ -17,7 +19,7 @@ describe(getSvgPhysicalSize.name, () => {
   });
 
   it('reads a viewBox at 96 per inch when the width is a percent', () => {
-    const size = getSvgPhysicalSize(getRootElement('width="100%" viewBox="0 0 960 480"'));
+    const size: SvgPhysicalSize | undefined = getSvgPhysicalSize(getRootElement('width="100%" viewBox="0 0 960 480"'));
 
     expect(size?.widthMm).toBeCloseTo(254);
     expect(size?.heightMm).toBeCloseTo(127);

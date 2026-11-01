@@ -1,6 +1,7 @@
 import { getSanitizedSvg } from './get.sanitized.svg';
-import { isSvgImportFailure } from './is.svg.import.failure';
 import type { SanitizedSvg } from './interfaces/SanitizedSvg';
+import type { SvgImportFailure } from './interfaces/SvgImportFailure';
+import { isSvgImportFailure } from './is.svg.import.failure';
 import { MAX_SVG_FILE_BYTES, SVG_IMPORT_ERROR_KIND, SVG_REMOVED_CONTENT_KIND } from './svg.constants';
 
 const XMLNS = 'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"';
@@ -10,13 +11,13 @@ const PNG_DATA_URL = 'data:image/png;base64,AAAA';
 const getSvgText = (body: string): string => `<svg ${XMLNS} ${SIZE}>${body}</svg>`;
 
 const getSanitized = (body: string): SanitizedSvg => {
-  const result = getSanitizedSvg(getSvgText(body));
+  const importResult: SanitizedSvg | SvgImportFailure = getSanitizedSvg(getSvgText(body));
 
-  if (isSvgImportFailure(result)) {
-    throw new Error(`unexpected failure ${result.errorKind}`);
+  if (isSvgImportFailure(importResult)) {
+    throw new Error(`unexpected failure ${importResult.errorKind}`);
   }
 
-  return result;
+  return importResult;
 };
 
 describe(getSanitizedSvg.name, () => {
@@ -55,10 +56,10 @@ describe(getSanitizedSvg.name, () => {
   });
 
   it('reports a removed foreignObject', () => {
-    const result = getSanitized('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml">x</div></foreignObject>');
+    const importResult: SanitizedSvg = getSanitized('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml">x</div></foreignObject>');
 
-    expect(result.svgText).not.toMatch(/foreignobject/i);
-    expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT]);
+    expect(importResult.svgText).not.toMatch(/foreignobject/i);
+    expect(importResult.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT]);
   });
 
   it('reports a removed linked image', () => {
@@ -68,8 +69,8 @@ describe(getSanitizedSvg.name, () => {
   });
 
   it('removes a style with a remote url or @import and reports it', () => {
-    const remote = getSanitized('<style>a { fill: url(https://example.com/a.png) }</style>');
-    const imported = getSanitized('<style>@import url(x.css);</style>');
+    const remote: SanitizedSvg = getSanitized('<style>a { fill: url(https://example.com/a.png) }</style>');
+    const imported: SanitizedSvg = getSanitized('<style>@import url(x.css);</style>');
 
     expect(remote.svgText).not.toContain('<style');
     expect(remote.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
@@ -77,18 +78,20 @@ describe(getSanitizedSvg.name, () => {
   });
 
   it('keeps a style with same-document and data urls', () => {
-    const result = getSanitized(`<style>a { fill: url(#g) } b { fill: url(${PNG_DATA_URL}) }</style>`);
+    const importResult: SanitizedSvg = getSanitized(
+      `<style>a { fill: url(#g) } b { fill: url(${PNG_DATA_URL}) }</style>`,
+    );
 
-    expect(result.svgText).toContain('<style');
-    expect(result.removedContentKinds).toEqual([]);
+    expect(importResult.svgText).toContain('<style');
+    expect(importResult.removedContentKinds).toEqual([]);
   });
 
   it('reports each kind once in a stable order', () => {
-    const result = getSanitized(
+    const importResult: SanitizedSvg = getSanitized(
       '<style>@import "a";</style><image href="a.png"/><image href="b.png"/><foreignObject/><script/>',
     );
 
-    expect(result.removedContentKinds).toEqual([
+    expect(importResult.removedContentKinds).toEqual([
       SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT,
       SVG_REMOVED_CONTENT_KIND.LINKED_IMAGE,
       SVG_REMOVED_CONTENT_KIND.STYLE_URL,
@@ -126,17 +129,17 @@ describe(getSanitizedSvg.name, () => {
   });
 
   it('sanitises the root element attributes but keeps the root', () => {
-    const result = getSanitizedSvg(
+    const importResult: SanitizedSvg | SvgImportFailure = getSanitizedSvg(
       `<svg ${XMLNS} ${SIZE} onload="alert(1)" style="background:url(https://e.x/a)"/>`,
     );
 
-    expect(isSvgImportFailure(result)).toBe(false);
+    expect(isSvgImportFailure(importResult)).toBe(false);
 
-    if (!isSvgImportFailure(result)) {
-      expect(result.svgText).toContain('<svg');
-      expect(result.svgText).not.toContain('onload');
-      expect(result.svgText).not.toContain('e.x');
-      expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
+    if (!isSvgImportFailure(importResult)) {
+      expect(importResult.svgText).toContain('<svg');
+      expect(importResult.svgText).not.toContain('onload');
+      expect(importResult.svgText).not.toContain('e.x');
+      expect(importResult.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
     }
   });
 
@@ -168,42 +171,44 @@ describe(getSanitizedSvg.name, () => {
   });
 
   it('removes style content with css escapes and image functions', () => {
-    const payloads = ['a{fill:u\\72l(https://e.x/a)}', '@im\\port "https://e.x/a";', 'a{fill:image-set("https://e.x/a" 1x)}'];
+    const payloads: string[] = ['a{fill:u\\72l(https://e.x/a)}', '@im\\port "https://e.x/a";', 'a{fill:image-set("https://e.x/a" 1x)}'];
 
     for (const payload of payloads) {
-      const result = getSanitized(`<style>${payload}</style><rect style="${payload.replace(/"/g, "'")}"/>`);
+      const importResult: SanitizedSvg = getSanitized(
+        `<style>${payload}</style><rect style="${payload.replace(/"/g, "'")}"/>`,
+      );
 
-      expect(result.svgText).not.toContain('e.x');
-      expect(result.svgText).not.toContain('<style');
-      expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
+      expect(importResult.svgText).not.toContain('e.x');
+      expect(importResult.svgText).not.toContain('<style');
+      expect(importResult.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
     }
   });
 
   it('removes elements in a foreign namespace with their subtree and reports foreign-object', () => {
-    const result = getSanitized(
+    const importResult: SanitizedSvg = getSanitized(
       '<h:img xmlns:h="http://www.w3.org/1999/xhtml" src="https://e.x/a.png"/>' +
         '<h:iframe xmlns:h="http://www.w3.org/1999/xhtml" src="https://e.x"><rect/></h:iframe>',
     );
 
-    expect(result.svgText).not.toMatch(/img|iframe|e\.x|<rect/);
-    expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT]);
+    expect(importResult.svgText).not.toMatch(/img|iframe|e\.x|<rect/);
+    expect(importResult.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.FOREIGN_OBJECT]);
   });
 
   it('removes an href animation that uses a custom xlink prefix', () => {
-    const result = getSanitizedSvg(
+    const importResult: SanitizedSvg | SvgImportFailure = getSanitizedSvg(
       `<svg xmlns="http://www.w3.org/2000/svg" xmlns:x="http://www.w3.org/1999/xlink" ${SIZE}>` +
         '<image href="#a"><set attributeName="x:href" to="https://e.x/a.png"/></image></svg>',
     );
 
-    expect(isSvgImportFailure(result)).toBe(false);
+    expect(isSvgImportFailure(importResult)).toBe(false);
 
-    if (!isSvgImportFailure(result)) {
-      expect(result.svgText).not.toMatch(/<set|e\.x/);
+    if (!isSvgImportFailure(importResult)) {
+      expect(importResult.svgText).not.toMatch(/<set|e\.x/);
     }
   });
 
   it('reports no removed content for a realistic Inkscape header', () => {
-    const result = getSanitizedSvg(
+    const importResult: SanitizedSvg | SvgImportFailure = getSanitizedSvg(
       '<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" ' +
         'xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" ' +
         'xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cc="http://creativecommons.org/ns#" ' +
@@ -211,31 +216,31 @@ describe(getSanitizedSvg.name, () => {
         '<sodipodi:namedview id="base"/><metadata><rdf:RDF><cc:Work/></rdf:RDF></metadata><rect width="1"/></svg>',
     );
 
-    expect(isSvgImportFailure(result)).toBe(false);
+    expect(isSvgImportFailure(importResult)).toBe(false);
 
-    if (!isSvgImportFailure(result)) {
-      expect(result.removedContentKinds).toEqual([]);
-      expect(result.svgText).not.toMatch(/sodipodi:namedview|rdf:RDF|export-filename/);
-      expect(result.svgText).toContain('<rect');
+    if (!isSvgImportFailure(importResult)) {
+      expect(importResult.removedContentKinds).toEqual([]);
+      expect(importResult.svgText).not.toMatch(/sodipodi:namedview|rdf:RDF|export-filename/);
+      expect(importResult.svgText).toContain('<rect');
     }
   });
 
   it('removes a css escape in a presentation attribute and reports it', () => {
-    const result = getSanitized('<rect fill="u\\72l(https://e.x)"/>');
+    const importResult: SanitizedSvg = getSanitized('<rect fill="u\\72l(https://e.x)"/>');
 
-    expect(result.svgText).not.toContain('e.x');
-    expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
+    expect(importResult.svgText).not.toContain('e.x');
+    expect(importResult.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
   });
 
   it('does not treat a backslash in a non-css attribute as remote content', () => {
-    const result = getSanitized('<rect id="a\\b" width="1"/>');
+    const importResult: SanitizedSvg = getSanitized('<rect id="a\\b" width="1"/>');
 
-    expect(result.removedContentKinds).toEqual([]);
-    expect(result.svgText).toContain('id="a\\b"');
+    expect(importResult.removedContentKinds).toEqual([]);
+    expect(importResult.svgText).toContain('id="a\\b"');
   });
 
   it('removes animation values that carry remote or escaped urls and reports style-url', () => {
-    const payloads = [
+    const payloads: string[] = [
       '<set attributeName="cursor" to="url(https://e.x/c.png), auto"/>',
       '<animate attributeName="fill" values="url(https://e.x/p.svg#g);red"/>',
       '<set attributeName="mask" to="url(https://e.x/m.png)"/>',
@@ -244,17 +249,19 @@ describe(getSanitizedSvg.name, () => {
     ];
 
     for (const payload of payloads) {
-      const result = getSanitized(`<rect>${payload}</rect>`);
+      const importResult: SanitizedSvg = getSanitized(`<rect>${payload}</rect>`);
 
-      expect(result.svgText).not.toContain('e.x');
-      expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
+      expect(importResult.svgText).not.toContain('e.x');
+      expect(importResult.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
     }
   });
 
   it('keeps animation values with same-document urls', () => {
-    const result = getSanitized('<rect><animate attributeName="fill" values="url(#g);red"/></rect>');
+    const importResult: SanitizedSvg = getSanitized(
+      '<rect><animate attributeName="fill" values="url(#g);red"/></rect>',
+    );
 
-    expect(result.svgText).toContain('values="url(#g);red"');
-    expect(result.removedContentKinds).toEqual([]);
+    expect(importResult.svgText).toContain('values="url(#g);red"');
+    expect(importResult.removedContentKinds).toEqual([]);
   });
 });

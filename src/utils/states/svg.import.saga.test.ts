@@ -14,7 +14,7 @@ import { DEFAULT } from '../localization/default.locales';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
 import { IMPORT_PLACEMENT_OFFSET_MM, MAX_PROJECT_OBJECTS } from '../project/project.constants';
-import { MAX_SVG_FILE_BYTES } from '../svg/svg.constants';
+import { MAX_SVG_FILE_BYTES, SVG_MIME_TYPE } from '../svg/svg.constants';
 import type { AppToast } from './interfaces/AppToast';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
@@ -29,7 +29,6 @@ import { watchSvgImport } from './svg.import.saga';
 import { TOAST_SEVERITY } from './toast.constants';
 import { selectToasts } from './toast.state';
 
-const SVG_MIME_TYPE = 'image/svg+xml';
 const SQUARE_SIZE_MM = 20;
 const OVERSIZED_SIZE_MM = DEFAULT_BED_SIZE_MM + 100;
 const FIRST_FILE_NAME = 'first.svg';

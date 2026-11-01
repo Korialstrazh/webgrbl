@@ -98,7 +98,16 @@ export const SVG_CSS_VALUE_ATTRIBUTE_NAMES: readonly string[] = [
   SVG_MARKER_END_ATTRIBUTE_NAME,
   SVG_CURSOR_ATTRIBUTE_NAME,
 ];
-export const SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES: readonly string[] = ['to', 'from', 'by', 'values'];
+const SVG_TO_ATTRIBUTE_NAME = 'to';
+const SVG_FROM_ATTRIBUTE_NAME = 'from';
+const SVG_BY_ATTRIBUTE_NAME = 'by';
+const SVG_VALUES_ATTRIBUTE_NAME = 'values';
+export const SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES: readonly string[] = [
+  SVG_TO_ATTRIBUTE_NAME,
+  SVG_FROM_ATTRIBUTE_NAME,
+  SVG_BY_ATTRIBUTE_NAME,
+  SVG_VALUES_ATTRIBUTE_NAME,
+];
 export const SVG_ANCHOR_ELEMENT_NAME = 'a';
 export const SVG_ALL_ELEMENTS_SELECTOR = '*';
 export const SVG_WIDTH_ATTRIBUTE = 'width';

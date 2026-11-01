@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { SVG_LENGTH_UNIT, SVG_LENGTH_UNIT_MM, SVG_LENGTH_PATTERN } from './svg.constants';
+import { SVG_LENGTH_PATTERN, SVG_LENGTH_UNIT, SVG_LENGTH_UNIT_MM } from './svg.constants';
 import type { SvgLengthUnit } from './svg.constants';
 
 const isSvgLengthUnit = (unit: string): unit is SvgLengthUnit => unit in SVG_LENGTH_UNIT_MM;

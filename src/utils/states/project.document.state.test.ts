@@ -10,8 +10,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
-import { MAX_UNDO_STEPS } from '../project/project.constants';
 import { newProjectObject } from '../project/new.project.object';
+import { MAX_UNDO_STEPS } from '../project/project.constants';
 import { Action } from './action';
 import {
   PROJECT_DOCUMENT_STATE_NAME,
@@ -41,6 +41,8 @@ const UNKNOWN_ACTION_TYPE = 'unknown action';
 const MOVED_X_MM = 55;
 const UNKNOWN_OBJECT_ID = 'unknown-object';
 const EXTRA_CHANGE_COUNT = 1;
+const FIRST_OBJECT_ID = 'a';
+const SECOND_OBJECT_ID = 'b';
 
 class UnknownAction extends Action {
   public static readonly type: string = UNKNOWN_ACTION_TYPE;
@@ -51,13 +53,15 @@ const getInitialState = (): ProjectDocumentState => projectDocumentReducer(undef
 const getStateWithObjects = (objects: ProjectObject[]): ProjectDocumentState =>
   projectDocumentReducer(getInitialState(), new ProjectObjectsAdded({ objects }));
 
+type ProjectRootState = {
+  [PROJECT_DOCUMENT_STATE_NAME]: ProjectDocumentState;
+  [PROJECT_SELECTION_STATE_NAME]: ProjectSelectionState;
+};
+
 const getRootState = (
   documentState: ProjectDocumentState,
   selectionState: ProjectSelectionState,
-): {
-  [PROJECT_DOCUMENT_STATE_NAME]: ProjectDocumentState;
-  [PROJECT_SELECTION_STATE_NAME]: ProjectSelectionState;
-} => ({
+): ProjectRootState => ({
   [PROJECT_DOCUMENT_STATE_NAME]: documentState,
   [PROJECT_SELECTION_STATE_NAME]: selectionState,
 });
@@ -197,7 +201,7 @@ describe(projectDocumentReducer.name, () => {
 
   it('selects the objects of the document', () => {
     const projectObject: ProjectObject = newProjectObject();
-    const rootState = getRootState(getStateWithObjects([projectObject]), { selectedObjectIds: [] });
+    const rootState: ProjectRootState = getRootState(getStateWithObjects([projectObject]), { selectedObjectIds: [] });
 
     expect(selectProjectObjects(rootState)).toEqual([projectObject]);
   });
@@ -207,19 +211,19 @@ describe(projectSelectionReducer.name, () => {
   it('stores the selected ids', () => {
     const state: ProjectSelectionState = projectSelectionReducer(
       undefined,
-      new ProjectSelectionChanged({ objectIds: ['a'] }),
+      new ProjectSelectionChanged({ objectIds: [FIRST_OBJECT_ID] }),
     );
 
-    expect(state.selectedObjectIds).toEqual(['a']);
+    expect(state.selectedObjectIds).toEqual([FIRST_OBJECT_ID]);
   });
 
   it('drops a deleted object from the selection', () => {
     const state: ProjectSelectionState = projectSelectionReducer(
-      { selectedObjectIds: ['a', 'b'] },
-      new ProjectObjectsDeleted({ objectIds: ['a'] }),
+      { selectedObjectIds: [FIRST_OBJECT_ID, SECOND_OBJECT_ID] },
+      new ProjectObjectsDeleted({ objectIds: [FIRST_OBJECT_ID] }),
     );
 
-    expect(state.selectedObjectIds).toEqual(['b']);
+    expect(state.selectedObjectIds).toEqual([SECOND_OBJECT_ID]);
   });
 
   it('keeps only ids of the loaded document', () => {

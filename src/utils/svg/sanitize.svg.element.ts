@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { sanitizeSvgAttributes } from './sanitize.svg.attributes';
 import { hasRemoteStyleReference } from './has.remote.style.reference';
+import { sanitizeSvgAttributes } from './sanitize.svg.attributes';
 import {
   SVG_ANIMATION_ELEMENT_NAMES,
   SVG_ATTRIBUTE_NAME_ATTRIBUTE,

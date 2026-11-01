@@ -11,5 +11,5 @@
 import type { SanitizedSvg } from './interfaces/SanitizedSvg';
 import type { SvgImportFailure } from './interfaces/SvgImportFailure';
 
-export const isSvgImportFailure = (result: SanitizedSvg | SvgImportFailure): result is SvgImportFailure =>
-  'errorKind' in result;
+export const isSvgImportFailure = (importResult: SanitizedSvg | SvgImportFailure): importResult is SvgImportFailure =>
+  'errorKind' in importResult;

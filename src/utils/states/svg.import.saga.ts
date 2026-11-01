@@ -11,8 +11,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { call, put, select, takeEvery } from 'redux-saga/effects';
-import type { BedDimensions } from '../bed/interfaces/BedDimensions';
 import { getBedDimensions } from '../bed/get.bed.dimensions';
+import type { BedDimensions } from '../bed/interfaces/BedDimensions';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
@@ -27,8 +27,8 @@ import type { SanitizedSvg } from '../svg/interfaces/SanitizedSvg';
 import type { SvgImportFailure } from '../svg/interfaces/SvgImportFailure';
 import { isSvgImportFailure } from '../svg/is.svg.import.failure';
 import { readSvgFile } from '../svg/read.svg.file';
-import type { AcceptedSvgFile } from './interfaces/AcceptedSvgFile';
 import { selectGrblSettings, selectIsConnected } from './grbl.connection.state';
+import type { AcceptedSvgFile } from './interfaces/AcceptedSvgFile';
 import { selectActiveMachineProfile } from './machine.profile.state';
 import { ProjectObjectsAdded, SvgFilesImportRequested, selectProjectObjects } from './project.document.state';
 import { ProjectSelectionChanged } from './project.selection.state';
@@ -114,18 +114,19 @@ function* importSvgFiles(action: SvgFilesImportRequested): Generator {
       break;
     }
 
-    const result: SanitizedSvg | SvgImportFailure = (yield call(readSvgFile, file)) as SanitizedSvg | SvgImportFailure;
+    const importResult: SanitizedSvg | SvgImportFailure =
+      (yield call(readSvgFile, file)) as SanitizedSvg | SvgImportFailure;
 
-    if (isSvgImportFailure(result)) {
-      yield call(showToast, TOAST_SEVERITY.ERROR, SVG_IMPORT_FAILURE_TOAST_KEY[result.errorKind], {
+    if (isSvgImportFailure(importResult)) {
+      yield call(showToast, TOAST_SEVERITY.ERROR, SVG_IMPORT_FAILURE_TOAST_KEY[importResult.errorKind], {
         fileName: file.name,
       });
 
       continue;
     }
 
-    acceptedFiles.push({ fileName: file.name, svg: result });
-    yield call(showToastsOfAcceptedFile, result, file.name, bed);
+    acceptedFiles.push({ fileName: file.name, svg: importResult });
+    yield call(showToastsOfAcceptedFile, importResult, file.name, bed);
   }
 
   const hasTrimmedFiles: boolean = (yield call(addAcceptedFiles, acceptedFiles)) as boolean;
