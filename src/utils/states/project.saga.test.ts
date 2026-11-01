@@ -24,6 +24,7 @@ import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import type { ProjectSummary } from '../project/interfaces/ProjectSummary';
 import type { StoredProject } from '../project/interfaces/StoredProject';
+import type { StoredSvgAsset } from '../project/interfaces/StoredSvgAsset';
 import { newProjectObject } from '../project/new.project.object';
 import {
   AUTOSAVE_DEBOUNCE_MS,
@@ -33,7 +34,9 @@ import {
   PROJECT_FILE_EXTENSION,
   PROJECT_FILE_MIME_TYPE,
 } from '../project/project.constants';
+import { SVG_ASSET_PROJECT_ID_INDEX } from '../project/project.database.constants';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
+import { WEBGRBL_DATABASE } from '../project/webgrbl.database';
 import { useStorageSafeFakeTimers } from '../test.support/use.storage.safe.fake.timers';
 import type { AppToast } from './interfaces/AppToast';
 import { newStore } from './new.store';
@@ -76,6 +79,8 @@ const ONE_MS = 1;
 const STORAGE_FAILURE_MESSAGE = 'quota exceeded';
 /** Keeps created projects apart in time, so newest-first order never depends on a tie. */
 const PROJECT_TIME_GAP_MS = 10;
+/** Real time a leftover store gets to write after a flush event; several database round trips fit in it. */
+const LEFTOVER_STORE_SETTLE_MS = 300;
 
 type SaveDocument = typeof PROJECT_REPOSITORY.saveDocument;
 
@@ -129,6 +134,15 @@ const getStoredProject = async (projectId: string): Promise<LoadedProject | unde
 const getStoredProjectIds = async (): Promise<string[]> =>
   (await PROJECT_REPOSITORY.listProjects()).map((summary: ProjectSummary): string => summary.id);
 
+/** The stored artwork of one object, read straight from the database, so a deleted object's row can be checked. */
+const getStoredSvgText = async (projectId: string, objectId: string): Promise<string | undefined> => {
+  const projectAssets: StoredSvgAsset[] = await WEBGRBL_DATABASE.svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX)
+    .equals(projectId)
+    .toArray();
+
+  return projectAssets.find((assetRow: StoredSvgAsset): boolean => assetRow.objectId === objectId)?.svgText;
+};
+
 const getToastsOf = (store: AppStore, messageKey: string): AppToast[] =>
   selectToasts(store.getState()).filter((toast: AppToast): boolean => toast.messageKey === messageKey);
 
@@ -175,6 +189,30 @@ describe(watchProjects.name, () => {
     vi.restoreAllMocks();
     vi.mocked(downloadTextFile).mockClear();
     vi.useRealTimers();
+  });
+
+  // These two tests run in order on purpose: the first leaves a store with an unsaved change behind, the second
+  // checks that the leftover store cannot write into the next test's database.
+  describe('stores left over from an earlier test', () => {
+    it('leaves a store with an unsaved change behind', async () => {
+      const store: AppStore = await newStartedStore();
+
+      addObject(store);
+
+      expect(selectProjectSaveStatus(store.getState())).toBe(PROJECT_SAVE_STATUS.UNSAVED);
+    });
+
+    it('does not let the leftover store write into this test\'s database when the page is left', async () => {
+      await newStartedStore();
+      vi.useRealTimers();
+
+      window.dispatchEvent(new Event(PAGE_HIDE_EVENT_NAME));
+      await new Promise((resolve: (value: unknown) => void): void => {
+        setTimeout(resolve, LEFTOVER_STORE_SETTLE_MS);
+      });
+
+      expect(await getStoredProjectIds()).toHaveLength(1);
+    });
   });
 
   describe('start', () => {
@@ -381,6 +419,28 @@ describe(watchProjects.name, () => {
       await autosave(store);
     });
 
+    it('shows the failure toast again when the project opened after a failed one also fails to save', async () => {
+      const store: AppStore = await newStartedStore();
+      const failingProjectId: string = selectProjectId(store.getState()) ?? '';
+      const saveSpy: SaveDocumentSpy = vi.spyOn(PROJECT_REPOSITORY, 'saveDocument')
+        .mockRejectedValueOnce(new Error(STORAGE_FAILURE_MESSAGE));
+      addObject(store);
+      await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+      await vi.waitFor((): void => {
+        expect(selectHasProjectSaveFailed(store.getState())).toBe(true);
+      });
+
+      store.dispatch(new ProjectDeleteRequested({ projectId: failingProjectId }));
+      await waitForNewProject(store, failingProjectId);
+      saveSpy.mockRejectedValueOnce(new Error(STORAGE_FAILURE_MESSAGE));
+      addObject(store);
+      await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+      await vi.waitFor((): void => {
+        expect(getToastsOf(store, DEFAULT.TOAST_PROJECT_SAVE_FAILED)[0]?.repeatCount).toBe(2);
+      });
+    });
+
     it('stores the document in a new project without a toast when the open project was deleted elsewhere', async () => {
       const store: AppStore = await newStartedStore();
       const deletedProjectId: string = selectProjectId(store.getState()) ?? '';
@@ -402,6 +462,8 @@ describe(watchProjects.name, () => {
       await autosave(firstStore);
       firstStore.dispatch(new ProjectObjectsDeleted({ objectIds: [projectObject.id] }));
       await autosave(firstStore);
+      expect(await getStoredSvgText(selectProjectId(firstStore.getState()) ?? '', projectObject.id))
+        .toBe(ARTWORK_SVG_TEXT);
       firstStore.dispatch(new ProjectUndoRequested());
       await autosave(firstStore);
 

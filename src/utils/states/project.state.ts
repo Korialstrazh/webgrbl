@@ -133,6 +133,8 @@ export const projectReducer = (state: ProjectState = INITIAL_PROJECT_STATE, acti
       projectId: (action as ProjectOpened).payload.projectId,
       name: (action as ProjectOpened).payload.name,
       saveStatus: PROJECT_SAVE_STATUS.SAVED,
+      // A newly opened project has not failed yet, so its first failed save shows the toast again.
+      hasSaveFailed: false,
     };
   case ProjectRenamed.type:
     return getStateWithRename(state, (action as ProjectRenamed).payload);
