@@ -228,6 +228,14 @@ OPEN_PROJECT_OPEN_FILE;Open file…
 OPEN_PROJECT_RENAME;Rename
 OPEN_PROJECT_RENAME_INPUT;New name for {{name}}
 OPEN_PROJECT_TITLE;Open project
+PALETTE_ERROR_COLOUR_INVALID;Enter a colour such as #ff0000
+PALETTE_ERROR_LINE_INTERVAL_INVALID;Line interval must be from {{min}} to {{max}} mm
+PALETTE_ERROR_MAX_POWER_INVALID;Maximum power must be from {{min}} to {{max}} %
+PALETTE_ERROR_MIN_POWER_ABOVE_MAX;Minimum power cannot be above the maximum power
+PALETTE_ERROR_MIN_POWER_INVALID;Minimum power must be from {{min}} to {{max}} %
+PALETTE_ERROR_NAME_REQUIRED;Enter a name for the colour
+PALETTE_ERROR_PASSES_INVALID;Passes must be a whole number from {{min}} to {{max}}
+PALETTE_ERROR_SPEED_INVALID;Speed must be from {{min}} to {{max}} mm/min
 PROJECT_FILE_INPUT;Open a project file
 STATUS_STRIP_CURSOR;Cursor
 STATUS_STRIP_ESTIMATE;Estimate

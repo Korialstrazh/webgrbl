@@ -8,7 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { PERCENT_DIVISOR, POINTER_WATTS_DECIMALS } from './machine.command.constants';
+import { POINTER_WATTS_DECIMALS } from './machine.command.constants';
+import { PERCENT_DIVISOR } from '../percent.constants';
 
 export const getPointerApproximateWatts = (maxPowerWatts: number, powerPercent: number): string =>
   ((maxPowerWatts * powerPercent) / PERCENT_DIVISOR).toFixed(POINTER_WATTS_DECIMALS);

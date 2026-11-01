@@ -9,8 +9,9 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { getClampedPointerPowerPercent } from './get.clamped.pointer.power.percent';
-import { MIN_POINTER_S_VALUE, PERCENT_DIVISOR, POINTER_FEED_RATE } from './machine.command.constants';
+import { MIN_POINTER_S_VALUE, POINTER_FEED_RATE } from './machine.command.constants';
 import { POINTER_FEED_COMMAND_PREFIX, POINTER_ON_COMMAND_PREFIX } from './machine.commands';
+import { PERCENT_DIVISOR } from '../percent.constants';
 
 export const getPointerOnCommands = (percent: number, sValueMax: number): string[] => {
   const clampedPercent: number = getClampedPointerPowerPercent(percent);
