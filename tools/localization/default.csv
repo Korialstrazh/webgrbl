@@ -223,6 +223,12 @@ TOAST_PROFILE_CREATED;Created the machine profile {{name}} from the laser's sett
 TOAST_PROFILE_DIFFERS;The laser reports a work area of {{laserWidth}} x {{laserHeight}} mm, but the profile {{name}} has {{profileWidth}} x {{profileHeight}} mm. Nothing was changed - you can update the profile from the laser in the Machine profiles dialog.
 TOAST_PROFILE_IMPORT_INVALID;The file is not a machine profiles file. Nothing was imported.
 TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}} - {{description}}
+TOAST_SVG_CONTENT_REMOVED;Parts of {{fileName}} were left out: embedded web content, linked images or external styles.
+TOAST_SVG_IMPORT_FAILED_NO_SIZE;{{fileName}} was skipped: it has no size (width and height or a viewBox).
+TOAST_SVG_IMPORT_FAILED_NOT_SVG;{{fileName}} was skipped: it is not a usable SVG file.
+TOAST_SVG_IMPORT_FAILED_TOO_LARGE;{{fileName}} was skipped: it is larger than 10 MB.
+TOAST_SVG_IMPORT_LIMIT_REACHED;A project holds at most {{limit}} objects. The remaining files were not imported.
+TOAST_SVG_LARGER_THAN_BED;{{fileName}} is larger than the bed. Scale it down to fit.
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
 TOP_BAR_AUTOSAVE_DESCRIPTION;Your design will be saved automatically.
 TOP_BAR_AUTOSAVE_READOUT;Autosave: off
