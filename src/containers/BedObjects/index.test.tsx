@@ -77,6 +77,8 @@ const WIDE_HEIGHT_MM = 50;
 const WIDE_X_MM = 50;
 const WIDE_Y_MM = 50;
 const HANDLE_DRAG_RIGHT_MM = 50;
+const SCALED_WIDTH_MM = 150;
+const SCALED_HEIGHT_MM = 75;
 // The top-right handle of the wide object sits on its selection box corner: SVG y is the bed height minus machine y.
 const TOP_RIGHT_HANDLE_X = 151;
 const TOP_RIGHT_HANDLE_Y = 199;
@@ -551,8 +553,8 @@ describe(BedObjects.name, () => {
       expect(getStoredObject(store, wideObject.id)).toMatchObject({
         xMm: WIDE_X_MM,
         yMm: WIDE_Y_MM,
-        widthMm: 150,
-        heightMm: 75,
+        widthMm: SCALED_WIDTH_MM,
+        heightMm: SCALED_HEIGHT_MM,
       });
     });
 
@@ -569,7 +571,7 @@ describe(BedObjects.name, () => {
       expect(getStoredObject(store, wideObject.id)).toMatchObject({
         xMm: WIDE_X_MM,
         yMm: WIDE_Y_MM,
-        widthMm: 150,
+        widthMm: SCALED_WIDTH_MM,
         heightMm: WIDE_HEIGHT_MM,
       });
     });
@@ -608,8 +610,8 @@ describe(BedObjects.name, () => {
       expect(getStoredObject(store, wideObject.id)).toMatchObject({
         xMm: WIDE_X_MM,
         yMm: WIDE_Y_MM + NUDGE_MM,
-        widthMm: 150,
-        heightMm: 75,
+        widthMm: SCALED_WIDTH_MM,
+        heightMm: SCALED_HEIGHT_MM,
       });
 
       pressUndoHotkey();

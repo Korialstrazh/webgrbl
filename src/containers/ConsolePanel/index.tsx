@@ -87,18 +87,18 @@ export const ConsolePanel = (): ReactNode => {
   };
 
   /** Typing edits the input, so the next ArrowUp starts again from the newest command. */
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setInputText(event.target.value);
+  const handleInputChange = (changeEvent: ChangeEvent<HTMLInputElement>): void => {
+    setInputText(changeEvent.target.value);
     setHistoryOffset(NO_HISTORY_OFFSET);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-    const historyStep: number | undefined = getHistoryStep(event.key);
+  const handleKeyDown = (keyboardEvent: KeyboardEvent<HTMLInputElement>): void => {
+    const historyStep: number | undefined = getHistoryStep(keyboardEvent.key);
 
-    if (event.key === ENTER_KEY) {
+    if (keyboardEvent.key === ENTER_KEY) {
       submitCommand();
     } else if (historyStep) {
-      event.preventDefault();
+      keyboardEvent.preventDefault();
       recallHistory(historyStep);
     }
   };

@@ -28,10 +28,10 @@ import { ProjectNotFoundError } from '../project/project.not.found.error';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
 import type { Action } from './action';
 import { watchProjectAutosave } from './project.autosave.saga';
+import { SvgFilesImportRequested } from './project.document.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import { exportProjectFile } from './project.file.export.saga';
 import { importProjectFile } from './project.file.import.saga';
-import { SvgFilesImportRequested } from './project.document.state';
 import { openLoadedProject } from './project.open.saga';
 import { openStoredOrNewProject } from './project.open.stored.or.new.saga';
 import { saveOpenProjectDocument } from './project.save.saga';
@@ -53,8 +53,8 @@ import {
 } from './project.state';
 import { storeDocumentInNewProject } from './project.store.in.new.saga';
 import { loadProjectSummaries } from './project.summaries.saga';
-import { switchToCreatedProject } from './project.switch.to.created.saga';
 import { switchToLoadedProject } from './project.switch.saga';
+import { switchToCreatedProject } from './project.switch.to.created.saga';
 import { importSvgFiles } from './svg.import.saga';
 
 const PROJECT_COMMAND_ACTION_TYPES: string[] = [
