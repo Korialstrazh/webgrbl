@@ -12,6 +12,8 @@ import { DEFAULT } from '../localization/default.locales';
 
 export const MAX_PROJECT_OBJECTS = 50;
 export const IMPORT_PLACEMENT_OFFSET_MM = 10;
+/** After this many imported objects the placement cascade starts again at the corner. */
+export const IMPORT_PLACEMENT_CASCADE_LENGTH = 10;
 export const NUDGE_STEP_MM = 1;
 export const NUDGE_STEP_SHIFT_MM = 10;
 export const ROTATION_SNAP_DEG = 15;

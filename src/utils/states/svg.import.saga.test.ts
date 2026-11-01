@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DEFAULT_BED_SIZE_MM } from '../bed/bed.constants';
 import { DEFAULT } from '../localization/default.locales';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
@@ -29,7 +29,6 @@ import { watchSvgImport } from './svg.import.saga';
 import { TOAST_SEVERITY } from './toast.constants';
 import { selectToasts } from './toast.state';
 
-const IMPORT_SETTLE_MS = 50;
 const SVG_MIME_TYPE = 'image/svg+xml';
 const SQUARE_SIZE_MM = 20;
 const OVERSIZED_SIZE_MM = DEFAULT_BED_SIZE_MM + 100;
@@ -49,10 +48,19 @@ const newSvgText = (sizeMm: number, innerMarkup: string = ''): string =>
 const newSvgFile = (fileName: string, svgText: string = newSvgText(SQUARE_SIZE_MM)): File =>
   new File([svgText], fileName, { type: SVG_MIME_TYPE });
 
-const importFiles = async (store: AppStore, files: File[]): Promise<void> => {
+const requestImport = (store: AppStore, files: File[]): void => {
   store.dispatch(new SvgFilesImportRequested({ files }));
-  await new Promise<void>((resolve: () => void): void => {
-    setTimeout(resolve, IMPORT_SETTLE_MS);
+};
+
+const waitForObjectCount = async (store: AppStore, objectCount: number): Promise<void> => {
+  await vi.waitFor((): void => {
+    expect(selectProjectObjects(store.getState())).toHaveLength(objectCount);
+  });
+};
+
+const waitForToast = async (store: AppStore, messageKey: string): Promise<void> => {
+  await vi.waitFor((): void => {
+    expect(getToastsOf(store, messageKey)).toHaveLength(1);
   });
 };
 
@@ -63,7 +71,8 @@ describe(watchSvgImport.name, () => {
   it('adds two valid files at stepped positions, selects both and records one undo step', async () => {
     const store: AppStore = newStore();
 
-    await importFiles(store, [newSvgFile(FIRST_FILE_NAME), newSvgFile(SECOND_FILE_NAME)]);
+    requestImport(store, [newSvgFile(FIRST_FILE_NAME), newSvgFile(SECOND_FILE_NAME)]);
+    await waitForObjectCount(store, 2);
     const importedObjects: ProjectObject[] = selectProjectObjects(store.getState());
 
     expect(importedObjects.map((projectObject: ProjectObject) => projectObject.name)).toEqual(['first', 'second']);
@@ -90,11 +99,16 @@ describe(watchSvgImport.name, () => {
   it('gives the same file imported twice different ids and two undo steps', async () => {
     const store: AppStore = newStore();
 
-    await importFiles(store, [newSvgFile(FIRST_FILE_NAME)]);
-    await importFiles(store, [newSvgFile(FIRST_FILE_NAME)]);
+    requestImport(store, [newSvgFile(FIRST_FILE_NAME)]);
+    await waitForObjectCount(store, 1);
+    requestImport(store, [newSvgFile(FIRST_FILE_NAME)]);
+    await waitForObjectCount(store, 2);
     const importedObjects: ProjectObject[] = selectProjectObjects(store.getState());
 
-    expect(importedObjects).toHaveLength(2);
+    expect(importedObjects.map((projectObject: ProjectObject) => [projectObject.xMm, projectObject.yMm])).toEqual([
+      [0, 0],
+      [IMPORT_PLACEMENT_OFFSET_MM, IMPORT_PLACEMENT_OFFSET_MM],
+    ]);
     expect(importedObjects[0]?.id).not.toBe(importedObjects[1]?.id);
 
     store.dispatch(new ProjectUndoRequested());
@@ -110,7 +124,9 @@ describe(watchSvgImport.name, () => {
     const store: AppStore = newStore();
     const brokenFile: File = newSvgFile(BROKEN_FILE_NAME, '<not-svg>');
 
-    await importFiles(store, [newSvgFile(FIRST_FILE_NAME), brokenFile, newSvgFile(SECOND_FILE_NAME)]);
+    requestImport(store, [newSvgFile(FIRST_FILE_NAME), brokenFile, newSvgFile(SECOND_FILE_NAME)]);
+    await waitForObjectCount(store, 2);
+    await waitForToast(store, DEFAULT.TOAST_SVG_IMPORT_FAILED_NOT_SVG);
     const failureToasts: AppToast[] = getToastsOf(store, DEFAULT.TOAST_SVG_IMPORT_FAILED_NOT_SVG);
 
     expect(selectProjectObjects(store.getState())).toHaveLength(2);
@@ -124,9 +140,9 @@ describe(watchSvgImport.name, () => {
   it('reports a file without a size with its own reason', async () => {
     const store: AppStore = newStore();
 
-    await importFiles(store, [newSvgFile(NO_SIZE_FILE_NAME, '<svg xmlns="http://www.w3.org/2000/svg"></svg>')]);
+    requestImport(store, [newSvgFile(NO_SIZE_FILE_NAME, '<svg xmlns="http://www.w3.org/2000/svg"></svg>')]);
+    await waitForToast(store, DEFAULT.TOAST_SVG_IMPORT_FAILED_NO_SIZE);
 
-    expect(getToastsOf(store, DEFAULT.TOAST_SVG_IMPORT_FAILED_NO_SIZE)).toHaveLength(1);
     expect(selectProjectObjects(store.getState())).toHaveLength(0);
   });
 
@@ -134,7 +150,8 @@ describe(watchSvgImport.name, () => {
     const store: AppStore = newStore();
     const hugeFile: File = newSvgFile(HUGE_FILE_NAME, 'x'.repeat(MAX_SVG_FILE_BYTES + 1));
 
-    await importFiles(store, [hugeFile]);
+    requestImport(store, [hugeFile]);
+    await waitForToast(store, DEFAULT.TOAST_SVG_IMPORT_FAILED_TOO_LARGE);
 
     expect(selectProjectObjects(store.getState())).toEqual([]);
     expect(selectSelectedObjectIds(store.getState())).toEqual([]);
@@ -150,7 +167,9 @@ describe(watchSvgImport.name, () => {
       newSvgText(SQUARE_SIZE_MM, '<foreignObject><p xmlns="http://www.w3.org/1999/xhtml">hi</p></foreignObject>'),
     );
 
-    await importFiles(store, [foreignFile]);
+    requestImport(store, [foreignFile]);
+    await waitForObjectCount(store, 1);
+    await waitForToast(store, DEFAULT.TOAST_SVG_CONTENT_REMOVED);
     const removedToasts: AppToast[] = getToastsOf(store, DEFAULT.TOAST_SVG_CONTENT_REMOVED);
 
     expect(selectProjectObjects(store.getState())).toHaveLength(1);
@@ -164,7 +183,9 @@ describe(watchSvgImport.name, () => {
   it('imports an svg larger than the bed with an info toast', async () => {
     const store: AppStore = newStore();
 
-    await importFiles(store, [newSvgFile(BIG_FILE_NAME, newSvgText(OVERSIZED_SIZE_MM))]);
+    requestImport(store, [newSvgFile(BIG_FILE_NAME, newSvgText(OVERSIZED_SIZE_MM))]);
+    await waitForObjectCount(store, 1);
+    await waitForToast(store, DEFAULT.TOAST_SVG_LARGER_THAN_BED);
     const bedToasts: AppToast[] = getToastsOf(store, DEFAULT.TOAST_SVG_LARGER_THAN_BED);
 
     expect(selectProjectObjects(store.getState())).toHaveLength(1);
@@ -183,11 +204,12 @@ describe(watchSvgImport.name, () => {
     );
 
     store.dispatch(new ProjectObjectsAdded({ objects: preloadedObjects }));
-    await importFiles(store, [
+    requestImport(store, [
       newSvgFile(FIRST_FILE_NAME),
       newSvgFile(SECOND_FILE_NAME),
       newSvgFile(THIRD_FILE_NAME),
     ]);
+    await waitForToast(store, DEFAULT.TOAST_SVG_IMPORT_LIMIT_REACHED);
     const limitToasts: AppToast[] = getToastsOf(store, DEFAULT.TOAST_SVG_IMPORT_LIMIT_REACHED);
 
     expect(selectProjectObjects(store.getState())).toHaveLength(MAX_PROJECT_OBJECTS);
@@ -196,5 +218,20 @@ describe(watchSvgImport.name, () => {
       severity: TOAST_SEVERITY.ERROR,
       messageParameters: { limit: MAX_PROJECT_OBJECTS },
     });
+  });
+
+  it('keeps the object limit when two imports run at the same time', async () => {
+    const store: AppStore = newStore();
+    const preloadedObjects: ProjectObject[] = Array.from(
+      { length: PRELOADED_OBJECT_COUNT },
+      (): ProjectObject => newProjectObject(),
+    );
+
+    store.dispatch(new ProjectObjectsAdded({ objects: preloadedObjects }));
+    requestImport(store, [newSvgFile(FIRST_FILE_NAME)]);
+    requestImport(store, [newSvgFile(SECOND_FILE_NAME)]);
+    await waitForToast(store, DEFAULT.TOAST_SVG_IMPORT_LIMIT_REACHED);
+
+    expect(selectProjectObjects(store.getState())).toHaveLength(MAX_PROJECT_OBJECTS);
   });
 });
