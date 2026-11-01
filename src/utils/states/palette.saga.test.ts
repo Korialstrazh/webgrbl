@@ -7,6 +7,7 @@ import {
   PALETTE_EXPORT_FILE_NAME,
   PALETTE_EXPORT_MIME_TYPE,
   PALETTE_STORAGE_KEY,
+  PALETTE_VERSION,
 } from '../palette/palette.constants';
 import type { PaletteEntry } from '../palette/interfaces/PaletteEntry';
 import { PALETTE_STORAGE } from '../palette/palette.storage';
@@ -27,7 +28,7 @@ describe(watchPalette.name, () => {
 
   it('loads the stored palette at start', () => {
     const storedEntry: PaletteEntry = newPaletteEntry();
-    PALETTE_STORAGE.storePalette({ version: 1, entries: [storedEntry] });
+    PALETTE_STORAGE.storePalette({ version: PALETTE_VERSION, entries: [storedEntry] });
 
     const entries: PaletteEntry[] = selectPaletteEntries(newStore().getState());
 

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { ARROW_RIGHT } from '../characters.constants';
 import { getInkscapePaletteText } from './get.inkscape.palette.text';
 import { newPaletteEntry } from './new.palette.entry';
-import { DEFAULT_PALETTE } from './palette.constants';
+import { DEFAULT_PALETTE, PALETTE_VERSION } from './palette.constants';
 
 const EXPECTED_DEFAULT_TEXT = [
   'GIMP Palette',
@@ -11,7 +12,7 @@ const EXPECTED_DEFAULT_TEXT = [
   '255   0   0 Cut',
   '  0   0 255 Score',
   '  0 160   0 Fill',
-  '  0   0   0 Shading (black → white)',
+  `  0   0   0 Shading (black ${ARROW_RIGHT} white)`,
   '',
 ].join('\n');
 
@@ -22,7 +23,7 @@ describe(getInkscapePaletteText.name, () => {
 
   it('skips an entry whose colour cannot be read and flattens line breaks in names', () => {
     const text: string = getInkscapePaletteText({
-      version: 1,
+      version: PALETTE_VERSION,
       entries: [newPaletteEntry({ colour: 'none' }), newPaletteEntry({ name: 'A\nB', colour: '#102030' })],
     });
 

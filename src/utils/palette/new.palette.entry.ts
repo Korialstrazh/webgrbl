@@ -13,7 +13,10 @@ import {
   DEFAULT_LINE_INTERVAL_MM,
   LAYER_MODE,
   NEW_PALETTE_ENTRY_COLOUR,
+  NEW_PALETTE_ENTRY_MAX_POWER_PERCENT,
   NEW_PALETTE_ENTRY_NAME,
+  NEW_PALETTE_ENTRY_SPEED_MM_PER_MIN,
+  POWER_PERCENT_MIN,
 } from './palette.constants';
 
 export const newPaletteEntry = (overrides: Partial<PaletteEntry> = {}): PaletteEntry => ({
@@ -21,9 +24,9 @@ export const newPaletteEntry = (overrides: Partial<PaletteEntry> = {}): PaletteE
   name: NEW_PALETTE_ENTRY_NAME,
   colour: NEW_PALETTE_ENTRY_COLOUR,
   mode: LAYER_MODE.LINE,
-  maxPowerPercent: 20,
-  minPowerPercent: 0,
-  speedMmPerMin: 1000,
+  maxPowerPercent: NEW_PALETTE_ENTRY_MAX_POWER_PERCENT,
+  minPowerPercent: POWER_PERCENT_MIN,
+  speedMmPerMin: NEW_PALETTE_ENTRY_SPEED_MM_PER_MIN,
   passes: 1,
   airAssist: false,
   lineIntervalMm: DEFAULT_LINE_INTERVAL_MM,

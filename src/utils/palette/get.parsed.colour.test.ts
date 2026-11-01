@@ -1,8 +1,10 @@
+import { COLOUR_CHANNEL_MAX } from './colour.constants';
 import { getParsedColour } from './get.parsed.colour';
 
 const RED = '#ff0000';
 const HALF_ALPHA = 0.5;
-const HEX_HALF_ALPHA = 128 / 255;
+const HALF_ALPHA_CHANNEL_VALUE = 128;
+const HEX_HALF_ALPHA = HALF_ALPHA_CHANNEL_VALUE / COLOUR_CHANNEL_MAX;
 
 describe(getParsedColour.name, () => {
   it('reads the forms getNormalizedColour reads with full alpha', () => {

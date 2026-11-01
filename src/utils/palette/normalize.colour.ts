@@ -13,6 +13,7 @@ import {
   COLOUR_CHANNEL_MAX,
   HEX_CHANNEL_DIGITS,
   HEX_COLOUR_PREFIX,
+  HEX_PAD_DIGIT,
   HEX_RADIX,
   LONG_HEX_COLOUR_PATTERN,
   NAMED_COLOURS,
@@ -21,7 +22,7 @@ import {
 } from './colour.constants';
 
 const getChannelHex = (channelValue: number): string =>
-  channelValue.toString(HEX_RADIX).padStart(HEX_CHANNEL_DIGITS, '0');
+  channelValue.toString(HEX_RADIX).padStart(HEX_CHANNEL_DIGITS, HEX_PAD_DIGIT);
 
 const getNormalizedRgbFunction = (channelTexts: string[]): string | undefined => {
   const channelValues: number[] = channelTexts.map((channelText: string): number => Number(channelText));

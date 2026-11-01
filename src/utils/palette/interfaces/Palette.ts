@@ -8,11 +8,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { PALETTE_VERSION } from '../palette.constants';
 import type { PaletteEntry } from './PaletteEntry';
 
 export interface Palette {
   /** Format version of the stored palette. */
-  version: 1;
+  version: typeof PALETTE_VERSION;
   /** The entries, in the order the user arranged them. */
   entries: PaletteEntry[];
 }

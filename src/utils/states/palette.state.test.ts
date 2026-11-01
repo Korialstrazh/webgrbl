@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { newPaletteEntry } from '../palette/new.palette.entry';
-import { CUT_ENTRY_ID, DEFAULT_CUT_ENTRY, DEFAULT_PALETTE, FILL_ENTRY_ID, SHADING_ENTRY_ID } from '../palette/palette.constants';
+import {
+  CUT_ENTRY_ID,
+  DEFAULT_CUT_ENTRY,
+  DEFAULT_PALETTE,
+  FILL_ENTRY_ID,
+  PALETTE_VERSION,
+  SHADING_ENTRY_ID,
+} from '../palette/palette.constants';
 import type { PaletteEntry } from '../palette/interfaces/PaletteEntry';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
@@ -13,6 +20,9 @@ import {
   selectPalette,
   selectPaletteEntries,
 } from './palette.state';
+
+const RENAMED_ENTRY_NAME = 'Renamed';
+const CHANGED_PASSES = 7;
 
 const getEntryIds = (store: AppStore): string[] =>
   selectPaletteEntries(store.getState()).map((entry: PaletteEntry): string => entry.id);
@@ -27,14 +37,14 @@ describe('palette state', () => {
     const addedEntry: PaletteEntry = newPaletteEntry();
 
     store.dispatch(new PaletteEntrySaved({ entry: addedEntry }));
-    store.dispatch(new PaletteEntrySaved({ entry: { ...addedEntry, name: 'Renamed' } }));
-    store.dispatch(new PaletteEntrySaved({ entry: { ...DEFAULT_CUT_ENTRY, passes: 7 } }));
+    store.dispatch(new PaletteEntrySaved({ entry: { ...addedEntry, name: RENAMED_ENTRY_NAME } }));
+    store.dispatch(new PaletteEntrySaved({ entry: { ...DEFAULT_CUT_ENTRY, passes: CHANGED_PASSES } }));
 
     const entries: PaletteEntry[] = selectPaletteEntries(store.getState());
 
     expect(entries).toHaveLength(DEFAULT_PALETTE.entries.length + 1);
-    expect(entries.at(-1)?.name).toBe('Renamed');
-    expect(entries.find((entry: PaletteEntry): boolean => entry.id === CUT_ENTRY_ID)?.passes).toBe(7);
+    expect(entries.at(-1)?.name).toBe(RENAMED_ENTRY_NAME);
+    expect(entries.find((entry: PaletteEntry): boolean => entry.id === CUT_ENTRY_ID)?.passes).toBe(CHANGED_PASSES);
   });
 
   it('deletes an entry', () => {
@@ -65,7 +75,7 @@ describe('palette state', () => {
   it('loads a palette and resets to the default', () => {
     const store: AppStore = newStore();
 
-    store.dispatch(new PaletteLoaded({ palette: { version: 1, entries: [newPaletteEntry()] } }));
+    store.dispatch(new PaletteLoaded({ palette: { version: PALETTE_VERSION, entries: [newPaletteEntry()] } }));
     expect(selectPaletteEntries(store.getState())).toHaveLength(1);
 
     store.dispatch(new PaletteResetRequested());

@@ -86,8 +86,6 @@ export const SVG_DEFAULT_OPACITY = 1;
 export const SVG_DEFAULT_STOP_COLOUR = '#000000';
 
 export const SVG_PAINT_URL_PATTERN = /^url\(\s*["']?#([^"')\s]+)["']?\s*\)/i;
-export const SVG_PERCENT_SUFFIX = '%';
-export const PERCENT_DIVISOR = 100;
 export const SVG_OPACITY_DECIMALS = 3;
 export const SVG_OPACITY_ROUNDING_FACTOR = 10 ** SVG_OPACITY_DECIMALS;
 

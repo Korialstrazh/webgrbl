@@ -3,7 +3,7 @@ import { getPaletteEntryErrors } from './get.palette.entry.errors';
 import type { PaletteEntry } from './interfaces/PaletteEntry';
 import type { PaletteEntryFieldError } from './interfaces/PaletteEntryFieldError';
 import { newPaletteEntry } from './new.palette.entry';
-import { PALETTE_ENTRY_ERROR_KEY } from './palette.constants';
+import { PALETTE_ENTRY_ERROR_KEY, POWER_PERCENT_MAX, POWER_PERCENT_MIN } from './palette.constants';
 
 const getErrorFields = (entry: PaletteEntry): Array<keyof PaletteEntry> =>
   getPaletteEntryErrors(entry).map((error: PaletteEntryFieldError): keyof PaletteEntry => error.field);
@@ -18,7 +18,7 @@ describe(getPaletteEntryErrors.name, () => {
       {
         field: 'maxPowerPercent',
         messageKey: PALETTE_ENTRY_ERROR_KEY.MAX_POWER_INVALID,
-        messageParameters: { min: 0, max: 100 },
+        messageParameters: { min: POWER_PERCENT_MIN, max: POWER_PERCENT_MAX },
       },
     ]);
   });

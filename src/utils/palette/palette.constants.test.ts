@@ -8,6 +8,8 @@ import {
   SHADING_ENTRY_ID,
 } from './palette.constants';
 
+const EXPECTED_FILL_LINE_INTERVAL_MM = 0.1;
+
 const EXPECTED_ROWS: Array<Partial<PaletteEntry>> = [
   { name: 'Cut', colour: '#ff0000', mode: LAYER_MODE.LINE, maxPowerPercent: 100, speedMmPerMin: 300, passes: 3 },
   { name: 'Score', colour: '#0000ff', mode: LAYER_MODE.LINE, maxPowerPercent: 30, speedMmPerMin: 1500, passes: 1 },
@@ -31,7 +33,7 @@ describe('DEFAULT_PALETTE', () => {
   });
 
   it('gives the fill entries a line interval of 0.1 mm', () => {
-    expect(DEFAULT_FILL_ENTRY.lineIntervalMm).toBe(0.1);
-    expect(DEFAULT_SHADING_ENTRY.lineIntervalMm).toBe(0.1);
+    expect(DEFAULT_FILL_ENTRY.lineIntervalMm).toBe(EXPECTED_FILL_LINE_INTERVAL_MM);
+    expect(DEFAULT_SHADING_ENTRY.lineIntervalMm).toBe(EXPECTED_FILL_LINE_INTERVAL_MM);
   });
 });

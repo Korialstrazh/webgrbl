@@ -12,7 +12,14 @@
  */
 import type { SvgPaintContext } from './interfaces/SvgPaintContext';
 import type { SvgResolvedPaint } from './interfaces/SvgResolvedPaint';
-import { SVG_CURRENT_COLOUR_KEYWORD, SVG_INHERITING_KEYWORDS, SVG_DEFAULT_OPACITY, SVG_PAINT_NONE, SVG_PAINT_URL_PATTERN } from './svg.geometry.constants';
+import {
+  SVG_CURRENT_COLOUR_KEYWORD,
+  SVG_DEFAULT_OPACITY,
+  SVG_INHERITING_KEYWORDS,
+  SVG_PAINT_NONE,
+  SVG_PAINT_URL_PATTERN,
+} from './svg.geometry.constants';
+import { TRANSPARENT_ALPHA } from '../../palette/colour.constants';
 import { getParsedColour } from '../../palette/get.parsed.colour';
 import type { ParsedColour } from '../../palette/interfaces/ParsedColour';
 
@@ -29,7 +36,11 @@ const getColourPaint = (colourText: string, context: SvgPaintContext): SvgResolv
 
   const parsedColour: ParsedColour | undefined = getParsedColour(colourText);
 
-  return parsedColour && parsedColour.alpha > 0 ? { value: parsedColour.colour, alpha: parsedColour.alpha } : NO_PAINT;
+  if (!parsedColour || parsedColour.alpha <= TRANSPARENT_ALPHA) {
+    return NO_PAINT;
+  }
+
+  return { value: parsedColour.colour, alpha: parsedColour.alpha };
 };
 
 export const getSvgPaintValue = (value: string | undefined, context: SvgPaintContext): SvgResolvedPaint => {

@@ -1,7 +1,7 @@
 import type { SvgPaint } from './interfaces/SvgPaint';
 import { getSvgPaints } from './get.svg.paints';
 import type { SvgGradientStop } from './interfaces/SvgGradientStop';
-import { SVG_GRADIENT_KIND } from './svg.geometry.constants';
+import { SVG_GRADIENT_KIND, SVG_INHERIT_KEYWORD, SVG_UNSET_KEYWORD } from './svg.geometry.constants';
 import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 
 const RED = '#ff0000';
@@ -178,17 +178,20 @@ describe(getSvgPaints.name, () => {
   });
 
   it.each([
-    ['fill attribute', 'fill="inherit"'],
-    ['unset fill attribute', 'fill="unset"'],
-    ['fill style', 'style="fill:inherit"'],
-    ['fill with a missing reference', 'fill="url(#missing) inherit"'],
+    ['fill attribute', `fill="${SVG_INHERIT_KEYWORD}"`],
+    ['unset fill attribute', `fill="${SVG_UNSET_KEYWORD}"`],
+    ['fill style', `style="fill:${SVG_INHERIT_KEYWORD}"`],
+    ['fill with a missing reference', `fill="url(#missing) ${SVG_INHERIT_KEYWORD}"`],
   ])('inherits the parent fill for the %s', (_caseName: string, attributes: string) => {
     const paints: SvgPaint[] = getSvgPaints(getSvgText(`<g fill="${RED}"><path ${attributes} d="M0 0L1 1"/></g>`));
 
     expect(getColours(paints)).toEqual([RED]);
   });
 
-  it.each(['stroke="inherit"', 'style="stroke:inherit"'])('inherits the parent stroke for %s', (attributes: string) => {
+  it.each([
+    `stroke="${SVG_INHERIT_KEYWORD}"`,
+    `style="stroke:${SVG_INHERIT_KEYWORD}"`,
+  ])('inherits the parent stroke for %s', (attributes: string) => {
     const paints: SvgPaint[] = getSvgPaints(
       getSvgText(`<g fill="none" stroke="${BLUE}"><path ${attributes} d="M0 0L1 1"/></g>`),
     );

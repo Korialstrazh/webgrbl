@@ -17,6 +17,7 @@ import { getSvgFraction } from './get.svg.fraction';
 import { getSvgPaintValue } from './get.svg.paint.value';
 import type { SvgResolvedPaint } from './interfaces/SvgResolvedPaint';
 import type { SvgCssRule } from './interfaces/SvgCssRule';
+import type { SvgResolvedStop } from './interfaces/SvgResolvedStop';
 import type { SvgResolvedStyle } from './interfaces/SvgResolvedStyle';
 import {
   SVG_CURRENT_COLOUR_KEYWORD,
@@ -55,7 +56,11 @@ const getColourProperty = (colourValue: string | undefined, parentColour: string
   return parsedColour?.colour ?? parentColour;
 };
 
-const getResolvedStop = (stopColourValue: string | undefined, stopOpacityValue: string | undefined, colour: string) => {
+const getResolvedStop = (
+  stopColourValue: string | undefined,
+  stopOpacityValue: string | undefined,
+  colour: string,
+): SvgResolvedStop => {
   const isCurrentColour: boolean = stopColourValue?.trim().toLowerCase() === SVG_CURRENT_COLOUR_KEYWORD;
   const parsedColour: ParsedColour | undefined =
     stopColourValue && !isCurrentColour ? getParsedColour(stopColourValue) : undefined;

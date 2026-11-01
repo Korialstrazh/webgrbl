@@ -14,6 +14,7 @@ import { getResolvedSvgStyles } from './resolve.svg.styles';
 import { getSvgGradient } from './get.svg.gradient';
 import type { SvgGreyGradient } from './interfaces/SvgGreyGradient';
 import type { SvgPaint } from './interfaces/SvgPaint';
+import type { SvgPaintLookup } from './interfaces/SvgPaintLookup';
 import type { SvgResolvedStyle } from './interfaces/SvgResolvedStyle';
 import {
   SVG_DEFAULT_STOP_COLOUR,
@@ -57,8 +58,7 @@ const isDrawnElement = (element: Element, style: SvgResolvedStyle | undefined): 
 const getPaintOfValue = (
   paintValue: string,
   paintOpacity: number,
-  elementsById: Map<string, Element>,
-  resolvedStyles: Map<Element, SvgResolvedStyle>,
+  paintLookup: SvgPaintLookup,
 ): SvgPaint | undefined => {
   const roundedOpacity: number = getRoundedOpacity(paintOpacity);
 
@@ -70,7 +70,11 @@ const getPaintOfValue = (
     return { colour: paintValue, opacity: roundedOpacity, gradient: undefined };
   }
 
-  const gradient: SvgGreyGradient | undefined = getSvgGradient(paintValue, elementsById, resolvedStyles);
+  const gradient: SvgGreyGradient | undefined = getSvgGradient(
+    paintValue,
+    paintLookup.elementsById,
+    paintLookup.resolvedStyles,
+  );
 
   if (!gradient) {
     return undefined;
@@ -82,21 +86,15 @@ const getPaintOfValue = (
 const getElementPaints = (
   element: Element,
   style: SvgResolvedStyle,
-  elementsById: Map<string, Element>,
-  resolvedStyles: Map<Element, SvgResolvedStyle>,
+  paintLookup: SvgPaintLookup,
 ): SvgPaint[] => {
   const fillPaint: SvgPaint | undefined =
     element.localName === SVG_DRAWN_ELEMENT.LINE
       ? undefined
-      : getPaintOfValue(style.fill, style.opacity * style.fillOpacity * style.fillAlpha, elementsById, resolvedStyles);
+      : getPaintOfValue(style.fill, style.opacity * style.fillOpacity * style.fillAlpha, paintLookup);
   const strokePaint: SvgPaint | undefined =
     style.strokeWidth > 0
-      ? getPaintOfValue(
-        style.stroke,
-        style.opacity * style.strokeOpacity * style.strokeAlpha,
-        elementsById,
-        resolvedStyles,
-      )
+      ? getPaintOfValue(style.stroke, style.opacity * style.strokeOpacity * style.strokeAlpha, paintLookup)
       : undefined;
 
   return [fillPaint, strokePaint].filter((paint: SvgPaint | undefined): paint is SvgPaint => Boolean(paint));
@@ -113,11 +111,12 @@ export const getSvgPaints = (svgText: string): SvgPaint[] => {
 
   const resolvedStyles: Map<Element, SvgResolvedStyle> = getResolvedSvgStyles(svgDocument);
   const elementsById: Map<string, Element> = getElementsById(svgDocument);
+  const paintLookup: SvgPaintLookup = { elementsById, resolvedStyles };
   const distinctPaints: Map<string, SvgPaint> = new Map<string, SvgPaint>();
 
   for (const [element, style] of resolvedStyles) {
     if (isDrawnElement(element, style)) {
-      for (const paint of getElementPaints(element, style, elementsById, resolvedStyles)) {
+      for (const paint of getElementPaints(element, style, paintLookup)) {
         distinctPaints.set(getPaintKey(paint), paint);
       }
     }

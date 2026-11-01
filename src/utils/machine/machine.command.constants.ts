@@ -52,6 +52,5 @@ export const POINTER_POWER_STEP_PERCENT = 0.1;
 export const MAX_POINTER_HOLD_MS = 10000;
 export const MILLISECONDS_PER_SECOND = 1000;
 export const POINTER_FEED_RATE = 100;
-export const PERCENT_DIVISOR = 100;
 export const POINTER_WATTS_DECIMALS = 2;
 export const MIN_POINTER_S_VALUE = 1;
