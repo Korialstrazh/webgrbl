@@ -137,6 +137,7 @@ LAYERS_LIST_LABEL;Project layers
 LAYERS_MOVE_DOWN;Move {{name}} down
 LAYERS_MOVE_UP;Move {{name}} up
 LAYERS_NOT_IN_PALETTE;Not in the palette
+LAYERS_OPEN_PALETTE;Palette
 LAYERS_SUMMARY;{{mode}} · {{power}} % · {{speed}} mm/min · {{passes}}×
 LAYERS_TOGGLE;Send {{name}} to the laser
 MACHINE_CONTROL_RESET;Reset
@@ -254,6 +255,11 @@ OPEN_PROJECT_OPEN_FILE;Open file…
 OPEN_PROJECT_RENAME;Rename
 OPEN_PROJECT_RENAME_INPUT;New name for {{name}}
 OPEN_PROJECT_TITLE;Open project
+PALETTE_DELETE;Delete {{name}}
+PALETTE_DELETE_CANCEL;Cancel
+PALETTE_DELETE_CONFIRM;Delete the colour {{name}}?
+PALETTE_DELETE_OK;Yes, delete
+PALETTE_ERROR_COLOUR_DUPLICATE;This colour is already in the palette
 PALETTE_ERROR_COLOUR_INVALID;Enter a colour such as #ff0000
 PALETTE_ERROR_LINE_INTERVAL_INVALID;Line interval must be from {{min}} to {{max}} mm
 PALETTE_ERROR_MAX_POWER_INVALID;Maximum power must be from {{min}} to {{max}} %
@@ -262,6 +268,23 @@ PALETTE_ERROR_MIN_POWER_INVALID;Minimum power must be from {{min}} to {{max}} %
 PALETTE_ERROR_NAME_REQUIRED;Enter a name for the colour
 PALETTE_ERROR_PASSES_INVALID;Passes must be a whole number from {{min}} to {{max}}
 PALETTE_ERROR_SPEED_INVALID;Speed must be from {{min}} to {{max}} mm/min
+PALETTE_EXPORT;Export for Inkscape
+PALETTE_FIELD_COLOUR;Colour
+PALETTE_FIELD_NAME;Name
+PALETTE_INKSCAPE_HINT;To use the exported file in Inkscape, put it in its palettes folder:
+PALETTE_INKSCAPE_PATH_LINUX;Linux: ~/.config/inkscape/palettes/
+PALETTE_INKSCAPE_PATH_WINDOWS;Windows: %APPDATA%\inkscape\palettes\
+PALETTE_LIST;Palette colours
+PALETTE_MOVE_DOWN;Move {{name}} down
+PALETTE_MOVE_UP;Move {{name}} up
+PALETTE_NEW;+ New colour
+PALETTE_RESET;Reset to defaults
+PALETTE_RESET_CANCEL;Cancel
+PALETTE_RESET_CONFIRM;Replace the whole palette with the default colours? Your changes to the palette are lost.
+PALETTE_RESET_OK;Yes, reset
+PALETTE_SAVE;Save
+PALETTE_SHADING_COLOUR_NOTE;The shading colour is fixed: it covers every grey from black to white.
+PALETTE_TITLE;Palette
 PROJECT_FILE_INPUT;Open a project file
 STATUS_STRIP_CURSOR;Cursor
 STATUS_STRIP_ESTIMATE;Estimate

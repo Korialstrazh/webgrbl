@@ -1,5 +1,7 @@
 /**
- * Lists the problems of a palette entry, one item per invalid field; an empty list means the entry is valid.
+ * Lists the problems of a palette entry, one item per invalid field; an empty list means the entry is valid. When the
+ * other palette entries are given, a colour one of them already uses is a problem too, because layers are matched to
+ * palette entries by exact colour.
  *
  * @author michael.morosov
  *
@@ -36,7 +38,19 @@ const hasMinPowerAboveMax = (entry: PaletteEntry): boolean =>
   isPowerValid(entry.minPowerPercent) && isPowerValid(entry.maxPowerPercent) &&
   entry.minPowerPercent > entry.maxPowerPercent;
 
-export const getPaletteEntryErrors = (entry: PaletteEntry): PaletteEntryFieldError[] => {
+const isColourUsedByOtherEntry = (entry: PaletteEntry, otherEntries: PaletteEntry[]): boolean => {
+  const entryColour: string | undefined = getNormalizedColour(entry.colour);
+
+  return otherEntries.some(
+    (otherEntry: PaletteEntry): boolean =>
+      otherEntry.id !== entry.id && getNormalizedColour(otherEntry.colour) === entryColour,
+  );
+};
+
+export const getPaletteEntryErrors = (
+  entry: PaletteEntry,
+  otherEntries: PaletteEntry[] = [],
+): PaletteEntryFieldError[] => {
   const errors: PaletteEntryFieldError[] = [];
   const powerParameters: Record<string, number> = { min: POWER_PERCENT_MIN, max: POWER_PERCENT_MAX };
 
@@ -46,6 +60,8 @@ export const getPaletteEntryErrors = (entry: PaletteEntry): PaletteEntryFieldErr
 
   if (!getNormalizedColour(entry.colour)) {
     errors.push({ field: 'colour', messageKey: PALETTE_ENTRY_ERROR_KEY.COLOUR_INVALID });
+  } else if (isColourUsedByOtherEntry(entry, otherEntries)) {
+    errors.push({ field: 'colour', messageKey: PALETTE_ENTRY_ERROR_KEY.COLOUR_DUPLICATE });
   }
 
   if (!isPowerValid(entry.maxPowerPercent)) {

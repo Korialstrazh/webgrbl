@@ -45,4 +45,24 @@ describe(getPaletteEntryErrors.name, () => {
   it('reports an empty name and an unusable colour', () => {
     expect(getErrorFields(newPaletteEntry({ name: '  ', colour: 'none' }))).toEqual(['name', 'colour']);
   });
+
+  it('reports a colour another entry already uses', () => {
+    const otherEntry: PaletteEntry = newPaletteEntry({ colour: '#ff0000' });
+
+    expect(getPaletteEntryErrors(newPaletteEntry({ colour: '#FF0000' }), [otherEntry])).toEqual([
+      { field: 'colour', messageKey: PALETTE_ENTRY_ERROR_KEY.COLOUR_DUPLICATE },
+    ]);
+  });
+
+  it('accepts a colour that no other entry uses', () => {
+    const otherEntry: PaletteEntry = newPaletteEntry({ colour: '#ff0000' });
+
+    expect(getPaletteEntryErrors(newPaletteEntry({ colour: '#00ff00' }), [otherEntry])).toEqual([]);
+  });
+
+  it('does not compare an entry with itself', () => {
+    const entry: PaletteEntry = newPaletteEntry();
+
+    expect(getPaletteEntryErrors(entry, [entry])).toEqual([]);
+  });
 });
