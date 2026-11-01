@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { HistoryHotkeys } from '.';
 import { REDO_KEY, UNDO_KEY } from '../../utils/browser/browser.events.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
+import { BedGestureActivityChanged } from '../../utils/states/bed.gesture.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { ProjectObjectsAdded, selectCanRedo, selectProjectObjects } from '../../utils/states/project.document.state';
@@ -111,5 +112,27 @@ describe(HistoryHotkeys.name, () => {
     fireEvent.keyDown(window, { key: UNDO_KEY, ctrlKey: true, isComposing: true });
 
     expect(getObjectCount(store)).toBe(1);
+  });
+
+  it('does not undo or redo while a drag or handle gesture runs on the bed, and does again after it', () => {
+    const store: AppStore = newStore();
+
+    renderHotkeys(store);
+    addObject(store);
+    act(() => {
+      store.dispatch(new BedGestureActivityChanged({ isBedGestureActive: true }));
+    });
+
+    const wasNotPrevented: boolean = fireEvent.keyDown(window, { key: UNDO_KEY, ctrlKey: true });
+
+    expect(wasNotPrevented).toBe(true);
+    expect(getObjectCount(store)).toBe(1);
+
+    act(() => {
+      store.dispatch(new BedGestureActivityChanged({ isBedGestureActive: false }));
+    });
+    fireEvent.keyDown(window, { key: UNDO_KEY, ctrlKey: true });
+
+    expect(getObjectCount(store)).toBe(0);
   });
 });

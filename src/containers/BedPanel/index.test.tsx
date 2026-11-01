@@ -14,6 +14,7 @@ import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
+import type { AppToast } from '../../utils/states/interfaces/AppToast';
 import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
@@ -25,7 +26,7 @@ import {
 } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged } from '../../utils/states/project.selection.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
-import { ToastShown } from '../../utils/states/toast.state';
+import { selectToasts, ToastShown } from '../../utils/states/toast.state';
 import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
 import { BED_HEAD_TEST_ID } from '../../views/BedView/bed.view.constants';
@@ -60,7 +61,13 @@ const DRAG_RIGHT_MM = 20;
 const FILE_DRAG = { dataTransfer: { types: [DATA_TRANSFER_FILES_TYPE] } };
 const TEXT_DRAG = { dataTransfer: { types: ['text/plain'] } };
 
-const newPhotoFile = (): File => new File(['png'], 'photo.png', { type: 'image/png' });
+const PHOTO_FILE_NAME = 'photo.png';
+
+const newPhotoFile = (): File => new File(['png'], PHOTO_FILE_NAME, { type: 'image/png' });
+
+const getNotSvgToasts = (store: AppStore): AppToast[] => selectToasts(store.getState()).filter(
+  (toast: AppToast): boolean => toast.messageKey === DEFAULT.TOAST_SVG_IMPORT_FAILED_NOT_SVG,
+);
 
 const renderPanel = (store: AppStore): void => {
   render(
@@ -197,7 +204,7 @@ describe(BedPanel.name, () => {
     expect(selectProjectObjects(store.getState())[0]).toMatchObject({ xMm: projectObject.xMm + DRAG_RIGHT_MM });
   });
 
-  it('imports the dropped SVG files and ignores the rest', () => {
+  it('sends every dropped file to the import, in the order dropped', () => {
     const store: AppStore = newStore();
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
     const firstSvgFile: File = new File([SVG_TEXT], 'logo.svg');
@@ -211,17 +218,35 @@ describe(BedPanel.name, () => {
 
     expect(dispatchSpy).toHaveBeenCalledTimes(1);
     expect(dispatchSpy.mock.calls[0]?.[0]).toBeInstanceOf(SvgFilesImportRequested);
-    expect(dispatchSpy.mock.calls[0]?.[0]).toMatchObject({ payload: { files: [firstSvgFile, secondSvgFile] } });
+    expect(dispatchSpy.mock.calls[0]?.[0]).toMatchObject({
+      payload: { files: [firstSvgFile, photoFile, secondSvgFile] },
+    });
   });
 
-  it('dispatches nothing when no dropped file is an SVG', () => {
+  it('names a dropped file that is not an SVG in an error toast and adds no object', async () => {
     const store: AppStore = newStore();
-    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderPanel(store);
     fireEvent.drop(screen.getByTestId(BED_DROP_AREA_TEST_ID), {
       dataTransfer: { files: [newPhotoFile()] },
     });
+
+    await vi.waitFor((): void => {
+      expect(getNotSvgToasts(store)).toHaveLength(1);
+    });
+    expect(getNotSvgToasts(store)[0]).toMatchObject({
+      severity: TOAST_SEVERITY.ERROR,
+      messageParameters: { fileName: PHOTO_FILE_NAME },
+    });
+    expect(selectProjectObjects(store.getState())).toEqual([]);
+  });
+
+  it('dispatches nothing when the drop holds no file', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderPanel(store);
+    fireEvent.drop(screen.getByTestId(BED_DROP_AREA_TEST_ID), { dataTransfer: { files: [] } });
 
     expect(dispatchSpy).not.toHaveBeenCalled();
   });

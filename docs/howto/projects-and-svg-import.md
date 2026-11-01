@@ -4,9 +4,9 @@ A project is the design on the bed: SVG objects with a size, position and rotati
 
 ## What the user gets
 
-- **Import.** The "Import SVG" button (top bar, and in the empty Objects section) and a drop of one or more files on the bed (`SvgImportButton`, `useSvgFileDrop` in `BedPanel`). Each file becomes an object named after the file. A project holds up to 50 objects, a file may be up to 10 MB.
+- **Import.** The "Import SVG" button (top bar, and in the empty Objects section) and a drop of one or more files on the bed (`SvgImportButton`, `useSvgFileDrop` in `BedPanel`). Each file becomes an object named after the file, placed on a cascade: accepted file `i` of an import lands at `((existingCount + i) mod 10) × 10` mm on X and Y, where `existingCount` is the number of objects already in the project, so the first import starts at 0,0 and later imports carry on down the diagonal instead of landing on top; a dropped file that is not an SVG (a PNG, say) is named in an error toast. A project holds up to 50 objects, a file may be up to 10 MB.
 - **Edit.** Select (click, Shift-click, click on empty bed to clear), drag, scale and rotate with the handles, nudge with the arrow keys (1 mm, Shift 10 mm), Delete or Backspace to remove, and X / Y / Width / Height / Rotation fields in the Objects section. The Move tool drags the whole selection from anywhere.
-- **Undo and redo.** Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y, and the top bar buttons. 100 steps. One gesture is one step: a drag, a handle gesture, one field commit, and an import of several files.
+- **Undo and redo.** Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y, and the top bar buttons. 100 steps. One gesture is one step: a drag, a handle gesture, one field commit, and an import of several files. The undo and redo keys do nothing while a drag or handle gesture is still under way.
 - **Project menu** (top bar): New project, Open..., Save (Ctrl/Cmd+S), Save as file, Open file.... Click the name to rename it. The autosave readout shows Saved, Saving... or Not saved. Export G-code is still "soon".
 
 ## Coordinates
@@ -48,7 +48,7 @@ The toast names the file and shows once per file, however many things were remov
 | Id of the last opened project | table `appState` | when a project opens |
 | Machine profiles | `localStorage` (see `docs/howto/machine-control.md`) | not part of a project |
 
-The split keeps an autosave after a nudge small: only the project row is rewritten. A save never deletes SVG rows, because undo can bring a removed object back. Unused rows are deleted when a project opens and when it closes (the history is empty or gone then).
+The split keeps an autosave after a nudge small: only the project row is rewritten. A save never deletes SVG rows, because undo can bring a removed object back. Unused rows are deleted when a project opens and, for the project that was closed, right after the next one is on screen (the history is empty or gone then).
 
 **Autosave timing** (`project.constants.ts`, `project.autosave.saga.ts`): a change marks the project "Not saved"; the save runs 1000 ms after the last change, at the latest 3000 ms after the first unsaved change, and at once when the tab is hidden or the page is left (`visibilitychange`, `pagehide`). A failed save keeps the changes on screen, shows one toast until a save works again, and the next change tries again. If the project was deleted in another tab, the next save stores the document in a new project.
 
@@ -71,7 +71,7 @@ The split keeps an autosave after a nudge small: only the project row is rewritt
 }
 ```
 
-"Open file..." (also in the Open dialog) always creates a **new** project with new ids, so a file never overwrites a stored project. Import (`getImportedProjectFile`) rejects the whole file when the format or version is wrong, there are more than 50 objects, a field has the wrong type, or any SVG fails sanitising; it sanitises every SVG again, re-measures the size, clamps the box and brings the rotation into [0, 360). An invalid file shows "The file is not a webgrbl project file. Nothing was opened." and changes nothing. A new file version needs `PROJECT_FILE_VERSION` raised and a reader for the old one.
+"Open file..." (also in the Open dialog) always creates a **new** project with new ids, so a file never overwrites a stored project. A file over `MAX_PROJECT_FILE_BYTES` (50 objects of 10 MB plus 50 MB for the JSON around them) is rejected before it is read. Import (`getImportedProjectFile`) rejects the whole file when the format or version is wrong, there are more than 50 objects, a field has the wrong type, or any SVG fails sanitising; it sanitises every SVG again, re-measures the size, clamps the box, brings the rotation into [0, 360) and trims each object name and cuts it to 100 characters. An invalid file shows "The file is not a webgrbl project file. Nothing was opened." and changes nothing. A new file version needs `PROJECT_FILE_VERSION` raised and a reader for the old one.
 
 ## Use it from code
 
@@ -85,7 +85,7 @@ dispatch(new SvgFilesImportRequested({ files }));
 dispatch(new ProjectObjectsTransformed({ transforms: [{ id, xMm: 20, yMm: 20, widthMm: 40, heightMm: 40, rotationDeg: 0 }] }));
 dispatch(new ProjectUndoRequested());
 
-// Project commands go into one queue, so they never run at the same time as an autosave.
+// Project commands and SVG imports go into one queue, so they never run at the same time as an autosave or a switch.
 dispatch(new ProjectSaveRequested());
 dispatch(new ProjectOpenRequested({ projectId }));
 ```
@@ -98,7 +98,7 @@ dispatch(new ProjectOpenRequested({ projectId }));
 
 `npm run dev`, import an Inkscape SVG, drop a few more, move, scale, rotate, undo, then reload the tab: the project comes back as it was. "Save as file", then "New project" and "Open file...", and delete a project in "Open...".
 
-Manual check in Chrome: pending, done by the user after the PR opens.
+Manual check in Chrome: done by the user on 2026-11-01 and reported fine.
 
 ## Tests
 

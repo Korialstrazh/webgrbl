@@ -10,10 +10,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { REDO_KEY, UNDO_KEY } from '../../utils/browser/browser.events.constants';
+import { hasCommandModifier } from '../../utils/browser/has.command.modifier';
 import { ProjectRedoRequested, ProjectUndoRequested } from '../../utils/states/project.document.state';
-
-const hasCommandModifier = (keyboardEvent: KeyboardEvent): boolean =>
-  (keyboardEvent.ctrlKey || keyboardEvent.metaKey) && !keyboardEvent.altKey;
 
 const isRedoPress = (keyboardEvent: KeyboardEvent, pressedKey: string): boolean =>
   (pressedKey === UNDO_KEY && keyboardEvent.shiftKey) || (pressedKey === REDO_KEY && !keyboardEvent.shiftKey);

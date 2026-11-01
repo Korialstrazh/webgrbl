@@ -47,6 +47,11 @@ const EMPTY_HINT_PATTERN = /No objects yet/;
 const SECOND_ROW_NAME_PATTERN = /^Moon/;
 const PRESSED_ATTRIBUTE = 'aria-pressed';
 const TRUE_TEXT = 'true';
+const FRACTIONAL_X_MM = 12.3456;
+const SECOND_X_MM = 80;
+const SECOND_X_TEXT = '80.0';
+const MOVED_X_MM = 40;
+const MOVED_X_TEXT = '40.0';
 
 const loadObjects = (store: AppStore): void => {
   act(() => {
@@ -83,6 +88,32 @@ const commitField = (label: string, text: string): void => {
   fireEvent.change(input, { target: { value: text } });
   fireEvent.blur(input);
 };
+
+const loadFractionalObjects = (store: AppStore): void => {
+  act(() => {
+    store.dispatch(new ProjectDocumentLoaded({
+      document: {
+        objects: [
+          newProjectObject({ id: FIRST_ID, name: FIRST_NAME, xMm: FRACTIONAL_X_MM }),
+          newProjectObject({ id: SECOND_ID, name: SECOND_NAME, xMm: SECOND_X_MM }),
+        ],
+      },
+    }));
+  });
+};
+
+const focusAndLeaveField = (label: string): void => {
+  const input: HTMLElement = screen.getByLabelText(label);
+
+  fireEvent.focus(input);
+  fireEvent.blur(input);
+};
+
+const getTransformDispatchCount = (dispatchSpy: MockInstance<AppDispatch>): number =>
+  dispatchSpy.mock.calls.filter(
+    ([dispatchedAction]: Parameters<AppDispatch>): boolean =>
+      dispatchedAction.type === ProjectObjectsTransformed.type,
+  ).length;
 
 const getObjectById = (store: AppStore, objectId: string): ProjectObject | undefined =>
   selectProjectObjects(store.getState()).find(
@@ -242,5 +273,70 @@ describe(ObjectsSection.name, () => {
 
     expect(dispatchSpy).toHaveBeenCalledTimes(1);
     expect(getObjectById(store, FIRST_ID)?.xMm).toBe(12);
+  });
+
+  it('commits nothing and keeps no draft when a fractional value is focused and left', () => {
+    const store: AppStore = newStore();
+
+    loadFractionalObjects(store);
+    selectFirst(store);
+
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderSection(store);
+    focusAndLeaveField(X_LABEL);
+    act(() => {
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [SECOND_ID] }));
+    });
+
+    expect(screen.getByLabelText(X_LABEL)).toHaveValue(SECOND_X_TEXT);
+
+    focusAndLeaveField(X_LABEL);
+
+    expect(getTransformDispatchCount(dispatchSpy)).toBe(0);
+    expect(getObjectById(store, FIRST_ID)?.xMm).toBe(FRACTIONAL_X_MM);
+    expect(getObjectById(store, SECOND_ID)?.xMm).toBe(SECOND_X_MM);
+  });
+
+  it('commits nothing and keeps no draft on Enter in an untouched fractional field', () => {
+    const store: AppStore = newStore();
+
+    loadFractionalObjects(store);
+    selectFirst(store);
+
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderSection(store);
+
+    const xInput: HTMLElement = screen.getByLabelText(X_LABEL);
+
+    fireEvent.focus(xInput);
+    fireEvent.keyDown(xInput, { key: ENTER_KEY });
+    fireEvent.blur(xInput);
+    act(() => {
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [SECOND_ID] }));
+    });
+    focusAndLeaveField(X_LABEL);
+
+    expect(getTransformDispatchCount(dispatchSpy)).toBe(0);
+    expect(getObjectById(store, SECOND_ID)?.xMm).toBe(SECOND_X_MM);
+  });
+
+  it('shows the new value after the selected object is moved elsewhere', () => {
+    const store: AppStore = newStore();
+
+    loadFractionalObjects(store);
+    selectFirst(store);
+    renderSection(store);
+    focusAndLeaveField(X_LABEL);
+    act(() => {
+      store.dispatch(new ProjectObjectsTransformed({
+        transforms: {
+          [FIRST_ID]: { xMm: MOVED_X_MM, yMm: 0, widthMm: SECOND_SIZE_MM, heightMm: SECOND_SIZE_MM, rotationDeg: 0 },
+        },
+      }));
+    });
+
+    expect(screen.getByLabelText(X_LABEL)).toHaveValue(MOVED_X_TEXT);
   });
 });

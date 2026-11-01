@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { call, put, select, takeEvery } from 'redux-saga/effects';
+import { call, put, select } from 'redux-saga/effects';
 import { getBedDimensions } from '../bed/get.bed.dimensions';
 import type { BedDimensions } from '../bed/interfaces/BedDimensions';
 import { DEFAULT } from '../localization/default.locales';
@@ -30,7 +30,8 @@ import { readSvgFile } from '../svg/read.svg.file';
 import { selectGrblSettings, selectIsConnected } from './grbl.connection.state';
 import type { AcceptedSvgFile } from './interfaces/AcceptedSvgFile';
 import { selectActiveMachineProfile } from './machine.profile.state';
-import { ProjectObjectsAdded, SvgFilesImportRequested, selectProjectObjects } from './project.document.state';
+import { ProjectObjectsAdded, selectProjectObjects } from './project.document.state';
+import type { SvgFilesImportRequested } from './project.document.state';
 import { ProjectSelectionChanged } from './project.selection.state';
 import { SVG_IMPORT_FAILURE_TOAST_KEY } from './svg.import.constants';
 import { TOAST_SEVERITY } from './toast.constants';
@@ -102,7 +103,8 @@ function* addAcceptedFiles(acceptedFiles: AcceptedSvgFile[]): Generator<unknown,
   return fittingFiles.length < acceptedFiles.length;
 }
 
-function* importSvgFiles(action: SvgFilesImportRequested): Generator {
+/** Run by the project command queue, so it never overlaps a project switch and waits for the first project. */
+export function* importSvgFiles(action: SvgFilesImportRequested): Generator {
   const existingObjects: ProjectObject[] = (yield select(selectProjectObjects)) as ProjectObject[];
   const bed: BedDimensions = (yield call(getCurrentBed)) as BedDimensions;
   const acceptedFiles: AcceptedSvgFile[] = [];
@@ -136,8 +138,4 @@ function* importSvgFiles(action: SvgFilesImportRequested): Generator {
       limit: MAX_PROJECT_OBJECTS,
     });
   }
-}
-
-export function* watchSvgImport(): Generator {
-  yield takeEvery(SvgFilesImportRequested.type, importSvgFiles);
 }

@@ -14,7 +14,8 @@
  */
 import { useCallback } from 'react';
 import type { KeyboardEvent } from 'react';
-import { isTextEntryTarget } from '../../utils/browser/is.text.entry.target';
+import { canShortcutAct } from '../../utils/browser/can.shortcut.act';
+import { hasCtrlMetaOrAltModifier } from '../../utils/browser/has.ctrl.meta.or.alt.modifier';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import type { AppRootState, AppStore } from '../../utils/states/new.store';
 import { ProjectObjectsDeleted, ProjectObjectsTransformed } from '../../utils/states/project.document.state';
@@ -27,14 +28,8 @@ import { getNudgedObjectTransforms } from './get.nudged.object.transforms';
 import type { BedMachinePoint } from './interfaces/BedMachinePoint';
 import type { BedObjectsKeyDownHandler } from './interfaces/BedObjectsKeyDownHandler';
 
-const hasCommandModifier = (keyboardEvent: KeyboardEvent): boolean =>
-  keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.altKey;
-
-const isPlainKeyPress = (keyboardEvent: KeyboardEvent): boolean =>
-  !keyboardEvent.nativeEvent.isComposing && !hasCommandModifier(keyboardEvent);
-
 const canBedObjectsKeyAct = (keyboardEvent: KeyboardEvent, state: AppRootState): boolean =>
-  isPlainKeyPress(keyboardEvent) && !isTextEntryTarget(keyboardEvent.target) && !selectIsAnyOverlayOpen(state);
+  !hasCtrlMetaOrAltModifier(keyboardEvent) && canShortcutAct(keyboardEvent.nativeEvent, selectIsAnyOverlayOpen(state));
 
 export const useBedObjectsKeys = (): BedObjectsKeyDownHandler => {
   const store: AppStore = useAppStore();

@@ -22,7 +22,7 @@ import type { AppDispatch } from '../../../utils/states/new.store';
 import { ProjectObjectsTransformed } from '../../../utils/states/project.document.state';
 import type { ObjectTransformFieldConfig } from '../interfaces/ObjectTransformFieldConfig';
 import type { ObjectTransformFieldsProps } from '../interfaces/ObjectTransformFieldsProps';
-import { OBJECT_TRANSFORM_FIELDS } from '../objects.section.constants';
+import { OBJECT_FIELD_KEY_SEPARATOR, OBJECT_TRANSFORM_FIELDS } from '../objects.section.constants';
 import { ObjectTransformField } from './ObjectTransformField';
 import styles from './styles.module.scss';
 
@@ -45,7 +45,7 @@ export const ObjectTransformFields = ({ projectObject }: ObjectTransformFieldsPr
       <div className={styles.grid}>
         {OBJECT_TRANSFORM_FIELDS.map((config: ObjectTransformFieldConfig) => (
           <ObjectTransformField
-            key={config.field}
+            key={[projectObject.id, config.field].join(OBJECT_FIELD_KEY_SEPARATOR)}
             label={t(config.labelKey)}
             value={projectObject[config.field]}
             decimals={config.decimals}

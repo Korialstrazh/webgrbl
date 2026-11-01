@@ -15,7 +15,6 @@ import type { GrblControllerSagaDependencies } from './interfaces/GrblController
 import { watchLaserPointer } from './laser.pointer.saga';
 import { watchMachineProfiles } from './machine.profile.saga';
 import { watchProjects } from './project.saga';
-import { watchSvgImport } from './svg.import.saga';
 import { watchInfoToastExpiry } from './toast.state';
 
 export function* rootSaga(grblControllerSagaDependencies: GrblControllerSagaDependencies): Generator {
@@ -24,7 +23,6 @@ export function* rootSaga(grblControllerSagaDependencies: GrblControllerSagaDepe
     fork(watchInfoToastExpiry),
     fork(watchMachineProfiles),
     fork(watchLaserPointer),
-    fork(watchSvgImport),
     fork(watchProjects),
     fork(watchGrblController, grblControllerSagaDependencies),
   ]);

@@ -39,6 +39,7 @@ import type { BedObjectsKeyDownHandler } from './interfaces/BedObjectsKeyDownHan
 import type { BedObjectsProps } from './interfaces/BedObjectsProps';
 import type { SelectToolPointerDownOutcome } from './interfaces/SelectToolPointerDownOutcome';
 import styles from './styles.module.scss';
+import { useBedGestureActivity } from './use.bed.gesture.activity';
 import { useBedHandleGesture } from './use.bed.handle.gesture';
 import { useBedObjectDrag } from './use.bed.object.drag';
 import { useBedObjectsKeys } from './use.bed.objects.keys';
@@ -66,10 +67,12 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
   const handleKeyDown: BedObjectsKeyDownHandler = useBedObjectsKeys();
   const pixelsPerMm: number | undefined = useBedPixelsPerMm(layerRef, dimensions);
   const handleSizes: BedHandleSizes = useMemo(() => getBedHandleSizes(pixelsPerMm), [pixelsPerMm]);
-  const { startObjectDrag } = dragControls;
+  const { startObjectDrag, drag } = dragControls;
   const { startHandleGesture, handleGesture } = gestureControls;
   const isMoveToolActive: boolean = activeTool === BED_TOOL.MOVE;
   const hasSingleSelection: boolean = selectedObjectIds.length === 1;
+
+  useBedGestureActivity(Boolean(drag ?? handleGesture));
 
   // A press on the bed gives it keyboard focus, so the arrow and Delete keys reach it next.
   const focusLayer = useCallback((): void => {

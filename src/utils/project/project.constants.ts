@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { DEFAULT } from '../localization/default.locales';
+import { BYTES_PER_MEGABYTE, MAX_SVG_FILE_BYTES } from '../svg/svg.constants';
 
 export const MAX_PROJECT_OBJECTS = 50;
 export const IMPORT_PLACEMENT_OFFSET_MM = 10;
@@ -24,6 +25,8 @@ export const AUTOSAVE_DEBOUNCE_MS = 1000;
 export const AUTOSAVE_MAX_WAIT_MS = 3000;
 export const MIN_PROJECT_NAME_LENGTH = 1;
 export const MAX_PROJECT_NAME_LENGTH = 100;
+/** An object name read from a project file is cut to this many characters after trimming. */
+export const MAX_OBJECT_NAME_LENGTH = 100;
 export const DEFAULT_PROJECT_NAME_KEY = DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER;
 
 export const PROJECT_FILE_FORMAT = 'webgrbl-project';
@@ -34,6 +37,14 @@ export const PROJECT_FILE_MIME_TYPE = 'application/json';
 export const PROJECT_FILE_NAME_FORBIDDEN_CHARACTERS = /[\\/:*?"<>|]/g;
 /** Base name of a downloaded project file whose project name has no allowed character left. */
 export const PROJECT_FILE_FALLBACK_BASE_NAME = 'project';
+/** Room in a project file for the JSON fields, the indentation and the escaped quotes around every SVG text. */
+const PROJECT_FILE_OVERHEAD_MEGABYTES = 50;
+/**
+ * A project file larger than this cannot hold a valid project, so it is rejected before it is read: reading a huge
+ * file at once would freeze the tab. The size of each SVG inside is still checked on its own.
+ */
+export const MAX_PROJECT_FILE_BYTES = MAX_PROJECT_OBJECTS * MAX_SVG_FILE_BYTES
+  + PROJECT_FILE_OVERHEAD_MEGABYTES * BYTES_PER_MEGABYTE;
 /** Spaces per indent level, so a saved project file stays readable in a text editor. */
 export const PROJECT_FILE_JSON_INDENT = 2;
 

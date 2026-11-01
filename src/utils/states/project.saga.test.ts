@@ -29,6 +29,7 @@ import { newProjectObject } from '../project/new.project.object';
 import {
   AUTOSAVE_DEBOUNCE_MS,
   AUTOSAVE_MAX_WAIT_MS,
+  MAX_PROJECT_FILE_BYTES,
   MAX_PROJECT_NAME_LENGTH,
   PROJECT_FILE_EXTENSION,
   PROJECT_FILE_MIME_TYPE,
@@ -36,6 +37,7 @@ import {
 import { SVG_ASSET_PROJECT_ID_INDEX } from '../project/project.database.constants';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
 import { WEBGRBL_DATABASE } from '../project/webgrbl.database';
+import { SVG_MIME_TYPE } from '../svg/svg.constants';
 import { useStorageSafeFakeTimers } from '../test.support/use.storage.safe.fake.timers';
 import type { AppToast } from './interfaces/AppToast';
 import { newStore } from './new.store';
@@ -45,6 +47,7 @@ import {
   ProjectObjectsDeleted,
   ProjectObjectsTransformed,
   ProjectUndoRequested,
+  SvgFilesImportRequested,
   selectCanUndo,
   selectProjectObjects,
 } from './project.document.state';
@@ -80,6 +83,10 @@ const STORAGE_FAILURE_MESSAGE = 'quota exceeded';
 const PROJECT_TIME_GAP_MS = 10;
 /** Real time a leftover store gets to write after a flush event; several database round trips fit in it. */
 const LEFTOVER_STORE_SETTLE_MS = 300;
+const ARTWORK_FILE_NAME = 'artwork.svg';
+/** How long the start holds the project load back, so an import that does not wait for the project gets ahead. */
+const EARLY_IMPORT_WAIT_MS = 300;
+const ARTWORK_OBJECT_NAME = 'artwork';
 
 type SaveDocument = typeof PROJECT_REPOSITORY.saveDocument;
 
@@ -172,6 +179,30 @@ const keepMovingObjectUntilMaximumWait = async (store: AppStore, projectObject: 
 
 const newProjectFile = (fileText: string): File =>
   new File([fileText], `${IMPORTED_PROJECT_NAME}${PROJECT_FILE_EXTENSION}`);
+
+const newArtworkFile = (): File => new File([ARTWORK_SVG_TEXT], ARTWORK_FILE_NAME, { type: SVG_MIME_TYPE });
+
+const requestArtworkImport = (store: AppStore): void => {
+  store.dispatch(new SvgFilesImportRequested({ files: [newArtworkFile()] }));
+};
+
+const ORIGINAL_CREATE_PROJECT: typeof PROJECT_REPOSITORY.createProject = PROJECT_REPOSITORY.createProject;
+const ORIGINAL_PRUNE_ASSETS: typeof PROJECT_REPOSITORY.pruneAssets = PROJECT_REPOSITORY.pruneAssets;
+const ORIGINAL_GET_PROJECT: typeof PROJECT_REPOSITORY.getProject = PROJECT_REPOSITORY.getProject;
+
+/** Runs the side effect once, at the moment the next project is created, then creates it as usual. */
+const runWhenProjectIsCreated = (sideEffect: () => void): void => {
+  vi.spyOn(PROJECT_REPOSITORY, 'createProject').mockImplementationOnce(
+    async (projectName: string): Promise<StoredProject> => {
+      sideEffect();
+
+      return ORIGINAL_CREATE_PROJECT.call(PROJECT_REPOSITORY, projectName);
+    },
+  );
+};
+
+const getObjectNames = (projectObjects: ProjectObject[]): string[] =>
+  projectObjects.map((projectObject: ProjectObject): string => projectObject.name);
 
 const hideTab = (): void => {
   vi.spyOn(document, 'visibilityState', 'get').mockReturnValue(HIDDEN_VISIBILITY_STATE);
@@ -539,6 +570,35 @@ describe(watchProjects.name, () => {
       expect(await getStoredProjectIds()).toEqual([projectId]);
     });
 
+    it('rejects a project file over the size limit before reading it', async () => {
+      const store: AppStore = await newStartedStore();
+      const projectId: string = selectProjectId(store.getState()) ?? '';
+      const oversizedFile: File = newProjectFile(getProjectFileText(IMPORTED_PROJECT_NAME, { objects: [] }));
+      Object.defineProperty(oversizedFile, 'size', { value: MAX_PROJECT_FILE_BYTES + 1 });
+      const readSpy: MockInstance<File['text']> = vi.spyOn(oversizedFile, 'text');
+
+      store.dispatch(new ProjectFileImportRequested({ file: oversizedFile }));
+
+      await vi.waitFor((): void => {
+        expect(getToastsOf(store, DEFAULT.TOAST_PROJECT_FILE_INVALID)).toHaveLength(1);
+      });
+      expect(readSpy).not.toHaveBeenCalled();
+      expect(selectProjectId(store.getState())).toBe(projectId);
+      expect(await getStoredProjectIds()).toEqual([projectId]);
+    });
+
+    it('opens a project file of exactly the size limit', async () => {
+      const store: AppStore = await newStartedStore();
+      const oldProjectId: string = selectProjectId(store.getState()) ?? '';
+      const limitSizedFile: File = newProjectFile(getProjectFileText(IMPORTED_PROJECT_NAME, { objects: [] }));
+      Object.defineProperty(limitSizedFile, 'size', { value: MAX_PROJECT_FILE_BYTES });
+
+      store.dispatch(new ProjectFileImportRequested({ file: limitSizedFile }));
+      await waitForNewProject(store, oldProjectId);
+
+      expect(selectProjectName(store.getState())).toBe(IMPORTED_PROJECT_NAME);
+    });
+
     it('deleting the open project opens the most recent remaining one', async () => {
       const store: AppStore = await newStartedStore();
       const oldestProjectId: string = selectProjectId(store.getState()) ?? '';
@@ -616,6 +676,136 @@ describe(watchProjects.name, () => {
           mimeType: PROJECT_FILE_MIME_TYPE,
         });
       });
+    });
+  });
+
+  describe('edits during a project switch', () => {
+    it('keeps an object added while New creates the project in the old project, with its artwork', async () => {
+      const store: AppStore = await newStartedStore();
+      const oldProjectId: string = selectProjectId(store.getState()) ?? '';
+      const lateObject: ProjectObject = newProjectObject({ svgText: ARTWORK_SVG_TEXT });
+      runWhenProjectIsCreated((): void => {
+        addObject(store, lateObject);
+      });
+
+      await requestNewProject(store);
+
+      expect(selectProjectObjects(store.getState())).toEqual([]);
+      expect((await getStoredProject(oldProjectId))?.document.objects).toEqual([lateObject]);
+      expect(await getStoredSvgText(oldProjectId, lateObject.id)).toBe(ARTWORK_SVG_TEXT);
+    });
+
+    it('keeps an object added while a project file is stored in the old project, with its artwork', async () => {
+      const store: AppStore = await newStartedStore();
+      const oldProjectId: string = selectProjectId(store.getState()) ?? '';
+      const lateObject: ProjectObject = newProjectObject({ svgText: ARTWORK_SVG_TEXT });
+      const fileText: string = getProjectFileText(IMPORTED_PROJECT_NAME, { objects: [] });
+      runWhenProjectIsCreated((): void => {
+        addObject(store, lateObject);
+      });
+
+      store.dispatch(new ProjectFileImportRequested({ file: newProjectFile(fileText) }));
+      await waitForNewProject(store, oldProjectId);
+
+      expect((await getStoredProject(oldProjectId))?.document.objects).toEqual([lateObject]);
+      expect(await getStoredSvgText(oldProjectId, lateObject.id)).toBe(ARTWORK_SVG_TEXT);
+    });
+
+    it('keeps an object added while Open finishes in the opened project', async () => {
+      const store: AppStore = await newStartedStore();
+      const firstProjectId: string = selectProjectId(store.getState()) ?? '';
+      const firstObject: ProjectObject = addObject(store);
+      await requestNewProject(store);
+      const lateObject: ProjectObject = newProjectObject({ svgText: ARTWORK_SVG_TEXT });
+      vi.spyOn(PROJECT_REPOSITORY, 'pruneAssets').mockImplementationOnce(
+        async (projectId: string, objectIdsToKeep: string[]): Promise<void> => {
+          addObject(store, lateObject);
+
+          return ORIGINAL_PRUNE_ASSETS.call(PROJECT_REPOSITORY, projectId, objectIdsToKeep);
+        },
+      );
+
+      store.dispatch(new ProjectOpenRequested({ projectId: firstProjectId }));
+      await vi.waitFor((): void => {
+        expect(selectProjectObjects(store.getState())).toHaveLength(2);
+      });
+      await autosave(store);
+
+      expect(selectProjectId(store.getState())).toBe(firstProjectId);
+      expect((await getStoredProject(firstProjectId))?.document.objects).toEqual([firstObject, lateObject]);
+    });
+
+    it('deletes the project New created when the open project cannot be saved, and stays open', async () => {
+      const store: AppStore = await newStartedStore();
+      const projectId: string = selectProjectId(store.getState()) ?? '';
+      const projectObject: ProjectObject = addObject(store);
+      vi.spyOn(PROJECT_REPOSITORY, 'saveDocument').mockRejectedValue(new Error(STORAGE_FAILURE_MESSAGE));
+      const deleteSpy: MockInstance<typeof PROJECT_REPOSITORY.deleteProject> =
+        vi.spyOn(PROJECT_REPOSITORY, 'deleteProject');
+
+      store.dispatch(new NewProjectRequested());
+      await vi.waitFor((): void => {
+        expect(deleteSpy).toHaveBeenCalledTimes(1);
+      });
+      await vi.waitFor(async (): Promise<void> => {
+        expect(await getStoredProjectIds()).toEqual([projectId]);
+      });
+
+      expect(selectProjectId(store.getState())).toBe(projectId);
+      expect(selectProjectObjects(store.getState())).toEqual([projectObject]);
+      expect(getToastsOf(store, DEFAULT.TOAST_PROJECT_SAVE_FAILED)).toHaveLength(1);
+    });
+
+    it('applies an svg import requested during New to the new project, after it opens', async () => {
+      const store: AppStore = await newStartedStore();
+      const oldProjectId: string = selectProjectId(store.getState()) ?? '';
+      runWhenProjectIsCreated((): void => {
+        requestArtworkImport(store);
+      });
+
+      const newProjectId: string = await requestNewProject(store);
+      await vi.waitFor((): void => {
+        expect(getObjectNames(selectProjectObjects(store.getState()))).toEqual([ARTWORK_OBJECT_NAME]);
+      });
+      await autosave(store);
+
+      expect(selectProjectId(store.getState())).toBe(newProjectId);
+      expect((await getStoredProject(oldProjectId))?.document.objects).toEqual([]);
+      expect(getObjectNames((await getStoredProject(newProjectId))?.document.objects ?? [])).toEqual([
+        ARTWORK_OBJECT_NAME,
+      ]);
+    });
+
+    it('applies an svg import requested during the start to the reopened project', async () => {
+      const firstStore: AppStore = await newStartedStore();
+      const projectObject: ProjectObject = addObject(firstStore);
+      await autosave(firstStore);
+      let secondStore: AppStore | undefined;
+      vi.spyOn(PROJECT_REPOSITORY, 'getProject').mockImplementationOnce(
+        async (projectId: string): Promise<LoadedProject | undefined> => {
+          try {
+            // Gives an import that does not wait for the project the time to land before the project loads.
+            await vi.waitFor((): void => {
+              expect(selectProjectObjects(secondStore?.getState() ?? firstStore.getState())).toHaveLength(1);
+            }, { timeout: EARLY_IMPORT_WAIT_MS });
+          } catch {
+            // The import waited for the project, as it should.
+          }
+
+          return ORIGINAL_GET_PROJECT.call(PROJECT_REPOSITORY, projectId);
+        },
+      );
+
+      secondStore = newStore();
+      requestArtworkImport(secondStore);
+      await waitForOpenProject(secondStore);
+      const startedStore: AppStore = secondStore;
+      await vi.waitFor((): void => {
+        expect(selectProjectObjects(startedStore.getState())).toHaveLength(2);
+      });
+
+      expect(selectProjectObjects(startedStore.getState())[0]).toEqual(projectObject);
+      expect(selectProjectObjects(startedStore.getState())[1]?.name).toBe(ARTWORK_OBJECT_NAME);
     });
   });
 });
