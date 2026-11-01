@@ -118,3 +118,6 @@ export const SVG_REMOTE_URL_PATTERN = /url\(\s*["']?\s*(?![\s"']|data:|#)/i;
 export const SVG_VIEW_BOX_VALUE_COUNT = 4;
 export const SVG_VIEW_BOX_WIDTH_INDEX = 2;
 export const SVG_VIEW_BOX_HEIGHT_INDEX = 3;
+
+/** The character that starts a file name extension. */
+export const FILE_EXTENSION_SEPARATOR = '.';

@@ -19,6 +19,7 @@ import type { ProjectDocumentPayload } from './interfaces/ProjectDocumentPayload
 import type { ProjectObjectIdsPayload } from './interfaces/ProjectObjectIdsPayload';
 import type { ProjectObjectTransformsPayload } from './interfaces/ProjectObjectTransformsPayload';
 import type { ProjectObjectsPayload } from './interfaces/ProjectObjectsPayload';
+import type { SvgFilesPayload } from './interfaces/SvgFilesPayload';
 
 // #region State
 export interface ProjectDocumentState {
@@ -62,6 +63,10 @@ export class ProjectRedoRequested extends Action {
 
 export class ProjectDocumentLoaded extends Action<ProjectDocumentPayload> {
   public static readonly type: string = actionType('project document loaded');
+}
+
+export class SvgFilesImportRequested extends Action<SvgFilesPayload> {
+  public static readonly type: string = actionType('svg files import requested');
 }
 // #endregion
 
