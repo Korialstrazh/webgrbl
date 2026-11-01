@@ -43,6 +43,21 @@ export const SHADING_ENTRY_ID = 'palette-shading';
 
 export const NEW_PALETTE_ENTRY_NAME = 'New colour';
 export const NEW_PALETTE_ENTRY_COLOUR = '#000000';
+/** Colours a new entry tries in turn, so it starts with one no other entry uses. */
+export const NEW_PALETTE_ENTRY_COLOUR_CANDIDATES: readonly string[] = [
+  '#ff00ff',
+  '#00ffff',
+  '#ff8000',
+  '#8000ff',
+  '#00ff80',
+  '#808000',
+];
+
+/** Odd, so stepping by it through the 24-bit colour range never repeats a colour before the range is used up. */
+export const FALLBACK_COLOUR_STEP = 0x3d7a1b;
+export const COLOUR_VALUE_COUNT = 0x1000000;
+export const COLOUR_HEX_DIGIT_COUNT = 6;
+
 export const NEW_PALETTE_ENTRY_MAX_POWER_PERCENT = 20;
 export const NEW_PALETTE_ENTRY_SPEED_MM_PER_MIN = 1000;
 export const DEFAULT_LINE_INTERVAL_MM = 0.1;

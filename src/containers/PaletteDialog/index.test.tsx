@@ -7,6 +7,7 @@ import { newPaletteEntry } from '../../utils/palette/new.palette.entry';
 import {
   CUT_ENTRY_ID,
   DEFAULT_PALETTE,
+  NEW_PALETTE_ENTRY_COLOUR_CANDIDATES,
   SCORE_ENTRY_ID,
 } from '../../utils/palette/palette.constants';
 import { newStore } from '../../utils/states/new.store';
@@ -50,6 +51,11 @@ const SHADING_NAME_PATTERN = /^Shading/;
 const SCORE_NAME_PATTERN = /^Score/;
 const DRAG_DATA_TYPE = 'text/plain';
 const NEW_ENTRY_COLOUR = '#12ab34';
+const FIRST_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[0] ?? '';
+const SECOND_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[1] ?? '';
+const CUT_COLOUR = '#ff0000';
+const CUSTOM_ENTRY_NAME = 'Custom etch';
+const CUSTOM_NAME_PATTERN = /^Custom etch/;
 const COLOUR_HEX_INPUT_SELECTOR = '.ant-color-picker-hex-input input';
 
 const renderDialog = (store: AppStore, onClose: () => void = vi.fn()): void => {
@@ -131,16 +137,68 @@ describe(PaletteDialog.name, () => {
     expect(getEntryIds(store)).toHaveLength(DEFAULT_PALETTE.entries.length + 1);
   });
 
-  it('blocks Save when a new entry keeps the colour of another entry', () => {
+  it('saves a new entry at once, because it starts with an unused colour', () => {
     const store: AppStore = newStore();
-    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderDialog(store);
     clickButton(NEW_COLOUR_LABEL);
     clickButton(SAVE_LABEL);
 
+    expect(screen.queryByText(DUPLICATE_ERROR_TEXT)).not.toBeInTheDocument();
+    expect(getEntryIds(store)).toHaveLength(DEFAULT_PALETTE.entries.length + 1);
+  });
+
+  it('starts a new entry with the next candidate colour when the first is taken', () => {
+    const store: AppStore = newStore();
+
+    act(() => {
+      store.dispatch(new PaletteEntrySaved({ entry: newPaletteEntry({ colour: FIRST_CANDIDATE_COLOUR }) }));
+    });
+    renderDialog(store);
+    clickButton(NEW_COLOUR_LABEL);
+    clickButton(SAVE_LABEL);
+
+    expect(selectPaletteEntries(store.getState()).at(-1)?.colour).toBe(SECOND_CANDIDATE_COLOUR);
+  });
+
+  it('blocks Save when an entry is given the colour of another entry', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderDialog(store);
+    clickButton(NEW_COLOUR_LABEL);
+    changeColour(CUT_COLOUR);
+    clickButton(SAVE_LABEL);
+
     expect(screen.getByText(DUPLICATE_ERROR_TEXT)).toBeInTheDocument();
     expect(getDispatchedActionCalls(dispatchSpy, PaletteEntrySaved)).toEqual([]);
+  });
+
+  it('shows a default entry after Reset and does not bring a custom entry back on Save', () => {
+    const store: AppStore = newStore();
+
+    act(() => {
+      store.dispatch(new PaletteEntrySaved({
+        entry: newPaletteEntry({ name: CUSTOM_ENTRY_NAME, colour: NEW_ENTRY_COLOUR }),
+      }));
+    });
+    renderDialog(store);
+    fireEvent.click(screen.getByRole('button', { name: CUSTOM_NAME_PATTERN }));
+    clickButton(RESET_LABEL);
+    clickButton(RESET_CONFIRM_LABEL);
+
+    expect(screen.getByLabelText(NAME_LABEL)).toHaveValue('Cut');
+
+    clickButton(SAVE_LABEL);
+
+    expect(selectPaletteEntries(store.getState())).toEqual(DEFAULT_PALETTE.entries);
+  });
+
+  it('keeps a new unsaved entry in the form while the palette is unchanged', () => {
+    renderDialog(newStore());
+    clickButton(NEW_COLOUR_LABEL);
+
+    expect(screen.getByLabelText(NAME_LABEL)).toHaveValue('New colour');
   });
 
   it('saves an edited entry in place', () => {

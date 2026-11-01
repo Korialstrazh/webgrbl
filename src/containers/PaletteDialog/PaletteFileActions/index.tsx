@@ -16,9 +16,10 @@ import { useDispatch } from 'react-redux';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { PaletteExportRequested, PaletteResetRequested } from '../../../utils/states/palette.state';
+import type { PaletteFileActionsProps } from '../interfaces/PaletteFileActionsProps';
 import styles from './styles.module.scss';
 
-export const PaletteFileActions = (): ReactNode => {
+export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
 
@@ -30,7 +31,10 @@ export const PaletteFileActions = (): ReactNode => {
           okText={t(DEFAULT.PALETTE_RESET_OK)}
           cancelText={t(DEFAULT.PALETTE_RESET_CANCEL)}
           okButtonProps={{ danger: true }}
-          onConfirm={() => dispatch(new PaletteResetRequested())}
+          onConfirm={() => {
+            dispatch(new PaletteResetRequested());
+            onReset();
+          }}
         >
           <Button>{t(DEFAULT.PALETTE_RESET)}</Button>
         </Popconfirm>
