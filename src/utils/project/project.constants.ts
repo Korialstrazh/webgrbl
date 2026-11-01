@@ -29,6 +29,8 @@ export const DEFAULT_PROJECT_NAME_KEY = DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER;
 export const PROJECT_FILE_FORMAT = 'webgrbl-project';
 export const PROJECT_FILE_VERSION = 1;
 export const PROJECT_FILE_EXTENSION = '.webgrbl.json';
+/** Spaces per indent level, so a saved project file stays readable in a text editor. */
+export const PROJECT_FILE_JSON_INDENT = 2;
 
 /** Tolerance for float noise when a rotated corner is compared with a bed edge. */
 export const BED_EDGE_EPSILON_MM = 1e-9;

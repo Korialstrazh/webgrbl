@@ -1,7 +1,10 @@
+import 'fake-indexeddb/auto';
 import '@testing-library/jest-dom/vitest';
+import { DEXIE_DELETE_KEEPING_AUTO_OPEN } from './src/utils/dexie.constants';
 import { FALLBACK_LANGUAGE } from './src/utils/localization/constants';
 import './src/utils/localization/default.locales';
 import { i18n } from './src/utils/localization/localization';
+import { WEBGRBL_DATABASE } from './src/utils/project/webgrbl.database';
 import { installMatchMediaMock, resetMatchMediaMock } from './src/utils/test.support/match.media.mock';
 import { installResizeObserverMock } from './src/utils/test.support/resize.observer.mock';
 import { installSvgScreenMatrixMock } from './src/utils/test.support/svg.screen.matrix.mock';
@@ -33,4 +36,13 @@ installSvgScreenMatrixMock();
 afterEach(() => {
   localStorage.clear();
   installSvgScreenMatrixMock();
+});
+
+// fake-indexeddb keeps its databases for the whole test file, so a test that used the project database deletes it
+// afterwards and the next test starts empty. A test that never opened it leaves it untouched, which also keeps
+// tests with fake timers away from IndexedDB, whose fake runs on timers.
+afterEach(async () => {
+  if (WEBGRBL_DATABASE.isOpen()) {
+    await WEBGRBL_DATABASE.delete(DEXIE_DELETE_KEEPING_AUTO_OPEN);
+  }
 });
