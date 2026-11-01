@@ -296,6 +296,19 @@ describe(getToolpath.name, () => {
     expect(toolpath.layers[1]?.firstMoveIndex).toBe((toolpath.layers[0]?.lastMoveIndex ?? 0) + 1);
   });
 
+  it('reports the share of enabled layers done after each layer', () => {
+    const reportedProgress: number[] = [];
+
+    getToolpath(
+      [getRedSquare(0), getFilledBox(GREEN, 0, 1)],
+      [],
+      [getCutLayer(), getFillLayer(), { ...getShadingLayer(), enabled: false }],
+      (progress: number) => reportedProgress.push(progress),
+    );
+
+    expect(reportedProgress).toEqual([0.5, 1]);
+  });
+
   it('passes the warnings of unsupported objects through', () => {
     const warnings: Toolpath['warnings'] = [{ objectId: 'text-object', kind: SVG_UNSUPPORTED_KIND.TEXT }];
 

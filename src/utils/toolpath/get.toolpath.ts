@@ -23,6 +23,7 @@ import type { Toolpath } from './interfaces/Toolpath';
 import type { ToolpathLayerRange } from './interfaces/ToolpathLayerRange';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
 import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
+import type { ToolpathProgressListener } from './interfaces/ToolpathProgressListener';
 import { TOOLPATH_START_POINT } from './toolpath.constants';
 import { getLayerKey } from '../layers/get.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
@@ -46,7 +47,13 @@ const getLayerMoves = ({ layer, drawables, paintAreas, startPoint }: LayerMovesI
     ? getFillMoves({ fillLines: getFillLines({ paintAreas, layer }), layer, startPoint })
     : getLineMoves({ drawables, layer, startPoint }));
 
-export const getToolpath = (drawables: BedDrawable[], warnings: ObjectWarning[], layers: ProjectLayer[]): Toolpath => {
+/** onProgress hears the share of enabled layers done after each layer; the passes of a layer are not counted apart. */
+export const getToolpath = (
+  drawables: BedDrawable[],
+  warnings: ObjectWarning[],
+  layers: ProjectLayer[],
+  onProgress?: ToolpathProgressListener,
+): Toolpath => {
   const enabledLayers: ProjectLayer[] = getEnabledLayersInOrder(layers);
   const hasFillLayer: boolean = enabledLayers.some(
     (layer: ProjectLayer): boolean => layer.settings.mode === LAYER_MODE.FILL,
@@ -55,7 +62,7 @@ export const getToolpath = (drawables: BedDrawable[], warnings: ObjectWarning[],
   const moves: ToolpathMove[] = [];
   const layerRanges: ToolpathLayerRange[] = [];
 
-  for (const layer of enabledLayers) {
+  for (const [layerIndex, layer] of enabledLayers.entries()) {
     const firstMoveIndex: number = moves.length;
 
     const startPoint: GeometryPoint = moves.at(-1)?.to ?? TOOLPATH_START_POINT;
@@ -65,6 +72,8 @@ export const getToolpath = (drawables: BedDrawable[], warnings: ObjectWarning[],
     if (moves.length > firstMoveIndex) {
       layerRanges.push({ layerKey: getLayerKey(layer), firstMoveIndex, lastMoveIndex: moves.length - 1 });
     }
+
+    onProgress?.((layerIndex + 1) / enabledLayers.length);
   }
 
   return { moves, layers: layerRanges, warnings, bounds: getToolpathBounds(moves) };

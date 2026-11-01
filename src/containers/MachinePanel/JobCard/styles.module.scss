@@ -1,0 +1,28 @@
+.jobCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+
+  dt {
+    color: var(--color-text-muted);
+  }
+
+  dd {
+    margin: 0;
+    text-align: right;
+  }
+}
+
+.exportButtonWrapper {
+  display: block;
+}

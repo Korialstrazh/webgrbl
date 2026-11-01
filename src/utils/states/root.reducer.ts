@@ -21,6 +21,7 @@ import { PROJECT_DOCUMENT_STATE_NAME, projectDocumentReducer } from './project.d
 import { PROJECT_SELECTION_STATE_NAME, projectSelectionReducer } from './project.selection.state';
 import { PROJECT_STATE_NAME, projectReducer } from './project.state';
 import { TOAST_STATE_NAME, toastReducer } from './toast.state';
+import { TOOLPATH_STATE_NAME, toolpathReducer } from './toolpath.state';
 import { UI_OVERLAY_STATE_NAME, uiOverlayReducer } from './ui.overlay.state';
 
 export const rootReducer = combineReducers({
@@ -37,4 +38,5 @@ export const rootReducer = combineReducers({
   [TOAST_STATE_NAME]: toastReducer,
   [UI_OVERLAY_STATE_NAME]: uiOverlayReducer,
   [BED_GESTURE_STATE_NAME]: bedGestureReducer,
+  [TOOLPATH_STATE_NAME]: toolpathReducer,
 });

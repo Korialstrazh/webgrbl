@@ -11,14 +11,21 @@
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
 import type { SagaMiddleware } from 'redux-saga';
+import { BrowserToolpathWorkerClient } from '../toolpath/browser.toolpath.worker.client';
+import type { ToolpathWorkerClient } from '../toolpath/interfaces/ToolpathWorkerClient';
 import { newBrowserGrblControllerSagaDependencies } from './browser.grbl.controller.saga.dependencies';
 import { classActionToPlainObjectMiddleware } from './class.action.to.plain.object.middleware';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
 import { rootReducer } from './root.reducer';
 import { rootSaga } from './root.saga';
+import { TOOLPATH_STATE_NAME } from './toolpath.state';
 
 const SAGA_CRASHED_LOG_MESSAGE = 'A saga crashed and every saga has stopped';
+// A toolpath can hold millions of moves. The development checks walk the whole state on every action, which would
+// freeze the app, so they skip it; it is plain data written only by its reducer.
+const TOOLPATH_STATE_PATH = `${TOOLPATH_STATE_NAME}.toolpath`;
+const TOOLPATH_ACTION_PATH = 'payload.toolpath';
 
 // An error that escapes a saga ends the root saga and with it every other saga, so the app stays on screen but
 // stops reacting. This log says what the crash means instead of only printing the stack.
@@ -30,7 +37,13 @@ const logSagaCrash = (error: Error): void => {
 // The return type is left to inference on purpose: AppStore is derived from it.
 const configureAppStore = (sagaMiddleware: SagaMiddleware) => configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware()
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    immutableCheck: { ignoredPaths: [TOOLPATH_STATE_PATH] },
+    serializableCheck: {
+      ignoredPaths: [TOOLPATH_STATE_PATH],
+      ignoredActionPaths: [TOOLPATH_ACTION_PATH],
+    },
+  })
     .prepend(classActionToPlainObjectMiddleware)
     .concat(sagaMiddleware),
 });
@@ -41,14 +54,20 @@ export type AppDispatch = AppStore['dispatch'];
 
 export type AppRootState = ReturnType<AppStore['getState']>;
 
-/** Tests pass their own dependencies, such as a simulated laser and in-memory storage, instead of the browser's. */
+/**
+ * Tests pass their own dependencies, such as a simulated laser and in-memory storage, instead of the browser's, and a
+ * toolpath worker client that builds at once instead of in a Web Worker.
+ */
 export const newStore = (
   grblControllerSagaDependencies: GrblControllerSagaDependencies = newBrowserGrblControllerSagaDependencies(),
+  toolpathWorkerClient: ToolpathWorkerClient = new BrowserToolpathWorkerClient(),
 ): AppStore => {
   const sagaMiddleware: SagaMiddleware = createSagaMiddleware({ onError: logSagaCrash });
   const store: AppStore = configureAppStore(sagaMiddleware);
 
-  LIVE_STORE_TASK_REGISTRY.registerStoreTask(sagaMiddleware.run(rootSaga, grblControllerSagaDependencies));
+  LIVE_STORE_TASK_REGISTRY.registerStoreTask(
+    sagaMiddleware.run(rootSaga, grblControllerSagaDependencies, toolpathWorkerClient),
+  );
 
   return store;
 };

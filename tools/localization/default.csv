@@ -61,6 +61,14 @@ DESIGN_MATERIAL_DESCRIPTION;The material on the bed and its ready-made speed and
 DESIGN_MATERIAL_TITLE;Material
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Design
+GCODE_EXPORT_NEEDS_LAYER;Switch on a layer to export G-code.
+GCODE_EXPORT_NEEDS_PROFILE;Add a machine profile to export G-code.
+GCODE_WARNINGS_CANCEL;Cancel
+GCODE_WARNINGS_CONFIRM;Export anyway
+GCODE_WARNINGS_INTRO;Some content is left out of the job or burns differently than the bed shows:
+GCODE_WARNINGS_ITEM;{{objectName}}: {{warning}}
+GCODE_WARNINGS_LIST_LABEL;Toolpath warnings
+GCODE_WARNINGS_TITLE;Export G-code with warnings?
 GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again.
 GRBL_ALARM_10;Emergency stop asserted - clear it and reset.
 GRBL_ALARM_2;Soft limit alarm - the G-code target is beyond the machine travel. The position is kept and it is safe to unlock.
@@ -143,6 +151,12 @@ LAYERS_TOGGLE;Send {{name}} to the laser
 MACHINE_CONTROL_RESET;Reset
 MACHINE_CONTROL_STOP;Stop
 MACHINE_CONTROL_UNLOCK;Unlock
+MACHINE_JOB_ESTIMATE_LABEL;Estimate
+MACHINE_JOB_EXPORT_GCODE;Export G-code
+MACHINE_JOB_LAYER_COUNT_one;{{count}} layer
+MACHINE_JOB_LAYER_COUNT_other;{{count}} layers
+MACHINE_JOB_LAYERS_LABEL;Layers
+MACHINE_JOB_LAYERS_OFF;{{count}} off
 MACHINE_JOG_DOWN;Jog down
 MACHINE_JOG_DOWN_LEFT;Jog down and left
 MACHINE_JOG_DOWN_RIGHT;Jog down and right
@@ -230,6 +244,11 @@ MACHINE_STATUS_MACHINE_POSITION;Machine position
 MACHINE_STATUS_POWER;Power
 MACHINE_STATUS_TITLE;Status
 MACHINE_STATUS_WORK_POSITION;Work position
+OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visible part.
+OBJECT_WARNING_IMAGE;Images are not engraved yet.
+OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.
+OBJECT_WARNING_TEXT;Text is not converted to paths. In Inkscape use Path > Object to Path.
+OBJECT_WARNING_USE_LIMIT;The design repeats too many elements, so some repeated parts are left out.
 OBJECTS_DELETE;Delete {{name}}
 OBJECTS_EMPTY_HINT;No objects yet. Import an SVG or drop one on the bed.
 OBJECTS_FIELD_HEIGHT;Height
@@ -316,6 +335,7 @@ TOAST_SVG_IMPORT_FAILED_NOT_SVG;{{fileName}} was skipped: it is not a usable SVG
 TOAST_SVG_IMPORT_FAILED_TOO_LARGE;{{fileName}} was skipped: it is larger than 10 MB.
 TOAST_SVG_IMPORT_LIMIT_REACHED;A project holds at most {{limit}} objects. The remaining files were not imported.
 TOAST_SVG_LARGER_THAN_BED;{{fileName}} is larger than the bed. Scale it down to fit.
+TOAST_TOOLPATH_FAILED;The toolpath could not be generated. Try again, or simplify the design.
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
 TOP_BAR_AUTOSAVE_SAVED;Saved
 TOP_BAR_AUTOSAVE_SAVING;Saving…
@@ -332,7 +352,6 @@ TOP_BAR_PROJECT_MENU_OPEN_FILE;Open file…
 TOP_BAR_PROJECT_MENU_SAVE;Save
 TOP_BAR_PROJECT_MENU_SAVE_AS_FILE;Save as file
 TOP_BAR_PROJECT_MENU_SAVE_SHORTCUT;Ctrl+S
-TOP_BAR_PROJECT_MENU_SOON;soon
 TOP_BAR_PROJECT_NAME_INPUT;Project name
 TOP_BAR_PROJECT_PLACEHOLDER;Untitled project
 TOP_BAR_REDO;Redo

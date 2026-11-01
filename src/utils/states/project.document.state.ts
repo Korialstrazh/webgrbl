@@ -282,6 +282,13 @@ export const selectProjectLayers = createSelector(
   },
 );
 
+/** The layers that at least one object draws with and that are sent to the laser, in burn order. */
+export const selectEnabledProjectLayers = createSelector(
+  [selectProjectLayers],
+  (projectLayers: ProjectLayer[]): ProjectLayer[] =>
+    projectLayers.filter((layer: ProjectLayer): boolean => layer.enabled),
+);
+
 export const selectCanUndo = (state: RootState): boolean => !!state[PROJECT_DOCUMENT_STATE_NAME].past.length;
 
 export const selectCanRedo = (state: RootState): boolean => !!state[PROJECT_DOCUMENT_STATE_NAME].future.length;

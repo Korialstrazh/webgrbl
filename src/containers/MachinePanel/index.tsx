@@ -21,7 +21,7 @@ import { MachineResetUnlock } from './MachineResetUnlock';
 import { MachineStateReadout } from './MachineStateReadout';
 import { MoveCard } from './MoveCard';
 import { PreflightCard } from './PreflightCard';
-import { StartJobCard } from './StartJobCard';
+import { JobCard } from './JobCard';
 import styles from './styles.module.scss';
 
 export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
@@ -42,7 +42,7 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
         <MoveCard />
         <LaserCard />
         <PreflightCard />
-        <StartJobCard />
+        <JobCard />
       </div>
       {isWide && (
         <div className={styles.stopArea}>

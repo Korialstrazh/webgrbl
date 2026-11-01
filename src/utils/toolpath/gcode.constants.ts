@@ -32,3 +32,7 @@ export const GCODE_ORIGIN_LABEL = 'origin ';
 export const GCODE_HEADER_FIELD_SEPARATOR = ', ';
 export const FULL_POWER_PERCENT = 100;
 export const NO_POWER_PERCENT = 0;
+export const GCODE_FILE_EXTENSION = '.gcode';
+export const GCODE_MIME_TYPE = 'text/plain';
+/** The smallest S value that can stand for full power. */
+export const GCODE_S_VALUE_MAX_MIN = 1;
