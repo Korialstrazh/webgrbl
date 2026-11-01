@@ -15,6 +15,8 @@ import { GRBL_CONSOLE_STATE_NAME, grblConsoleReducer } from './grbl.console.stat
 import { LASER_POINTER_STATE_NAME, laserPointerReducer } from './laser.pointer.state';
 import { MACHINE_PROFILE_STATE_NAME, machineProfileReducer } from './machine.profile.state';
 import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
+import { PROJECT_DOCUMENT_STATE_NAME, projectDocumentReducer } from './project.document.state';
+import { PROJECT_SELECTION_STATE_NAME, projectSelectionReducer } from './project.selection.state';
 import { TOAST_STATE_NAME, toastReducer } from './toast.state';
 import { UI_OVERLAY_STATE_NAME, uiOverlayReducer } from './ui.overlay.state';
 
@@ -24,6 +26,8 @@ export const rootReducer = combineReducers({
   [MACHINE_STATUS_STATE_NAME]: machineStatusReducer,
   [MACHINE_PROFILE_STATE_NAME]: machineProfileReducer,
   [LASER_POINTER_STATE_NAME]: laserPointerReducer,
+  [PROJECT_DOCUMENT_STATE_NAME]: projectDocumentReducer,
+  [PROJECT_SELECTION_STATE_NAME]: projectSelectionReducer,
   [GRBL_CONSOLE_STATE_NAME]: grblConsoleReducer,
   [TOAST_STATE_NAME]: toastReducer,
   [UI_OVERLAY_STATE_NAME]: uiOverlayReducer,
