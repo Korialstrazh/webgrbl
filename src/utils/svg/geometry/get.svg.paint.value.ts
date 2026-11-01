@@ -1,5 +1,7 @@
 /**
- * Reads a fill or stroke value: a lowercase #rrggbb, none or a url(#id) reference; anything else falls back.
+ * Reads a fill or stroke value into none, a colour with its alpha, or a url(#id) gradient reference. An unset
+ * value is inherited; a value that cannot be read, and transparent, is no paint. A reference to a missing gradient
+ * uses its fallback colour, if any.
  *
  * @author michael.morosov
  *
@@ -8,21 +10,42 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { getNormalizedColour } from '../../palette/normalize.colour';
-import { SVG_PAINT_NONE, SVG_PAINT_URL_PATTERN } from './svg.geometry.constants';
+import type { SvgPaintContext } from './interfaces/SvgPaintContext';
+import type { SvgResolvedPaint } from './interfaces/SvgResolvedPaint';
+import { SVG_CURRENT_COLOUR_KEYWORD, SVG_DEFAULT_OPACITY, SVG_PAINT_NONE, SVG_PAINT_URL_PATTERN } from './svg.geometry.constants';
+import { getParsedColour } from '../../palette/get.parsed.colour';
+import type { ParsedColour } from '../../palette/interfaces/ParsedColour';
 
-export const getSvgPaintValue = (value: string | undefined, fallback: string): string => {
-  if (!value) {
-    return fallback;
+const NO_PAINT: SvgResolvedPaint = { value: SVG_PAINT_NONE, alpha: SVG_DEFAULT_OPACITY };
+
+const getColourPaint = (colourText: string, context: SvgPaintContext): SvgResolvedPaint => {
+  if (colourText.toLowerCase() === SVG_CURRENT_COLOUR_KEYWORD) {
+    return { value: context.currentColour, alpha: SVG_DEFAULT_OPACITY };
   }
 
-  const trimmedValue: string = value.trim();
+  const parsedColour: ParsedColour | undefined = getParsedColour(colourText);
 
-  if (trimmedValue.toLowerCase() === SVG_PAINT_NONE) {
-    return SVG_PAINT_NONE;
+  return parsedColour && parsedColour.alpha > 0 ? { value: parsedColour.colour, alpha: parsedColour.alpha } : NO_PAINT;
+};
+
+export const getSvgPaintValue = (value: string | undefined, context: SvgPaintContext): SvgResolvedPaint => {
+  const trimmedValue: string = value?.trim() ?? '';
+
+  if (!trimmedValue) {
+    return context.parentPaint;
   }
 
   const urlMatch: RegExpMatchArray | null = trimmedValue.match(SVG_PAINT_URL_PATTERN);
 
-  return urlMatch ? urlMatch[0] : (getNormalizedColour(trimmedValue) ?? fallback);
+  if (!urlMatch) {
+    return getColourPaint(trimmedValue, context);
+  }
+
+  const fallbackText: string = trimmedValue.slice(urlMatch[0].length).trim();
+
+  if (context.gradientIds.has(urlMatch[1] ?? '')) {
+    return { value: urlMatch[0], alpha: SVG_DEFAULT_OPACITY };
+  }
+
+  return fallbackText ? getColourPaint(fallbackText, context) : NO_PAINT;
 };

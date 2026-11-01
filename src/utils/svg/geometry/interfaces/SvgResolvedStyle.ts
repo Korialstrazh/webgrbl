@@ -13,6 +13,12 @@ export interface SvgResolvedStyle {
   fill: string;
   /** Lowercase #rrggbb, none, or a url(#id) reference. */
   stroke: string;
+  /** Alpha of the fill colour itself (for example from rgba), inherited with the fill. */
+  fillAlpha: number;
+  /** Alpha of the stroke colour itself, inherited with the stroke. */
+  strokeAlpha: number;
+  /** The color property as lowercase #rrggbb, inherited; what currentColor means. */
+  colour: string;
   /** Stroke width in user units. */
   strokeWidth: number;
   /** Opacity of this element times the opacity of all its ancestors. */

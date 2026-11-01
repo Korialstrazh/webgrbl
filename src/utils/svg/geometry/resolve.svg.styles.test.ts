@@ -8,6 +8,7 @@ const BLACK = '#000000';
 const NONE = 'none';
 const CHILD_ID = 'child';
 const WIDE_STROKE_WIDTH = 4;
+const MM_STROKE_WIDTH_USER_UNITS = (0.5 * 96) / 25.4;
 
 const getStyleOfChild = (content: string): SvgResolvedStyle | undefined => {
   const svgDocument: Document = new DOMParser().parseFromString(
@@ -65,5 +66,15 @@ describe(getResolvedSvgStyles.name, () => {
     );
 
     expect(style?.fill).toBe(BLUE);
+  });
+
+  it('converts a stroke width in absolute units to user units at 96 px per inch', () => {
+    const style: SvgResolvedStyle | undefined = getStyleOfChild(`<rect id="${CHILD_ID}" stroke-width="0.5mm"/>`);
+
+    expect(style?.strokeWidth).toBeCloseTo(MM_STROKE_WIDTH_USER_UNITS);
+  });
+
+  it('keeps a stroke width of 0', () => {
+    expect(getStyleOfChild(`<rect id="${CHILD_ID}" stroke-width="0"/>`)?.strokeWidth).toBe(0);
   });
 });

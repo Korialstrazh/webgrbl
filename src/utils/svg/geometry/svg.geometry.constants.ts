@@ -27,7 +27,6 @@ export type SvgGradientUnits = (typeof SVG_GRADIENT_UNITS)[keyof typeof SVG_GRAD
 export const SVG_LINEAR_GRADIENT_ELEMENT_NAME = 'linearGradient';
 export const SVG_RADIAL_GRADIENT_ELEMENT_NAME = 'radialGradient';
 export const SVG_STOP_ELEMENT_NAME = 'stop';
-export const SVG_USE_ELEMENT_NAME = 'use';
 
 export const SVG_DRAWN_ELEMENT = {
   PATH: 'path',
@@ -70,13 +69,14 @@ export const SVG_PROPERTY = {
   VISIBILITY: 'visibility',
   STOP_COLOR: 'stop-color',
   STOP_OPACITY: 'stop-opacity',
+  COLOR: 'color',
 } as const;
 
 export const SVG_PAINT_NONE = 'none';
 export const SVG_DISPLAY_NONE = 'none';
 export const SVG_VISIBILITY_HIDDEN = 'hidden';
 export const SVG_VISIBILITY_VISIBLE = 'visible';
-export const SVG_INHERIT_KEYWORD = 'inherit';
+export const SVG_CURRENT_COLOUR_KEYWORD = 'currentcolor';
 export const SVG_DEFAULT_FILL = '#000000';
 export const SVG_DEFAULT_STROKE_WIDTH = 1;
 export const SVG_DEFAULT_OPACITY = 1;
@@ -107,6 +107,9 @@ export const SVG_ROOT_DEFAULT_STYLE: SvgResolvedStyle = {
   stroke: SVG_PAINT_NONE,
   strokeWidth: SVG_DEFAULT_STROKE_WIDTH,
   opacity: SVG_DEFAULT_OPACITY,
+  fillAlpha: SVG_DEFAULT_OPACITY,
+  strokeAlpha: SVG_DEFAULT_OPACITY,
+  colour: SVG_DEFAULT_FILL,
   fillOpacity: SVG_DEFAULT_OPACITY,
   strokeOpacity: SVG_DEFAULT_OPACITY,
   isDisplayed: true,

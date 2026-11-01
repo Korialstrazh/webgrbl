@@ -15,3 +15,12 @@ export const SHADING_LAYER_COLOUR = 'shading';
 export const GREY_AXIS_TOLERANCE = 10;
 
 export const COLOUR_CHANNEL_COUNT = 3;
+
+/** Sort ranks for new layers: colours of the palette first, unknown colours after them. */
+export const PALETTE_COLOUR_RANK = 0;
+export const UNKNOWN_COLOUR_RANK = 1;
+/** Within one kind of colour, fill layers burn before line layers. */
+export const FILL_MODE_RANK = 0;
+export const LINE_MODE_RANK = 1;
+/** The order value before the first layer, so the first layer gets 0. */
+export const NO_LAYER_ORDER = -1;

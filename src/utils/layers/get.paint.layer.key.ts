@@ -14,10 +14,15 @@ import { SHADING_LAYER_COLOUR } from './layer.constants';
 import type { SvgGradientStop } from '../svg/geometry/interfaces/SvgGradientStop';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
 
-const isGreyStop = (stop: SvgGradientStop): boolean => isGreyColour(stop.colour);
+const getFirstColourStop = (stops: SvgGradientStop[]): SvgGradientStop | undefined =>
+  stops.find((stop: SvgGradientStop): boolean => !isGreyColour(stop.colour));
 
 export const getPaintLayerKey = (paint: SvgPaint): string => {
-  const isGreyPaint: boolean = paint.gradient ? paint.gradient.stops.every(isGreyStop) : isGreyColour(paint.colour);
+  const colourStop: SvgGradientStop | undefined = paint.gradient ? getFirstColourStop(paint.gradient.stops) : undefined;
 
-  return isGreyPaint ? SHADING_LAYER_COLOUR : paint.colour;
+  if (colourStop) {
+    return colourStop.colour;
+  }
+
+  return isGreyColour(paint.colour) ? SHADING_LAYER_COLOUR : paint.colour;
 };

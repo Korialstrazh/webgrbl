@@ -88,10 +88,15 @@ const getElementPaints = (
   const fillPaint: SvgPaint | undefined =
     element.localName === SVG_DRAWN_ELEMENT.LINE
       ? undefined
-      : getPaintOfValue(style.fill, style.opacity * style.fillOpacity, elementsById, resolvedStyles);
+      : getPaintOfValue(style.fill, style.opacity * style.fillOpacity * style.fillAlpha, elementsById, resolvedStyles);
   const strokePaint: SvgPaint | undefined =
     style.strokeWidth > 0
-      ? getPaintOfValue(style.stroke, style.opacity * style.strokeOpacity, elementsById, resolvedStyles)
+      ? getPaintOfValue(
+        style.stroke,
+        style.opacity * style.strokeOpacity * style.strokeAlpha,
+        elementsById,
+        resolvedStyles,
+      )
       : undefined;
 
   return [fillPaint, strokePaint].filter((paint: SvgPaint | undefined): paint is SvgPaint => Boolean(paint));

@@ -7,6 +7,7 @@ import {
   DEFAULT_PALETTE,
   DEFAULT_SCORE_ENTRY,
   DEFAULT_SHADING_ENTRY,
+  LAYER_MODE,
 } from '../palette/palette.constants';
 import type { ProjectLayer } from './interfaces/ProjectLayer';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
@@ -17,6 +18,7 @@ const BLACK = '#000000';
 const WHITE = '#ffffff';
 const GREY = '#808080';
 const ORANGE = '#ff8800';
+const NEAR_FILL_GREEN = '#00ff00';
 const CHANGED_SPEED = 777;
 
 const getPaint = (colour: string, gradient?: SvgGreyGradient): SvgPaint => ({ colour, opacity: 1, gradient });
@@ -136,6 +138,27 @@ describe(getDerivedLayers.name, () => {
     );
 
     expect(getKeys(layers)).toEqual([DEFAULT_SCORE_ENTRY.colour, ORANGE]);
+  });
+
+  it('maps a gradient that mixes grey and colour stops to its first non-grey stop', () => {
+    const layers: ProjectLayer[] = getDerivedLayers(
+      [[getPaint(BLACK, getLinearGradient(BLACK, DEFAULT_CUT_ENTRY.colour))]],
+      DEFAULT_PALETTE,
+      [],
+    );
+
+    expect(getKeys(layers)).toEqual([DEFAULT_CUT_ENTRY.colour]);
+  });
+
+  it('places an unknown colour after the palette colours even when it is a fill', () => {
+    const layers: ProjectLayer[] = getDerivedLayers(
+      [[getPaint(DEFAULT_CUT_ENTRY.colour), getPaint(DEFAULT_SCORE_ENTRY.colour), getPaint(NEAR_FILL_GREEN)]],
+      DEFAULT_PALETTE,
+      [],
+    );
+
+    expect(getKeys(layers)).toEqual([DEFAULT_CUT_ENTRY.colour, DEFAULT_SCORE_ENTRY.colour, NEAR_FILL_GREEN]);
+    expect(layers[2]?.settings.mode).toBe(LAYER_MODE.FILL);
   });
 
   it('gives no layers for no paints', () => {

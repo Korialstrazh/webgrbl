@@ -9,6 +9,7 @@ const BLUE = '#0000ff';
 const BLACK = '#000000';
 const WHITE = '#ffffff';
 const GREEN = '#00ff00';
+const HALF_OPACITY = 0.5;
 
 const getSvgText = (content: string): string =>
   `<svg xmlns="${SVG_NAMESPACE_URI}" xmlns:xlink="${XLINK_NAMESPACE_URI}" width="10mm" height="10mm">${content}</svg>`;
@@ -126,6 +127,54 @@ describe(getSvgPaints.name, () => {
 
   it('gives no paint for a missing gradient', () => {
     expect(getSvgPaints(getSvgText('<rect fill="url(#missing)" width="1" height="1"/>'))).toEqual([]);
+  });
+
+  it.each(['transparent', 'bogus', 'hsl(nonsense)'])('gives no paint for the fill %s', (fillValue: string) => {
+    const paints: SvgPaint[] = getSvgPaints(getSvgText(`<g fill="${RED}"><rect fill="${fillValue}"/></g>`));
+
+    expect(paints).toEqual([]);
+  });
+
+  it.each(['rgba(255,0,0,0.5)', 'hsla(0,100%,50%,0.5)', '#ff000080'])(
+    'folds the alpha of %s into the opacity',
+    (fillValue: string) => {
+      const paints: SvgPaint[] = getSvgPaints(getSvgText(`<rect fill="${fillValue}" width="1" height="1"/>`));
+
+      expect(paints).toHaveLength(1);
+      expect(paints[0]?.colour).toBe(RED);
+      expect(paints[0]?.opacity).toBeCloseTo(HALF_OPACITY, 2);
+    },
+  );
+
+  it.each(['rgb(100%,0%,0%)', 'hsl(0,100%,50%)'])('reads the fill %s as red', (fillValue: string) => {
+    expect(getColours(getSvgPaints(getSvgText(`<rect fill="${fillValue}" width="1" height="1"/>`)))).toEqual([RED]);
+  });
+
+  it('resolves currentColor from an inherited color property', () => {
+    const paints: SvgPaint[] = getSvgPaints(
+      getSvgText(`<g color="${RED}" fill="none"><rect stroke="currentColor" width="1" height="1"/></g>`),
+    );
+
+    expect(getColours(paints)).toEqual([RED]);
+  });
+
+  it('resolves currentColor set on the root svg element, as icon sets do', () => {
+    const svgText: string = [
+      `<svg xmlns="${SVG_NAMESPACE_URI}" width="10" height="10"`,
+      ` color="${BLUE}" fill="none" stroke="currentColor"><path d="M0 0L1 1"/></svg>`,
+    ].join('');
+
+    expect(getColours(getSvgPaints(svgText))).toEqual([BLUE]);
+  });
+
+  it('uses black for currentColor when no color is set', () => {
+    expect(getColours(getSvgPaints(getSvgText('<rect fill="currentColor" width="1" height="1"/>')))).toEqual([BLACK]);
+  });
+
+  it('uses the fallback colour of a paint whose reference is missing', () => {
+    const paints: SvgPaint[] = getSvgPaints(getSvgText(`<rect fill="url(#missing) ${RED}" width="1" height="1"/>`));
+
+    expect(getColours(paints)).toEqual([RED]);
   });
 
   it('gives no paints for text that is not an svg', () => {
