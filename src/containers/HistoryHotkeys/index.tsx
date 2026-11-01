@@ -13,7 +13,7 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { KEYDOWN_EVENT_NAME } from '../../utils/browser/browser.events.constants';
-import { isTextEntryTarget } from '../../utils/browser/is.text.entry.target';
+import { canShortcutAct } from '../../utils/browser/can.shortcut.act';
 import { selectIsBedGestureActive } from '../../utils/states/bed.gesture.state';
 import type { AppRootState, AppStore } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested } from '../../utils/states/project.document.state';
@@ -24,8 +24,7 @@ import { getHistoryHotkeyAction } from './get.history.hotkey.action';
 // A drag or handle gesture commits onto the document as it is when the pointer comes up, so a history step taken
 // in the middle of it would be overwritten or lost.
 const canHistoryHotkeyAct = (keyboardEvent: KeyboardEvent, state: AppRootState): boolean =>
-  !keyboardEvent.isComposing && !isTextEntryTarget(keyboardEvent.target) && !selectIsAnyOverlayOpen(state)
-  && !selectIsBedGestureActive(state);
+  canShortcutAct(keyboardEvent, selectIsAnyOverlayOpen(state)) && !selectIsBedGestureActive(state);
 
 export const HistoryHotkeys = (): ReactNode => {
   const store: AppStore = useAppStore();

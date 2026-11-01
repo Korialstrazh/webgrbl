@@ -12,13 +12,13 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { KEYDOWN_EVENT_NAME, SAVE_KEY } from '../../utils/browser/browser.events.constants';
+import { hasCommandModifier } from '../../utils/browser/has.command.modifier';
 import type { AppStore } from '../../utils/states/new.store';
 import { ProjectSaveRequested } from '../../utils/states/project.state';
 import { useAppStore } from '../../utils/states/use.app.store';
 
 const isSavePress = (keyboardEvent: KeyboardEvent): boolean =>
-  (keyboardEvent.ctrlKey || keyboardEvent.metaKey)
-  && !keyboardEvent.altKey
+  hasCommandModifier(keyboardEvent)
   && !keyboardEvent.shiftKey
   && !keyboardEvent.isComposing
   && keyboardEvent.key.toLowerCase() === SAVE_KEY;
