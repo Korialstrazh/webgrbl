@@ -13,7 +13,7 @@ import type { DragEvent } from 'react';
 export interface SvgFileDropArea {
   /** Whether a drag is over the area, so it shows the drop highlight. */
   isDropTarget: boolean;
-  /** Accepts the drag, which a browser needs before it allows a drop, and shows the highlight. */
+  /** Accepts a drag of files, which a browser needs before it allows a drop, and shows the highlight. */
   handleDragOver: (dragEvent: DragEvent<HTMLElement>) => void;
   /** Hides the highlight once the drag leaves the area, not when it only moves onto a child of it. */
   handleDragLeave: (dragEvent: DragEvent<HTMLElement>) => void;

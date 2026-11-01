@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BedPanel } from '.';
+import { DATA_TRANSFER_FILES_TYPE } from '../../utils/browser/browser.events.constants';
 import { GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
 import { getResolvedGrblPositions } from '../../utils/grbl/grbl.position.resolver';
 import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
@@ -54,6 +55,9 @@ const POINTER_ID = 1;
 const DRAG_START_X = 100;
 const DRAG_START_Y = 100;
 const DRAG_RIGHT_MM = 20;
+
+const FILE_DRAG = { dataTransfer: { types: [DATA_TRANSFER_FILES_TYPE] } };
+const TEXT_DRAG = { dataTransfer: { types: ['text/plain'] } };
 
 const newPhotoFile = (): File => new File(['png'], 'photo.png', { type: 'image/png' });
 
@@ -226,16 +230,25 @@ describe(BedPanel.name, () => {
 
     const dropArea: HTMLElement = screen.getByTestId(BED_DROP_AREA_TEST_ID);
 
-    expect(fireEvent.dragOver(dropArea)).toBe(false);
+    expect(fireEvent.dragOver(dropArea, FILE_DRAG)).toBe(false);
     expect(dropArea).toHaveAttribute(DROP_TARGET_ATTRIBUTE, TRUE_TEXT);
 
     fireEvent.dragLeave(dropArea);
 
     expect(dropArea).toHaveAttribute(DROP_TARGET_ATTRIBUTE, FALSE_TEXT);
 
-    fireEvent.dragOver(dropArea);
+    fireEvent.dragOver(dropArea, FILE_DRAG);
     fireEvent.drop(dropArea, { dataTransfer: { files: [] } });
 
+    expect(dropArea).toHaveAttribute(DROP_TARGET_ATTRIBUTE, FALSE_TEXT);
+  });
+
+  it('shows no highlight and does not accept a drag of text', () => {
+    renderPanel(newStore());
+
+    const dropArea: HTMLElement = screen.getByTestId(BED_DROP_AREA_TEST_ID);
+
+    expect(fireEvent.dragOver(dropArea, TEXT_DRAG)).toBe(true);
     expect(dropArea).toHaveAttribute(DROP_TARGET_ATTRIBUTE, FALSE_TEXT);
   });
 
@@ -244,7 +257,7 @@ describe(BedPanel.name, () => {
 
     const dropArea: HTMLElement = screen.getByTestId(BED_DROP_AREA_TEST_ID);
 
-    fireEvent.dragOver(dropArea);
+    fireEvent.dragOver(dropArea, FILE_DRAG);
     // jsdom has no DragEvent, so the leave is sent as the mouse event it is based on, which carries relatedTarget.
     fireEvent(dropArea, new MouseEvent('dragleave', {
       bubbles: true,

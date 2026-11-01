@@ -29,6 +29,8 @@ installResizeObserverMock();
 installSvgScreenMatrixMock();
 
 // jsdom keeps localStorage for the whole test file, and stores persist what sagas write, so every test starts empty.
+// A screen matrix a test set is dropped the same way, so it cannot leak into the next test.
 afterEach(() => {
   localStorage.clear();
+  installSvgScreenMatrixMock();
 });
