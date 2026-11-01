@@ -10,8 +10,10 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.profile.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../utils/states/machine.status.state';
+import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
@@ -28,6 +30,7 @@ const DESIGN_VIEW_LABEL = 'Design';
 const PROFILE_WIDTH_MM = 300;
 const PROFILE_HEIGHT_MM = 200;
 const PROFILE_BED_LABEL = 'Machine bed, 300 by 200 mm';
+const OBJECT_NAME = 'Logo';
 
 const renderPanel = (store: AppStore): void => {
   render(
@@ -118,5 +121,16 @@ describe(BedPanel.name, () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Toolpath', hidden: true }));
 
     expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('draws the project objects on the bed', () => {
+    const store: AppStore = newStore();
+
+    renderPanel(store);
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [newProjectObject({ name: OBJECT_NAME })] } }));
+    });
+
+    expect(screen.getByRole('img', { name: OBJECT_NAME })).toBeInTheDocument();
   });
 });

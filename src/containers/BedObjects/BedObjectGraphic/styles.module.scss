@@ -1,0 +1,31 @@
+.bedObject {
+  cursor: move;
+}
+
+.outsideOutline,
+.selectionBox,
+.selectionHandle {
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.outsideOutline,
+.selectionBox {
+  fill: none;
+}
+
+.outsideOutline {
+  stroke: var(--color-danger);
+  stroke-dasharray: 3 3;
+}
+
+.selectionBox {
+  stroke: var(--color-accent);
+  stroke-dasharray: 4 2;
+}
+
+.selectionHandle {
+  fill: var(--color-bed-surface);
+  stroke: var(--color-accent);
+}

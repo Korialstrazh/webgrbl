@@ -9,6 +9,17 @@
   fill: var(--color-bed-surface);
 }
 
+// Presses go through the drawing to the objects layer, which handles them.
+.surface,
+.minorGrid,
+.majorGrid,
+.rulerLabel,
+.workOrigin,
+.head,
+.placeholder {
+  pointer-events: none;
+}
+
 .minorGrid,
 .majorGrid,
 .head path {

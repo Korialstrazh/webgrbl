@@ -1,5 +1,5 @@
 /**
- * The bed toolbar: tool labels and the view modes (Design is the one shown as selected).
+ * The bed toolbar: the editing tools, the tool labels and the view modes (Design is the one shown as selected).
  *
  * @author michael.morosov
  *
@@ -10,6 +10,14 @@
  */
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
+
+/** The editing tools of the bed; Select is the default. */
+export const BED_TOOL = {
+  SELECT: 'select',
+  MOVE: 'move',
+} as const;
+
+export type BedTool = typeof BED_TOOL[keyof typeof BED_TOOL];
 
 export const BED_VIEW_MODE_DESIGN = 'design';
 const BED_VIEW_MODE_TOOLPATH = 'toolpath';

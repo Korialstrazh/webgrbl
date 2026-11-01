@@ -1,5 +1,6 @@
 /**
- * The central region: a toolbar (not built yet) above the bed drawn to scale; the toasts are anchored to its top right.
+ * The central region: a toolbar (not built yet) above the bed drawn to scale with the project objects on it; the toasts
+ * are anchored to its top right.
  * Its element is the host that dialogs and drawers render into.
  *
  * @author michael.morosov
@@ -24,9 +25,15 @@ import { selectActiveMachineProfile } from '../../utils/states/machine.profile.s
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { BedView } from '../../views/BedView';
 import { ComingSoon } from '../../views/ComingSoon';
+import { BedObjects } from '../BedObjects';
 import { ToastStack } from '../ToastStack';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
-import { BED_TOOL_LABEL_KEYS, BED_VIEW_MODE_DESIGN, BED_VIEW_MODE_OPTION_KEYS } from './bed.toolbar.constants';
+import {
+  BED_TOOL,
+  BED_TOOL_LABEL_KEYS,
+  BED_VIEW_MODE_DESIGN,
+  BED_VIEW_MODE_OPTION_KEYS,
+} from './bed.toolbar.constants';
 import type { BedPanelProps } from './interfaces/BedPanelProps';
 import type { BedViewModeOption } from './interfaces/BedViewModeOption';
 import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
@@ -70,7 +77,9 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           headPosition={status?.machinePosition}
           workOriginPosition={status?.workCoordinateOffset}
           placeholderLabel={placeholderKey && t(placeholderKey)}
-        />
+        >
+          <BedObjects dimensions={dimensions} activeTool={BED_TOOL.SELECT} />
+        </BedView>
       </div>
       <ToastStack isWide={isWide} />
     </Layout.Content>

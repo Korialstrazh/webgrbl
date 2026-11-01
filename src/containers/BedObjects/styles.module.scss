@@ -1,0 +1,10 @@
+// Touch drags move objects instead of scrolling or zooming the page.
+.bedObjects {
+  touch-action: none;
+}
+
+// Invisible, but it takes the presses on empty bed that clear the selection.
+.surface {
+  fill: transparent;
+  pointer-events: all;
+}

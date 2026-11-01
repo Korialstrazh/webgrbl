@@ -1,6 +1,7 @@
 /**
- * The machine bed drawn to scale: grid, rulers, the laser-head crosshair and the work zero marker. A head or work zero
- * outside the bed is drawn at the nearest bed edge in a dashed outside style.
+ * The machine bed drawn to scale: grid, rulers, the content passed as children (the project objects), the laser-head
+ * crosshair and the work zero marker. A head or work zero outside the bed is drawn at the nearest bed edge in a dashed
+ * outside style. Only the children take pointer presses; the rest of the drawing lets them through.
  *
  * @author michael.morosov
  *
@@ -80,7 +81,7 @@ const getScreenTransform = (xMm: number, yMm: number, heightMm: number): string 
 
 export const BedView = (props: BedViewProps): ReactNode => {
   const { t } = useTranslation();
-  const { dimensions, headPosition, workOriginPosition, placeholderLabel } = props;
+  const { dimensions, headPosition, workOriginPosition, placeholderLabel, children } = props;
   const { widthMm, heightMm } = dimensions;
   const minorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, false), [widthMm, heightMm]);
   const majorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, true), [widthMm, heightMm]);
@@ -127,6 +128,7 @@ export const BedView = (props: BedViewProps): ReactNode => {
           {positionMm}
         </text>
       ))}
+      <g>{children}</g>
       {workOriginMarker && (
         <circle
           className={getMarkerClassName(styles.workOrigin, workOriginMarker)}

@@ -12,6 +12,7 @@ const WIDTH_LABEL_TEXT = '400';
 const HEIGHT_LABEL_TEXT = '300';
 const OUTSIDE_WORK_ORIGIN = { x: -50, y: 20, z: 0 };
 const OUTSIDE_SCREEN_TRANSFORM = 'translate(0 280)';
+const CHILD_TEST_ID = 'bed-child';
 
 const renderBed = (overrides: Partial<ComponentProps<typeof BedView>>): HTMLElement => {
   const { container } = render(
@@ -111,5 +112,22 @@ describe(BedView.name, () => {
     renderBed({ workOriginPosition: HEAD_POSITION });
 
     expect(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)).toHaveAttribute('data-outside-bed', 'false');
+  });
+
+  it('draws its children above the grid and below the head and work zero markers', () => {
+    const container: HTMLElement = renderBed({
+      headPosition: HEAD_POSITION,
+      workOriginPosition: HEAD_POSITION,
+      children: <rect data-testid={CHILD_TEST_ID} />,
+    });
+    const childElement: HTMLElement = screen.getByTestId(CHILD_TEST_ID);
+    const gridElements: Element[] = [...container.querySelectorAll('svg > path')];
+    const lastGridElement: Element | undefined = gridElements[gridElements.length - 1];
+
+    expect(lastGridElement?.compareDocumentPosition(childElement)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(childElement.compareDocumentPosition(screen.getByTestId(BED_WORK_ORIGIN_TEST_ID)))
+      .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(childElement.compareDocumentPosition(screen.getByTestId(BED_HEAD_TEST_ID)))
+      .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 });
