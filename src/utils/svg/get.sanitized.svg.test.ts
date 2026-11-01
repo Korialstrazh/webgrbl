@@ -233,4 +233,28 @@ describe(getSanitizedSvg.name, () => {
     expect(result.removedContentKinds).toEqual([]);
     expect(result.svgText).toContain('id="a\\b"');
   });
+
+  it('removes animation values that carry remote or escaped urls and reports style-url', () => {
+    const payloads = [
+      '<set attributeName="cursor" to="url(https://e.x/c.png), auto"/>',
+      '<animate attributeName="fill" values="url(https://e.x/p.svg#g);red"/>',
+      '<set attributeName="mask" to="url(https://e.x/m.png)"/>',
+      '<set attributeName="fill" to="u\\72l(https://e.x/a)"/>',
+      '<animate attributeName="fill" from="red" by="url(https://e.x/a)"/>',
+    ];
+
+    for (const payload of payloads) {
+      const result = getSanitized(`<rect>${payload}</rect>`);
+
+      expect(result.svgText).not.toContain('e.x');
+      expect(result.removedContentKinds).toEqual([SVG_REMOVED_CONTENT_KIND.STYLE_URL]);
+    }
+  });
+
+  it('keeps animation values with same-document urls', () => {
+    const result = getSanitized('<rect><animate attributeName="fill" values="url(#g);red"/></rect>');
+
+    expect(result.svgText).toContain('values="url(#g);red"');
+    expect(result.removedContentKinds).toEqual([]);
+  });
 });

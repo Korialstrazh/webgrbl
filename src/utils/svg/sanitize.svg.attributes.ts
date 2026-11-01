@@ -34,8 +34,12 @@ const hasUnsafeAttributeValue = (attribute: Attr): boolean =>
 const hasUnsafeHref = (attribute: Attr): boolean =>
   attribute.localName.toLowerCase() === SVG_HREF_ATTRIBUTE_NAME && !isSafeSvgHref(attribute.value);
 
+const hasCssValueName = (attribute: Attr): boolean =>
+  SVG_CSS_VALUE_ATTRIBUTE_NAMES.includes(attribute.name.toLowerCase()) ||
+  SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES.includes(attribute.name.toLowerCase());
+
 const hasRemoteCssValue = (attribute: Attr): boolean =>
-  SVG_CSS_VALUE_ATTRIBUTE_NAMES.includes(attribute.name.toLowerCase()) && hasRemoteStyleReference(attribute.value);
+  hasCssValueName(attribute) && hasRemoteStyleReference(attribute.value);
 
 const isSilentlyRemoved = (attribute: Attr): boolean =>
   hasUnsafeAttributeValue(attribute) || isEditorDataAttribute(attribute);
