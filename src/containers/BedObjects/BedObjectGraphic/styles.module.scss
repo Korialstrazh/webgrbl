@@ -4,15 +4,17 @@
 
 .outsideOutline,
 .selectionBox,
-.selectionHandle {
+.selectionHandle,
+.rotateArm {
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
-  pointer-events: none;
 }
 
 .outsideOutline,
-.selectionBox {
+.selectionBox,
+.rotateArm {
   fill: none;
+  pointer-events: none;
 }
 
 .outsideOutline {
@@ -20,12 +22,32 @@
   stroke-dasharray: 3 3;
 }
 
-.selectionBox {
+.selectionBox,
+.rotateArm {
   stroke: var(--color-accent);
+}
+
+.selectionBox {
   stroke-dasharray: 4 2;
 }
 
 .selectionHandle {
   fill: var(--color-bed-surface);
   stroke: var(--color-accent);
+  pointer-events: all;
+}
+
+// The resize cursors follow the unrotated box, which is close enough for small turns.
+.selectionHandle[data-handle='top-left'],
+.selectionHandle[data-handle='bottom-right'] {
+  cursor: nwse-resize;
+}
+
+.selectionHandle[data-handle='top-right'],
+.selectionHandle[data-handle='bottom-left'] {
+  cursor: nesw-resize;
+}
+
+.selectionHandle[data-handle='rotate'] {
+  cursor: grab;
 }

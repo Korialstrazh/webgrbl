@@ -9,15 +9,13 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { BedSvgPoint } from './BedSvgPoint';
+import type { PointerPressOrigin } from './PointerPressOrigin';
 
-export interface BedObjectDrag {
+export interface BedObjectDrag extends PointerPressOrigin {
   /** The pointer that started the drag; other pointers are ignored. */
   pointerId: number;
   /** The objects that move with the pointer. */
   objectIds: string[];
-  /** Where the pointer went down, in screen pixels, to tell a click from a drag. */
-  startClientX: number;
-  startClientY: number;
   /** Where the pointer went down, in bed SVG units. */
   startPoint: BedSvgPoint;
   /** How far the pointer has moved since it went down, in bed SVG units (Y down). */

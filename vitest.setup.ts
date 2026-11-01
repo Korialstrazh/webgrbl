@@ -4,6 +4,7 @@ import './src/utils/localization/default.locales';
 import { i18n } from './src/utils/localization/localization';
 import { installMatchMediaMock, resetMatchMediaMock } from './src/utils/test.support/match.media.mock';
 import { installResizeObserverMock } from './src/utils/test.support/resize.observer.mock';
+import { installSvgScreenMatrixMock } from './src/utils/test.support/svg.screen.matrix.mock';
 
 // Awaited so the language switch cannot race i18next's own init.
 await i18n.changeLanguage(FALLBACK_LANGUAGE);
@@ -23,6 +24,9 @@ beforeEach(resetMatchMediaMock);
 
 // jsdom has no ResizeObserver, and antd needs one to place popovers.
 installResizeObserverMock();
+
+// jsdom has no getScreenCTM, so every SVG reports no matrix, like one that is not on screen, until a test sets one.
+installSvgScreenMatrixMock();
 
 // jsdom keeps localStorage for the whole test file, and stores persist what sagas write, so every test starts empty.
 afterEach(() => {

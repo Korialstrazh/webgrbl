@@ -33,3 +33,14 @@ export const BLUR_EVENT_NAME = 'blur';
 export const VISIBILITY_CHANGE_EVENT_NAME = 'visibilitychange';
 /** The `document.visibilityState` value of a tab the user cannot see. */
 export const HIDDEN_VISIBILITY_STATE = 'hidden';
+/** The `key` values of the arrow keys. */
+export const ARROW_UP_KEY = 'ArrowUp';
+export const ARROW_DOWN_KEY = 'ArrowDown';
+export const ARROW_LEFT_KEY = 'ArrowLeft';
+export const ARROW_RIGHT_KEY = 'ArrowRight';
+/** The `key` value of the Delete key. */
+export const DELETE_KEY = 'Delete';
+/** The `key` value of the Backspace key. */
+export const BACKSPACE_KEY = 'Backspace';
+/** Matches an element inside a region the user can edit as text; `contenteditable="false"` switches a region off. */
+export const CONTENT_EDITABLE_REGION_SELECTOR = '[contenteditable]:not([contenteditable="false"])';

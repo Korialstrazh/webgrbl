@@ -1,7 +1,9 @@
 /**
  * One object drawn on the bed: its artwork stretched to its box, a dashed danger outline when it leaves the bed, and
- * the dashed selection box with square corner handles when it is selected. The group is turned around the box centre,
- * so everything inside is drawn around the origin.
+ * the dashed selection box when it is selected. As the one selected object it also gets four corner handles that scale
+ * it and a handle on an arm above the box that turns it. The group is turned around the box centre, so everything
+ * inside is drawn around the origin. It renders again only when its own props change, so a drag of one object does
+ * not redraw the others.
  *
  * @author michael.morosov
  *
@@ -10,44 +12,91 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { memo } from 'react';
 import type { PointerEvent, ReactNode } from 'react';
 import { getSvgDataUrl } from '../../../utils/project/get.svg.data.url';
 import type { ProjectObject } from '../../../utils/project/interfaces/ProjectObject';
 import { HALF_BOX_FACTOR } from '../../../utils/project/project.constants';
 import {
+  BED_OBJECT_HANDLE,
+  BED_OBJECT_HANDLE_TEST_ID,
   BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID,
   SELECTION_BOX_PADDING_MM,
-  SELECTION_HANDLE_SIZE_MM,
   SVG_PRESERVE_ASPECT_RATIO_NONE,
 } from '../bed.objects.constants';
+import type { BedObjectHandle } from '../bed.objects.constants';
 import { getObjectSvgTransform } from '../get.object.svg.transform';
+import type { BedHandleSizes } from '../interfaces/BedHandleSizes';
 import { getSelectionHandleOrigins } from './get.selection.handle.origins';
 import type { BedObjectGraphicProps } from './interfaces/BedObjectGraphicProps';
-import type { ObjectFramePoint } from './interfaces/ObjectFramePoint';
+import type { SelectionHandlePlacement } from './interfaces/SelectionHandlePlacement';
 import styles from './styles.module.scss';
 
-const renderSelectionHandles = (selectionWidthMm: number, selectionHeightMm: number): ReactNode =>
-  getSelectionHandleOrigins(selectionWidthMm, selectionHeightMm).map((handleOrigin: ObjectFramePoint) => (
-    <rect
-      key={`${handleOrigin.x} ${handleOrigin.y}`}
-      className={styles.selectionHandle}
-      x={handleOrigin.x}
-      y={handleOrigin.y}
-      width={SELECTION_HANDLE_SIZE_MM}
-      height={SELECTION_HANDLE_SIZE_MM}
-    />
-  ));
+type HandlePointerDownHandler = (pointerEvent: PointerEvent<SVGElement>, handle: BedObjectHandle) => void;
 
-export const BedObjectGraphic = (props: BedObjectGraphicProps): ReactNode => {
-  const { projectObject, bedHeightMm, isSelected, hasHandles, isOutsideBed, onPointerDown } = props;
+/** The size of the dashed selection box around an object's box. */
+type SelectionBoxSize = Pick<ProjectObject, 'widthMm' | 'heightMm'>;
+
+const renderSelectionHandles = (
+  handleSizes: BedHandleSizes,
+  selectionBox: SelectionBoxSize,
+  handlePointerDown: HandlePointerDownHandler,
+): ReactNode => {
+  const { handleSizeMm, rotateArmMm } = handleSizes;
+  const selectionTop: number = -selectionBox.heightMm * HALF_BOX_FACTOR;
+  const rotateHandleY: number = selectionTop - rotateArmMm;
+
+  return (
+    <>
+      {getSelectionHandleOrigins(selectionBox.widthMm, selectionBox.heightMm, handleSizeMm).map(
+        ({ handle, origin }: SelectionHandlePlacement) => (
+          <rect
+            key={handle}
+            className={styles.selectionHandle}
+            data-testid={BED_OBJECT_HANDLE_TEST_ID}
+            data-handle={handle}
+            x={origin.x}
+            y={origin.y}
+            width={handleSizeMm}
+            height={handleSizeMm}
+            onPointerDown={(pointerEvent: PointerEvent<SVGRectElement>) => handlePointerDown(pointerEvent, handle)}
+          />
+        ),
+      )}
+      <line className={styles.rotateArm} x1={0} y1={selectionTop} x2={0} y2={rotateHandleY} />
+      <circle
+        className={styles.selectionHandle}
+        data-testid={BED_OBJECT_HANDLE_TEST_ID}
+        data-handle={BED_OBJECT_HANDLE.ROTATE}
+        cx={0}
+        cy={rotateHandleY}
+        r={handleSizeMm * HALF_BOX_FACTOR}
+        onPointerDown={(pointerEvent: PointerEvent<SVGCircleElement>) =>
+          handlePointerDown(pointerEvent, BED_OBJECT_HANDLE.ROTATE)}
+      />
+    </>
+  );
+};
+
+const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
+  const { projectObject, bedHeightMm, isSelected, hasHandles, isOutsideBed, handleSizes } = props;
+  const { onPointerDown, onHandlePointerDown } = props;
   const { id, name, svgText, widthMm, heightMm }: ProjectObject = projectObject;
   const left: number = -widthMm * HALF_BOX_FACTOR;
   const top: number = -heightMm * HALF_BOX_FACTOR;
-  const selectionWidthMm: number = widthMm + SELECTION_BOX_PADDING_MM + SELECTION_BOX_PADDING_MM;
-  const selectionHeightMm: number = heightMm + SELECTION_BOX_PADDING_MM + SELECTION_BOX_PADDING_MM;
+  const selectionBox: SelectionBoxSize = {
+    widthMm: widthMm + SELECTION_BOX_PADDING_MM + SELECTION_BOX_PADDING_MM,
+    heightMm: heightMm + SELECTION_BOX_PADDING_MM + SELECTION_BOX_PADDING_MM,
+  };
 
   const handlePointerDown = (pointerEvent: PointerEvent<SVGGElement>): void => {
     onPointerDown(pointerEvent, id);
+  };
+
+  // A handle press must not also reach the object's own press, which would start a move.
+  const handleHandlePointerDown: HandlePointerDownHandler = (pointerEvent, handle) => {
+    pointerEvent.stopPropagation();
+    onHandlePointerDown(pointerEvent, id, handle);
   };
 
   return (
@@ -83,11 +132,13 @@ export const BedObjectGraphic = (props: BedObjectGraphicProps): ReactNode => {
           className={styles.selectionBox}
           x={left - SELECTION_BOX_PADDING_MM}
           y={top - SELECTION_BOX_PADDING_MM}
-          width={selectionWidthMm}
-          height={selectionHeightMm}
+          width={selectionBox.widthMm}
+          height={selectionBox.heightMm}
         />
       )}
-      {hasHandles && renderSelectionHandles(selectionWidthMm, selectionHeightMm)}
+      {hasHandles && renderSelectionHandles(handleSizes, selectionBox, handleHandlePointerDown)}
     </g>
   );
 };
+
+export const BedObjectGraphic = memo(BedObjectGraphicContent);

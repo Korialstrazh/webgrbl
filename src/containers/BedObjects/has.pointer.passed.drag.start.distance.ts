@@ -9,7 +9,11 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { DRAG_START_DISTANCE_PX } from './bed.objects.constants';
-import type { BedObjectDrag } from './interfaces/BedObjectDrag';
+import type { PointerPressOrigin } from './interfaces/PointerPressOrigin';
 
-export const hasPointerPassedDragStartDistance = (drag: BedObjectDrag, clientX: number, clientY: number): boolean =>
-  Math.hypot(clientX - drag.startClientX, clientY - drag.startClientY) >= DRAG_START_DISTANCE_PX;
+export const hasPointerPassedDragStartDistance = (
+  pressOrigin: PointerPressOrigin,
+  clientX: number,
+  clientY: number,
+): boolean =>
+  Math.hypot(clientX - pressOrigin.startClientX, clientY - pressOrigin.startClientY) >= DRAG_START_DISTANCE_PX;

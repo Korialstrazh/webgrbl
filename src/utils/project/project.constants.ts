@@ -33,7 +33,7 @@ export const PROJECT_FILE_EXTENSION = '.webgrbl.json';
 /** Tolerance for float noise when a rotated corner is compared with a bed edge. */
 export const BED_EDGE_EPSILON_MM = 1e-9;
 
-const FULL_TURN_DEG = 360;
+export const FULL_TURN_DEG = 360;
 export const HALF_TURN_DEG = FULL_TURN_DEG / 2;
 export const HALF_BOX_FACTOR = 0.5;
 
