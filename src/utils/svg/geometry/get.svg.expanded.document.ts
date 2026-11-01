@@ -12,11 +12,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getSvgElementCountUpTo } from './get.svg.element.count.up.to';
 import { getSvgElementsById } from './get.svg.elements.by.id';
 import { getSvgLengthUserUnits } from './get.svg.length.user.units';
 import { getSvgMatrixProduct } from './get.svg.matrix.product';
 import type { SvgExpandedDocument } from './interfaces/SvgExpandedDocument';
 import type { SvgMatrix } from './interfaces/SvgMatrix';
+import { isSvgZeroLength } from './is.svg.zero.length';
 import { getSvgTransformMatrix } from './parse.svg.transform';
 import { SVG_NOT_RENDERED_ANCESTOR_SELECTOR } from './svg.geometry.constants';
 import {
@@ -31,7 +33,6 @@ import {
 } from './svg.shape.constants';
 import { SVG_IDENTITY_MATRIX, SVG_TRANSFORM_ATTRIBUTE_NAME, SVG_TRANSFORM_FUNCTION } from './svg.transform.constants';
 import {
-  SVG_ALL_ELEMENTS_SELECTOR,
   SVG_HREF_ATTRIBUTE_NAME,
   SVG_MIME_TYPE,
   SVG_NAMESPACE_URI,
@@ -129,21 +130,44 @@ const getReferenceCopy = (referencedElement: Element, useElement: Element): Node
   return elementCopy;
 };
 
-/** The number of elements a copy of this element adds: the element and all its descendants. */
-const getCopiedElementCount = (referencedElement: Element): number =>
-  1 + referencedElement.querySelectorAll(SVG_ALL_ELEMENTS_SELECTOR).length;
+/** A use is drawn unless it sits in defs, a symbol, a clip path, a mask or another reference-only container. */
+const isDrawnUse = (useElement: Element): boolean => !useElement.closest(SVG_NOT_RENDERED_ANCESTOR_SELECTOR);
+
+/** A zero width or height on a use stops it from being drawn. */
+const hasZeroUseSize = (useElement: Element): boolean =>
+  SVG_USE_VIEWPORT_ATTRIBUTE_NAMES.some((attributeName: string): boolean =>
+    isSvgZeroLength(useElement.getAttribute(attributeName)));
 
 /**
- * Changes the document in place; it is only called on a document this module has just parsed. Only uses that are
- * drawn are expanded: uses inside defs and symbols are copied as they are and expanded inside each copy, so no copy
- * is ever made of content that is itself already expanded.
+ * Changes the document in place; it is only called on a document this module has just parsed. Only drawn uses are
+ * expanded: uses inside defs, symbols, clip paths and masks stay as they are, also inside copies, so no budget goes
+ * to content that is never drawn. A copy's own drawn uses are expanded inside the copy, so no copy is ever made of
+ * content that is itself already expanded. Copy sizes are counted once per referenced element.
  */
 const expandSvgUseElements = (svgDocument: Document): boolean => {
   const elementsById: Map<string, Element> = getSvgElementsById(svgDocument);
+  // Copy sizes per referenced element; a size above the budget left at the time is a lower bound, which stays above
+  // the budget, since the budget only shrinks.
+  const copiedElementCounts: Map<Element, number> = new Map<Element, number>();
   let remainingElements: number = SVG_USE_MAX_COPIED_ELEMENTS;
   let isUseLimitReached = false;
 
+  const getCopiedElementCount = (referencedElement: Element): number => {
+    const knownCount: number = copiedElementCounts.get(referencedElement)
+      ?? getSvgElementCountUpTo(referencedElement, remainingElements);
+
+    copiedElementCounts.set(referencedElement, knownCount);
+
+    return knownCount;
+  };
+
   const expandUse = (useElement: Element, referenceChain: Element[]): void => {
+    if (hasZeroUseSize(useElement)) {
+      useElement.remove();
+
+      return;
+    }
+
     const reference: string | null = getUseReference(useElement);
     const referencedElement: Element | undefined = reference?.startsWith(SVG_SAME_DOCUMENT_REFERENCE_PREFIX)
       ? elementsById.get(reference.slice(1))
@@ -170,12 +194,14 @@ const expandSvgUseElements = (svgDocument: Document): boolean => {
     useElement.replaceWith(groupElement);
 
     for (const innerUseElement of Array.from(groupElement.querySelectorAll(SVG_USE_ELEMENT_NAME))) {
-      expandUse(innerUseElement, [...referenceChain, referencedElement]);
+      if (isDrawnUse(innerUseElement)) {
+        expandUse(innerUseElement, [...referenceChain, referencedElement]);
+      }
     }
   };
 
   for (const useElement of Array.from(svgDocument.querySelectorAll(SVG_USE_ELEMENT_NAME))) {
-    if (useElement.isConnected && !useElement.closest(SVG_NOT_RENDERED_ANCESTOR_SELECTOR)) {
+    if (useElement.isConnected && isDrawnUse(useElement)) {
       expandUse(useElement, []);
     }
   }

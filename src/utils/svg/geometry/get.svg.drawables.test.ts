@@ -16,6 +16,28 @@ const getSvgText = (content: string): string =>
 
 const getDrawableSet = (content: string): SvgDrawableSet => getSvgDrawables(getSvgText(content), TOLERANCE);
 
+const VIEWPORT_SIZE = 100;
+const QUICK_RUN_LIMIT_MS = 2000;
+
+/** An SVG whose root viewport is 100 x 100 user units, as in the Inkscape checks. */
+const getViewportDrawableSet = (content: string): SvgDrawableSet => getSvgDrawables(
+  `<svg xmlns="${SVG_NAMESPACE_URI}" width="100mm" height="100mm" viewBox="0 0 ${VIEWPORT_SIZE} ${VIEWPORT_SIZE}">`
+  + `${content}</svg>`,
+  TOLERANCE,
+);
+
+const getOnlyViewportDrawable = (content: string): SvgDrawable => {
+  const { drawables }: SvgDrawableSet = getViewportDrawableSet(content);
+
+  expect(drawables).toHaveLength(1);
+
+  if (!drawables[0]) {
+    throw new Error('no drawable');
+  }
+
+  return drawables[0];
+};
+
 const getOnlyDrawable = (content: string): SvgDrawable => {
   const { drawables }: SvgDrawableSet = getDrawableSet(content);
 
@@ -115,10 +137,83 @@ describe(getSvgDrawables.name, () => {
 
   it('places a nested svg at its x and y and fits its viewBox into its size', () => {
     const drawable: SvgDrawable = getOnlyDrawable(
-      `<svg x="50" y="50" viewBox="0 0 10 10" width="20"><line x2="10" stroke="${RED}"/></svg>`,
+      `<svg x="50" y="50" viewBox="0 0 10 10" width="20" height="20"><line x2="10" stroke="${RED}"/></svg>`,
     );
 
     expect(drawable.subpaths[0]?.points).toEqual([{ x: 50, y: 50 }, { x: 70, y: 50 }]);
+  });
+
+  it('gives a nested svg without a height the full height of the parent viewport', () => {
+    const drawable: SvgDrawable = getOnlyViewportDrawable(
+      `<svg x="50" y="50" viewBox="0 0 10 10" width="20"><line x2="10" stroke="${RED}"/></svg>`,
+    );
+
+    expect(drawable.subpaths[0]?.points).toEqual([{ x: 50, y: 90 }, { x: 70, y: 90 }]);
+  });
+
+  it('resolves a percentage size of a nested svg against the parent viewport', () => {
+    const drawable: SvgDrawable = getOnlyViewportDrawable(
+      `<svg x="50" y="50" viewBox="0 0 10 10" width="20" height="100%"><line x2="10" stroke="${RED}"/></svg>`,
+    );
+
+    expect(drawable.subpaths[0]?.points).toEqual([{ x: 50, y: 90 }, { x: 70, y: 90 }]);
+  });
+
+  it('fills the parent viewport with a symbol drawn by a use without a size', () => {
+    const drawable: SvgDrawable = getOnlyViewportDrawable(
+      '<symbol id="s" viewBox="0 0 10 10"><rect width="10" height="10"/></symbol><use href="#s"/>',
+    );
+
+    expect(drawable.subpaths[0]?.points).toEqual([
+      { x: 0, y: 0 },
+      { x: VIEWPORT_SIZE, y: 0 },
+      { x: VIEWPORT_SIZE, y: VIEWPORT_SIZE },
+      { x: 0, y: VIEWPORT_SIZE },
+    ]);
+  });
+
+  it('draws nothing for a use or a nested svg with a zero width or height', () => {
+    expect(getViewportDrawableSet(`
+      <defs><rect id="a" ${UNIT_SQUARE}/></defs>
+      <use href="#a" width="0"/>
+      <svg height="0"><rect ${UNIT_SQUARE}/></svg>
+    `).drawables).toEqual([]);
+  });
+
+  it('checks the copy budget of a large group once, so many uses of it stay quick', () => {
+    const groupSize = 20_001;
+    const useCount = 2000;
+    const getGroupDrawableSet = (groupUseCount: number): SvgDrawableSet => getDrawableSet(
+      `<g id="big">${'<g/>'.repeat(groupSize)}</g>${'<use href="#big"/>'.repeat(groupUseCount)}`,
+    );
+    // The same document with one use measures the fixed cost (parsing, styles, walk) on this machine, so only the
+    // extra cost of the other uses is compared with the limit.
+    const oneUseStartTime: number = performance.now();
+
+    getGroupDrawableSet(1);
+
+    const oneUseTime: number = performance.now() - oneUseStartTime;
+    const manyUsesStartTime: number = performance.now();
+    const { drawables, unsupported }: SvgDrawableSet = getGroupDrawableSet(useCount);
+
+    expect(performance.now() - manyUsesStartTime - oneUseTime).toBeLessThan(QUICK_RUN_LIMIT_MS);
+    expect(unsupported).toEqual([SVG_UNSUPPORTED_KIND.USE_LIMIT]);
+    expect(drawables).toEqual([]);
+  }, USE_LIMIT_TEST_TIMEOUT_MS);
+
+  it('does not expand uses inside copied defs, so undrawn content costs no budget', () => {
+    const groupSize = 20_001;
+    const useCount = 10;
+    const { drawables, unsupported }: SvgDrawableSet = getDrawableSet(`
+      <defs>
+        <g id="big">${'<g/>'.repeat(groupSize)}</g>
+        <g id="a"><defs><use href="#big"/></defs><rect ${UNIT_SQUARE}/></g>
+      </defs>
+      ${'<use href="#a"/>'.repeat(useCount)}
+    `);
+
+    expect(drawables).toHaveLength(useCount);
+    expect(unsupported).toEqual([]);
   });
 
   it('reports clipped content for a clip-path or a mask but still draws it in full', () => {

@@ -39,7 +39,16 @@ export const SVG_DRAWN_ELEMENT = {
 } as const;
 
 export const SVG_DRAWN_ELEMENT_NAMES: readonly string[] = Object.values(SVG_DRAWN_ELEMENT);
-export const SVG_NOT_RENDERED_ANCESTOR_SELECTOR = 'defs, clipPath, mask, pattern, marker, symbol';
+/** Containers whose content is only drawn by reference, never where it stands. */
+export const SVG_NOT_RENDERED_CONTAINER_NAMES: ReadonlySet<string> = new Set([
+  'defs',
+  'clipPath',
+  'mask',
+  'pattern',
+  'marker',
+  'symbol',
+]);
+export const SVG_NOT_RENDERED_ANCESTOR_SELECTOR: string = Array.from(SVG_NOT_RENDERED_CONTAINER_NAMES).join(', ');
 
 export const SVG_ID_ATTRIBUTE_NAME = 'id';
 export const SVG_GRADIENT_DEFAULT_LINEAR_END_X = 1;
