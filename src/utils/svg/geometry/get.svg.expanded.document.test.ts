@@ -8,8 +8,14 @@ const SMALL_SHAPE_NAME = 'circle';
 const RECT_ELEMENT_NAME = 'rect';
 // jsdom takes several seconds just to parse the deeply nested probe file, and the test parses it twice.
 const HOSTILE_FILE_TEST_TIMEOUT_MS = 60_000;
-// Expansion work on top of parsing; before the source was counted first, the probe took minutes.
-const EXPANSION_TIME_LIMIT_MS = 2000;
+// Expansion work on top of parsing. It is loose so that a loaded CI machine passes; the quadratic work it guards
+// against took tens of seconds at k=60 and minutes at k=500.
+const EXPANSION_TIME_LIMIT_MS = 10_000;
+// Expanding a file with a wide node must cost about what a file of the same size with a narrow node costs. Load slows
+// both runs alike, so a ratio stays stable; counting every child of the wide node made it about 6 to 9 times slower.
+const WIDE_NODE_TIME_RATIO_LIMIT = 3;
+// jsdom parses each of the two deeply nested wide-node files twice, and that is slow in a loaded test run.
+const WIDE_NODE_TEST_TIMEOUT_MS = 120_000;
 
 interface TimedSvgExpansion {
   /** The expansion result. */
@@ -91,6 +97,23 @@ describe(getSvgExpandedDocument.name, () => {
     expect(copiedRectCount).toBeLessThanOrEqual(SVG_USE_MAX_COPIED_ELEMENTS);
     expect(expansionTimeMs).toBeLessThan(EXPANSION_TIME_LIMIT_MS);
   }, HOSTILE_FILE_TEST_TIMEOUT_MS);
+
+  it('counts a wide node no further than the budget left, so many uses of wrappers around it stay quick', () => {
+    const remainingBudget = 450;
+    const wrapperCount = 450;
+    const wideNodeWidth = 40_000;
+    // Both files hold the same rects, so work that grows with the file size is the same in both; only the node under
+    // the wrappers changes width.
+    const getWrappedNodeContent = (wrappedRectCount: number): string =>
+      `<defs><g id="filler">${RECT.repeat(SVG_USE_MAX_COPIED_ELEMENTS - remainingBudget - 1)}</g>`
+      + `<g>${RECT.repeat(wideNodeWidth - wrappedRectCount)}</g></defs><use href="#filler"/>`
+      + getNestedWrapperContent(wrapperCount, `<g>${RECT.repeat(wrappedRectCount)}</g>`);
+    const narrowExpansion: TimedSvgExpansion = getTimedExpansion(getWrappedNodeContent(remainingBudget));
+    const wideExpansion: TimedSvgExpansion = getTimedExpansion(getWrappedNodeContent(wideNodeWidth));
+
+    expect(wideExpansion.expandedDocument.isUseLimitReached).toBe(true);
+    expect(wideExpansion.expansionTimeMs / narrowExpansion.expansionTimeMs).toBeLessThan(WIDE_NODE_TIME_RATIO_LIMIT);
+  }, WIDE_NODE_TEST_TIMEOUT_MS);
 
   it('rejects every later use once the inspection budget is spent, even one that fits the copy budget', () => {
     const wrappedRectCount: number = SVG_USE_MAX_COPIED_ELEMENTS;
