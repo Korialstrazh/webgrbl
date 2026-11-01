@@ -1,5 +1,5 @@
 /**
- * The left region for the design tools: layers, objects and material. Shown but inert for now.
+ * The left region for the design tools: layers, objects and material. Only the objects section works for now.
  *
  * @author michael.morosov
  *
@@ -15,6 +15,7 @@ import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { ComingSoon } from '../../views/ComingSoon';
 import { Panel } from '../../views/Panel';
+import { ObjectsSection } from '../ObjectsSection';
 import styles from './styles.module.scss';
 
 export const DesignPanel = (): ReactNode => {
@@ -33,9 +34,7 @@ export const DesignPanel = (): ReactNode => {
         </ComingSoon>
       </Panel>
       <Panel title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>
-        <ComingSoon description={t(DEFAULT.DESIGN_OBJECTS_DESCRIPTION)}>
-          <div className={styles.placeholder} />
-        </ComingSoon>
+        <ObjectsSection />
       </Panel>
       <Panel title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
         <ComingSoon description={t(DEFAULT.DESIGN_MATERIAL_DESCRIPTION)}>

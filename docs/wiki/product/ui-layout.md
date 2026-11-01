@@ -28,7 +28,7 @@ The approved screen layout of webgrbl and the order in which features get built.
 - **Roadmap:**
   1. ~~App shell and design system.~~ Done: see [[app-shell]] and [[ui-components]].
   2. ~~Machine control and machine profiles.~~ Done: see [[machine-control]].
-  3. Projects and SVG import (Dexie autosave, undo/redo).
+  3. ~~Projects and SVG import (Dexie autosave, undo/redo).~~ Done: see [[projects-and-svg-import]].
   4. Layers and power mapping, G-code, toolpath preview.
   5. Running jobs (pre-flight, progress, pause, overrides).
   6. Material library (import/export).

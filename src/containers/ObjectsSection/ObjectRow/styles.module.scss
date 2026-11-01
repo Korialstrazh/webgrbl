@@ -1,0 +1,43 @@
+.row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+}
+
+.selectedRow {
+  border-color: var(--color-accent);
+}
+
+// The button grows to the row width and stacks its name, size and note.
+.selectButton {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr auto;
+  gap: 0 var(--space-2);
+  align-items: center;
+  height: auto;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.size {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.outsideNote {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--color-danger-text);
+}

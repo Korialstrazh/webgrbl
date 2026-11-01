@@ -22,17 +22,14 @@ import { MACHINE_PROFILES_STORAGE } from '../profiles/machine.profiles.storage';
 import { newMachineProfile } from '../profiles/new.machine.profile';
 import { isBoolean } from '../type.guards/is.boolean';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
-import { ConnectionEstablished, selectGrblSettings, selectIsConnected } from './grbl.connection.state';
+import { ConnectionEstablished } from './grbl.connection.state';
 import {
   ActiveMachineProfileSelected,
   MachineProfileDeleted,
-  MachineProfileReadFromLaserRequested,
   MachineProfileSaved,
-  MachineProfileUpdateFromLaserAccepted,
   MachineProfilesImported,
   MachineProfilesLoaded,
   selectActiveMachineProfile,
-  selectMachineProfile,
   selectMachineProfiles,
   selectMachineProfilesDocument,
 } from './machine.profile.state';
@@ -123,46 +120,6 @@ function* checkMachineProfileOnConnect(action: ConnectionEstablished): Generator
   }
 }
 
-/**
- * Applies the values the connected laser reports validly to a profile and keeps the profile's own value for every
- * other field; returns the reported values, or undefined when nothing changed.
- */
-function* updateMachineProfileFromLaser(profileId: string): Generator {
-  const isConnected: boolean = (yield select(selectIsConnected)) as boolean;
-  const profile: MachineProfile | undefined =
-    (yield select(selectMachineProfile(profileId))) as MachineProfile | undefined;
-
-  if (!isConnected) {
-    return undefined;
-  }
-
-  if (!profile) {
-    return undefined;
-  }
-
-  const settings: Record<number, string> = (yield select(selectGrblSettings)) as Record<number, string>;
-  const laserValues: ReportedMachineProfileValues = getValidlyReportedProfileValues(settings);
-  const updatedProfile: MachineProfile = { ...profile, ...getReportedProfileFields(laserValues) };
-
-  yield put(new MachineProfileSaved({ profile: updatedProfile }));
-
-  return laserValues;
-}
-
-function* acceptMachineProfileUpdateFromLaser(action: MachineProfileUpdateFromLaserAccepted): Generator {
-  yield call(updateMachineProfileFromLaser, action.payload.profileId);
-}
-
-function* readMachineProfileFromLaser(action: MachineProfileReadFromLaserRequested): Generator {
-  const laserValues: ReportedMachineProfileValues | undefined = (
-    yield call(updateMachineProfileFromLaser, action.payload.profileId)
-  ) as ReportedMachineProfileValues | undefined;
-
-  if (isLaserModeReportedOff(laserValues)) {
-    yield call(showLaserModeOffWarning);
-  }
-}
-
 export function* watchMachineProfiles(): Generator {
   const storedDocument: MachineProfilesDocument =
     (yield call([MACHINE_PROFILES_STORAGE, MACHINE_PROFILES_STORAGE.getStoredDocument])) as MachineProfilesDocument;
@@ -170,6 +127,4 @@ export function* watchMachineProfiles(): Generator {
   yield put(new MachineProfilesLoaded({ document: storedDocument }));
   yield takeEvery(PROFILE_CHANGE_ACTION_TYPES, storeMachineProfiles);
   yield takeEvery(ConnectionEstablished.type, checkMachineProfileOnConnect);
-  yield takeEvery(MachineProfileUpdateFromLaserAccepted.type, acceptMachineProfileUpdateFromLaser);
-  yield takeEvery(MachineProfileReadFromLaserRequested.type, readMachineProfileFromLaser);
 }

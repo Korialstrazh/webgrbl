@@ -51,6 +51,8 @@ const EXPORT_LABEL = 'Export';
 const ACTIVE_PATTERN = /Active/;
 const WORKSHOP_NAME = 'Workshop laser';
 const GARAGE_NAME = 'Garage laser';
+const FIRST_SAVED_NAME = 'First saved name';
+const SECOND_SAVED_NAME = 'Second saved name';
 const IMPORTED_NAME = 'Imported laser';
 const EDITED_WORK_AREA_X_MM = 300;
 const EDITED_MAX_POWER_WATTS = 20;
@@ -212,6 +214,24 @@ describe(MachineProfilesDialog.name, () => {
     expect(screen.getByText(WORK_AREA_X_ERROR_TEXT)).toBeInTheDocument();
     expect(screen.getByText(NAME_ERROR_TEXT)).toBeInTheDocument();
     expect(selectMachineProfiles(store.getState())).toEqual([]);
+  });
+
+  it('saves a new profile twice in one session without duplicating it', () => {
+    const store: AppStore = newStore();
+
+    renderDialog(store);
+    clickButton(NEW_PROFILE_LABEL);
+    changeField(NAME_LABEL, FIRST_SAVED_NAME);
+    clickButton(SAVE_LABEL);
+    const firstSavedId: string | undefined = selectMachineProfiles(store.getState()).at(0)?.id;
+    changeField(NAME_LABEL, SECOND_SAVED_NAME);
+    clickButton(SAVE_LABEL);
+
+    const profiles: MachineProfile[] = selectMachineProfiles(store.getState());
+
+    expect(profiles).toHaveLength(1);
+    expect(profiles.at(0)?.name).toBe(SECOND_SAVED_NAME);
+    expect(profiles.at(0)?.id).toBe(firstSavedId);
   });
 
   it('deletes the selected profile after the confirmation', () => {

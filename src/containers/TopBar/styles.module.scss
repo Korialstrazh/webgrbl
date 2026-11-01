@@ -38,6 +38,7 @@
 .heading {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
 }
 
 .title {
@@ -45,21 +46,10 @@
   font-size: 1.25rem;
 }
 
-.project {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: var(--color-text-muted);
-}
-
 .group {
   display: flex;
+  align-items: center;
   gap: var(--space-1);
-}
-
-.autosave {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: var(--color-text-muted);
 }
 
 .trailing {

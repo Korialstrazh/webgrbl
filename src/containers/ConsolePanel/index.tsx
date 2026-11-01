@@ -14,6 +14,7 @@ import type { ChangeEvent, KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY } from '../../utils/browser/browser.events.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsConnected } from '../../utils/states/grbl.connection.state';
 import {
@@ -32,9 +33,6 @@ import type { ConsoleHistoryRecall } from './interfaces/ConsoleHistoryRecall';
 import { isConsoleScrolledToBottom } from './is.console.scrolled.to.bottom';
 import styles from './styles.module.scss';
 
-const ENTER_KEY = 'Enter';
-const ARROW_UP_KEY = 'ArrowUp';
-const ARROW_DOWN_KEY = 'ArrowDown';
 const OLDER_COMMAND_STEP = 1;
 const NEWER_COMMAND_STEP = -1;
 
@@ -89,18 +87,18 @@ export const ConsolePanel = (): ReactNode => {
   };
 
   /** Typing edits the input, so the next ArrowUp starts again from the newest command. */
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setInputText(event.target.value);
+  const handleInputChange = (changeEvent: ChangeEvent<HTMLInputElement>): void => {
+    setInputText(changeEvent.target.value);
     setHistoryOffset(NO_HISTORY_OFFSET);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
-    const historyStep: number | undefined = getHistoryStep(event.key);
+  const handleKeyDown = (keyboardEvent: KeyboardEvent<HTMLInputElement>): void => {
+    const historyStep: number | undefined = getHistoryStep(keyboardEvent.key);
 
-    if (event.key === ENTER_KEY) {
+    if (keyboardEvent.key === ENTER_KEY) {
       submitCommand();
     } else if (historyStep) {
-      event.preventDefault();
+      keyboardEvent.preventDefault();
       recallHistory(historyStep);
     }
   };

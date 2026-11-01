@@ -8,7 +8,17 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { AlertProps, ButtonProps, FormItemProps, FormProps, InputNumberProps, MenuProps, PopoverProps } from 'antd';
+import type {
+  AlertProps,
+  ButtonProps,
+  DropdownProps,
+  FormItemProps,
+  FormProps,
+  InputNumberProps,
+  MenuProps,
+  PopoverProps,
+  SwitchProps,
+} from 'antd';
 
 /** The compact button size, for actions inside a chip or a bar. */
 export const ANTD_BUTTON_SIZE_SMALL: ButtonProps['size'] = 'small';
@@ -48,3 +58,12 @@ export const ANTD_MENU_MODE_INLINE: MenuProps['mode'] = 'inline';
 
 /** A number input that shows and accepts whole numbers only. */
 export const ANTD_INPUT_NUMBER_PRECISION_INTEGER: InputNumberProps['precision'] = 0;
+
+/** The compact switch size, for a switch next to small text. */
+export const ANTD_SWITCH_SIZE_SMALL: SwitchProps['size'] = 'small';
+
+/** The dropdown opens and closes when its anchor is clicked. */
+export const ANTD_DROPDOWN_TRIGGER_CLICK: DropdownProps['trigger'] = ['click'];
+
+/** The `type` of a menu entry that draws a dividing line between two groups of items. */
+export const ANTD_MENU_ITEM_TYPE_DIVIDER = 'divider' as const;

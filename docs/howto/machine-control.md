@@ -13,7 +13,12 @@ The Move card, the Laser pointer card and the Machine profiles dialog drive a GR
 Build the line with a pure builder from `src/utils/machine/` and dispatch `MachineLineRequested`. Controls never talk to the controller directly, and the line is dropped while disconnected.
 
 ```tsx
-const { canJog }: MoveAvailability = getMoveAvailability(isConnected, machineStatus?.machineState, hasHomingSwitches);
+const { canJog }: MoveAvailability = getMoveAvailability({
+  isConnected,
+  machineState: machineStatus?.machineState,
+  hasHomingSwitches,
+  isPointerFiring,
+});
 
 <Button size={ANTD_BUTTON_SIZE_LARGE} disabled={!canJog} onClick={() => {
   dispatch(new MachineLineRequested({ line: getJogCommand(JOG_DIRECTION.EAST, 10, 1500) }));

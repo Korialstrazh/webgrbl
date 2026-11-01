@@ -1,6 +1,7 @@
 /**
- * The machine bed drawn to scale: grid, rulers, the laser-head crosshair and the work zero marker. A head or work zero
- * outside the bed is drawn at the nearest bed edge in a dashed outside style.
+ * The machine bed drawn to scale: grid, rulers, the content passed as children (the project objects), the laser-head
+ * crosshair and the work zero marker. A head or work zero outside the bed is drawn at the nearest bed edge in a dashed
+ * outside style. Only the children take pointer presses; the rest of the drawing lets them through.
  *
  * @author michael.morosov
  *
@@ -9,10 +10,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
 import { getBedMarker } from '../../utils/bed/get.bed.marker';
 import { getCoordinateText } from '../../utils/bed/get.coordinate.text';
 import { getGridLinePath } from '../../utils/bed/get.grid.line.path';
@@ -80,7 +81,7 @@ const getScreenTransform = (xMm: number, yMm: number, heightMm: number): string 
 
 export const BedView = (props: BedViewProps): ReactNode => {
   const { t } = useTranslation();
-  const { dimensions, headPosition, workOriginPosition, placeholderLabel } = props;
+  const { dimensions, headPosition, workOriginPosition, placeholderLabel, children } = props;
   const { widthMm, heightMm } = dimensions;
   const minorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, false), [widthMm, heightMm]);
   const majorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, true), [widthMm, heightMm]);
@@ -99,7 +100,9 @@ export const BedView = (props: BedViewProps): ReactNode => {
     <svg
       className={styles.bedView}
       viewBox={`0 0 ${widthMm} ${heightMm}`}
-      role="img"
+      // A group, not an img: an img hides its children from assistive technology, and the objects on the bed carry
+      // their own names.
+      role="group"
       aria-label={getAriaLabel(t, props)}
     >
       <rect className={styles.surface} x={0} y={0} width={widthMm} height={heightMm} />
@@ -127,6 +130,7 @@ export const BedView = (props: BedViewProps): ReactNode => {
           {positionMm}
         </text>
       ))}
+      <g>{children}</g>
       {workOriginMarker && (
         <circle
           className={getMarkerClassName(styles.workOrigin, workOriginMarker)}
