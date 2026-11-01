@@ -92,6 +92,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
               onMoveUp={() => moveLayerToIndex(layerKey, layerIndex - 1)}
               onMoveDown={() => moveLayerToIndex(layerKey, layerIndex + 1)}
               onDragStart={(dragEvent: DragEvent<HTMLLIElement>) => startDrag(dragEvent, layerKey)}
+              onDragEnd={() => setDraggedLayerKey(undefined)}
               onDrop={() => dropOnLayer(layerKey)}
             />
           );

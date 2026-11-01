@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { Provider, useSelector } from 'react-redux';
 import type { MockInstance } from 'vitest';
@@ -12,7 +12,6 @@ import {
   DEFAULT_CUT_ENTRY,
   DEFAULT_FILL_ENTRY,
   DEFAULT_PALETTE,
-  DEFAULT_SHADING_ENTRY,
 } from '../../utils/palette/palette.constants';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
@@ -48,6 +47,7 @@ const SEND_LABEL = 'Send to laser';
 const FILL_MODE_LABEL = 'Fill';
 const PRESET_LABEL = 'Save as material preset';
 const SIXTY_PERCENT_WATTS_TEXT = '6.0 W';
+const BAR_LABEL = 'Power from black to white';
 const BLACK_END_TEXT = 'Black: 6.0 W';
 const WHITE_END_TEXT = 'White: 0.0 W';
 const BLACK_END_PERCENT_TEXT = 'Black: 60 %';
@@ -243,7 +243,56 @@ describe(LayerSettingsDrawer.name, () => {
     renderDrawer(store, SHADING_LAYER_COLOUR);
 
     expect(screen.getByText(BLACK_END_PERCENT_TEXT)).toBeInTheDocument();
-    expect(DEFAULT_SHADING_ENTRY.maxPowerPercent).toBe(SIXTY_PERCENT);
+
+    cleanup();
+    renderDrawer(store, CUT_COLOUR);
+
+    expect(screen.queryByRole('group', { name: BAR_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('leaves an unknown colour disabled when it is saved to the palette', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [UNKNOWN_COLOUR]);
+    renderDrawer(store, UNKNOWN_COLOUR);
+
+    expect(getLayer(store, UNKNOWN_COLOUR).enabled).toBe(false);
+
+    fireEvent.click(screen.getByRole('button', { name: SAVE_TO_PALETTE_LABEL }));
+
+    expect(getLayer(store, UNKNOWN_COLOUR).enabled).toBe(false);
+  });
+
+  it('drops a typed draft when another layer opens', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    const cutSpeedBefore: number = getLayer(store, CUT_COLOUR).settings.speedMmPerMin;
+    const fillSpeedBefore: number = getLayer(store, FILL_COLOUR).settings.speedMmPerMin;
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+    const { rerender } = render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <BedRegionTestHost>
+            <LiveDrawer layerKey={CUT_COLOUR} onEditPalette={vi.fn()} />
+          </BedRegionTestHost>
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.change(screen.getByLabelText(SPEED_LABEL), { target: { value: NEW_SPEED_TEXT } });
+    rerender(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <BedRegionTestHost>
+            <LiveDrawer layerKey={FILL_COLOUR} onEditPalette={vi.fn()} />
+          </BedRegionTestHost>
+        </AntdTestProvider>
+      </Provider>,
+    );
+    fireEvent.blur(screen.getByLabelText(SPEED_LABEL));
+
+    expect(getActionCount(dispatchSpy, LayerSettingsChanged.type)).toBe(0);
+    expect(getLayer(store, FILL_COLOUR).settings.speedMmPerMin).toBe(fillSpeedBefore);
+    expect(getLayer(store, CUT_COLOUR).settings.speedMmPerMin).toBe(cutSpeedBefore);
   });
 
   it('saves the layer settings to its palette entry', () => {

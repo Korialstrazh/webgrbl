@@ -132,7 +132,6 @@ LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
 LAYER_SETTINGS_SEND;Send to laser
 LAYER_SETTINGS_SPEED;Speed (mm/min)
 LAYER_SETTINGS_TITLE;Layer settings: {{name}}
-LAYERS_DRAG_HANDLE;Drag {{name}} to reorder
 LAYERS_EMPTY_HINT;No layers yet. Layers appear when the design has colours.
 LAYERS_LIST_LABEL;Project layers
 LAYERS_MOVE_DOWN;Move {{name}} down

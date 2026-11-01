@@ -8,7 +8,10 @@
   background-color: var(--color-surface-2);
 }
 
+// A decoration only: the Move buttons are the keyboard path.
 .handle {
+  padding: 0 var(--space-1);
+  color: var(--color-text-muted);
   cursor: grab;
 }
 

@@ -36,6 +36,7 @@ export const LayerRow = ({
   onMoveUp,
   onMoveDown,
   onDragStart,
+  onDragEnd,
   onDrop,
 }: LayerRowProps): ReactNode => {
   const { t } = useTranslation();
@@ -44,15 +45,15 @@ export const LayerRow = ({
   const hasNoPaletteEntry: boolean = !layerEntry;
 
   return (
-    <li className={styles.row} draggable onDragStart={onDragStart} onDragOver={allowDropOnRow} onDrop={onDrop}>
-      <Button
-        className={styles.handle}
-        type={ANTD_BUTTON_TYPE_TEXT}
-        size={ANTD_BUTTON_SIZE_SMALL}
-        icon={DRAG_HANDLE_GRIP}
-        tabIndex={-1}
-        aria-label={t(DEFAULT.LAYERS_DRAG_HANDLE, { name })}
-      />
+    <li
+      className={styles.row}
+      draggable
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={allowDropOnRow}
+      onDrop={onDrop}
+    >
+      <span className={styles.handle} aria-hidden="true">{DRAG_HANDLE_GRIP}</span>
       <Checkbox
         checked={layer.enabled}
         aria-label={t(DEFAULT.LAYERS_TOGGLE, { name })}

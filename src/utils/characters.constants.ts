@@ -48,4 +48,4 @@ export const DELETE_CROSS = '\u2715';
 /** The small triangle that marks a button as opening a dropdown menu. */
 export const DROPDOWN_CARET = '\u25BE';
 /** The grip that marks the handle a layer row is dragged by. */
-export const DRAG_HANDLE_GRIP = '☰';
+export const DRAG_HANDLE_GRIP = '\u2630';

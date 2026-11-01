@@ -12,6 +12,9 @@
 import { getLayerKey } from './get.layer.key';
 import type { ProjectLayer } from './interfaces/ProjectLayer';
 
+const isLinkNeeded = (layer: ProjectLayer | undefined, paletteEntryId: string): layer is ProjectLayer =>
+  Boolean(layer) && layer?.paletteEntryId !== paletteEntryId;
+
 export const getLayersWithPaletteEntryLink = (
   layers: ProjectLayer[],
   layerKey: string,
@@ -21,7 +24,7 @@ export const getLayersWithPaletteEntryLink = (
     (layer: ProjectLayer): boolean => getLayerKey(layer) === layerKey,
   );
 
-  if (!linkedLayer || linkedLayer.paletteEntryId === paletteEntryId) {
+  if (!isLinkNeeded(linkedLayer, paletteEntryId)) {
     return layers;
   }
 

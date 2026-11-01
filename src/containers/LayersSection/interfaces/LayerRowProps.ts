@@ -25,5 +25,6 @@ export interface LayerRowProps {
   onMoveUp: () => void;
   onMoveDown: () => void;
   onDragStart: (dragEvent: DragEvent<HTMLLIElement>) => void;
+  onDragEnd: () => void;
   onDrop: () => void;
 }

@@ -33,7 +33,6 @@ const LAYERS_LIST_NAME = 'Project layers';
 const EMPTY_HINT_PATTERN = /No layers yet/;
 const SEND_CUT_LABEL = 'Send Cut to the laser';
 const SEND_UNKNOWN_LABEL = `Send ${UNKNOWN_COLOUR} to the laser`;
-const DRAG_CUT_LABEL = 'Drag Cut to reorder';
 const MOVE_CUT_DOWN_LABEL = 'Move Cut down';
 const MOVE_CUT_UP_LABEL = 'Move Cut up';
 const MOVE_FILL_UP_LABEL = 'Move Fill up';
@@ -160,7 +159,6 @@ describe(LayersSection.name, () => {
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
     renderSection(store);
 
-    expect(screen.getByRole('button', { name: DRAG_CUT_LABEL })).toBeInTheDocument();
     expect(getLayerKeys(store)).toEqual([FILL_COLOUR, CUT_COLOUR]);
 
     fireEvent.dragStart(getRow(CUT_ROW_INDEX), { dataTransfer: DRAG_TRANSFER });
@@ -169,6 +167,30 @@ describe(LayersSection.name, () => {
 
     expect(dispatchSpy).toHaveBeenCalledWith(new LayersReordered({ layerKeys: [CUT_COLOUR, FILL_COLOUR] }));
     expect(getLayerKeys(store)).toEqual([CUT_COLOUR, FILL_COLOUR]);
+  });
+
+  it('ignores a drop after the drag ended without a drop', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+    renderSection(store);
+
+    fireEvent.dragStart(getRow(CUT_ROW_INDEX), { dataTransfer: DRAG_TRANSFER });
+    fireEvent.dragEnd(getRow(CUT_ROW_INDEX));
+    fireEvent.drop(getRow(FILL_ROW_INDEX));
+
+    expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('ignores a drop that no row drag started', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+    renderSection(store);
+
+    fireEvent.drop(getRow(FILL_ROW_INDEX));
+
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
   it('reorders with the move buttons, and disables the ends', () => {
