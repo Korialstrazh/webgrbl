@@ -8,7 +8,7 @@ import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
 const CONTROL_SELECTOR = 'button, input';
 const PANEL_TITLES: readonly string[] = ['Layers', 'Objects', 'Material'];
-const COMING_SOON_PANEL_COUNT = 2;
+const COMING_SOON_PANEL_COUNT = 1;
 const IMPORT_SVG_LABEL = 'Import SVG';
 
 const renderDesignPanel = (store: AppStore): void => {
@@ -20,7 +20,7 @@ const renderDesignPanel = (store: AppStore): void => {
 };
 
 describe(DesignPanel.name, () => {
-  it('shows the three panels, with layers and material as coming soon', () => {
+  it('shows the three panels, with material as coming soon', () => {
     renderDesignPanel(newStore());
 
     for (const panelTitle of PANEL_TITLES) {

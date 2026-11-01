@@ -14,6 +14,7 @@ import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
 import { Action } from './action';
 import {
+  LayerPaletteEntryLinked,
   LayerSettingsChanged,
   LayerToggled,
   LayersReordered,
@@ -30,6 +31,7 @@ import type { ProjectDocumentState } from './project.document.state';
 const RED = DEFAULT_CUT_ENTRY.colour;
 const BLUE = DEFAULT_SCORE_ENTRY.colour;
 const UNKNOWN_LAYER_KEY = '#123456';
+const LINKED_ENTRY_ID = 'linked-entry';
 const CHANGED_POWER_PERCENT = 40;
 const OVER_MAX_POWER_PERCENT = 150;
 const OVER_MAX_PASSES = 99;
@@ -215,5 +217,36 @@ describe(LayersReordered.name, () => {
     );
 
     expect(projectDocumentReducer(state, new LayersReordered({ layerKeys: getVisibleKeys(state) }))).toBe(state);
+  });
+});
+
+describe(LayerPaletteEntryLinked.name, () => {
+  it('links a layer to a palette entry as one undo step and changes nothing else', () => {
+    const before: ProjectDocumentState = getStateWithAddedObjects(
+      getInitialState(),
+      [newColouredObject(UNKNOWN_LAYER_KEY)],
+    );
+    const layerBefore: ProjectLayer | undefined = getDocumentLayer(before, UNKNOWN_LAYER_KEY);
+    const linked: ProjectDocumentState = projectDocumentReducer(
+      before,
+      new LayerPaletteEntryLinked({ layerKey: UNKNOWN_LAYER_KEY, paletteEntryId: LINKED_ENTRY_ID }),
+    );
+
+    expect(getDocumentLayer(linked, UNKNOWN_LAYER_KEY)).toEqual({ ...layerBefore, paletteEntryId: LINKED_ENTRY_ID });
+    expect(linked.past).toHaveLength(before.past.length + 1);
+  });
+
+  it('makes no undo step for an unknown layer or an unchanged link', () => {
+    const before: ProjectDocumentState = getStateWithAddedObjects(getInitialState(), [newColouredObject(RED)]);
+    const redEntryId: string | undefined = getDocumentLayer(before, RED)?.paletteEntryId;
+
+    expect(projectDocumentReducer(
+      before,
+      new LayerPaletteEntryLinked({ layerKey: UNKNOWN_LAYER_KEY, paletteEntryId: LINKED_ENTRY_ID }),
+    )).toBe(before);
+    expect(projectDocumentReducer(
+      before,
+      new LayerPaletteEntryLinked({ layerKey: RED, paletteEntryId: redEntryId ?? LINKED_ENTRY_ID }),
+    )).toBe(before);
   });
 });

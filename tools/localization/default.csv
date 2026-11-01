@@ -56,7 +56,6 @@ CONSOLE_REALTIME_STATUS_QUERY;Status query
 CONSOLE_SHOW_STATUS_REPORTS;Show status reports
 CONSOLE_TITLE;Console
 CONSOLE_TOGGLE;Console
-DESIGN_LAYERS_DESCRIPTION;The layers of the design, with colour, speed, power and visibility per layer.
 DESIGN_LAYERS_TITLE;Layers
 DESIGN_MATERIAL_DESCRIPTION;The material on the bed and its ready-made speed and power settings.
 DESIGN_MATERIAL_TITLE;Material
@@ -113,6 +112,34 @@ GRBL_ERROR_8;This $ command only works while the machine is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
+LAYER_MODE_FILL;Fill
+LAYER_MODE_LINE;Line
+LAYER_POWER_PERCENT;{{percent}} %
+LAYER_POWER_WATTS;{{watts}} W
+LAYER_SETTINGS_AIR_ASSIST;Air assist
+LAYER_SETTINGS_BAR_BLACK;Black: {{power}}
+LAYER_SETTINGS_BAR_LABEL;Power from black to white
+LAYER_SETTINGS_BAR_WHITE;White: {{power}}
+LAYER_SETTINGS_EDIT_PALETTE;Edit palette…
+LAYER_SETTINGS_LINE_INTERVAL;Line interval (mm)
+LAYER_SETTINGS_MAX_POWER;Max power (%)
+LAYER_SETTINGS_MIN_POWER;Min power (%)
+LAYER_SETTINGS_MODE;Mode
+LAYER_SETTINGS_PASSES;Passes
+LAYER_SETTINGS_PRESET_DESCRIPTION;Save these settings as a material preset to use on other designs.
+LAYER_SETTINGS_PRESET_SAVE;Save as material preset
+LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
+LAYER_SETTINGS_SEND;Send to laser
+LAYER_SETTINGS_SPEED;Speed (mm/min)
+LAYER_SETTINGS_TITLE;Layer settings: {{name}}
+LAYERS_DRAG_HANDLE;Drag {{name}} to reorder
+LAYERS_EMPTY_HINT;No layers yet. Layers appear when the design has colours.
+LAYERS_LIST_LABEL;Project layers
+LAYERS_MOVE_DOWN;Move {{name}} down
+LAYERS_MOVE_UP;Move {{name}} up
+LAYERS_NOT_IN_PALETTE;Not in the palette
+LAYERS_SUMMARY;{{mode}} · {{power}} % · {{speed}} mm/min · {{passes}}×
+LAYERS_TOGGLE;Send {{name}} to the laser
 MACHINE_CONTROL_RESET;Reset
 MACHINE_CONTROL_STOP;Stop
 MACHINE_CONTROL_UNLOCK;Unlock

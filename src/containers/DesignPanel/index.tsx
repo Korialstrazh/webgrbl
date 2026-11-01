@@ -1,5 +1,6 @@
 /**
- * The left region for the design tools: layers, objects and material. Only the objects section works for now.
+ * The left region for the design tools: layers, objects and material. Layers and objects work; material is still
+ * coming soon.
  *
  * @author michael.morosov
  *
@@ -15,8 +16,12 @@ import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { ComingSoon } from '../../views/ComingSoon';
 import { Panel } from '../../views/Panel';
+import { LayersSection } from '../LayersSection';
 import { ObjectsSection } from '../ObjectsSection';
 import styles from './styles.module.scss';
+
+// The palette dialog is not built yet; until it is, the Edit palette button does nothing.
+const openPaletteDialog = (): void => undefined;
 
 export const DesignPanel = (): ReactNode => {
   const { t } = useTranslation();
@@ -29,9 +34,7 @@ export const DesignPanel = (): ReactNode => {
       aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}
     >
       <Panel title={t(DEFAULT.DESIGN_LAYERS_TITLE)}>
-        <ComingSoon description={t(DEFAULT.DESIGN_LAYERS_DESCRIPTION)}>
-          <div className={styles.placeholder} />
-        </ComingSoon>
+        <LayersSection onEditPalette={openPaletteDialog} />
       </Panel>
       <Panel title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>
         <ObjectsSection />

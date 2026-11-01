@@ -19,6 +19,7 @@ import { getLayerKey } from '../layers/get.layer.key';
 import { getLayersInOrder } from '../layers/get.layers.in.order';
 import { getLayersWithEnabledState } from '../layers/get.layers.with.enabled.state';
 import { getLayersWithNewLayers } from '../layers/get.layers.with.new.layers';
+import { getLayersWithPaletteEntryLink } from '../layers/get.layers.with.palette.entry.link';
 import { getLayersWithSettings } from '../layers/get.layers.with.settings';
 import { getUsedLayerKeys } from '../layers/get.used.layer.keys';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
@@ -30,6 +31,7 @@ import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { LayerKeysPayload } from './interfaces/LayerKeysPayload';
+import type { LayerPaletteEntryLinkedPayload } from './interfaces/LayerPaletteEntryLinkedPayload';
 import type { LayerSettingsChangedPayload } from './interfaces/LayerSettingsChangedPayload';
 import type { LayerToggledPayload } from './interfaces/LayerToggledPayload';
 import type { ProjectDocumentPayload } from './interfaces/ProjectDocumentPayload';
@@ -92,6 +94,10 @@ export class LayerToggled extends Action<LayerToggledPayload> {
 
 export class LayersReordered extends Action<LayerKeysPayload> {
   public static readonly type: string = actionType('layers reordered');
+}
+
+export class LayerPaletteEntryLinked extends Action<LayerPaletteEntryLinkedPayload> {
+  public static readonly type: string = actionType('layer palette entry linked');
 }
 
 export class SvgFilesImportRequested extends Action<SvgFilesPayload> {
@@ -217,6 +223,11 @@ const getStateWithLayerAction = (state: ProjectDocumentState, action: Action<unk
     const { layerKey, enabled } = (action as LayerToggled).payload;
 
     return getStateWithLayers(state, getLayersWithEnabledState(layers, layerKey, enabled));
+  }
+  case LayerPaletteEntryLinked.type: {
+    const { layerKey, paletteEntryId } = (action as LayerPaletteEntryLinked).payload;
+
+    return getStateWithLayers(state, getLayersWithPaletteEntryLink(layers, layerKey, paletteEntryId));
   }
   case LayersReordered.type:
     return getStateWithLayers(state, getLayersInOrder(layers, (action as LayersReordered).payload.layerKeys));
