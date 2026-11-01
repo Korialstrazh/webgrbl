@@ -120,6 +120,24 @@ describe(projectDocumentReducer.name, () => {
     ).toBe(state);
   });
 
+  it('ignores a transform equal to the current values and keeps redo', () => {
+    const original: ProjectObject = newProjectObject();
+    const undoneState: ProjectDocumentState = projectDocumentReducer(
+      projectDocumentReducer(
+        getStateWithObjects([original]),
+        new ProjectObjectsTransformed({ transforms: { [original.id]: { ...original, xMm: MOVED_X_MM } } }),
+      ),
+      new ProjectUndoRequested(),
+    );
+    const after: ProjectDocumentState = projectDocumentReducer(
+      undoneState,
+      new ProjectObjectsTransformed({ transforms: { [original.id]: { ...original } } }),
+    );
+
+    expect(after).toBe(undoneState);
+    expect(after.future).toHaveLength(1);
+  });
+
   it('undoes to the exact previous document and redoes it', () => {
     const state: ProjectDocumentState = getStateWithObjects([newProjectObject()]);
     const undone: ProjectDocumentState = projectDocumentReducer(state, new ProjectUndoRequested());

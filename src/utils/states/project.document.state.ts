@@ -96,6 +96,13 @@ const getTransformFields = (transform: ProjectObjectTransform): ProjectObjectTra
   rotationDeg: transform.rotationDeg,
 });
 
+const isTransformEqualToObject = (projectObject: ProjectObject, transform: ProjectObjectTransform): boolean =>
+  projectObject.xMm === transform.xMm
+  && projectObject.yMm === transform.yMm
+  && projectObject.widthMm === transform.widthMm
+  && projectObject.heightMm === transform.heightMm
+  && projectObject.rotationDeg === transform.rotationDeg;
+
 const getObjectWithTransform = (
   projectObject: ProjectObject,
   transforms: ProjectObjectTransformsPayload['transforms'],
@@ -104,25 +111,26 @@ const getObjectWithTransform = (
     ? transforms[projectObject.id]
     : undefined;
 
-  return transform ? { ...projectObject, ...getTransformFields(transform) } : projectObject;
+  if (!transform || isTransformEqualToObject(projectObject, transform)) {
+    return projectObject;
+  }
+
+  return { ...projectObject, ...getTransformFields(transform) };
 };
 
 const getStateWithTransforms = (
   state: ProjectDocumentState,
   transforms: ProjectObjectTransformsPayload['transforms'],
 ): ProjectDocumentState => {
-  const hasTransformedObject: boolean = state.document.objects.some(
-    (projectObject: ProjectObject): boolean => Object.hasOwn(transforms, projectObject.id),
+  const transformedObjects: ProjectObject[] = state.document.objects.map(
+    (projectObject: ProjectObject): ProjectObject => getObjectWithTransform(projectObject, transforms),
+  );
+  const hasChangedObject: boolean = transformedObjects.some(
+    (projectObject: ProjectObject, objectIndex: number): boolean =>
+      projectObject !== state.document.objects[objectIndex],
   );
 
-  if (!hasTransformedObject) {
-    return state;
-  }
-
-  return getStateWithChange(state, {
-    objects: state.document.objects.map((projectObject: ProjectObject): ProjectObject =>
-      getObjectWithTransform(projectObject, transforms)),
-  });
+  return hasChangedObject ? getStateWithChange(state, { objects: transformedObjects }) : state;
 };
 
 const getStateWithoutObjects = (state: ProjectDocumentState, objectIds: string[]): ProjectDocumentState => {
