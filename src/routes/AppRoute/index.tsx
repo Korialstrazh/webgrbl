@@ -18,6 +18,7 @@ import { DesignPanel } from '../../containers/DesignPanel';
 import { HistoryHotkeys } from '../../containers/HistoryHotkeys';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
 import { MachinePanel } from '../../containers/MachinePanel';
+import { SaveHotkey } from '../../containers/SaveHotkey';
 import { StatusStrip } from '../../containers/StatusStrip';
 import { StickyStopBar } from '../../containers/StickyStopBar';
 import { StopHotkey } from '../../containers/StopHotkey';
@@ -44,6 +45,7 @@ export const AppRoute = (): ReactNode => {
         <LeavePageGuard />
         <StopHotkey />
         <HistoryHotkeys />
+        <SaveHotkey />
       </Layout>
     </BedRegionHostContext>
   );

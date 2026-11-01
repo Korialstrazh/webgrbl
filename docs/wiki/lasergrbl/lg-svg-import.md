@@ -32,7 +32,7 @@ LaserGRBL opens `.svg` files and converts their outlines straight to G-code (vec
   - The file is read as text; invalid XML characters are stripped with a regex before `XElement.Parse`. Malformed XML or a color the parser cannot read aborts the import silently (the exception is only logged).
   - Generate > Accuracy Test opens an SVG embedded in the app through the same path (see [[lg-generators]]).
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`OpenFile`), [`LaserGRBL/GrblFile.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblFile.cs) (`LoadImportedSVG`)
-- **webgrbl notes:** Status: not started. Accept SVG through `<input type=file accept=".svg,image/svg+xml">`, the File System Access API (`showOpenFilePicker`), drag-and-drop, the PWA manifest `file_handlers` (`image/svg+xml`: `.svg`) and paste from the clipboard (SVG text from Inkscape/Illustrator). Parse with `DOMParser` (`image/svg+xml`) in a Web Worker so large files don't block the UI. Show parse errors to the user instead of failing silently.
+- **webgrbl notes:** Status: in progress. Shipped in [[projects-and-svg-import]]: pick (`<input type=file>`, several files) and drop on the bed; the file is sanitised and its size read, with errors shown as toasts. No File System Access picker, `file_handlers` or paste yet, and no G-code is made from it (that follows with layers and G-code). Original proposal: Accept SVG through `<input type=file accept=".svg,image/svg+xml">`, the File System Access API (`showOpenFilePicker`), drag-and-drop, the PWA manifest `file_handlers` (`image/svg+xml`: `.svg`) and paste from the clipboard (SVG text from Inkscape/Illustrator). Parse with `DOMParser` (`image/svg+xml`) in a Web Worker so large files don't block the UI. Show parse errors to the user instead of failing silently.
 
 ### LG-SVG-02 Vector vs raster mode chooser (disabled)
 
@@ -99,7 +99,7 @@ LaserGRBL opens `.svg` files and converts their outlines straight to G-code (vec
   - `transform` lists are parsed in order: `translate`, `scale`, `rotate(a[,cx,cy])`, `matrix`. `skewX`/`skewY` are ignored. Element transforms multiply onto the enclosing group matrix.
   - The decimal separator is forced to `.` (`Replace(',', '.')`) on the final text.
 - **Upstream source:** [`LaserGRBL/SvgConverter/GCodeFromSVG.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/SvgConverter/GCodeFromSVG.cs) (`parseGlobals`, `ConvertToPixel`, `parseTransform`, `ParseTransform`)
-- **webgrbl notes:** Status: not started. Follow the SVG spec exactly, including `preserveAspectRatio` and 96 DPI. Let the user override the DPI for files from tools that assume 72 or 90 DPI (old Illustrator, old Inkscape), and show the detected physical size before converting. Reuse a well-tested matrix library (DOMMatrix is built in).
+- **webgrbl notes:** Status: in progress. Physical size is read to the spec in [[projects-and-svg-import]]: `width`/`height` units mm, cm, in, pt, pc, px, else the `viewBox` as 96 px per inch; a file without a size is rejected (`no-size`). There is no DPI override yet (Illustrator files at 72 per inch come in 4/3 too small, resize in the Objects section), and no coordinate mapping to G-code yet. Original proposal: Follow the SVG spec exactly, including `preserveAspectRatio` and 96 DPI. Let the user override the DPI for files from tools that assume 72 or 90 DPI (old Illustrator, old Inkscape), and show the detected physical size before converting. Reuse a well-tested matrix library (DOMMatrix is built in).
 
 ### LG-SVG-06 Curve flattening (smart vs legacy Bézier)
 
@@ -181,7 +181,7 @@ LaserGRBL opens `.svg` files and converts their outlines straight to G-code (vec
 - **Options & defaults:** The same dialog and settings as a normal open (LG-SVG-03).
 - **Behaviour & gotchas:** No offset is applied, so appended artwork overlaps at its own SVG coordinates. Ranges and time are recomputed for the whole program. This append-per-color workflow is the only way to get different power/speed per color.
 - **Upstream source:** [`LaserGRBL/GrblFile.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblFile.cs) (`LoadImportedSVG(append)`)
-- **webgrbl notes:** Status: not started. Model a job as a list of placed objects (each with source, transform and layer params) instead of concatenated G-code. Append then becomes "add object", with drag-to-position on the canvas ([[lg-preview]]).
+- **webgrbl notes:** Status: in progress. Imported SVGs are placed objects in a project ([[projects-and-svg-import]]): each import adds objects (cascade placement, up to 50) that can be moved, scaled, rotated, with undo. No G-code from them yet. Original proposal: Model a job as a list of placed objects (each with source, transform and layer params) instead of concatenated G-code. Append then becomes "add object", with drag-to-position on the canvas ([[lg-preview]]).
 
 ## Upstream Source
 

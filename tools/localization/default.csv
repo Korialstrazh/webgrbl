@@ -214,6 +214,21 @@ OBJECTS_LIST_LABEL;Project objects
 OBJECTS_LOCK_RATIO;Lock aspect ratio
 OBJECTS_OUTSIDE_BED;Outside the bed
 OBJECTS_SIZE;{{widthMm}} × {{heightMm}} mm
+OPEN_PROJECT_DELETE;Delete
+OPEN_PROJECT_DELETE_CANCEL;Cancel
+OPEN_PROJECT_DELETE_CONFIRM;Delete the project {{name}}?
+OPEN_PROJECT_DELETE_OK;Yes, delete
+OPEN_PROJECT_EMPTY;No stored projects yet.
+OPEN_PROJECT_FOOTER;Projects are stored in this browser. Save as file to keep a copy or move it to another computer.
+OPEN_PROJECT_LIST;Stored projects
+OPEN_PROJECT_META;Changed {{time}} · Objects: {{count}}
+OPEN_PROJECT_NOW;open now
+OPEN_PROJECT_OPEN;Open
+OPEN_PROJECT_OPEN_FILE;Open file…
+OPEN_PROJECT_RENAME;Rename
+OPEN_PROJECT_RENAME_INPUT;New name for {{name}}
+OPEN_PROJECT_TITLE;Open project
+PROJECT_FILE_INPUT;Open a project file
 STATUS_STRIP_CURSOR;Cursor
 STATUS_STRIP_ESTIMATE;Estimate
 STATUS_STRIP_JOB_SIZE;Job size
@@ -235,6 +250,9 @@ TOAST_PROFILE_CREATED;Created the machine profile {{name}} from the laser's sett
 TOAST_PROFILE_DIFFERS;The laser reports a work area of {{laserWidth}} x {{laserHeight}} mm, but the profile {{name}} has {{profileWidth}} x {{profileHeight}} mm. Nothing was changed - you can update the profile from the laser in the Machine profiles dialog.
 TOAST_PROFILE_IMPORT_INVALID;The file is not a machine profiles file. Nothing was imported.
 TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}} - {{description}}
+TOAST_PROJECT_FILE_INVALID;The file is not a webgrbl project file. Nothing was opened.
+TOAST_PROJECT_SAVE_FAILED;The project could not be saved - the browser storage may be full. Your changes stay on screen, and the next change tries to save again.
+TOAST_PROJECT_STORAGE_FAILED;The saved projects could not be read or changed. Try again, or reload the page.
 TOAST_SVG_CONTENT_REMOVED;Parts of {{fileName}} were left out: embedded web content, linked images or external styles.
 TOAST_SVG_IMPORT_FAILED_NO_SIZE;{{fileName}} was skipped: it has no size (width and height or a viewBox).
 TOAST_SVG_IMPORT_FAILED_NOT_SVG;{{fileName}} was skipped: it is not a usable SVG file.
@@ -242,13 +260,23 @@ TOAST_SVG_IMPORT_FAILED_TOO_LARGE;{{fileName}} was skipped: it is larger than 10
 TOAST_SVG_IMPORT_LIMIT_REACHED;A project holds at most {{limit}} objects. The remaining files were not imported.
 TOAST_SVG_LARGER_THAN_BED;{{fileName}} is larger than the bed. Scale it down to fit.
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
-TOP_BAR_AUTOSAVE_DESCRIPTION;Your design will be saved automatically.
-TOP_BAR_AUTOSAVE_READOUT;Autosave: off
+TOP_BAR_AUTOSAVE_SAVED;Saved
+TOP_BAR_AUTOSAVE_SAVING;Saving…
+TOP_BAR_AUTOSAVE_UNSAVED;Not saved
+TOP_BAR_MATERIALS_DESCRIPTION;Material presets.
 TOP_BAR_MENU_IMPORT_SVG;Import SVG
 TOP_BAR_MENU_MACHINE_PROFILES;Machine profiles
 TOP_BAR_MENU_MATERIALS;Materials
 TOP_BAR_MENU_PROJECT;Project
-TOP_BAR_MENUS_DESCRIPTION;Project files and materials.
+TOP_BAR_PROJECT_MENU_EXPORT_GCODE;Export G-code
+TOP_BAR_PROJECT_MENU_NEW;New project
+TOP_BAR_PROJECT_MENU_OPEN;Open…
+TOP_BAR_PROJECT_MENU_OPEN_FILE;Open file…
+TOP_BAR_PROJECT_MENU_SAVE;Save
+TOP_BAR_PROJECT_MENU_SAVE_AS_FILE;Save as file
+TOP_BAR_PROJECT_MENU_SAVE_SHORTCUT;Ctrl+S
+TOP_BAR_PROJECT_MENU_SOON;soon
+TOP_BAR_PROJECT_NAME_INPUT;Project name
 TOP_BAR_PROJECT_PLACEHOLDER;Untitled project
 TOP_BAR_REDO;Redo
 TOP_BAR_UNDO;Undo

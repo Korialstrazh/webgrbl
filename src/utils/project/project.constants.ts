@@ -29,6 +29,13 @@ export const DEFAULT_PROJECT_NAME_KEY = DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER;
 export const PROJECT_FILE_FORMAT = 'webgrbl-project';
 export const PROJECT_FILE_VERSION = 1;
 export const PROJECT_FILE_EXTENSION = '.webgrbl.json';
+export const PROJECT_FILE_MIME_TYPE = 'application/json';
+/** Characters Windows, macOS or Linux do not allow in a file name; they are left out of a downloaded file's name. */
+export const PROJECT_FILE_NAME_FORBIDDEN_CHARACTERS = /[\\/:*?"<>|]/g;
+/** Base name of a downloaded project file whose project name has no allowed character left. */
+export const PROJECT_FILE_FALLBACK_BASE_NAME = 'project';
+/** Spaces per indent level, so a saved project file stays readable in a text editor. */
+export const PROJECT_FILE_JSON_INDENT = 2;
 
 /** Tolerance for float noise when a rotated corner is compared with a bed edge. */
 export const BED_EDGE_EPSILON_MM = 1e-9;

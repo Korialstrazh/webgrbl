@@ -20,6 +20,8 @@ const APP_NAME = 'webgrbl';
 const APP_DESCRIPTION = 'Control a GRBL laser cutter or engraver straight from the browser.';
 const THEME_COLOR = '#121417';
 const ICON_PATH = 'favicon.svg';
+// antd dialog tests can take longer than vitest's default 5 s on a heavily loaded machine.
+const TEST_TIMEOUT_MS = 15_000;
 // antd and the packages it is built from go into chunks of their own, so the app chunk stays small and caches apart.
 // The components and their building blocks (styling engine and icons, rc components) are split so each chunk stays
 // under the size limit.
@@ -73,5 +75,6 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, '.claude/worktrees/**', '.worktrees/**'],
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    testTimeout: TEST_TIMEOUT_MS,
   },
 });

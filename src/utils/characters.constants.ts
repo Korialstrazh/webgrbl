@@ -44,3 +44,6 @@ export const ARROW_DOWN_RIGHT = '\u2198';
 
 /** The cross that marks the delete button of an object row. */
 export const DELETE_CROSS = '\u2715';
+
+/** The small triangle that marks a button as opening a dropdown menu. */
+export const DROPDOWN_CARET = '\u25BE';

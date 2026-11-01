@@ -179,13 +179,13 @@ Some features touch several areas. Their articles cross-link each other, and the
 | LG-GCODE-01 | [[lg-gcode-files#LG-GCODE-01 Open file and type dispatch\|Open file and type dispatch]] | core | not started |
 | LG-GCODE-02 | [[lg-gcode-files#LG-GCODE-02 Append file to the current program\|Append file to the current program]] | core | not started |
 | LG-GCODE-03 | [[lg-gcode-files#LG-GCODE-03 Reload last file\|Reload last file]] | core | not started |
-| LG-GCODE-04 | [[lg-gcode-files#LG-GCODE-04 Drag-and-drop and command-line opening\|Drag-and-drop and command-line opening]] | core | not started |
+| LG-GCODE-04 | [[lg-gcode-files#LG-GCODE-04 Drag-and-drop and command-line opening\|Drag-and-drop and command-line opening]] | core | in progress |
 | LG-GCODE-05 | [[lg-gcode-files#LG-GCODE-05 G-code file loading and line normalisation\|G-code file loading and line normalisation]] | core | not started |
 | LG-GCODE-06 | [[lg-gcode-files#LG-GCODE-06 Program analysis: modal state and positions\|Program analysis: modal state and positions]] | core | not started |
 | LG-GCODE-07 | [[lg-gcode-files#LG-GCODE-07 Bounding box / ranges and quadrant\|Bounding box / ranges and quadrant]] | core | not started |
 | LG-GCODE-08 | [[lg-gcode-files#LG-GCODE-08 Time estimation and projected time\|Time estimation and projected time]] | core | not started |
 | LG-GCODE-09 | [[lg-gcode-files#LG-GCODE-09 Save G-code (quick and advanced)\|Save G-code (quick and advanced)]] | core | not started |
-| LG-GCODE-10 | [[lg-gcode-files#LG-GCODE-10 Project files (.lps)\|Project files (.lps)]] | adapt | not started |
+| LG-GCODE-10 | [[lg-gcode-files#LG-GCODE-10 Project files (.lps)\|Project files (.lps)]] | adapt | in progress |
 | LG-GCODE-11 | [[lg-gcode-files#LG-GCODE-11 File loading events and program state\|File loading events and program state]] | core | not started |
 | LG-GCODE-12 | [[lg-gcode-files#LG-GCODE-12 Hershey single-stroke font (internal)\|Hershey single-stroke font (internal)]] | core | not started |
 
@@ -193,16 +193,16 @@ Some features touch several areas. Their articles cross-link each other, and the
 
 | ID | Feature | Scope | Status |
 | --- | --- | --- | --- |
-| LG-SVG-01 | [[lg-svg-import#LG-SVG-01 Open an SVG file\|Open an SVG file]] | core | not started |
+| LG-SVG-01 | [[lg-svg-import#LG-SVG-01 Open an SVG file\|Open an SVG file]] | core | in progress |
 | LG-SVG-02 | [[lg-svg-import#LG-SVG-02 Vector vs raster mode chooser (disabled)\|Vector vs raster mode chooser (disabled)]] | skip | not started |
 | LG-SVG-03 | [[lg-svg-import#LG-SVG-03 Laser options dialog ("Target image")\|Laser options dialog ("Target image")]] | core | not started |
 | LG-SVG-04 | [[lg-svg-import#LG-SVG-04 Supported elements and parsing order\|Supported elements and parsing order]] | core | not started |
-| LG-SVG-05 | [[lg-svg-import#LG-SVG-05 Units, DPI, viewBox and coordinate mapping\|Units, DPI, viewBox and coordinate mapping]] | core | not started |
+| LG-SVG-05 | [[lg-svg-import#LG-SVG-05 Units, DPI, viewBox and coordinate mapping\|Units, DPI, viewBox and coordinate mapping]] | core | in progress |
 | LG-SVG-06 | [[lg-svg-import#LG-SVG-06 Curve flattening (smart vs legacy Bézier)\|Curve flattening (smart vs legacy Bézier)]] | core | not started |
 | LG-SVG-07 | [[lg-svg-import#LG-SVG-07 Arc output (G3 for circles and rounded corners)\|Arc output (G3 for circles and rounded corners)]] | core | not started |
 | LG-SVG-08 | [[lg-svg-import#LG-SVG-08 Color filter\|Color filter]] | core | not started |
 | LG-SVG-09 | [[lg-svg-import#LG-SVG-09 G-code output shape\|G-code output shape]] | core | not started |
-| LG-SVG-10 | [[lg-svg-import#LG-SVG-10 Append SVG to the current job\|Append SVG to the current job]] | core | not started |
+| LG-SVG-10 | [[lg-svg-import#LG-SVG-10 Append SVG to the current job\|Append SVG to the current job]] | core | in progress |
 
 ### Raster import - [[lg-raster-import]]
 

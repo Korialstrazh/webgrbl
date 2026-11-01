@@ -14,6 +14,7 @@ import type { SagaMiddleware } from 'redux-saga';
 import { newBrowserGrblControllerSagaDependencies } from './browser.grbl.controller.saga.dependencies';
 import { classActionToPlainObjectMiddleware } from './class.action.to.plain.object.middleware';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
+import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
 import { rootReducer } from './root.reducer';
 import { rootSaga } from './root.saga';
 
@@ -47,7 +48,7 @@ export const newStore = (
   const sagaMiddleware: SagaMiddleware = createSagaMiddleware({ onError: logSagaCrash });
   const store: AppStore = configureAppStore(sagaMiddleware);
 
-  sagaMiddleware.run(rootSaga, grblControllerSagaDependencies);
+  LIVE_STORE_TASK_REGISTRY.registerStoreTask(sagaMiddleware.run(rootSaga, grblControllerSagaDependencies));
 
   return store;
 };
