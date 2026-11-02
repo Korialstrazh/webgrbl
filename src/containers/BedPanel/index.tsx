@@ -3,8 +3,8 @@
  *
  * - Design view: the project objects on the bed, edited with the Select and Move tools.
  * - Toolpath view: the real job at the simulation time instead of the objects (no editing there), with its colour and
- *   travel toggles, the job size and estimate, the generation progress or out-of-date banner, the warnings, and the
- *   simulation playback bar below the bed.
+ *   travel toggles, the warnings chip in the toolbar row, the job size and estimate, the generation progress or
+ *   out-of-date banner, and the simulation playback bar below the bed.
  * - The bed zooms and pans in both views (see BedViewport).
  * - The other tools and the 3D view are not built yet. SVG files dropped on the bed are imported.
  *
@@ -87,12 +87,15 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       <div className={styles.header}>
         {isToolpathView ? (
-          <ToolpathToolbar
-            displayMode={toolpathDisplayMode}
-            onDisplayModeChange={setToolpathDisplayMode}
-            isTravelShown={isTravelShown}
-            onTravelShownChange={setIsTravelShown}
-          />
+          <div className={styles.editingTools}>
+            <ToolpathToolbar
+              displayMode={toolpathDisplayMode}
+              onDisplayModeChange={setToolpathDisplayMode}
+              isTravelShown={isTravelShown}
+              onTravelShownChange={setIsTravelShown}
+            />
+            <ToolpathWarningsPanel />
+          </div>
         ) : (
           <div className={styles.editingTools}>
             <Segmented<BedTool>
@@ -146,7 +149,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           )}
         </BedViewport>
         {isToolpathView && <ToolpathStatusOverlay />}
-        {isToolpathView && <ToolpathWarningsPanel />}
       </div>
       {isToolpathView && <SimulationPlaybackBar />}
       <ToastStack isWide={isWide} />

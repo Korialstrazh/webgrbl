@@ -27,9 +27,9 @@
   min-width: 10rem;
 }
 
-// antd insets the rail by the handle radius; the layer bar above it uses the same inset, so both strips line up.
-.timeline > :first-child {
-  margin-inline: 0.375rem;
+// antd insets the rail by half the handle; the layer bar above it uses the same inset, so both strips line up.
+.timeline > :not(.slider) {
+  margin-inline: 0.5rem;
 }
 
 .slider {

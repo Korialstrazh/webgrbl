@@ -1,4 +1,17 @@
-// A thin strip over the full width of the slider; the segments share it by their burn time.
+// The caption above a thin strip over the full width of the slider; the segments share the strip by their burn time.
+.simulationLayerBar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.caption {
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+}
+
 .layerBar {
   display: flex;
   overflow: hidden;

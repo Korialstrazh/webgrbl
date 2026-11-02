@@ -48,6 +48,13 @@ const CONTROL_HEIGHT_PIXELS = 36;
 const TARGET_MIN_PIXELS = 44;
 /** The button label weight of the approved design. */
 const BUTTON_FONT_WEIGHT = 600;
+
+// The slider handle is a 1rem target (WCAG 2.5.8 asks for at least 24 px including the space around it); the rail is
+// thick enough to read as the timeline.
+const SLIDER_HANDLE_SIZE_PIXELS = 16;
+const SLIDER_HANDLE_HOVER_SIZE_PIXELS = 18;
+const SLIDER_RAIL_SIZE_PIXELS = 6;
+const SLIDER_CONTROL_SIZE_PIXELS = 16;
 const FONT_FAMILY_UI = '\'Inter\', system-ui, -apple-system, \'Segoe UI\', Roboto, sans-serif';
 const FONT_FAMILY_CODE = '\'JetBrains Mono\', ui-monospace, \'SFMono-Regular\', Consolas, monospace';
 
@@ -116,6 +123,10 @@ export const ANTD_THEME: ThemeConfig = {
       handleColor: COLOR_ACCENT,
       handleActiveColor: COLOR_ACCENT_HOVER,
       railBg: COLOR_SURFACE_3,
+      handleSize: SLIDER_HANDLE_SIZE_PIXELS,
+      handleSizeHover: SLIDER_HANDLE_HOVER_SIZE_PIXELS,
+      railSize: SLIDER_RAIL_SIZE_PIXELS,
+      controlSize: SLIDER_CONTROL_SIZE_PIXELS,
     },
     Select: {
       hoverBorderColor: COLOR_ACCENT_HOVER,

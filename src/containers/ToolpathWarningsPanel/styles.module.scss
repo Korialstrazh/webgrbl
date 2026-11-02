@@ -1,38 +1,48 @@
-// Sits in the bottom-left corner over the bed drawing; the bed area is its positioned parent.
+// A chip in the toolbar row above the bed; the open list drops below it over the bed, so the row never grows.
 .warningsPanel {
-  position: absolute;
-  bottom: var(--space-3);
-  left: var(--space-3);
-  z-index: 1;
-  max-width: min(22rem, calc(100% - 2 * var(--space-3)));
-  max-height: 40%;
-  overflow: auto;
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface-2);
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.75rem;
 }
 
 .title {
+  display: flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 var(--space-3);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
   color: var(--color-warning);
   font-size: 0.75rem;
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.disclosure[open] .title {
-  margin-bottom: var(--space-1);
-}
-
 .warningList {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
+  width: max-content;
+  max-width: min(22rem, 80vw);
+  max-height: 16rem;
   margin: 0;
-  padding: 0;
+  overflow: auto;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+  box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 40%);
   list-style: none;
 
   li {

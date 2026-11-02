@@ -50,6 +50,7 @@ const TOTAL_TIME_S = 66;
 const SIXTY_SIX_SECONDS_TEXT = '01:06';
 // The red burn takes 0.2 + 1000 / 100 = 10.2 s and the blue one 0.2 + 3000 / 100 = 30.2 s; the travel between them
 // turns back, so both burns start and end at rest, and the travel is left out of the shares.
+const LAYER_BAR_LABEL = 'Burn time per layer';
 const TWO_LAYER_TOOLPATH: Toolpath = newToolpath({
   moves: [
     newToolpathMove({ from: { x: 0, y: 0 }, to: { x: 1010, y: 0 } }),
@@ -264,6 +265,15 @@ describe(SimulationPlaybackBar.name, () => {
     expect(segmentWidthPercents).toHaveLength(TWO_LAYER_TOOLPATH.layers.length);
     expect(segmentWidthPercents[0]).toBeCloseTo(RED_SHARE_PERCENT, SHARE_DECIMALS);
     expect(segmentWidthPercents[1]).toBeCloseTo(BLUE_SHARE_PERCENT, SHARE_DECIMALS);
+    expect(screen.getByRole('group', { name: LAYER_BAR_LABEL })).toBeInTheDocument();
+    expect(screen.getByText(LAYER_BAR_LABEL)).toBeVisible();
+  });
+
+  it('leaves out the layer bar when the toolpath has one layer, where it would read as a second progress bar', () => {
+    renderBar(newReadyStore());
+
+    expect(screen.queryByTestId(SIMULATION_LAYER_SEGMENT_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByText(LAYER_BAR_LABEL)).not.toBeInTheDocument();
   });
 
   it('toggles play with Space while the bar has the focus', () => {

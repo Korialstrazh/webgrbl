@@ -32,15 +32,21 @@ import type { BedPanStep } from './interfaces/BedPanStep';
 const isPanPress = (button: number, isSpaceHeld: boolean): boolean =>
   button === MIDDLE_POINTER_BUTTON || (button === PRIMARY_POINTER_BUTTON && isSpaceHeld);
 
+// A Space press that readies the pan: over the bed, and not already taken by a focused control such as the playback
+// bar, which handles Space itself.
+const isBedPanKeyPress = (keyboardEvent: KeyboardEvent, isPointerOverBed: boolean): boolean =>
+  keyboardEvent.key === SPACE_KEY && isPointerOverBed && !keyboardEvent.defaultPrevented;
+
 const useSpaceHeldOverBed = (isPointerOverBedRef: RefObject<boolean>): boolean => {
   const store: AppStore = useAppStore();
   const [isSpaceHeld, setIsSpaceHeld] = useState<boolean>(false);
 
   useEffect(() => {
     const handleKeyDown = (keyboardEvent: KeyboardEvent): void => {
-      const isPanKey: boolean = keyboardEvent.key === SPACE_KEY && isPointerOverBedRef.current;
+      const isOverlayOpen: boolean = selectIsAnyOverlayOpen(store.getState());
+      const isPanKeyPress: boolean = isBedPanKeyPress(keyboardEvent, isPointerOverBedRef.current);
 
-      if (isPanKey && canShortcutAct(keyboardEvent, selectIsAnyOverlayOpen(store.getState()))) {
+      if (isPanKeyPress && canShortcutAct(keyboardEvent, isOverlayOpen)) {
         keyboardEvent.preventDefault();
         setIsSpaceHeld(true);
       }

@@ -1,7 +1,8 @@
 /**
- * A small panel in the Toolpath view that lists what the ready toolpath leaves out: a closed chip with the count, which
- * opens to each affected object with the text of its warning. Nothing is shown while there is no ready toolpath or it
- * has no warnings.
+ * The warnings chip of the Toolpath view, in the toolbar row above the bed so it never covers the work or the origin
+ * corner. Closed, it names each kind of warning with its count ("Warnings: text left out (1)"); open, it lists each
+ * affected object with the full text of its warning below the chip. Nothing is shown while there is no ready toolpath
+ * or it has no warnings.
  *
  * @author michael.morosov
  *
@@ -18,9 +19,11 @@ import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject
 import { selectProjectObjects } from '../../utils/states/project.document.state';
 import { selectToolpath, selectToolpathStatus } from '../../utils/states/toolpath.state';
 import { TOOLPATH_STATUS } from '../../utils/states/toolpath.status.constants';
+import type { ObjectWarning } from '../../utils/toolpath/interfaces/ObjectWarning';
 import type { Toolpath } from '../../utils/toolpath/interfaces/Toolpath';
 import { getGcodeWarningLines } from '../GcodeExportConfirmDialog/get.gcode.warning.lines';
 import type { GcodeWarningLine } from '../GcodeExportConfirmDialog/interfaces/GcodeWarningLine';
+import { getToolpathWarningsSummaryText } from './get.toolpath.warnings.summary.text';
 import styles from './styles.module.scss';
 
 export const ToolpathWarningsPanel = (): ReactNode => {
@@ -28,9 +31,8 @@ export const ToolpathWarningsPanel = (): ReactNode => {
   const isToolpathCurrent: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.READY;
   const toolpath: Toolpath | undefined = useSelector(selectToolpath);
   const projectObjects: ProjectObject[] = useSelector(selectProjectObjects);
-  const warningLines: GcodeWarningLine[] = isToolpathCurrent && toolpath
-    ? getGcodeWarningLines(toolpath.warnings, projectObjects)
-    : [];
+  const currentWarnings: ObjectWarning[] = isToolpathCurrent && toolpath ? toolpath.warnings : [];
+  const warningLines: GcodeWarningLine[] = getGcodeWarningLines(currentWarnings, projectObjects);
 
   if (!warningLines.length) {
     return undefined;
@@ -38,12 +40,9 @@ export const ToolpathWarningsPanel = (): ReactNode => {
 
   return (
     <section className={styles.warningsPanel} aria-label={t(DEFAULT.TOOLPATH_WARNINGS_TITLE)}>
-      {/* A native disclosure: closed it is a small chip, so it does not cover the artwork; antd Collapse brings a
-          bordered card. */}
+      {/* A native disclosure: closed it is a small chip in the toolbar row; antd Collapse brings a bordered card. */}
       <details className={styles.disclosure}>
-        <summary className={styles.title}>
-          {t(DEFAULT.TOOLPATH_WARNINGS_SUMMARY, { count: warningLines.length })}
-        </summary>
+        <summary className={styles.title}>{getToolpathWarningsSummaryText(t, currentWarnings)}</summary>
         {/* A plain list: antd has no lightweight list for a few lines of text. */}
         <ul className={styles.warningList}>
           {warningLines.map(({ lineKey, objectName, warningTextKey }: GcodeWarningLine) => (
