@@ -58,6 +58,8 @@ const FIRST_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[0] ??
 const SECOND_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[1] ?? '';
 const CUT_COLOUR = DEFAULT_CUT_ENTRY.colour;
 const DELETE_NAME_PATTERN = /^Delete/;
+const EDITED_ROW_CLASS_NAME = 'editedRow';
+const ANTD_DANGEROUS_BUTTON_CLASS = 'ant-btn-dangerous';
 const CUSTOM_ENTRY_NAME = 'Custom etch';
 const CUSTOM_NAME_PATTERN = /^Custom etch/;
 const COLOUR_HEX_INPUT_SELECTOR = '.ant-color-picker-hex-input input';
@@ -282,6 +284,16 @@ describe(PaletteDialog.name, () => {
     clickButton(DELETE_CONFIRM_LABEL);
 
     expect(getEntryIds(store)).not.toContain(SCORE_ENTRY_ID);
+  });
+
+  it('marks the edited entry on its whole row and keeps Delete quiet instead of a red cross', () => {
+    renderDialog(newStore());
+    fireEvent.click(screen.getByRole('button', { name: SCORE_NAME_PATTERN }));
+
+    expect(getRow(SCORE_NAME_PATTERN).className).toContain(EDITED_ROW_CLASS_NAME);
+    expect(getRow(CUT_NAME_PATTERN).className).not.toContain(EDITED_ROW_CLASS_NAME);
+    expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN }))
+      .not.toHaveClass(ANTD_DANGEROUS_BUTTON_CLASS);
   });
 
   it('moves an entry down with its move button', () => {
