@@ -14,7 +14,7 @@ import { getProfileDistance } from './get.profile.distance';
 import type { MotionTimeline } from './interfaces/MotionTimeline';
 import type { MoveMotionProfile } from './interfaces/MoveMotionProfile';
 import type { TimelinePosition } from './interfaces/TimelinePosition';
-import type { Toolpath } from './interfaces/Toolpath';
+import type { TimelineToolpath } from './interfaces/TimelineToolpath';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
 import { TRAVEL_POWER_PERCENT } from './toolpath.constants';
 
@@ -36,8 +36,6 @@ const getLastStartedMoveIndex = (moveStartTimesS: number[], timeS: number): numb
 
   return low;
 };
-
-type TimelineToolpath = Pick<Toolpath, 'moves' | 'startPoint'>;
 
 const getStartPosition = (startPoint: GeometryPoint): TimelinePosition => ({
   point: { ...startPoint },
