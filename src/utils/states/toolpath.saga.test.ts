@@ -60,6 +60,10 @@ const GENERATION_ERROR = new Error('worker crashed');
 const OTHER_PROJECT_ID = 'other-project';
 const OTHER_PROJECT_NAME = 'Other project';
 const NUDGE_COUNT = 3;
+const OFF_LAYER_OBJECT_X_MM = 200;
+const BLUE_LAYER_KEY = '#0000ff';
+const RED_SQUARE_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
+  + '<rect fill="none" stroke="#ff0000" width="10" height="10"/></svg>';
 const RENAMED_PROFILE_NAME = 'Renamed laser';
 const NUDGE_STEP_MM = 1;
 const SECOND_SQUARE_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
@@ -277,6 +281,30 @@ describe(watchToolpath.name, () => {
     toolpathWorkerClient.rejectHeldGeneration(FIRST_GENERATION, GENERATION_ERROR);
 
     await waitForToolpathStatus(store, TOOLPATH_STATUS.FAILED);
+  });
+
+  it('writes no burn move from the geometry of a switched-off layer into the downloaded G-code', async () => {
+    const downloadSpy = spyOnDownload();
+    const store: AppStore = await newGcodeExportTestStore({
+      objects: [
+        newProjectObject({ svgText: RED_SQUARE_SVG_TEXT, xMm: 0, yMm: 0 }),
+        newProjectObject({ svgText: SECOND_SQUARE_SVG_TEXT, xMm: OFF_LAYER_OBJECT_X_MM, yMm: 0 }),
+      ],
+    });
+
+    store.dispatch(new LayerToggled({ layerKey: BLUE_LAYER_KEY, enabled: false }));
+    store.dispatch(new GcodeExportRequested({ isWarningConfirmed: false }));
+    await vi.waitFor((): void => {
+      expect(downloadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    const burnXs: number[] = Array.from(
+      getDownloadedText(downloadSpy).matchAll(/^G1 X(-?[\d.]+)/gm),
+      (match: RegExpMatchArray): number => Number(match[1]),
+    );
+
+    expect(burnXs.length).toBeGreaterThan(0);
+    expect(Math.max(...burnXs)).toBeLessThan(OFF_LAYER_OBJECT_X_MM);
   });
 
   it('generates when needed and downloads Coaster set.gcode with M4 S0 and the profile S max', async () => {
