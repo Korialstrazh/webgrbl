@@ -87,7 +87,7 @@ Switch to Toolpath. If there is no toolpath yet, or it is out of date, a banner 
 
 ## The time estimate
 
-Shown on the Job card ("Estimate") and in the Toolpath toolbar ("Job 50.0 × 30.0 mm · est. 1 min 6 s"), only while the toolpath is current (a dash otherwise). It is planned the way GRBL moves: every move speeds up and slows down at the machine's acceleration (`$120`, `$121`) and maximum rate (`$110`, `$111`), and corners are taken at the speed `$11` (junction deviation) allows. The values come from the connected laser; without a connection, or when a value is missing, the GRBL defaults are used (6000 mm/min, 1000 mm/s², 0.01 mm). All passes and the overscan of fills are included. It is an estimate, not a promise.
+Shown on the Job card ("Estimate") and in the playback bar clock, next to the job size ("Job 50.0 × 30.0 mm"), only while the toolpath is current (a dash otherwise). It is planned the way GRBL moves: every move speeds up and slows down at the machine's acceleration (`$120`, `$121`) and maximum rate (`$110`, `$111`), and corners are taken at the speed `$11` (junction deviation) allows. The values come from the connected laser; without a connection, or when a value is missing, the GRBL defaults are used (6000 mm/min, 1000 mm/s², 0.01 mm). All passes and the overscan of fills are included. It is an estimate, not a promise.
 
 ## Known limits
 
