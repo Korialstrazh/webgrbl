@@ -69,7 +69,8 @@ M5 S0
 - `M4` is dynamic laser mode: the laser power follows the speed and is off during travel. It needs **`$32=1`** (laser mode) on the controller. webgrbl does not check or change `$32` when you export, so set it before you run the file; with `$32=0` the laser would stay on during moves.
 - Travel is `G0`, burning is `G1`. X and Y are written on every move; `S` (power) and `F` (feed) only when they change.
 - `S` is the power percent of the profile's S max (the `$30` the connected laser reports, else the profile's value, else 1000).
-- Fills add 2 mm of overscan at each end of a line. The head travels to the start of the run-in with `G0`, but the overscan itself is written as `G1` moves at `S0` and the layer's feed, never as `G0`.
+- Fills add 2 mm of overscan at each end of a line. The head travels to the start of the run-in with `G0`, but the overscan itself is written as `G1` moves at `S0` and the layer's feed, never as `G0`. At the edges of the work area the overscan is shortened, so a fill that touches the bed edge never sends the head past 0 or past the work area width (no soft-limit alarm, no crash into the frame). The laser may then still be speeding up on the first millimetres at the very edge.
+- The preview and the estimate start the head at the profile's origin corner (where work zero is), so the first travel and its time match the real machine.
 - With air assist on the profile, `M8` / `M9` go around the moves of layers that use it.
 - The file ends with `M5 S0`. The name is `<project name>.gcode`.
 

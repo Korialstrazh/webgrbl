@@ -18,12 +18,12 @@ import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getFillLines } from './get.fill.lines';
 import { getFillMoves } from './get.fill.moves';
 import { getLineMoves } from './get.line.moves';
+import { getOriginMappedPoint } from './get.origin.mapped.point';
 import { getToolpathBounds } from './get.toolpath.bounds';
 import { getToolpathPaintAreas } from './get.toolpath.paint.areas';
-import type { BedDrawable } from './interfaces/BedDrawable';
 import type { LayerMovesInput } from './interfaces/LayerMovesInput';
-import type { ObjectWarning } from './interfaces/ObjectWarning';
 import type { Toolpath } from './interfaces/Toolpath';
+import type { ToolpathGenerationInput } from './interfaces/ToolpathGenerationInput';
 import type { ToolpathLayerRange } from './interfaces/ToolpathLayerRange';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
 import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
@@ -42,18 +42,17 @@ const addMoves = (moves: ToolpathMove[], newMoves: ToolpathMove[]): void => {
   }
 };
 
-const getLayerMoves = ({ layer, drawables, paintAreas, startPoint }: LayerMovesInput): ToolpathMove[] =>
+const getLayerMoves = ({ layer, drawables, paintAreas, startPoint, workAreaXMm }: LayerMovesInput): ToolpathMove[] =>
   (layer.settings.mode === LAYER_MODE.FILL
-    ? getFillMoves({ fillLines: getFillLines({ paintAreas, layer }), layer, startPoint })
+    ? getFillMoves({ fillLines: getFillLines({ paintAreas, layer }), layer, startPoint, workAreaXMm })
     : getLineMoves({ drawables, layer, startPoint }));
 
 /** onProgress hears the share of enabled layers done after each layer; the passes of a layer are not counted apart. */
-export const getToolpath = (
-  drawables: BedDrawable[],
-  warnings: ObjectWarning[],
-  layers: ProjectLayer[],
-  onProgress?: ToolpathProgressListener,
-): Toolpath => {
+export const getToolpath = (input: ToolpathGenerationInput, onProgress?: ToolpathProgressListener): Toolpath => {
+  const { drawables, warnings, layers, machineArea } = input;
+  const { workAreaXMm } = machineArea;
+  // The head starts at the machine's origin corner; mapping the G-code zero back into the bed frame finds it.
+  const jobStartPoint: GeometryPoint = getOriginMappedPoint(TOOLPATH_START_POINT, machineArea.originCorner, machineArea);
   const enabledLayers: ProjectLayer[] = getEnabledLayersInOrder(layers);
   const hasFillLayer: boolean = enabledLayers.some(
     (layer: ProjectLayer): boolean => layer.settings.mode === LAYER_MODE.FILL,
@@ -65,9 +64,9 @@ export const getToolpath = (
   for (const [layerIndex, layer] of enabledLayers.entries()) {
     const firstMoveIndex: number = moves.length;
 
-    const startPoint: GeometryPoint = moves.at(-1)?.to ?? TOOLPATH_START_POINT;
+    const startPoint: GeometryPoint = moves.at(-1)?.to ?? jobStartPoint;
 
-    addMoves(moves, getLayerMoves({ layer, drawables, paintAreas, startPoint }));
+    addMoves(moves, getLayerMoves({ layer, drawables, paintAreas, startPoint, workAreaXMm }));
 
     if (moves.length > firstMoveIndex) {
       layerRanges.push({ layerKey: getLayerKey(layer), firstMoveIndex, lastMoveIndex: moves.length - 1 });
@@ -76,5 +75,5 @@ export const getToolpath = (
     onProgress?.((layerIndex + 1) / enabledLayers.length);
   }
 
-  return { moves, layers: layerRanges, warnings, bounds: getToolpathBounds(moves) };
+  return { startPoint: jobStartPoint, moves, layers: layerRanges, warnings, bounds: getToolpathBounds(moves) };
 };

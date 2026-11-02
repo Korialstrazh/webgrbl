@@ -22,10 +22,10 @@ export const runToolpathWorkerRequest = (
   request: ToolpathWorkerRequest,
   postMessage: ToolpathWorkerMessagePoster,
 ): void => {
-  const { requestId, drawables, warnings, layers } = request;
+  const { requestId } = request;
 
   try {
-    const toolpath: Toolpath = getToolpath(drawables, warnings, layers, (progress: number): void => {
+    const toolpath: Toolpath = getToolpath(request, (progress: number): void => {
       postMessage({ kind: TOOLPATH_WORKER_MESSAGE_KIND.PROGRESS, requestId, progress });
     });
 

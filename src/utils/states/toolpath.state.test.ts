@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
+import { newToolpath } from '../toolpath/test.support/new.toolpath';
 import { Action } from './action';
 import { ProjectObjectsDeleted } from './project.document.state';
 import {
@@ -16,7 +17,7 @@ import type { ToolpathState } from './toolpath.state';
 import { TOOLPATH_STATUS } from './toolpath.status.constants';
 
 const HALF_PROGRESS = 0.5;
-const EMPTY_TOOLPATH: Toolpath = { moves: [], layers: [], warnings: [], bounds: undefined };
+const EMPTY_TOOLPATH: Toolpath = newToolpath();
 const FIRST_DOCUMENT_VERSION = 0;
 
 class UnknownAction extends Action {

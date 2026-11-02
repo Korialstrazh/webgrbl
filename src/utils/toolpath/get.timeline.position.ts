@@ -9,13 +9,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getProfileDistance } from './get.profile.distance';
 import type { MotionTimeline } from './interfaces/MotionTimeline';
 import type { MoveMotionProfile } from './interfaces/MoveMotionProfile';
 import type { TimelinePosition } from './interfaces/TimelinePosition';
 import type { Toolpath } from './interfaces/Toolpath';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
-import { TOOLPATH_START_POINT, TRAVEL_POWER_PERCENT } from './toolpath.constants';
+import { TRAVEL_POWER_PERCENT } from './toolpath.constants';
 
 const NO_MOVE_INDEX = -1;
 
@@ -36,14 +37,16 @@ const getLastStartedMoveIndex = (moveStartTimesS: number[], timeS: number): numb
   return low;
 };
 
-const getStartPosition = (): TimelinePosition => ({
-  point: { ...TOOLPATH_START_POINT },
+type TimelineToolpath = Pick<Toolpath, 'moves' | 'startPoint'>;
+
+const getStartPosition = (startPoint: GeometryPoint): TimelinePosition => ({
+  point: { ...startPoint },
   moveIndex: NO_MOVE_INDEX,
   powerPercent: TRAVEL_POWER_PERCENT,
 });
 
 export const getTimelinePosition = (
-  toolpath: Pick<Toolpath, 'moves'>,
+  toolpath: TimelineToolpath,
   timeline: MotionTimeline,
   timeS: number,
 ): TimelinePosition => {
@@ -53,7 +56,7 @@ export const getTimelinePosition = (
   const profile: MoveMotionProfile | undefined = timeline.moveProfiles[moveIndex];
 
   if (!move || !profile) {
-    return getStartPosition();
+    return getStartPosition(toolpath.startPoint);
   }
 
   const coveredMm: number = getProfileDistance(profile, clampedTimeS - (timeline.moveStartTimesS[moveIndex] ?? 0));

@@ -10,6 +10,7 @@ import { getGcodeText } from './get.gcode.text';
 import type { GcodeContext } from './interfaces/GcodeContext';
 import type { Toolpath } from './interfaces/Toolpath';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
+import { newToolpath } from './test.support/new.toolpath';
 import { TOOLPATH_MOVE_KIND } from './toolpath.constants';
 
 const LAYER_KEY = '#ff0000';
@@ -44,7 +45,7 @@ const getMove = (overrides: Partial<ToolpathMove> = {}): ToolpathMove => ({
   ...overrides,
 });
 
-const getToolpath = (moves: ToolpathMove[]): Toolpath => ({ moves, layers: [], warnings: [], bounds: undefined });
+const getToolpath = (moves: ToolpathMove[]): Toolpath => newToolpath({ moves });
 
 const getSValues = (text: string): number[] =>
   Array.from(text.matchAll(/S(\d+)/g), (match: RegExpMatchArray): number => Number(match[1]));

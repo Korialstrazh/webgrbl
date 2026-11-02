@@ -19,4 +19,6 @@ export interface FillMovesInput {
   layer: ProjectLayer;
   /** Where the head is before the layer starts. */
   startPoint: GeometryPoint;
+  /** Width of the machine work area in mm; the overscan is shortened so the head stays inside it. */
+  workAreaXMm: number;
 }

@@ -5,7 +5,7 @@
  *   data to the worker. takeLatest cancels the running generation on a new request or a cancel, and the generation's
  *   finally block cancels the worker.
  * - Parsed drawables are cached per object (BedDrawablesCache), so a layer change parses no SVG again.
- * - A document change during a generation restarts it, debounced by TOOLPATH_RESTART_DEBOUNCE_MS, so the result
+ * - A document or machine profile change during a generation restarts it, debounced by TOOLPATH_RESTART_DEBOUNCE_MS, so the result
  *   always matches the current document.
  * - An export started for one project is dropped, with an info toast, when another project opens before it downloads.
  * - When the store's sagas stop, the worker client is disposed.
@@ -35,24 +35,34 @@ import { getGcodeText } from '../toolpath/get.gcode.text';
 import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathGeneration } from '../toolpath/interfaces/ToolpathGeneration';
+import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachineArea';
 import type { ToolpathWorkerClient } from '../toolpath/interfaces/ToolpathWorkerClient';
 import { logToolpathGenerationError } from '../toolpath/log.toolpath.generation.error';
 import type { Action } from './action';
 import { selectGrblSettings } from './grbl.connection.state';
 import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
-import { selectActiveMachineProfile } from './machine.profile.state';
+import {
+  ActiveMachineProfileSelected,
+  MachineProfileDeleted,
+  MachineProfileSaved,
+  MachineProfilesImported,
+  MachineProfilesLoaded,
+  selectActiveMachineProfile,
+} from './machine.profile.state';
 import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 import { ProjectDocumentLoaded, selectProjectDocument, selectProjectLayers } from './project.document.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import { ProjectOpened, selectProjectId, selectProjectName } from './project.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
+import { selectToolpathMachineArea } from './toolpath.machine.area.selector';
 import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import {
   GcodeExportConfirmationRequested,
   GcodeExportRequested,
   ToolpathCancelled,
   ToolpathFailed,
+  ToolpathMachineAreaChanged,
   ToolpathProgress,
   ToolpathReady,
   ToolpathRequested,
@@ -65,6 +75,38 @@ import type { ToolpathStatus } from './toolpath.status.constants';
 
 // Only the newest progress matters, so older ones the saga has not put yet are dropped.
 const PROGRESS_BUFFER_SIZE = 1;
+const MACHINE_PROFILE_ACTION_TYPES: string[] = [
+  MachineProfilesLoaded.type,
+  MachineProfileSaved.type,
+  MachineProfileDeleted.type,
+  ActiveMachineProfileSelected.type,
+  MachineProfilesImported.type,
+];
+const TOOLPATH_INPUT_CHANGE_ACTION_TYPES: string[] = [
+  ...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES,
+  ToolpathMachineAreaChanged.type,
+];
+
+const hasMachineAreaChanged = (machineArea: ToolpathMachineArea, lastMachineArea: ToolpathMachineArea): boolean =>
+  machineArea.workAreaXMm !== lastMachineArea.workAreaXMm
+  || machineArea.workAreaYMm !== lastMachineArea.workAreaYMm
+  || machineArea.originCorner !== lastMachineArea.originCorner;
+
+/** A profile save that keeps the work area and origin (a jog speed, a name) leaves the toolpath current. */
+function* watchToolpathMachineArea(): Generator {
+  let lastMachineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
+
+  while (true) {
+    yield take(MACHINE_PROFILE_ACTION_TYPES);
+
+    const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
+
+    if (hasMachineAreaChanged(machineArea, lastMachineArea)) {
+      lastMachineArea = machineArea;
+      yield put(new ToolpathMachineAreaChanged());
+    }
+  }
+}
 
 function* putToolpathProgress(progressChannel: Channel<number>): Generator {
   while (true) {
@@ -78,6 +120,7 @@ function* generateToolpath(toolpathWorkerClient: ToolpathWorkerClient, drawables
   const documentVersion: number = (yield select(selectToolpathDocumentVersion)) as number;
   const projectDocument: ProjectDocument = (yield select(selectProjectDocument)) as ProjectDocument;
   const layers: ProjectLayer[] = (yield select(selectProjectLayers)) as ProjectLayer[];
+  const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
   const progressChannel: Channel<number> = channel<number>(buffers.sliding<number>(PROGRESS_BUFFER_SIZE));
   let generation: ToolpathGeneration | undefined;
 
@@ -87,7 +130,7 @@ function* generateToolpath(toolpathWorkerClient: ToolpathWorkerClient, drawables
       projectDocument,
     )) as BedDrawableSet;
 
-    generation = toolpathWorkerClient.generate({ ...drawableSet, layers }, (progress: number): void => {
+    generation = toolpathWorkerClient.generate({ ...drawableSet, layers, machineArea }, (progress: number): void => {
       progressChannel.put(progress);
     });
     yield fork(putToolpathProgress, progressChannel);
@@ -215,7 +258,8 @@ export function* watchToolpath(toolpathWorkerClient: ToolpathWorkerClient): Gene
         toolpathWorkerClient,
         drawablesCache,
       ),
-      debounce(TOOLPATH_RESTART_DEBOUNCE_MS, [...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES], restartRunningGeneration),
+      debounce(TOOLPATH_RESTART_DEBOUNCE_MS, TOOLPATH_INPUT_CHANGE_ACTION_TYPES, restartRunningGeneration),
+      fork(watchToolpathMachineArea),
       takeLeading(GcodeExportRequested.type, exportGcode),
     ])) as Task[];
 

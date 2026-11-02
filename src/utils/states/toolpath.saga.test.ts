@@ -3,6 +3,8 @@ import * as downloadModule from '../browser/download.text.file';
 import { getLayerKey } from '../layers/get.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
+import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
+import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
 import { newMachineProfile } from '../profiles/new.machine.profile';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
@@ -20,6 +22,7 @@ import { AnsweringToolpathWorker } from '../toolpath/test.support/answering.tool
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
 import type { AppToast } from './interfaces/AppToast';
 import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
+import { MachineProfileSaved, selectActiveMachineProfile } from './machine.profile.state';
 import type { AppStore } from './new.store';
 import {
   LayerToggled,
@@ -31,6 +34,7 @@ import {
 } from './project.document.state';
 import { ProjectOpened } from './project.state';
 import { selectToasts } from './toast.state';
+import { selectToolpathMachineArea } from './toolpath.machine.area.selector';
 import { watchToolpath } from './toolpath.saga';
 import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import {
@@ -56,6 +60,7 @@ const GENERATION_ERROR = new Error('worker crashed');
 const OTHER_PROJECT_ID = 'other-project';
 const OTHER_PROJECT_NAME = 'Other project';
 const NUDGE_COUNT = 3;
+const RENAMED_PROFILE_NAME = 'Renamed laser';
 const NUDGE_STEP_MM = 1;
 const SECOND_SQUARE_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
   + '<rect fill="none" stroke="#0000ff" width="10" height="10"/></svg>';
@@ -76,6 +81,16 @@ const nudgeFirstObject = (store: AppStore, stepIndex: number): void => {
   store.dispatch(new ProjectObjectsTransformed({
     transforms: { [firstObject.id]: { ...firstObject, xMm: firstObject.xMm + NUDGE_STEP_MM * (stepIndex + 1) } },
   }));
+};
+
+const getActiveProfile = (store: AppStore): MachineProfile => {
+  const activeProfile: MachineProfile | undefined = selectActiveMachineProfile(store.getState());
+
+  if (!activeProfile) {
+    throw new Error('The test store has no active profile');
+  }
+
+  return activeProfile;
 };
 
 const getFirstLayer = (store: AppStore): ProjectLayer => {
@@ -125,7 +140,11 @@ describe(watchToolpath.name, () => {
     const drawableSet: BedDrawableSet = getBedDrawables(selectProjectDocument(store.getState()));
 
     expect(selectToolpath(store.getState())).toEqual(
-      getToolpath(drawableSet.drawables, drawableSet.warnings, selectProjectLayers(store.getState())),
+      getToolpath({
+        ...drawableSet,
+        layers: selectProjectLayers(store.getState()),
+        machineArea: selectToolpathMachineArea(store.getState()),
+      }),
     );
     expect(selectToolpathProgress(store.getState())).toBe(FULL_PROGRESS);
   });
@@ -140,7 +159,30 @@ describe(watchToolpath.name, () => {
     expect(toolpathWorkerClient.generationInputs).toEqual([{
       ...getBedDrawables(selectProjectDocument(store.getState())),
       layers: selectProjectLayers(store.getState()),
+      machineArea: selectToolpathMachineArea(store.getState()),
     }]);
+  });
+
+  it('marks a ready toolpath stale when the active profile moves the origin corner', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+    const profile: MachineProfile = getActiveProfile(store);
+
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+    store.dispatch(new MachineProfileSaved({ profile: { ...profile, originCorner: MACHINE_ORIGIN_CORNER.BACK_RIGHT } }));
+
+    expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.STALE);
+  });
+
+  it('keeps a ready toolpath current when a profile save leaves the work area and origin alone', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+    const profile: MachineProfile = getActiveProfile(store);
+
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+    store.dispatch(new MachineProfileSaved({ profile: { ...profile, name: RENAMED_PROFILE_NAME } }));
+
+    expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.READY);
   });
 
   it('marks a ready toolpath stale when the document changes', async () => {

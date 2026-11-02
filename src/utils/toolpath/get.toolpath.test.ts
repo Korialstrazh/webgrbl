@@ -2,6 +2,7 @@ import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
 import { DEFAULT_PALETTE } from '../palette/palette.constants';
+import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
 import { newProjectObject } from '../project/new.project.object';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { SvgLinearGradient } from '../svg/geometry/interfaces/SvgLinearGradient';
@@ -11,16 +12,22 @@ import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
 import { SVG_IDENTITY_MATRIX } from '../svg/geometry/svg.transform.constants';
 import { SVG_NAMESPACE_URI } from '../svg/svg.constants';
 import { getBedDrawables } from './get.bed.drawables';
+import { getGcodeText } from './get.gcode.text';
 import { getToolpath } from './get.toolpath';
 import type { BedDrawable } from './interfaces/BedDrawable';
 import type { BedDrawableSet } from './interfaces/BedDrawableSet';
+import type { GcodeContext } from './interfaces/GcodeContext';
+import type { ObjectWarning } from './interfaces/ObjectWarning';
 import type { Toolpath } from './interfaces/Toolpath';
 import type { ToolpathLayerRange } from './interfaces/ToolpathLayerRange';
+import type { ToolpathMachineArea } from './interfaces/ToolpathMachineArea';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
+import type { ToolpathProgressListener } from './interfaces/ToolpathProgressListener';
 import { getBoxSubpath } from './test.support/get.box.subpath';
 import { newBedDrawable } from './test.support/new.bed.drawable';
 import { newDrawablePaint } from './test.support/new.drawable.paint';
 import { newSvgPaint } from './test.support/new.svg.paint';
+import { newToolpathMachineArea } from './test.support/new.toolpath.machine.area';
 import { FILL_OVERSCAN_MM, TOOLPATH_MOVE_KIND, TRAVEL_POWER_PERCENT } from './toolpath.constants';
 
 const RED = '#ff0000';
@@ -28,6 +35,8 @@ const GREEN = '#00a000';
 const WHITE = '#ffffff';
 const BLACK = '#000000';
 const FILL_SIZE_MM = 10;
+const FILL_LEFT_X_MM = 20;
+const TEST_WORK_AREA_X_MM = 400;
 const FILL_LINE_COUNT = 101;
 const HALF_FILL_MM = 5;
 const CUT_PASSES = 3;
@@ -42,6 +51,24 @@ const GRADIENT_DEFS: string = '<defs><linearGradient id="g" GRADIENT_ATTRIBUTES>
 const RING_PATH_DATA = 'M 0 5 A 5 5 0 1 0 10 5 A 5 5 0 1 0 0 5 Z M 3 5 A 2 2 0 1 0 7 5 A 2 2 0 1 0 3 5 Z';
 const RING_HOLE_INSIDE_MIN_X = 3.5;
 const RING_HOLE_INSIDE_MAX_X = 6.5;
+
+/** The toolpath on the default 400 x 300 mm front-left test machine. */
+const getTestToolpath = (
+  drawables: BedDrawable[],
+  warnings: ObjectWarning[],
+  layers: ProjectLayer[],
+  onProgress?: ToolpathProgressListener,
+): Toolpath => getToolpath({ drawables, warnings, layers, machineArea: newToolpathMachineArea() }, onProgress);
+
+const newGcodeContext = (machineArea: ToolpathMachineArea): GcodeContext => ({
+  ...machineArea,
+  projectName: 'Edges',
+  profileName: 'Right-hand laser',
+  sValueMax: 1000,
+  hasAirAssist: false,
+  appVersion: '0.1.0',
+  createdAtIso: '2026-11-02T00:00:00.000Z',
+});
 
 const getBlackToWhiteGradient = (overrides: Partial<SvgLinearGradient>): SvgLinearGradient => ({
   kind: SVG_GRADIENT_KIND.LINEAR,
@@ -73,7 +100,7 @@ const getGradientObjectToolpath = (gradientAttributes: string, rotationDeg: numb
     rotationDeg,
   );
 
-  return getToolpath(drawables, warnings, [getShadingLayer()]);
+  return getTestToolpath(drawables, warnings, [getShadingLayer()]);
 };
 
 /** The power of each fill line, with how many burnt pieces the line has. */
@@ -103,6 +130,16 @@ const getFilledBox = (colour: string, minX: number, paintOrder: number): BedDraw
   paintOrder,
 });
 
+/** A 10 x 10 mm filled box whose left edge is at leftX. */
+const getFilledBoxAt = (colour: string, leftX: number): BedDrawable => newBedDrawable({
+  subpaths: [getBoxSubpath({ minX: leftX, minY: 0, maxX: leftX + FILL_SIZE_MM, maxY: FILL_SIZE_MM })],
+  paint: newDrawablePaint({ fill: newSvgPaint({ colour }), stroke: undefined, strokeWidth: 1 }),
+  paintOrder: 0,
+});
+
+const getMoveXs = (toolpath: Toolpath): number[] =>
+  toolpath.moves.flatMap((move: ToolpathMove): number[] => [move.from.x, move.to.x]);
+
 const getBurnMoves = (toolpath: Toolpath): ToolpathMove[] =>
   toolpath.moves.filter(
     (move: ToolpathMove): boolean => move.kind === TOOLPATH_MOVE_KIND.BURN && move.powerPercent > 0,
@@ -123,7 +160,7 @@ const isOverscanMove = (move: ToolpathMove | undefined, lineY: number): boolean 
 
 describe(getToolpath.name, () => {
   it('burns a red square on the Cut layer as 3 closed loops at 100 %', () => {
-    const toolpath: Toolpath = getToolpath([getRedSquare(0)], [], [getCutLayer()]);
+    const toolpath: Toolpath = getTestToolpath([getRedSquare(0)], [], [getCutLayer()]);
     const loop: GeometryPoint[] = [{ x: 20, y: 10 }, { x: 20, y: 20 }, { x: 10, y: 20 }, { x: 10, y: 10 }];
 
     expect(toolpath.moves[0]).toMatchObject({
@@ -139,7 +176,7 @@ describe(getToolpath.name, () => {
   });
 
   it('fills a 10 x 10 mm green square at 0.1 mm with 101 alternating lines and 2 mm overscan at power 0', () => {
-    const toolpath: Toolpath = getToolpath([getFilledBox(GREEN, 0, 0)], [], [getFillLayer()]);
+    const toolpath: Toolpath = getTestToolpath([getFilledBoxAt(GREEN, FILL_LEFT_X_MM)], [], [getFillLayer()]);
     const burnMoves: ToolpathMove[] = getBurnMoves(toolpath);
 
     expect(getBurnLineHeights(toolpath)).toHaveLength(FILL_LINE_COUNT);
@@ -157,15 +194,50 @@ describe(getToolpath.name, () => {
     }
 
     expect(toolpath.bounds).toEqual({
-      minX: -FILL_OVERSCAN_MM,
+      minX: FILL_LEFT_X_MM - FILL_OVERSCAN_MM,
       minY: 0,
-      maxX: FILL_SIZE_MM + FILL_OVERSCAN_MM,
+      maxX: FILL_LEFT_X_MM + FILL_SIZE_MM + FILL_OVERSCAN_MM,
       maxY: FILL_SIZE_MM,
     });
   });
 
+  it('shortens the fill overscan at the left edge so the head never goes below x = 0', () => {
+    const toolpath: Toolpath = getTestToolpath([getFilledBoxAt(GREEN, 0)], [], [getFillLayer()]);
+
+    expect(toolpath.bounds?.minX).toBe(0);
+    expect(Math.min(...getMoveXs(toolpath))).toBe(0);
+    expect(getBurnMoves(toolpath)).toHaveLength(FILL_LINE_COUNT);
+  });
+
+  it('shortens the fill overscan at the right edge so the head never passes the work area width', () => {
+    const rightEdgeBox: BedDrawable = getFilledBoxAt(GREEN, TEST_WORK_AREA_X_MM - FILL_SIZE_MM);
+
+    const toolpath: Toolpath = getTestToolpath([rightEdgeBox], [], [getFillLayer()]);
+
+    expect(toolpath.bounds?.maxX).toBe(TEST_WORK_AREA_X_MM);
+    expect(Math.max(...getMoveXs(toolpath))).toBe(TEST_WORK_AREA_X_MM);
+  });
+
+  it('keeps every G-code X inside the work area and starts at the corner for a right-hand origin', () => {
+    const machineArea: ToolpathMachineArea = newToolpathMachineArea({ originCorner: MACHINE_ORIGIN_CORNER.FRONT_RIGHT });
+    const drawables: BedDrawable[] = [
+      getFilledBoxAt(GREEN, 0),
+      getFilledBoxAt(GREEN, TEST_WORK_AREA_X_MM - FILL_SIZE_MM),
+    ];
+
+    const toolpath: Toolpath = getToolpath({ drawables, warnings: [], layers: [getFillLayer()], machineArea });
+    const gcodeText: string = getGcodeText(toolpath, newGcodeContext(machineArea));
+    const gcodeXs: number[] = Array.from(gcodeText.matchAll(/X(-?[\d.]+)/g), (match: RegExpMatchArray) => Number(match[1]));
+
+    expect(gcodeXs.length).toBeGreaterThan(FILL_LINE_COUNT);
+    expect(Math.min(...gcodeXs)).toBe(0);
+    expect(Math.max(...gcodeXs)).toBe(TEST_WORK_AREA_X_MM);
+    expect(toolpath.startPoint).toEqual({ x: TEST_WORK_AREA_X_MM, y: 0 });
+    expect(toolpath.moves[0]?.from).toEqual({ x: TEST_WORK_AREA_X_MM, y: 0 });
+  });
+
   it('leaves the half under a white rectangle unburnt while a cut line under the fill still burns', () => {
-    const toolpath: Toolpath = getToolpath(
+    const toolpath: Toolpath = getTestToolpath(
       [getRedSquare(0), getFilledBox(GREEN, 0, 1), getFilledBox(WHITE, HALF_FILL_MM, 2)],
       [],
       [getCutLayer(), getFillLayer()],
@@ -181,7 +253,7 @@ describe(getToolpath.name, () => {
   });
 
   it('burns grey #808080 in the shading layer at the power of its lightness', () => {
-    const toolpath: Toolpath = getToolpath([getFilledBox('#808080', 0, 0)], [], [getShadingLayer()]);
+    const toolpath: Toolpath = getTestToolpath([getFilledBox('#808080', 0, 0)], [], [getShadingLayer()]);
 
     expect(getBurnMoves(toolpath)[0]?.powerPercent).toBeCloseTo(SHADING_MAX_PERCENT * (1 - GREY_LIGHTNESS), 6);
     expect(getBurnMoves(toolpath)[0]?.powerPercent).toBeCloseTo(29.9, 1);
@@ -193,7 +265,7 @@ describe(getToolpath.name, () => {
       paint: newDrawablePaint({ fill: newSvgPaint({ colour: BLACK, opacity: 0.5 }) }),
     });
 
-    const toolpath: Toolpath = getToolpath([halfBlack], [], [getShadingLayer()]);
+    const toolpath: Toolpath = getTestToolpath([halfBlack], [], [getShadingLayer()]);
 
     expect(getBurnMoves(toolpath)[0]?.powerPercent).toBeCloseTo(30, 9);
   });
@@ -207,7 +279,7 @@ describe(getToolpath.name, () => {
       }),
     });
 
-    const toolpath: Toolpath = getToolpath([gradientBox], [], [getShadingLayer()]);
+    const toolpath: Toolpath = getTestToolpath([gradientBox], [], [getShadingLayer()]);
     const firstLineBurns: ToolpathMove[] = getBurnMoves(toolpath).filter(
       (move: ToolpathMove): boolean => move.to.y === 0 && move.powerPercent > 0,
     );
@@ -234,7 +306,7 @@ describe(getToolpath.name, () => {
       }),
     });
 
-    const firstLineBurns: ToolpathMove[] = getBurnMoves(getToolpath([gradientBox], [], [getShadingLayer()]))
+    const firstLineBurns: ToolpathMove[] = getBurnMoves(getTestToolpath([gradientBox], [], [getShadingLayer()]))
       .filter((move: ToolpathMove): boolean => move.to.y === 0);
 
     expect(firstLineBurns[0]?.from.x).toBe(0);
@@ -271,7 +343,7 @@ describe(getToolpath.name, () => {
         0,
       );
 
-      return getBurnMoves(getToolpath(drawables, warnings, [getFillLayer()]))
+      return getBurnMoves(getTestToolpath(drawables, warnings, [getFillLayer()]))
         .filter((move: ToolpathMove): boolean => Math.abs(move.to.y - HALF_FILL_MM) < 0.05);
     };
     const isCrossingHole = (move: ToolpathMove): boolean =>
@@ -284,13 +356,13 @@ describe(getToolpath.name, () => {
   });
 
   it('leaves a disabled layer out entirely', () => {
-    const toolpath: Toolpath = getToolpath([getRedSquare(0)], [], [{ ...getCutLayer(), enabled: false }]);
+    const toolpath: Toolpath = getTestToolpath([getRedSquare(0)], [], [{ ...getCutLayer(), enabled: false }]);
 
-    expect(toolpath).toEqual({ moves: [], layers: [], warnings: [], bounds: undefined });
+    expect(toolpath).toEqual({ startPoint: { x: 0, y: 0 }, moves: [], layers: [], warnings: [], bounds: undefined });
   });
 
   it('burns the enabled layers in their order, not in list order', () => {
-    const toolpath: Toolpath = getToolpath(
+    const toolpath: Toolpath = getTestToolpath(
       [getRedSquare(0), getFilledBox(GREEN, 0, 1)],
       [],
       [{ ...getCutLayer(), order: 1 }, { ...getFillLayer(), order: 0 }],
@@ -303,7 +375,7 @@ describe(getToolpath.name, () => {
   it('reports the share of enabled layers done after each layer', () => {
     const reportedProgress: number[] = [];
 
-    getToolpath(
+    getTestToolpath(
       [getRedSquare(0), getFilledBox(GREEN, 0, 1)],
       [],
       [getCutLayer(), getFillLayer(), { ...getShadingLayer(), enabled: false }],
@@ -316,11 +388,11 @@ describe(getToolpath.name, () => {
   it('passes the warnings of unsupported objects through', () => {
     const warnings: Toolpath['warnings'] = [{ objectId: 'text-object', kind: SVG_UNSUPPORTED_KIND.TEXT }];
 
-    expect(getToolpath([], warnings, [getCutLayer()]).warnings).toEqual(warnings);
+    expect(getTestToolpath([], warnings, [getCutLayer()]).warnings).toEqual(warnings);
   });
 
   it('contributes nothing for a paint whose colour has no layer', () => {
-    const toolpath: Toolpath = getToolpath([getFilledBox('#123456', 0, 0)], [], [getCutLayer(), getFillLayer()]);
+    const toolpath: Toolpath = getTestToolpath([getFilledBox('#123456', 0, 0)], [], [getCutLayer(), getFillLayer()]);
 
     expect(toolpath.moves).toEqual([]);
   });

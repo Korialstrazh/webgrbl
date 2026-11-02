@@ -13,6 +13,7 @@ const LIMITS: MachineMotionLimits = {
 };
 const BURN_POWER_PERCENT = 40;
 const DIGITS = 6;
+const START_POINT = { x: 0, y: 0 };
 const ACCELERATION_PHASE_SECONDS = 0.05;
 const ACCELERATION_PHASE_DISTANCE_MM = 1.25;
 
@@ -27,7 +28,7 @@ const getMove = (fromX: number, toX: number, powerPercent: number): ToolpathMove
 });
 
 describe(getTimelinePosition.name, () => {
-  const toolpath = { moves: [getMove(0, 100, BURN_POWER_PERCENT)] };
+  const toolpath = { startPoint: START_POINT, moves: [getMove(0, 100, BURN_POWER_PERCENT)] };
   const timeline = getMotionTimeline(toolpath, LIMITS);
 
   it('returns the midpoint at half time for a symmetric move', () => {
@@ -50,7 +51,7 @@ describe(getTimelinePosition.name, () => {
   });
 
   it('finds the move that is running with a binary search', () => {
-    const twoMoves = { moves: [getMove(0, 100, 10), getMove(100, 200, 20)] };
+    const twoMoves = { startPoint: START_POINT, moves: [getMove(0, 100, 10), getMove(100, 200, 20)] };
     const twoMoveTimeline = getMotionTimeline(twoMoves, LIMITS);
     const position = getTimelinePosition(twoMoves, twoMoveTimeline, (twoMoveTimeline.moveStartTimesS[1] ?? 0) + 0.01);
 
@@ -59,11 +60,12 @@ describe(getTimelinePosition.name, () => {
     expect(position.point.x).toBeGreaterThan(100);
   });
 
-  it('gives the origin, move index -1 and power 0 for an empty toolpath', () => {
+  it('gives the start point, move index -1 and power 0 for an empty toolpath', () => {
     const emptyTimeline = getMotionTimeline({ moves: [] }, LIMITS);
+    const backRightStartPoint = { x: 400, y: 300 };
 
-    expect(getTimelinePosition({ moves: [] }, emptyTimeline, 5)).toEqual({
-      point: { x: 0, y: 0 },
+    expect(getTimelinePosition({ startPoint: backRightStartPoint, moves: [] }, emptyTimeline, 5)).toEqual({
+      point: backRightStartPoint,
       moveIndex: -1,
       powerPercent: 0,
     });
