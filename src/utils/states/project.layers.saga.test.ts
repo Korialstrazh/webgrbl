@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getLayerKey } from '../layers/get.layer.key';
+import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { DEFAULT_CUT_ENTRY, DEFAULT_SCORE_ENTRY } from '../palette/palette.constants';
+import { DEFAULT_CUT_ENTRY, DEFAULT_PALETTE, DEFAULT_SCORE_ENTRY } from '../palette/palette.constants';
 import type { LoadedProject } from '../project/interfaces/LoadedProject';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import type { StoredProject } from '../project/interfaces/StoredProject';
@@ -151,5 +152,25 @@ describe('project layers', () => {
     expect(selectProjectId(store.getState())).toBe(storedProject.id);
     expect(getVisibleLayer(store, RED)?.paletteEntryId).toBe(DEFAULT_CUT_ENTRY.id);
     expect(getVisibleLayer(store, BLUE)?.paletteEntryId).toBe(DEFAULT_SCORE_ENTRY.id);
+  });
+
+  it('brings a stored layer that fails validation back switched off, so an off layer never turns on', async () => {
+    const storedProject: StoredProject = await PROJECT_REPOSITORY.createProject(OLD_PROJECT_NAME);
+    const redObject: ProjectObject = newProjectObject({ svgText: RED_AND_BLUE_SVG_TEXT });
+    const { svgText, ...storedObject } = redObject;
+    // A NaN order fails validation, as a row written by an older or broken build might.
+    const malformedRedLayer: ProjectLayer = {
+      ...getNewLayer(RED, DEFAULT_PALETTE, 0),
+      enabled: false,
+      order: Number.NaN,
+    };
+
+    await WEBGRBL_DATABASE.svgAssets.put({ objectId: redObject.id, projectId: storedProject.id, svgText });
+    await WEBGRBL_DATABASE.projects.put({ ...storedProject, objects: [storedObject], layers: [malformedRedLayer] });
+    await PROJECT_REPOSITORY.setLastOpenedProjectId(storedProject.id);
+
+    const store: AppStore = await newStartedStore();
+
+    expect(getVisibleLayer(store, RED)?.enabled).toBe(false);
   });
 });

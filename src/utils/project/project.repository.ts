@@ -161,7 +161,13 @@ export const PROJECT_REPOSITORY = {
       const svgAssetRows: StoredSvgAsset[] = await svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX).equals(projectId)
         .toArray();
 
-      return { project: storedProject, document: getJoinedProjectDocument(storedProject, svgAssetRows) };
+      const projectDocument: ProjectDocument = getJoinedProjectDocument(storedProject, svgAssetRows);
+
+      return {
+        project: storedProject,
+        document: projectDocument,
+        hasDroppedLayers: projectDocument.layers.length < (storedProject.layers?.length ?? 0),
+      };
     });
   },
 
