@@ -134,13 +134,13 @@ LAYER_SETTINGS_LINE_INTERVAL;Line interval (mm)
 LAYER_SETTINGS_MAX_POWER;Max power (%)
 LAYER_SETTINGS_MIN_POWER;Min power (%)
 LAYER_SETTINGS_MODE;Mode
+LAYER_SETTINGS_OVERLINE;Layer settings
 LAYER_SETTINGS_PASSES;Passes
 LAYER_SETTINGS_PRESET_DESCRIPTION;Save these settings as a material preset to use on other designs.
 LAYER_SETTINGS_PRESET_SAVE;Save as material preset
 LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
 LAYER_SETTINGS_SEND;Send to laser
 LAYER_SETTINGS_SPEED;Speed (mm/min)
-LAYER_SETTINGS_TITLE;Layer settings: {{name}}
 LAYERS_EMPTY_HINT;No layers yet. Layers appear when the design has colours.
 LAYERS_LIST_LABEL;Project layers
 LAYERS_MOVE_DOWN;Move {{name}} down

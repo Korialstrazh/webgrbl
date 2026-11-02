@@ -32,6 +32,7 @@ export const LayerRow = ({
   layerEntry,
   isFirst,
   isLast,
+  isOpen,
   onOpen,
   onToggle,
   onMoveUp,
@@ -53,7 +54,7 @@ export const LayerRow = ({
 
   return (
     <li
-      className={styles.row}
+      className={isOpen ? [styles.row, styles.openRow].join(' ') : styles.row}
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -66,7 +67,7 @@ export const LayerRow = ({
         aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
         onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
       />
-      <Button className={styles.openButton} type={ANTD_BUTTON_TYPE_TEXT} onClick={onOpen}>
+      <Button className={styles.openButton} type={ANTD_BUTTON_TYPE_TEXT} aria-expanded={isOpen} onClick={onOpen}>
         <span className={styles.swatch}>
           <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
         </span>

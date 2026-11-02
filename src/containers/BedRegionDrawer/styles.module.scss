@@ -3,3 +3,15 @@
 .bedRegionDrawer:global(.ant-drawer) {
   position: absolute;
 }
+
+// A clear mask: it still takes the click outside that closes the drawer, but the bed stays fully visible, so the user
+// sees the drawing change while tuning a setting.
+.transparentMask:global(.ant-drawer-mask) {
+  background-color: transparent;
+  backdrop-filter: none;
+}
+
+// The drawer edge continues the panel border it opens from, so drawer and panel read as one surface.
+.drawerSection {
+  border-inline: 1px solid var(--color-border);
+}

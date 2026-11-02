@@ -87,6 +87,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
               layerEntry={getLayerPaletteEntry(layer, paletteEntries)}
               isFirst={layerIndex === 0}
               isLast={layerIndex === layers.length - 1}
+              isOpen={layerKey === openLayerKey}
               onOpen={() => setOpenLayerKey(layerKey)}
               onToggle={(enabled: boolean) => dispatch(new LayerToggled({ layerKey, enabled }))}
               onMoveUp={() => moveLayerToIndex(layerKey, layerIndex - 1)}

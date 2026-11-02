@@ -20,6 +20,8 @@ export interface LayerRowProps {
   isFirst: boolean;
   /** Whether the layer burns last, so it cannot move down. */
   isLast: boolean;
+  /** Whether the settings drawer shows this layer, so the whole row is highlighted as its owner. */
+  isOpen: boolean;
   onOpen: () => void;
   onToggle: (enabled: boolean) => void;
   onMoveUp: () => void;

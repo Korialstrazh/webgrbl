@@ -1,7 +1,7 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { Provider, useSelector } from 'react-redux';
-import type { MockInstance } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 import { LayerSettingsDrawer } from '.';
 import { ENTER_KEY } from '../../utils/browser/browser.events.constants';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
@@ -51,6 +51,10 @@ const BLACK_END_PERCENT_TEXT = 'Black: 60 %';
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
 const DRAWER_ROOT_SELECTOR = '.ant-drawer';
 const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
+const DRAWER_MASK_SELECTOR = '.ant-drawer-mask';
+const TRANSPARENT_MASK_CLASS_NAME = 'transparentMask';
+const DRAWER_OVERLINE = 'Layer settings';
+const CUT_LAYER_NAME = 'Cut';
 
 const newColouredObject = (colour: string): ProjectObject => newProjectObject({
   svgText: `<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm"><rect fill="${colour}" width="5" height="5"/></svg>`,
@@ -143,6 +147,43 @@ describe(LayerSettingsDrawer.name, () => {
 
     expect(bedRegionHost).toContainElement(drawerRoot instanceof HTMLElement ? drawerRoot : null);
     expect(drawerRoot).toHaveClass(DRAWER_LEFT_CLASS_NAME);
+  });
+
+  it('keeps the bed visible under a clear mask that still closes the drawer when clicked', () => {
+    const store: AppStore = newStore();
+    const onClose: Mock<() => void> = vi.fn<() => void>();
+    loadColours(store, [CUT_COLOUR]);
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <BedRegionTestHost>
+            <LayerSettingsDrawer
+              layer={selectProjectLayers(store.getState())[0]}
+              onClose={onClose}
+              onEditPalette={vi.fn()}
+            />
+          </BedRegionTestHost>
+        </AntdTestProvider>
+      </Provider>,
+    );
+    const mask: HTMLElement | null = document.querySelector(DRAWER_MASK_SELECTOR);
+
+    expect(mask?.className).toContain(TRANSPARENT_MASK_CLASS_NAME);
+
+    fireEvent.click(mask ?? document.body);
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('titles the drawer with the layer name under a small overline', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    renderDrawer(store, CUT_COLOUR);
+
+    const layerName: HTMLElement = within(screen.getByRole('dialog')).getByTitle(CUT_LAYER_NAME);
+
+    expect(layerName).toHaveTextContent(CUT_LAYER_NAME);
+    expect(layerName.previousElementSibling).toHaveTextContent(DRAWER_OVERLINE);
   });
 
   it('shows the watts of the active profile next to the power', () => {
