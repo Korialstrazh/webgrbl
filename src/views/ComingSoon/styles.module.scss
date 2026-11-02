@@ -1,32 +1,39 @@
-.comingSoon {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
+@use '../../styles/accessibility' as accessibility;
 
-.notice {
+// The feature and its tag on one line, so the notice never adds a row to a bar or a card.
+.comingSoon {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin: 0;
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
-.badge {
-  padding: 0.125rem var(--space-2);
-  border: 1px solid var(--color-warning);
-  border-radius: var(--radius-sm);
-  color: var(--color-warning);
-  font-weight: 600;
-}
-
-.description {
-  color: var(--color-text-muted);
-}
-
-.disabled {
-  opacity: 0.55;
-  pointer-events: none;
+// Slightly dimmed, never below 0.8 opacity, so the label stays readable; inert, so it takes no clicks or focus.
+.content {
+  flex: 0 1 auto;
+  min-width: 0;
+  opacity: 0.8;
   user-select: none;
+}
+
+// A small neutral chip: muted text on a subtle surface, so it does not compete with the real controls.
+.soonTag:global(.ant-tag) {
+  flex: none;
+  margin: 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  cursor: help;
+}
+
+// The description for screen readers; sighted users get it from the tooltip.
+.description {
+  @include accessibility.visually-hidden;
 }

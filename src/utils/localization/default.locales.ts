@@ -434,7 +434,7 @@ registerLocales({
       [DEFAULT.BED_VIEW_DESIGN]: "Design",
       [DEFAULT.BED_VIEW_MODE_LABEL]: "Bed view",
       [DEFAULT.BED_VIEW_TOOLPATH]: "Toolpath",
-      [DEFAULT.COMING_SOON]: "Coming soon",
+      [DEFAULT.COMING_SOON]: "Soon",
       [DEFAULT.CONNECTION_PILL_CONNECTED]: "Connected",
       [DEFAULT.CONNECTION_PILL_CONNECTING]: "Connecting",
       [DEFAULT.CONNECTION_PILL_DISCONNECTED]: "Disconnected",

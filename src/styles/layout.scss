@@ -14,8 +14,8 @@ $machine-panel-width: 22rem;
 $design-panel-width: 18.75rem;
 
 // The top bar and the status strip keep these heights at any width, so the regions between them get a known space.
-$top-bar-height: 6rem;
-$status-strip-height: 4.75rem;
+$top-bar-height: 3.5rem;
+$status-strip-height: 3rem;
 
 // The sticky STOP bar at the bottom of a narrow window; the pinned toast stack stops short of it.
 $sticky-stop-bar-height: 4.5rem;

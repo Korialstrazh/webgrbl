@@ -1,11 +1,13 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Button, Slider, Switch } from 'antd';
 import type { Mock } from 'vitest';
 import { ComingSoon } from '.';
 import { ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
 
 const DESCRIPTION_TEXT = 'Frame the job outline on the bed.';
-const BADGE_TEXT = 'Coming soon';
+const TAG_TEXT = 'Soon';
+// antd opens a tooltip after a short hover delay.
+const TOOLTIP_OPEN_DELAY_MS = 200;
 const BUTTON_LABEL = 'Frame';
 const WRAPPED_TEST_ID = 'wrapped';
 const ENTER_KEY = 'Enter';
@@ -81,14 +83,57 @@ describe(ComingSoon.name, () => {
     expect(wrapper).toHaveAttribute('inert');
   });
 
-  it('shows the badge and the description', () => {
+  it('shows a small Soon tag beside the feature, not an inline description', () => {
+    render(
+      <ComingSoon description={DESCRIPTION_TEXT}>
+        <span data-testid={WRAPPED_TEST_ID}>{BUTTON_LABEL}</span>
+      </ComingSoon>,
+    );
+
+    const tag: HTMLElement = screen.getByText(TAG_TEXT);
+
+    expect(tag).toBeVisible();
+    expect(tag.closest('[inert]')).toBeNull();
+    expect(screen.getByTestId(WRAPPED_TEST_ID).parentElement?.nextElementSibling).toBe(tag);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('shows the description in a tooltip while the feature is hovered', async () => {
+    vi.useFakeTimers();
+    render(
+      <ComingSoon description={DESCRIPTION_TEXT}>
+        <span data-testid={WRAPPED_TEST_ID}>{BUTTON_LABEL}</span>
+      </ComingSoon>,
+    );
+
+    fireEvent.mouseEnter(screen.getByTestId(WRAPPED_TEST_ID).parentElement?.parentElement ?? document.body);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(TOOLTIP_OPEN_DELAY_MS);
+    });
+    vi.useRealTimers();
+
+    expect(screen.getByRole('tooltip')).toHaveTextContent(DESCRIPTION_TEXT);
+  });
+
+  it('shows the description in a tooltip when the tag takes the keyboard focus', async () => {
+    vi.useFakeTimers();
     render(
       <ComingSoon description={DESCRIPTION_TEXT}>
         <span>{BUTTON_LABEL}</span>
       </ComingSoon>,
     );
 
-    expect(screen.getByText(BADGE_TEXT)).toBeVisible();
-    expect(screen.getByText(DESCRIPTION_TEXT)).toBeVisible();
+    const tag: HTMLElement = screen.getByText(TAG_TEXT);
+
+    act(() => {
+      tag.focus();
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(TOOLTIP_OPEN_DELAY_MS);
+    });
+    vi.useRealTimers();
+
+    expect(tag).toHaveFocus();
+    expect(screen.getByRole('tooltip')).toHaveTextContent(DESCRIPTION_TEXT);
   });
 });

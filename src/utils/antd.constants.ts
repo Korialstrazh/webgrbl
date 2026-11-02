@@ -22,6 +22,8 @@ import type {
   SegmentedProps,
   SplitterProps,
   SwitchProps,
+  TagProps,
+  TooltipProps,
 } from 'antd';
 
 /** The compact button size, for actions inside a chip or a bar. */
@@ -83,3 +85,9 @@ export const ANTD_SPLITTER_ORIENTATION_VERTICAL: SplitterProps['orientation'] = 
 
 /** The compact segmented control size, for secondary choices next to larger controls. */
 export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
+
+/** A tag drawn as a soft filled chip without a border. */
+export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';
+
+/** The tooltip opens while its anchor is hovered or holds the keyboard focus. */
+export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['hover', 'focus'];

@@ -1,3 +1,5 @@
+@use '../../styles/accessibility' as accessibility;
+
 // Dialogs and drawers render in here, absolutely positioned, so they fill this box only; the regions container clips
 // them, so they never reach the machine panel or the sticky stop bar.
 .bedPanel {
@@ -23,13 +25,7 @@
 
 // Kept for screen readers and the landmark name, hidden on screen: the header row already shows what the panel is.
 .title {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  @include accessibility.visually-hidden;
 }
 
 // One row that never grows into the bed: the editing tools, or the Toolpath controls, on the left and the view switch at

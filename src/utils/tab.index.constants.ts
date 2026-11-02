@@ -11,3 +11,6 @@
 
 /** The element can take focus from code or a click, but Tab skips it. */
 export const SCRIPT_FOCUS_ONLY_TAB_INDEX = -1;
+
+/** The element joins the Tab order where it stands in the page. */
+export const KEYBOARD_FOCUSABLE_TAB_INDEX = 0;
