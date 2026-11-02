@@ -1,9 +1,5 @@
 import type { ScanlineSpan } from './interfaces/ScanlineSpan';
 
-/** Whether the two spans neither overlap nor touch. */
-const isSpanApart = (firstSpan: ScanlineSpan, secondSpan: ScanlineSpan): boolean =>
-  firstSpan.x1 < secondSpan.x0 || firstSpan.x0 > secondSpan.x1;
-
 /**
  * Tracks which pieces of one scanline are already covered while paint areas are laid on it from front to back.
  *
@@ -52,3 +48,9 @@ export class ScanlineCoverage {
     return visibleSpans;
   }
 }
+
+// Declared after the class so the file header stays the class header right below the imports; it is only called once
+// a method runs.
+/** Whether the two spans neither overlap nor touch. */
+const isSpanApart = (firstSpan: ScanlineSpan, secondSpan: ScanlineSpan): boolean =>
+  firstSpan.x1 < secondSpan.x0 || firstSpan.x0 > secondSpan.x1;
