@@ -3,7 +3,8 @@
  *
  * - Design view: the project objects on the bed, edited with the Select and Move tools.
  * - Toolpath view: the real job at the simulation time instead of the objects (no editing there), with its colour and
- *   travel toggles, the job size and estimate, the generation progress or out-of-date banner, and the warnings.
+ *   travel toggles, the job size and estimate, the generation progress or out-of-date banner, the warnings, and the
+ *   simulation playback bar below the bed.
  * - The other tools and the 3D view are not built yet. SVG files dropped on the bed are imported.
  *
  * Its element is the host that dialogs and drawers render into.
@@ -31,6 +32,7 @@ import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.
 import { BedView } from '../../views/BedView';
 import { ComingSoon } from '../../views/ComingSoon';
 import { BedObjects } from '../BedObjects';
+import { SimulationPlaybackBar } from '../SimulationPlaybackBar';
 import { ToastStack } from '../ToastStack';
 import { ToolpathLayer } from '../ToolpathLayer';
 import { ToolpathStatusOverlay } from '../ToolpathStatusOverlay';
@@ -139,6 +141,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
         {isToolpathView && <ToolpathStatusOverlay />}
         {isToolpathView && <ToolpathWarningsPanel />}
       </div>
+      {isToolpathView && <SimulationPlaybackBar />}
       <ToastStack isWide={isWide} />
     </Layout.Content>
   );

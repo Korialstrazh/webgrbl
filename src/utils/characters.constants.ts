@@ -59,3 +59,17 @@ export const HORIZONTAL_ELLIPSIS = '\u2026';
 
 /** The long dash that separates the parts of the G-code title line. */
 export const EM_DASH = '\u2014';
+
+// The playback symbols end in the text variation selector (U+FE0E), so they draw as plain glyphs, not as emoji.
+
+/** The bar and left triangles that stand for back to start. */
+export const BACK_TO_START_SYMBOL = '\u23EE\uFE0E';
+
+/** The right triangle that stands for play. */
+export const PLAY_SYMBOL = '\u25B6\uFE0E';
+
+/** The two bars that stand for pause. */
+export const PAUSE_SYMBOL = '\u23F8\uFE0E';
+
+/** The right triangles and bar that stand for to end. */
+export const TO_END_SYMBOL = '\u23ED\uFE0E';

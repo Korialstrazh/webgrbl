@@ -17,6 +17,7 @@ import { watchLaserPointer } from './laser.pointer.saga';
 import { watchMachineProfiles } from './machine.profile.saga';
 import { watchPalette } from './palette.saga';
 import { watchProjects } from './project.saga';
+import { watchSimulation } from './simulation.saga';
 import { watchInfoToastExpiry } from './toast.state';
 import { watchToolpath } from './toolpath.saga';
 
@@ -33,5 +34,6 @@ export function* rootSaga(
     fork(watchProjects),
     fork(watchGrblController, grblControllerSagaDependencies),
     fork(watchToolpath, toolpathWorkerClient),
+    fork(watchSimulation),
   ]);
 }

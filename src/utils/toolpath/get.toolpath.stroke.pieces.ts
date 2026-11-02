@@ -1,7 +1,8 @@
 /**
  * Cuts one burn path group into what the Toolpath view draws at one time: whole chunks before the head are burnt,
  * whole chunks after it remain, and only the chunk the head is in is split into a burnt and a remaining piece. Whole
- * chunks reuse their prebuilt text, so per frame at most one chunk (TOOLPATH_PATH_CHUNK_MOVE_COUNT moves) is rebuilt.
+ * chunks reuse their prebuilt text, so per frame at most one chunk (TOOLPATH_PATH_CHUNK_MOVE_COUNT moves) is rebuilt;
+ * a group the head has not reached or has finished, or whose burnt moves end at a chunk start, rebuilds none.
  *
  * @author michael.morosov
  *
@@ -82,6 +83,44 @@ const getWholeChunkPiece = (
   pathText: strokePath.chunkTexts[chunkIndex] ?? '',
 });
 
+/**
+ * The burn state of the whole chunk the head count falls in when the head does not cut it: the head stands at its
+ * first move (nothing of it is burnt) or past its last move (all of it is burnt, as for a finished group). Undefined
+ * when the head is inside the chunk, so only then its text has to be rebuilt.
+ */
+const getUncutChunkBurnState = (
+  strokePath: ToolpathStrokePath,
+  { burntMoveCount, splitMove }: ToolpathHeadCut,
+  chunkIndex: number,
+): ToolpathBurnState | undefined => {
+  const chunkStart: number = chunkIndex * TOOLPATH_PATH_CHUNK_MOVE_COUNT;
+  const chunkEnd: number = Math.min(chunkStart + TOOLPATH_PATH_CHUNK_MOVE_COUNT, strokePath.moveIndices.length);
+
+  if (splitMove) {
+    return undefined;
+  }
+
+  if (burntMoveCount === chunkStart) {
+    return TOOLPATH_BURN_STATE.REMAINING;
+  }
+
+  return burntMoveCount === chunkEnd ? TOOLPATH_BURN_STATE.BURNT : undefined;
+};
+
+/** The pieces of the chunk the head count falls in: the prebuilt chunk when the head does not cut it. */
+const getHeadChunkPieces = (
+  strokePath: ToolpathStrokePath,
+  moves: ToolpathMove[],
+  headCut: ToolpathHeadCut,
+  chunkIndex: number,
+): ToolpathStrokePiece[] => {
+  const uncutBurnState: ToolpathBurnState | undefined = getUncutChunkBurnState(strokePath, headCut, chunkIndex);
+
+  return uncutBurnState
+    ? [getWholeChunkPiece(strokePath, chunkIndex, uncutBurnState)]
+    : getSplitChunkPieces(strokePath, moves, headCut);
+};
+
 export const getToolpathStrokePieces = (
   strokePath: ToolpathStrokePath,
   moves: ToolpathMove[],
@@ -97,7 +136,7 @@ export const getToolpathStrokePieces = (
     } else if (chunkIndex > splitChunkIndex) {
       pieces.push(getWholeChunkPiece(strokePath, chunkIndex, TOOLPATH_BURN_STATE.REMAINING));
     } else {
-      pieces.push(...getSplitChunkPieces(strokePath, moves, headCut));
+      pieces.push(...getHeadChunkPieces(strokePath, moves, headCut, chunkIndex));
     }
   }
 

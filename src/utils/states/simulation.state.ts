@@ -48,6 +48,10 @@ export class SimulationPlayToggled extends Action {
   public static readonly type: string = actionType('simulation play toggled');
 }
 
+export class SimulationPaused extends Action {
+  public static readonly type: string = actionType('simulation paused');
+}
+
 export class SimulationSpeedSet extends Action<SimulationSpeedPayload> {
   public static readonly type: string = actionType('simulation speed set');
 }
@@ -86,6 +90,8 @@ export const simulationReducer = (
     return { ...state, currentTimeS: Math.max((action as SimulationTimeSet).payload.timeS, 0) };
   case SimulationPlayToggled.type:
     return { ...state, isPlaying: !state.isPlaying };
+  case SimulationPaused.type:
+    return state.isPlaying ? { ...state, isPlaying: false } : state;
   case SimulationSpeedSet.type:
     return { ...state, speed: (action as SimulationSpeedSet).payload.speed };
   default:

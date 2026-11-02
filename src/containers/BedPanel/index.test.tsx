@@ -94,6 +94,7 @@ const SIXTY_SIX_SECOND_TOOLPATH: Toolpath = newToolpath({
   bounds: { minX: 10, minY: 20, maxX: 60, maxY: 50 },
 });
 const JOB_SUMMARY_TEXT = 'Job 50.0 × 30.0 mm · est. 1 min 6 s';
+const PLAYBACK_BAR_LABEL = 'Simulation playback';
 
 const newPhotoFile = (): File => new File(['png'], PHOTO_FILE_NAME, { type: 'image/png' });
 
@@ -362,6 +363,25 @@ describe(BedPanel.name, () => {
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ToolpathRequested));
     expect(screen.queryByTestId(BED_OBJECTS_SURFACE_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByRole('img', { name: OBJECT_NAME })).not.toBeInTheDocument();
+  });
+
+  it('shows the simulation playback bar in Toolpath view only', () => {
+    const store: AppStore = newHeldToolpathStore();
+
+    act(() => {
+      putReadyToolpath(store, SIXTY_SIX_SECOND_TOOLPATH);
+    });
+    renderPanel(store);
+
+    expect(screen.queryByRole('group', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
+
+    openToolpathView();
+
+    expect(screen.getByRole('group', { name: PLAYBACK_BAR_LABEL })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL }));
+
+    expect(screen.queryByRole('group', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
   it('offers 3D only as a disabled coming-soon view', () => {

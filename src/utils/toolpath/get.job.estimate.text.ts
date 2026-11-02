@@ -11,10 +11,7 @@
  */
 import type { TFunction } from 'i18next';
 import { DEFAULT } from '../localization/default.locales';
-import { SECONDS_PER_MINUTE } from './motion.constants';
-
-const MINUTES_PER_HOUR = 60;
-const SECONDS_PER_HOUR: number = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+import { SECONDS_PER_HOUR, SECONDS_PER_MINUTE } from './motion.constants';
 
 export const getJobEstimateText = (t: TFunction, totalTimeS: number): string => {
   const roundedTimeS: number = Math.round(totalTimeS);

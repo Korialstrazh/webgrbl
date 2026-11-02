@@ -3,6 +3,7 @@ import { newToolpath } from '../toolpath/test.support/new.toolpath';
 import { Action } from './action';
 import { ProjectObjectsDeleted } from './project.document.state';
 import {
+  SimulationPaused,
   SimulationPlayToggled,
   SimulationReset,
   SimulationSpeedSet,
@@ -44,6 +45,13 @@ describe(simulationReducer.name, () => {
 
     expect(playingState.isPlaying).toBe(true);
     expect(simulationReducer(playingState, new SimulationPlayToggled()).isPlaying).toBe(false);
+  });
+
+  it('pauses on a pause and keeps the time, also when already paused', () => {
+    const pausedState: SimulationState = simulationReducer(getPlayingStateAt(MIDDLE_TIME_S), new SimulationPaused());
+
+    expect(pausedState).toMatchObject({ currentTimeS: MIDDLE_TIME_S, isPlaying: false });
+    expect(simulationReducer(pausedState, new SimulationPaused())).toEqual(pausedState);
   });
 
   it('keeps the chosen speed through a reset', () => {

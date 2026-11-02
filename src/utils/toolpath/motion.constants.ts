@@ -16,6 +16,9 @@ export const DEFAULT_ACCELERATION_MM_PER_S2 = 1000;
 export const DEFAULT_JUNCTION_DEVIATION_MM = 0.01;
 /** Feeds are in mm per minute, speeds in mm per second. */
 export const SECONDS_PER_MINUTE = 60;
+/** Job times from one hour on are written with hours. */
+export const MINUTES_PER_HOUR = 60;
+export const SECONDS_PER_HOUR: number = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
 /** A direction component smaller than this is treated as zero when it limits a rate. */
 export const DIRECTION_COMPONENT_EPSILON = 1e-9;
 /** A turn whose half-angle sine is below this is a straight continuation. */

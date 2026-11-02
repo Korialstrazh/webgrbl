@@ -62,9 +62,6 @@ const BURN_STATE_CLASS_NAMES: Readonly<Record<ToolpathBurnState, string | undefi
   [TOOLPATH_BURN_STATE.REMAINING]: styles.remaining,
 };
 
-/** Stands in for the head before a position is known; no stroke path is cut then. */
-const NO_HEAD_POSITION: TimelinePosition = { point: TOOLPATH_START_POINT, moveIndex: -1, powerPercent: 0 };
-
 const getPointTransform = (point: GeometryPoint): string => `translate(${point.x} ${point.y})`;
 
 /** The bed's Y-up millimetres turned into the SVG's Y-down ones, in one transform for the whole drawing. */
@@ -110,8 +107,10 @@ export const ToolpathLayer = ({ dimensions, displayMode, isTravelShown }: Toolpa
   const position: TimelinePosition | undefined = currentToolpath && timeline
     && getTimelinePosition(currentToolpath, timeline, currentTimeS);
   const strokePaths: ToolpathStrokePath[] = (position && drawing?.strokePaths) || [];
-  const piecesOfPaths: ToolpathStrokePiece[][] = strokePaths.map((strokePath: ToolpathStrokePath) =>
-    getToolpathStrokePieces(strokePath, currentToolpath?.moves ?? [], position ?? NO_HEAD_POSITION));
+  const piecesOfPaths: ToolpathStrokePiece[][] = currentToolpath && position
+    ? strokePaths.map((strokePath: ToolpathStrokePath) =>
+      getToolpathStrokePieces(strokePath, currentToolpath.moves, position))
+    : [];
   const originPoint: GeometryPoint = getOriginMappedPoint(
     TOOLPATH_START_POINT,
     profile?.originCorner ?? DEFAULT_MACHINE_ORIGIN_CORNER,

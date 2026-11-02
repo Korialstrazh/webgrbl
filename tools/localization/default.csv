@@ -305,6 +305,19 @@ PALETTE_SAVE;Save
 PALETTE_SHADING_COLOUR_NOTE;The shading colour is fixed: it covers every grey from black to white.
 PALETTE_TITLE;Palette
 PROJECT_FILE_INPUT;Open a project file
+SIMULATION_BACK_TO_START;Back to start
+SIMULATION_ELAPSED_OF_TOTAL;{{elapsed}} / {{total}}
+SIMULATION_LAYER_BAR_LABEL;Burn time per layer
+SIMULATION_PAUSE;Pause
+SIMULATION_PLAY;Play
+SIMULATION_PLAYBACK_LABEL;Simulation playback
+SIMULATION_READOUT_POWER;Power {{power}} %
+SIMULATION_READOUT_X;X {{x}} mm
+SIMULATION_READOUT_Y;Y {{y}} mm
+SIMULATION_SPEED_LABEL;Playback speed
+SIMULATION_SPEED_OPTION;{{speed}}×
+SIMULATION_TIME_LABEL;Simulation time
+SIMULATION_TO_END;To end
 STATUS_STRIP_CURSOR;Cursor
 STATUS_STRIP_ESTIMATE;Estimate
 STATUS_STRIP_JOB_SIZE;Job size
@@ -345,9 +358,11 @@ TOOLPATH_DISPLAY_POWER_SHADING;Power shading
 TOOLPATH_ESTIMATE_HOURS;{{hours}} h {{minutes}} min
 TOOLPATH_ESTIMATE_MINUTES;{{minutes}} min {{seconds}} s
 TOOLPATH_FAILED;The toolpath could not be generated
+TOOLPATH_GENERATE;Generate
 TOOLPATH_GENERATING;Generating… {{percent}} %
 TOOLPATH_JOB_SUMMARY;Job {{width}} × {{height}} mm · est. {{estimate}}
 TOOLPATH_LAYER_LABEL;Toolpath preview
+TOOLPATH_NOT_GENERATED;No toolpath yet
 TOOLPATH_OUT_OF_DATE;Out of date
 TOOLPATH_REGENERATE;Regenerate
 TOOLPATH_SHOW_TRAVEL;Show travel moves

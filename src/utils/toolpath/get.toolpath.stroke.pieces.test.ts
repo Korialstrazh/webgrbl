@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { getToolpathDrawing } from './get.toolpath.drawing';
+import { getToolpathMovesPathText } from './get.toolpath.moves.path.text';
 import { getToolpathStrokePieces } from './get.toolpath.stroke.pieces';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
 import type { ToolpathStrokePath } from './interfaces/ToolpathStrokePath';
@@ -14,6 +15,16 @@ const MIDDLE_MOVE_INDEX = 1500;
 const HALF_MOVE_MM = 0.5;
 const NO_MOVE_INDEX = -1;
 const HALF_POWER_PERCENT = 50;
+const CHUNK_BOUNDARY_MOVE_INDEX = 1000;
+
+type MovesPathTextModule = typeof import('./get.toolpath.moves.path.text');
+
+// The real path text builder, watched, so a test can tell a reused prebuilt chunk from a rebuilt one.
+vi.mock(import('./get.toolpath.moves.path.text'), async (importOriginal: () => Promise<MovesPathTextModule>) => {
+  const originalModule: MovesPathTextModule = await importOriginal();
+
+  return { getToolpathMovesPathText: vi.fn(originalModule.getToolpathMovesPathText) };
+});
 
 const LONG_LAYER_MOVES: ToolpathMove[] = Array.from(
   { length: LONG_LAYER_MOVE_COUNT },
@@ -30,6 +41,9 @@ const getFirstStrokePath = (moves: ToolpathMove[]): ToolpathStrokePath => {
     throw new Error('The toolpath has no burn path');
   }
 
+  // The drawing builds the prebuilt chunks with the same builder; only the calls of the cut itself count.
+  vi.mocked(getToolpathMovesPathText).mockClear();
+
   return strokePath;
 };
 
@@ -45,6 +59,7 @@ describe(getToolpathStrokePieces.name, () => {
     expect(pieces.map(({ burnState, pathText }) => ({ burnState, pathText }))).toEqual(strokePath.chunkTexts.map(
       (chunkText: string) => ({ burnState: TOOLPATH_BURN_STATE.REMAINING, pathText: chunkText }),
     ));
+    expect(getToolpathMovesPathText).not.toHaveBeenCalled();
   });
 
   it('splits only the chunk the head is in, inside a move', () => {
@@ -82,6 +97,23 @@ describe(getToolpathStrokePieces.name, () => {
     expect(pieces.map(({ burnState }) => burnState))
       .toEqual(strokePath.chunkTexts.map(() => TOOLPATH_BURN_STATE.BURNT));
     expect(pieces.map(({ pathText }) => pathText).join('')).toBe(strokePath.chunkTexts.join(''));
+    expect(getToolpathMovesPathText).not.toHaveBeenCalled();
+  });
+
+  it('reuses the prebuilt chunk texts when the head stands at the start of a chunk', () => {
+    const strokePath: ToolpathStrokePath = getFirstStrokePath(LONG_LAYER_MOVES);
+    const pieces: ToolpathStrokePiece[] = getToolpathStrokePieces(strokePath, LONG_LAYER_MOVES, {
+      point: { x: CHUNK_BOUNDARY_MOVE_INDEX, y: 0 },
+      moveIndex: CHUNK_BOUNDARY_MOVE_INDEX,
+      powerPercent: HALF_POWER_PERCENT,
+    });
+
+    expect(pieces).toEqual([
+      { pieceKey: '0:burnt', burnState: TOOLPATH_BURN_STATE.BURNT, pathText: strokePath.chunkTexts[0] },
+      { pieceKey: '1:remaining', burnState: TOOLPATH_BURN_STATE.REMAINING, pathText: strokePath.chunkTexts[1] },
+      { pieceKey: '2:remaining', burnState: TOOLPATH_BURN_STATE.REMAINING, pathText: strokePath.chunkTexts[2] },
+    ]);
+    expect(getToolpathMovesPathText).not.toHaveBeenCalled();
   });
 
   it('burns the moves of a layer before the head while the head travels', () => {
