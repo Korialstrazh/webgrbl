@@ -28,6 +28,7 @@ const ZOOMED_PERCENT_TEXT = '125 %';
 const OVERLAY_ID = 'test-overlay';
 const POINTER_ID = 1;
 const RULER_LABEL_TEXT = '350';
+const RULER_UNIT_TEXT = 'mm';
 
 const getBedSvg = (): HTMLElement => screen.getByRole('group', { name: BED_GROUP_NAME });
 
@@ -89,6 +90,16 @@ describe(BedViewport.name, () => {
     expectViewBox(FIT_VIEW_BOX);
     expect(screen.getByText(FIT_PERCENT_TEXT)).toBeInTheDocument();
     expect(screen.getByText(RULER_LABEL_TEXT)).toBeInTheDocument();
+  });
+
+  it('draws the rulers in their own bands beside the drawing area, never on the drawing', () => {
+    renderBedViewport();
+
+    for (const rulerLabel of screen.getAllByText(RULER_LABEL_TEXT)) {
+      expect(getViewElement()).not.toContainElement(rulerLabel);
+    }
+
+    expect(getViewElement()).not.toContainElement(screen.getByText(RULER_UNIT_TEXT));
   });
 
   it('zooms in and out with the buttons and fits the bed again with Fit', () => {

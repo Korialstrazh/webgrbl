@@ -1,7 +1,19 @@
-// Fills the bed area; the drawing fills it and the rulers and zoom cluster float over it.
+@use '../../styles/layout' as layout;
+
+// Fills the bed area: the ruler bands along the top and left, and the drawing area in the rest.
 .bedViewport {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+}
+
+// Starts where the ruler bands end, so no ruler label sits on the drawing; the zoom cluster floats over it.
+.drawingArea {
+  position: absolute;
+  top: layout.$bed-ruler-band-size;
+  right: 0;
+  bottom: 0;
+  left: layout.$bed-ruler-band-size;
   overflow: hidden;
 }
 

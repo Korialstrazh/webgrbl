@@ -1,5 +1,6 @@
 /**
- * Both bed rulers on screen: where each runs and the labels along it, in CSS pixels of the view.
+ * Both bed rulers on screen: the labels and the tick marks in the top band (bed X) and in the left band (machine Y), in
+ * CSS pixels from the top-left corner of the bed drawing, which starts where the bands end.
  *
  * @author michael.morosov
  *
@@ -9,14 +10,15 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { BedRulerLabel } from './BedRulerLabel';
+import type { BedRulerTick } from './BedRulerTick';
 
 export interface BedRulerLayout {
-  /** The top ruler runs along the back edge of the bed, or along the top of the view once that edge is scrolled off. */
-  topRulerYPx: number;
-  /** The left ruler runs along the bed's left edge, or along the left of the view once that edge is scrolled off. */
-  leftRulerXPx: number;
-  /** Labels of bed X along the top ruler; each is written to the right of its position. */
+  /** Labels of bed X in the top band; each is written to the right of its position. */
   topLabels: BedRulerLabel[];
-  /** Labels of machine Y along the left ruler; each is written above its position. */
+  /** Labels of machine Y in the left band; each is written upwards from its position. */
   leftLabels: BedRulerLabel[];
+  /** The tick marks of the top band, from the part of the bed in view only. */
+  topTicks: BedRulerTick[];
+  /** The tick marks of the left band, from the part of the bed in view only. */
+  leftTicks: BedRulerTick[];
 }

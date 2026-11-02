@@ -31,3 +31,6 @@ $sticky-stop-bar-height: 4.5rem;
   height: $height;
   overflow: hidden;
 }
+
+// The bed rulers have bands of their own along the top and left of the bed drawing; the drawing starts where they end.
+$bed-ruler-band-size: 1.25rem;

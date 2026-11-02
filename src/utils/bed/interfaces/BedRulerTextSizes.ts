@@ -1,5 +1,5 @@
 /**
- * The sizes of the ruler text in one ruler layout, in CSS pixels.
+ * The sizes of the ruler text and the tick spacing in one ruler layout, in CSS pixels.
  *
  * @author michael.morosov
  *
@@ -14,4 +14,6 @@ export interface BedRulerTextSizes {
   labelOffsetPx: number;
   /** The least distance between two labels. */
   minSpacingPx: number;
+  /** The least distance between two short ticks. */
+  minMinorTickSpacingPx: number;
 }

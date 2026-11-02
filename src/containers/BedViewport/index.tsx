@@ -1,9 +1,10 @@
 /**
- * The bed view: the bed drawing, its rulers and the zoom cluster, with zoom and pan. The mouse wheel zooms around the
- * pointer, a middle drag or Space plus a drag pans, and the buttons and the plus, minus and zero keys zoom in, zoom
- * out and fit the bed. The bed point under the pointer goes to the status strip through the bed cursor store. The view
- * lives for the session and starts fitted. The zoom is the drawing's view box, so the
- * objects layer and the Toolpath layer read pointer positions through the SVG's screen matrix as before.
+ * The bed view: the bed drawing, its rulers in bands along the top and left, and the zoom cluster, with zoom and pan.
+ * The mouse wheel zooms around the pointer, a middle drag or Space plus a drag pans, and the buttons and the plus,
+ * minus and zero keys zoom in, zoom out and fit the bed. The bed point under the pointer goes to the status strip
+ * through the bed cursor store. The view lives for the session and starts fitted. The zoom is the drawing's view box,
+ * so the objects layer and the Toolpath layer read pointer positions through the SVG's screen matrix as before; every
+ * position is read in the drawing area, which starts where the ruler bands end.
  *
  * @author michael.morosov
  *
@@ -38,12 +39,12 @@ import { useBedViewportControls } from './use.bed.viewport.controls';
 import { useBedWheelZoom } from './use.bed.wheel.zoom';
 import { useBedZoomHotkeys } from './use.bed.zoom.hotkeys';
 
-const getViewClassName = ({ isPanReady, isPanning }: BedPanGesture): string | undefined => {
+const getDrawingAreaClassName = ({ isPanReady, isPanning }: BedPanGesture): string | undefined => {
   if (isPanning) {
-    return [styles.bedViewport, styles.panning].join(' ');
+    return [styles.drawingArea, styles.panning].join(' ');
   }
 
-  return isPanReady ? [styles.bedViewport, styles.panReady].join(' ') : styles.bedViewport;
+  return isPanReady ? [styles.drawingArea, styles.panReady].join(' ') : styles.drawingArea;
 };
 
 export const BedViewport = (props: BedViewportProps): ReactNode => {
@@ -84,32 +85,35 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
   };
 
   return (
-    // A plain element: it is the positioned box of the drawing and its overlays, and it takes the pan gesture.
-    <div
-      ref={viewRef}
-      className={getViewClassName(panGesture)}
-      onPointerDownCapture={onPointerDownCapture}
-      onPointerMove={handlePointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      onPointerEnter={onPointerEnter}
-      onPointerLeave={handlePointerLeave}
-      onMouseDownCapture={onMouseDownCapture}
-    >
-      <BedZoomContext value={viewport.zoom}>
-        <BedView dimensions={dimensions} viewBox={viewBox} zoom={viewport.zoom} {...markerProps}>
-          {children}
-        </BedView>
-      </BedZoomContext>
+    // Plain elements: the outer box holds the ruler bands and the drawing area; the drawing area is the positioned box
+    // of the drawing and its overlays, the box every pointer position is read in, and it takes the pan gesture.
+    <div className={styles.bedViewport}>
       <BedRulers rulers={rulers} />
-      <BedZoomControls
-        zoomPercent={Math.round(viewport.zoom * PERCENT_DIVISOR)}
-        canZoomIn={viewport.zoom < MAX_BED_ZOOM}
-        canZoomOut={viewport.zoom > MIN_BED_ZOOM}
-        onZoomIn={() => zoomBedBy(BED_ZOOM_STEP_FACTOR)}
-        onZoomOut={() => zoomBedBy(1 / BED_ZOOM_STEP_FACTOR)}
-        onFit={fitBedToView}
-      />
+      <div
+        ref={viewRef}
+        className={getDrawingAreaClassName(panGesture)}
+        onPointerDownCapture={onPointerDownCapture}
+        onPointerMove={handlePointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={handlePointerLeave}
+        onMouseDownCapture={onMouseDownCapture}
+      >
+        <BedZoomContext value={viewport.zoom}>
+          <BedView dimensions={dimensions} viewBox={viewBox} zoom={viewport.zoom} {...markerProps}>
+            {children}
+          </BedView>
+        </BedZoomContext>
+        <BedZoomControls
+          zoomPercent={Math.round(viewport.zoom * PERCENT_DIVISOR)}
+          canZoomIn={viewport.zoom < MAX_BED_ZOOM}
+          canZoomOut={viewport.zoom > MIN_BED_ZOOM}
+          onZoomIn={() => zoomBedBy(BED_ZOOM_STEP_FACTOR)}
+          onZoomOut={() => zoomBedBy(1 / BED_ZOOM_STEP_FACTOR)}
+          onFit={fitBedToView}
+        />
+      </div>
     </div>
   );
 };
