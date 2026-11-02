@@ -1,0 +1,28 @@
+// Both sit over the top of the bed drawing; the bed area is their positioned parent.
+.generating,
+.banner {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+  max-width: calc(100% - 2 * var(--space-3));
+}
+
+.generating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+}
+
+.progress {
+  width: 8rem;
+  margin: 0;
+}

@@ -1,0 +1,41 @@
+// Sits in the bottom-left corner over the bed drawing; the bed area is its positioned parent.
+.warningsPanel {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-3);
+  z-index: 1;
+  max-width: min(22rem, calc(100% - 2 * var(--space-3)));
+  max-height: 40%;
+  overflow: auto;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+}
+
+.title {
+  margin: 0 0 var(--space-1);
+  color: var(--color-warning);
+  font-size: 0.75rem;
+}
+
+.warningList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.objectName {
+  font-weight: 600;
+}

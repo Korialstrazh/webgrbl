@@ -30,7 +30,22 @@ import { selectToasts, ToastShown } from '../../utils/states/toast.state';
 import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
 import { BED_HEAD_TEST_ID } from '../../views/BedView/bed.view.constants';
+import { SimulationPlayToggled, selectIsSimulationPlaying } from '../../utils/states/simulation.state';
+import { selectIsSimulationPlayable } from '../../utils/states/toolpath.timeline.selectors';
+import {
+  ToolpathCancelled,
+  ToolpathProgress,
+  ToolpathReady,
+  ToolpathRequested,
+  selectToolpathDocumentVersion,
+} from '../../utils/states/toolpath.state';
+import { newGcodeExportTestStore } from '../../utils/test.support/new.gcode.export.test.store';
+import type { Toolpath } from '../../utils/toolpath/interfaces/Toolpath';
+import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake.toolpath.worker.client';
+import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
+import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
 import { BED_OBJECTS_SURFACE_TEST_ID } from '../BedObjects/bed.objects.constants';
+import { TOOLPATH_BURN_PATH_TEST_ID } from '../ToolpathLayer/toolpath.layer.constants';
 import { BED_DROP_AREA_TEST_ID } from './bed.panel.constants';
 
 const NOT_RESPONDING_TEXT = 'The controller is not responding.';
@@ -62,12 +77,40 @@ const FILE_DRAG = { dataTransfer: { types: [DATA_TRANSFER_FILES_TYPE] } };
 const TEXT_DRAG = { dataTransfer: { types: ['text/plain'] } };
 
 const PHOTO_FILE_NAME = 'photo.png';
+const TOOLPATH_VIEW_LABEL = 'Toolpath';
+const THREE_D_VIEW_LABEL = '3D · soon';
+const REGENERATE_LABEL = 'Regenerate';
+const OUT_OF_DATE_TEXT = 'Out of date';
+const CANCEL_LABEL = 'Cancel';
+const GENERATING_TEXT = 'Generating… 40 %';
+const GENERATION_PROGRESS = 0.4;
+const TEXT_WARNING = 'Text is not converted to paths. In Inkscape use Path > Object to Path.';
+const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
+  + '<rect fill="none" stroke="#ff0000" width="10" height="10"/><text x="1" y="5">Hi</text></svg>';
+// One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
+const SIXTY_SIX_SECOND_TOOLPATH: Toolpath = newToolpath({
+  moves: [newToolpathMove({ from: { x: 0, y: 0 }, to: { x: 6590, y: 0 } })],
+  layers: [{ layerKey: '#ff0000', firstMoveIndex: 0, lastMoveIndex: 0 }],
+  bounds: { minX: 10, minY: 20, maxX: 60, maxY: 50 },
+});
+const JOB_SUMMARY_TEXT = 'Job 50.0 × 30.0 mm · est. 1 min 6 s';
 
 const newPhotoFile = (): File => new File(['png'], PHOTO_FILE_NAME, { type: 'image/png' });
 
 const getNotSvgToasts = (store: AppStore): AppToast[] => selectToasts(store.getState()).filter(
   (toast: AppToast): boolean => toast.messageKey === DEFAULT.TOAST_SVG_IMPORT_FAILED_NOT_SVG,
 );
+
+const newHeldToolpathStore = (): AppStore => newStore(undefined, new FakeToolpathWorkerClient(true));
+
+const putReadyToolpath = (store: AppStore, toolpath: Toolpath): void => {
+  store.dispatch(new ToolpathRequested());
+  store.dispatch(new ToolpathReady({ toolpath, documentVersion: selectToolpathDocumentVersion(store.getState()) }));
+};
+
+const openToolpathView = (): void => {
+  fireEvent.click(screen.getByRole('radio', { name: TOOLPATH_VIEW_LABEL }));
+};
 
 const renderPanel = (store: AppStore): void => {
   render(
@@ -156,7 +199,6 @@ describe(BedPanel.name, () => {
     renderPanel(store);
     fireEvent.click(screen.getByRole('button', { name: EDIT_NODES_LABEL, hidden: true }));
     fireEvent.click(screen.getByRole('button', { name: ALIGN_LABEL, hidden: true }));
-    fireEvent.click(screen.getByRole('radio', { name: 'Toolpath', hidden: true }));
 
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
@@ -304,5 +346,116 @@ describe(BedPanel.name, () => {
     });
 
     expect(screen.getByRole('img', { name: OBJECT_NAME })).toBeInTheDocument();
+  });
+  it('switching to Toolpath requests a toolpath and hides the editing objects', () => {
+    const store: AppStore = newHeldToolpathStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderPanel(store);
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({
+        document: { objects: [newProjectObject({ name: OBJECT_NAME })], layers: [] },
+      }));
+    });
+    openToolpathView();
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ToolpathRequested));
+    expect(screen.queryByTestId(BED_OBJECTS_SURFACE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: OBJECT_NAME })).not.toBeInTheDocument();
+  });
+
+  it('offers 3D only as a disabled coming-soon view', () => {
+    renderPanel(newStore());
+
+    expect(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL })).toBeDisabled();
+  });
+
+  it('shows the job size and estimate in the toolbar in Toolpath view', () => {
+    const store: AppStore = newHeldToolpathStore();
+
+    act(() => {
+      putReadyToolpath(store, SIXTY_SIX_SECOND_TOOLPATH);
+    });
+    renderPanel(store);
+    openToolpathView();
+
+    expect(screen.getByText(JOB_SUMMARY_TEXT)).toBeInTheDocument();
+  });
+
+  it('editing the document in Toolpath view shows the Regenerate banner, hides the toolpath and disables play', () => {
+    const store: AppStore = newHeldToolpathStore();
+
+    act(() => {
+      putReadyToolpath(store, SIXTY_SIX_SECOND_TOOLPATH);
+    });
+    renderPanel(store);
+    openToolpathView();
+    act(() => {
+      store.dispatch(new SimulationPlayToggled());
+    });
+
+    expect(screen.getAllByTestId(TOOLPATH_BURN_PATH_TEST_ID)).not.toEqual([]);
+
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [newProjectObject()], layers: [] } }));
+    });
+
+    expect(screen.getByText(OUT_OF_DATE_TEXT)).toBeInTheDocument();
+    expect(screen.queryAllByTestId(TOOLPATH_BURN_PATH_TEST_ID)).toEqual([]);
+    expect(screen.queryByText(JOB_SUMMARY_TEXT)).not.toBeInTheDocument();
+    expect(selectIsSimulationPlaying(store.getState())).toBe(false);
+    expect(selectIsSimulationPlayable(store.getState())).toBe(false);
+  });
+
+  it('regenerates the toolpath from the out-of-date banner', () => {
+    const store: AppStore = newHeldToolpathStore();
+
+    act(() => {
+      putReadyToolpath(store, SIXTY_SIX_SECOND_TOOLPATH);
+    });
+
+    // Spied before the render: the panel keeps the dispatch it got when it first rendered.
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderPanel(store);
+    openToolpathView();
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [newProjectObject()], layers: [] } }));
+    });
+
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(ToolpathRequested));
+
+    fireEvent.click(screen.getByRole('button', { name: REGENERATE_LABEL }));
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ToolpathRequested));
+  });
+
+  it('shows the generation progress with a Cancel button that cancels it', () => {
+    const store: AppStore = newHeldToolpathStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderPanel(store);
+    openToolpathView();
+    act(() => {
+      store.dispatch(new ToolpathProgress({ progress: GENERATION_PROGRESS }));
+    });
+
+    expect(screen.getByText(GENERATING_TEXT)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: CANCEL_LABEL }));
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ToolpathCancelled));
+  });
+
+  it('lists the text warning of an object in the Toolpath view', async () => {
+    const store: AppStore = await newGcodeExportTestStore({
+      objects: [newProjectObject({ name: OBJECT_NAME, svgText: TEXT_SVG_TEXT })],
+    });
+
+    renderPanel(store);
+    openToolpathView();
+
+    expect(await screen.findByText(TEXT_WARNING)).toBeInTheDocument();
+    expect(screen.getByText(OBJECT_NAME)).toBeInTheDocument();
   });
 });

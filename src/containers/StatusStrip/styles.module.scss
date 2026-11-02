@@ -22,7 +22,10 @@
 
 // The readouts give up space first, so the console toggle always stays visible.
 .readoutsArea {
+  display: flex;
   flex: 1;
+  align-items: center;
+  gap: var(--space-4);
   min-width: 0;
   overflow: hidden;
 }

@@ -22,7 +22,9 @@ import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/states/project.document.state';
+import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.timeline.selectors';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
+import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
 import { ComingSoon } from '../../../views/ComingSoon';
 import { Panel } from '../../../views/Panel';
 import { getJobLayerCountText } from './get.job.layer.count.text';
@@ -34,6 +36,7 @@ export const JobCard = (): ReactNode => {
   const layers: ProjectLayer[] = useSelector(selectProjectLayers);
   const enabledLayers: ProjectLayer[] = useSelector(selectEnabledProjectLayers);
   const { isGcodeExportEnabled, gcodeExportBlockedReasonKey }: GcodeExportAvailability = useGcodeExportAvailability();
+  const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
 
   return (
     <Panel title={t(DEFAULT.MACHINE_START_JOB_TITLE)}>
@@ -42,7 +45,8 @@ export const JobCard = (): ReactNode => {
           <dt>{t(DEFAULT.MACHINE_JOB_LAYERS_LABEL)}</dt>
           <dd>{getJobLayerCountText(t, enabledLayers.length, layers.length - enabledLayers.length)}</dd>
           <dt>{t(DEFAULT.MACHINE_JOB_ESTIMATE_LABEL)}</dt>
-          <dd>{EM_DASH}</dd>
+          {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
+          <dd>{totalTimeS === undefined ? EM_DASH : getJobEstimateText(t, totalTimeS)}</dd>
         </dl>
         <Tooltip title={gcodeExportBlockedReasonKey && t(gcodeExportBlockedReasonKey)}>
           {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}

@@ -41,3 +41,11 @@
   font-size: 0.75rem;
   color: var(--color-danger-text);
 }
+
+// Content the job leaves out; the text wraps, since it says what to do about it.
+.warningNote {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--color-warning);
+  white-space: normal;
+}

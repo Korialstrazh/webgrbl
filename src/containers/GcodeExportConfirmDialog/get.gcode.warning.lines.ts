@@ -12,7 +12,7 @@
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { DEFAULT_OBJECT_NAME } from '../../utils/project/project.constants';
 import type { ObjectWarning } from '../../utils/toolpath/interfaces/ObjectWarning';
-import { OBJECT_WARNING_TEXT_KEY } from './gcode.export.confirm.dialog.constants';
+import { OBJECT_WARNING_TEXT_KEY } from '../../utils/toolpath/object.warning.text.key';
 import type { GcodeWarningLine } from './interfaces/GcodeWarningLine';
 
 const LINE_KEY_SEPARATOR = ':';

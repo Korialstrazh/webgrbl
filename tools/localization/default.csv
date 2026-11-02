@@ -18,8 +18,8 @@ BED_TOOL_EDIT_NODES;Edit nodes
 BED_TOOL_LABEL;Bed tool
 BED_TOOL_MOVE;Move
 BED_TOOL_SELECT;Select
-BED_TOOLBAR_DESCRIPTION;Edit nodes, align objects and switch the bed view.
-BED_VIEW_3D;3D
+BED_TOOLBAR_DESCRIPTION;Edit nodes and align objects.
+BED_VIEW_3D;3D · soon
 BED_VIEW_DESIGN;Design
 BED_VIEW_MODE_LABEL;Bed view
 BED_VIEW_TOOLPATH;Toolpath
@@ -338,6 +338,20 @@ TOAST_SVG_IMPORT_LIMIT_REACHED;A project holds at most {{limit}} objects. The re
 TOAST_SVG_LARGER_THAN_BED;{{fileName}} is larger than the bed. Scale it down to fit.
 TOAST_TOOLPATH_FAILED;The toolpath could not be generated. Try again, or simplify the design.
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
+TOOLPATH_CANCEL;Cancel
+TOOLPATH_DISPLAY_BY_LAYER;By layer
+TOOLPATH_DISPLAY_LABEL;Toolpath colours
+TOOLPATH_DISPLAY_POWER_SHADING;Power shading
+TOOLPATH_ESTIMATE_HOURS;{{hours}} h {{minutes}} min
+TOOLPATH_ESTIMATE_MINUTES;{{minutes}} min {{seconds}} s
+TOOLPATH_FAILED;The toolpath could not be generated
+TOOLPATH_GENERATING;Generating… {{percent}} %
+TOOLPATH_JOB_SUMMARY;Job {{width}} × {{height}} mm · est. {{estimate}}
+TOOLPATH_LAYER_LABEL;Toolpath preview
+TOOLPATH_OUT_OF_DATE;Out of date
+TOOLPATH_REGENERATE;Regenerate
+TOOLPATH_SHOW_TRAVEL;Show travel moves
+TOOLPATH_WARNINGS_TITLE;Left out of the job
 TOP_BAR_AUTOSAVE_SAVED;Saved
 TOP_BAR_AUTOSAVE_SAVING;Saving…
 TOP_BAR_AUTOSAVE_UNSAVED;Not saved

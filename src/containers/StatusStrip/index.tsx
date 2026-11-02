@@ -1,6 +1,6 @@
 /**
- * The bottom region: the coming-soon readouts for cursor, job size and estimate, and the console toggle. The console
- * opens as an overlay above the strip, over the bed, without resizing it.
+ * The bottom region: the coming-soon readouts for cursor and job size, the estimate of the ready toolpath, and the
+ * console toggle. The console opens as an overlay above the strip, over the bed, without resizing it.
  *
  * @author michael.morosov
  *
@@ -13,8 +13,11 @@ import { Layout, Switch } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../utils/missing.value.constants';
+import { selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
+import { getJobEstimateText } from '../../utils/toolpath/get.job.estimate.text';
 import { ComingSoon } from '../../views/ComingSoon';
 import { ConsolePanel } from '../ConsolePanel';
 import styles from './styles.module.scss';
@@ -22,6 +25,7 @@ import styles from './styles.module.scss';
 export const StatusStrip = (): ReactNode => {
   const { t } = useTranslation();
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
+  const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
 
   return (
     <Layout.Footer
@@ -45,12 +49,15 @@ export const StatusStrip = (): ReactNode => {
               <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
               <dd>{MISSING_VALUE_TEXT}</dd>
             </div>
-            <div className={styles.readout}>
-              <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>
-              <dd>{MISSING_VALUE_TEXT}</dd>
-            </div>
           </dl>
         </ComingSoon>
+        <dl className={styles.readouts}>
+          <div className={styles.readout}>
+            <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>
+            {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
+            <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
+          </div>
+        </dl>
       </div>
       <label className={styles.consoleSwitch}>
         <Switch checked={isConsoleOpen} onChange={setIsConsoleOpen} />
