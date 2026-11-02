@@ -1,28 +1,16 @@
-@use '../../../styles/layout' as layout;
-
-.moveCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.homeRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-  max-width: layout.$machine-control-max-width;
-}
-
-// Fixed-size cells, so the arrows keep their places around Origin at any panel width instead of stretching apart.
-.jogPad {
-  display: grid;
-  grid-template-columns: repeat(3, 4.5rem);
-  grid-auto-rows: var(--target-min);
-  justify-content: start;
+// The hint and the Show button share the heading line of the collapsed card.
+.collapsedSummary {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-2);
+  min-width: 0;
+}
 
-  > :global(.ant-btn) {
-    width: 100%;
-    padding-inline: 0;
-  }
+.collapsedHint {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

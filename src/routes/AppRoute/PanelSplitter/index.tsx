@@ -1,8 +1,8 @@
 /**
  * The wide workbench: the design panel, the bed and the machine panel side by side in an antd Splitter, so the user can
  * drag the bars between them. Each panel keeps a minimum width, and the side panels a maximum width so the bed takes
- * the extra width of a wide screen, in rem so they follow the user's font size. The panels
- * open with the stored sizes, or the default widths, and the new sizes are stored once a drag ends, not on every move.
+ * the extra width of a wide screen, in rem so they follow the user's font size. The side panels open in pixels, at
+ * their stored share or their default width, and the new sizes are stored once a drag ends, not on every move.
  *
  * @author michael.morosov
  *
@@ -37,9 +37,12 @@ export const PanelSplitter = (props: PanelSplitterProps): ReactNode => {
   const storedPanelSizePercents: number[] | undefined = useSelector(selectPanelSizePercents);
   const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
   // The splitter reads its default sizes only when it mounts, so later stored sizes must not change them.
-  const [panelDefaultSizes] = useState<PanelDefaultSize[]>(
-    () => getPanelDefaultSizes(storedPanelSizePercents, rootFontSizePx),
-  );
+  const [panelDefaultSizes] = useState<PanelDefaultSize[]>(() => getPanelDefaultSizes({
+    storedPanelSizePercents,
+    rootFontSizePx,
+    // The splitter spans the whole window width in the wide layout.
+    workbenchWidthPx: window.innerWidth,
+  }));
   const [designDefaultSize, bedDefaultSize, machineDefaultSize] = panelDefaultSizes;
 
   const handlePanelResizeEnd = (panelSizesPx: number[]): void => {

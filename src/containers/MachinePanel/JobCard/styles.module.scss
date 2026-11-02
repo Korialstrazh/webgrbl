@@ -1,3 +1,5 @@
+@use '../../../styles/layout' as layout;
+
 .jobCard {
   display: flex;
   flex-direction: column;
@@ -23,6 +25,8 @@
   }
 }
 
+// As wide as the jog pad, so the button does not stretch across a wide machine panel.
 .exportButtonWrapper {
   display: block;
+  max-width: layout.$machine-control-max-width;
 }

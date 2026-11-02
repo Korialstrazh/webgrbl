@@ -1,5 +1,7 @@
 /**
- * The move card: home, set zero, the jog pad, the step sizes and the jog speed.
+ * The move card. While a laser is connected it shows the move controls. While none is connected none of them can act,
+ * so the card is one line, "Connect to move", with a Show button that opens the controls anyway, disabled, for a user
+ * who wants to see them first.
  *
  * @author michael.morosov
  *
@@ -8,101 +10,46 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Segmented } from 'antd';
-import { useState } from 'react';
+import { Button } from 'antd';
+import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_LARGE } from '../../../utils/antd.constants';
-import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
+import { useSelector } from 'react-redux';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
-import { getGoToWorkZeroCommand } from '../../../utils/machine/get.go.to.work.zero.command';
-import { getJogCommand } from '../../../utils/machine/get.jog.command';
-import { getMoveAvailability } from '../../../utils/machine/get.move.availability';
-import type { MoveAvailability } from '../../../utils/machine/interfaces/MoveAvailability';
-import { DEFAULT_JOG_STEP_MM, JOG_STEP_SIZES_MM } from '../../../utils/machine/machine.command.constants';
-import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
-import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
-import { DEFAULT_MACHINE_JOG_FEED_RATE } from '../../../utils/profiles/machine.profile.constants';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
-import { selectIsLaserPointerFiring } from '../../../utils/states/laser.pointer.state';
-import { selectActiveMachineProfile } from '../../../utils/states/machine.profile.state';
-import { MachineLineRequested, selectMachineStatus } from '../../../utils/states/machine.status.state';
-import type { AppDispatch } from '../../../utils/states/new.store';
 import { Panel } from '../../../views/Panel';
-import type { JogPadCell } from './interfaces/JogPadCell';
-import type { JogStepOption } from './interfaces/JogStepOption';
-import { JogSpeedInput } from './JogSpeedInput';
-import { JOG_PAD_CELLS } from './jog.pad.constants';
+import { MoveControls } from './MoveControls';
 import styles from './styles.module.scss';
 
 export const MoveCard = (): ReactNode => {
   const { t } = useTranslation();
-  const dispatch: AppDispatch = useDispatch();
   const isConnected: boolean = useSelector(selectIsConnected);
-  const machineStatus: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
-  const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const isPointerFiring: boolean = useSelector(selectIsLaserPointerFiring);
-  const [stepMm, setStepMm] = useState<number>(DEFAULT_JOG_STEP_MM);
-  const feedRate: number = activeProfile?.jogFeedRate ?? DEFAULT_MACHINE_JOG_FEED_RATE;
-  const { canJog, canHome, canSetZero }: MoveAvailability = getMoveAvailability({
-    isConnected,
-    machineState: machineStatus?.machineState,
-    hasHomingSwitches: activeProfile?.hasHomingSwitches ?? false,
-    isPointerFiring,
-  });
-  const stepOptions: JogStepOption[] = JOG_STEP_SIZES_MM.map((distance: number) => ({
-    value: distance,
-    label: t(DEFAULT.MACHINE_MOVE_STEP_OPTION, { distance }),
-  }));
-
-  const requestLine = (line: string): void => {
-    dispatch(new MachineLineRequested({ line }));
-  };
-
-  const requestJogPadLine = (cell: JogPadCell): void => {
-    requestLine(cell.direction ? getJogCommand(cell.direction, stepMm, feedRate) : getGoToWorkZeroCommand(feedRate));
-  };
+  const [isShownWhileDisconnected, setIsShownWhileDisconnected] = useState<boolean>(false);
+  const controlsId: string = useId();
+  const isCollapsed: boolean = !isConnected && !isShownWhileDisconnected;
+  const toggleLabelKey: string = isCollapsed
+    ? DEFAULT.MACHINE_MOVE_SHOW_CONTROLS_LABEL
+    : DEFAULT.MACHINE_MOVE_HIDE_CONTROLS_LABEL;
+  const collapseToggleComponent: ReactNode = isConnected ? undefined : (
+    <span className={styles.collapsedSummary}>
+      {isCollapsed && <span className={styles.collapsedHint}>{t(DEFAULT.MACHINE_MOVE_COLLAPSED_HINT)}</span>}
+      <Button
+        type={ANTD_BUTTON_TYPE_TEXT}
+        size={ANTD_BUTTON_SIZE_SMALL}
+        aria-expanded={!isCollapsed}
+        aria-controls={controlsId}
+        aria-label={t(toggleLabelKey)}
+        onClick={() => setIsShownWhileDisconnected(isCollapsed)}
+      >
+        {t(isCollapsed ? DEFAULT.MACHINE_MOVE_SHOW_CONTROLS : DEFAULT.MACHINE_MOVE_HIDE_CONTROLS)}
+      </Button>
+    </span>
+  );
 
   return (
-    <Panel title={t(DEFAULT.MACHINE_MOVE_TITLE)}>
-      <div className={styles.moveCard}>
-        <div className={styles.homeRow}>
-          {activeProfile?.hasHomingSwitches && (
-            <Button size={ANTD_BUTTON_SIZE_LARGE} disabled={!canHome} onClick={() => requestLine(MACHINE_COMMAND.HOME)}>
-              {t(DEFAULT.MACHINE_MOVE_HOME)}
-            </Button>
-          )}
-          <Button
-            size={ANTD_BUTTON_SIZE_LARGE}
-            disabled={!canSetZero}
-            onClick={() => requestLine(MACHINE_COMMAND.SET_WORK_ZERO)}
-          >
-            {t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
-          </Button>
-        </div>
-        <div className={styles.jogPad}>
-          {JOG_PAD_CELLS.map((cell: JogPadCell) => (
-            <Button
-              key={cell.labelKey}
-              size={ANTD_BUTTON_SIZE_LARGE}
-              disabled={!canJog}
-              icon={cell.arrowGlyph}
-              aria-label={t(cell.labelKey)}
-              onClick={() => requestJogPadLine(cell)}
-            >
-              {cell.arrowGlyph ? undefined : t(cell.labelKey)}
-            </Button>
-          ))}
-        </div>
-        <Segmented
-          aria-label={t(DEFAULT.MACHINE_MOVE_STEP_LABEL)}
-          options={stepOptions}
-          value={stepMm}
-          onChange={setStepMm}
-        />
-        <JogSpeedInput />
-      </div>
+    <Panel title={t(DEFAULT.MACHINE_MOVE_TITLE)} headerActionComponent={collapseToggleComponent}>
+      {isCollapsed ? undefined : <MoveControls id={controlsId} />}
     </Panel>
   );
 };
