@@ -21,7 +21,13 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_SEGMENTED_SIZE_SMALL } from '../../utils/antd.constants';
-import { BACK_TO_START_SYMBOL, PAUSE_SYMBOL, PLAY_SYMBOL, TO_END_SYMBOL } from '../../utils/characters.constants';
+import {
+  BACK_TO_START_SYMBOL,
+  PAUSE_SYMBOL,
+  PLAY_SYMBOL,
+  REPLAY_SYMBOL,
+  TO_END_SYMBOL,
+} from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
 import { SIMULATION_SPEEDS } from '../../utils/states/simulation.speed.constants';
@@ -47,6 +53,26 @@ import styles from './styles.module.scss';
 import { useSimulationPlayback } from './use.simulation.playback';
 import { useSimulationTransport } from './use.simulation.transport';
 
+/** Whether the simulation stands at the end of a job, so Play starts it again from the beginning. */
+const isSimulationAtEnd = (isPlaying: boolean, currentTimeS: number, totalTimeS: number): boolean =>
+  !isPlaying && totalTimeS > 0 && currentTimeS >= totalTimeS;
+
+const getPlayLabelKey = (isPlaying: boolean, isAtEnd: boolean): string => {
+  if (isPlaying) {
+    return DEFAULT.SIMULATION_PAUSE;
+  }
+
+  return isAtEnd ? DEFAULT.SIMULATION_REPLAY : DEFAULT.SIMULATION_PLAY;
+};
+
+const getPlayIcon = (isPlaying: boolean, isAtEnd: boolean): string => {
+  if (isPlaying) {
+    return PAUSE_SYMBOL;
+  }
+
+  return isAtEnd ? REPLAY_SYMBOL : PLAY_SYMBOL;
+};
+
 /** The slider tooltip shows the time under the handle as a clock. */
 const getSliderTooltipText = (timeS: number | undefined): string => getSimulationClockText(timeS ?? 0);
 
@@ -71,7 +97,8 @@ export const SimulationPlaybackBar = (): ReactNode => {
     })),
     [t],
   );
-  const playLabel: string = t(isPlaying ? DEFAULT.SIMULATION_PAUSE : DEFAULT.SIMULATION_PLAY);
+  const isAtEnd: boolean = isSimulationAtEnd(isPlaying, currentTimeS, totalTimeS);
+  const playLabel: string = t(getPlayLabelKey(isPlaying, isAtEnd));
 
   useSimulationPlayback();
 
@@ -94,7 +121,7 @@ export const SimulationPlaybackBar = (): ReactNode => {
         />
         <Button
           type={ANTD_BUTTON_TYPE_PRIMARY}
-          icon={isPlaying ? PAUSE_SYMBOL : PLAY_SYMBOL}
+          icon={getPlayIcon(isPlaying, isAtEnd)}
           aria-label={playLabel}
           title={playLabel}
           disabled={!isPlayable}
@@ -129,6 +156,7 @@ export const SimulationPlaybackBar = (): ReactNode => {
         })}
       </span>
       <Segmented<SimulationSpeed>
+        className={styles.speedSwitch}
         aria-label={t(DEFAULT.SIMULATION_SPEED_LABEL)}
         size={ANTD_SEGMENTED_SIZE_SMALL}
         options={speedOptions}

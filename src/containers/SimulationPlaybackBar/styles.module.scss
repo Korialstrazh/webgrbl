@@ -58,3 +58,8 @@
   font-size: 0.8125rem;
   white-space: nowrap;
 }
+
+// The chosen speed is marked by the accent colour as well as the lighter fill, so it is found at a glance (6.4:1).
+.speedSwitch :global(.ant-segmented-item-selected) {
+  color: var(--color-accent);
+}

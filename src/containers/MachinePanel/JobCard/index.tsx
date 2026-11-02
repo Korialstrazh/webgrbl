@@ -14,11 +14,11 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE } from '../../../utils/antd.constants';
-import { EM_DASH } from '../../../utils/characters.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/states/project.document.state';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
@@ -45,7 +45,7 @@ export const JobCard = (): ReactNode => {
           <dd>{getJobLayerCountText(t, enabledLayers.length, layers.length - enabledLayers.length)}</dd>
           <dt>{t(DEFAULT.MACHINE_JOB_ESTIMATE_LABEL)}</dt>
           {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
-          <dd>{totalTimeS === undefined ? EM_DASH : getJobEstimateText(t, totalTimeS)}</dd>
+          <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
         </dl>
         <Tooltip title={gcodeExportBlockedReasonKey && t(gcodeExportBlockedReasonKey)}>
           {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}

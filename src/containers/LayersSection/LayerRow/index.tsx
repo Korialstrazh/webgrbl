@@ -1,6 +1,6 @@
 /**
  * A row of the layer list: a drag handle, an on/off checkbox and a button that opens the layer settings, showing the
- * swatch, the name, a one-line summary and a note when the colour is not in the palette. Move buttons reorder it
+ * swatch, the name, a summary and a note when the colour is not in the palette. Move buttons reorder it
  * without a pointer.
  *
  * @author michael.morosov
@@ -34,6 +34,7 @@ export const LayerRow = ({
   isLast,
   isOpen,
   onOpen,
+  openButtonRef,
   onToggle,
   onMoveUp,
   onMoveDown,
@@ -67,7 +68,13 @@ export const LayerRow = ({
         aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
         onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
       />
-      <Button className={styles.openButton} type={ANTD_BUTTON_TYPE_TEXT} aria-expanded={isOpen} onClick={onOpen}>
+      <Button
+        ref={openButtonRef}
+        className={styles.openButton}
+        type={ANTD_BUTTON_TYPE_TEXT}
+        aria-expanded={isOpen}
+        onClick={onOpen}
+      >
         <span className={styles.swatch}>
           <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
         </span>

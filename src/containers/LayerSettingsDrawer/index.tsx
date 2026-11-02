@@ -4,7 +4,7 @@
  * The layer rows that open it sit in the design panel on the left, so it slides in from the left edge of the bed
  * region, which is the right edge of the design panel: it never covers the layer list, and it follows that edge when
  * the user resizes the panels. In a narrow window the bed region is below the design panel, and the drawer is never
- * wider than it.
+ * wider than it. When it closes the focus goes back to the layer row that opened it.
  *
  * @author michael.morosov
  *
@@ -13,6 +13,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { DrawerProps } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -28,7 +29,11 @@ import { LayerSettingsFields } from './LayerSettingsFields';
 import { LAYER_SETTINGS_DRAWER_OVERLAY_ID, LAYER_SETTINGS_DRAWER_WIDTH } from './layer.settings.drawer.constants';
 import styles from './styles.module.scss';
 
-export const LayerSettingsDrawer = ({ layer, onClose, onEditPalette }: LayerSettingsDrawerProps): ReactNode => {
+// The layer row takes the focus back itself once the drawer has closed, so antd does not move it as well.
+const LAYER_SETTINGS_DRAWER_FOCUS: DrawerProps['focusable'] = { focusTriggerAfterClose: false };
+
+export const LayerSettingsDrawer = (props: LayerSettingsDrawerProps): ReactNode => {
+  const { layer, onClose, onEditPalette } = props;
   const { t } = useTranslation();
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
   const layerName: string = layer ? getLayerDisplayName(layer, getLayerPaletteEntry(layer, paletteEntries)) : '';
@@ -45,8 +50,10 @@ export const LayerSettingsDrawer = ({ layer, onClose, onEditPalette }: LayerSett
       isOpen={Boolean(layer)}
       overlayIdPrefix={LAYER_SETTINGS_DRAWER_OVERLAY_ID}
       title={titleComponent}
+      className={styles.layerSettingsDrawer}
       placement={ANTD_DRAWER_PLACEMENT_LEFT}
       size={LAYER_SETTINGS_DRAWER_WIDTH}
+      focusable={LAYER_SETTINGS_DRAWER_FOCUS}
       onClose={onClose}
     >
       {layer && <LayerSettingsFields layer={layer} onEditPalette={onEditPalette} />}

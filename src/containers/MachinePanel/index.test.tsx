@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MachinePanel } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
@@ -17,13 +17,15 @@ const WORK_POSITION_TEXT = '8.000';
 const MACHINE_POSITION_TEXT = '10.500';
 const FEED_RATE = 1200;
 const SPINDLE_SPEED = 750;
-const MISSING_VALUE_TEXT = '-';
+// The one empty-readout mark, an em dash.
+const MISSING_VALUE_TEXT = '\u2014';
 const IDLE_LABEL = 'Idle';
 const RUN_LABEL = 'Run';
 const RESET_LABEL = 'Reset';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
 const NOT_CONNECTED_TEXT = 'Not connected';
+const STATUS_CARD_TITLE = 'Status';
 const STATUS_CONNECT_LABEL = 'Connect...';
 const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
 const SOON_TAG_TEXT = 'Soon';
@@ -69,8 +71,10 @@ describe(MachinePanel.name, () => {
   it('collapses the status card to one line while not connected, without readouts or buttons', () => {
     renderMachinePanel();
 
-    expect(screen.getByText(NOT_CONNECTED_TEXT)).toBeInTheDocument();
-    expect(screen.queryByText(MISSING_VALUE_TEXT)).not.toBeInTheDocument();
+    const statusCard: HTMLElement = screen.getByRole('region', { name: STATUS_CARD_TITLE });
+
+    expect(within(statusCard).getByText(NOT_CONNECTED_TEXT)).toBeInTheDocument();
+    expect(within(statusCard).queryByText(MISSING_VALUE_TEXT)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
   });

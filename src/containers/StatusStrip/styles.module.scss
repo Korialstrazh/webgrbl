@@ -71,4 +71,10 @@
     margin: 0;
     font-family: var(--font-mono);
   }
+
+  // A hint in place of a value reads as text, not as a number.
+  .readoutHint {
+    color: var(--color-text-muted);
+    font-family: var(--font-ui);
+  }
 }

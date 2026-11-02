@@ -21,10 +21,12 @@ const CURSOR_LABEL = 'Cursor';
 const JOB_SIZE_LABEL = 'Job size';
 const SOON_LABEL = 'Soon';
 const OFFLINE_LABEL = 'Offline';
-const MISSING_VALUE_TEXT = '-';
+// The one empty-readout mark, an em dash.
+const MISSING_VALUE_TEXT = '\u2014';
 const CURSOR_POINT = { xMm: 123.45, yMm: 6.7 };
 const CURSOR_TEXT = 'X 123.5 Y 6.7 mm';
 const JOB_SIZE_TEXT = '196.0 \u00D7 196.6 mm';
+const JOB_SIZE_HINT_TEXT = 'Open the Toolpath view';
 const FRAME_TIME_MS = 16;
 const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
@@ -102,6 +104,12 @@ describe(StatusStrip.name, () => {
 
     expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
     vi.unstubAllGlobals();
+  });
+
+  it('shows a short hint in place of the job size until the toolpath has been worked out', () => {
+    renderStatusStrip();
+
+    expect(screen.getByText(JOB_SIZE_LABEL).closest('div')).toHaveTextContent(`${JOB_SIZE_LABEL}${JOB_SIZE_HINT_TEXT}`);
   });
 
   it('shows the size of the ready toolpath as the job size', () => {

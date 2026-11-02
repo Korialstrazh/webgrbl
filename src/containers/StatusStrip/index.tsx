@@ -46,7 +46,7 @@ export const StatusStrip = (): ReactNode => {
         <dl className={styles.readouts}>
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
-            <dd>{getJobSizeReadoutText(t, jobBounds)}</dd>
+            <dd className={jobBounds ? undefined : styles.readoutHint}>{getJobSizeReadoutText(t, jobBounds)}</dd>
           </div>
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>

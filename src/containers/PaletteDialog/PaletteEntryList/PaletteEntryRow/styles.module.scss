@@ -16,7 +16,8 @@
 }
 
 // The button takes the row width the handle and the icon buttons leave: the swatch beside the name, the summary below
-// it. Its text is cut with an ellipsis, so it never runs under the icon buttons.
+// it across the button. The name and the summary each wrap to a second line instead of being cut short, and the button
+// grows with them, so they never run under the icon buttons.
 .selectButton {
   display: grid;
   flex: 1;
@@ -28,6 +29,7 @@
   padding: var(--space-2);
   overflow: hidden;
   text-align: left;
+  white-space: normal;
 
   &[aria-current='true'] {
     background-color: var(--color-surface-3);
@@ -35,22 +37,32 @@
 }
 
 .swatch {
-  grid-row: 1 / span 2;
   width: 1.5rem;
   height: 1.5rem;
 }
 
+// At most two lines each; only longer text is cut short, and its title shows it in full.
 .name,
 .summary {
+  display: -webkit-box;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .summary {
-  grid-column: 2;
+  grid-column: 1 / -1;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--color-text-muted);
+}
+
+// The move and delete buttons are a 2rem target each, though their icons are small.
+.row > :global(.ant-btn.ant-btn-icon-only) {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
 }

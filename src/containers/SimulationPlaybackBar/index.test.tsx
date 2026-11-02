@@ -33,6 +33,7 @@ import { SIMULATION_LAYER_SEGMENT_TEST_ID } from './simulation.playback.constant
 
 const PLAY_LABEL = 'Play';
 const PAUSE_LABEL = 'Pause';
+const REPLAY_LABEL = 'Replay from the start';
 const BACK_TO_START_LABEL = 'Back to start';
 const TO_END_LABEL = 'To end';
 const SLIDER_LABEL = 'Simulation time';
@@ -174,7 +175,7 @@ describe(SimulationPlaybackBar.name, () => {
     expect(selectSimulationTimeS(store.getState())).toBe(selectReadyToolpathTotalTimeS(store.getState()));
     expect(selectIsSimulationPlaying(store.getState())).toBe(false);
     expect(animationFrames.getWaitingCallbackCount()).toBe(0);
-    expect(getButton(PLAY_LABEL)).toBeInTheDocument();
+    expect(getButton(REPLAY_LABEL)).toBeInTheDocument();
   });
 
   it('advances a long gap between two frames by one short frame only, so a hidden tab does not jump', () => {
@@ -188,12 +189,12 @@ describe(SimulationPlaybackBar.name, () => {
     expect(selectSimulationTimeS(store.getState())).toBeCloseTo(LONGEST_FRAME_S, SHARE_DECIMALS);
   });
 
-  it('restarts from 0 when Play is pressed at the end', () => {
+  it('offers Replay at the end and restarts from 0 when it is pressed', () => {
     const store: AppStore = newReadyStore();
 
     store.dispatch(new SimulationTimeSet({ timeS: TOTAL_TIME_S }));
     renderBar(store);
-    fireEvent.click(getButton(PLAY_LABEL));
+    fireEvent.click(getButton(REPLAY_LABEL));
 
     expect(selectSimulationTimeS(store.getState())).toBe(0);
     expect(selectIsSimulationPlaying(store.getState())).toBe(true);

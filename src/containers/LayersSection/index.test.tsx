@@ -1,7 +1,8 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { LayersSection } from '.';
+import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
 import { HORIZONTAL_ELLIPSIS, MIDDLE_DOT, MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
@@ -37,6 +38,7 @@ const MOVE_CUT_UP_LABEL = 'Move Cut up';
 const MOVE_FILL_UP_LABEL = 'Move Fill up';
 const CUT_BUTTON_PATTERN = /^Cut/;
 const DRAWER_OVERLINE = 'Layer settings';
+const CLOSE_LABEL = 'Close';
 const OPEN_ROW_CLASS_NAME = 'openRow';
 const ROW_ROLE_SELECTOR = 'li';
 const FILL_BUTTON_PATTERN = /^Fill/;
@@ -223,6 +225,33 @@ describe(LayersSection.name, () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 
     expect(screen.queryByText(DRAWER_OVERLINE)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['the close button', (): void => {
+      fireEvent.click(screen.getByRole('button', { name: CLOSE_LABEL }));
+    }],
+    ['Escape', (): void => {
+      fireEvent.keyDown(screen.getByText(DRAWER_OVERLINE), { key: ESCAPE_KEY });
+    }],
+  ])('returns the focus to the layer row when the drawer closes with %s', async (
+    _closeName: string,
+    closeDrawer: () => void,
+  ) => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+    const cutButton: HTMLElement = screen.getByRole('button', { name: CUT_BUTTON_PATTERN });
+
+    fireEvent.click(cutButton);
+    act(() => {
+      screen.getByRole('button', { name: CLOSE_LABEL }).focus();
+    });
+    closeDrawer();
+
+    await waitFor(() => {
+      expect(cutButton).toHaveFocus();
+    });
   });
 
   it('highlights the whole row of the layer the drawer shows, and only that row', () => {
