@@ -18,7 +18,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Layout, Segmented } from 'antd';
+import { Layout, Segmented } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +32,6 @@ import { selectBedColour } from '../../utils/states/bed.appearance.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
-import { ComingSoon } from '../../views/ComingSoon';
 import { BedObjects } from '../BedObjects';
 import { BedViewport } from '../BedViewport';
 import { SimulationPlaybackBar } from '../SimulationPlaybackBar';
@@ -41,10 +40,10 @@ import { ToolpathLayer } from '../ToolpathLayer';
 import { ToolpathStatusOverlay } from '../ToolpathStatusOverlay';
 import { ToolpathToolbar } from '../ToolpathToolbar';
 import { ToolpathWarningsPanel } from '../ToolpathWarningsPanel';
+import { BedMoreToolsMenu } from './BedMoreToolsMenu';
 import { BED_DROP_AREA_TEST_ID, BED_VIEWPORT_KEY_SEPARATOR } from './bed.panel.constants';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
 import {
-  BED_COMING_SOON_TOOLS,
   BED_TOOL,
   BED_TOOL_OPTION_KEYS,
   BED_TOOL_SWITCH_NAME,
@@ -53,7 +52,6 @@ import {
   BED_VIEW_MODE_SWITCH_NAME,
 } from './bed.toolbar.constants';
 import type { BedTool, BedViewMode } from './bed.toolbar.constants';
-import type { BedComingSoonToolKeys } from './interfaces/BedComingSoonToolKeys';
 import type { BedPanelProps } from './interfaces/BedPanelProps';
 import type { BedSurfaceStyle } from './interfaces/BedSurfaceStyle';
 import type { BedToolOption } from './interfaces/BedToolOption';
@@ -86,10 +84,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   }));
   const viewModeOptions: BedViewModeOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option: BedViewModeOptionKey) => ({
     value: option.value,
-    label: option.soonDescriptionKey
-      ? <ComingSoon description={t(option.soonDescriptionKey)}>{t(option.labelKey)}</ComingSoon>
-      : t(option.labelKey),
-    disabled: !!option.soonDescriptionKey,
+    label: t(option.labelKey),
   }));
 
   return (
@@ -116,11 +111,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               value={activeTool}
               onChange={setActiveTool}
             />
-            {BED_COMING_SOON_TOOLS.map(({ labelKey, descriptionKey }: BedComingSoonToolKeys) => (
-              <ComingSoon key={labelKey} description={t(descriptionKey)}>
-                <Button disabled>{t(labelKey)}</Button>
-              </ComingSoon>
-            ))}
           </div>
         )}
         <div className={styles.viewTools}>
@@ -133,6 +123,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
             value={viewMode}
             onChange={changeBedViewMode}
           />
+          <BedMoreToolsMenu />
         </div>
       </div>
       {/* The region dialogs and drawers open in: everything below the header, so they never cover the toolbar. */}

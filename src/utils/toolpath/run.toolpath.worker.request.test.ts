@@ -9,6 +9,7 @@ import { getBoxSubpath } from './test.support/get.box.subpath';
 import { newBedDrawable } from './test.support/new.bed.drawable';
 import { newDrawablePaint } from './test.support/new.drawable.paint';
 import { newSvgPaint } from './test.support/new.svg.paint';
+import { newToolpathMachineArea } from './test.support/new.toolpath.machine.area';
 import { TOOLPATH_WORKER_MESSAGE_KIND } from './toolpath.worker.constants';
 
 const REQUEST_ID = 7;
@@ -31,6 +32,7 @@ const newCutAndScoreRequest = (): ToolpathWorkerRequest => ({
     getNewLayer(DEFAULT_CUT_ENTRY.colour, DEFAULT_PALETTE, 0),
     getNewLayer(DEFAULT_SCORE_ENTRY.colour, DEFAULT_PALETTE, 1),
   ],
+  machineArea: newToolpathMachineArea(),
 });
 
 describe(runToolpathWorkerRequest.name, () => {
@@ -50,7 +52,7 @@ describe(runToolpathWorkerRequest.name, () => {
       {
         kind: TOOLPATH_WORKER_MESSAGE_KIND.RESULT,
         requestId: REQUEST_ID,
-        toolpath: getToolpathModule.getToolpath(request.drawables, request.warnings, request.layers),
+        toolpath: getToolpathModule.getToolpath(request),
       },
     ]);
   });

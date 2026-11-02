@@ -8,6 +8,8 @@
 
 .header {
   display: flex;
+  // A header action that does not fit beside the title moves to a line of its own instead of being cut.
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);

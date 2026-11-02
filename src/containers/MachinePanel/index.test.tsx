@@ -27,6 +27,9 @@ const STOP_LABEL = 'Stop';
 const NOT_CONNECTED_TEXT = 'Not connected';
 const STATUS_CARD_TITLE = 'Status';
 const STATUS_CONNECT_LABEL = 'Connect...';
+const ANTD_PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
+const EXPORT_GCODE_LABEL = 'Export G-code';
+const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
 const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
 const SOON_TAG_TEXT = 'Soon';
 const CONTROL_SELECTOR = 'button, input';
@@ -85,6 +88,15 @@ describe(MachinePanel.name, () => {
     fireEvent.click(screen.getByRole('button', { name: STATUS_CONNECT_LABEL }));
 
     expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
+  });
+
+  it('keeps Export G-code the only filled primary button while not connected', () => {
+    renderMachinePanel();
+
+    expect(screen.getByRole('button', { name: STATUS_CONNECT_LABEL })).not.toHaveClass(ANTD_PRIMARY_BUTTON_CLASS);
+    // STOP is a danger button of its own, not a next step, so it is not counted.
+    expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(1);
+    expect(screen.getByRole('button', { name: EXPORT_GCODE_LABEL })).toHaveClass(ANTD_PRIMARY_BUTTON_CLASS);
   });
 
   it('drops the Connect button from the status card once connected', () => {

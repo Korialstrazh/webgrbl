@@ -11,6 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { call, put } from 'redux-saga/effects';
+import { getLayerKey } from '../layers/get.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { getProjectObjectIds } from '../project/get.project.object.ids';
 import type { LoadedProject } from '../project/interfaces/LoadedProject';
@@ -21,14 +22,25 @@ import { deriveProjectLayers } from './project.layers.derive.saga';
 import { ProjectOpened } from './project.state';
 import { loadProjectSummaries } from './project.summaries.saga';
 
+/** The derived layers, with every layer that was not stored valid switched off. */
+const getLayersWithNewLayersOff = (derivedLayers: ProjectLayer[], storedLayers: ProjectLayer[]): ProjectLayer[] => {
+  const storedLayerKeys: Set<string> = new Set<string>(storedLayers.map(getLayerKey));
+
+  return derivedLayers.map((layer: ProjectLayer): ProjectLayer =>
+    (storedLayerKeys.has(getLayerKey(layer)) ? layer : { ...layer, enabled: false }));
+};
+
 /**
  * The layers are derived before the document loads, so a project stored before projects had layers, or with a colour
  * that has no layer, opens with a layer for every colour; existing layers keep their settings.
  */
-export function* openLoadedProject({ project, document: storedDocument }: LoadedProject): Generator {
+export function* openLoadedProject({ project, document: storedDocument, hasDroppedLayers }: LoadedProject): Generator {
   const derivedLayers: ProjectLayer[] =
     (yield call(deriveProjectLayers, storedDocument.objects, storedDocument.layers)) as ProjectLayer[];
-  const projectDocument: ProjectDocument = { ...storedDocument, layers: derivedLayers };
+  const projectDocument: ProjectDocument = {
+    ...storedDocument,
+    layers: hasDroppedLayers ? getLayersWithNewLayersOff(derivedLayers, storedDocument.layers) : derivedLayers,
+  };
 
   yield put(new ProjectDocumentLoaded({ document: projectDocument }));
   yield put(new ProjectOpened({ projectId: project.id, name: project.name }));

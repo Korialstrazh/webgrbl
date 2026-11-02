@@ -21,10 +21,10 @@ import {
   SVG_SAME_DOCUMENT_REFERENCE_PREFIX,
   XLINK_NAMESPACE_URI,
 } from '../svg.constants';
-import { getSvgElementCountUpTo } from './get.svg.element.count.up.to';
 import { getSvgElementsById } from './get.svg.elements.by.id';
 import { getSvgLengthUserUnits } from './get.svg.length.user.units';
 import { getSvgMatrixProduct } from './get.svg.matrix.product';
+import { getSvgNodeCountUpTo } from './get.svg.node.count.up.to';
 import type { SvgExpandedDocument } from './interfaces/SvgExpandedDocument';
 import type { SvgMatrix } from './interfaces/SvgMatrix';
 import { isSvgZeroLength } from './is.svg.zero.length';
@@ -147,9 +147,10 @@ const hasZeroUseSize = (useElement: Element): boolean =>
  * Changes the document in place; it is only called on a document this module has just parsed. Only drawn uses are
  * expanded: uses inside defs, symbols, clip paths and masks stay as they are, also inside copies, so no budget goes
  * to content that is never drawn. A copy's own drawn uses are expanded inside the copy, so no copy is ever made of
- * content that is itself already expanded. The referenced element is counted before it is cloned, and the copy is
- * charged that count: a clone is an exact copy of its source, and turning a symbol into an svg keeps the count. Every
- * count also spends the inspection budget, so many distinct large references cannot make the work grow without bound.
+ * content that is itself already expanded. The referenced element is counted before it is cloned (every node: text
+ * and comments too, since the clone copies them), and the copy is charged that count: a clone is an exact copy of its
+ * source, and turning a symbol into an svg keeps the count. Every count also spends the inspection budget, so many
+ * distinct large references cannot make the work grow without bound.
  */
 const expandSvgUseElements = (svgDocument: Document): boolean => {
   const elementsById: Map<string, Element> = getSvgElementsById(svgDocument);
@@ -176,7 +177,7 @@ const expandSvgUseElements = (svgDocument: Document): boolean => {
       return undefined;
     }
 
-    const copySize: number = getSvgElementCountUpTo(referencedElement, remainingElements);
+    const copySize: number = getSvgNodeCountUpTo(referencedElement, remainingElements);
 
     remainingInspectedElements -= copySize;
     knownCopySizes.set(referencedElement, copySize);

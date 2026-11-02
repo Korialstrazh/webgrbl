@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { RedoOutlined, UndoOutlined } from '@ant-design/icons';
+import { ImportOutlined, RedoOutlined, UndoOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -53,7 +53,7 @@ export const TopBar = (): ReactNode => {
         >
           {t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
         </Button>
-        <SvgImportButton />
+        <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.compactHiddenLabel} />
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <Button

@@ -1,5 +1,5 @@
 .nameButton {
-  max-width: 16rem;
+  max-width: min(16rem, 100%);
   height: auto;
   padding: 0 var(--space-1);
   line-height: 1.5;

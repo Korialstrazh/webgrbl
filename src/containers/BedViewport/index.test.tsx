@@ -12,19 +12,22 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 const DIMENSIONS: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
 const VIEW_WIDTH_PX = 800;
 const VIEW_HEIGHT_PX = 400;
-const FIT_VIEW_BOX: readonly number[] = [-100, 0, 600, 300];
+// Fit leaves 16 px on each side: 300 mm fill 368 px of height, so 1.2267 px per mm, centred on 200, 150.
+const FIT_VIEW_BOX: readonly number[] = [-126.087, -13.043, 652.174, 326.087];
 // The plus key zooms by 1.25 around the view centre: the view box keeps its centre at 200, 150.
-const ZOOMED_IN_VIEW_BOX: readonly number[] = [-40, 30, 480, 240];
-// 40 px at 5/3 px per mm move the zoomed view 24 mm to the left.
-const PANNED_VIEW_BOX: readonly number[] = [-64, 30, 480, 240];
+const ZOOMED_IN_VIEW_BOX: readonly number[] = [-60.87, 19.565, 521.739, 260.87];
+// 40 px at 1.5333 px per mm move the zoomed view 26.087 mm to the left.
+const PANNED_VIEW_BOX: readonly number[] = [-86.957, 19.565, 521.739, 260.87];
+const FIT_MARGIN_PX = 16;
 const VIEW_BOX_SEPARATOR = ' ';
 const ZOOM_IN_LABEL = /^Zoom in/;
 const ZOOM_OUT_LABEL = /^Zoom out/;
 const FIT_LABEL = /^Fit the bed/;
 const VIEW_BOX_ATTRIBUTE = 'viewBox';
 const BED_GROUP_NAME = /Machine bed/;
-const FIT_PERCENT_TEXT = '100 %';
+const FIT_PERCENT_TEXT = '100 % (fit)';
 const ZOOMED_PERCENT_TEXT = '125 %';
+const UNFITTED_FULL_PERCENT_TEXT = '100 %';
 const OVERLAY_ID = 'test-overlay';
 const POINTER_ID = 1;
 const RULER_LABEL_TEXT = '350';
@@ -96,6 +99,51 @@ describe(BedViewport.name, () => {
     expect(screen.getByText(RULER_LABEL_TEXT)).toBeInTheDocument();
   });
 
+  it('leaves the fit margin free above and below the bed, the side that limits the fit', () => {
+    renderBedViewport();
+
+    const [, viewBoxY, , viewBoxHeight] = getViewBoxNumbers();
+    const pixelsPerMm: number = VIEW_HEIGHT_PX / (viewBoxHeight ?? 1);
+
+    expect(-(viewBoxY ?? 0) * pixelsPerMm).toBeCloseTo(FIT_MARGIN_PX);
+    expect(((viewBoxHeight ?? 0) + (viewBoxY ?? 0) - DIMENSIONS.heightMm) * pixelsPerMm).toBeCloseTo(FIT_MARGIN_PX);
+  });
+
+  it('labels the zoom of a fitted bed as fit and a zoomed bed as a plain percent', () => {
+    renderBedViewport();
+
+    expect(screen.getByText(FIT_PERCENT_TEXT)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
+
+    expect(screen.queryByText(FIT_PERCENT_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByText(ZOOMED_PERCENT_TEXT)).toBeInTheDocument();
+  });
+
+  it('drops the fit note from 100 % once the view is panned away from the fitted centre', () => {
+    renderBedViewport();
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
+
+    const viewElement: HTMLElement = getViewElement();
+
+    fireEvent.pointerDown(viewElement, {
+      pointerId: POINTER_ID,
+      button: MIDDLE_POINTER_BUTTON,
+      clientX: 100,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+    fireEvent.pointerUp(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_OUT_LABEL }));
+
+    expect(screen.queryByText(FIT_PERCENT_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByText(UNFITTED_FULL_PERCENT_TEXT)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: FIT_LABEL }));
+
+    expect(screen.getByText(FIT_PERCENT_TEXT)).toBeInTheDocument();
+  });
+
   it('draws the rulers in their own bands beside the drawing area, never on the drawing', () => {
     renderBedViewport();
 
@@ -127,14 +175,14 @@ describe(BedViewport.name, () => {
   it('zooms with the wheel around the pointer, keeping the bed point under it', () => {
     renderBedViewport();
 
-    // The pointer is at the view's top-left corner, bed point -100, 0; it stays there while the bed grows.
+    // The pointer is at the view's top-left corner, the view box corner; it stays there while the bed grows.
     fireEvent.wheel(getViewElement(), { deltaY: -100, clientX: 0, clientY: 0 });
 
     const [viewBoxX, viewBoxY, viewBoxWidth] = getViewBoxNumbers();
 
-    expect(viewBoxX).toBeCloseTo(-100);
-    expect(viewBoxY).toBeCloseTo(0);
-    expect(viewBoxWidth).toBeLessThan(600);
+    expect(viewBoxX).toBeCloseTo(FIT_VIEW_BOX[0] ?? 0);
+    expect(viewBoxY).toBeCloseTo(FIT_VIEW_BOX[1] ?? 0);
+    expect(viewBoxWidth).toBeLessThan(FIT_VIEW_BOX[2] ?? 0);
   });
 
   it('leaves a plain wheel to the page in a narrow window and zooms with Ctrl held', () => {

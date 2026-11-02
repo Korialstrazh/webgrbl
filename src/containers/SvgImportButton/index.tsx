@@ -23,7 +23,11 @@ import type { SvgImportButtonProps } from './interfaces/SvgImportButtonProps';
 import styles from './styles.module.scss';
 import { EMPTY_FILE_INPUT_VALUE, SVG_FILE_PICKER_ACCEPT, SVG_IMPORT_INPUT_TEST_ID } from './svg.import.button.constants';
 
-export const SvgImportButton = ({ buttonType = ANTD_BUTTON_TYPE_DEFAULT }: SvgImportButtonProps): ReactNode => {
+export const SvgImportButton = ({
+  buttonType = ANTD_BUTTON_TYPE_DEFAULT,
+  iconComponent,
+  labelClassName,
+}: SvgImportButtonProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
@@ -40,8 +44,13 @@ export const SvgImportButton = ({ buttonType = ANTD_BUTTON_TYPE_DEFAULT }: SvgIm
 
   return (
     <>
-      <Button type={buttonType} onClick={() => inputRef.current?.click()}>
-        {t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}
+      <Button
+        type={buttonType}
+        icon={iconComponent}
+        aria-label={t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}
+        onClick={() => inputRef.current?.click()}
+      >
+        <span className={labelClassName}>{t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}</span>
       </Button>
       <input
         ref={inputRef}

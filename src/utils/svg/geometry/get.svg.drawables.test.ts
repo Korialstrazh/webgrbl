@@ -1,3 +1,5 @@
+import type { CountedDomWalk } from '../../test.support/interfaces/CountedDomWalk';
+import { countDomWalkSteps } from '../../test.support/count.dom.walk.steps';
 import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 import { getSvgDrawables } from './get.svg.drawables';
 import type { SvgDrawable } from './interfaces/SvgDrawable';
@@ -19,7 +21,6 @@ const getSvgText = (content: string): string =>
 const getDrawableSet = (content: string): SvgDrawableSet => getSvgDrawables(getSvgText(content), TOLERANCE);
 
 const VIEWPORT_SIZE = 100;
-const QUICK_RUN_LIMIT_MS = 2000;
 
 /** An SVG whose root viewport is 100 x 100 user units, as in the Inkscape checks. */
 const getViewportDrawableSet = (content: string): SvgDrawableSet => getSvgDrawables(
@@ -188,17 +189,13 @@ describe(getSvgDrawables.name, () => {
     const getGroupDrawableSet = (groupUseCount: number): SvgDrawableSet => getDrawableSet(
       `<g id="big">${'<g/>'.repeat(groupSize)}</g>${'<use href="#big"/>'.repeat(groupUseCount)}`,
     );
-    // The same document with one use measures the fixed cost (parsing, styles, walk) on this machine, so only the
-    // extra cost of the other uses is compared with the limit.
-    const oneUseStartTime: number = performance.now();
+    // The same document with one use gives the fixed walk (styles, drawables); the other uses may add only their own
+    // few steps each, never another count of the large group.
+    const oneUseWalk: CountedDomWalk<SvgDrawableSet> = countDomWalkSteps(() => getGroupDrawableSet(1));
+    const manyUsesWalk: CountedDomWalk<SvgDrawableSet> = countDomWalkSteps(() => getGroupDrawableSet(useCount));
+    const { drawables, unsupported }: SvgDrawableSet = manyUsesWalk.result;
 
-    getGroupDrawableSet(1);
-
-    const oneUseTime: number = performance.now() - oneUseStartTime;
-    const manyUsesStartTime: number = performance.now();
-    const { drawables, unsupported }: SvgDrawableSet = getGroupDrawableSet(useCount);
-
-    expect(performance.now() - manyUsesStartTime - oneUseTime).toBeLessThan(QUICK_RUN_LIMIT_MS);
+    expect(manyUsesWalk.walkStepCount - oneUseWalk.walkStepCount).toBeLessThan(groupSize);
     expect(unsupported).toEqual([SVG_UNSUPPORTED_KIND.USE_LIMIT]);
     expect(drawables).toEqual([]);
   }, USE_LIMIT_TEST_TIMEOUT_MS);

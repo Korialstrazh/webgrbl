@@ -1,3 +1,5 @@
+@use '../../../styles/accessibility' as accessibility;
+
 // The end margin keeps the readout from touching the button after it in a tight bar.
 .autosave {
   display: flex;
@@ -25,4 +27,16 @@
 
 .unsaved {
   background-color: var(--color-danger);
+}
+
+// At the narrowest widths only the coloured dot stays on screen; the label is still read out. 46rem must match the
+// TopBar styles.
+@media (width < 46rem) {
+  .autosave {
+    margin-right: 0;
+  }
+
+  .label {
+    @include accessibility.visually-hidden;
+  }
 }

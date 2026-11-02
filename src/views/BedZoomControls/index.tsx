@@ -1,7 +1,7 @@
 /**
  * The small view cluster in the bottom-right corner of the bed: an optional leading control (the bed colour), zoom
- * out, the zoom as a percentage of the fitted bed, zoom in and Fit. Each button names its keyboard shortcut in its
- * tooltip, and the cluster tells how to pan.
+ * out, the zoom as a percentage of the fitted bed (with a fit note only while the view is fitted), zoom in and Fit.
+ * Each button names its keyboard shortcut in its tooltip, and the cluster tells how to pan.
  *
  * @author michael.morosov
  *
@@ -19,7 +19,7 @@ import type { BedZoomControlsProps } from './interfaces/BedZoomControlsProps';
 import styles from './styles.module.scss';
 
 export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
-  const { leadingControlComponent, zoomPercent, canZoomIn, canZoomOut, onZoomIn, onZoomOut, onFit } = props;
+  const { leadingControlComponent, zoomPercent, isFitted, canZoomIn, canZoomOut, onZoomIn, onZoomOut, onFit } = props;
   const { t } = useTranslation();
 
   return (
@@ -37,7 +37,9 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
       <Tooltip title={t(DEFAULT.BED_ZOOM_PAN_HINT)}>
         {/* A plain readout: it shows the zoom and carries the pan hint, it is not a control. */}
         <span className={styles.zoomPercent} aria-live="polite">
-          {t(DEFAULT.BED_ZOOM_PERCENT, { percent: zoomPercent })}
+          {t(isFitted ? DEFAULT.BED_ZOOM_PERCENT_FIT : DEFAULT.BED_ZOOM_PERCENT, {
+            percent: zoomPercent,
+          })}
         </span>
       </Tooltip>
       <Tooltip title={t(DEFAULT.BED_ZOOM_IN_HINT)}>

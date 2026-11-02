@@ -20,7 +20,7 @@ export const TOOLPATH_MOVE_KIND = {
 
 export type ToolpathMoveKind = (typeof TOOLPATH_MOVE_KIND)[keyof typeof TOOLPATH_MOVE_KIND];
 
-/** The head starts every job at the bed origin. */
+/** The G-code work zero. The head starts every job there, which is the origin corner of the machine. */
 export const TOOLPATH_START_POINT: Readonly<GeometryPoint> = { x: 0, y: 0 };
 export const TRAVEL_POWER_PERCENT = 0;
 /** Moves shorter than this, in mm, are left out: the head is already there. */

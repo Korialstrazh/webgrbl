@@ -15,8 +15,6 @@ import type { BedViewMode } from '../bed.toolbar.constants';
 export interface BedViewModeOption {
   /** The view mode id. */
   value: BedViewMode;
-  /** antd names this field; it holds the label text, with a Soon tag for a mode that is not built yet. */
+  /** antd names this field; it holds the label text. */
   label: ReactNode;
-  /** Whether the mode cannot be chosen yet. */
-  disabled: boolean;
 }

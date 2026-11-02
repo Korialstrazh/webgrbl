@@ -7,6 +7,8 @@ import type { BedRulersRequest } from './interfaces/BedRulersRequest';
 import type { BedRulerTick } from './interfaces/BedRulerTick';
 
 const DIMENSIONS: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
+// The request screen is an 800 x 400 px drawing area plus the 16 px fit margin on each side, so the fitted bed
+// takes 4/3 px per mm.
 const ROOT_FONT_SIZE_PX = 16;
 const ZOOM_IN_FOUR_TIMES = 4;
 // 3 rem at a 16 px root font.
@@ -24,7 +26,7 @@ const ZOOMED_TOP_LABELS: readonly number[] = [
 
 const newRequest = (zoom: number, centerXMm: number = 200, centerYMm: number = 150): BedRulersRequest => ({
   viewport: { zoom, centerXMm, centerYMm },
-  screenSize: { widthPx: 800, heightPx: 400 },
+  screenSize: { widthPx: 832, heightPx: 432 },
   dimensions: DIMENSIONS,
   rootFontSizePx: ROOT_FONT_SIZE_PX,
 });
@@ -37,7 +39,7 @@ describe(getBedRulers.name, () => {
 
     expect(getValues(rulers.topLabels)).toEqual([0, 50, 100, 150, 200, 250, 300, 350]);
     expect(getValues(rulers.leftLabels)).toEqual([0, 50, 100, 150, 200, 250]);
-    expect(rulers.topLabels[1]?.offsetPx).toBeCloseTo(200);
+    expect(rulers.topLabels[1]?.offsetPx).toBeCloseTo(216);
   });
 
   it('labels a finer step from the part of the bed in view when zoomed in', () => {

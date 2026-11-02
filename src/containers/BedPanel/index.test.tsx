@@ -63,8 +63,8 @@ const OBJECT_NAME = 'Logo';
 const TOOL_LABEL = 'Bed tool';
 const SELECT_TOOL_LABEL = 'Select';
 const MOVE_TOOL_LABEL = 'Move';
-const EDIT_NODES_LABEL = 'Edit nodes';
-const ALIGN_LABEL = 'Align';
+const EDIT_NODES_LABEL = /^Edit nodes/;
+const ALIGN_LABEL = /^Align/;
 const SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
 const DROP_TARGET_ATTRIBUTE = 'data-drop-target';
 const TRUE_TEXT = 'true';
@@ -79,8 +79,10 @@ const TEXT_DRAG = { dataTransfer: { types: ['text/plain'] } };
 
 const PHOTO_FILE_NAME = 'photo.png';
 const TOOLPATH_VIEW_LABEL = 'Toolpath';
-// The name of the 3D option also carries its Soon tag and the hidden description.
+// The name of each More entry starts with its tool name and also carries its Soon tag and description.
 const THREE_D_VIEW_LABEL = /^3D/;
+const MORE_TOOLS_LABEL = /^More bed tools/;
+const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const SOON_TAG_TEXT = 'Soon';
 const REGENERATE_LABEL = 'Regenerate';
 const OUT_OF_DATE_TEXT = 'Out of date';
@@ -196,26 +198,28 @@ describe(BedPanel.name, () => {
     expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).toBeChecked();
   });
 
-  it('dispatches nothing from the coming-soon toolbar controls', () => {
+  it('lists Edit nodes, Align and 3D under More as disabled entries, each with a Soon tag', async () => {
+    renderPanel(newStore());
+    fireEvent.click(screen.getByRole('button', { name: MORE_TOOLS_LABEL }));
+
+    for (const soonLabel of [EDIT_NODES_LABEL, ALIGN_LABEL, THREE_D_VIEW_LABEL]) {
+      const soonEntry: HTMLElement = await screen.findByRole('menuitem', { name: soonLabel });
+
+      expect(soonEntry).toHaveAttribute(ARIA_DISABLED_ATTRIBUTE, 'true');
+      expect(soonEntry).toHaveTextContent(SOON_TAG_TEXT);
+    }
+  });
+
+  it('dispatches nothing from the coming-soon entries under More', async () => {
     const store: AppStore = newStore();
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderPanel(store);
-    fireEvent.click(screen.getByRole('button', { name: EDIT_NODES_LABEL }));
-    fireEvent.click(screen.getByRole('button', { name: ALIGN_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: MORE_TOOLS_LABEL }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: EDIT_NODES_LABEL }));
+    fireEvent.click(screen.getByRole('menuitem', { name: THREE_D_VIEW_LABEL }));
 
     expect(dispatchSpy).not.toHaveBeenCalled();
-  });
-
-  it('shows Edit nodes and Align as disabled buttons, each with its own Soon tag', () => {
-    renderPanel(newStore());
-
-    for (const soonLabel of [EDIT_NODES_LABEL, ALIGN_LABEL]) {
-      const soonButton: HTMLElement = screen.getByRole('button', { name: soonLabel });
-
-      expect(soonButton).toBeDisabled();
-      expect(soonButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_TAG_TEXT);
-    }
   });
 
   it('shows the zoom, Fit and bed colour controls in the header, never over the bed drawing', () => {
@@ -415,13 +419,11 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('group', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('offers 3D only as a disabled view with the same Soon tag as the other unbuilt controls', () => {
+  it('offers only Design and Toolpath in the view switch', () => {
     renderPanel(newStore());
 
-    const threeDRadio: HTMLElement = screen.getByRole('radio', { name: THREE_D_VIEW_LABEL });
-
-    expect(threeDRadio).toBeDisabled();
-    expect(threeDRadio.closest('label')).toHaveTextContent(SOON_TAG_TEXT);
+    expect(screen.queryByRole('radio', { name: THREE_D_VIEW_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: TOOLPATH_VIEW_LABEL })).toBeEnabled();
   });
 
   it('shows the job size in the playback bar in Toolpath view', () => {

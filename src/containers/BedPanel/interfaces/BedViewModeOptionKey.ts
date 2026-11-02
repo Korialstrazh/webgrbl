@@ -13,6 +13,4 @@ import type { BedViewMode } from '../bed.toolbar.constants';
 export interface BedViewModeOptionKey {
   value: BedViewMode;
   labelKey: string;
-  /** What a mode that is not built yet will show; such a mode is disabled and carries a Soon tag. */
-  soonDescriptionKey?: string;
 }

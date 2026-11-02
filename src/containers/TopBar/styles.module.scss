@@ -1,3 +1,4 @@
+@use '../../styles/accessibility' as accessibility;
 @use '../../styles/layout' as layout;
 
 .topBar {
@@ -65,5 +66,22 @@
   .heading {
     flex-shrink: 1;
     min-width: 0;
+    // The heading shrinks to make room, so its title and project name are cut instead of drawing over the menus.
+    overflow: hidden;
+  }
+
+  .title {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// At the narrowest widths (the 684 px window included) Import SVG keeps only its icon, so the app title and the
+// project name keep room to show. 46rem must match the AutosaveReadout styles.
+@media (width < 46rem) {
+  .compactHiddenLabel {
+    @include accessibility.visually-hidden;
   }
 }

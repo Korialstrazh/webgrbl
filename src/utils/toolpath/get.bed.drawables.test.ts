@@ -28,6 +28,16 @@ const getSquareObject = (overrides: Partial<ProjectObject>): ProjectObject => ne
 const getDocument = (objects: ProjectObject[]): ProjectDocument => ({ objects, layers: [] });
 
 describe(getBedDrawables.name, () => {
+  it('leaves out an object whose SVG cannot be read, with an unreadable warning instead of silence', () => {
+    const { drawables, warnings }: BedDrawableSet = getBedDrawables(getDocument([getSquareObject({
+      id: FIRST_OBJECT_ID,
+      svgText: 'not an svg <<<',
+    })]));
+
+    expect(drawables).toEqual([]);
+    expect(warnings).toEqual([{ objectId: FIRST_OBJECT_ID, kind: SVG_UNSUPPORTED_KIND.UNREADABLE }]);
+  });
+
   it('maps the shapes into bed millimetres with Y up', () => {
     const { drawables }: BedDrawableSet = getBedDrawables(getDocument([getSquareObject({
       id: FIRST_OBJECT_ID,
@@ -105,13 +115,16 @@ describe(getBedDrawables.name, () => {
     expect(drawables).toHaveLength(2);
   });
 
-  it('warns about unsupported content per object and skips objects whose SVG cannot be read', () => {
+  it('warns about unsupported content per object and about objects whose SVG cannot be read', () => {
     expect(getBedDrawables(getDocument([
       getSquareObject({ id: FIRST_OBJECT_ID, svgText: 'not svg' }),
       getSquareObject({ id: SECOND_OBJECT_ID, svgText: getSvgText(OBJECT_SIZE_MM, OBJECT_SIZE_MM, '<text>x</text>') }),
     ]))).toEqual({
       drawables: [],
-      warnings: [{ objectId: SECOND_OBJECT_ID, kind: SVG_UNSUPPORTED_KIND.TEXT }],
+      warnings: [
+        { objectId: FIRST_OBJECT_ID, kind: SVG_UNSUPPORTED_KIND.UNREADABLE },
+        { objectId: SECOND_OBJECT_ID, kind: SVG_UNSUPPORTED_KIND.TEXT },
+      ],
     });
   });
 });

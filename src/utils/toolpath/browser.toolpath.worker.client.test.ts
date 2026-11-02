@@ -6,6 +6,8 @@ import type { ToolpathGenerationInput } from './interfaces/ToolpathGenerationInp
 import type { ToolpathWorkerClient } from './interfaces/ToolpathWorkerClient';
 import type { ToolpathWorkerMessage } from './interfaces/ToolpathWorkerMessage';
 import type { ToolpathWorkerRequest } from './interfaces/ToolpathWorkerRequest';
+import { newToolpath } from './test.support/new.toolpath';
+import { newToolpathMachineArea } from './test.support/new.toolpath.machine.area';
 import {
   TOOLPATH_WORKER_MESSAGE_KIND,
   WORKER_ERROR_EVENT_NAME,
@@ -17,8 +19,13 @@ import { ToolpathWorkerError } from './toolpath.worker.error';
 const HALF_DONE = 0.5;
 const WORKER_ERROR_TEXT = 'out of memory';
 const OTHER_REQUEST_ID = -1;
-const EMPTY_INPUT: ToolpathGenerationInput = { drawables: [], warnings: [], layers: [] };
-const EMPTY_TOOLPATH: Toolpath = { moves: [], layers: [], warnings: [], bounds: undefined };
+const EMPTY_INPUT: ToolpathGenerationInput = {
+  drawables: [],
+  warnings: [],
+  layers: [],
+  machineArea: newToolpathMachineArea(),
+};
+const EMPTY_TOOLPATH: Toolpath = newToolpath();
 
 /** Stands in for a Web Worker: records what it is sent and lets the test answer. */
 class FakeWorker extends EventTarget {

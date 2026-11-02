@@ -5,9 +5,10 @@ import type { BedViewportFrame } from './interfaces/BedViewportFrame';
 
 const DIMENSIONS: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
 
+// An 800 x 400 px drawing area plus the 16 px fit margin on each side, so the fitted bed takes 4/3 px per mm.
 const newFrame = (zoom: number): BedViewportFrame => ({
   viewport: { zoom, centerXMm: 200, centerYMm: 150 },
-  screenSize: { widthPx: 800, heightPx: 400 },
+  screenSize: { widthPx: 832, heightPx: 432 },
   dimensions: DIMENSIONS,
 });
 

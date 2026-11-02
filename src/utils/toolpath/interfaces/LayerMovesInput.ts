@@ -22,4 +22,6 @@ export interface LayerMovesInput {
   paintAreas: ToolpathPaintArea[];
   /** Where the head is before the layer starts. */
   startPoint: GeometryPoint;
+  /** Width of the machine work area in mm, which the fill overscan must not leave. */
+  workAreaXMm: number;
 }

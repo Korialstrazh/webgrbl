@@ -4,8 +4,10 @@
  * - A request reads the drawables on the main thread (parsing needs DOMParser) and hands only plain
  *   data to the worker. takeLatest cancels the running generation on a new request or a cancel, and the generation's
  *   finally block cancels the worker.
- * - Parsed drawables are cached per object (BedDrawablesCache), so a layer change parses no SVG again.
- * - A document change during a generation restarts it, debounced by TOOLPATH_RESTART_DEBOUNCE_MS, so the result
+ * - Parsed drawables are cached per object (BedDrawablesCache), so a layer change, a move or a resize parses no SVG
+ *   again.
+ * - The toolpath is kept current in the background: a document or machine area change restarts a running generation,
+ *   and generates an idle or out-of-date toolpath, debounced by TOOLPATH_RESTART_DEBOUNCE_MS, so the result
  *   always matches the current document.
  * - An export started for one project is dropped, with an info toast, when another project opens before it downloads.
  * - When the store's sagas stop, the worker client is disposed.
@@ -27,6 +29,7 @@ import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
+import { EVERY_ACTION_PATTERN } from '../redux.saga.constants';
 import { BedDrawablesCache } from '../toolpath/bed.drawables.cache';
 import { GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
 import { getGcodeExportContext } from '../toolpath/get.gcode.export.context';
@@ -35,6 +38,7 @@ import { getGcodeText } from '../toolpath/get.gcode.text';
 import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathGeneration } from '../toolpath/interfaces/ToolpathGeneration';
+import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachineArea';
 import type { ToolpathWorkerClient } from '../toolpath/interfaces/ToolpathWorkerClient';
 import { logToolpathGenerationError } from '../toolpath/log.toolpath.generation.error';
 import type { Action } from './action';
@@ -42,17 +46,24 @@ import { selectGrblSettings } from './grbl.connection.state';
 import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
 import { selectActiveMachineProfile } from './machine.profile.state';
 import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
-import { ProjectDocumentLoaded, selectProjectDocument, selectProjectLayers } from './project.document.state';
+import {
+  ProjectDocumentLoaded,
+  selectEnabledProjectLayers,
+  selectProjectDocument,
+  selectProjectLayers,
+} from './project.document.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import { ProjectOpened, selectProjectId, selectProjectName } from './project.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
+import { selectToolpathMachineArea } from './toolpath.machine.area.selector';
 import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import {
   GcodeExportConfirmationRequested,
   GcodeExportRequested,
   ToolpathCancelled,
   ToolpathFailed,
+  ToolpathMachineAreaChanged,
   ToolpathProgress,
   ToolpathReady,
   ToolpathRequested,
@@ -65,6 +76,37 @@ import type { ToolpathStatus } from './toolpath.status.constants';
 
 // Only the newest progress matters, so older ones the saga has not put yet are dropped.
 const PROGRESS_BUFFER_SIZE = 1;
+const TOOLPATH_INPUT_CHANGE_ACTION_TYPES: string[] = [
+  ...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES,
+  ToolpathMachineAreaChanged.type,
+];
+
+const TOOLPATH_BACKGROUND_STATUSES: readonly ToolpathStatus[] = [TOOLPATH_STATUS.IDLE, TOOLPATH_STATUS.STALE];
+
+const hasMachineAreaChanged = (machineArea: ToolpathMachineArea, lastMachineArea: ToolpathMachineArea): boolean =>
+  machineArea.workAreaXMm !== lastMachineArea.workAreaXMm
+  || machineArea.workAreaYMm !== lastMachineArea.workAreaYMm
+  || machineArea.originCorner !== lastMachineArea.originCorner;
+
+/**
+ * Watches the derived machine area, not a list of actions: with no active profile it follows a connect, a disconnect
+ * and the $130/$131 settings, so it is checked after every action. A change that keeps the work area and origin (a
+ * jog speed, a profile name, a status report) leaves the toolpath current.
+ */
+function* watchToolpathMachineArea(): Generator {
+  let lastMachineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
+
+  while (true) {
+    yield take(EVERY_ACTION_PATTERN);
+
+    const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
+
+    if (hasMachineAreaChanged(machineArea, lastMachineArea)) {
+      lastMachineArea = machineArea;
+      yield put(new ToolpathMachineAreaChanged());
+    }
+  }
+}
 
 function* putToolpathProgress(progressChannel: Channel<number>): Generator {
   while (true) {
@@ -78,6 +120,7 @@ function* generateToolpath(toolpathWorkerClient: ToolpathWorkerClient, drawables
   const documentVersion: number = (yield select(selectToolpathDocumentVersion)) as number;
   const projectDocument: ProjectDocument = (yield select(selectProjectDocument)) as ProjectDocument;
   const layers: ProjectLayer[] = (yield select(selectProjectLayers)) as ProjectLayer[];
+  const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
   const progressChannel: Channel<number> = channel<number>(buffers.sliding<number>(PROGRESS_BUFFER_SIZE));
   let generation: ToolpathGeneration | undefined;
 
@@ -87,7 +130,7 @@ function* generateToolpath(toolpathWorkerClient: ToolpathWorkerClient, drawables
       projectDocument,
     )) as BedDrawableSet;
 
-    generation = toolpathWorkerClient.generate({ ...drawableSet, layers }, (progress: number): void => {
+    generation = toolpathWorkerClient.generate({ ...drawableSet, layers, machineArea }, (progress: number): void => {
       progressChannel.put(progress);
     });
     yield fork(putToolpathProgress, progressChannel);
@@ -116,10 +159,20 @@ function* runToolpathAction(
   }
 }
 
-function* restartRunningGeneration(): Generator {
-  const status: ToolpathStatus = (yield select(selectToolpathStatus)) as ToolpathStatus;
+/**
+ * Whether the background refresh must ask for a toolpath. A running generation always restarts, else its result would
+ * be dropped as out of date and the status would never leave generating. An idle or out-of-date toolpath is generated
+ * when there is a layer to burn. A failed one waits for the user, so a failure does not repeat its toast on every edit.
+ */
+const isToolpathRefreshNeeded = (status: ToolpathStatus, enabledLayers: ProjectLayer[]): boolean =>
+  status === TOOLPATH_STATUS.GENERATING || (!!enabledLayers.length && TOOLPATH_BACKGROUND_STATUSES.includes(status));
 
-  if (status === TOOLPATH_STATUS.GENERATING) {
+/** Keeps the toolpath current in the background once the inputs are quiet, so the Design view shows the job too. */
+function* refreshToolpath(): Generator {
+  const status: ToolpathStatus = (yield select(selectToolpathStatus)) as ToolpathStatus;
+  const enabledLayers: ProjectLayer[] = (yield select(selectEnabledProjectLayers)) as ProjectLayer[];
+
+  if (isToolpathRefreshNeeded(status, enabledLayers)) {
     yield put(new ToolpathRequested());
   }
 }
@@ -182,9 +235,11 @@ function* downloadGcode(toolpath: Toolpath, profile: MachineProfile): Generator 
 }
 
 function* exportGcode(action: GcodeExportRequested): Generator {
-  const profile: MachineProfile | undefined = (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
+  const startProfile: MachineProfile | undefined = (
+    yield select(selectActiveMachineProfile)
+  ) as MachineProfile | undefined;
 
-  if (!profile) {
+  if (!startProfile) {
     return;
   }
 
@@ -192,6 +247,14 @@ function* exportGcode(action: GcodeExportRequested): Generator {
   const toolpath: Toolpath | undefined = (yield call(waitForReadyToolpath, exportProjectId)) as Toolpath | undefined;
 
   if (!toolpath) {
+    return;
+  }
+
+  // A ready toolpath matches the machine area of the profile active now, and a profile switch during the wait
+  // regenerated it. So the origin mapping reads that same profile, not the one the export started with.
+  const profile: MachineProfile | undefined = (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
+
+  if (!profile) {
     return;
   }
 
@@ -215,7 +278,8 @@ export function* watchToolpath(toolpathWorkerClient: ToolpathWorkerClient): Gene
         toolpathWorkerClient,
         drawablesCache,
       ),
-      debounce(TOOLPATH_RESTART_DEBOUNCE_MS, [...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES], restartRunningGeneration),
+      debounce(TOOLPATH_RESTART_DEBOUNCE_MS, TOOLPATH_INPUT_CHANGE_ACTION_TYPES, refreshToolpath),
+      fork(watchToolpathMachineArea),
       takeLeading(GcodeExportRequested.type, exportGcode),
     ])) as Task[];
 

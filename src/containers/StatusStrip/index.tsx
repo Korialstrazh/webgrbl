@@ -21,6 +21,8 @@ import { MISSING_VALUE_TEXT } from '../../utils/missing.value.constants';
 import { KEYBOARD_FOCUSABLE_TAB_INDEX } from '../../utils/tab.index.constants';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
+import { selectToolpathStatus } from '../../utils/states/toolpath.state';
+import { TOOLPATH_STATUS } from '../../utils/states/toolpath.status.constants';
 import { selectReadyToolpathBounds, selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
 import type { ToolpathBounds } from '../../utils/toolpath/interfaces/ToolpathBounds';
 import { getJobEstimateText } from '../../utils/toolpath/get.job.estimate.text';
@@ -36,6 +38,8 @@ export const StatusStrip = (): ReactNode => {
   const jobBounds: ToolpathBounds | undefined = useSelector(selectReadyToolpathBounds);
   const isOnline: boolean = useSelector(selectIsOnline);
   const isOffline: boolean = !isOnline;
+  const isCalculating: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.GENERATING;
+  const pendingValueText: string = isCalculating ? t(DEFAULT.STATUS_STRIP_CALCULATING) : MISSING_VALUE_TEXT;
 
   return (
     <Layout.Footer
@@ -48,19 +52,19 @@ export const StatusStrip = (): ReactNode => {
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
             <Tooltip
-              title={jobBounds ? undefined : t(DEFAULT.STATUS_STRIP_JOB_SIZE_HINT)}
+              title={t(jobBounds ? DEFAULT.STATUS_STRIP_JOB_SIZE_EXPLANATION : DEFAULT.STATUS_STRIP_JOB_SIZE_HINT)}
               trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
             >
-              {/* Focusable while it stands for a missing value, so a keyboard user can read why. */}
-              <dd tabIndex={jobBounds ? undefined : KEYBOARD_FOCUSABLE_TAB_INDEX}>
-                {getJobSizeReadoutText(t, jobBounds)}
+              {/* Focusable, so a keyboard user can read what the size measures, or why it is missing. */}
+              <dd tabIndex={KEYBOARD_FOCUSABLE_TAB_INDEX}>
+                {jobBounds ? getJobSizeReadoutText(t, jobBounds) : pendingValueText}
               </dd>
             </Tooltip>
           </div>
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>
             {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
-            <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
+            <dd>{totalTimeS === undefined ? pendingValueText : getJobEstimateText(t, totalTimeS)}</dd>
           </div>
           {/* Last, so the room its changing value keeps never leaves a gap between the other readouts. */}
           <BedCursorReadout />

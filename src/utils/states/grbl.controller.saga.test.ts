@@ -426,7 +426,7 @@ describe(watchGrblController.name, () => {
     expect(selectSelectedPortId(store.getState())).toBe(NO_SERIAL_PORT_ID);
   });
 
-  it('a stored simulated laser choice is not chosen again at start', async () => {
+  it('a stored simulated laser choice, which the user made by connecting to it, is chosen again at start', async () => {
     const rig: GrblControllerSagaTestRig = newTestRig({
       storedPreferences: {
         baudRate: STORED_BAUD_RATE,
@@ -435,6 +435,13 @@ describe(watchGrblController.name, () => {
     });
 
     store = newStore(rig.dependencies);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(selectSelectedPortId(store.getState())).toBe(SIMULATED_LASER_PORT_ID);
+  });
+
+  it('a fresh start without a stored choice preselects no port, not even the simulated laser', async () => {
+    store = newStore(newTestRig().dependencies);
     await vi.advanceTimersByTimeAsync(0);
 
     expect(selectSelectedPortId(store.getState())).toBe(NO_SERIAL_PORT_ID);

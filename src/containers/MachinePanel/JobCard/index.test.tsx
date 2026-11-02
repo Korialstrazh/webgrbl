@@ -13,6 +13,7 @@ import {
   selectProjectDocument,
   selectProjectLayers,
 } from '../../../utils/states/project.document.state';
+import { selectToolpathMachineArea } from '../../../utils/states/toolpath.machine.area.selector';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../../utils/states/toolpath.state';
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../../utils/test.support/bed.region.test.host';
@@ -163,7 +164,11 @@ describe(JobCard.name, () => {
     const store: AppStore = await newGcodeExportTestStore({ areLayersEnabled: false });
     const drawableSet: BedDrawableSet = getBedDrawables(selectProjectDocument(store.getState()));
     const gcodeText: string = getGcodeText(
-      getToolpath(drawableSet.drawables, drawableSet.warnings, selectProjectLayers(store.getState())),
+      getToolpath({
+        ...drawableSet,
+        layers: selectProjectLayers(store.getState()),
+        machineArea: selectToolpathMachineArea(store.getState()),
+      }),
       getGcodeExportContext({
         profile: newMachineProfile(),
         laserSettings: {},

@@ -1,8 +1,10 @@
 // On the heading line: a grey dot, "Not connected" and the Connect button at the end, so the card is no taller than a
-// heading while there is nothing to read out.
+// heading while there is nothing to read out. In a narrow panel the group moves under the title instead of cutting
+// its text.
 .notConnected {
   display: flex;
   min-width: 0;
+  margin-left: auto;
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-ui);
@@ -19,13 +21,12 @@
 }
 
 .notConnectedLabel {
-  overflow: hidden;
   color: var(--color-text-muted);
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-// A slimmer primary button, so the state and Connect share the heading line of the narrowest panel.
+// A secondary button: the top-bar pill is the main way to connect, and Export G-code stays the panel's one filled
+// button. Slimmer, so the state and Connect share the heading line of a narrow panel.
 .connectButton:global(.ant-btn) {
   flex: none;
   padding-inline: var(--space-3);

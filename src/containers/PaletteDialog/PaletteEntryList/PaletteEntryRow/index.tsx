@@ -14,9 +14,10 @@ import { Button, Popconfirm } from 'antd';
 import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
-import { LAYER_MODE_LABEL_KEY } from '../../../../utils/layers/layer.constants';
+import { getLayerSummaryParts } from '../../../../utils/layers/get.layer.summary.parts';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { SHADING_ENTRY_ID } from '../../../../utils/palette/palette.constants';
+import { LayerSummaryText } from '../../../../views/LayerSummaryText';
 import { LayerSwatch } from '../../../../views/LayerSwatch';
 import type { PaletteEntryRowProps } from '../interfaces/PaletteEntryRowProps';
 import styles from './styles.module.scss';
@@ -41,16 +42,10 @@ export const PaletteEntryRow = ({
   const { t } = useTranslation();
   const { name: entryName } = entry;
   const isShading: boolean = entry.id === SHADING_ENTRY_ID;
-  const summaryText: string = t(DEFAULT.LAYERS_SUMMARY, {
-    mode: t(LAYER_MODE_LABEL_KEY[entry.mode]),
-    power: entry.maxPowerPercent,
-    speed: entry.speedMmPerMin,
-    passes: entry.passes,
-  });
 
   return (
     <li
-      className={styles.row}
+      className={isEdited ? [styles.row, styles.editedRow].join(' ') : styles.row}
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -68,7 +63,7 @@ export const PaletteEntryRow = ({
           <LayerSwatch colour={entry.colour} isShading={isShading} />
         </span>
         <span className={styles.name} title={entryName}>{entryName}</span>
-        <span className={styles.summary} title={summaryText}>{summaryText}</span>
+        <LayerSummaryText className={styles.summary} parts={getLayerSummaryParts(t, entry)} />
       </Button>
       <Button
         type={ANTD_BUTTON_TYPE_TEXT}
@@ -95,7 +90,7 @@ export const PaletteEntryRow = ({
           onConfirm={onDelete}
         >
           <Button
-            danger
+            className={styles.deleteButton}
             type={ANTD_BUTTON_TYPE_TEXT}
             size={ANTD_BUTTON_SIZE_SMALL}
             icon={<CloseOutlined />}

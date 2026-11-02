@@ -21,5 +21,5 @@ export const MIDDLE_DOT = '\u00B7';
 /** The three dots that show a button opens a dialog. */
 export const HORIZONTAL_ELLIPSIS = '\u2026';
 
-/** The long dash that separates the parts of the G-code title line. */
+/** The long dash that stands for a missing value. */
 export const EM_DASH = '\u2014';

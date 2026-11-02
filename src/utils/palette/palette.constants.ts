@@ -114,6 +114,14 @@ export const DEFAULT_PALETTE: Palette = {
   entries: [DEFAULT_CUT_ENTRY, DEFAULT_SCORE_ENTRY, DEFAULT_FILL_ENTRY, DEFAULT_SHADING_ENTRY],
 };
 
+// Frozen, entries included, so no code can change the defaults that every reset and every new layer copies.
+for (const defaultEntry of DEFAULT_PALETTE.entries) {
+  Object.freeze(defaultEntry);
+}
+
+Object.freeze(DEFAULT_PALETTE.entries);
+Object.freeze(DEFAULT_PALETTE);
+
 export const PALETTE_ENTRY_ERROR_KEY = {
   NAME_REQUIRED: DEFAULT.PALETTE_ERROR_NAME_REQUIRED,
   COLOUR_INVALID: DEFAULT.PALETTE_ERROR_COLOUR_INVALID,

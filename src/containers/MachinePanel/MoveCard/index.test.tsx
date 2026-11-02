@@ -102,7 +102,7 @@ describe(MoveCard.name, () => {
     expect(screen.queryByRole('spinbutton', { name: JOG_SPEED_LABEL })).not.toBeInTheDocument();
   });
 
-  it('shows the disabled controls on Show while disconnected and hides them again on Hide', () => {
+  it('shows the disabled controls on Show while disconnected, still saying why, and hides them again on Hide', () => {
     renderMoveCard(newStore());
 
     showControlsWhileDisconnected();
@@ -113,7 +113,8 @@ describe(MoveCard.name, () => {
     expect(document.getElementById(hideButton.getAttribute('aria-controls') ?? '')).toContainElement(
       screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL }),
     );
-    expect(screen.queryByText(COLLAPSED_HINT_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeDisabled();
+    expect(screen.getByText(COLLAPSED_HINT_TEXT)).toBeInTheDocument();
 
     fireEvent.click(hideButton);
 

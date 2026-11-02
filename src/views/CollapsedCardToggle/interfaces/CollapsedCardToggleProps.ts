@@ -10,7 +10,7 @@
  */
 export interface CollapsedCardToggleProps {
   isCollapsed: boolean;
-  /** Why the card is collapsed, shown beside the toggle while it is. */
+  /** Why the card is collapsed and its controls are disabled, shown beside the toggle open or closed. */
   hintText: string;
   /** The id of the card body the toggle shows and hides. */
   controlsId: string;

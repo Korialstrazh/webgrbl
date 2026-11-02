@@ -31,7 +31,8 @@ const getLayerPaintPower = (paint: SvgPaint | undefined, layer: ProjectLayer): n
 
 const getDrawablePolylines = (drawable: BedDrawable, layer: ProjectLayer): LinePolyline[] => {
   const { fill, stroke } = drawable.paint;
-  const isFillOutline: boolean = isLayerPaint(fill, layer);
+  // Only a fill that burns closes the outline: a white fill on an open grey stroke must not add a closing line.
+  const isFillOutline: boolean = getLayerPaintPower(fill, layer) > 0;
   const powerPercent: number = Math.max(getLayerPaintPower(fill, layer), getLayerPaintPower(stroke, layer));
 
   if (powerPercent <= 0) {

@@ -10,8 +10,11 @@
  */
 import type { ProjectLayer } from '../../layers/interfaces/ProjectLayer';
 import type { BedDrawableSet } from './BedDrawableSet';
+import type { ToolpathMachineArea } from './ToolpathMachineArea';
 
 export interface ToolpathGenerationInput extends BedDrawableSet {
   /** The layers of the project in burn order; off layers are left out of the toolpath. */
   layers: ProjectLayer[];
+  /** The machine the toolpath is made for. */
+  machineArea: ToolpathMachineArea;
 }

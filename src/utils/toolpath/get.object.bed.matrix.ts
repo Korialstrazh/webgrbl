@@ -19,10 +19,7 @@ import { getSvgMatrixProduct } from '../svg/geometry/get.svg.matrix.product';
 import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
 import type { SvgViewBox } from '../svg/interfaces/SvgViewBox';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
-import { getObjectArtworkMatrix } from './get.object.artwork.matrix';
-
-const getSizeRatio = (sizeMm: number, intrinsicSizeMm: number): number =>
-  intrinsicSizeMm > 0 ? sizeMm / intrinsicSizeMm : 1;
+import { getObjectArtworkScaleMatrix } from './get.object.artwork.scale.matrix';
 
 /** From the scaled artwork (origin top-left, Y down) to the box centre with Y up, then turned and placed. */
 const getBoxPlacementMatrix = (projectObject: ProjectObject): SvgMatrix => {
@@ -49,18 +46,9 @@ export const getObjectBedMatrix = (
   svgViewBox: SvgViewBox | undefined,
   bedHeightMm?: number,
 ): SvgMatrix => {
-  const viewBoxMatrix: SvgMatrix = getObjectArtworkMatrix(projectObject, svgViewBox);
-  const sizeMatrix: SvgMatrix = {
-    a: getSizeRatio(projectObject.widthMm, projectObject.intrinsicWidthMm),
-    b: 0,
-    c: 0,
-    d: getSizeRatio(projectObject.heightMm, projectObject.intrinsicHeightMm),
-    e: 0,
-    f: 0,
-  };
   const bedMatrix: SvgMatrix = getSvgMatrixProduct(
     getBoxPlacementMatrix(projectObject),
-    getSvgMatrixProduct(sizeMatrix, viewBoxMatrix),
+    getObjectArtworkScaleMatrix(projectObject, svgViewBox),
   );
 
   if (!isFiniteNumber(bedHeightMm)) {

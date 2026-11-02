@@ -2,8 +2,9 @@
  * The toolpath of the open project: whether it is being generated, ready, out of date or failed, the generation
  * progress, and whether the G-code export waits for the user to confirm the toolpath's warnings.
  *
- * Every document change bumps documentVersion and makes a ready toolpath stale. A result carries the version its
- * generation read, so a result for an older document is dropped instead of shown as current.
+ * Every document change, and every change of the machine area (the work area and origin shape the toolpath), bumps
+ * documentVersion and makes a ready toolpath stale. A result carries the version its generation read, so a result for
+ * an older document is dropped instead of shown as current.
  *
  * @author michael.morosov
  *
@@ -78,6 +79,11 @@ export class GcodeExportConfirmationRequested extends Action {
 export class GcodeExportConfirmationClosed extends Action {
   public static readonly type: string = actionType('gcode export confirmation closed');
 }
+
+/** The work area or origin corner the toolpath is made for changed, so a ready toolpath is out of date. */
+export class ToolpathMachineAreaChanged extends Action {
+  public static readonly type: string = actionType('toolpath machine area changed');
+}
 // #endregion
 
 // #region Initial state
@@ -117,6 +123,10 @@ const getStateAfterCancel = (state: ToolpathState): ToolpathState => {
   return { ...state, status: state.toolpath ? TOOLPATH_STATUS.STALE : TOOLPATH_STATUS.IDLE, progress: 0 };
 };
 
+/** Whether the action changes what the toolpath is made from: the project document or the machine area. */
+const isToolpathInputChange = (action: Action<unknown>): boolean =>
+  PROJECT_DOCUMENT_CHANGE_ACTION_TYPES.includes(action.type) || action.type === ToolpathMachineAreaChanged.type;
+
 const getStateWithExportAction = (state: ToolpathState, action: Action<unknown>): ToolpathState => {
   switch (action.type) {
   case GcodeExportConfirmationRequested.type:
@@ -125,7 +135,7 @@ const getStateWithExportAction = (state: ToolpathState, action: Action<unknown>)
   case GcodeExportRequested.type:
     return { ...state, isGcodeExportConfirmationOpen: false };
   default:
-    return PROJECT_DOCUMENT_CHANGE_ACTION_TYPES.includes(action.type) ? getStateAfterDocumentChange(state) : state;
+    return isToolpathInputChange(action) ? getStateAfterDocumentChange(state) : state;
   }
 };
 

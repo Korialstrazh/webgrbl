@@ -11,6 +11,7 @@
 import type { Toolpath } from '../interfaces/Toolpath';
 
 export const newToolpath = (overrides: Partial<Toolpath> = {}): Toolpath => ({
+  startPoint: { x: 0, y: 0 },
   moves: [],
   layers: [],
   warnings: [],

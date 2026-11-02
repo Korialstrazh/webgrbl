@@ -9,5 +9,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 
-/** A running generation restarts only after the document is quiet this long, so a held arrow key restarts once. */
+/**
+ * A background generation starts, or restarts, only after the inputs are quiet this long, so a held arrow key starts
+ * one generation.
+ */
 export const TOOLPATH_RESTART_DEBOUNCE_MS = 150;

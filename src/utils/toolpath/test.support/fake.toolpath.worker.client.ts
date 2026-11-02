@@ -46,7 +46,7 @@ export class FakeToolpathWorkerClient implements ToolpathWorkerClient {
 
     if (!this.isHeld) {
       return {
-        promise: Promise.resolve(getToolpath(input.drawables, input.warnings, input.layers, onProgress)),
+        promise: Promise.resolve(getToolpath(input, onProgress)),
         cancel: doNothing,
       };
     }
@@ -64,7 +64,7 @@ export class FakeToolpathWorkerClient implements ToolpathWorkerClient {
     const { input } = heldGeneration;
 
     heldGeneration.isRunning = false;
-    heldGeneration.resolve(getToolpath(input.drawables, input.warnings, input.layers, heldGeneration.onProgress));
+    heldGeneration.resolve(getToolpath(input, heldGeneration.onProgress));
   }
 
   /** Fails a held generation with the given error. */
