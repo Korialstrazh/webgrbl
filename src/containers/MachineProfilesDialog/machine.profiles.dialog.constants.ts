@@ -15,7 +15,7 @@ import type { MachineOriginCorner } from '../../utils/profiles/machine.profile.c
 
 export const MACHINE_PROFILES_DIALOG_OVERLAY_ID = 'machine-profiles-dialog';
 
-/** Room for the profile list beside the form; antd keeps the dialog inside a narrower window. */
+/** Room for the profile list beside the form; a narrower window makes the dialog narrower. */
 export const MACHINE_PROFILES_DIALOG_WIDTH = '56rem';
 
 export const MACHINE_PROFILES_EXPORT_FILE_NAME = 'webgrbl-machine-profiles.json';

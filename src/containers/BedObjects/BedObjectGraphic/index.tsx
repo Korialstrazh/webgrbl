@@ -1,5 +1,6 @@
 /**
- * One object drawn on the bed: its artwork stretched to its box, a dashed danger outline when it leaves the bed, and
+ * One object drawn on the bed: its artwork stretched to its box, drawn the way its layers burn it, a dashed danger
+ * outline when it leaves the bed, and
  * the dashed selection box when it is selected. As the one selected object it also gets four corner handles that scale
  * it and a handle on an arm above the box that turns it. The group is turned around the box centre, so everything
  * inside is drawn around the origin. It renders again only when its own props change, so a drag of one object does
@@ -12,24 +13,30 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import type { PointerEvent, ReactNode } from 'react';
+import { getObjectDesignDrawing } from '../../../utils/bed/get.object.design.drawing';
+import type { ObjectDesignDrawing } from '../../../utils/bed/interfaces/ObjectDesignDrawing';
+import { isDesignDrawnAsAuthored } from '../../../utils/bed/is.design.drawn.as.authored';
 import { getSvgDataUrl } from '../../../utils/project/get.svg.data.url';
 import type { ProjectObject } from '../../../utils/project/interfaces/ProjectObject';
 import { HALF_BOX_FACTOR } from '../../../utils/project/project.constants';
 import {
   BED_OBJECT_HANDLE,
   BED_OBJECT_HANDLE_TEST_ID,
+  BED_OBJECT_HIT_AREA_TEST_ID,
   BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID,
   SELECTION_BOX_PADDING_MM,
   SVG_PRESERVE_ASPECT_RATIO_NONE,
 } from '../bed.objects.constants';
 import type { BedObjectHandle } from '../bed.objects.constants';
+import { getObjectArtworkSvgTransform } from '../get.object.artwork.svg.transform';
 import { getObjectSvgTransform } from '../get.object.svg.transform';
 import type { BedHandleSizes } from '../interfaces/BedHandleSizes';
 import { getSelectionHandleOrigins } from './get.selection.handle.origins';
 import type { BedObjectGraphicProps } from './interfaces/BedObjectGraphicProps';
 import type { SelectionHandlePlacement } from './interfaces/SelectionHandlePlacement';
+import { ObjectDesignArtwork } from './ObjectDesignArtwork';
 import styles from './styles.module.scss';
 
 type HandlePointerDownHandler = (pointerEvent: PointerEvent<SVGElement>, handle: BedObjectHandle) => void;
@@ -79,9 +86,15 @@ const renderSelectionHandles = (
 };
 
 const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
-  const { projectObject, bedHeightMm, isSelected, hasHandles, isOutsideBed, handleSizes } = props;
+  const { projectObject, bedHeightMm, isSelected, hasHandles, isOutsideBed, handleSizes, layerLooks } = props;
   const { onPointerDown, onHandlePointerDown } = props;
-  const { id, name, svgText, widthMm, heightMm }: ProjectObject = projectObject;
+  const { id, name: objectName, svgText, widthMm, heightMm }: ProjectObject = projectObject;
+  const { intrinsicWidthMm, intrinsicHeightMm }: ProjectObject = projectObject;
+  // Read once per artwork: a drag changes only the box, so it neither reads the SVG nor looks it up again.
+  const designDrawing: ObjectDesignDrawing = useMemo(
+    () => getObjectDesignDrawing({ svgText, intrinsicWidthMm, intrinsicHeightMm }),
+    [svgText, intrinsicWidthMm, intrinsicHeightMm],
+  );
   const left: number = -widthMm * HALF_BOX_FACTOR;
   const top: number = -heightMm * HALF_BOX_FACTOR;
   const selectionBox: SelectionBoxSize = {
@@ -103,20 +116,36 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
     <g
       className={styles.bedObject}
       role="img"
-      aria-label={name}
+      aria-label={objectName}
       data-selected={isSelected}
       data-outside-bed={isOutsideBed}
       transform={getObjectSvgTransform(projectObject, bedHeightMm)}
       onPointerDown={handlePointerDown}
     >
-      <image
-        href={getSvgDataUrl(svgText)}
-        x={left}
-        y={top}
-        width={widthMm}
-        height={heightMm}
-        preserveAspectRatio={SVG_PRESERVE_ASPECT_RATIO_NONE}
-      />
+      {isDesignDrawnAsAuthored(designDrawing, layerLooks) ? (
+        <image
+          href={getSvgDataUrl(svgText)}
+          x={left}
+          y={top}
+          width={widthMm}
+          height={heightMm}
+          preserveAspectRatio={SVG_PRESERVE_ASPECT_RATIO_NONE}
+        />
+      ) : (
+        <>
+          <rect
+            className={styles.hitArea}
+            data-testid={BED_OBJECT_HIT_AREA_TEST_ID}
+            x={left}
+            y={top}
+            width={widthMm}
+            height={heightMm}
+          />
+          <g transform={getObjectArtworkSvgTransform(projectObject)}>
+            <ObjectDesignArtwork designDrawing={designDrawing} layerLooks={layerLooks} />
+          </g>
+        </>
+      )}
       {isOutsideBed && (
         <rect
           className={styles.outsideOutline}

@@ -48,6 +48,9 @@ const SECOND_ROW_NAME_PATTERN = /^Moon/;
 const PRESSED_ATTRIBUTE = 'aria-pressed';
 const TRUE_TEXT = 'true';
 const FRACTIONAL_X_MM = 12.3456;
+const TEXT_WARNING = 'Text is not converted to paths. In Inkscape use Path > Object to Path.';
+const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
+  + '<rect fill="none" stroke="#ff0000" width="10" height="10"/><text x="1" y="5">Hi</text></svg>';
 const SECOND_X_MM = 80;
 const SECOND_X_TEXT = '80.0';
 const MOVED_X_MM = 40;
@@ -190,6 +193,28 @@ describe(ObjectsSection.name, () => {
     renderSection(store);
 
     expect(screen.getAllByText(OUTSIDE_NOTE)).toHaveLength(1);
+  });
+
+  it('shows the warning of an object whose SVG holds text under its name', () => {
+    const store: AppStore = newStore();
+
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({
+        document: {
+          objects: [
+            newProjectObject({ id: FIRST_ID, name: FIRST_NAME, svgText: TEXT_SVG_TEXT }),
+            newProjectObject({ id: SECOND_ID, name: SECOND_NAME }),
+          ],
+          layers: [],
+        },
+      }));
+    });
+    renderSection(store);
+
+    const rows: HTMLElement[] = within(screen.getByRole('list', { name: OBJECTS_LIST_NAME })).getAllByRole('listitem');
+
+    expect(rows[0]).toHaveTextContent(TEXT_WARNING);
+    expect(rows[1]).not.toHaveTextContent(TEXT_WARNING);
   });
 
   it('scales the height with the width while the ratio is locked, as one undo step', () => {

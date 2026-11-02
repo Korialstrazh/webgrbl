@@ -1,32 +1,42 @@
+// The control and its tag on one line, so the notice never adds a row to a bar or a card.
 .comingSoon {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.notice {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  margin: 0;
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  gap: var(--space-1);
+  min-width: 0;
+  max-width: 100%;
+  cursor: not-allowed;
 }
 
-.badge {
-  padding: 0.125rem var(--space-2);
-  border: 1px solid var(--color-warning);
-  border-radius: var(--radius-sm);
-  color: var(--color-warning);
-  font-weight: 600;
+// The disabled control lets the pointer through to the wrapper, which shows the tooltip. A control that is not built
+// yet is a ghost: no fill, a dashed outline and muted text, so it never reads as one that works.
+.control {
+  display: inline-flex;
+  min-width: 0;
+
+  > * {
+    pointer-events: none;
+  }
+
+  > :global(.ant-btn:disabled) {
+    border-style: dashed;
+    border-color: var(--color-border);
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--color-disabled-text);
+  }
 }
 
-.description {
-  color: var(--color-text-muted);
-}
+// A full-width control: the control takes the row and the tag sits at its end.
+.fullWidth {
+  display: flex;
+  width: 100%;
 
-.disabled {
-  opacity: 0.55;
-  pointer-events: none;
-  user-select: none;
+  .control {
+    flex: 1;
+
+    > * {
+      width: 100%;
+    }
+  }
 }

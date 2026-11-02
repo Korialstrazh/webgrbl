@@ -17,6 +17,21 @@ export const ONLINE_EVENT_NAME = 'online';
 export const OFFLINE_EVENT_NAME = 'offline';
 /** Fired when a key goes down; the Escape-to-STOP hotkey listens for it. */
 export const KEYDOWN_EVENT_NAME = 'keydown';
+/** Fired on an element when the mouse wheel or a trackpad scrolls over it. */
+export const WHEEL_EVENT_NAME = 'wheel';
+/** The `deltaMode` of a wheel event that measures its move in lines rather than pixels. */
+export const WHEEL_DELTA_MODE_LINE = 1;
+/** The `button` value of a pointer event from the middle mouse button (the wheel pressed down). */
+export const MIDDLE_POINTER_BUTTON = 1;
+/** The `key` values of the bed zoom shortcuts: plus or equals zooms in, minus zooms out, zero fits the bed. */
+export const PLUS_KEY = '+';
+export const EQUALS_KEY = '=';
+export const MINUS_KEY = '-';
+export const ZERO_KEY = '0';
+/** Fired on window when a key comes up. */
+export const KEYUP_EVENT_NAME = 'keyup';
+/** Fired on an element when its content scrolls. */
+export const SCROLL_EVENT_NAME = 'scroll';
 /** The `key` value of the Escape key. */
 export const ESCAPE_KEY = 'Escape';
 /** The `key` value of the Enter key. */
@@ -38,6 +53,9 @@ export const ARROW_UP_KEY = 'ArrowUp';
 export const ARROW_DOWN_KEY = 'ArrowDown';
 export const ARROW_LEFT_KEY = 'ArrowLeft';
 export const ARROW_RIGHT_KEY = 'ArrowRight';
+/** The `key` values of the Home and End keys. */
+export const HOME_KEY = 'Home';
+export const END_KEY = 'End';
 /** The `key` value of the Delete key. */
 export const DELETE_KEY = 'Delete';
 /** The `key` value of the Backspace key. */

@@ -21,6 +21,7 @@ import type { BedMachinePoint } from './interfaces/BedMachinePoint';
 
 export const BED_OBJECTS_SURFACE_TEST_ID = 'bed-objects-surface';
 export const BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID = 'bed-object-outside-outline';
+export const BED_OBJECT_HIT_AREA_TEST_ID = 'bed-object-hit-area';
 /** Gap between an object's box and its selection box, so the box does not hide the artwork's edge. */
 export const SELECTION_BOX_PADDING_MM = 1;
 /** Side of a square corner handle of the selection box, used while the bed's screen scale is not known. */

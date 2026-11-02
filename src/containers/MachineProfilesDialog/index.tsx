@@ -1,7 +1,7 @@
 /**
  * The machine profiles dialog: the list of profiles, the form that edits one, reading values from the connected
- * laser, and import and export of a profiles file. It opens in the bed region, so STOP stays usable, and its
- * content starts over on every open.
+ * laser, and import and export of a profiles file. It opens over the whole window, so the form has room, and
+ * its content starts over on every open.
  *
  * @author michael.morosov
  *
@@ -13,7 +13,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { BedRegionModal } from '../BedRegionModal';
+import { AppModal } from '../AppModal';
 import type { MachineProfilesDialogProps } from './interfaces/MachineProfilesDialogProps';
 import { MACHINE_PROFILES_DIALOG_OVERLAY_ID, MACHINE_PROFILES_DIALOG_WIDTH } from './machine.profiles.dialog.constants';
 import { MachineProfilesEditor } from './MachineProfilesEditor';
@@ -22,16 +22,16 @@ export const MachineProfilesDialog = ({ isOpen, onClose }: MachineProfilesDialog
   const { t } = useTranslation();
 
   return (
-    <BedRegionModal
+    <AppModal
       isOpen={isOpen}
       overlayIdPrefix={MACHINE_PROFILES_DIALOG_OVERLAY_ID}
       title={t(DEFAULT.MACHINE_PROFILES_TITLE)}
       footer={null}
-      width={MACHINE_PROFILES_DIALOG_WIDTH}
+      maxWidth={MACHINE_PROFILES_DIALOG_WIDTH}
       destroyOnHidden
       onClose={onClose}
     >
       <MachineProfilesEditor />
-    </BedRegionModal>
+    </AppModal>
   );
 };

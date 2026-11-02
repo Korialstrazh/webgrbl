@@ -1,8 +1,6 @@
 @use '../../styles/layout' as layout;
 
-// The console overlay (z-index 30) is drawn over the bed; toasts use z-index 40 so they stay readable above it.
 .statusStrip {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,18 +11,31 @@
   background-color: var(--color-surface-1);
 }
 
-// Not clipped like the other fixed bars: the console overlay opens above the strip, outside its box.
 .fixedHeightBar {
-  flex-shrink: 0;
-  flex-wrap: nowrap;
-  height: layout.$status-strip-height;
+  @include layout.fixed-height-bar(layout.$status-strip-height);
 }
 
 // The readouts give up space first, so the console toggle always stays visible.
 .readoutsArea {
+  display: flex;
   flex: 1;
+  align-items: center;
+  gap: var(--space-4);
   min-width: 0;
   overflow: hidden;
+}
+
+// Only shown while the browser has no network; amber like other notices, so it is noticed without alarming.
+.offlineNote {
+  flex-shrink: 0;
+  padding: 0.125rem var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+  color: var(--color-warning);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .consoleSwitch {
@@ -32,35 +43,10 @@
   flex-shrink: 0;
   align-items: center;
   gap: var(--space-3);
-  min-height: var(--target-min);
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.875rem;
   cursor: pointer;
-}
-
-.consoleOverlay {
-  position: absolute;
-  right: 0;
-  bottom: 100%;
-  left: 0;
-  z-index: 30;
-  display: flex;
-  height: 14rem;
-  overflow: auto;
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--color-border);
-  background-color: var(--color-surface-2);
-}
-
-// The status strip spans the full width, so in a wide window the console covers only the bed's lower part: it starts
-// at the design panel's right edge and stops short of the machine panel and STOP.
-// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
-@media (min-width: 80rem) {
-  .consoleOverlay {
-    right: layout.$machine-panel-width;
-    left: layout.$design-panel-width;
-  }
 }
 
 .readouts {

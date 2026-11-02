@@ -1,0 +1,9 @@
+// The header stays in view and the body scrolls: the body takes the window height less the header, the dialog padding
+// and the gutters above and below the centred dialog. The extra class outranks antd's own selector.
+.appModal:global(.ant-modal-root) {
+  :global(.ant-modal-body) {
+    max-height: calc(100dvh - 8rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}

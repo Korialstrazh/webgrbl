@@ -1,94 +1,83 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { Button, Slider, Switch } from 'antd';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { Button } from 'antd';
 import type { Mock } from 'vitest';
 import { ComingSoon } from '.';
-import { ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
 
 const DESCRIPTION_TEXT = 'Frame the job outline on the bed.';
-const BADGE_TEXT = 'Coming soon';
+const TAG_TEXT = 'Soon';
+// The tooltip waits 0.4 s after the pointer enters, so a pass over the control does not open it.
+const TOOLTIP_OPEN_DELAY_MS = 500;
 const BUTTON_LABEL = 'Frame';
-const WRAPPED_TEST_ID = 'wrapped';
-const ENTER_KEY = 'Enter';
-const ARROW_RIGHT_KEY = 'ArrowRight';
-const SLIDER_ROLE = 'slider';
-const SLIDER_LABEL = 'Power';
-const SLIDER_MAX_VALUE = 100;
+
+const renderDisabledButton = (onClick: () => void = vi.fn<() => void>()): void => {
+  render(
+    <ComingSoon description={DESCRIPTION_TEXT}>
+      <Button disabled onClick={onClick}>{BUTTON_LABEL}</Button>
+    </ComingSoon>,
+  );
+};
+
+const advanceTooltipDelay = async (): Promise<void> => {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(TOOLTIP_OPEN_DELAY_MS);
+  });
+};
 
 describe(ComingSoon.name, () => {
-  it('blocks clicks and keyboard on a wrapped antd button', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('keeps the wrapped control a real disabled control that ignores clicks', () => {
     const onClick: Mock<() => void> = vi.fn<() => void>();
 
-    render(
-      <ComingSoon description={DESCRIPTION_TEXT}>
-        <Button type={ANTD_BUTTON_TYPE_PRIMARY} onClick={onClick}>{BUTTON_LABEL}</Button>
-      </ComingSoon>,
-    );
-    const wrappedButton: HTMLElement = screen.getByRole('button', { name: BUTTON_LABEL, hidden: true });
+    renderDisabledButton(onClick);
+    const wrappedButton: HTMLElement = screen.getByRole('button', { name: BUTTON_LABEL });
 
-    wrappedButton.focus();
     fireEvent.click(wrappedButton);
-    fireEvent.keyDown(wrappedButton, { key: ENTER_KEY });
-    fireEvent.keyUp(wrappedButton, { key: ENTER_KEY });
 
+    expect(wrappedButton).toBeDisabled();
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('blocks clicks and keyboard on a wrapped antd switch', () => {
-    const onChange: Mock<(isChecked: boolean) => void> = vi.fn<(isChecked: boolean) => void>();
+  it('shows one Soon tag right after the control, not an inline description', () => {
+    renderDisabledButton();
 
-    render(
-      <ComingSoon description={DESCRIPTION_TEXT}>
-        <Switch checked={false} onChange={onChange} />
-      </ComingSoon>,
-    );
-    const wrappedSwitch: HTMLElement = screen.getByRole('switch', { hidden: true });
+    const tag: HTMLElement = screen.getByText(TAG_TEXT);
 
-    fireEvent.click(wrappedSwitch);
-    fireEvent.keyDown(wrappedSwitch, { key: ENTER_KEY });
-    fireEvent.keyUp(wrappedSwitch, { key: ENTER_KEY });
-
-    expect(onChange).not.toHaveBeenCalled();
+    expect(tag).toBeVisible();
+    expect(screen.getByRole('button', { name: BUTTON_LABEL }).parentElement?.nextElementSibling).toBe(tag);
+    expect(screen.getAllByText(TAG_TEXT)).toHaveLength(1);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
-  it('blocks mouse and keyboard on a wrapped antd slider', () => {
-    const onChange: Mock<(value: number) => void> = vi.fn<(value: number) => void>();
+  it('shows the description in a tooltip while the pointer is over the wrapper of the disabled control', async () => {
+    vi.useFakeTimers();
+    renderDisabledButton();
 
-    render(
-      <ComingSoon description={DESCRIPTION_TEXT}>
-        <Slider max={SLIDER_MAX_VALUE} defaultValue={0} ariaLabelledByForHandle={SLIDER_LABEL} onChange={onChange} />
-      </ComingSoon>,
-    );
-    const wrappedHandle: HTMLElement = screen.getByRole(SLIDER_ROLE, { hidden: true });
+    fireEvent.mouseEnter(screen.getByText(TAG_TEXT).parentElement ?? document.body);
+    await advanceTooltipDelay();
 
-    wrappedHandle.focus();
-    fireEvent.mouseDown(wrappedHandle);
-    fireEvent.click(wrappedHandle);
-    fireEvent.keyDown(wrappedHandle, { key: ARROW_RIGHT_KEY });
-    fireEvent.keyUp(wrappedHandle, { key: ARROW_RIGHT_KEY });
-
-    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('tooltip')).toHaveTextContent(DESCRIPTION_TEXT);
   });
 
-  it('marks the wrapper inert and aria-disabled', () => {
-    render(
-      <ComingSoon description={DESCRIPTION_TEXT}>
-        <span data-testid={WRAPPED_TEST_ID}>{BUTTON_LABEL}</span>
-      </ComingSoon>,
-    );
-    const wrapper: HTMLElement | null = screen.getByTestId(WRAPPED_TEST_ID).parentElement;
+  it('shows the description in a tooltip when the tag takes the keyboard focus', async () => {
+    vi.useFakeTimers();
+    renderDisabledButton();
+    const tag: HTMLElement = screen.getByText(TAG_TEXT);
 
-    expect(wrapper).toHaveAttribute('aria-disabled', 'true');
-    expect(wrapper).toHaveAttribute('inert');
+    act(() => {
+      tag.focus();
+    });
+    await advanceTooltipDelay();
+
+    expect(tag).toHaveFocus();
+    expect(screen.getByRole('tooltip')).toHaveTextContent(DESCRIPTION_TEXT);
   });
 
-  it('shows the badge and the description', () => {
-    render(
-      <ComingSoon description={DESCRIPTION_TEXT}>
-        <span>{BUTTON_LABEL}</span>
-      </ComingSoon>,
-    );
+  it('reads the description out with the tag for screen readers', () => {
+    renderDisabledButton();
 
-    expect(screen.getByText(BADGE_TEXT)).toBeVisible();
-    expect(screen.getByText(DESCRIPTION_TEXT)).toBeVisible();
+    expect(screen.getByText(TAG_TEXT)).toHaveTextContent(DESCRIPTION_TEXT);
   });
 });

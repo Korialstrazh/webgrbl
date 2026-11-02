@@ -1,0 +1,33 @@
+@use '../../styles/layout' as layout;
+
+// Fills the bed area: the ruler bands along the top and left, and the drawing area in the rest.
+.bedViewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+// Starts where the ruler bands end, so no ruler label sits on the drawing; nothing floats over it.
+.drawingArea {
+  position: absolute;
+  top: layout.$bed-ruler-band-size;
+  right: 0;
+  bottom: 0;
+  left: layout.$bed-ruler-band-size;
+  overflow: hidden;
+}
+
+// Space is held over the bed: a left drag pans.
+.panReady {
+  cursor: grab;
+}
+
+.panning {
+  cursor: grabbing;
+}
+
+// The objects layer sets its own cursors; while a pan is ready or going on the hand wins.
+.panReady *,
+.panning * {
+  cursor: inherit !important;
+}

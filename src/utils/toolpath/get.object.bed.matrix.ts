@@ -17,10 +17,9 @@ import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { HALF_BOX_FACTOR, HALF_TURN_DEG } from '../project/project.constants';
 import { getSvgMatrixProduct } from '../svg/geometry/get.svg.matrix.product';
 import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
-import { getSvgViewBoxMatrix } from '../svg/get.svg.view.box.matrix';
 import type { SvgViewBox } from '../svg/interfaces/SvgViewBox';
-import { SVG_STRETCH_ASPECT_RATIO_FIT } from '../svg/svg.constants';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
+import { getObjectArtworkMatrix } from './get.object.artwork.matrix';
 
 const getSizeRatio = (sizeMm: number, intrinsicSizeMm: number): number =>
   intrinsicSizeMm > 0 ? sizeMm / intrinsicSizeMm : 1;
@@ -50,15 +49,7 @@ export const getObjectBedMatrix = (
   svgViewBox: SvgViewBox | undefined,
   bedHeightMm?: number,
 ): SvgMatrix => {
-  // The bed draws the SVG through an image with preserveAspectRatio none, which overrides the root's own fit.
-  const stretchedViewBox: SvgViewBox | undefined = svgViewBox && {
-    ...svgViewBox,
-    aspectRatioFit: SVG_STRETCH_ASPECT_RATIO_FIT,
-  };
-  const viewBoxMatrix: SvgMatrix = getSvgViewBoxMatrix(stretchedViewBox, {
-    widthMm: projectObject.intrinsicWidthMm,
-    heightMm: projectObject.intrinsicHeightMm,
-  });
+  const viewBoxMatrix: SvgMatrix = getObjectArtworkMatrix(projectObject, svgViewBox);
   const sizeMatrix: SvgMatrix = {
     a: getSizeRatio(projectObject.widthMm, projectObject.intrinsicWidthMm),
     b: 0,

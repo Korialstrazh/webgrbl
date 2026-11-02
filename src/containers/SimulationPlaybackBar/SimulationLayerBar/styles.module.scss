@@ -1,0 +1,31 @@
+// The caption above a thin strip over the full width of the slider; the segments share the strip by their burn time.
+.simulationLayerBar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.caption {
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+}
+
+.layerBar {
+  display: flex;
+  overflow: hidden;
+  height: 0.375rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+}
+
+.segment {
+  flex: none;
+  height: 100%;
+}
+
+// The shading layer is black, which the dark bed would hide; it is drawn in a mid grey instead.
+.shadingSegment {
+  background-color: var(--color-text-muted);
+}

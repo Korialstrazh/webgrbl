@@ -2,6 +2,12 @@
   cursor: move;
 }
 
+// The whole box takes the presses of an object drawn as outlines, as the artwork image does for a filled one.
+.hitArea {
+  fill: transparent;
+  pointer-events: all;
+}
+
 .outsideOutline,
 .selectionBox,
 .selectionHandle,
@@ -18,13 +24,13 @@
 }
 
 .outsideOutline {
-  stroke: var(--color-danger);
+  stroke: var(--color-bed-danger);
   stroke-dasharray: 3 3;
 }
 
 .selectionBox,
 .rotateArm {
-  stroke: var(--color-accent);
+  stroke: var(--color-bed-accent);
 }
 
 .selectionBox {
@@ -33,7 +39,7 @@
 
 .selectionHandle {
   fill: var(--color-bed-surface);
-  stroke: var(--color-accent);
+  stroke: var(--color-bed-accent);
   pointer-events: all;
 }
 

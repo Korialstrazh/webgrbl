@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { DragEvent } from 'react';
+import type { DragEvent, RefCallback } from 'react';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntry';
 
@@ -20,7 +20,11 @@ export interface LayerRowProps {
   isFirst: boolean;
   /** Whether the layer burns last, so it cannot move down. */
   isLast: boolean;
+  /** Whether the settings drawer shows this layer, so the whole row is highlighted as its owner. */
+  isOpen: boolean;
   onOpen: () => void;
+  /** Receives the button that opens the settings, so the focus can go back to it when the drawer closes. */
+  openButtonRef: RefCallback<HTMLButtonElement>;
   onToggle: (enabled: boolean) => void;
   onMoveUp: () => void;
   onMoveDown: () => void;

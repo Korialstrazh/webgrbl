@@ -8,6 +8,8 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 
 const STOP_LABEL = 'Stop';
+const SHORTCUT_HINT_TEXT = 'Esc';
+const ESCAPE_KEY_NAME = 'Escape';
 // antd's classes for a solid danger button in the large size: the most prominent button on the page.
 // After an antd upgrade, check these class names in the rendered button if this test fails.
 const PROMINENT_DANGER_CLASS_NAMES: readonly string[] = [
@@ -48,5 +50,14 @@ describe(StopButton.name, () => {
     fireEvent.click(screen.getByRole('button', { name: STOP_LABEL }));
 
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(MachineStopRequested));
+  });
+
+  it('shows its Esc shortcut without adding it to the button name', () => {
+    renderStopButton(newStore());
+
+    const stopButton: HTMLElement = screen.getByRole('button', { name: STOP_LABEL });
+
+    expect(stopButton).toHaveAttribute('aria-keyshortcuts', ESCAPE_KEY_NAME);
+    expect(stopButton).toContainElement(screen.getByText(SHORTCUT_HINT_TEXT));
   });
 });

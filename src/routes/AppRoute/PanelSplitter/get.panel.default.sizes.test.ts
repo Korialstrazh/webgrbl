@@ -1,0 +1,62 @@
+import { getPanelDefaultSizes } from './get.panel.default.sizes';
+import type { PanelDefaultSize } from './interfaces/PanelDefaultSize';
+
+const ROOT_FONT_SIZE_PX = 16;
+const WORKBENCH_WIDTH_PX = 1600;
+const WIDE_WORKBENCH_WIDTH_PX = 1920;
+// 28rem at a 16 px root font is 448 px, 23.33 % of 1920 px; the bed takes what the side panels give up.
+const WIDE_SIDE_PANEL_PERCENT = 448 / 1920 * 100;
+const WIDE_BED_PERCENT = 100 - 2 * WIDE_SIDE_PANEL_PERCENT;
+// 16.25rem and 20rem at a 16 px root font, in percent of 1600 px.
+const NARROW_DESIGN_PERCENT = 16.25;
+const NARROW_MACHINE_PERCENT = 20;
+
+const getPercents = (panelSizes: PanelDefaultSize[]): number[] =>
+  panelSizes.map((panelSize: PanelDefaultSize): number => parseFloat(String(panelSize)));
+
+const expectPercents = (panelSizes: PanelDefaultSize[], expectedPercents: readonly number[]): void => {
+  const percents: number[] = getPercents(panelSizes);
+
+  expect(percents).toHaveLength(expectedPercents.length);
+  expectedPercents.forEach((expectedPercent: number, index: number) => {
+    expect(percents[index]).toBeCloseTo(expectedPercent);
+  });
+};
+
+describe(getPanelDefaultSizes.name, () => {
+  it('opens with the stored percentages when every side panel is within its limits', () => {
+    expect(getPanelDefaultSizes({
+      storedPanelSizePercents: [20, 55, 25],
+      rootFontSizePx: ROOT_FONT_SIZE_PX,
+      workbenchWidthPx: WORKBENCH_WIDTH_PX,
+    })).toEqual(['20%', '55%', '25%']);
+  });
+
+  it('keeps a stored side panel share at its maximum width on a wide screen, so the bed takes the extra width', () => {
+    const panelSizes: PanelDefaultSize[] = getPanelDefaultSizes({
+      storedPanelSizePercents: [24, 50, 26],
+      rootFontSizePx: ROOT_FONT_SIZE_PX,
+      workbenchWidthPx: WIDE_WORKBENCH_WIDTH_PX,
+    });
+
+    expectPercents(panelSizes, [WIDE_SIDE_PANEL_PERCENT, WIDE_BED_PERCENT, WIDE_SIDE_PANEL_PERCENT]);
+  });
+
+  it('keeps a stored side panel share at its minimum width in a narrow workbench', () => {
+    const panelSizes: PanelDefaultSize[] = getPanelDefaultSizes({
+      storedPanelSizePercents: [10, 80, 10],
+      rootFontSizePx: ROOT_FONT_SIZE_PX,
+      workbenchWidthPx: WORKBENCH_WIDTH_PX,
+    });
+
+    expectPercents(panelSizes, [NARROW_DESIGN_PERCENT, 100 - NARROW_DESIGN_PERCENT - NARROW_MACHINE_PERCENT, 20]);
+  });
+
+  it('opens with the fixed side panel widths and the bed taking the rest when nothing is stored', () => {
+    expect(getPanelDefaultSizes({
+      storedPanelSizePercents: undefined,
+      rootFontSizePx: ROOT_FONT_SIZE_PX,
+      workbenchWidthPx: WORKBENCH_WIDTH_PX,
+    })).toEqual([328, undefined, 352]);
+  });
+});

@@ -1,6 +1,6 @@
 /**
- * The left region for the design tools: layers, objects and material. Layers and objects work; material is still
- * coming soon.
+ * The left region for the design tools: layers and objects. The material panel is planned and stays off the screen
+ * until it is built.
  *
  * @author michael.morosov
  *
@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL } from '../../utils/antd.constants';
 import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { ComingSoon } from '../../views/ComingSoon';
 import { Panel } from '../../views/Panel';
 import { LayersSection } from '../LayersSection';
 import { ObjectsSection } from '../ObjectsSection';
@@ -46,11 +45,6 @@ export const DesignPanel = (): ReactNode => {
       </Panel>
       <Panel title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>
         <ObjectsSection />
-      </Panel>
-      <Panel title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
-        <ComingSoon description={t(DEFAULT.DESIGN_MATERIAL_DESCRIPTION)}>
-          <div className={styles.placeholder} />
-        </ComingSoon>
       </Panel>
       <PaletteDialog isOpen={isPaletteDialogOpen} onClose={() => setIsPaletteDialogOpen(false)} />
     </Layout.Sider>

@@ -12,7 +12,7 @@ webgrbl talks to a GRBL laser over the Web Serial API. This page covers using it
 ## Connect
 
 1. Click the connection pill in the top bar to open its popover and pick a baud rate (115200 by default).
-2. In the popover press **Choose port...** to pick a real USB serial port in the browser dialog, or **Simulated laser** to use the built-in fake machine (no hardware needed), then press **Connect**.
+2. In the popover press **Choose port...** to pick a real USB serial port in the browser dialog, or **Simulated laser (no hardware)** to use the built-in fake machine, then press **Connect**. No port is chosen for you, not even the simulated laser, so Connect stays disabled until you pick one. The top-bar pill and the Status card both open this popover with **Connect...**.
 3. When the handshake succeeds the pill shows the firmware, and the machine panel shows the machine state and position.
 
 Chrome and Edge are required (Web Serial). A connection that gets no banner within 10 s fails with a toast.

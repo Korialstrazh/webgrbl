@@ -17,4 +17,13 @@ describe(Panel.name, () => {
     expect(screen.getByRole('region', { name: PANEL_TITLE })).toHaveTextContent(BODY_TEXT);
     expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
   });
+
+  it('stays at its heading line without content', () => {
+    render(<Panel title={PANEL_TITLE} headerActionComponent={<button type="button">{ACTION_LABEL}</button>} />);
+
+    const panelRegion: HTMLElement = screen.getByRole('region', { name: PANEL_TITLE });
+
+    expect(panelRegion.children).toHaveLength(1);
+    expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
+  });
 });

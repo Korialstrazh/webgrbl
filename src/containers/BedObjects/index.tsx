@@ -17,12 +17,15 @@ import { useCallback, useMemo, useRef } from 'react';
 import type { PointerEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { getDesignLayerLooks } from '../../utils/bed/get.design.layer.looks';
+import type { DesignLayerLooks } from '../../utils/bed/interfaces/DesignLayerLooks';
 import { PRIMARY_POINTER_BUTTON } from '../../utils/browser/browser.events.constants';
+import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { isObjectOutsideBed } from '../../utils/project/is.object.outside.bed';
 import type { AppDispatch } from '../../utils/states/new.store';
-import { selectProjectObjects } from '../../utils/states/project.document.state';
+import { selectProjectLayers, selectProjectObjects } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { BED_TOOL } from '../BedPanel/bed.toolbar.constants';
 import { BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
@@ -61,6 +64,8 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
   const dispatch: AppDispatch = useDispatch();
   const projectObjects: ProjectObject[] = useSelector(selectProjectObjects);
   const selectedObjectIds: string[] = useSelector(selectSelectedObjectIds);
+  const projectLayers: ProjectLayer[] = useSelector(selectProjectLayers);
+  const layerLooks: DesignLayerLooks = useMemo(() => getDesignLayerLooks(projectLayers), [projectLayers]);
   const layerRef: RefObject<SVGGElement | null> = useRef<SVGGElement>(null);
   const dragControls: BedObjectDragControls = useBedObjectDrag(layerRef);
   const gestureControls: BedHandleGestureControls = useBedHandleGesture(layerRef, dimensions.heightMm);
@@ -200,6 +205,7 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
             isSelected={isSelected}
             hasHandles={isSelected && hasSingleSelection}
             isOutsideBed={isObjectOutsideBed(drawnObject, dimensions)}
+            layerLooks={layerLooks}
             handleSizes={handleSizes}
             onPointerDown={handleObjectPointerDown}
             onHandlePointerDown={handleHandlePointerDown}

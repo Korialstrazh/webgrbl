@@ -1,0 +1,105 @@
+@use '../../styles/layout' as layout;
+
+// Over the whole bed area: the corner, the top band and the left band; the drawing fills the rest.
+.bedRulers {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.band,
+.corner {
+  position: absolute;
+  overflow: hidden;
+  background-color: var(--color-surface-1);
+}
+
+.corner {
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: layout.$bed-ruler-band-size;
+  height: layout.$bed-ruler-band-size;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+}
+
+// The labels and ticks are placed in CSS pixels from the start of the band, which lines up with the drawing.
+.topBand {
+  top: 0;
+  right: 0;
+  left: layout.$bed-ruler-band-size;
+  height: layout.$bed-ruler-band-size;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.leftBand {
+  top: layout.$bed-ruler-band-size;
+  bottom: 0;
+  left: 0;
+  width: layout.$bed-ruler-band-size;
+  border-right: 1px solid var(--color-border);
+}
+
+// The ticks stand on the edge next to the drawing; long ones mark the labelled steps.
+.tick {
+  position: absolute;
+  background-color: var(--color-text-muted);
+}
+
+.topTick {
+  bottom: 0;
+  width: 1px;
+}
+
+.leftTick {
+  right: 0;
+  height: 1px;
+}
+
+.topTick.majorTick {
+  height: 0.5rem;
+}
+
+.topTick.minorTick {
+  height: 0.25rem;
+}
+
+.leftTick.majorTick {
+  width: 0.5rem;
+}
+
+.leftTick.minorTick {
+  width: 0.25rem;
+}
+
+// The font size must match BED_RULER_FONT_SIZE_REM, and the gap to the tick BED_RULER_LABEL_OFFSET_REM.
+.label {
+  position: absolute;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+// Written to the right of its tick, at the outer edge of the band.
+.topLabel {
+  top: 0.1875rem;
+  padding-left: 0.25rem;
+}
+
+// Turned to run upwards from its tick, at the outer edge of the band, so a long value fits the narrow band.
+.leftLabel {
+  left: 0.1875rem;
+  padding-left: 0.25rem;
+  transform: rotate(-90deg);
+  transform-origin: left top;
+}

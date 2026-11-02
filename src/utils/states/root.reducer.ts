@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { combineReducers } from '@reduxjs/toolkit';
+import { BED_APPEARANCE_STATE_NAME, bedAppearanceReducer } from './bed.appearance.state';
 import { BED_GESTURE_STATE_NAME, bedGestureReducer } from './bed.gesture.state';
 import { BROWSER_ENVIRONMENT_STATE_NAME, browserEnvironmentReducer } from './browser.environment.state';
 import { GRBL_CONNECTION_STATE_NAME, grblConnectionReducer } from './grbl.connection.state';
@@ -17,9 +18,11 @@ import { LASER_POINTER_STATE_NAME, laserPointerReducer } from './laser.pointer.s
 import { MACHINE_PROFILE_STATE_NAME, machineProfileReducer } from './machine.profile.state';
 import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
 import { PALETTE_STATE_NAME, paletteReducer } from './palette.state';
+import { PANEL_LAYOUT_STATE_NAME, panelLayoutReducer } from './panel.layout.state';
 import { PROJECT_DOCUMENT_STATE_NAME, projectDocumentReducer } from './project.document.state';
 import { PROJECT_SELECTION_STATE_NAME, projectSelectionReducer } from './project.selection.state';
 import { PROJECT_STATE_NAME, projectReducer } from './project.state';
+import { SIMULATION_STATE_NAME, simulationReducer } from './simulation.state';
 import { TOAST_STATE_NAME, toastReducer } from './toast.state';
 import { TOOLPATH_STATE_NAME, toolpathReducer } from './toolpath.state';
 import { UI_OVERLAY_STATE_NAME, uiOverlayReducer } from './ui.overlay.state';
@@ -30,6 +33,7 @@ export const rootReducer = combineReducers({
   [MACHINE_STATUS_STATE_NAME]: machineStatusReducer,
   [MACHINE_PROFILE_STATE_NAME]: machineProfileReducer,
   [PALETTE_STATE_NAME]: paletteReducer,
+  [PANEL_LAYOUT_STATE_NAME]: panelLayoutReducer,
   [LASER_POINTER_STATE_NAME]: laserPointerReducer,
   [PROJECT_DOCUMENT_STATE_NAME]: projectDocumentReducer,
   [PROJECT_SELECTION_STATE_NAME]: projectSelectionReducer,
@@ -38,5 +42,7 @@ export const rootReducer = combineReducers({
   [TOAST_STATE_NAME]: toastReducer,
   [UI_OVERLAY_STATE_NAME]: uiOverlayReducer,
   [BED_GESTURE_STATE_NAME]: bedGestureReducer,
+  [BED_APPEARANCE_STATE_NAME]: bedAppearanceReducer,
   [TOOLPATH_STATE_NAME]: toolpathReducer,
+  [SIMULATION_STATE_NAME]: simulationReducer,
 });

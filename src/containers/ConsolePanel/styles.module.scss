@@ -28,9 +28,11 @@
   font-size: 0.8125rem;
 }
 
+// Fills the panel and scrolls; it never gets lower than three log lines, which CONSOLE_PANEL_MIN_HEIGHT_REM makes
+// room for.
 .scrollArea {
   flex: 1;
-  min-height: 0;
+  min-height: calc(3lh + 2 * var(--space-2) + 2px);
   overflow-y: auto;
   padding: var(--space-2);
   border: 1px solid var(--color-border);
@@ -39,6 +41,13 @@
   color: var(--color-text);
   font-family: var(--font-mono);
   font-size: 0.8125rem;
+}
+
+// The empty log says what will appear there; plain UI text, not a console line.
+.emptyHint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
 }
 
 // antd Input brings its own border, focus ring and disabled look; the console keeps its monospace commands.

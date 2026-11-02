@@ -166,20 +166,20 @@ function* handleGrblControllerCommands(controller: GrblController): Generator {
 // #region Controller session
 const newGrblControllerEventChannel = (controller: GrblController): EventChannel<GrblControllerEvent> =>
   eventChannel(
-    (emit: (event: GrblControllerEvent) => void) => controller.addEventListener(emit),
+    (emit: (controllerEvent: GrblControllerEvent) => void) => controller.addEventListener(emit),
     buffers.expanding<GrblControllerEvent>(CONTROLLER_EVENT_BUFFER_INITIAL_SIZE),
   );
 
 /** Puts the actions of every controller event; ends after a connection loss, which ends the session. */
 function* forwardGrblControllerEvents(eventChannelOfController: EventChannel<GrblControllerEvent>): Generator {
   while (true) {
-    const event: GrblControllerEvent = (yield take(eventChannelOfController)) as GrblControllerEvent;
+    const controllerEvent: GrblControllerEvent = (yield take(eventChannelOfController)) as GrblControllerEvent;
 
-    for (const action of getGrblControllerEventActions(event)) {
+    for (const action of getGrblControllerEventActions(controllerEvent)) {
       yield put(action);
     }
 
-    if (event.kind === GRBL_CONTROLLER_EVENT_KIND.CONNECTION_LOST) {
+    if (controllerEvent.kind === GRBL_CONTROLLER_EVENT_KIND.CONNECTION_LOST) {
       return;
     }
   }
@@ -270,6 +270,11 @@ function* runGrblControllerSession(dependencies: GrblControllerSagaDependencies)
   const baudRate: number = (yield select(selectBaudRate)) as number;
   const availablePorts: SerialPortDescriptor[] = (yield select(selectAvailablePorts)) as SerialPortDescriptor[];
   let controller: GrblController;
+
+  // The Connect buttons stay disabled until a port is chosen; a request without one has nothing to open.
+  if (!portId) {
+    return;
+  }
 
   yield put(newConnectionStatusChanged(GRBL_CONNECTION_STATUS.CONNECTING));
 

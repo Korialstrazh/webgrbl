@@ -1,6 +1,7 @@
 /**
- * The only access to the webgrbl database: projects, the SVG text of their objects, and the last opened project.
- * Feature code (containers, slices, sagas) goes through this module, which owns name validation and timestamps.
+ * Access to the projects in the webgrbl database: projects, the SVG text of their objects, and the last opened project.
+ * Feature code (containers, slices, sagas) goes through this module, which owns name validation and timestamps. The
+ * panel sizes have their own repository next to it.
  *
  * The SVG text of an object is written once, the first time a document with that object is saved, and is not touched
  * by later saves, so an autosave after a nudge writes only the small project row. A save never deletes SVG rows,

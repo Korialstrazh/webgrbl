@@ -9,11 +9,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { ArrowDownOutlined, ArrowUpOutlined, CloseOutlined, HolderOutlined } from '@ant-design/icons';
 import { Button, Popconfirm } from 'antd';
 import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
-import { ARROW_DOWN, ARROW_UP, DELETE_CROSS, DRAG_HANDLE_GRIP } from '../../../../utils/characters.constants';
 import { LAYER_MODE_LABEL_KEY } from '../../../../utils/layers/layer.constants';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { SHADING_ENTRY_ID } from '../../../../utils/palette/palette.constants';
@@ -41,6 +41,12 @@ export const PaletteEntryRow = ({
   const { t } = useTranslation();
   const { name: entryName } = entry;
   const isShading: boolean = entry.id === SHADING_ENTRY_ID;
+  const summaryText: string = t(DEFAULT.LAYERS_SUMMARY, {
+    mode: t(LAYER_MODE_LABEL_KEY[entry.mode]),
+    power: entry.maxPowerPercent,
+    speed: entry.speedMmPerMin,
+    passes: entry.passes,
+  });
 
   return (
     <li
@@ -51,7 +57,7 @@ export const PaletteEntryRow = ({
       onDragOver={allowDropOnRow}
       onDrop={onDrop}
     >
-      <span className={styles.handle} aria-hidden="true">{DRAG_HANDLE_GRIP}</span>
+      <HolderOutlined className={styles.handle} aria-hidden="true" />
       <Button
         className={styles.selectButton}
         type={ANTD_BUTTON_TYPE_TEXT}
@@ -61,20 +67,13 @@ export const PaletteEntryRow = ({
         <span className={styles.swatch}>
           <LayerSwatch colour={entry.colour} isShading={isShading} />
         </span>
-        <span className={styles.name}>{entryName}</span>
-        <span className={styles.summary}>
-          {t(DEFAULT.LAYERS_SUMMARY, {
-            mode: t(LAYER_MODE_LABEL_KEY[entry.mode]),
-            power: entry.maxPowerPercent,
-            speed: entry.speedMmPerMin,
-            passes: entry.passes,
-          })}
-        </span>
+        <span className={styles.name} title={entryName}>{entryName}</span>
+        <span className={styles.summary} title={summaryText}>{summaryText}</span>
       </Button>
       <Button
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
-        icon={ARROW_UP}
+        icon={<ArrowUpOutlined />}
         disabled={isFirst}
         aria-label={t(DEFAULT.PALETTE_MOVE_UP, { name: entryName })}
         onClick={onMoveUp}
@@ -82,7 +81,7 @@ export const PaletteEntryRow = ({
       <Button
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
-        icon={ARROW_DOWN}
+        icon={<ArrowDownOutlined />}
         disabled={isLast}
         aria-label={t(DEFAULT.PALETTE_MOVE_DOWN, { name: entryName })}
         onClick={onMoveDown}
@@ -99,7 +98,7 @@ export const PaletteEntryRow = ({
             danger
             type={ANTD_BUTTON_TYPE_TEXT}
             size={ANTD_BUTTON_SIZE_SMALL}
-            icon={DELETE_CROSS}
+            icon={<CloseOutlined />}
             aria-label={t(DEFAULT.PALETTE_DELETE, { name: entryName })}
           />
         </Popconfirm>

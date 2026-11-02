@@ -1,6 +1,6 @@
 /**
  * The palette dialog: the colour list, the form that edits one entry, reset to defaults and export for Inkscape. It
- * opens in the bed region, so STOP stays usable, and its content starts over on every open.
+ * opens over the whole window, so the form has room, and its content starts over on every open.
  *
  * @author michael.morosov
  *
@@ -12,7 +12,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { BedRegionModal } from '../BedRegionModal';
+import { AppModal } from '../AppModal';
 import type { PaletteDialogProps } from './interfaces/PaletteDialogProps';
 import { PALETTE_DIALOG_OVERLAY_ID, PALETTE_DIALOG_WIDTH } from './palette.dialog.constants';
 import { PaletteEditor } from './PaletteEditor';
@@ -21,16 +21,16 @@ export const PaletteDialog = ({ isOpen, onClose }: PaletteDialogProps): ReactNod
   const { t } = useTranslation();
 
   return (
-    <BedRegionModal
+    <AppModal
       isOpen={isOpen}
       overlayIdPrefix={PALETTE_DIALOG_OVERLAY_ID}
       title={t(DEFAULT.PALETTE_TITLE)}
       footer={null}
-      width={PALETTE_DIALOG_WIDTH}
+      maxWidth={PALETTE_DIALOG_WIDTH}
       destroyOnHidden
       onClose={onClose}
     >
       <PaletteEditor />
-    </BedRegionModal>
+    </AppModal>
   );
 };

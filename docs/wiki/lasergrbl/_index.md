@@ -183,7 +183,7 @@ Some features touch several areas. Their articles cross-link each other, and the
 | LG-GCODE-05 | [[lg-gcode-files#LG-GCODE-05 G-code file loading and line normalisation\|G-code file loading and line normalisation]] | core | not started |
 | LG-GCODE-06 | [[lg-gcode-files#LG-GCODE-06 Program analysis: modal state and positions\|Program analysis: modal state and positions]] | core | not started |
 | LG-GCODE-07 | [[lg-gcode-files#LG-GCODE-07 Bounding box / ranges and quadrant\|Bounding box / ranges and quadrant]] | core | not started |
-| LG-GCODE-08 | [[lg-gcode-files#LG-GCODE-08 Time estimation and projected time\|Time estimation and projected time]] | core | not started |
+| LG-GCODE-08 | [[lg-gcode-files#LG-GCODE-08 Time estimation and projected time\|Time estimation and projected time]] | core | in progress |
 | LG-GCODE-09 | [[lg-gcode-files#LG-GCODE-09 Save G-code (quick and advanced)\|Save G-code (quick and advanced)]] | core | not started |
 | LG-GCODE-10 | [[lg-gcode-files#LG-GCODE-10 Project files (.lps)\|Project files (.lps)]] | adapt | in progress |
 | LG-GCODE-11 | [[lg-gcode-files#LG-GCODE-11 File loading events and program state\|File loading events and program state]] | core | not started |
@@ -198,10 +198,10 @@ Some features touch several areas. Their articles cross-link each other, and the
 | LG-SVG-03 | [[lg-svg-import#LG-SVG-03 Laser options dialog ("Target image")\|Laser options dialog ("Target image")]] | core | not started |
 | LG-SVG-04 | [[lg-svg-import#LG-SVG-04 Supported elements and parsing order\|Supported elements and parsing order]] | core | not started |
 | LG-SVG-05 | [[lg-svg-import#LG-SVG-05 Units, DPI, viewBox and coordinate mapping\|Units, DPI, viewBox and coordinate mapping]] | core | in progress |
-| LG-SVG-06 | [[lg-svg-import#LG-SVG-06 Curve flattening (smart vs legacy Bézier)\|Curve flattening (smart vs legacy Bézier)]] | core | not started |
+| LG-SVG-06 | [[lg-svg-import#LG-SVG-06 Curve flattening (smart vs legacy Bézier)\|Curve flattening (smart vs legacy Bézier)]] | core | done |
 | LG-SVG-07 | [[lg-svg-import#LG-SVG-07 Arc output (G3 for circles and rounded corners)\|Arc output (G3 for circles and rounded corners)]] | core | not started |
-| LG-SVG-08 | [[lg-svg-import#LG-SVG-08 Color filter\|Color filter]] | core | not started |
-| LG-SVG-09 | [[lg-svg-import#LG-SVG-09 G-code output shape\|G-code output shape]] | core | not started |
+| LG-SVG-08 | [[lg-svg-import#LG-SVG-08 Color filter\|Color filter]] | core | improved |
+| LG-SVG-09 | [[lg-svg-import#LG-SVG-09 G-code output shape\|G-code output shape]] | core | done |
 | LG-SVG-10 | [[lg-svg-import#LG-SVG-10 Append SVG to the current job\|Append SVG to the current job]] | core | in progress |
 
 ### Raster import - [[lg-raster-import]]
@@ -228,7 +228,7 @@ Some features touch several areas. Their articles cross-link each other, and the
 | LG-RAST-18 | [[lg-raster-import#LG-RAST-18 Laser mode (M3/M4) and power range (S-MIN/S-MAX)\|Laser mode (M3/M4) and power range (S-MIN/S-MAX)]] | core | not started |
 | LG-RAST-19 | [[lg-raster-import#LG-RAST-19 White skip and fast-skip optimisation\|White skip and fast-skip optimisation]] | core | not started |
 | LG-RAST-20 | [[lg-raster-import#LG-RAST-20 Generated G-code format (raster tools)\|Generated G-code format (raster tools)]] | core | not started |
-| LG-RAST-21 | [[lg-raster-import#LG-RAST-21 Raster filling of vectorized shapes\|Raster filling of vectorized shapes]] | core | not started |
+| LG-RAST-21 | [[lg-raster-import#LG-RAST-21 Raster filling of vectorized shapes\|Raster filling of vectorized shapes]] | core | in progress |
 
 ### Vectorization - [[lg-vectorization]]
 
@@ -254,18 +254,18 @@ Some features touch several areas. Their articles cross-link each other, and the
 | ID | Feature | Scope | Status |
 | --- | --- | --- | --- |
 | LG-PREV-01 | [[lg-preview#LG-PREV-01 Renderer selection and fallback\|Renderer selection and fallback]] | skip | not started |
-| LG-PREV-02 | [[lg-preview#LG-PREV-02 Toolpath rendering (burning vs travel, power shading)\|Toolpath rendering (burning vs travel, power shading)]] | core | not started |
+| LG-PREV-02 | [[lg-preview#LG-PREV-02 Toolpath rendering (burning vs travel, power shading)\|Toolpath rendering (burning vs travel, power shading)]] | core | done |
 | LG-PREV-03 | [[lg-preview#LG-PREV-03 Grid, origin axes and rulers\|Grid, origin axes and rulers]] | core | not started |
 | LG-PREV-04 | [[lg-preview#LG-PREV-04 Bounding box and job dimensions\|Bounding box and job dimensions]] | core | not started |
 | LG-PREV-05 | [[lg-preview#LG-PREV-05 Zoom, pan and auto-size\|Zoom, pan and auto-size]] | core | not started |
 | LG-PREV-06 | [[lg-preview#LG-PREV-06 Laser position cursor and coordinate overlay\|Laser position cursor and coordinate overlay]] | core | not started |
-| LG-PREV-07 | [[lg-preview#LG-PREV-07 Job progress drawing (executed commands)\|Job progress drawing (executed commands)]] | core | not started |
-| LG-PREV-08 | [[lg-preview#LG-PREV-08 Show/hide laser-off movements\|Show/hide laser-off movements]] | core | not started |
+| LG-PREV-07 | [[lg-preview#LG-PREV-07 Job progress drawing (executed commands)\|Job progress drawing (executed commands)]] | core | in progress |
+| LG-PREV-08 | [[lg-preview#LG-PREV-08 Show/hide laser-off movements\|Show/hide laser-off movements]] | core | done |
 | LG-PREV-09 | [[lg-preview#LG-PREV-09 Cross cursor and mouse coordinates\|Cross cursor and mouse coordinates]] | core | not started |
 | LG-PREV-10 | [[lg-preview#LG-PREV-10 Click-to-jog on the preview\|Click-to-jog on the preview]] | core | not started |
 | LG-PREV-11 | [[lg-preview#LG-PREV-11 Status overlays (loading, tips, diagnostics)\|Status overlays (loading, tips, diagnostics)]] | later | not started |
 | LG-PREV-12 | [[lg-preview#LG-PREV-12 Colour schemes for the preview\|Colour schemes for the preview]] | core | not started |
-| LG-PREV-13 | [[lg-preview#LG-PREV-13 Estimated / projected time display\|Estimated / projected time display]] | core | not started |
+| LG-PREV-13 | [[lg-preview#LG-PREV-13 Estimated / projected time display\|Estimated / projected time display]] | core | in progress |
 | LG-PREV-14 | [[lg-preview#LG-PREV-14 UsageClassPreview (not a job preview)\|UsageClassPreview (not a job preview)]] | later | not started |
 
 ### Generators & material DB - [[lg-generators]]

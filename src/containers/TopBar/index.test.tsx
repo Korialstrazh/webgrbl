@@ -40,28 +40,28 @@ import { PROJECT_FILE_PICKER_ACCEPT } from '../ProjectFileInput/project.file.inp
 import { StopHotkey } from '../StopHotkey';
 import { SVG_FILE_PICKER_ACCEPT, SVG_IMPORT_INPUT_TEST_ID } from '../SvgImportButton/svg.import.button.constants';
 
-const COMING_SOON_CONTROL_LABELS: readonly string[] = [
-  'Materials',
-];
 const UNDO_LABEL = 'Undo';
 const REDO_LABEL = 'Redo';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PICKED_FILE_NAME = 'star.svg';
 const APP_TITLE = 'webgrbl';
 const AUTOSAVE_TEXT = 'Saved';
-const DISCONNECTED_PATTERN = /Disconnected/;
+const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const MACHINE_PROFILES_LABEL = 'Machine profiles';
+const MORE_LABEL = 'More';
+const MATERIALS_LABEL = 'Materials';
+const SOON_LABEL = 'Soon';
 const PROJECT_MENU_LABEL = 'Project';
 const PROJECT_ID = 'project-1';
 const PROJECT_NAME = 'Coasters';
 const NEW_PROJECT_NAME = 'Coasters v2';
 const PROJECT_NAME_INPUT_LABEL = 'Project name';
 const NEW_PROJECT_LABEL = 'New project';
-const OPEN_LABEL = 'Open\u2026';
+const OPEN_LABEL = 'Open from this browser\u2026';
 const SAVE_SHORTCUT_PATTERN = /Ctrl\+S/;
 const SAVE_AS_FILE_LABEL = 'Save as file';
-const OPEN_FILE_LABEL = 'Open file\u2026';
+const OPEN_FILE_LABEL = 'Open project file\u2026';
 const EXPORT_GCODE_PATTERN = /Export G-code/;
 const OPEN_PROJECT_DIALOG_LABEL = 'Open project';
 const PROJECT_FILE_INPUT_LABEL = 'Open a project file';
@@ -118,18 +118,15 @@ describe(TopBar.name, () => {
     expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).toBeInTheDocument();
   });
 
-  it.each(COMING_SOON_CONTROL_LABELS)('clicking the coming-soon control %s dispatches nothing', (label: string) => {
-    const store: AppStore = newStore();
-    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
-
+  it('shows no placeholder for planned features', () => {
     render(
-      <Provider store={store}>
+      <Provider store={newStore()}>
         <TopBar />
       </Provider>,
     );
-    fireEvent.click(screen.getByRole('button', { name: label, hidden: true }));
 
-    expect(dispatchSpy).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: MATERIALS_LABEL, hidden: true })).not.toBeInTheDocument();
+    expect(screen.queryByText(SOON_LABEL)).not.toBeInTheDocument();
   });
 
   it('keeps a fixed height on one row', () => {
@@ -150,6 +147,24 @@ describe(TopBar.name, () => {
 
     expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
+  });
+
+  it('opens the machine profiles dialog from the overflow menu of a narrow bar', async () => {
+    renderWorkbenchTopBar(newStore());
+
+    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL }));
+
+    expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
+  });
+
+  it('lists no planned Materials entry in the overflow menu', async () => {
+    renderWorkbenchTopBar(newStore());
+
+    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
+
+    expect(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: new RegExp(`^${MATERIALS_LABEL}`) })).not.toBeInTheDocument();
   });
 
   it('closes the machine profiles dialog on Escape without stopping the machine', () => {

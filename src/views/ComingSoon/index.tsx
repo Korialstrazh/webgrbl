@@ -1,5 +1,8 @@
 /**
- * Wraps a feature that is not built yet: shows it but makes it inert, with a visible badge and description.
+ * Wraps one control that is not built yet. The control itself is a real disabled antd control, so it looks and acts
+ * like every other control that cannot be used right now; a small "Soon" tag beside it tells why. What the control will
+ * do appears in a tooltip below it on hover, or when the tag takes the keyboard focus, so the notice never adds a line
+ * to a bar and never covers the controls above it.
  *
  * @author michael.morosov
  *
@@ -8,42 +11,35 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
-import { DEFAULT } from '../../utils/localization/default.locales';
+import { Tooltip } from 'antd';
+import type { ReactNode } from 'react';
+import { ANTD_TOOLTIP_PLACEMENT_BOTTOM, ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
+import { SoonTag } from '../SoonTag';
 import styles from './styles.module.scss';
 
 interface ComingSoonProps {
-  /** What the feature will do, shown next to the badge. */
+  /** What the control will do, shown in the tooltip and read out with the tag. */
   description: string;
+  /** The one control, rendered disabled by the caller. */
   children: ReactNode;
+  /** Whether the control fills the width it is given, with the tag at its end. */
+  isFullWidth?: boolean;
 }
 
-// jsdom does not enforce `inert`, so the wrapper also stops these events itself.
-const stopBlockedEvent = (blockedEvent: MouseEvent | KeyboardEvent): void => {
-  blockedEvent.stopPropagation();
-  blockedEvent.preventDefault();
-};
+// A short wait, so the tooltip does not flash up while the pointer only passes over the control.
+const COMING_SOON_TOOLTIP_DELAY_S = 0.4;
 
-export const ComingSoon = ({ description, children }: ComingSoonProps): ReactNode => {
-  const { t } = useTranslation();
-
-  return (
-    <div className={styles.comingSoon}>
-      <p className={styles.notice}>
-        <span className={styles.badge}>{t(DEFAULT.COMING_SOON)}</span>
-        <span className={styles.description}>{description}</span>
-      </p>
-      <div
-        className={styles.disabled}
-        inert
-        aria-disabled="true"
-        onClickCapture={stopBlockedEvent}
-        onKeyDownCapture={stopBlockedEvent}
-        onKeyUpCapture={stopBlockedEvent}
-      >
-        {children}
-      </div>
-    </div>
-  );
-};
+export const ComingSoon = ({ description, children, isFullWidth = false }: ComingSoonProps): ReactNode => (
+  // The tooltip sits on the wrapper: a disabled button fires no pointer events, so the wrapper takes the hover.
+  <Tooltip
+    title={description}
+    trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
+    placement={ANTD_TOOLTIP_PLACEMENT_BOTTOM}
+    mouseEnterDelay={COMING_SOON_TOOLTIP_DELAY_S}
+  >
+    <span className={isFullWidth ? [styles.comingSoon, styles.fullWidth].join(' ') : styles.comingSoon}>
+      <span className={styles.control}>{children}</span>
+      <SoonTag description={description} />
+    </span>
+  </Tooltip>
+);

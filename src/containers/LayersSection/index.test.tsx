@@ -1,7 +1,8 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { LayersSection } from '.';
+import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
 import { HORIZONTAL_ELLIPSIS, MIDDLE_DOT, MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
@@ -36,7 +37,11 @@ const MOVE_CUT_DOWN_LABEL = 'Move Cut down';
 const MOVE_CUT_UP_LABEL = 'Move Cut up';
 const MOVE_FILL_UP_LABEL = 'Move Fill up';
 const CUT_BUTTON_PATTERN = /^Cut/;
-const DRAWER_TITLE = 'Layer settings: Cut';
+const DRAWER_OVERLINE = 'Layer settings';
+const CLOSE_LABEL = 'Close';
+const OPEN_ROW_CLASS_NAME = 'openRow';
+const ROW_ROLE_SELECTOR = 'li';
+const FILL_BUTTON_PATTERN = /^Fill/;
 const EDIT_PALETTE_LABEL = `Edit palette${HORIZONTAL_ELLIPSIS}`;
 const FILL_ROW_INDEX = 0;
 const CUT_ROW_INDEX = 1;
@@ -211,15 +216,61 @@ describe(LayersSection.name, () => {
     loadColours(store, [CUT_COLOUR]);
     renderSection(store);
 
-    expect(screen.queryByText(DRAWER_TITLE)).not.toBeInTheDocument();
+    expect(screen.queryByText(DRAWER_OVERLINE)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: CUT_BUTTON_PATTERN }));
 
-    expect(screen.getByText(DRAWER_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(DRAWER_OVERLINE)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 
-    expect(screen.queryByText(DRAWER_TITLE)).not.toBeInTheDocument();
+    expect(screen.queryByText(DRAWER_OVERLINE)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['the close button', (): void => {
+      fireEvent.click(screen.getByRole('button', { name: CLOSE_LABEL }));
+    }],
+    ['Escape', (): void => {
+      fireEvent.keyDown(screen.getByText(DRAWER_OVERLINE), { key: ESCAPE_KEY });
+    }],
+  ])('returns the focus to the layer row when the drawer closes with %s', async (
+    _closeName: string,
+    closeDrawer: () => void,
+  ) => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+    const cutButton: HTMLElement = screen.getByRole('button', { name: CUT_BUTTON_PATTERN });
+
+    fireEvent.click(cutButton);
+    act(() => {
+      screen.getByRole('button', { name: CLOSE_LABEL }).focus();
+    });
+    closeDrawer();
+
+    await waitFor(() => {
+      expect(cutButton).toHaveFocus();
+    });
+  });
+
+  it('highlights the whole row of the layer the drawer shows, and only that row', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+
+    const cutButton: HTMLElement = screen.getByRole('button', { name: CUT_BUTTON_PATTERN });
+    const fillButton: HTMLElement = screen.getByRole('button', { name: FILL_BUTTON_PATTERN });
+
+    fireEvent.click(cutButton);
+
+    expect(cutButton.closest(ROW_ROLE_SELECTOR)?.className).toContain(OPEN_ROW_CLASS_NAME);
+    expect(fillButton.closest(ROW_ROLE_SELECTOR)?.className).not.toContain(OPEN_ROW_CLASS_NAME);
+    expect(cutButton).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(cutButton.closest(ROW_ROLE_SELECTOR)?.className).not.toContain(OPEN_ROW_CLASS_NAME);
   });
 
   it('calls onEditPalette from the drawer', () => {

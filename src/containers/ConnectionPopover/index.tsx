@@ -69,6 +69,10 @@ const focusFirstPopoverControl = (contentElement: HTMLElement | null): void => {
   (firstControl ?? contentElement)?.focus({ preventScroll: true });
 };
 
+/** A laser can always be disconnected; connecting needs a chosen port. */
+const canToggleConnection = (isConnected: boolean, selectedPortId: string): boolean =>
+  isConnected || Boolean(selectedPortId);
+
 const getConnectButtonKey = (isConnected: boolean, isConnecting: boolean): string => {
   if (isConnecting) {
     return DEFAULT.CONNECTION_POPOVER_CONNECTING;
@@ -135,7 +139,8 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
         <Select<string>
           id={portSelectId}
           className={styles.select}
-          value={selectedPortId}
+          value={selectedPortId || undefined}
+          placeholder={t(DEFAULT.CONNECTION_NO_PORT_CHOSEN)}
           options={portOptions}
           disabled={isLinkLocked}
           virtual={false}
@@ -165,7 +170,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       </div>
       <Button
         type={isConnected ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
-        disabled={isConnecting}
+        disabled={isConnecting || !canToggleConnection(isConnected, selectedPortId)}
         onClick={toggleConnection}
       >
         {t(getConnectButtonKey(isConnected, isConnecting))}

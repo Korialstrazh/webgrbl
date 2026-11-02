@@ -1,0 +1,27 @@
+// The Toolpath view controls in the bed header, at the one control height of the header: they keep their width and stay on one line, so on a narrow bed the
+// whole group wraps to a row of its own; a bed narrower still clips the row rather than squeezing the controls.
+.toolpathToolbar {
+  display: flex;
+  flex: none;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  overflow: hidden;
+
+  > * {
+    flex: none;
+  }
+}
+
+.travelSwitch {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  cursor: pointer;
+}

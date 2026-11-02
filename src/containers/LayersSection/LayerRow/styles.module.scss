@@ -1,5 +1,9 @@
+// The handle, the checkbox, the open button and the move buttons side by side. The move buttons have a column of their
+// own, so they never cover the name or the summary.
 .row {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-1);
   padding-left: var(--space-1);
@@ -8,47 +12,118 @@
   background-color: var(--color-surface-2);
 }
 
+// The row whose settings the drawer shows: the whole row is highlighted, with an accent edge on its right, the side
+// the drawer opens on.
+.openRow {
+  border-color: var(--color-accent);
+  background-color: var(--color-surface-3);
+  box-shadow: inset -0.1875rem 0 0 var(--color-accent);
+}
+
 // A decoration only: the Move buttons are the keyboard path.
 .handle {
   padding: 0 var(--space-1);
   color: var(--color-text-muted);
+  font-size: 1rem;
   cursor: grab;
 }
 
-// The button grows to the row width: the swatch beside the name, the summary and the note below.
+// The swatch beside the name, then the summary and the palette note below across the full width of the button. The
+// name and the summary each wrap to a second line in a narrow panel instead of being cut short, and the button grows
+// with them, so they stay inside it. antd centres a button's content on one line, so the button is laid out as a start-aligned grid.
 .openButton {
   display: grid;
-  flex: 1;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0 var(--space-2);
   align-items: center;
+  justify-content: stretch;
   height: auto;
   min-width: 0;
   padding: var(--space-2);
+  overflow: hidden;
   text-align: left;
+  white-space: normal;
 }
 
 .swatch {
-  grid-row: 1 / span 2;
   width: 1.5rem;
   height: 1.5rem;
 }
 
-.name {
+.name,
+.summary,
+.note {
+  min-width: 0;
+}
+
+.summary,
+.note {
+  grid-column: 1 / -1;
+}
+
+// At most two lines each; only a name or summary longer than that is cut short, and its title shows it in full.
+.name,
+.summary {
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .summary {
-  grid-column: 2;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }
 
 .note {
-  grid-column: 1 / -1;
+  grid-column: 2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.note {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.75rem;
   color: var(--color-danger-text);
+}
+
+// Faded out until the row is hovered or holds the focus, so a list of rows stays calm; their column keeps its width.
+// They stay in the tab order: tabbing onto one shows both.
+.moveButtons {
+  display: flex;
+  flex-direction: column;
+  padding-right: var(--space-1);
+  opacity: 0;
+  transition: opacity 0.12s;
+
+  // A 2rem target each, though the arrows are small.
+  > :global(.ant-btn) {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+.row:hover .moveButtons,
+.row:focus-within .moveButtons {
+  opacity: 1;
+}
+
+// A touch screen has no hover, so the buttons stay visible.
+@media (hover: none) {
+  .moveButtons {
+    opacity: 1;
+  }
 }

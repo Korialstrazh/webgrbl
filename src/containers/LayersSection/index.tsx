@@ -1,6 +1,7 @@
 /**
  * The Layers section of the design panel: the project layers in burn order, each with an on/off checkbox, drag and
- * button reordering, and a click that opens the layer settings drawer. With no layers it shows a hint.
+ * button reordering, and a click that opens the layer settings drawer; when the drawer closes the focus goes back to
+ * the row. With no layers it shows a hint.
  *
  * @author michael.morosov
  *
@@ -10,7 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { DragEvent, ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
@@ -35,6 +36,8 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
   const [openLayerKey, setOpenLayerKey] = useState<string | undefined>(undefined);
   const [draggedLayerKey, setDraggedLayerKey] = useState<string | undefined>(undefined);
+  const openButtonsRef = useRef<Map<string, HTMLButtonElement>>(new Map<string, HTMLButtonElement>());
+  const closedLayerKeyRef = useRef<string | undefined>(undefined);
   const layerKeys: string[] = layers.map(getLayerKey);
   const openLayer: ProjectLayer | undefined = layers.find(
     (layer: ProjectLayer): boolean => getLayerKey(layer) === openLayerKey,
@@ -70,6 +73,32 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
     setDraggedLayerKey(undefined);
   };
 
+  const closeLayerSettings = (): void => {
+    closedLayerKeyRef.current = openLayerKey;
+    setOpenLayerKey(undefined);
+  };
+
+  // Escape, the close button and a click on the bed all close the drawer; once it has closed, the keyboard user gets
+  // back to the row that opened it instead of the page body.
+  useEffect(() => {
+    const closedLayerKey: string | undefined = closedLayerKeyRef.current;
+
+    if (openLayerKey || !closedLayerKey) {
+      return;
+    }
+
+    closedLayerKeyRef.current = undefined;
+    openButtonsRef.current.get(closedLayerKey)?.focus();
+  }, [openLayerKey]);
+
+  const registerOpenButton = (layerKey: string, openButton: HTMLButtonElement | null): void => {
+    if (openButton) {
+      openButtonsRef.current.set(layerKey, openButton);
+    } else {
+      openButtonsRef.current.delete(layerKey);
+    }
+  };
+
   if (!layers.length) {
     return <p className={styles.hint}>{t(DEFAULT.LAYERS_EMPTY_HINT)}</p>;
   }
@@ -87,7 +116,9 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
               layerEntry={getLayerPaletteEntry(layer, paletteEntries)}
               isFirst={layerIndex === 0}
               isLast={layerIndex === layers.length - 1}
+              isOpen={layerKey === openLayerKey}
               onOpen={() => setOpenLayerKey(layerKey)}
+              openButtonRef={(openButton: HTMLButtonElement | null) => registerOpenButton(layerKey, openButton)}
               onToggle={(enabled: boolean) => dispatch(new LayerToggled({ layerKey, enabled }))}
               onMoveUp={() => moveLayerToIndex(layerKey, layerIndex - 1)}
               onMoveDown={() => moveLayerToIndex(layerKey, layerIndex + 1)}
@@ -100,7 +131,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
       </ul>
       <LayerSettingsDrawer
         layer={openLayer}
-        onClose={() => setOpenLayerKey(undefined)}
+        onClose={closeLayerSettings}
         onEditPalette={onEditPalette}
       />
     </>

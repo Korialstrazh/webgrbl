@@ -1,10 +1,14 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ConsolePanel } from '.';
-import { GRBL_CONSOLE_DIRECTION, GRBL_REALTIME_COMMAND } from '../../utils/grbl/grbl.constants';
+import {
+  GRBL_CONSOLE_DIRECTION,
+  GRBL_REALTIME_COMMAND,
+  SIMULATED_LASER_PORT_ID,
+} from '../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { ConnectRequested } from '../../utils/states/grbl.connection.state';
+import { ConnectRequested, SerialPortSelected } from '../../utils/states/grbl.connection.state';
 import { ConsoleEntryReceived, ConsoleInfoAdded, selectIsStatusReportVisible } from '../../utils/states/grbl.console.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
@@ -27,6 +31,7 @@ const FEED_HOLD_TEXT = '!';
 const ENTRY_TIMESTAMP = 1_000;
 const ANTD_INPUT_CLASS_NAME = 'ant-input';
 const ANTD_CHECKBOX_CLASS_NAME = 'ant-checkbox-input';
+const EMPTY_HINT_TEXT = 'No messages yet. Connect a machine to see what it sends.';
 
 const renderConsolePanel = (): AppStore => {
   const store: AppStore = newStore();
@@ -48,6 +53,7 @@ const settle = async (): Promise<void> => {
 
 const connect = async (store: AppStore): Promise<void> => {
   act(() => {
+    store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
     store.dispatch(new ConnectRequested());
   });
   await settle();
@@ -78,6 +84,23 @@ const submitCommand = async (commandText: string): Promise<void> => {
 };
 
 describe(ConsolePanel.name, () => {
+  it('says what will appear while the log is empty, and drops the hint at the first line', () => {
+    const store: AppStore = renderConsolePanel();
+
+    expect(screen.getByText(EMPTY_HINT_TEXT)).toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new ConsoleInfoAdded({
+        messageKey: DEFAULT.CONSOLE_RAW_ERROR,
+        isError: true,
+        timestamp: ENTRY_TIMESTAMP,
+        messageParameters: { detail: RAW_ERROR_DETAIL },
+      }));
+    });
+
+    expect(screen.queryByText(EMPTY_HINT_TEXT)).not.toBeInTheDocument();
+  });
+
   beforeEach(() => {
     vi.useFakeTimers();
   });

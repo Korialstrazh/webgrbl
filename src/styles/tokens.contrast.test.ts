@@ -5,6 +5,9 @@ import { getScssTokenValue } from '../utils/test.support/get.scss.token.value';
 
 const TOKENS_PATH = resolve(__dirname, 'tokens.scss');
 const MIN_TEXT_CONTRAST = 4.5;
+// WCAG 1.4.11: a focus indicator needs 3:1 against what it sits on.
+const MIN_FOCUS_RING_CONTRAST = 3;
+const FOCUS_RING_TOKEN = '--color-focus-ring';
 const HEX_RADIX = 16;
 const HEX_DIGITS_PER_CHANNEL = 2;
 const CHANNEL_MAX = 255;
@@ -35,9 +38,29 @@ const TEXT_TOKEN = '--color-text';
 const MUTED_TOKEN = '--color-text-muted';
 const MUTED_STRONG_TOKEN = '--color-text-muted-strong';
 const BG_TOKEN = '--color-bg';
+const BED_TOKEN = '--color-bed';
+const BED_SURFACE_TOKEN = '--color-bed-surface';
+const HEX_PREFIX = '#';
 const ACCENT_BUTTON_TOKEN = '--color-accent';
 const DANGER_TEXT_TOKEN = '--color-danger-text';
 const DARK_TEXT_ON_ACCENT = '#121417';
+// Black artwork and the marks and text drawn on the light bed need 4.5:1; markers and outlines need 3:1.
+const BLACK_ARTWORK = '#000000';
+const BED_TONE_PREFIXES = ['--color-bed-on-light-', '--color-bed-on-dark-'] as const;
+// The darkest light bed and the lightest dark bed each set is meant for: the default grey and the dark grey preset.
+type BedTonePrefix = (typeof BED_TONE_PREFIXES)[number];
+const BED_SURFACE_OF_TONE: Readonly<Record<BedTonePrefix, string>> = {
+  '--color-bed-on-light-': '#a7acb1',
+  '--color-bed-on-dark-': '#3a3e43',
+};
+const BED_TEXT_TOKEN_NAMES = ['ink', 'text'] as const;
+const BED_MARKER_TOKEN_NAMES = ['accent', 'laser-head', 'danger', 'travel'] as const;
+const MIN_GRAPHIC_CONTRAST = 3;
+const DISABLED_TEXT_TOKEN = '--color-disabled-text';
+const DISABLED_BG_TOKEN = '--color-disabled-bg';
+const DISABLED_BORDER_TOKEN = '--color-disabled-border';
+const ENABLED_BORDER_TOKEN = '--color-border';
+const ENABLED_BUTTON_BG_TOKEN = '--color-surface-2';
 
 const getChannelLuminance = (channelHex: string): number => {
   const channel: number = parseInt(channelHex, HEX_RADIX) / CHANNEL_MAX;
@@ -48,7 +71,7 @@ const getChannelLuminance = (channelHex: string): number => {
 };
 
 const getRelativeLuminance = (hex: string): number => {
-  const digits: string = hex.replace('#', '');
+  const digits: string = hex.replace(HEX_PREFIX, '');
   const red: number = getChannelLuminance(digits.slice(0, HEX_DIGITS_PER_CHANNEL));
   const greenStart: number = GREEN_START_INDEX * HEX_DIGITS_PER_CHANNEL;
   const blueStart: number = BLUE_START_INDEX * HEX_DIGITS_PER_CHANNEL;
@@ -69,11 +92,11 @@ const getContrastRatio = (hexA: string, hexB: string): number => {
 
 describe('design token contrast', () => {
   const source: string = readFileSync(TOKENS_PATH, 'utf8');
-  const requireToken = (name: string): string => {
-    const value: string | undefined = getScssTokenValue(source, name);
+  const requireToken = (tokenName: string): string => {
+    const value: string | undefined = getScssTokenValue(source, tokenName);
 
     if (!value) {
-      throw new Error(`Token ${name} is missing`);
+      throw new Error(`Token ${tokenName} is missing`);
     }
 
     return value;
@@ -95,6 +118,18 @@ describe('design token contrast', () => {
     const mutedHex: string = getScssTokenValue(source, MUTED_STRONG_TOKEN) ?? requireToken(MUTED_TOKEN);
 
     expect(getContrastRatio(mutedHex, requireToken(surfaceToken))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+  });
+
+  it.each([BG_TOKEN, BED_TOKEN])('keeps the muted text readable on %s', (surfaceToken: string) => {
+    expect(getContrastRatio(requireToken(MUTED_TOKEN), requireToken(surfaceToken))).toBeGreaterThanOrEqual(
+      MIN_TEXT_CONTRAST,
+    );
+  });
+
+  it.each([BG_TOKEN, ...SURFACE_TOKENS])('keeps the focus ring visible on %s', (surfaceToken: string) => {
+    expect(getContrastRatio(requireToken(FOCUS_RING_TOKEN), requireToken(surfaceToken))).toBeGreaterThanOrEqual(
+      MIN_FOCUS_RING_CONTRAST,
+    );
   });
 
   it.each(DANGER_BUTTON_TOKENS)('keeps the text readable on %s', (buttonToken: string) => {
@@ -119,5 +154,43 @@ describe('design token contrast', () => {
     expect(getContrastRatio(DARK_TEXT_ON_ACCENT, requireToken(ACCENT_BUTTON_TOKEN))).toBeGreaterThanOrEqual(
       MIN_TEXT_CONTRAST,
     );
+  });
+
+  it('keeps the text of a disabled control readable on its fill', () => {
+    expect(getContrastRatio(requireToken(DISABLED_TEXT_TOKEN), requireToken(DISABLED_BG_TOKEN))).toBeGreaterThanOrEqual(
+      MIN_TEXT_CONTRAST,
+    );
+  });
+
+  it('draws a disabled control fainter than an enabled one, with a quieter border and dimmer text', () => {
+    const disabledBorderContrast: number =
+      getContrastRatio(requireToken(DISABLED_BORDER_TOKEN), requireToken(DISABLED_BG_TOKEN));
+    const enabledBorderContrast: number =
+      getContrastRatio(requireToken(ENABLED_BORDER_TOKEN), requireToken(ENABLED_BUTTON_BG_TOKEN));
+    const disabledTextContrast: number =
+      getContrastRatio(requireToken(DISABLED_TEXT_TOKEN), requireToken(DISABLED_BG_TOKEN));
+    const enabledTextContrast: number =
+      getContrastRatio(requireToken(TEXT_TOKEN), requireToken(ENABLED_BUTTON_BG_TOKEN));
+
+    expect(disabledBorderContrast).toBeLessThan(enabledBorderContrast);
+    expect(disabledTextContrast).toBeLessThan(enabledTextContrast);
+  });
+
+  it('keeps black artwork clearly visible on the bed surface', () => {
+    expect(getContrastRatio(BLACK_ARTWORK, requireToken(BED_SURFACE_TOKEN))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+  });
+
+  it.each(BED_TONE_PREFIXES)('keeps the marks and text of %s readable on its bed', (tonePrefix: BedTonePrefix) => {
+    for (const tokenName of BED_TEXT_TOKEN_NAMES) {
+      expect(getContrastRatio(requireToken(tonePrefix + tokenName), BED_SURFACE_OF_TONE[tonePrefix]))
+        .toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+    }
+  });
+
+  it.each(BED_TONE_PREFIXES)('keeps the markers of %s visible on its bed', (tonePrefix: BedTonePrefix) => {
+    for (const tokenName of BED_MARKER_TOKEN_NAMES) {
+      expect(getContrastRatio(requireToken(tonePrefix + tokenName), BED_SURFACE_OF_TONE[tonePrefix]))
+        .toBeGreaterThanOrEqual(MIN_GRAPHIC_CONTRAST);
+    }
   });
 });

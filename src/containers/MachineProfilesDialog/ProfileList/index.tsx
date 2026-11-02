@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Menu, Popconfirm, Tag } from 'antd';
+import { Button, Menu, Popconfirm, Tag, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_MENU_MODE_INLINE } from '../../../utils/antd.constants';
@@ -30,6 +30,9 @@ export const ProfileList = (props: ProfileListProps): ReactNode => {
     profiles.find((profile: MachineProfile): boolean => profile.id === editedProfileId);
   const isEditedProfileStored: boolean = !!editedStoredProfile;
   const canSetEditedProfileActive: boolean = isEditedProfileStored && editedProfileId !== activeProfileId;
+  // The last profile stays: without one the bed size and the G-code export have nothing to work from.
+  const isOnlyProfile: boolean = profiles.length <= 1;
+  const canDeleteEditedProfile: boolean = isEditedProfileStored && !isOnlyProfile;
   const menuItems: ProfileMenuItems = profiles.map((profile: MachineProfile) => ({
     key: profile.id,
     label: (
@@ -43,6 +46,7 @@ export const ProfileList = (props: ProfileListProps): ReactNode => {
   return (
     <div className={styles.profileList}>
       <Menu
+        className={styles.profileMenu}
         mode={ANTD_MENU_MODE_INLINE}
         items={menuItems}
         selectedKeys={[editedProfileId]}
@@ -59,10 +63,15 @@ export const ProfileList = (props: ProfileListProps): ReactNode => {
           okText={t(DEFAULT.MACHINE_PROFILES_DELETE_OK)}
           cancelText={t(DEFAULT.MACHINE_PROFILES_DELETE_CANCEL)}
           okButtonProps={{ danger: true }}
-          disabled={!isEditedProfileStored}
+          disabled={!canDeleteEditedProfile}
           onConfirm={() => onDelete(editedProfileId)}
         >
-          <Button danger disabled={!isEditedProfileStored}>{t(DEFAULT.MACHINE_PROFILES_DELETE)}</Button>
+          <Tooltip title={isOnlyProfile ? t(DEFAULT.MACHINE_PROFILES_DELETE_LAST_HINT) : undefined}>
+            {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}
+            <span className={styles.deleteButtonWrapper}>
+              <Button danger disabled={!canDeleteEditedProfile}>{t(DEFAULT.MACHINE_PROFILES_DELETE)}</Button>
+            </span>
+          </Tooltip>
         </Popconfirm>
       </div>
     </div>
