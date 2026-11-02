@@ -39,7 +39,16 @@ export const SVG_DRAWN_ELEMENT = {
 } as const;
 
 export const SVG_DRAWN_ELEMENT_NAMES: readonly string[] = Object.values(SVG_DRAWN_ELEMENT);
-export const SVG_NOT_RENDERED_ANCESTOR_SELECTOR = 'defs, clipPath, mask, pattern, marker, symbol';
+/** Containers whose content is only drawn by reference, never where it stands. */
+export const SVG_NOT_RENDERED_CONTAINER_NAMES: ReadonlySet<string> = new Set([
+  'defs',
+  'clipPath',
+  'mask',
+  'pattern',
+  'marker',
+  'symbol',
+]);
+export const SVG_NOT_RENDERED_ANCESTOR_SELECTOR: string = Array.from(SVG_NOT_RENDERED_CONTAINER_NAMES).join(', ');
 
 export const SVG_ID_ATTRIBUTE_NAME = 'id';
 export const SVG_GRADIENT_DEFAULT_LINEAR_END_X = 1;
@@ -56,6 +65,7 @@ export const SVG_GRADIENT_ATTRIBUTE = {
   R: 'r',
 } as const;
 export const SVG_GRADIENT_UNITS_ATTRIBUTE_NAME = 'gradientUnits';
+export const SVG_GRADIENT_TRANSFORM_ATTRIBUTE_NAME = 'gradientTransform';
 export const SVG_OFFSET_ATTRIBUTE_NAME = 'offset';
 
 export const SVG_PROPERTY = {
@@ -70,7 +80,19 @@ export const SVG_PROPERTY = {
   STOP_COLOR: 'stop-color',
   STOP_OPACITY: 'stop-opacity',
   COLOR: 'color',
+  CLIP_PATH: 'clip-path',
+  FILL_RULE: 'fill-rule',
+  MASK: 'mask',
 } as const;
+
+export const SVG_FILL_RULE = {
+  NONZERO: 'nonzero',
+  EVENODD: 'evenodd',
+} as const;
+
+export type SvgFillRule = (typeof SVG_FILL_RULE)[keyof typeof SVG_FILL_RULE];
+
+export const SVG_FILL_RULES: readonly string[] = Object.values(SVG_FILL_RULE);
 
 export const SVG_PAINT_NONE = 'none';
 export const SVG_DISPLAY_NONE = 'none';
@@ -117,4 +139,5 @@ export const SVG_ROOT_DEFAULT_STYLE: SvgResolvedStyle = {
   isVisible: true,
   stopColour: SVG_DEFAULT_STOP_COLOUR,
   stopOpacity: SVG_DEFAULT_OPACITY,
+  fillRule: SVG_FILL_RULE.NONZERO,
 };

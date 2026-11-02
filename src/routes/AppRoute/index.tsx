@@ -15,6 +15,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { BedPanel } from '../../containers/BedPanel';
 import { DesignPanel } from '../../containers/DesignPanel';
+import { GcodeExportConfirmDialog } from '../../containers/GcodeExportConfirmDialog';
 import { HistoryHotkeys } from '../../containers/HistoryHotkeys';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
 import { MachinePanel } from '../../containers/MachinePanel';
@@ -46,6 +47,7 @@ export const AppRoute = (): ReactNode => {
         <StopHotkey />
         <HistoryHotkeys />
         <SaveHotkey />
+        <GcodeExportConfirmDialog />
       </Layout>
     </BedRegionHostContext>
   );

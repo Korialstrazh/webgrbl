@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { all, fork } from 'redux-saga/effects';
+import type { ToolpathWorkerClient } from '../toolpath/interfaces/ToolpathWorkerClient';
 import { watchOnlineStatus } from './browser.environment.state';
 import { watchGrblController } from './grbl.controller.saga';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
@@ -17,8 +18,12 @@ import { watchMachineProfiles } from './machine.profile.saga';
 import { watchPalette } from './palette.saga';
 import { watchProjects } from './project.saga';
 import { watchInfoToastExpiry } from './toast.state';
+import { watchToolpath } from './toolpath.saga';
 
-export function* rootSaga(grblControllerSagaDependencies: GrblControllerSagaDependencies): Generator {
+export function* rootSaga(
+  grblControllerSagaDependencies: GrblControllerSagaDependencies,
+  toolpathWorkerClient: ToolpathWorkerClient,
+): Generator {
   yield all([
     fork(watchOnlineStatus),
     fork(watchInfoToastExpiry),
@@ -27,5 +32,6 @@ export function* rootSaga(grblControllerSagaDependencies: GrblControllerSagaDepe
     fork(watchLaserPointer),
     fork(watchProjects),
     fork(watchGrblController, grblControllerSagaDependencies),
+    fork(watchToolpath, toolpathWorkerClient),
   ]);
 }

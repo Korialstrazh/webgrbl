@@ -36,8 +36,8 @@ import type { LayerSettingsChangedPayload } from './interfaces/LayerSettingsChan
 import type { LayerToggledPayload } from './interfaces/LayerToggledPayload';
 import type { ProjectDocumentPayload } from './interfaces/ProjectDocumentPayload';
 import type { ProjectObjectIdsPayload } from './interfaces/ProjectObjectIdsPayload';
-import type { ProjectObjectsPayload } from './interfaces/ProjectObjectsPayload';
 import type { ProjectObjectTransformsPayload } from './interfaces/ProjectObjectTransformsPayload';
+import type { ProjectObjectsPayload } from './interfaces/ProjectObjectsPayload';
 import type { SvgFilesPayload } from './interfaces/SvgFilesPayload';
 
 // #region State
@@ -280,6 +280,13 @@ export const selectProjectLayers = createSelector(
       .filter((layer: ProjectLayer): boolean => usedLayerKeys.has(getLayerKey(layer)))
       .sort((firstLayer: ProjectLayer, secondLayer: ProjectLayer): number => firstLayer.order - secondLayer.order);
   },
+);
+
+/** The layers that at least one object draws with and that are sent to the laser, in burn order. */
+export const selectEnabledProjectLayers = createSelector(
+  [selectProjectLayers],
+  (projectLayers: ProjectLayer[]): ProjectLayer[] =>
+    projectLayers.filter((layer: ProjectLayer): boolean => layer.enabled),
 );
 
 export const selectCanUndo = (state: RootState): boolean => !!state[PROJECT_DOCUMENT_STATE_NAME].past.length;

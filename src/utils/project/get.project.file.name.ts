@@ -9,16 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import {
-  PROJECT_FILE_EXTENSION,
-  PROJECT_FILE_FALLBACK_BASE_NAME,
-  PROJECT_FILE_NAME_FORBIDDEN_CHARACTERS,
-} from './project.constants';
+import { getProjectFileBaseName } from './get.project.file.base.name';
+import { PROJECT_FILE_EXTENSION } from './project.constants';
 
-const NO_CHARACTER = '';
-
-export const getProjectFileName = (projectName: string): string => {
-  const allowedBaseName: string = projectName.replace(PROJECT_FILE_NAME_FORBIDDEN_CHARACTERS, NO_CHARACTER).trim();
-
-  return (allowedBaseName || PROJECT_FILE_FALLBACK_BASE_NAME) + PROJECT_FILE_EXTENSION;
-};
+export const getProjectFileName = (projectName: string): string =>
+  getProjectFileBaseName(projectName) + PROJECT_FILE_EXTENSION;

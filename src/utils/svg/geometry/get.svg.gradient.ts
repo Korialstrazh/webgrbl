@@ -10,72 +10,25 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { getSvgFraction } from './get.svg.fraction';
+import { getSvgGradientChain } from './get.svg.gradient.chain';
+import { getSvgGradientChainAttribute } from './get.svg.gradient.chain.attribute';
 import { getSvgNumber } from './get.svg.number';
 import type { SvgGradientStop } from './interfaces/SvgGradientStop';
 import type { SvgGreyGradient } from './interfaces/SvgGreyGradient';
 import type { SvgResolvedStyle } from './interfaces/SvgResolvedStyle';
-import { SVG_HREF_ATTRIBUTE_NAME, SVG_SAME_DOCUMENT_REFERENCE_PREFIX, XLINK_NAMESPACE_URI } from '../svg.constants';
 import {
   SVG_GRADIENT_ATTRIBUTE,
-  SVG_GRADIENT_CHAIN_LIMIT,
   SVG_GRADIENT_DEFAULT_CENTRE,
   SVG_GRADIENT_DEFAULT_LINEAR_END_X,
   SVG_GRADIENT_DEFAULT_RADIUS,
   SVG_GRADIENT_KIND,
   SVG_GRADIENT_UNITS,
   SVG_GRADIENT_UNITS_ATTRIBUTE_NAME,
-  SVG_LINEAR_GRADIENT_ELEMENT_NAME,
   SVG_OFFSET_ATTRIBUTE_NAME,
-  SVG_PAINT_URL_PATTERN,
   SVG_RADIAL_GRADIENT_ELEMENT_NAME,
   SVG_STOP_ELEMENT_NAME,
 } from './svg.geometry.constants';
 import type { SvgGradientUnits } from './svg.geometry.constants';
-
-const isGradientElement = (element: Element): boolean =>
-  element.localName === SVG_LINEAR_GRADIENT_ELEMENT_NAME || element.localName === SVG_RADIAL_GRADIENT_ELEMENT_NAME;
-
-const getReferencedGradient = (gradientElement: Element, elementsById: Map<string, Element>): Element | undefined => {
-  const reference: string | null =
-    gradientElement.getAttribute(SVG_HREF_ATTRIBUTE_NAME) ??
-    gradientElement.getAttributeNS(XLINK_NAMESPACE_URI, SVG_HREF_ATTRIBUTE_NAME);
-
-  if (!reference?.startsWith(SVG_SAME_DOCUMENT_REFERENCE_PREFIX)) {
-    return undefined;
-  }
-
-  const referencedElement: Element | undefined = elementsById.get(reference.slice(1));
-
-  return referencedElement && isGradientElement(referencedElement) ? referencedElement : undefined;
-};
-
-const getGradientChain = (firstGradient: Element, elementsById: Map<string, Element>): Element[] => {
-  const chain: Element[] = [firstGradient];
-
-  while (chain.length < SVG_GRADIENT_CHAIN_LIMIT) {
-    const nextGradient: Element | undefined = getReferencedGradient(chain.at(-1) ?? firstGradient, elementsById);
-
-    if (!nextGradient || chain.includes(nextGradient)) {
-      break;
-    }
-
-    chain.push(nextGradient);
-  }
-
-  return chain;
-};
-
-const getChainAttribute = (chain: Element[], attributeName: string): string | undefined => {
-  for (const gradientElement of chain) {
-    const attributeValue: string | null = gradientElement.getAttribute(attributeName);
-
-    if (attributeValue) {
-      return attributeValue;
-    }
-  }
-
-  return undefined;
-};
 
 const getChainStops = (
   chain: Element[],
@@ -105,26 +58,25 @@ const getChainStops = (
 };
 
 const getChainUnits = (chain: Element[]): SvgGradientUnits =>
-  getChainAttribute(chain, SVG_GRADIENT_UNITS_ATTRIBUTE_NAME) === SVG_GRADIENT_UNITS.USER_SPACE_ON_USE
+  getSvgGradientChainAttribute(chain, SVG_GRADIENT_UNITS_ATTRIBUTE_NAME) === SVG_GRADIENT_UNITS.USER_SPACE_ON_USE
     ? SVG_GRADIENT_UNITS.USER_SPACE_ON_USE
     : SVG_GRADIENT_UNITS.OBJECT_BOUNDING_BOX;
 
 const getChainNumber = (chain: Element[], attributeName: string, fallback: number): number =>
-  getSvgNumber(getChainAttribute(chain, attributeName), fallback);
+  getSvgNumber(getSvgGradientChainAttribute(chain, attributeName), fallback);
 
 export const getSvgGradient = (
   paintValue: string,
   elementsById: Map<string, Element>,
   resolvedStyles: Map<Element, SvgResolvedStyle>,
 ): SvgGreyGradient | undefined => {
-  const urlMatch: RegExpMatchArray | null = paintValue.match(SVG_PAINT_URL_PATTERN);
-  const gradientElement: Element | undefined = urlMatch ? elementsById.get(urlMatch[1] ?? '') : undefined;
+  const chain: Element[] = getSvgGradientChain(paintValue, elementsById);
+  const [gradientElement] = chain;
 
-  if (!gradientElement || !isGradientElement(gradientElement)) {
+  if (!gradientElement) {
     return undefined;
   }
 
-  const chain: Element[] = getGradientChain(gradientElement, elementsById);
   const stops: SvgGradientStop[] = getChainStops(chain, resolvedStyles);
   const units: SvgGradientUnits = getChainUnits(chain);
 

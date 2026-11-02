@@ -15,6 +15,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { configDefaults } from 'vitest/config';
+import packageManifest from './package.json' with { type: 'json' };
 
 const APP_NAME = 'webgrbl';
 const APP_DESCRIPTION = 'Control a GRBL laser cutter or engraver straight from the browser.';
@@ -38,6 +39,10 @@ const ANTD_RC_CHUNK_PRIORITY = 20;
 const ANTD_CHUNK_PRIORITY = 10;
 
 export default defineConfig({
+  // The app version is read from package.json once, at build time, and written into the code as a text constant.
+  define: {
+    __APP_VERSION__: JSON.stringify(packageManifest.version),
+  },
   build: {
     rolldownOptions: {
       output: {

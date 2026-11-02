@@ -1,6 +1,7 @@
-import { getResolvedSvgStyles } from './resolve.svg.styles';
-import type { SvgResolvedStyle } from './interfaces/SvgResolvedStyle';
 import { SVG_MIME_TYPE, SVG_NAMESPACE_URI } from '../svg.constants';
+import type { SvgResolvedStyle } from './interfaces/SvgResolvedStyle';
+import { getResolvedSvgStyles } from './resolve.svg.styles';
+import { SVG_FILL_RULE } from './svg.geometry.constants';
 
 const RED = '#ff0000';
 const BLUE = '#0000ff';
@@ -76,5 +77,17 @@ describe(getResolvedSvgStyles.name, () => {
 
   it('keeps a stroke width of 0', () => {
     expect(getStyleOfChild(`<rect id="${CHILD_ID}" stroke-width="0"/>`)?.strokeWidth).toBe(0);
+  });
+
+  it('resolves the inherited fill rule from attribute, style attribute and style rule, nonzero by default', () => {
+    expect(getStyleOfChild(`<rect id="${CHILD_ID}"/>`)?.fillRule).toBe(SVG_FILL_RULE.NONZERO);
+    expect(getStyleOfChild(`<g fill-rule="evenodd"><rect id="${CHILD_ID}"/></g>`)?.fillRule)
+      .toBe(SVG_FILL_RULE.EVENODD);
+    expect(getStyleOfChild(`<g style="fill-rule: evenodd"><rect id="${CHILD_ID}"/></g>`)?.fillRule)
+      .toBe(SVG_FILL_RULE.EVENODD);
+    expect(getStyleOfChild(`<style>.holes{fill-rule:evenodd}</style><rect class="holes" id="${CHILD_ID}"/>`)?.fillRule)
+      .toBe(SVG_FILL_RULE.EVENODD);
+    expect(getStyleOfChild(`<g fill-rule="evenodd"><rect fill-rule="nonzero" id="${CHILD_ID}"/></g>`)?.fillRule)
+      .toBe(SVG_FILL_RULE.NONZERO);
   });
 });

@@ -9,6 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { SvgAspectRatioFit } from './interfaces/SvgAspectRatioFit';
+
 export const SVG_LENGTH_UNIT = {
   MILLIMETRE: 'mm',
   CENTIMETRE: 'cm',
@@ -113,6 +115,28 @@ export const SVG_ALL_ELEMENTS_SELECTOR = '*';
 export const SVG_WIDTH_ATTRIBUTE = 'width';
 export const SVG_HEIGHT_ATTRIBUTE = 'height';
 export const SVG_VIEW_BOX_ATTRIBUTE = 'viewBox';
+export const SVG_PRESERVE_ASPECT_RATIO_ATTRIBUTE = 'preserveAspectRatio';
+/** Groups: the alignment (none or xMinYMin to xMaxYMax), its x part, its y part, then meet or slice. */
+export const SVG_PRESERVE_ASPECT_RATIO_PATTERN =
+  /^\s*(?:defer\s+)?(none|x(Min|Mid|Max)Y(Min|Mid|Max))(?:\s+(meet|slice))?\s*$/;
+export const SVG_ASPECT_RATIO_ALIGN_NONE = 'none';
+export const SVG_ASPECT_RATIO_SLICE = 'slice';
+/** Where each alignment keyword puts the content in the spare room of its axis. */
+export const SVG_ASPECT_RATIO_ALIGN_FRACTIONS: Readonly<Record<string, number>> = { Min: 0, Mid: 0.5, Max: 1 };
+/** preserveAspectRatio none: each axis stretched on its own to fill the viewport. */
+export const SVG_STRETCH_ASPECT_RATIO_FIT: SvgAspectRatioFit = {
+  isUniform: false,
+  isSlice: false,
+  alignX: 0,
+  alignY: 0,
+};
+/** The fit of a root without preserveAspectRatio: xMidYMid meet. */
+export const SVG_DEFAULT_ASPECT_RATIO_FIT: SvgAspectRatioFit = {
+  isUniform: true,
+  isSlice: false,
+  alignX: 0.5,
+  alignY: 0.5,
+};
 export const SVG_HREF_ATTRIBUTE_NAME = 'href';
 export const SVG_EVENT_ATTRIBUTE_PREFIX = 'on';
 export const SVG_JAVASCRIPT_URL_PREFIX = 'javascript:';
@@ -125,6 +149,8 @@ export const SVG_IMPORT_RULE_PATTERN = /@import/i;
 export const SVG_CSS_ESCAPE_OR_IMAGE_FUNCTION_PATTERN = /\\|(?:image-set|image|src)\(/i;
 export const SVG_REMOTE_URL_PATTERN = /url\(\s*["']?\s*(?![\s"']|data:|#)/i;
 export const SVG_VIEW_BOX_VALUE_COUNT = 4;
+export const SVG_VIEW_BOX_MIN_X_INDEX = 0;
+export const SVG_VIEW_BOX_MIN_Y_INDEX = 1;
 export const SVG_VIEW_BOX_WIDTH_INDEX = 2;
 export const SVG_VIEW_BOX_HEIGHT_INDEX = 3;
 

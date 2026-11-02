@@ -1,8 +1,9 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { TopBar } from '.';
 import { ENTER_KEY, ESCAPE_KEY, UNDO_KEY } from '../../utils/browser/browser.events.constants';
+import * as downloadModule from '../../utils/browser/download.text.file';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import { PROJECT_FILE_MIME_TYPE } from '../../utils/project/project.constants';
@@ -32,6 +33,8 @@ import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
+import { newGcodeExportTestStore } from '../../utils/test.support/new.gcode.export.test.store';
+import { GcodeExportConfirmDialog } from '../GcodeExportConfirmDialog';
 import { HistoryHotkeys } from '../HistoryHotkeys';
 import { PROJECT_FILE_PICKER_ACCEPT } from '../ProjectFileInput/project.file.input.constants';
 import { StopHotkey } from '../StopHotkey';
@@ -67,6 +70,11 @@ const SAVING_TEXT = 'Saving\u2026';
 const NOT_SAVED_TEXT = 'Not saved';
 const UNTITLED_PROJECT_NAME = 'Untitled project';
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
+const ARIA_DISABLED_TRUE = 'true';
+const GCODE_WARNINGS_DIALOG_LABEL = 'Export G-code with warnings?';
+const CANCEL_LABEL = 'Cancel';
+const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
+  + '<rect fill="none" stroke="#ff0000" width="10" height="10"/><text x="1" y="5">Hi</text></svg>';
 
 const openProject = (store: AppStore): void => {
   act(() => {
@@ -86,6 +94,7 @@ const renderWorkbenchTopBar = (store: AppStore): void => {
           <TopBar />
           <StopHotkey />
           <HistoryHotkeys />
+          <GcodeExportConfirmDialog />
         </BedRegionTestHost>
       </AntdTestProvider>
     </Provider>,
@@ -93,6 +102,10 @@ const renderWorkbenchTopBar = (store: AppStore): void => {
 };
 
 describe(TopBar.name, () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('shows the app name, the autosave readout and the connection pill', () => {
     render(
       <Provider store={newStore()}>
@@ -251,14 +264,51 @@ describe(TopBar.name, () => {
       expect(getDispatchedActionCalls(dispatchSpy, ProjectFileExportRequested)).toHaveLength(1);
     });
 
-    it('keeps Export G-code disabled', () => {
-      renderWorkbenchTopBar(newStore());
+    it('disables Export G-code with every layer off', async () => {
+      renderWorkbenchTopBar(await newGcodeExportTestStore({ areLayersEnabled: false }));
       openProjectMenu();
 
       expect(screen.getByRole('menuitem', { name: EXPORT_GCODE_PATTERN })).toHaveAttribute(
         ARIA_DISABLED_ATTRIBUTE,
-        'true',
+        ARIA_DISABLED_TRUE,
       );
+    });
+
+    it('disables Export G-code without an active machine profile', async () => {
+      renderWorkbenchTopBar(await newGcodeExportTestStore({ activeProfile: undefined }));
+      openProjectMenu();
+
+      expect(screen.getByRole('menuitem', { name: EXPORT_GCODE_PATTERN })).toHaveAttribute(
+        ARIA_DISABLED_ATTRIBUTE,
+        ARIA_DISABLED_TRUE,
+      );
+    });
+
+    it('downloads the G-code from Export G-code', async () => {
+      const downloadSpy = vi.spyOn(downloadModule, 'downloadTextFile').mockImplementation(() => undefined);
+
+      renderWorkbenchTopBar(await newGcodeExportTestStore());
+      openProjectMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: EXPORT_GCODE_PATTERN }));
+
+      await vi.waitFor((): void => {
+        expect(downloadSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('asks first when the design has text, and Cancel downloads nothing', async () => {
+      const downloadSpy = vi.spyOn(downloadModule, 'downloadTextFile').mockImplementation(() => undefined);
+
+      renderWorkbenchTopBar(await newGcodeExportTestStore({
+        objects: [newProjectObject({ svgText: TEXT_SVG_TEXT })],
+      }));
+      openProjectMenu();
+      fireEvent.click(screen.getByRole('menuitem', { name: EXPORT_GCODE_PATTERN }));
+      fireEvent.click(within(await screen.findByRole('dialog', { name: GCODE_WARNINGS_DIALOG_LABEL }))
+        .getByRole('button', { name: CANCEL_LABEL }));
+
+      expect(screen.queryByRole('dialog', { name: GCODE_WARNINGS_DIALOG_LABEL })).not.toBeInTheDocument();
+      expect(downloadSpy).not.toHaveBeenCalled();
     });
 
     it('opens the Open project dialog as a registered overlay', () => {

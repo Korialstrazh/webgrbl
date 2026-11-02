@@ -1,6 +1,6 @@
 /**
- * The Project menu of the top bar: new project, the Open dialog, save, save as file, open file and the Export G-code
- * entry that is not built yet. Open file uses a hidden file input.
+ * The Project menu of the top bar: new project, the Open dialog, save, save as file, open file and Export G-code.
+ * Open file uses a hidden file input.
  *
  * @author michael.morosov
  *
@@ -16,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { ANTD_BUTTON_TYPE_TEXT, ANTD_DROPDOWN_TRIGGER_CLICK } from '../../../utils/antd.constants';
 import { DROPDOWN_CARET } from '../../../utils/characters.constants';
+import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
+import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import {
@@ -23,6 +25,7 @@ import {
   ProjectFileExportRequested,
   ProjectSaveRequested,
 } from '../../../utils/states/project.state';
+import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
 import { OpenProjectDialog } from '../../OpenProjectDialog';
 import { ProjectFileInput } from '../../ProjectFileInput';
 import type { ProjectMenuClickInfo } from '../interfaces/ProjectMenuClickInfo';
@@ -35,6 +38,7 @@ export const ProjectMenu = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const fileInputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
   const [isOpenDialogShown, setIsOpenDialogShown] = useState<boolean>(false);
+  const gcodeExport: GcodeExportAvailability = useGcodeExportAvailability();
 
   const handleMenuClick = ({ key }: ProjectMenuClickInfo): void => {
     switch (key) {
@@ -53,6 +57,9 @@ export const ProjectMenu = (): ReactNode => {
     case PROJECT_MENU_KEY.OPEN_FILE:
       fileInputRef.current?.click();
       break;
+    case PROJECT_MENU_KEY.EXPORT_GCODE:
+      dispatch(new GcodeExportRequested({ isWarningConfirmed: false }));
+      break;
     default:
       break;
     }
@@ -62,7 +69,7 @@ export const ProjectMenu = (): ReactNode => {
     <>
       <Dropdown
         trigger={ANTD_DROPDOWN_TRIGGER_CLICK}
-        menu={{ items: getProjectMenuItems(t), onClick: handleMenuClick }}
+        menu={{ items: getProjectMenuItems(t, gcodeExport), onClick: handleMenuClick }}
       >
         <Button type={ANTD_BUTTON_TYPE_TEXT}>
           {t(DEFAULT.TOP_BAR_MENU_PROJECT)}

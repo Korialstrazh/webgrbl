@@ -1,8 +1,8 @@
-import type { SvgPaint } from './interfaces/SvgPaint';
+import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 import { getSvgPaints } from './get.svg.paints';
 import type { SvgGradientStop } from './interfaces/SvgGradientStop';
+import type { SvgPaint } from './interfaces/SvgPaint';
 import { SVG_GRADIENT_KIND, SVG_INHERIT_KEYWORD, SVG_UNSET_KEYWORD } from './svg.geometry.constants';
-import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 
 const RED = '#ff0000';
 const BLUE = '#0000ff';
@@ -201,5 +201,12 @@ describe(getSvgPaints.name, () => {
 
   it('gives no paints for text that is not an svg', () => {
     expect(getSvgPaints('<not-xml')).toEqual([]);
+  });
+  it('finds the colour a use gives to the shape it draws', () => {
+    const paints: SvgPaint[] = getSvgPaints(
+      getSvgText(`<defs><rect id="a" width="1" height="1"/></defs><use href="#a" fill="${BLUE}"/>`),
+    );
+
+    expect(getColours(paints)).toEqual([BLUE]);
   });
 });
