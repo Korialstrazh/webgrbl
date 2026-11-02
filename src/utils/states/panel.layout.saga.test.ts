@@ -111,6 +111,27 @@ describe(watchPanelLayout.name, () => {
     });
   });
 
+  it('keeps and stores a resize made while the stored sizes are still loading', async () => {
+    await PANEL_SIZES_REPOSITORY.setPanelSizePercents(STORED_PERCENTS);
+    let finishRead: (panelSizePercents: number[]) => void = () => undefined;
+    vi.spyOn(PANEL_SIZES_REPOSITORY, 'getPanelSizePercents').mockImplementation(() => new Promise<number[]>(
+      (resolve: (panelSizePercents: number[]) => void) => {
+        finishRead = resolve;
+      },
+    ));
+    const store: AppStore = newStore();
+
+    store.dispatch(new PanelSizesResized({ panelSizePercents: RESIZED_PERCENTS }));
+    finishRead(STORED_PERCENTS);
+    await waitForPanelLayout(store);
+
+    expect(selectPanelSizePercents(store.getState())).toEqual(RESIZED_PERCENTS);
+    vi.mocked(PANEL_SIZES_REPOSITORY.getPanelSizePercents).mockRestore();
+    await vi.waitFor(async (): Promise<void> => {
+      expect(await PANEL_SIZES_REPOSITORY.getPanelSizePercents()).toEqual(RESIZED_PERCENTS);
+    });
+  });
+
   it('keeps the resized sizes and logs when storing them fails', async () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     vi.spyOn(PANEL_SIZES_REPOSITORY, 'setPanelSizePercents').mockRejectedValue(new Error('quota'));
