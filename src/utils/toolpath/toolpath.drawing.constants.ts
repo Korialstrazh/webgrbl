@@ -43,6 +43,7 @@ export const TOOLPATH_PATH_COORDINATE_DECIMALS = 3;
 export const TOOLPATH_PATH_LENGTH_EPSILON_MM = 1e-9;
 export const SVG_PATH_MOVE_TO = 'M';
 export const SVG_PATH_LINE_TO = 'L';
+export const SVG_PATH_CLOSE = 'Z';
 export const SVG_PATH_COORDINATE_SEPARATOR = ' ';
 /** Joins a layer key and a power band into the key of one burn path group. */
 export const TOOLPATH_PATH_KEY_SEPARATOR = ':';

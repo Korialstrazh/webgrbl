@@ -2,6 +2,12 @@
   cursor: move;
 }
 
+// The whole box takes the presses of an object drawn as outlines, as the artwork image does for a filled one.
+.hitArea {
+  fill: transparent;
+  pointer-events: all;
+}
+
 .outsideOutline,
 .selectionBox,
 .selectionHandle,
