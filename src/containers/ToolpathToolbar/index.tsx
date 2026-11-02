@@ -1,6 +1,6 @@
 /**
- * The Toolpath view part of the bed toolbar: the colour switch (Power shading or By layer), the travel moves switch,
- * and on the right the job size and estimate of the ready toolpath.
+ * The Toolpath view group of the bed header: the colour switch (Power shading or By layer) and the travel moves switch.
+ * The job size and time of the ready toolpath sit in the playback bar.
  *
  * @author michael.morosov
  *
@@ -12,13 +12,8 @@
 import { Segmented, Switch } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { ANTD_SWITCH_SIZE_SMALL } from '../../utils/antd.constants';
+import { ANTD_SEGMENTED_SIZE_SMALL, ANTD_SWITCH_SIZE_SMALL } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { selectToolpath } from '../../utils/states/toolpath.state';
-import { selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
-import { getJobSummaryText } from '../../utils/toolpath/get.job.summary.text';
-import type { Toolpath } from '../../utils/toolpath/interfaces/Toolpath';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayModeOption } from './interfaces/ToolpathDisplayModeOption';
 import type { ToolpathToolbarProps } from './interfaces/ToolpathToolbarProps';
@@ -32,8 +27,6 @@ export const ToolpathToolbar = ({
   onTravelShownChange,
 }: ToolpathToolbarProps): ReactNode => {
   const { t } = useTranslation();
-  const toolpath: Toolpath | undefined = useSelector(selectToolpath);
-  const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
 
   return (
     <div className={styles.toolpathToolbar}>
@@ -43,6 +36,7 @@ export const ToolpathToolbar = ({
           value: option.value,
           label: t(option.labelKey),
         }))}
+        size={ANTD_SEGMENTED_SIZE_SMALL}
         value={displayMode}
         onChange={onDisplayModeChange}
       />
@@ -50,10 +44,6 @@ export const ToolpathToolbar = ({
         <Switch size={ANTD_SWITCH_SIZE_SMALL} checked={isTravelShown} onChange={onTravelShownChange} />
         {t(DEFAULT.TOOLPATH_SHOW_TRAVEL)}
       </label>
-      {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
-      {totalTimeS !== undefined && (
-        <span className={styles.jobSummary}>{getJobSummaryText(t, toolpath?.bounds, totalTimeS)}</span>
-      )}
     </div>
   );
 };

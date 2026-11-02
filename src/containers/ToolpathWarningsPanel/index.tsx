@@ -1,6 +1,7 @@
 /**
- * A small panel in the Toolpath view that lists what the ready toolpath leaves out: each affected object with the
- * text of its warning. Nothing is shown while there is no ready toolpath or it has no warnings.
+ * A small panel in the Toolpath view that lists what the ready toolpath leaves out: a closed chip with the count, which
+ * opens to each affected object with the text of its warning. Nothing is shown while there is no ready toolpath or it
+ * has no warnings.
  *
  * @author michael.morosov
  *
@@ -37,16 +38,22 @@ export const ToolpathWarningsPanel = (): ReactNode => {
 
   return (
     <section className={styles.warningsPanel} aria-label={t(DEFAULT.TOOLPATH_WARNINGS_TITLE)}>
-      <h3 className={styles.title}>{t(DEFAULT.TOOLPATH_WARNINGS_TITLE)}</h3>
-      {/* A plain list: antd has no lightweight list for a few lines of text. */}
-      <ul className={styles.warningList}>
-        {warningLines.map(({ lineKey, objectName, warningTextKey }: GcodeWarningLine) => (
-          <li key={lineKey}>
-            <strong className={styles.objectName}>{objectName}</strong>
-            <span>{t(warningTextKey)}</span>
-          </li>
-        ))}
-      </ul>
+      {/* A native disclosure: closed it is a small chip, so it does not cover the artwork; antd Collapse brings a
+          bordered card. */}
+      <details className={styles.disclosure}>
+        <summary className={styles.title}>
+          {t(DEFAULT.TOOLPATH_WARNINGS_SUMMARY, { count: warningLines.length })}
+        </summary>
+        {/* A plain list: antd has no lightweight list for a few lines of text. */}
+        <ul className={styles.warningList}>
+          {warningLines.map(({ lineKey, objectName, warningTextKey }: GcodeWarningLine) => (
+            <li key={lineKey}>
+              <strong className={styles.objectName}>{objectName}</strong>
+              <span>{t(warningTextKey)}</span>
+            </li>
+          ))}
+        </ul>
+      </details>
     </section>
   );
 };

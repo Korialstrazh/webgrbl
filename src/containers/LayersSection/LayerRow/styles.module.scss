@@ -1,5 +1,8 @@
+// The handle, the checkbox and the open button side by side; the move buttons float over the right end of the row.
 .row {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-1);
   padding-left: var(--space-1);
@@ -10,18 +13,15 @@
 
 // A decoration only: the Move buttons are the keyboard path.
 .handle {
-  flex-shrink: 0;
   padding: 0 var(--space-1);
   color: var(--color-text-muted);
   cursor: grab;
 }
 
-// The button grows to the row width: the swatch beside the name, the summary and the note below. antd centres a
-// button's content and keeps it on one line, so a narrow panel pushed the content out over the handle and the arrows:
-// start-align it, let the text wrap and keep it inside the button.
+// Two lines in the button: the swatch beside the name on the first, the one-line summary on the second, and the
+// palette note below. antd centres a button's content on one line, so the button is laid out as a start-aligned grid.
 .openButton {
   display: grid;
-  flex: 1;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0 var(--space-2);
   align-items: center;
@@ -31,7 +31,6 @@
   padding: var(--space-2);
   overflow: hidden;
   text-align: left;
-  white-space: normal;
 }
 
 .swatch {
@@ -40,22 +39,56 @@
   height: 1.5rem;
 }
 
-.name {
+.name,
+.summary,
+.note {
+  grid-column: 2;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .summary {
-  grid-column: 2;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--color-text-muted);
-  overflow-wrap: anywhere;
 }
 
 .note {
-  grid-column: 1 / -1;
   font-size: 0.75rem;
   color: var(--color-danger-text);
+}
+
+// Hidden until the row is hovered or holds the focus, so the name and the summary get the whole row width. They stay
+// in the tab order: tabbing onto one shows both.
+.moveButtons {
+  position: absolute;
+  top: 50%;
+  right: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-3);
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.12s;
+}
+
+.row:hover .moveButtons,
+.row:focus-within .moveButtons {
+  opacity: 1;
+}
+
+// A touch screen has no hover, so the buttons get their own column and stay visible.
+@media (hover: none) {
+  .row {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+  }
+
+  .moveButtons {
+    position: static;
+    opacity: 1;
+    transform: none;
+  }
 }

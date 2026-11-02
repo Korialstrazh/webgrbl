@@ -1,9 +1,11 @@
-// One row below the bed that wraps on a narrow window; the slider takes the space the other controls leave.
+// Two rows below the bed: the transport, the timeline, the clock and the speed on the first, the job size and the live
+// head readout on the second. The slider takes the space the other controls leave; a narrow bed wraps the first row.
 .playbackBar {
   display: flex;
+  flex: none;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-4);
+  gap: var(--space-1) var(--space-3);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -24,10 +26,15 @@
 
 .timeline {
   display: flex;
-  flex: 1;
+  flex: 1 1 15rem;
   flex-direction: column;
   gap: var(--space-1);
-  min-width: 12rem;
+  min-width: 10rem;
+}
+
+// antd insets the rail by the handle radius; the layer bar above it uses the same inset, so both strips line up.
+.timeline > :first-child {
+  margin-inline: 0.375rem;
 }
 
 .slider {
@@ -36,6 +43,21 @@
 
 // Fixed-width digits, so the clock does not shift while it counts.
 .clock {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.details {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.jobSize {
   color: var(--color-text-muted);
   font-family: var(--font-mono);
   font-size: 0.8125rem;

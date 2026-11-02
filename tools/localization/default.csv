@@ -308,6 +308,7 @@ PALETTE_TITLE;Palette
 PROJECT_FILE_INPUT;Open a project file
 SIMULATION_BACK_TO_START;Back to start
 SIMULATION_ELAPSED_OF_TOTAL;{{elapsed}} / {{total}}
+SIMULATION_JOB_SIZE;Job {{width}} × {{height}} mm
 SIMULATION_LAYER_BAR_LABEL;Burn time per layer
 SIMULATION_PAUSE;Pause
 SIMULATION_PLAY;Play
@@ -361,12 +362,12 @@ TOOLPATH_ESTIMATE_MINUTES;{{minutes}} min {{seconds}} s
 TOOLPATH_FAILED;The toolpath could not be generated
 TOOLPATH_GENERATE;Generate
 TOOLPATH_GENERATING;Generating… {{percent}} %
-TOOLPATH_JOB_SUMMARY;Job {{width}} × {{height}} mm · est. {{estimate}}
 TOOLPATH_LAYER_LABEL;Toolpath preview
 TOOLPATH_NOT_GENERATED;No toolpath yet
 TOOLPATH_OUT_OF_DATE;Out of date
 TOOLPATH_REGENERATE;Regenerate
 TOOLPATH_SHOW_TRAVEL;Show travel moves
+TOOLPATH_WARNINGS_SUMMARY;Left out of the job ({{count}})
 TOOLPATH_WARNINGS_TITLE;Left out of the job
 TOP_BAR_AUTOSAVE_SAVED;Saved
 TOP_BAR_AUTOSAVE_SAVING;Saving…

@@ -1,11 +1,17 @@
-// Fills the rest of the toolbar row, so the job summary sits at its right end.
+// The Toolpath view controls in the bed header: they keep their width and stay on one line, so on a narrow bed the
+// whole group wraps to a row of its own; a bed narrower still clips the row rather than squeezing the controls.
 .toolpathToolbar {
   display: flex;
-  flex: 1;
-  flex-wrap: wrap;
+  flex: none;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: var(--space-2) var(--space-3);
+  gap: var(--space-3);
   min-width: 0;
+  overflow: hidden;
+
+  > * {
+    flex: none;
+  }
 }
 
 .travelSwitch {
@@ -15,12 +21,6 @@
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.875rem;
+  white-space: nowrap;
   cursor: pointer;
-}
-
-.jobSummary {
-  margin-left: auto;
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
 }

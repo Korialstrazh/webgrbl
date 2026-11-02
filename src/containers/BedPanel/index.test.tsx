@@ -94,7 +94,7 @@ const SIXTY_SIX_SECOND_TOOLPATH: Toolpath = newToolpath({
   layers: [{ layerKey: '#ff0000', firstMoveIndex: 0, lastMoveIndex: 0 }],
   bounds: { minX: 10, minY: 20, maxX: 60, maxY: 50 },
 });
-const JOB_SUMMARY_TEXT = `Job 50.0 ${MULTIPLICATION_SIGN} 30.0 mm ${MIDDLE_DOT} est. 1 min 6 s`;
+const JOB_SIZE_TEXT = `Job 50.0 ${MULTIPLICATION_SIGN} 30.0 mm`;
 const PLAYBACK_BAR_LABEL = 'Simulation playback';
 
 const newPhotoFile = (): File => new File(['png'], PHOTO_FILE_NAME, { type: 'image/png' });
@@ -391,7 +391,7 @@ describe(BedPanel.name, () => {
     expect(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL })).toBeDisabled();
   });
 
-  it('shows the job size and estimate in the toolbar in Toolpath view', () => {
+  it('shows the job size in the playback bar in Toolpath view', () => {
     const store: AppStore = newHeldToolpathStore();
 
     act(() => {
@@ -400,7 +400,18 @@ describe(BedPanel.name, () => {
     renderPanel(store);
     openToolpathView();
 
-    expect(screen.getByText(JOB_SUMMARY_TEXT)).toBeInTheDocument();
+    expect(within(screen.getByRole('group', { name: PLAYBACK_BAR_LABEL })).getByText(JOB_SIZE_TEXT))
+      .toBeInTheDocument();
+  });
+
+  it('hides the editing tools in Toolpath view, where they do nothing', () => {
+    renderPanel(newStore());
+
+    openToolpathView();
+
+    expect(screen.queryByRole('radiogroup', { name: TOOL_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: EDIT_NODES_LABEL, hidden: true })).not.toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: VIEW_MODE_LABEL })).toBeInTheDocument();
   });
 
   it('editing the document in Toolpath view shows the Regenerate banner, hides the toolpath and disables play', () => {
@@ -423,7 +434,7 @@ describe(BedPanel.name, () => {
 
     expect(screen.getByText(OUT_OF_DATE_TEXT)).toBeInTheDocument();
     expect(screen.queryAllByTestId(TOOLPATH_BURN_PATH_TEST_ID)).toEqual([]);
-    expect(screen.queryByText(JOB_SUMMARY_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByText(JOB_SIZE_TEXT)).not.toBeInTheDocument();
     expect(selectIsSimulationPlaying(store.getState())).toBe(false);
     expect(selectIsSimulationPlayable(store.getState())).toBe(false);
   });

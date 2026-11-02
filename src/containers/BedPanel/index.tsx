@@ -82,39 +82,42 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
 
   return (
     <Layout.Content ref={hostRef} className={styles.bedPanel}>
-      {/* A plain heading: antd Typography.Title would add its own margins and colours. */}
+      {/* A plain heading, read by screen readers only: the panel's controls already say what it is. */}
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
-      <div className={styles.toolbar}>
-        <Segmented<BedTool>
-          aria-label={t(DEFAULT.BED_TOOL_LABEL)}
-          options={toolOptions}
-          value={activeTool}
-          disabled={isToolpathView}
-          onChange={setActiveTool}
-        />
-        <ComingSoon description={t(DEFAULT.BED_TOOLBAR_DESCRIPTION)}>
-          <div className={styles.toolbar}>
-            {BED_COMING_SOON_TOOL_LABEL_KEYS.map((labelKey: string) => (
-              <Button key={labelKey} onClick={doNothing}>
-                {t(labelKey)}
-              </Button>
-            ))}
-          </div>
-        </ComingSoon>
-        <Segmented<BedViewMode>
-          aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
-          options={viewModeOptions}
-          value={viewMode}
-          onChange={changeBedViewMode}
-        />
-        {isToolpathView && (
+      <div className={styles.header}>
+        {isToolpathView ? (
           <ToolpathToolbar
             displayMode={toolpathDisplayMode}
             onDisplayModeChange={setToolpathDisplayMode}
             isTravelShown={isTravelShown}
             onTravelShownChange={setIsTravelShown}
           />
+        ) : (
+          <div className={styles.editingTools}>
+            <Segmented<BedTool>
+              aria-label={t(DEFAULT.BED_TOOL_LABEL)}
+              options={toolOptions}
+              value={activeTool}
+              onChange={setActiveTool}
+            />
+            <ComingSoon description={t(DEFAULT.BED_TOOLBAR_DESCRIPTION)}>
+              <div className={styles.editingTools}>
+                {BED_COMING_SOON_TOOL_LABEL_KEYS.map((labelKey: string) => (
+                  <Button key={labelKey} onClick={doNothing}>
+                    {t(labelKey)}
+                  </Button>
+                ))}
+              </div>
+            </ComingSoon>
+          </div>
         )}
+        <Segmented<BedViewMode>
+          className={styles.viewModeSwitch}
+          aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
+          options={viewModeOptions}
+          value={viewMode}
+          onChange={changeBedViewMode}
+        />
       </div>
       <div
         className={dropArea.isDropTarget ? [styles.bed, styles.dropTarget].join(' ') : styles.bed}

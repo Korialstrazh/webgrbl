@@ -3,10 +3,12 @@
 .bedPanel {
   position: relative;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
   min-width: 0;
-  padding: var(--space-4);
+  min-height: 0;
+  padding: var(--space-3);
   background-color: var(--color-bed);
   color: var(--color-text);
 }
@@ -15,27 +17,48 @@
 // 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
 @media (width < 80rem) {
   .bedPanel {
-    min-height: 20rem;
+    min-height: 28rem;
   }
 }
 
+// Kept for screen readers and the landmark name, hidden on screen: the header row already shows what the panel is.
 .title {
-  margin: 0;
-  font-size: 1rem;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.toolbar {
+// One row that never grows into the bed: the editing tools, or the Toolpath controls, on the left and the view switch at
+// the right end. On a narrow bed the left group moves to a row of its own instead of being squeezed.
+.header {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.editingTools {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }
 
-// The positioned parent of the Toolpath view overlays drawn over the bed.
+.viewModeSwitch {
+  margin-left: auto;
+}
+
+// The positioned parent of the Toolpath view overlays drawn over the bed. Its minimum height keeps the drawing
+// readable in a short window; the panel scrolls before the bed collapses.
 .bed {
   position: relative;
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 12rem;
 }
 
 // Shown while files are dragged over the bed, so the user can see it takes the drop.

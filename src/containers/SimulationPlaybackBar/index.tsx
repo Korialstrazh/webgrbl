@@ -20,7 +20,7 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_SEGMENTED_SIZE_SMALL } from '../../utils/antd.constants';
 import { BACK_TO_START_SYMBOL, PAUSE_SYMBOL, PLAY_SYMBOL, TO_END_SYMBOL } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
@@ -33,6 +33,7 @@ import {
   selectReadyToolpathTotalTimeS,
   selectToolpathMotionTimeline,
 } from '../../utils/states/toolpath.timeline.selectors';
+import { getJobSizeText } from '../../utils/toolpath/get.job.size.text';
 import { getSimulationClockText } from '../../utils/toolpath/get.simulation.clock.text';
 import { getTimelinePosition } from '../../utils/toolpath/get.timeline.position';
 import type { MotionTimeline } from '../../utils/toolpath/interfaces/MotionTimeline';
@@ -129,12 +130,16 @@ export const SimulationPlaybackBar = (): ReactNode => {
       </span>
       <Segmented<SimulationSpeed>
         aria-label={t(DEFAULT.SIMULATION_SPEED_LABEL)}
+        size={ANTD_SEGMENTED_SIZE_SMALL}
         options={speedOptions}
         value={speed}
         disabled={!isPlayable}
         onChange={transport.setSimulationSpeed}
       />
-      <SimulationReadout position={position} />
+      <div className={styles.details}>
+        {isPlayable && <span className={styles.jobSize}>{getJobSizeText(t, toolpath?.bounds)}</span>}
+        <SimulationReadout position={position} />
+      </div>
     </div>
   );
 };

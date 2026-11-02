@@ -19,6 +19,7 @@ import type {
   InputNumberProps,
   MenuProps,
   PopoverProps,
+  SegmentedProps,
   SplitterProps,
   SwitchProps,
 } from 'antd';
@@ -79,3 +80,6 @@ export const ANTD_DRAWER_PLACEMENT_LEFT: DrawerProps['placement'] = 'left';
 
 /** The splitter stacks its panels top to bottom, with horizontal bars between them. */
 export const ANTD_SPLITTER_ORIENTATION_VERTICAL: SplitterProps['orientation'] = 'vertical';
+
+/** The compact segmented control size, for secondary choices next to larger controls. */
+export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
