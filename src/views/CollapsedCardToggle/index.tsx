@@ -20,7 +20,8 @@ export const CollapsedCardToggle = (props: CollapsedCardToggleProps): ReactNode 
 
   return (
     <span className={styles.collapsedSummary}>
-      {isCollapsed && <span className={styles.collapsedHint}>{hintText}</span>}
+      {/* Kept while the card is open, so the disabled controls below it still say why they are disabled. */}
+      <span className={styles.collapsedHint}>{hintText}</span>
       <Button
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}

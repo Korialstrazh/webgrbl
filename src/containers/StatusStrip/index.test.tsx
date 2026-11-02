@@ -26,7 +26,9 @@ const MISSING_VALUE_TEXT = '\u2014';
 const CURSOR_POINT = { xMm: 123.45, yMm: 6.7 };
 const CURSOR_TEXT = 'X 123.5 Y 6.7 mm';
 const JOB_SIZE_TEXT = '196.0 \u00D7 196.6 mm';
-const JOB_SIZE_HINT_TEXT = 'The job size is worked out in the Toolpath view.';
+const JOB_SIZE_HINT_TEXT = 'Worked out in the background from the layers that are switched on, after each change.';
+const JOB_SIZE_EXPLANATION_START = /^The area the laser covers/;
+const CALCULATING_TEXT = 'Calculating...';
 const FRAME_TIME_MS = 16;
 const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
@@ -129,6 +131,34 @@ describe(StatusStrip.name, () => {
     renderStatusStrip(store);
 
     expect(screen.getByText(JOB_SIZE_LABEL).closest('div')).toHaveTextContent(`${JOB_SIZE_LABEL}${JOB_SIZE_TEXT}`);
+  });
+
+  it('says what the job size measures in a tooltip once it is shown', async () => {
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+
+    act(() => {
+      store.dispatch(new ToolpathRequested());
+      store.dispatch(new ToolpathReady({
+        toolpath: newToolpath({ bounds: { minX: 10, minY: 20, maxX: 206, maxY: 216.6 } }),
+        documentVersion: selectToolpathDocumentVersion(store.getState()),
+      }));
+    });
+    renderStatusStrip(store);
+    fireEvent.focus(screen.getByText(JOB_SIZE_TEXT));
+
+    expect(await screen.findByText(JOB_SIZE_EXPLANATION_START)).toBeInTheDocument();
+  });
+
+  it('shows Calculating for the job size and the estimate while the toolpath is generated', () => {
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+
+    act(() => {
+      store.dispatch(new ToolpathRequested());
+    });
+    renderStatusStrip(store);
+
+    expect(screen.getByText(JOB_SIZE_LABEL).closest('div')).toHaveTextContent(`${JOB_SIZE_LABEL}${CALCULATING_TEXT}`);
+    expect(screen.getByText(ESTIMATE_LABEL).closest('div')).toHaveTextContent(`${ESTIMATE_LABEL}${CALCULATING_TEXT}`);
   });
 
   it('opens and closes the console panel with the toggle', () => {

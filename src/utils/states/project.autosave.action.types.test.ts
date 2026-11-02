@@ -19,8 +19,11 @@ const NOT_AUTOSAVED_ACTION_TYPES: readonly string[] = [ProjectDocumentLoaded.typ
 const isProjectActionClass = (value: unknown): value is ProjectActionClass =>
   typeof value === 'function' && value.prototype instanceof Action;
 
-const getDocumentActionClasses = (): ProjectActionClass[] =>
-  Object.values(projectDocumentStateModule).filter(isProjectActionClass);
+const getDocumentActionClasses = (): ProjectActionClass[] => {
+  const exportedValues: unknown[] = Object.values(projectDocumentStateModule);
+
+  return exportedValues.filter(isProjectActionClass);
+};
 
 describe('PROJECT_AUTOSAVE_ACTION_TYPES', () => {
   it('finds the document action classes to check', () => {

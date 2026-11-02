@@ -5,7 +5,8 @@
  *   data to the worker. takeLatest cancels the running generation on a new request or a cancel, and the generation's
  *   finally block cancels the worker.
  * - Parsed drawables are cached per object (BedDrawablesCache), so a layer change parses no SVG again.
- * - A document or machine profile change during a generation restarts it, debounced by TOOLPATH_RESTART_DEBOUNCE_MS, so the result
+ * - The toolpath is kept current in the background: a document or machine area change restarts a running generation,
+ *   and generates an idle or out-of-date toolpath, debounced by TOOLPATH_RESTART_DEBOUNCE_MS, so the result
  *   always matches the current document.
  * - An export started for one project is dropped, with an info toast, when another project opens before it downloads.
  * - When the store's sagas stop, the worker client is disposed.
@@ -50,7 +51,12 @@ import {
   selectActiveMachineProfile,
 } from './machine.profile.state';
 import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
-import { ProjectDocumentLoaded, selectProjectDocument, selectProjectLayers } from './project.document.state';
+import {
+  ProjectDocumentLoaded,
+  selectEnabledProjectLayers,
+  selectProjectDocument,
+  selectProjectLayers,
+} from './project.document.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import { ProjectOpened, selectProjectId, selectProjectName } from './project.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
@@ -86,6 +92,8 @@ const TOOLPATH_INPUT_CHANGE_ACTION_TYPES: string[] = [
   ...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES,
   ToolpathMachineAreaChanged.type,
 ];
+
+const TOOLPATH_BACKGROUND_STATUSES: readonly ToolpathStatus[] = [TOOLPATH_STATUS.IDLE, TOOLPATH_STATUS.STALE];
 
 const hasMachineAreaChanged = (machineArea: ToolpathMachineArea, lastMachineArea: ToolpathMachineArea): boolean =>
   machineArea.workAreaXMm !== lastMachineArea.workAreaXMm
@@ -159,10 +167,20 @@ function* runToolpathAction(
   }
 }
 
-function* restartRunningGeneration(): Generator {
-  const status: ToolpathStatus = (yield select(selectToolpathStatus)) as ToolpathStatus;
+/**
+ * Whether the background refresh must ask for a toolpath. A running generation always restarts, else its result would
+ * be dropped as out of date and the status would never leave generating. An idle or out-of-date toolpath is generated
+ * when there is a layer to burn. A failed one waits for the user, so a failure does not repeat its toast on every edit.
+ */
+const isToolpathRefreshNeeded = (status: ToolpathStatus, enabledLayers: ProjectLayer[]): boolean =>
+  status === TOOLPATH_STATUS.GENERATING || (!!enabledLayers.length && TOOLPATH_BACKGROUND_STATUSES.includes(status));
 
-  if (status === TOOLPATH_STATUS.GENERATING) {
+/** Keeps the toolpath current in the background once the inputs are quiet, so the Design view shows the job too. */
+function* refreshToolpath(): Generator {
+  const status: ToolpathStatus = (yield select(selectToolpathStatus)) as ToolpathStatus;
+  const enabledLayers: ProjectLayer[] = (yield select(selectEnabledProjectLayers)) as ProjectLayer[];
+
+  if (isToolpathRefreshNeeded(status, enabledLayers)) {
     yield put(new ToolpathRequested());
   }
 }
@@ -258,7 +276,7 @@ export function* watchToolpath(toolpathWorkerClient: ToolpathWorkerClient): Gene
         toolpathWorkerClient,
         drawablesCache,
       ),
-      debounce(TOOLPATH_RESTART_DEBOUNCE_MS, TOOLPATH_INPUT_CHANGE_ACTION_TYPES, restartRunningGeneration),
+      debounce(TOOLPATH_RESTART_DEBOUNCE_MS, TOOLPATH_INPUT_CHANGE_ACTION_TYPES, refreshToolpath),
       fork(watchToolpathMachineArea),
       takeLeading(GcodeExportRequested.type, exportGcode),
     ])) as Task[];

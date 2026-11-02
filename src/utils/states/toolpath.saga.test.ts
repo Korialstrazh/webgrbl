@@ -169,7 +169,9 @@ describe(watchToolpath.name, () => {
 
     store.dispatch(new ToolpathRequested());
     await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
-    store.dispatch(new MachineProfileSaved({ profile: { ...profile, originCorner: MACHINE_ORIGIN_CORNER.BACK_RIGHT } }));
+    const movedOriginProfile: MachineProfile = { ...profile, originCorner: MACHINE_ORIGIN_CORNER.BACK_RIGHT };
+
+    store.dispatch(new MachineProfileSaved({ profile: movedOriginProfile }));
 
     expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.STALE);
   });
@@ -193,6 +195,35 @@ describe(watchToolpath.name, () => {
     store.dispatch(new LayerToggled({ layerKey: getLayerKey(getFirstLayer(store)), enabled: false }));
 
     expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.STALE);
+  });
+
+  it('regenerates an out-of-date toolpath in the background once the document is quiet', async () => {
+    const toolpathWorkerClient: FakeToolpathWorkerClient = new FakeToolpathWorkerClient();
+    const store: AppStore = await newGcodeExportTestStore({ toolpathWorkerClient });
+
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+    const generationCountBeforeEdit: number = toolpathWorkerClient.generationInputs.length;
+
+    nudgeFirstObject(store, 0);
+
+    expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.STALE);
+
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+
+    expect(toolpathWorkerClient.generationInputs).toHaveLength(generationCountBeforeEdit + 1);
+  });
+
+  it('generates nothing in the background while no layer is switched on', async () => {
+    useStorageSafeFakeTimers();
+    const toolpathWorkerClient: FakeToolpathWorkerClient = new FakeToolpathWorkerClient();
+    const store: AppStore = await newGcodeExportTestStore({ toolpathWorkerClient, areLayersEnabled: false });
+
+    nudgeFirstObject(store, 0);
+    await vi.advanceTimersByTimeAsync(TOOLPATH_RESTART_DEBOUNCE_MS);
+    vi.useRealTimers();
+
+    expect(toolpathWorkerClient.generationInputs).toHaveLength(0);
+    expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.IDLE);
   });
 
   it('cancels the running generation when a second request comes in', async () => {

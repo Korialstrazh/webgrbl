@@ -54,7 +54,7 @@ export const ObjectRow = ({
         onClick={() => onSelect(projectObject.id)}
       >
         <span className={styles.name} title={projectObject.name}>{projectObject.name}</span>
-        <span className={styles.size}>
+        <span className={styles.size} title={t(DEFAULT.OBJECTS_SIZE_HINT)}>
           {t(DEFAULT.OBJECTS_SIZE, {
             widthMm: projectObject.widthMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
             heightMm: projectObject.heightMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),

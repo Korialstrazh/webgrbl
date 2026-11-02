@@ -17,8 +17,9 @@ import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
-import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
+import { getLayerSummaryParts } from '../../../utils/layers/get.layer.summary.parts';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { LayerSummaryText } from '../../../views/LayerSummaryText';
 import { LayerSwatch } from '../../../views/LayerSwatch';
 import type { LayerRowProps } from '../interfaces/LayerRowProps';
 import styles from './styles.module.scss';
@@ -46,12 +47,6 @@ export const LayerRow = ({
   const layerName: string = getLayerDisplayName(layer, layerEntry);
   const { settings } = layer;
   const hasNoPaletteEntry: boolean = !layerEntry;
-  const summaryText: string = t(DEFAULT.LAYERS_SUMMARY, {
-    mode: t(LAYER_MODE_LABEL_KEY[settings.mode]),
-    power: settings.maxPowerPercent,
-    speed: settings.speedMmPerMin,
-    passes: settings.passes,
-  });
 
   return (
     <li
@@ -79,7 +74,7 @@ export const LayerRow = ({
           <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
         </span>
         <span className={styles.name} title={layerName}>{layerName}</span>
-        <span className={styles.summary} title={summaryText}>{summaryText}</span>
+        <LayerSummaryText className={styles.summary} parts={getLayerSummaryParts(t, settings)} />
         {hasNoPaletteEntry && <span className={styles.note}>{t(DEFAULT.LAYERS_NOT_IN_PALETTE)}</span>}
       </Button>
       <div className={styles.moveButtons}>

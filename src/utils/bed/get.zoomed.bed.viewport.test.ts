@@ -9,13 +9,14 @@ import type { BedViewportFrame } from './interfaces/BedViewportFrame';
 import { newFitBedViewport } from './new.fit.bed.viewport';
 
 const DIMENSIONS: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
+// An 800 x 400 px drawing area plus the 16 px fit margin on each side, so the fitted bed takes 4/3 px per mm.
 const FIT_FRAME: BedViewportFrame = {
   viewport: newFitBedViewport(DIMENSIONS),
-  screenSize: { widthPx: 800, heightPx: 400 },
+  screenSize: { widthPx: 832, heightPx: 432 },
   dimensions: DIMENSIONS,
 };
 const POINTER: BedScreenPoint = { xPx: 600, yPx: 100 };
-const VIEW_CENTRE: BedScreenPoint = { xPx: 400, yPx: 200 };
+const VIEW_CENTRE: BedScreenPoint = { xPx: 416, yPx: 216 };
 const ZOOM_IN_TWICE = 2;
 const HUGE_FACTOR = 1000;
 const TINY_FACTOR = 0.001;

@@ -18,6 +18,7 @@ BED_COLOUR_PRESET_PLYWOOD;Plywood
 BED_COLOUR_PRESET_WHITE;White
 BED_COLOUR_PRESETS;Presets
 BED_COLOUR_RESET;Reset to default
+BED_MORE_TOOLS_LABEL;More bed tools, coming in a later release
 BED_NO_MACHINE;Connect a machine to see its bed
 BED_OBJECTS_LABEL;Design objects: arrow keys move the selection, Delete removes it
 BED_PANEL_TITLE;Bed
@@ -40,8 +41,9 @@ BED_ZOOM_FIT;Fit
 BED_ZOOM_FIT_HINT;Fit the bed to the view (0)
 BED_ZOOM_IN_HINT;Zoom in (+). The mouse wheel zooms around the pointer.
 BED_ZOOM_OUT_HINT;Zoom out (-)
-BED_ZOOM_PAN_HINT;Drag with the middle mouse button, or hold Space and drag, to move the view.
+BED_ZOOM_PAN_HINT;Zoom relative to the fitted bed: 100 % (fit) shows the whole bed. Drag with the middle mouse button, or hold Space and drag, to move the view.
 BED_ZOOM_PERCENT;{{percent}} %
+BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
 COMING_SOON;Soon
 CONNECTION_CONNECT_MENU;Connect...
 CONNECTION_NO_PORT_CHOSEN;No port chosen
@@ -165,7 +167,9 @@ LAYERS_MOVE_DOWN;Move {{name}} down
 LAYERS_MOVE_UP;Move {{name}} up
 LAYERS_NOT_IN_PALETTE;Not in the palette
 LAYERS_OPEN_PALETTE;Palette
-LAYERS_SUMMARY;{{mode}} · {{power}} % · {{speed}} mm/min · {{passes}}×
+LAYERS_SUMMARY_PASSES;{{passes}}×
+LAYERS_SUMMARY_POWER;{{power}} %
+LAYERS_SUMMARY_SPEED;{{speed}} mm/min
 LAYERS_TOGGLE;Send {{name}} to the laser
 LAYOUT_RESIZE_CONSOLE;Resize the console
 LAYOUT_RESIZE_DESIGN_PANEL;Resize the design panel
@@ -291,7 +295,8 @@ OBJECTS_FIELD_Y;Y
 OBJECTS_LIST_LABEL;Project objects
 OBJECTS_LOCK_RATIO;Lock aspect ratio
 OBJECTS_OUTSIDE_BED;Outside the bed
-OBJECTS_SIZE;{{widthMm}} × {{heightMm}} mm
+OBJECTS_SIZE;Frame {{widthMm}} × {{heightMm}} mm
+OBJECTS_SIZE_HINT;The size of the drawing's frame (its SVG page), empty margins included. The job size in the status strip is what actually burns.
 OPEN_PROJECT_DELETE;Delete
 OPEN_PROJECT_DELETE_CANCEL;Cancel
 OPEN_PROJECT_DELETE_CONFIRM;Delete the project {{name}}?
@@ -352,11 +357,13 @@ SIMULATION_SPEED_LABEL;Playback speed
 SIMULATION_SPEED_OPTION;{{speed}}×
 SIMULATION_TIME_LABEL;Simulation time
 SIMULATION_TO_END;To end
+STATUS_STRIP_CALCULATING;Calculating...
 STATUS_STRIP_CURSOR;Cursor
 STATUS_STRIP_CURSOR_VALUE;X {{x}}  Y {{y}} mm
 STATUS_STRIP_ESTIMATE;Estimate
 STATUS_STRIP_JOB_SIZE;Job size
-STATUS_STRIP_JOB_SIZE_HINT;The job size is worked out in the Toolpath view.
+STATUS_STRIP_JOB_SIZE_EXPLANATION;The area the laser covers: every burnt line plus the fill overscan. An object's frame size can be larger when its SVG has empty margins.
+STATUS_STRIP_JOB_SIZE_HINT;Worked out in the background from the layers that are switched on, after each change.
 STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.

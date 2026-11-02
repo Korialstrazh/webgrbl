@@ -13,7 +13,7 @@ Each colour in your drawing becomes a layer with laser settings. From the layers
 
 ## The palette
 
-Open it with "Palette". Select an entry to edit it, drag entries (or use Move up / Move down) to reorder, "+ New colour" to add one, and Delete (it asks first) to remove one. Nothing changes until you press Save, and Save refuses an entry with an error (empty name, a power outside 0..100 %, speed outside 1..20000 mm/min, passes outside 1..50, line interval outside 0.02..2 mm, min power above max power, or a colour another entry already uses). "Reset to defaults" replaces the whole palette after you confirm.
+Open it with "Palette". Select an entry to edit it, drag entries (or use Move up / Move down) to reorder, "+ New colour" to add one, and Delete (it asks first) to remove one; the edited entry is highlighted across its whole row, and the Delete cross is quiet, shown on hover, keyboard focus or for the edited entry. Nothing changes until you press Save, and Save refuses an entry with an error (empty name, a power outside 0..100 %, speed outside 1..20000 mm/min, passes outside 1..50, line interval outside 0.02..2 mm, min power above max power, or a colour another entry already uses). "Reset to defaults" replaces the whole palette after you confirm.
 
 The Shading entry is built in: it cannot be deleted and its colour is fixed (see "Greys" below).
 
@@ -90,7 +90,7 @@ Switch to Toolpath. If there is no toolpath yet, or it is out of date, a banner 
 
 ## The time estimate
 
-Shown on the Job card ("Estimate") and in the playback bar clock, next to the job size ("Job 50.0 × 30.0 mm"), only while the toolpath is current (a dash otherwise). It is planned the way GRBL moves: every move speeds up and slows down at the machine's acceleration (`$120`, `$121`) and maximum rate (`$110`, `$111`), and corners are taken at the speed `$11` (junction deviation) allows. The values come from the connected laser; without a connection, or when a value is missing, the GRBL defaults are used (6000 mm/min, 1000 mm/s², 0.01 mm). All passes and the overscan of fills are included. It is an estimate, not a promise.
+Shown on the Job card ("Estimate") and in the playback bar clock, next to the job size ("Job 50.0 × 30.0 mm"), only while the toolpath is current. The toolpath is worked out in the background after every change (150 ms after the last one) when a layer is switched on, so the status strip shows the job size and estimate in the Design view too, with "Calculating..." while it runs and a dash when nothing is switched on. The job size is what burns (burnt lines plus fill overscan); an object's size in the Objects list is its frame (the SVG page, empty margins included), labelled "Frame", so the two can differ. It is planned the way GRBL moves: every move speeds up and slows down at the machine's acceleration (`$120`, `$121`) and maximum rate (`$110`, `$111`), and corners are taken at the speed `$11` (junction deviation) allows. The values come from the connected laser; without a connection, or when a value is missing, the GRBL defaults are used (6000 mm/min, 1000 mm/s², 0.01 mm). All passes and the overscan of fills are included. It is an estimate, not a promise.
 
 ## Known limits
 

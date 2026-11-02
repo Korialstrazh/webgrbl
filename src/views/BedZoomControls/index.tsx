@@ -14,6 +14,7 @@ import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Space, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { BED_FIT_ZOOM_PERCENT } from '../../utils/bed/bed.zoom.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { BedZoomControlsProps } from './interfaces/BedZoomControlsProps';
 import styles from './styles.module.scss';
@@ -37,7 +38,9 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
       <Tooltip title={t(DEFAULT.BED_ZOOM_PAN_HINT)}>
         {/* A plain readout: it shows the zoom and carries the pan hint, it is not a control. */}
         <span className={styles.zoomPercent} aria-live="polite">
-          {t(DEFAULT.BED_ZOOM_PERCENT, { percent: zoomPercent })}
+          {t(zoomPercent === BED_FIT_ZOOM_PERCENT ? DEFAULT.BED_ZOOM_PERCENT_FIT : DEFAULT.BED_ZOOM_PERCENT, {
+            percent: zoomPercent,
+          })}
         </span>
       </Tooltip>
       <Tooltip title={t(DEFAULT.BED_ZOOM_IN_HINT)}>

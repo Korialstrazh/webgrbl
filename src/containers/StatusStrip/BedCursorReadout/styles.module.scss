@@ -1,6 +1,8 @@
 .bedCursorReadout {
   display: flex;
+  flex-shrink: 0;
   gap: var(--space-2);
+  white-space: nowrap;
 
   dt {
     color: var(--color-text-muted);
@@ -17,4 +19,11 @@
 .cursorValue {
   min-width: 19ch;
   white-space: pre;
+}
+
+// In a narrow window the cursor readout gives way first, so the job size and estimate keep their place on one row.
+@media (width < 46rem) {
+  .bedCursorReadout {
+    display: none;
+  }
 }
