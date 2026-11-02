@@ -5,6 +5,7 @@ import { BED_PLACEHOLDER_KIND } from '../../utils/bed/bed.constants';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { GRBL_SETTING_X_MAX_RATE, GRBL_SETTING_Y_MAX_RATE } from '../../utils/grbl/grbl.constants';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import type { MachineOriginCorner } from '../../utils/profiles/machine.profile.constants';
 import { MACHINE_ORIGIN_CORNER, MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.profile.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../utils/project/new.project.object';
@@ -178,6 +179,25 @@ describe(ToolpathLayer.name, () => {
 
     expect(screen.queryAllByTestId(TOOLPATH_BURN_PATH_TEST_ID)).toEqual([]);
     expect(screen.queryByTestId(TOOLPATH_HEAD_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [MACHINE_ORIGIN_CORNER.FRONT_LEFT, `translate(0 ${BED_HEIGHT_MM}) scale(1)`],
+    [MACHINE_ORIGIN_CORNER.FRONT_RIGHT, `translate(${BED_WIDTH_MM} ${BED_HEIGHT_MM}) scale(1)`],
+    [MACHINE_ORIGIN_CORNER.BACK_LEFT, 'translate(0 0) scale(1)'],
+  ])('puts the work zero marker of a %s origin at that corner', (
+    originCorner: MachineOriginCorner,
+    transform: string,
+  ) => {
+    const store: AppStore = newReadyStore();
+    const profile: MachineProfile = newMachineProfile({ originCorner });
+
+    store.dispatch(new MachineProfilesLoaded({
+      document: { version: MACHINE_PROFILES_DOCUMENT_VERSION, activeProfileId: profile.id, profiles: [profile] },
+    }));
+    renderLayer(store);
+
+    expect(screen.getByTestId(TOOLPATH_ORIGIN_TEST_ID)).toHaveAttribute('transform', transform);
   });
 
   it('puts the work zero marker at the origin corner of the active profile', () => {

@@ -36,4 +36,10 @@ describe('DEFAULT_PALETTE', () => {
     expect(DEFAULT_FILL_ENTRY.lineIntervalMm).toBe(EXPECTED_FILL_LINE_INTERVAL_MM);
     expect(DEFAULT_SHADING_ENTRY.lineIntervalMm).toBe(EXPECTED_FILL_LINE_INTERVAL_MM);
   });
+
+  it('is frozen with its entries, so no code can change the defaults', () => {
+    expect(Object.isFrozen(DEFAULT_PALETTE)).toBe(true);
+    expect(Object.isFrozen(DEFAULT_PALETTE.entries)).toBe(true);
+    expect(DEFAULT_PALETTE.entries.every((entry: PaletteEntry): boolean => Object.isFrozen(entry))).toBe(true);
+  });
 });
