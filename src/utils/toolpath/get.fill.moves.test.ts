@@ -28,7 +28,12 @@ describe(getFillMoves.name, () => {
       { y: 1, segments: [{ x0: 10, x1: 20, powerPercent: POWER_PERCENT }] },
     ];
 
-    const moves: ToolpathMove[] = getFillMoves({ fillLines, layer: getFillLayer(), startPoint: TOOLPATH_START_POINT, workAreaXMm: WORK_AREA_X_MM });
+    const moves: ToolpathMove[] = getFillMoves({
+      fillLines,
+      layer: getFillLayer(),
+      startPoint: TOOLPATH_START_POINT,
+      workAreaXMm: WORK_AREA_X_MM,
+    });
 
     expect(getMoveSummaries(moves)).toEqual([
       [TOOLPATH_MOVE_KIND.TRAVEL, 8, 0, 0],
@@ -74,14 +79,24 @@ describe(getFillMoves.name, () => {
   });
 
   it('gives no moves for a layer without lines', () => {
-    expect(getFillMoves({ fillLines: [], layer: getFillLayer(), startPoint: TOOLPATH_START_POINT, workAreaXMm: WORK_AREA_X_MM })).toEqual([]);
+    expect(getFillMoves({
+      fillLines: [],
+      layer: getFillLayer(),
+      startPoint: TOOLPATH_START_POINT,
+      workAreaXMm: WORK_AREA_X_MM,
+    })).toEqual([]);
   });
 
   it('repeats every line for each pass of the layer', () => {
     const fillLines: FillLine[] = [{ y: 0, segments: [{ x0: 0, x1: 1, powerPercent: POWER_PERCENT }] }];
     const twoPassLayer: ProjectLayer = { ...getFillLayer(), settings: { ...getFillLayer().settings, passes: 2 } };
 
-    const moves: ToolpathMove[] = getFillMoves({ fillLines, layer: twoPassLayer, startPoint: TOOLPATH_START_POINT, workAreaXMm: WORK_AREA_X_MM });
+    const moves: ToolpathMove[] = getFillMoves({
+      fillLines,
+      layer: twoPassLayer,
+      startPoint: TOOLPATH_START_POINT,
+      workAreaXMm: WORK_AREA_X_MM,
+    });
 
     expect(moves.filter((move: ToolpathMove): boolean => move.powerPercent === POWER_PERCENT)).toHaveLength(2);
   });
@@ -109,7 +124,9 @@ describe(getFillMoves.name, () => {
   });
 
   it('keeps no overscan on a side whose burn edge is already outside the work area', () => {
-    const fillLines: FillLine[] = [{ y: 0, segments: [{ x0: -3, x1: WORK_AREA_X_MM + 3, powerPercent: POWER_PERCENT }] }];
+    const fillLines: FillLine[] = [
+      { y: 0, segments: [{ x0: -3, x1: WORK_AREA_X_MM + 3, powerPercent: POWER_PERCENT }] },
+    ];
 
     const moves: ToolpathMove[] = getFillMoves({
       fillLines,

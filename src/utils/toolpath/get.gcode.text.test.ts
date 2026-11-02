@@ -170,7 +170,10 @@ describe(getGcodeText.name, () => {
   });
 
   it('writes the header as printable ASCII for names outside ASCII', () => {
-    const context: GcodeContext = getContext({ projectName: 'Caf\u00E9 \u041A\u043E\u0442 \u2014 (v2); end', profileName: 'Lasero \u00FC' });
+    const context: GcodeContext = getContext({
+      projectName: 'Caf\u00E9 \u041A\u043E\u0442 \u2014 (v2); end',
+      profileName: 'Lasero \u00FC',
+    });
 
     const headerText: string = getGcodeText(getToolpath([]), context).split(LINE_BREAK_PATTERN).slice(0, 2).join('');
 

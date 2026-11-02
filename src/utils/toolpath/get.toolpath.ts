@@ -52,7 +52,11 @@ export const getToolpath = (input: ToolpathGenerationInput, onProgress?: Toolpat
   const { drawables, warnings, layers, machineArea } = input;
   const { workAreaXMm } = machineArea;
   // The head starts at the machine's origin corner; mapping the G-code zero back into the bed frame finds it.
-  const jobStartPoint: GeometryPoint = getOriginMappedPoint(TOOLPATH_START_POINT, machineArea.originCorner, machineArea);
+  const jobStartPoint: GeometryPoint = getOriginMappedPoint(
+    TOOLPATH_START_POINT,
+    machineArea.originCorner,
+    machineArea,
+  );
   const enabledLayers: ProjectLayer[] = getEnabledLayersInOrder(layers);
   const hasFillLayer: boolean = enabledLayers.some(
     (layer: ProjectLayer): boolean => layer.settings.mode === LAYER_MODE.FILL,

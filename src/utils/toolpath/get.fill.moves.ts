@@ -1,8 +1,8 @@
 /**
  * Gets the moves of all passes of a fill layer, each pass repeating every line. Lines are scanned in alternating
  * direction, starting left to right, with 2 mm of overscan before and after the burnt pieces, burnt at power 0 and the
- * layer feed so the head is at speed while it burns. The overscan is shortened at the work area edges, so the head never
- * leaves the work area for it (a soft-limit alarm, or a crash into the frame). A gap longer than 5 mm becomes a
+ * layer feed so the head is at speed while it burns. The overscan is shortened at the work area edges, so the head
+ * never leaves the work area for it (a soft-limit alarm, or a crash into the frame). A gap longer than 5 mm becomes a
  * travel; a shorter gap is crossed at power 0 at the layer feed.
  *
  * @author michael.morosov

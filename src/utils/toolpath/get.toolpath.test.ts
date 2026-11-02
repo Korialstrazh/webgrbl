@@ -219,7 +219,9 @@ describe(getToolpath.name, () => {
   });
 
   it('keeps every G-code X inside the work area and starts at the corner for a right-hand origin', () => {
-    const machineArea: ToolpathMachineArea = newToolpathMachineArea({ originCorner: MACHINE_ORIGIN_CORNER.FRONT_RIGHT });
+    const machineArea: ToolpathMachineArea = newToolpathMachineArea({
+      originCorner: MACHINE_ORIGIN_CORNER.FRONT_RIGHT,
+    });
     const drawables: BedDrawable[] = [
       getFilledBoxAt(GREEN, 0),
       getFilledBoxAt(GREEN, TEST_WORK_AREA_X_MM - FILL_SIZE_MM),
@@ -227,7 +229,10 @@ describe(getToolpath.name, () => {
 
     const toolpath: Toolpath = getToolpath({ drawables, warnings: [], layers: [getFillLayer()], machineArea });
     const gcodeText: string = getGcodeText(toolpath, newGcodeContext(machineArea));
-    const gcodeXs: number[] = Array.from(gcodeText.matchAll(/X(-?[\d.]+)/g), (match: RegExpMatchArray) => Number(match[1]));
+    const gcodeXs: number[] = Array.from(
+      gcodeText.matchAll(/X(-?[\d.]+)/g),
+      (match: RegExpMatchArray): number => Number(match[1]),
+    );
 
     expect(gcodeXs.length).toBeGreaterThan(FILL_LINE_COUNT);
     expect(Math.min(...gcodeXs)).toBe(0);
