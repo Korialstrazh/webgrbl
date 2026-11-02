@@ -183,7 +183,7 @@ Some features touch several areas. Their articles cross-link each other, and the
 | LG-GCODE-05 | [[lg-gcode-files#LG-GCODE-05 G-code file loading and line normalisation\|G-code file loading and line normalisation]] | core | not started |
 | LG-GCODE-06 | [[lg-gcode-files#LG-GCODE-06 Program analysis: modal state and positions\|Program analysis: modal state and positions]] | core | not started |
 | LG-GCODE-07 | [[lg-gcode-files#LG-GCODE-07 Bounding box / ranges and quadrant\|Bounding box / ranges and quadrant]] | core | not started |
-| LG-GCODE-08 | [[lg-gcode-files#LG-GCODE-08 Time estimation and projected time\|Time estimation and projected time]] | core | not started |
+| LG-GCODE-08 | [[lg-gcode-files#LG-GCODE-08 Time estimation and projected time\|Time estimation and projected time]] | core | in progress |
 | LG-GCODE-09 | [[lg-gcode-files#LG-GCODE-09 Save G-code (quick and advanced)\|Save G-code (quick and advanced)]] | core | not started |
 | LG-GCODE-10 | [[lg-gcode-files#LG-GCODE-10 Project files (.lps)\|Project files (.lps)]] | adapt | in progress |
 | LG-GCODE-11 | [[lg-gcode-files#LG-GCODE-11 File loading events and program state\|File loading events and program state]] | core | not started |

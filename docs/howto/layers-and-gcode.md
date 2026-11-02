@@ -67,6 +67,7 @@ M5 S0
 - `M4` is dynamic laser mode: the laser power follows the speed and is off during travel. It needs **`$32=1`** (laser mode) on the controller. webgrbl does not check or change `$32` when you export, so set it before you run the file; with `$32=0` the laser would stay on during moves.
 - Travel is `G0`, burning is `G1`. X and Y are written on every move; `S` (power) and `F` (feed) only when they change.
 - `S` is the power percent of the profile's S max (the `$30` the connected laser reports, else the profile's value, else 1000).
+- Fills add 2 mm of overscan at each end of a line. The head travels to the start of the run-in with `G0`, but the overscan itself is written as `G1` moves at `S0` and the layer's feed, never as `G0`.
 - With air assist on the profile, `M8` / `M9` go around the moves of layers that use it.
 - The file ends with `M5 S0`. The name is `<project name>.gcode`.
 
@@ -94,7 +95,7 @@ Shown on the Job card ("Estimate") and in the Toolpath toolbar ("Job 50.0 × 30.
 - **Images** are skipped, with a warning ("Images are not engraved yet.").
 - **`<use>`** copies are followed (so colours inside them make layers), up to 20 000 copied elements per SVG; beyond that, the extra parts are left out with a warning. Uses inside `defs`, `symbol`, `clipPath` and `mask` content are not expanded.
 - **Off-page and clipped content** still burns in full, with a warning. The bed hides the parts outside the page, but the toolpath does not; clip paths and masks are not applied.
-- **A stale toolpath must be regenerated** before it can play, be estimated or be exported.
+- **A stale toolpath must be regenerated** before it can play or be estimated (export generates it for you).
 - **The Toolpath view hides the live machine head.**
 - A file whose `width` / `height` proportions differ from its `viewBox` is stretched to fit, the same way the bed shows it.
 - Only the Line and Fill modes exist. Raster images, arcs (`G2` / `G3`), a laser without `M4` and the 3D preview come later.
