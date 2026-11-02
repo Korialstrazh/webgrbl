@@ -1,8 +1,9 @@
-// The handle, the checkbox and the open button side by side; the move buttons float over the right end of the row.
+// The handle, the checkbox, the open button and the move buttons side by side. The move buttons have a column of their
+// own, so they never cover the name or the summary.
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-1);
   padding-left: var(--space-1);
@@ -68,18 +69,13 @@
   color: var(--color-danger-text);
 }
 
-// Hidden until the row is hovered or holds the focus, so the name and the summary get the whole row width. They stay
-// in the tab order: tabbing onto one shows both.
+// Faded out until the row is hovered or holds the focus, so a list of rows stays calm; their column keeps its width.
+// They stay in the tab order: tabbing onto one shows both.
 .moveButtons {
-  position: absolute;
-  top: 50%;
-  right: var(--space-1);
   display: flex;
   flex-direction: column;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-surface-3);
+  padding-right: var(--space-1);
   opacity: 0;
-  transform: translateY(-50%);
   transition: opacity 0.12s;
 }
 
@@ -88,15 +84,9 @@
   opacity: 1;
 }
 
-// A touch screen has no hover, so the buttons get their own column and stay visible.
+// A touch screen has no hover, so the buttons stay visible.
 @media (hover: none) {
-  .row {
-    grid-template-columns: auto auto minmax(0, 1fr) auto;
-  }
-
   .moveButtons {
-    position: static;
     opacity: 1;
-    transform: none;
   }
 }

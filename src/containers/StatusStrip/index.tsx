@@ -1,5 +1,5 @@
 /**
- * The bottom region: the bed point under the pointer, the job size and the estimate of the ready toolpath, and the
+ * The bottom region: the job size and the estimate of the ready toolpath, the bed point under the pointer, and the
  * console toggle. The console opens as a panel below the bed, which the workbench lays out.
  *
  * @author michael.morosov
@@ -39,7 +39,6 @@ export const StatusStrip = (): ReactNode => {
       <div className={styles.readoutsArea}>
         {/* A description list keeps the term and value pairing; antd Descriptions renders a table instead. */}
         <dl className={styles.readouts}>
-          <BedCursorReadout />
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
             <dd>{getJobSizeReadoutText(t, jobBounds)}</dd>
@@ -49,6 +48,8 @@ export const StatusStrip = (): ReactNode => {
             {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
             <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
           </div>
+          {/* Last, so the room its changing value keeps never leaves a gap between the other readouts. */}
+          <BedCursorReadout />
         </dl>
       </div>
       <label className={styles.consoleSwitch}>

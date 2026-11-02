@@ -150,6 +150,16 @@ describe(AppRoute.name, () => {
       .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
+  it('puts the bed first in a narrow window, so the first screen shows the work', () => {
+    setMatchMediaMatches(false);
+    renderAppRoute();
+
+    const bedRegion: HTMLElement = screen.getByRole('main');
+    const designRegion: HTMLElement = screen.getByRole('complementary', { name: DESIGN_PANEL_LABEL });
+
+    expect(bedRegion.compareDocumentPosition(designRegion)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
   it('wide layout renders exactly one STOP, in the machine panel', async () => {
     renderAppRoute();
     await waitForRegions();

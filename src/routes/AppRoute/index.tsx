@@ -1,7 +1,8 @@
 /**
  * Top-level page of the app: the workbench with the top bar, design panel, bed, machine panel and status strip,
- * plus the overlays. It fills the window as an antd Layout; in a narrow window the regions stack and STOP moves to a
- * sticky bar. It shares the bed region element, which dialogs and drawers render into.
+ * plus the overlays. It fills the window as an antd Layout; in a narrow window the regions stack, the bed first so
+ * the first screen shows the work, and STOP moves to a sticky bar. It shares the bed region element, which bed-region
+ * dialogs and drawers render into.
  *
  * In a wide window the three panels sit in a splitter the user can resize, and the console, while open, sits below the
  * bed in a second, vertical splitter. The splitters wait until the stored panel sizes are read, a quick IndexedDB read
@@ -62,9 +63,9 @@ export const AppRoute = (): ReactNode => {
             )
             : (
               <>
-                {designPanelComponent}
                 {bedPanelComponent}
                 {isConsoleOpen && <ConsoleDock />}
+                {designPanelComponent}
                 {machinePanelComponent}
               </>
             )}
