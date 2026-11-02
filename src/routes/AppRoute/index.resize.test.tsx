@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { ARROW_RIGHT_KEY, ARROW_UP_KEY, END_KEY, HOME_KEY } from '../../utils/browser/browser.events.constants';
 import { Provider } from 'react-redux';
 import { AppRoute } from '.';
 import { PANEL_SIZES_REPOSITORY } from '../../utils/project/panel.sizes.repository';
@@ -21,6 +22,18 @@ const DRAGGED_CONSOLE_PERCENT = 40;
 const BED_COLUMN_DRAGGER_SELECTOR = `.ant-splitter-vertical > .ant-splitter-bar ${DRAGGER_SELECTOR}`;
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const ARIA_DISABLED_VALUE = 'true';
+const DESIGN_HANDLE_LABEL = 'Resize the design panel';
+const MACHINE_HANDLE_LABEL = 'Resize the machine panel';
+const CONSOLE_HANDLE_LABEL = 'Resize the console';
+// The default design panel, 20.5rem of 1600 px, and one 1rem step of 16 px, 1 %, to the right.
+const DESIGN_DEFAULT_PERCENT = 20.5;
+const DESIGN_STEPPED_PERCENT = 21.5;
+// The design panel limits, 16.25rem and 28rem of 1600 px, rounded for the ARIA values.
+const DESIGN_MIN_PERCENT = 16;
+const DESIGN_MAX_PERCENT = 28;
+const DESIGN_MIN_EXACT_PERCENT = 16.25;
+// The default console of 30 % grows by one 16 px step of the 1000 px column.
+const CONSOLE_STEPPED_PERCENT = 31.6;
 
 class ReportingResizeObserver implements ResizeObserver {
   private readonly resizeCallback: ResizeObserverCallback;
@@ -154,5 +167,65 @@ describe('AppRoute panel resizing', () => {
     await vi.waitFor(async (): Promise<void> => {
       expect(await PANEL_SIZES_REPOSITORY.getConsoleSizePercent()).toBe(DRAGGED_CONSOLE_PERCENT);
     });
+  });
+
+  it('names each bar handle and reports the bar position and range in percent', async () => {
+    await renderMeasuredAppRoute(newStore());
+
+    const designHandle: HTMLElement = screen.getByRole('separator', { name: DESIGN_HANDLE_LABEL });
+
+    expect(designHandle).toHaveAttribute('tabindex', '0');
+    expect(designHandle).toHaveAttribute('aria-orientation', 'vertical');
+    expect(designHandle).toHaveAttribute('aria-valuenow', String(Math.round(DESIGN_DEFAULT_PERCENT)));
+    expect(designHandle).toHaveAttribute('aria-valuemin', String(DESIGN_MIN_PERCENT));
+    expect(designHandle).toHaveAttribute('aria-valuemax', String(DESIGN_MAX_PERCENT));
+    expect(screen.getByRole('separator', { name: MACHINE_HANDLE_LABEL })).toBeInTheDocument();
+  });
+
+  it('steps the design panel one rem wider with the right arrow key and stores the sizes', async () => {
+    const store: AppStore = newStore();
+    await renderMeasuredAppRoute(store);
+
+    fireEvent.keyDown(screen.getByRole('separator', { name: DESIGN_HANDLE_LABEL }), { key: ARROW_RIGHT_KEY });
+
+    expect(selectPanelSizePercents(store.getState())?.[0]).toBeCloseTo(DESIGN_STEPPED_PERCENT);
+    await vi.waitFor(async (): Promise<void> => {
+      expect((await PANEL_SIZES_REPOSITORY.getPanelSizePercents())?.[0]).toBeCloseTo(DESIGN_STEPPED_PERCENT);
+    });
+  });
+
+  it('sends the design panel to its maximum with End and its minimum with Home', async () => {
+    const store: AppStore = newStore();
+    await renderMeasuredAppRoute(store);
+    const designHandle: HTMLElement = screen.getByRole('separator', { name: DESIGN_HANDLE_LABEL });
+
+    fireEvent.keyDown(designHandle, { key: END_KEY });
+
+    expect(selectPanelSizePercents(store.getState())?.[0]).toBeCloseTo(DESIGN_MAX_PERCENT);
+
+    fireEvent.keyDown(designHandle, { key: HOME_KEY });
+
+    expect(selectPanelSizePercents(store.getState())?.[0]).toBeCloseTo(DESIGN_MIN_EXACT_PERCENT);
+  });
+
+  it('ignores keys that do not move a bar', async () => {
+    const store: AppStore = newStore();
+    await renderMeasuredAppRoute(store);
+
+    fireEvent.keyDown(screen.getByRole('separator', { name: DESIGN_HANDLE_LABEL }), { key: ARROW_UP_KEY });
+
+    expect(selectPanelSizePercents(store.getState())).toBeUndefined();
+  });
+
+  it('grows the console one step with the up arrow key on its handle', async () => {
+    const store: AppStore = newStore();
+    await renderMeasuredAppRoute(store);
+    act(() => {
+      store.dispatch(new ConsoleOpenChanged({ isConsoleOpen: true }));
+    });
+
+    fireEvent.keyDown(await screen.findByRole('separator', { name: CONSOLE_HANDLE_LABEL }), { key: ARROW_UP_KEY });
+
+    expect(selectConsoleSizePercent(store.getState())).toBeCloseTo(CONSOLE_STEPPED_PERCENT);
   });
 });

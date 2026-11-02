@@ -46,6 +46,9 @@ export const MACHINE_PANEL_MIN_WIDTH_REM = 20;
 /** The machine panel never gets wider than this, so on a wide screen the bed takes the extra width. */
 export const MACHINE_PANEL_MAX_WIDTH_REM = 28;
 
+/** One arrow key step of a keyboard splitter handle, in rem: 16 px at the default font size. */
+export const SPLITTER_KEYBOARD_STEP_REM = 1;
+
 /** The panel sizes are stored as percentages of the workbench width, which add up to this. */
 export const PANEL_SIZE_PERCENT_TOTAL = 100;
 

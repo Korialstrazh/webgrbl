@@ -1,4 +1,13 @@
-// The splitter takes the whole regions area; each panel lays out the one region it holds to fill it.
+// The splitter takes the whole regions area; the wrapper is the positioned box its keyboard handles sit in.
+.panelSplitterWrapper {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+// Each panel lays out the one region it holds to fill it.
 .panelSplitter {
   flex: 1;
   min-width: 0;
@@ -7,4 +16,9 @@
 
 .splitterPanel {
   display: flex;
+}
+
+// The grip of a bar shows clearly while the pointer is over the bar, so the bars are easy to find.
+.panelSplitter :global(.ant-splitter-bar-dragger:hover)::after {
+  background-color: var(--color-text-muted);
 }

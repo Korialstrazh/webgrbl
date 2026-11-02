@@ -53,6 +53,9 @@ export const ARROW_UP_KEY = 'ArrowUp';
 export const ARROW_DOWN_KEY = 'ArrowDown';
 export const ARROW_LEFT_KEY = 'ArrowLeft';
 export const ARROW_RIGHT_KEY = 'ArrowRight';
+/** The `key` values of the Home and End keys. */
+export const HOME_KEY = 'Home';
+export const END_KEY = 'End';
 /** The `key` value of the Delete key. */
 export const DELETE_KEY = 'Delete';
 /** The `key` value of the Backspace key. */

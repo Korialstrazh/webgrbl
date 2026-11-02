@@ -204,7 +204,7 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('main')).toHaveClass(CONTENT_CLASS_NAME);
     expect(screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL })).toHaveClass(SIDER_CLASS_NAME);
     expect(screen.getByRole('contentinfo')).toHaveClass(FOOTER_CLASS_NAME);
-    expect(screen.getByRole('main').closest(HORIZONTAL_SPLITTER_SELECTOR)?.parentElement)
+    expect(screen.getByRole('main').closest(HORIZONTAL_SPLITTER_SELECTOR)?.parentElement?.parentElement)
       .toHaveClass(LAYOUT_CLASS_NAME);
   });
 

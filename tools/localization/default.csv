@@ -161,6 +161,9 @@ LAYERS_NOT_IN_PALETTE;Not in the palette
 LAYERS_OPEN_PALETTE;Palette
 LAYERS_SUMMARY;{{mode}} · {{power}} % · {{speed}} mm/min · {{passes}}×
 LAYERS_TOGGLE;Send {{name}} to the laser
+LAYOUT_RESIZE_CONSOLE;Resize the console
+LAYOUT_RESIZE_DESIGN_PANEL;Resize the design panel
+LAYOUT_RESIZE_MACHINE_PANEL;Resize the machine panel
 MACHINE_CARD_HIDE;Hide
 MACHINE_CARD_SHOW;Show
 MACHINE_CONTROL_RESET;Reset
