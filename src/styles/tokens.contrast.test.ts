@@ -44,6 +44,11 @@ const HEX_PREFIX = '#';
 const ACCENT_BUTTON_TOKEN = '--color-accent';
 const DANGER_TEXT_TOKEN = '--color-danger-text';
 const DARK_TEXT_ON_ACCENT = '#121417';
+const DISABLED_TEXT_TOKEN = '--color-disabled-text';
+const DISABLED_BG_TOKEN = '--color-disabled-bg';
+const DISABLED_BORDER_TOKEN = '--color-disabled-border';
+const ENABLED_BORDER_TOKEN = '--color-border';
+const ENABLED_BUTTON_BG_TOKEN = '--color-surface-2';
 
 const getChannelLuminance = (channelHex: string): number => {
   const channel: number = parseInt(channelHex, HEX_RADIX) / CHANNEL_MAX;
@@ -137,5 +142,25 @@ describe('design token contrast', () => {
     expect(getContrastRatio(DARK_TEXT_ON_ACCENT, requireToken(ACCENT_BUTTON_TOKEN))).toBeGreaterThanOrEqual(
       MIN_TEXT_CONTRAST,
     );
+  });
+
+  it('keeps the text of a disabled control readable on its fill', () => {
+    expect(getContrastRatio(requireToken(DISABLED_TEXT_TOKEN), requireToken(DISABLED_BG_TOKEN))).toBeGreaterThanOrEqual(
+      MIN_TEXT_CONTRAST,
+    );
+  });
+
+  it('draws a disabled control fainter than an enabled one, with a quieter border and dimmer text', () => {
+    const disabledBorderContrast: number =
+      getContrastRatio(requireToken(DISABLED_BORDER_TOKEN), requireToken(DISABLED_BG_TOKEN));
+    const enabledBorderContrast: number =
+      getContrastRatio(requireToken(ENABLED_BORDER_TOKEN), requireToken(ENABLED_BUTTON_BG_TOKEN));
+    const disabledTextContrast: number =
+      getContrastRatio(requireToken(DISABLED_TEXT_TOKEN), requireToken(DISABLED_BG_TOKEN));
+    const enabledTextContrast: number =
+      getContrastRatio(requireToken(TEXT_TOKEN), requireToken(ENABLED_BUTTON_BG_TOKEN));
+
+    expect(disabledBorderContrast).toBeLessThan(enabledBorderContrast);
+    expect(disabledTextContrast).toBeLessThan(enabledTextContrast);
   });
 });

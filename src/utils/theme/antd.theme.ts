@@ -32,6 +32,9 @@ const COLOR_DANGER_BUTTON_ACTIVE = '#9d2326';
 const COLOR_DANGER_TEXT = '#ff6b6b';
 const COLOR_DISABLED_BG = '#1a1d21';
 const COLOR_DISABLED_TEXT = '#8b9097';
+// antd's dark algorithm derives a bright blue-grey disabled border that made disabled buttons look more prominent than
+// enabled ones; this one is fainter than the enabled border.
+const COLOR_DISABLED_BORDER = '#23272c';
 const COLOR_WARNING = '#ffb547';
 const COLOR_SUCCESS = '#3fcf8e';
 const COLOR_INFO = '#4aa3ff';
@@ -76,6 +79,7 @@ export const ANTD_THEME: ThemeConfig = {
     colorErrorText: COLOR_DANGER_TEXT,
     colorTextDisabled: COLOR_DISABLED_TEXT,
     colorBgContainerDisabled: COLOR_DISABLED_BG,
+    colorBorderDisabled: COLOR_DISABLED_BORDER,
     colorWarning: COLOR_WARNING,
     colorSuccess: COLOR_SUCCESS,
     colorInfo: COLOR_INFO,
@@ -112,6 +116,13 @@ export const ANTD_THEME: ThemeConfig = {
       defaultActiveBg: COLOR_SURFACE_ACTIVE,
       controlHeightLG: TARGET_MIN_PIXELS,
       fontWeight: BUTTON_FONT_WEIGHT,
+      borderColorDisabled: COLOR_DISABLED_BORDER,
+    },
+    // The selected row is a neutral surface with the main text (12.2:1) and an accent edge, instead of accent text on
+    // a brown fill (3.4:1).
+    Menu: {
+      itemSelectedBg: COLOR_SURFACE_3,
+      itemSelectedColor: COLOR_TEXT,
     },
     Switch: {
       colorPrimary: COLOR_ACCENT,

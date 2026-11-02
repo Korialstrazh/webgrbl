@@ -43,6 +43,7 @@ export const ProfileList = (props: ProfileListProps): ReactNode => {
   return (
     <div className={styles.profileList}>
       <Menu
+        className={styles.profileMenu}
         mode={ANTD_MENU_MODE_INLINE}
         items={menuItems}
         selectedKeys={[editedProfileId]}

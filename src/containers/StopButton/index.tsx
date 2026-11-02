@@ -1,7 +1,7 @@
 /**
  * The one STOP button, an antd solid danger button in the large size: sends the stop request and can be pressed
- * whenever the laser is connected. It shows its Esc shortcut, and keeps a red outline while disconnected, so it never
- * looks like the grey Reset and Unlock buttons.
+ * whenever the laser is connected. It shows its Esc shortcut. While disconnected it looks disabled, grey with a dark
+ * red outline, so it only looks armed when a press can stop the laser.
  *
  * @author michael.morosov
  *

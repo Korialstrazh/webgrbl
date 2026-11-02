@@ -38,3 +38,14 @@ body {
 .ant-splitter-bar-dragger::before {
   transition: background-color 0.12s;
 }
+
+// antd colours outlined and text danger buttons with colorError, the dark red behind the light text of solid danger
+// buttons, which is only 2.6:1 on a surface. Their text and outline take the lighter danger text colour instead (5.4:1
+// or more on every surface); solid danger buttons and disabled ones keep their own colours.
+.ant-btn.ant-btn-dangerous:not(.ant-btn-variant-solid, :disabled) {
+  color: var(--color-danger-text);
+}
+
+.ant-btn.ant-btn-dangerous.ant-btn-variant-outlined:not(:disabled) {
+  border-color: var(--color-danger-text);
+}

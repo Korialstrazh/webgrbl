@@ -23,6 +23,7 @@ const COLOR_TOKEN_SOURCES = [
   ['colorErrorText', '--color-danger-text'],
   ['colorTextDisabled', '--color-disabled-text'],
   ['colorBgContainerDisabled', '--color-disabled-bg'],
+  ['colorBorderDisabled', '--color-disabled-border'],
   ['colorWarning', '--color-warning'],
   ['colorSuccess', '--color-success'],
   ['colorInfo', '--color-info'],
@@ -46,6 +47,11 @@ const BUTTON_TOKEN_SOURCES = [
   ['defaultBg', '--color-surface-2'],
   ['defaultHoverBg', '--color-surface-hover'],
   ['defaultActiveBg', '--color-surface-active'],
+  ['borderColorDisabled', '--color-disabled-border'],
+] as const;
+const MENU_TOKEN_SOURCES = [
+  ['itemSelectedBg', '--color-surface-3'],
+  ['itemSelectedColor', '--color-text'],
 ] as const;
 const SWITCH_TOKEN_SOURCES = [
   ['colorPrimary', '--color-accent'],
@@ -91,6 +97,7 @@ const switchTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Switch
 const sliderTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Slider };
 const selectTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Select };
 const splitterTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Splitter };
+const menuTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Menu };
 
 const requireScssToken = (name: string): string => {
   const value: string | undefined = getScssTokenValue(source, name);
@@ -163,5 +170,9 @@ describe('ANTD_THEME', () => {
 
   it.each(SPLITTER_TOKEN_SOURCES)('paints the splitter %s from %s', (splitterToken: string, scssToken: string) => {
     expect(splitterTokens[splitterToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(MENU_TOKEN_SOURCES)('paints the menu %s from %s', (menuToken: string, scssToken: string) => {
+    expect(menuTokens[menuToken]).toBe(requireScssToken(scssToken));
   });
 });
