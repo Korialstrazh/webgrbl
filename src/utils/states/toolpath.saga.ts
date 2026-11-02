@@ -29,6 +29,7 @@ import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
+import { EVERY_ACTION_PATTERN } from '../redux.saga.constants';
 import { BedDrawablesCache } from '../toolpath/bed.drawables.cache';
 import { GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
 import { getGcodeExportContext } from '../toolpath/get.gcode.export.context';
@@ -43,14 +44,7 @@ import { logToolpathGenerationError } from '../toolpath/log.toolpath.generation.
 import type { Action } from './action';
 import { selectGrblSettings } from './grbl.connection.state';
 import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
-import {
-  ActiveMachineProfileSelected,
-  MachineProfileDeleted,
-  MachineProfileSaved,
-  MachineProfilesImported,
-  MachineProfilesLoaded,
-  selectActiveMachineProfile,
-} from './machine.profile.state';
+import { selectActiveMachineProfile } from './machine.profile.state';
 import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 import {
   ProjectDocumentLoaded,
@@ -82,13 +76,6 @@ import type { ToolpathStatus } from './toolpath.status.constants';
 
 // Only the newest progress matters, so older ones the saga has not put yet are dropped.
 const PROGRESS_BUFFER_SIZE = 1;
-const MACHINE_PROFILE_ACTION_TYPES: string[] = [
-  MachineProfilesLoaded.type,
-  MachineProfileSaved.type,
-  MachineProfileDeleted.type,
-  ActiveMachineProfileSelected.type,
-  MachineProfilesImported.type,
-];
 const TOOLPATH_INPUT_CHANGE_ACTION_TYPES: string[] = [
   ...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES,
   ToolpathMachineAreaChanged.type,
@@ -101,12 +88,16 @@ const hasMachineAreaChanged = (machineArea: ToolpathMachineArea, lastMachineArea
   || machineArea.workAreaYMm !== lastMachineArea.workAreaYMm
   || machineArea.originCorner !== lastMachineArea.originCorner;
 
-/** A profile save that keeps the work area and origin (a jog speed, a name) leaves the toolpath current. */
+/**
+ * Watches the derived machine area, not a list of actions: with no active profile it follows a connect, a disconnect
+ * and the $130/$131 settings, so it is checked after every action. A change that keeps the work area and origin (a
+ * jog speed, a profile name, a status report) leaves the toolpath current.
+ */
 function* watchToolpathMachineArea(): Generator {
   let lastMachineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
 
   while (true) {
-    yield take(MACHINE_PROFILE_ACTION_TYPES);
+    yield take(EVERY_ACTION_PATTERN);
 
     const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
 

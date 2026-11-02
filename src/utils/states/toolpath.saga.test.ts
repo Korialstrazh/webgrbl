@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as downloadModule from '../browser/download.text.file';
 import { getLayerKey } from '../layers/get.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { GRBL_CONNECTION_STATUS, GRBL_SETTING_X_MAX_TRAVEL, GRBL_SETTING_Y_MAX_TRAVEL } from '../grbl/grbl.constants';
+import type { GrblConnectionInfo } from '../grbl/interfaces/GrblConnectionInfo';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
@@ -20,6 +22,7 @@ import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
 import type { ObjectWarning } from '../toolpath/interfaces/ObjectWarning';
 import { AnsweringToolpathWorker } from '../toolpath/test.support/answering.toolpath.worker';
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
+import { ConnectionEstablished, ConnectionStatusChanged } from './grbl.connection.state';
 import type { AppToast } from './interfaces/AppToast';
 import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
 import { ActiveMachineProfileSelected, MachineProfileSaved, selectActiveMachineProfile } from './machine.profile.state';
@@ -66,6 +69,17 @@ const RED_SQUARE_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/></svg>';
 const RENAMED_PROFILE_NAME = 'Renamed laser';
 const NUDGE_STEP_MM = 1;
+const REPORTED_X_TRAVEL_MM = 250;
+const REPORTED_Y_TRAVEL_MM = 180;
+const REPORTED_CONNECTION_INFO: GrblConnectionInfo = {
+  identity: { firmwareName: 'Grbl', version: '1.1h', vendorText: '' },
+  rxBufferSize: 127,
+  settings: {
+    [GRBL_SETTING_X_MAX_TRAVEL]: String(REPORTED_X_TRAVEL_MM),
+    [GRBL_SETTING_Y_MAX_TRAVEL]: String(REPORTED_Y_TRAVEL_MM),
+  },
+  buildInfoLines: [],
+};
 const NARROW_WORK_AREA_MM = 100;
 const WIDE_WORK_AREA_MM = 400;
 const WIDE_AREA_OBJECT_X_MM = 200;
@@ -491,5 +505,25 @@ describe(watchToolpath.name, () => {
     expect(gcodeXs.length).toBeGreaterThan(0);
     expect(Math.min(...gcodeXs)).toBeGreaterThanOrEqual(0);
     expect(Math.max(...gcodeXs)).toBeLessThanOrEqual(WIDE_WORK_AREA_MM);
+  });
+
+  it('marks a ready toolpath stale when a connect or disconnect changes the work area without a profile', async () => {
+    const store: AppStore = await newGcodeExportTestStore({ activeProfile: undefined });
+
+    // A stored but inactive profile keeps the connect from creating and selecting one.
+    store.dispatch(new MachineProfileSaved({ profile: newMachineProfile() }));
+    store.dispatch(new ConnectionEstablished({ connectionInfo: REPORTED_CONNECTION_INFO }));
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+    store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
+
+    expect(selectToolpathMachineArea(store.getState()).workAreaXMm).toBe(REPORTED_X_TRAVEL_MM);
+    expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.STALE);
+
+    store.dispatch(new ToolpathRequested());
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+    store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }));
+
+    expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.STALE);
   });
 });

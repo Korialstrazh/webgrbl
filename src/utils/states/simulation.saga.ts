@@ -11,11 +11,9 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { put, select, takeEvery } from 'redux-saga/effects';
+import { EVERY_ACTION_PATTERN } from '../redux.saga.constants';
 import { SimulationPaused, selectIsSimulationPlaying } from './simulation.state';
 import { selectIsSimulationPlayable } from './toolpath.timeline.selectors';
-
-// Every action, not a list: playability can change after any reducer pass, so it is checked after each one.
-const EVERY_ACTION_PATTERN = '*';
 
 function* pauseUnplayableSimulation(): Generator {
   const isPlaying: boolean = (yield select(selectIsSimulationPlaying)) as boolean;
@@ -31,6 +29,7 @@ function* pauseUnplayableSimulation(): Generator {
   }
 }
 
+// Every action, not a list: playability can change after any reducer pass, so it is checked after each one.
 export function* watchSimulation(): Generator {
   yield takeEvery(EVERY_ACTION_PATTERN, pauseUnplayableSimulation);
 }
