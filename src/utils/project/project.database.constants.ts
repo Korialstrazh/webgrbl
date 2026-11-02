@@ -35,6 +35,8 @@ export const WEBGRBL_DATABASE_SCHEMA: Record<string, string> = {
 
 export const APP_STATE_KEY = {
   LAST_OPENED_PROJECT_ID: 'lastOpenedProjectId',
+  /** The workbench panel sizes the user set, as a JSON list of percentages. */
+  PANEL_SIZES: 'panelSizes',
 } as const;
 
 export type AppStateKey = (typeof APP_STATE_KEY)[keyof typeof APP_STATE_KEY];

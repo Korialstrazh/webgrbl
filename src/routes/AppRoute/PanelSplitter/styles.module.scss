@@ -1,0 +1,10 @@
+// The splitter takes the whole regions area; each panel lays out the one region it holds to fill it.
+.panelSplitter {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.splitterPanel {
+  display: flex;
+}

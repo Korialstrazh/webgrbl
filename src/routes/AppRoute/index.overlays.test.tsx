@@ -48,7 +48,8 @@ interface RenderedWorkbench {
   countStopRequests: () => number;
 }
 
-const renderWorkbench = (overlayComponent: ReactNode): RenderedWorkbench => {
+/** Renders the workbench and waits for its regions; in a wide window they wait for the stored panel sizes. */
+const renderWorkbench = async (overlayComponent: ReactNode): Promise<RenderedWorkbench> => {
   const store: AppStore = newStore();
   const dispatchSpy = vi.spyOn(store, 'dispatch');
 
@@ -63,6 +64,8 @@ const renderWorkbench = (overlayComponent: ReactNode): RenderedWorkbench => {
   act(() => {
     store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
   });
+
+  await screen.findByRole('main');
 
   const countStopRequests = (): number =>
     dispatchSpy.mock.calls.filter(([action]) => action instanceof MachineStopRequested).length;
@@ -96,10 +99,11 @@ describe.each([
     newOverlayComponent: newTestDrawer,
   },
 ])('AppRoute with a bed region $overlayName open', ({ title, rootSelector, maskSelector, newOverlayComponent }) => {
-  it.each([true, false])('keeps STOP outside the overlay and clickable (wide: %s)', (isWide: boolean) => {
+  it.each([true, false])('keeps STOP outside the overlay and clickable (wide: %s)', async (isWide: boolean) => {
     setMatchMediaMatches(isWide);
 
-    const { countStopRequests } = renderWorkbench(newOverlayComponent(vi.fn()));
+    const { countStopRequests } = await renderWorkbench(newOverlayComponent(vi.fn()));
+    await screen.findByRole('dialog', { name: title });
     const overlayRoot: HTMLElement = getOverlayRoot(rootSelector);
     const stopButton: HTMLElement = screen.getByRole('button', { name: STOP_LABEL });
 
@@ -114,9 +118,9 @@ describe.each([
     expect(countStopRequests()).toBe(1);
   });
 
-  it('asks to close on Escape without stopping the machine', () => {
+  it('asks to close on Escape without stopping the machine', async () => {
     const closeSpy = vi.fn();
-    const { store, countStopRequests } = renderWorkbench(newOverlayComponent(closeSpy));
+    const { store, countStopRequests } = await renderWorkbench(newOverlayComponent(closeSpy));
 
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
 

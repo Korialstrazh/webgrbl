@@ -46,6 +46,7 @@ The toast names the file and shows once per file, however many things were remov
 | Project name, times, object transforms, layers | IndexedDB database `webgrbl`, table `projects` | every autosave |
 | SVG text of each object | table `svgAssets`, key `[projectId+objectId]` | once, the first save that holds the object |
 | Id of the last opened project | table `appState` | when a project opens |
+| Workbench panel sizes (percentages) | table `appState`, key `panelSizes` | when a panel resize ends |
 | Machine profiles | `localStorage` (see `docs/howto/machine-control.md`) | not part of a project |
 
 The split keeps an autosave after a nudge small: only the project row is rewritten. A save never deletes SVG rows, because undo can bring a removed object back. Unused rows are deleted when a project opens and, for the project that was closed, right after the next one is on screen (the history is empty or gone then).

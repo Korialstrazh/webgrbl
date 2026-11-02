@@ -6,6 +6,15 @@ The app is one screen, the Workbench, made of five regions plus overlays. This p
 
 `AppRoute` (`src/routes/AppRoute/`) composes the regions. From 1280 px they sit side by side (antd flex Layout); narrower they stack.
 
+From 1280 px the design panel, the bed and the machine panel sit in an antd `Splitter` (`src/routes/AppRoute/PanelSplitter/`): the user drags the bars between them to resize them. The top bar and the status strip are not part of it.
+
+- Defaults: the design panel 17.5 rem, the machine panel 22 rem, the bed takes the rest (`DESIGN_PANEL_DEFAULT_WIDTH_REM`, `MACHINE_PANEL_DEFAULT_WIDTH_REM` in `src/utils/layout.constants.ts`, matching `layout.scss`).
+- Minimum widths: design 14 rem, bed 20 rem, machine 18 rem (`*_MIN_WIDTH_REM`), turned into pixels with the root font size, so they follow the user's font size.
+- When a drag ends, the sizes are stored as percentages of the workbench width in IndexedDB (table `appState`, key `panelSizes`, `PANEL_SIZES_REPOSITORY`), through `PanelSizesResized` and `panel.layout.saga.ts`. They are not stored on every move.
+- At start the saga reads them (`PanelSizesLoaded`); the wide workbench waits for that read, so it opens with the stored sizes instead of jumping from the defaults. A stored value with the wrong count, a number that is not finite or not above 0, or a sum more than 1 away from 100 is ignored, and the defaults apply. A failed read or write is logged and the defaults or the current sizes stay.
+- The console overlay sits outside the splitter, so `AppRoute` puts the side column widths into `--design-column-width` and `--machine-column-width` on the workbench element, while dragging and after loading; the overlay lines up with them.
+- Below 1280 px there is no splitter: the regions stack as before. Crossing the breakpoint mounts the panels again.
+
 | Region | Container | Holds |
 | --- | --- | --- |
 | Top bar | `TopBar` | title, project and menus (coming soon), undo/redo, autosave, update prompt, `ConnectionPill` with its `ConnectionPopover` |
@@ -59,7 +68,7 @@ Exactly one STOP is rendered: `StopButton`, an antd `Button` with `type="primary
 - New colours must keep 4.5:1 text contrast (`tokens.contrast.test.ts`).
 - Inter and JetBrains Mono are self-hosted in `src/styles/fonts/` (`fonts.scss`); do not load fonts from a CDN, the app works offline.
 - antd components get the same look through `ANTD_THEME` (`src/utils/theme/antd.theme.ts`), whose values mirror `tokens.scss` (checked by `antd.theme.test.ts`). A new colour used by antd goes into both files.
-- Panel widths shared with overlays (the console overlay avoids the machine panel) live in `src/styles/layout.scss`.
+- The default panel widths live in `src/styles/layout.scss`; the console overlay reads the current column widths from `--design-column-width` and `--machine-column-width`, which default to them.
 
 ## Bed sizing
 

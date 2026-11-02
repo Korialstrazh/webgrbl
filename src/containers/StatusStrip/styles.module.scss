@@ -57,12 +57,13 @@
 }
 
 // The status strip spans the full width, so in a wide window the console covers only the bed's lower part: it starts
-// at the design panel's right edge and stops short of the machine panel and STOP.
+// at the design column's right edge and stops short of the machine column and STOP. The column widths follow the
+// panel sizes the user set with the splitter.
 // 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
 @media (min-width: 80rem) {
   .consoleOverlay {
-    right: layout.$machine-panel-width;
-    left: layout.$design-panel-width;
+    right: var(--machine-column-width);
+    left: var(--design-column-width);
   }
 }
 

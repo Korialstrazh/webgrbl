@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { AppRoute } from '.';
+import { DESIGN_COLUMN_WIDTH_PROPERTY, MACHINE_COLUMN_WIDTH_PROPERTY } from '../../utils/layout.constants';
+import { PANEL_SIZES_REPOSITORY } from '../../utils/project/panel.sizes.repository';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 import { newStore } from '../../utils/states/new.store';
 
@@ -18,7 +20,9 @@ const HEADER_CLASS_NAME = 'ant-layout-header';
 const SIDER_CLASS_NAME = 'ant-layout-sider';
 const CONTENT_CLASS_NAME = 'ant-layout-content';
 const FOOTER_CLASS_NAME = 'ant-layout-footer';
-const HAS_SIDER_CLASS_NAME = 'ant-layout-has-sider';
+const SPLITTER_SELECTOR = '.ant-splitter';
+const SPLITTER_PANEL_SELECTOR = '.ant-splitter-panel';
+const STORED_PERCENTS: number[] = [20, 50, 30];
 
 const renderAppRoute = (): HTMLElement => {
   const { container } = render(
@@ -30,7 +34,16 @@ const renderAppRoute = (): HTMLElement => {
   return container.firstElementChild as HTMLElement;
 };
 
-const getRegionsLayout = (): HTMLElement => screen.getByRole('main').parentElement as HTMLElement;
+/** In a wide window the regions wait for the stored panel sizes, which IndexedDB reads asynchronously. */
+const waitForRegions = async (): Promise<void> => {
+  await screen.findByRole('main');
+};
+
+const getSplitterPanels = (): HTMLElement[] =>
+  Array.from(document.querySelectorAll<HTMLElement>(SPLITTER_PANEL_SELECTOR));
+
+const getSplitterPanelFlexBases = (): string[] =>
+  getSplitterPanels().map((splitterPanel: HTMLElement): string => splitterPanel.style.flexBasis);
 
 // Testing Library counts every header as a banner, including the one inside the console section.
 const getTopBar = (): HTMLElement =>
@@ -49,8 +62,9 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('heading', { level: 1, name: APP_TITLE })).toBeInTheDocument();
   });
 
-  it('renders all five regions', () => {
+  it('renders all five regions', async () => {
     renderAppRoute();
+    await waitForRegions();
 
     expect(getTopBar()).toBeInTheDocument();
     expect(screen.getByRole('complementary', { name: DESIGN_PANEL_LABEL })).toBeInTheDocument();
@@ -67,8 +81,9 @@ describe(AppRoute.name, () => {
     expect(within(screen.getByRole('contentinfo')).getByRole('heading', { name: CONSOLE_TITLE })).toBeInTheDocument();
   });
 
-  it('wide layout renders exactly one STOP, in the machine panel', () => {
+  it('wide layout renders exactly one STOP, in the machine panel', async () => {
     renderAppRoute();
+    await waitForRegions();
 
     const stopButtons: HTMLElement[] = getStopButtons();
     const [stopButton] = stopButtons;
@@ -88,8 +103,9 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL })).not.toContainElement(stopButton ?? null);
   });
 
-  it('crossing the breakpoint keeps exactly one STOP', () => {
+  it('crossing the breakpoint keeps exactly one STOP', async () => {
     renderAppRoute();
+    await waitForRegions();
 
     setMatchMediaMatches(false);
     expect(getStopButtons()).toHaveLength(ONLY_STOP_COUNT);
@@ -98,15 +114,16 @@ describe(AppRoute.name, () => {
     expect(getStopButtons()).toHaveLength(ONLY_STOP_COUNT);
   });
 
-  it('builds the workbench from antd Layout landmarks', () => {
+  it('builds the workbench from antd Layout landmarks', async () => {
     renderAppRoute();
+    await waitForRegions();
 
     expect(getTopBar()).toHaveClass(HEADER_CLASS_NAME);
     expect(screen.getByRole('complementary', { name: DESIGN_PANEL_LABEL })).toHaveClass(SIDER_CLASS_NAME);
     expect(screen.getByRole('main')).toHaveClass(CONTENT_CLASS_NAME);
     expect(screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL })).toHaveClass(SIDER_CLASS_NAME);
     expect(screen.getByRole('contentinfo')).toHaveClass(FOOTER_CLASS_NAME);
-    expect(getRegionsLayout()).toHaveClass(LAYOUT_CLASS_NAME);
+    expect(screen.getByRole('main').closest(SPLITTER_SELECTOR)?.parentElement).toHaveClass(LAYOUT_CLASS_NAME);
   });
 
   it('fits the root layout to the window so only the inner regions scroll', () => {
@@ -118,12 +135,55 @@ describe(AppRoute.name, () => {
     expect(rootElement).toContainElement(screen.getByRole('contentinfo'));
   });
 
-  it('places the panels side by side only in the wide layout', () => {
+  it('places the panels in a resizable splitter only in the wide layout', async () => {
     renderAppRoute();
+    await waitForRegions();
 
-    expect(getRegionsLayout()).toHaveClass(HAS_SIDER_CLASS_NAME);
+    const splitterPanels: HTMLElement[] = getSplitterPanels();
+
+    expect(splitterPanels).toHaveLength(STORED_PERCENTS.length);
+    expect(splitterPanels[0]).toContainElement(screen.getByRole('complementary', { name: DESIGN_PANEL_LABEL }));
+    expect(splitterPanels[1]).toContainElement(screen.getByRole('main'));
+    expect(splitterPanels[2]).toContainElement(screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL }));
 
     setMatchMediaMatches(false);
-    expect(getRegionsLayout()).not.toHaveClass(HAS_SIDER_CLASS_NAME);
+
+    expect(document.querySelector(SPLITTER_SELECTOR)).not.toBeInTheDocument();
+    expect(screen.getByRole('main')).toBeInTheDocument();
+  });
+
+  it('opens the splitter with the stored panel sizes', async () => {
+    await PANEL_SIZES_REPOSITORY.setPanelSizePercents(STORED_PERCENTS);
+    renderAppRoute();
+    await waitForRegions();
+
+    expect(getSplitterPanelFlexBases()).toEqual(['20%', '50%', '30%']);
+  });
+
+  it('opens the splitter with the fixed side panel widths when no sizes are stored', async () => {
+    renderAppRoute();
+    await waitForRegions();
+
+    expect(getSplitterPanelFlexBases()).toEqual(['280px', 'auto', '352px']);
+  });
+
+  it('shows no panels in a wide window until the stored sizes are read, so they never jump', async () => {
+    await PANEL_SIZES_REPOSITORY.setPanelSizePercents(STORED_PERCENTS);
+    renderAppRoute();
+
+    expect(screen.queryByRole('main')).not.toBeInTheDocument();
+
+    await waitForRegions();
+
+    expect(getSplitterPanelFlexBases()).toEqual(['20%', '50%', '30%']);
+  });
+
+  it('lines the console overlay up with the stored column widths', async () => {
+    await PANEL_SIZES_REPOSITORY.setPanelSizePercents(STORED_PERCENTS);
+    const rootElement: HTMLElement = renderAppRoute();
+    await waitForRegions();
+
+    expect(rootElement.style.getPropertyValue(DESIGN_COLUMN_WIDTH_PROPERTY)).toBe('20%');
+    expect(rootElement.style.getPropertyValue(MACHINE_COLUMN_WIDTH_PROPERTY)).toBe('30%');
   });
 });

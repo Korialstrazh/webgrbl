@@ -17,6 +17,7 @@ import { LASER_POINTER_STATE_NAME, laserPointerReducer } from './laser.pointer.s
 import { MACHINE_PROFILE_STATE_NAME, machineProfileReducer } from './machine.profile.state';
 import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
 import { PALETTE_STATE_NAME, paletteReducer } from './palette.state';
+import { PANEL_LAYOUT_STATE_NAME, panelLayoutReducer } from './panel.layout.state';
 import { PROJECT_DOCUMENT_STATE_NAME, projectDocumentReducer } from './project.document.state';
 import { PROJECT_SELECTION_STATE_NAME, projectSelectionReducer } from './project.selection.state';
 import { PROJECT_STATE_NAME, projectReducer } from './project.state';
@@ -31,6 +32,7 @@ export const rootReducer = combineReducers({
   [MACHINE_STATUS_STATE_NAME]: machineStatusReducer,
   [MACHINE_PROFILE_STATE_NAME]: machineProfileReducer,
   [PALETTE_STATE_NAME]: paletteReducer,
+  [PANEL_LAYOUT_STATE_NAME]: panelLayoutReducer,
   [LASER_POINTER_STATE_NAME]: laserPointerReducer,
   [PROJECT_DOCUMENT_STATE_NAME]: projectDocumentReducer,
   [PROJECT_SELECTION_STATE_NAME]: projectSelectionReducer,
