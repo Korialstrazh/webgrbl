@@ -11,7 +11,15 @@
   backdrop-filter: none;
 }
 
-// The drawer edge continues the panel border it opens from, so drawer and panel read as one surface.
+// A neutral surface edge: the drawer edge continues the panel border it opens from, and a soft shadow lifts it off the
+// bed. Orange stays for the selected layer row it belongs to.
 .drawerSection {
   border-inline: 1px solid var(--color-border);
+  box-shadow: 0.5rem 0 1.5rem rgb(0 0 0 / 35%);
+}
+
+// antd focuses the drawer root, which spans the whole bed region with its clear mask; a ring around that box would mark
+// the bed, not the drawer, so the drawer panel and its controls carry the focus instead.
+.bedRegionDrawer:global(.ant-drawer):focus-visible {
+  outline: none;
 }

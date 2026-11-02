@@ -93,7 +93,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   }));
 
   return (
-    <Layout.Content ref={hostRef} className={styles.bedPanel}>
+    <Layout.Content className={styles.bedPanel}>
       {/* A plain heading, read by screen readers only: the panel's controls already say what it is. */}
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       <div className={styles.header}>
@@ -135,39 +135,42 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           />
         </div>
       </div>
-      <div
-        className={dropArea.isDropTarget ? [styles.bed, styles.dropTarget].join(' ') : styles.bed}
-        data-testid={BED_DROP_AREA_TEST_ID}
-        data-drop-target={dropArea.isDropTarget}
-        // The chosen bed colour and the set of mark colours that stays legible on it; both change at run time.
-        data-bed-tone={getBedOverlayTone(bedColour)}
-        // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
-        style={bedSurfaceStyle}
-        onDragOver={dropArea.handleDragOver}
-        onDragLeave={dropArea.handleDragLeave}
-        onDrop={dropArea.handleDrop}
-      >
-        <BedViewport
-          // A new bed size starts a new view, fitted to the new bed.
-          key={[dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR)}
-          dimensions={dimensions}
-          isWide={isWide}
-          controlsHost={viewControlsHost}
-          // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
-          // add a second crosshair.
-          headPosition={isToolpathView ? undefined : status?.machinePosition}
-          workOriginPosition={isToolpathView ? undefined : status?.workCoordinateOffset}
-          placeholderLabel={placeholderKey && t(placeholderKey)}
+      {/* The region dialogs and drawers open in: everything below the header, so they never cover the toolbar. */}
+      <div ref={hostRef} className={styles.bedBody}>
+        <div
+          className={dropArea.isDropTarget ? [styles.bed, styles.dropTarget].join(' ') : styles.bed}
+          data-testid={BED_DROP_AREA_TEST_ID}
+          data-drop-target={dropArea.isDropTarget}
+          // The chosen bed colour and the set of mark colours that stays legible on it; both change at run time.
+          data-bed-tone={getBedOverlayTone(bedColour)}
+          // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
+          style={bedSurfaceStyle}
+          onDragOver={dropArea.handleDragOver}
+          onDragLeave={dropArea.handleDragLeave}
+          onDrop={dropArea.handleDrop}
         >
-          {isToolpathView ? (
-            <ToolpathLayer dimensions={dimensions} displayMode={toolpathDisplayMode} isTravelShown={isTravelShown} />
-          ) : (
-            <BedObjects dimensions={dimensions} activeTool={activeTool} />
-          )}
-        </BedViewport>
-        {isToolpathView && <ToolpathStatusOverlay />}
+          <BedViewport
+          // A new bed size starts a new view, fitted to the new bed.
+            key={[dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR)}
+            dimensions={dimensions}
+            isWide={isWide}
+            controlsHost={viewControlsHost}
+            // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
+            // add a second crosshair.
+            headPosition={isToolpathView ? undefined : status?.machinePosition}
+            workOriginPosition={isToolpathView ? undefined : status?.workCoordinateOffset}
+            placeholderLabel={placeholderKey && t(placeholderKey)}
+          >
+            {isToolpathView ? (
+              <ToolpathLayer dimensions={dimensions} displayMode={toolpathDisplayMode} isTravelShown={isTravelShown} />
+            ) : (
+              <BedObjects dimensions={dimensions} activeTool={activeTool} />
+            )}
+          </BedViewport>
+          {isToolpathView && <ToolpathStatusOverlay />}
+        </div>
+        {isToolpathView && <SimulationPlaybackBar />}
       </div>
-      {isToolpathView && <SimulationPlaybackBar />}
       <ToastStack isWide={isWide} />
     </Layout.Content>
   );

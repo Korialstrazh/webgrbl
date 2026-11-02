@@ -50,7 +50,6 @@ export const LayerSettingsDrawer = (props: LayerSettingsDrawerProps): ReactNode 
       isOpen={Boolean(layer)}
       overlayIdPrefix={LAYER_SETTINGS_DRAWER_OVERLAY_ID}
       title={titleComponent}
-      className={styles.layerSettingsDrawer}
       placement={ANTD_DRAWER_PLACEMENT_LEFT}
       size={LAYER_SETTINGS_DRAWER_WIDTH}
       focusable={LAYER_SETTINGS_DRAWER_FOCUS}

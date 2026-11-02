@@ -228,6 +228,21 @@ describe(BedPanel.name, () => {
     expect(within(zoomGroup).getByRole('button', { name: /^Fit the bed/ })).toBeInTheDocument();
   });
 
+  it('hands the drawer region below the header, so a drawer never covers the bed toolbar', () => {
+    let regionElement: HTMLDivElement | null = null;
+
+    render(
+      <Provider store={newStore()}>
+        <BedPanel hostRef={(element: HTMLDivElement | null) => {
+          regionElement = element;
+        }} isWide />
+      </Provider>,
+    );
+
+    expect(regionElement).toContainElement(screen.getByTestId(BED_DROP_AREA_TEST_ID));
+    expect(regionElement).not.toContainElement(screen.getByRole('radiogroup', { name: 'Bed view' }));
+  });
+
   it('offers Select and Move as an active tool switch with Select chosen', () => {
     renderPanel(newStore());
 
