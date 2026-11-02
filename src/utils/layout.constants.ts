@@ -46,8 +46,11 @@ export const PANEL_SIZE_PERCENT_SUM_TOLERANCE = 1;
 /** The bed above the console never gets lower than this, so the bed drawing and the playback bar stay visible. */
 export const BED_PANEL_MIN_HEIGHT_REM = 22;
 
-/** The console never gets lower than this, so a few lines and the command input stay visible. */
-export const CONSOLE_PANEL_MIN_HEIGHT_REM = 7.5;
+/**
+ * The console never gets lower than this: its padding, header, three log lines (the log's own minimum height in the
+ * ConsolePanel stylesheet), the gaps and the command input, so no line is cut through.
+ */
+export const CONSOLE_PANEL_MIN_HEIGHT_REM = 11.5;
 
 /** Height of the console, in percent of the bed column, until the user resizes it. */
 export const CONSOLE_PANEL_DEFAULT_SIZE_PERCENT = 30;
