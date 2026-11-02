@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Form, Input, InputNumber, Select, Switch } from 'antd';
+import { Button, Form, Input, InputNumber, Select, Switch, Tooltip } from 'antd';
 import { useId, useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,7 +47,11 @@ const PROFILE_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
   { field: 'maxPowerWatts', labelKey: DEFAULT.MACHINE_PROFILES_FIELD_MAX_POWER },
   { field: 'workAreaXMm', labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_X },
   { field: 'workAreaYMm', labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_Y },
-  { field: 'sValueMax', labelKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX },
+  {
+    field: 'sValueMax',
+    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX,
+    hintKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX_HINT,
+  },
   { field: 'jogFeedRate', labelKey: DEFAULT.MACHINE_PROFILES_FIELD_JOG_FEED_RATE },
 ];
 
@@ -117,8 +121,14 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
           />
         </Form.Item>
         <div className={styles.numberFields}>
-          {PROFILE_NUMBER_FIELDS.map(({ field, labelKey }: ProfileNumberFieldDefinition) => (
-            <Form.Item key={field} label={t(labelKey)} htmlFor={getFieldId(field)} {...getFieldStatus(field)}>
+          {PROFILE_NUMBER_FIELDS.map(({ field, labelKey, hintKey }: ProfileNumberFieldDefinition) => (
+            <Form.Item
+              key={field}
+              label={t(labelKey)}
+              tooltip={hintKey && t(hintKey)}
+              htmlFor={getFieldId(field)}
+              {...getFieldStatus(field)}
+            >
               <InputNumber
                 id={getFieldId(field)}
                 className={styles.numberInput}
@@ -152,9 +162,14 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
         </label>
         {reportedLaserValues && <LaserReadingAlerts reportedValues={reportedLaserValues} />}
         <div className={styles.actions}>
-          <Button disabled={!isConnected} onClick={readDraftFromLaser}>
-            {t(DEFAULT.MACHINE_PROFILES_READ_FROM_LASER)}
-          </Button>
+          <Tooltip title={isConnected ? undefined : t(DEFAULT.MACHINE_PROFILES_READ_NEEDS_CONNECTION)}>
+            {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}
+            <span className={styles.readButtonWrapper}>
+              <Button disabled={!isConnected} onClick={readDraftFromLaser}>
+                {t(DEFAULT.MACHINE_PROFILES_READ_FROM_LASER)}
+              </Button>
+            </span>
+          </Tooltip>
           <Button type={ANTD_BUTTON_TYPE_PRIMARY} onClick={saveDraft}>{t(DEFAULT.MACHINE_PROFILES_SAVE)}</Button>
         </div>
       </div>

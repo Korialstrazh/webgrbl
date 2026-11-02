@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { StatusStrip } from '.';
 import { BED_CURSOR_STORE } from '../../utils/bed/bed.cursor.store';
@@ -26,7 +26,7 @@ const MISSING_VALUE_TEXT = '\u2014';
 const CURSOR_POINT = { xMm: 123.45, yMm: 6.7 };
 const CURSOR_TEXT = 'X 123.5 Y 6.7 mm';
 const JOB_SIZE_TEXT = '196.0 \u00D7 196.6 mm';
-const JOB_SIZE_HINT_TEXT = 'Open the Toolpath view';
+const JOB_SIZE_HINT_TEXT = 'The job size is worked out in the Toolpath view.';
 const FRAME_TIME_MS = 16;
 const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
@@ -106,10 +106,14 @@ describe(StatusStrip.name, () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows a short hint in place of the job size until the toolpath has been worked out', () => {
+  it('shows a dash for the job size, with the reason in a tooltip, until a toolpath is ready', async () => {
     renderStatusStrip();
+    const jobSizeValue: HTMLElement = within(screen.getByText(JOB_SIZE_LABEL).closest('div') ?? document.body)
+      .getByText(MISSING_VALUE_TEXT);
 
-    expect(screen.getByText(JOB_SIZE_LABEL).closest('div')).toHaveTextContent(`${JOB_SIZE_LABEL}${JOB_SIZE_HINT_TEXT}`);
+    fireEvent.focus(jobSizeValue);
+
+    expect(await screen.findByText(JOB_SIZE_HINT_TEXT)).toBeInTheDocument();
   });
 
   it('shows the size of the ready toolpath as the job size', () => {

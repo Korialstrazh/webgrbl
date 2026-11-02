@@ -15,4 +15,6 @@ export interface ProfileNumberFieldDefinition {
   field: keyof Pick<MachineProfile, 'maxPowerWatts' | 'workAreaXMm' | 'workAreaYMm' | 'sValueMax' | 'jogFeedRate'>;
   /** Localization key of the field label. */
   labelKey: string;
+  /** Localization key of a short explanation of a GRBL term in the label, shown from an info icon. */
+  hintKey?: string;
 }

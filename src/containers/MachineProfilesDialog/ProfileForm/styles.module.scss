@@ -37,3 +37,8 @@
   justify-content: flex-end;
   gap: var(--space-2);
 }
+
+// Takes the hover for the tooltip that says why the disabled button cannot read yet.
+.readButtonWrapper {
+  display: inline-flex;
+}

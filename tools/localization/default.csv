@@ -11,6 +11,11 @@ BED_ARIA_WORK_ORIGIN;Work zero at X {{x}}, Y {{y}} (machine coordinates)
 BED_ARIA_WORK_ORIGIN_OUTSIDE;Work zero at X {{x}}, Y {{y}} (machine coordinates), outside the bed
 BED_COLOUR_DARK_NOTE;A very dark bed hides black artwork.
 BED_COLOUR_LABEL;Bed colour
+BED_COLOUR_PRESET_DARK_GREY;Dark grey
+BED_COLOUR_PRESET_GREY;Grey (default)
+BED_COLOUR_PRESET_LIGHT_GREY;Light grey
+BED_COLOUR_PRESET_PLYWOOD;Plywood
+BED_COLOUR_PRESET_WHITE;White
 BED_COLOUR_PRESETS;Presets
 BED_COLOUR_RESET;Reset to default
 BED_NO_MACHINE;Connect a machine to see its bed
@@ -219,6 +224,7 @@ MACHINE_PROFILES_ACTIVE;Active
 MACHINE_PROFILES_DELETE;Delete
 MACHINE_PROFILES_DELETE_CANCEL;Cancel
 MACHINE_PROFILES_DELETE_CONFIRM;Delete the profile {{name}}?
+MACHINE_PROFILES_DELETE_LAST_HINT;Keep at least one machine profile. Add another before deleting this one.
 MACHINE_PROFILES_DELETE_OK;Yes, delete
 MACHINE_PROFILES_EXPORT;Export
 MACHINE_PROFILES_FIELD_AIR_ASSIST;Air assist
@@ -228,6 +234,7 @@ MACHINE_PROFILES_FIELD_MAX_POWER;Laser power (W)
 MACHINE_PROFILES_FIELD_NAME;Name
 MACHINE_PROFILES_FIELD_ORIGIN_CORNER;Origin corner
 MACHINE_PROFILES_FIELD_S_VALUE_MAX;Maximum S value ($30)
+MACHINE_PROFILES_FIELD_S_VALUE_MAX_HINT;The S value GRBL treats as full laser power, its setting $30. Usually 1000.
 MACHINE_PROFILES_FIELD_WORK_AREA_X;Work area width (mm)
 MACHINE_PROFILES_FIELD_WORK_AREA_Y;Work area height (mm)
 MACHINE_PROFILES_GRBL_SETTINGS;GRBL settings ($$)...
@@ -242,6 +249,7 @@ MACHINE_PROFILES_ORIGIN_BACK_RIGHT;Back right
 MACHINE_PROFILES_ORIGIN_FRONT_LEFT;Front left
 MACHINE_PROFILES_ORIGIN_FRONT_RIGHT;Front right
 MACHINE_PROFILES_READ_FROM_LASER;Read from connected laser
+MACHINE_PROFILES_READ_NEEDS_CONNECTION;Connect the laser to read its settings.
 MACHINE_PROFILES_READ_NO;no
 MACHINE_PROFILES_READ_NOTHING;The laser reported none of these settings, so the form was not changed.
 MACHINE_PROFILES_READ_SUMMARY;Read from the laser. Press Save to keep these values.
@@ -348,7 +356,7 @@ STATUS_STRIP_CURSOR;Cursor
 STATUS_STRIP_CURSOR_VALUE;X {{x}}  Y {{y}} mm
 STATUS_STRIP_ESTIMATE;Estimate
 STATUS_STRIP_JOB_SIZE;Job size
-STATUS_STRIP_JOB_SIZE_HINT;Open the Toolpath view
+STATUS_STRIP_JOB_SIZE_HINT;The job size is worked out in the Toolpath view.
 STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.

@@ -26,3 +26,21 @@
   font-family: var(--font-ui);
   font-size: 0.75rem;
 }
+
+// A row of named preset buttons, each reachable by Tab, with the current colour marked as pressed.
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.presetButton:global(.ant-btn) {
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.presetButton[aria-pressed='true'] {
+  border-color: var(--color-accent);
+}

@@ -51,6 +51,7 @@ const READ_FROM_LASER_LABEL = 'Read from connected laser';
 const IMPORT_LABEL = 'Import profiles file';
 const EXPORT_LABEL = 'Export';
 const ACTIVE_PATTERN = /Active/;
+const SPARE_PROFILE_NAME = 'Spare laser';
 const WORKSHOP_NAME = 'Workshop laser';
 const GARAGE_NAME = 'Garage laser';
 const FIRST_SAVED_NAME = 'First saved name';
@@ -238,13 +239,26 @@ describe(MachineProfilesDialog.name, () => {
 
   it('deletes the selected profile after the confirmation', () => {
     const store: AppStore = newStore();
+    const spareProfile: MachineProfile = newMachineProfile({ name: SPARE_PROFILE_NAME });
 
     saveProfile(store, { name: WORKSHOP_NAME });
+    act(() => {
+      store.dispatch(new MachineProfileSaved({ profile: spareProfile }));
+    });
     renderDialog(store);
     clickButton(DELETE_LABEL);
     clickButton(DELETE_CONFIRM_LABEL);
 
-    expect(selectMachineProfiles(store.getState())).toEqual([]);
+    expect(selectMachineProfiles(store.getState())).toEqual([spareProfile]);
+  });
+
+  it('keeps Delete disabled for the only profile', () => {
+    const store: AppStore = newStore();
+
+    saveProfile(store, { name: WORKSHOP_NAME });
+    renderDialog(store);
+
+    expect(screen.getByRole('button', { name: DELETE_LABEL })).toBeDisabled();
   });
 
   describe('with the simulated laser', () => {

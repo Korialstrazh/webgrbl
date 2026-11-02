@@ -9,6 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { DEFAULT } from '../localization/default.locales';
+import type { BedColourPreset } from './interfaces/BedColourPreset';
 
 /** The default bed: a mid-to-light grey on which black artwork stays clearly visible (9.2:1). */
 export const DEFAULT_BED_COLOUR = '#a7acb1';
@@ -18,13 +20,13 @@ export const WHITE_BED_COLOUR = '#ffffff';
 export const DARK_GREY_BED_COLOUR = '#3a3e43';
 export const WOOD_BED_COLOUR = '#c8a27a';
 
-/** The presets of the bed colour picker: the default grey, a light grey, white, a dark grey and a wood tone. */
-export const BED_COLOUR_PRESETS: readonly string[] = [
-  DEFAULT_BED_COLOUR,
-  LIGHT_GREY_BED_COLOUR,
-  WHITE_BED_COLOUR,
-  DARK_GREY_BED_COLOUR,
-  WOOD_BED_COLOUR,
+/** The named presets of the bed colour picker: the default grey, a light grey, white, a dark grey and plywood. */
+export const BED_COLOUR_PRESETS: readonly BedColourPreset[] = [
+  { colour: DEFAULT_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_GREY },
+  { colour: LIGHT_GREY_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_LIGHT_GREY },
+  { colour: WHITE_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_WHITE },
+  { colour: DARK_GREY_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_DARK_GREY },
+  { colour: WOOD_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_PLYWOOD },
 ];
 
 /** Which set of mark colours the bed uses: dark marks on a light bed, light marks on a dark bed. */

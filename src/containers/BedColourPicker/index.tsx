@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_COLOR_PICKER_FORMAT_HEX } from '../../utils/antd.constants';
 import { BED_COLOUR_PRESETS, DEFAULT_BED_COLOUR } from '../../utils/bed/bed.colour.constants';
 import { getValidBedColour } from '../../utils/bed/get.valid.bed.colour';
+import type { BedColourPreset } from '../../utils/bed/interfaces/BedColourPreset';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { BedColourChanged, selectBedColour } from '../../utils/states/bed.appearance.state';
 import type { AppDispatch } from '../../utils/states/new.store';
@@ -47,6 +48,27 @@ export const BedColourPicker = (): ReactNode => {
   const renderPanel: BedColourPickerPanelRender = (panelComponent: ReactNode) => (
     <div className={styles.panel}>
       {panelComponent}
+      {/* Our own named buttons: antd's preset swatches have no names and cannot be reached by keyboard. */}
+      <div className={styles.presets} role="group" aria-label={t(DEFAULT.BED_COLOUR_PRESETS)}>
+        {BED_COLOUR_PRESETS.map(({ colour, labelKey }: BedColourPreset) => (
+          <Tooltip key={colour} title={t(labelKey)}>
+            <Button
+              className={styles.presetButton}
+              aria-label={t(labelKey)}
+              aria-pressed={colour === bedColour}
+              onClick={() => changeBedColour(colour)}
+            >
+              {/* A plain swatch of the preset colour, which is data, not a style choice. */}
+              <span
+                className={styles.swatch}
+                aria-hidden="true"
+                // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
+                style={{ backgroundColor: colour }}
+              />
+            </Button>
+          </Tooltip>
+        ))}
+      </div>
       <p className={styles.darkNote}>{t(DEFAULT.BED_COLOUR_DARK_NOTE)}</p>
       <Button block disabled={bedColour === DEFAULT_BED_COLOUR} onClick={() => changeBedColour(DEFAULT_BED_COLOUR)}>
         {t(DEFAULT.BED_COLOUR_RESET)}
@@ -60,7 +82,6 @@ export const BedColourPicker = (): ReactNode => {
       format={ANTD_COLOR_PICKER_FORMAT_HEX}
       disabledAlpha
       disabledFormat
-      presets={[{ label: t(DEFAULT.BED_COLOUR_PRESETS), colors: [...BED_COLOUR_PRESETS], defaultOpen: true }]}
       panelRender={renderPanel}
       onChange={handlePickerChange}
     >

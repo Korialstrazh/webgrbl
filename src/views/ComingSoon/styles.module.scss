@@ -8,13 +8,22 @@
   cursor: not-allowed;
 }
 
-// The disabled control lets the pointer through to the wrapper, which shows the tooltip.
+// The disabled control lets the pointer through to the wrapper, which shows the tooltip. A control that is not built
+// yet is a ghost: no fill, a dashed outline and muted text, so it never reads as one that works.
 .control {
   display: inline-flex;
   min-width: 0;
 
   > * {
     pointer-events: none;
+  }
+
+  > :global(.ant-btn:disabled) {
+    border-style: dashed;
+    border-color: var(--color-border);
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--color-disabled-text);
   }
 }
 

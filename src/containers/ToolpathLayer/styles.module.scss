@@ -29,10 +29,11 @@
   stroke-dasharray: 3 3;
 }
 
+// Travel moves in the contrasting travel colour of the bed tone, wide and opaque enough to read on any bed colour.
 .travelPath {
   stroke: var(--color-bed-travel);
-  stroke-width: 1;
-  stroke-opacity: 0.7;
+  stroke-width: 1.5;
+  stroke-opacity: 0.9;
   stroke-dasharray: 4 3;
 }
 

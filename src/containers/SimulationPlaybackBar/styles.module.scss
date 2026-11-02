@@ -63,3 +63,9 @@
 .speedSwitch :global(.ant-segmented-item-selected) {
   color: var(--color-accent);
 }
+
+// The speed chips get a 1.75rem target, easier to hit than antd's small segment.
+.speedSwitch :global(.ant-segmented-item-label) {
+  min-height: 1.75rem;
+  line-height: 1.75rem;
+}

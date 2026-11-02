@@ -14,6 +14,7 @@ import { Layout, Switch, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsOnline } from '../../utils/states/browser.environment.state';
 import { MISSING_VALUE_TEXT } from '../../utils/missing.value.constants';
@@ -46,7 +47,15 @@ export const StatusStrip = (): ReactNode => {
         <dl className={styles.readouts}>
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
-            <dd className={jobBounds ? undefined : styles.readoutHint}>{getJobSizeReadoutText(t, jobBounds)}</dd>
+            <Tooltip
+              title={jobBounds ? undefined : t(DEFAULT.STATUS_STRIP_JOB_SIZE_HINT)}
+              trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
+            >
+              {/* Focusable while it stands for a missing value, so a keyboard user can read why. */}
+              <dd tabIndex={jobBounds ? undefined : KEYBOARD_FOCUSABLE_TAB_INDEX}>
+                {getJobSizeReadoutText(t, jobBounds)}
+              </dd>
+            </Tooltip>
           </div>
           <div className={styles.readout}>
             <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>
