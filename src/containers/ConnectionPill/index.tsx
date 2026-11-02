@@ -93,7 +93,7 @@ export const ConnectionPill = (): ReactNode => {
           <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
         )}
         {isConnectOffered(connectionStatus) && (
-          <span className={styles.connectVerb}>{t(DEFAULT.CONNECTION_PILL_CONNECT)}</span>
+          <span className={styles.connectVerb}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
         )}
         <DownOutlined className={styles.caret} aria-hidden="true" />
       </button>

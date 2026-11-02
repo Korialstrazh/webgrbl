@@ -12,7 +12,7 @@
 import {
   GRBL_CONNECTION_STATUS,
   GRBL_DEFAULT_BAUD_RATE,
-  SIMULATED_LASER_PORT_ID,
+  NO_SERIAL_PORT_ID,
 } from '../grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../grbl/grbl.constants';
 import type { GrblConnectionInfo } from '../grbl/interfaces/GrblConnectionInfo';
@@ -114,7 +114,7 @@ export class ConnectionEstablished extends Action<ConnectionEstablishedPayload> 
 const INITIAL_GRBL_CONNECTION_STATE: GrblConnectionState = {
   connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED,
   availablePorts: [],
-  selectedPortId: SIMULATED_LASER_PORT_ID,
+  selectedPortId: NO_SERIAL_PORT_ID,
   baudRate: GRBL_DEFAULT_BAUD_RATE,
   firmwareIdentity: undefined,
   rxBufferSize: undefined,

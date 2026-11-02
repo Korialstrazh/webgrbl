@@ -4,9 +4,14 @@ import type { RefObject } from 'react';
 import { Provider } from 'react-redux';
 import type { Mock } from 'vitest';
 import { ConnectionPopover } from '.';
-import { GRBL_BAUD_RATES } from '../../utils/grbl/grbl.constants';
+import { GRBL_BAUD_RATES, NO_SERIAL_PORT_ID, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
-import { AvailableSerialPortsReceived, selectBaudRate, selectSelectedPortId } from '../../utils/states/grbl.connection.state';
+import {
+  AvailableSerialPortsReceived,
+  SerialPortSelected,
+  selectBaudRate,
+  selectSelectedPortId,
+} from '../../utils/states/grbl.connection.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
@@ -16,7 +21,8 @@ const DISCONNECT_LABEL = 'Disconnect';
 const CHOOSE_PORT_LABEL = 'Choose port...';
 const PORT_LABEL = 'Port';
 const BAUD_LABEL = 'Baud rate';
-const SIMULATED_LASER_LABEL = 'Simulated laser';
+const SIMULATED_LASER_LABEL = 'Simulated laser (no hardware)';
+const NO_PORT_CHOSEN_LABEL = 'No port chosen';
 const WEB_SERIAL_UNAVAILABLE_PATTERN = /Web Serial unavailable/;
 const ANCHOR_LABEL = 'Laser connection';
 const USB_PORT_ID = 'serial-1';
@@ -51,8 +57,13 @@ const pickSelectOption = (optionLabel: string): void => {
   fireEvent.click(option);
 };
 
-const renderConnectionPopover = (): AppStore => {
+/** Renders the open popover; most tests choose the simulated laser first, since no port is chosen for the user. */
+const renderConnectionPopover = (isSimulatedLaserChosen: boolean = true): AppStore => {
   const store: AppStore = newStore();
+
+  if (isSimulatedLaserChosen) {
+    store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+  }
 
   render(
     <Provider store={store}>
@@ -105,6 +116,19 @@ describe(ConnectionPopover.name, () => {
     expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toBeInTheDocument();
   });
 
+  it('chooses no port for the user and keeps Connect disabled until a port is chosen', () => {
+    const store: AppStore = renderConnectionPopover(false);
+
+    expect(selectSelectedPortId(store.getState())).toBe(NO_SERIAL_PORT_ID);
+    expect(screen.getByText(NO_PORT_CHOSEN_LABEL)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: CONNECT_LABEL })).toBeDisabled();
+
+    openSelect(PORT_LABEL);
+    pickSelectOption(SIMULATED_LASER_LABEL);
+
+    expect(screen.getByRole('button', { name: CONNECT_LABEL })).toBeEnabled();
+  });
+
   it('asks to open when its anchor is clicked', () => {
     const onOpenChange: Mock<(isOpen: boolean) => void> = vi.fn<(isOpen: boolean) => void>();
 
@@ -133,7 +157,7 @@ describe(ConnectionPopover.name, () => {
   });
 
   it('lists the simulated laser and granted ports with their USB ids', () => {
-    const store: AppStore = renderConnectionPopover();
+    const store: AppStore = renderConnectionPopover(false);
 
     act(() => {
       store.dispatch(new AvailableSerialPortsReceived({

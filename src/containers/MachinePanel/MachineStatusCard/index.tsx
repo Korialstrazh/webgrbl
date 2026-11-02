@@ -37,7 +37,7 @@ export const MachineStatusCard = (): ReactNode => {
         type={ANTD_BUTTON_TYPE_PRIMARY}
         onClick={() => dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }))}
       >
-        {t(DEFAULT.MACHINE_STATUS_CONNECT)}
+        {t(DEFAULT.CONNECTION_CONNECT_MENU)}
       </Button>
     </span>
   );

@@ -295,6 +295,8 @@ export type GrblHandshakeFailureReason =
 // #endregion
 
 // #region Web Serial
+/** The selected port id while no port is chosen: no port, not even the simulated laser, is chosen for the user. */
+export const NO_SERIAL_PORT_ID = '';
 /** Port id of the built-in simulated laser, which has no real serial port behind it. */
 export const SIMULATED_LASER_PORT_ID = 'simulated';
 /** Prefix of the ids given to registered serial ports; the running number follows. */

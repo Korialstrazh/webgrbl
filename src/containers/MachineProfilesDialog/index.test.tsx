@@ -5,6 +5,7 @@ import {
   GRBL_CONNECTION_STATUS,
   GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
   GRBL_STATUS_POLL_INTERVAL_MS,
+  SIMULATED_LASER_PORT_ID,
 } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
@@ -19,6 +20,7 @@ import {
   ConnectionStatusChanged,
   ConnectRequested,
   DisconnectRequested,
+  SerialPortSelected,
 } from '../../utils/states/grbl.connection.state';
 import type { AppToast } from '../../utils/states/interfaces/AppToast';
 import {
@@ -279,6 +281,7 @@ describe(MachineProfilesDialog.name, () => {
       expect(screen.getByRole('button', { name: READ_FROM_LASER_LABEL })).toBeDisabled();
 
       await act(async () => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
         store.dispatch(new ConnectRequested());
         await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
       });

@@ -20,6 +20,7 @@ import {
   GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
   GRBL_MACHINE_STATE,
   GRBL_STATUS_POLL_INTERVAL_MS,
+  SIMULATED_LASER_PORT_ID,
 } from '../grbl/grbl.constants';
 import type { SerialTransport } from '../grbl/interfaces/SerialTransport';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
@@ -32,7 +33,7 @@ import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../profiles/new.machine.profile';
 import type { ConnectionPreferences } from '../storage/interfaces/ConnectionPreferences';
 import { Action } from './action';
-import { ConnectRequested, DisconnectRequested } from './grbl.connection.state';
+import { ConnectRequested, DisconnectRequested, SerialPortSelected } from './grbl.connection.state';
 import { ConsoleCommandSubmitted } from './grbl.console.state';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import { watchLaserPointer } from './laser.pointer.saga';
@@ -141,6 +142,7 @@ const getRequestedMachineLines = (toPlainObjectSpy: MockInstance): string[] => {
 };
 
 const connectStoreIdle = async (store: AppStore): Promise<void> => {
+  store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
   store.dispatch(new ConnectRequested());
   await vi.advanceTimersByTimeAsync(IDLE_REPORTED_MS);
 };

@@ -271,6 +271,11 @@ function* runGrblControllerSession(dependencies: GrblControllerSagaDependencies)
   const availablePorts: SerialPortDescriptor[] = (yield select(selectAvailablePorts)) as SerialPortDescriptor[];
   let controller: GrblController;
 
+  // The Connect buttons stay disabled until a port is chosen; a request without one has nothing to open.
+  if (!portId) {
+    return;
+  }
+
   yield put(newConnectionStatusChanged(GRBL_CONNECTION_STATUS.CONNECTING));
 
   try {

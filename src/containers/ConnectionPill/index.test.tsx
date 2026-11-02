@@ -2,12 +2,12 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { Provider } from 'react-redux';
 import { ConnectionPill } from '.';
 import { ESCAPE_KEY, OFFLINE_EVENT_NAME } from '../../utils/browser/browser.events.constants';
-import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
+import { GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
-import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
+import { ConnectionStatusChanged, SerialPortSelected } from '../../utils/states/grbl.connection.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
@@ -16,13 +16,13 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const ONLINE_OR_OFFLINE_PATTERN = /Online|Offline/;
 const DISCONNECTED_PATTERN = /^Connection: Not connected.*Open the connection menu\.$/;
-const CONNECT_VERB_TEXT = 'Connect';
+const CONNECT_VERB_TEXT = 'Connect...';
 const CONNECT_LABEL = 'Connect';
 const FIRMWARE_TEXT = 'Grbl 1.1h';
 const CONNECTED_WITH_FIRMWARE_PATTERN = /Connected.*Grbl 1\.1h/;
 const POPOVER_LABEL = 'Laser connection';
 const NO_WEB_SERIAL_LABEL = 'No Web Serial';
-const SIMULATED_LASER_LABEL = 'Simulated laser';
+const NO_PORT_CHOSEN_LABEL = 'No port chosen';
 const PORT_LABEL = 'Port';
 const PROFILE_NAME = 'Workshop laser';
 const PILL_WITH_PROFILE_PATTERN = /Not connected, Workshop laser/;
@@ -59,7 +59,7 @@ describe(ConnectionPill.name, () => {
 
     const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
 
-    expect(screen.getByText(SIMULATED_LASER_LABEL)).toBeInTheDocument();
+    expect(screen.getByText(NO_PORT_CHOSEN_LABEL)).toBeInTheDocument();
     expect(within(pillButton).getByText(CONNECT_VERB_TEXT)).toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: POPOVER_LABEL })).not.toBeInTheDocument();
 
@@ -88,8 +88,11 @@ describe(ConnectionPill.name, () => {
     });
 
     it('connecting to the simulated laser from the popover shows Grbl 1.1h in the pill', async () => {
-      renderConnectionPill();
+      const store: AppStore = renderConnectionPill();
 
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
       fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
       await settle();
