@@ -39,7 +39,7 @@ Restart Inkscape: it only reads the palette folder when it starts. The palette t
 
 ## Line and fill modes
 
-- **Line.** A shape whose stroke is in a Line layer burns along its outline, open or closed. A closed shape whose fill is in a Line layer burns its outline too. If both the fill and the stroke are in the layer, the outline burns once. Inner shapes burn before the outer ones around them, so a part does not move before it is scored. Power is the layer's Max power (or the grey power in the Shading layer).
+- **Line.** A shape whose stroke is in a Line layer burns along its outline, open or closed. A shape whose fill is in a Line layer burns its closed outline too, but only when that fill burns: a white fill (power 0 in the Shading layer) never closes an open stroke with an extra line. If both the fill and the stroke are in the layer, the outline burns once. Inner shapes burn before the outer ones around them, so a part does not move before it is scored. Power is the layer's Max power (or the grey power in the Shading layer).
 - **Fill.** The shape is engraved with lines at the layer's line interval (0.1 mm means 10 lines per mm), going back and forth. A stroke in a Fill layer is engraved at its drawn width. A stroke in a Line layer is not filled.
 - **Paint order.** What is on top wins. In fill layers a shape hides the shapes under it, even when it belongs to another layer, or to a layer that is switched off. Only the visible part burns, so a white shape on top of a black one cuts a hole in the engraving. White burns nothing but still hides what is below.
 - **Passes.** Each pass repeats the whole layer before the next layer starts. Layers burn in the order of the Layers section.

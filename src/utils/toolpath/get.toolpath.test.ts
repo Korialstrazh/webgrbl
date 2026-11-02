@@ -1,7 +1,7 @@
 import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
-import { DEFAULT_PALETTE } from '../palette/palette.constants';
+import { DEFAULT_PALETTE, LAYER_MODE } from '../palette/palette.constants';
 import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
 import { newProjectObject } from '../project/new.project.object';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
@@ -353,6 +353,39 @@ describe(getToolpath.name, () => {
     expect(getMiddleLineBurns('fill-rule="evenodd"').length).toBeGreaterThan(0);
     expect(getMiddleLineBurns('fill-rule="evenodd"').some(isCrossingHole)).toBe(false);
     expect(getMiddleLineBurns('').some(isCrossingHole)).toBe(true);
+  });
+
+  it('keeps an open black stroke open in a line-mode shading layer when its fill is white', () => {
+    const lineShadingLayer: ProjectLayer = {
+      ...getShadingLayer(),
+      settings: { ...getShadingLayer().settings, mode: LAYER_MODE.LINE },
+    };
+    const openStrokeWithWhiteFill: BedDrawable = newBedDrawable({
+      subpaths: [{ points: [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }], isClosed: false }],
+      paint: newDrawablePaint({ fill: newSvgPaint({ colour: WHITE }), stroke: newSvgPaint({ colour: BLACK }) }),
+    });
+
+    const toolpath: Toolpath = getTestToolpath([openStrokeWithWhiteFill], [], [lineShadingLayer]);
+
+    expect(getBurnMoves(toolpath).map((move: ToolpathMove): GeometryPoint => move.to)).toEqual([
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+    ]);
+  });
+
+  it('closes an open stroke whose grey fill burns in a line-mode shading layer', () => {
+    const lineShadingLayer: ProjectLayer = {
+      ...getShadingLayer(),
+      settings: { ...getShadingLayer().settings, mode: LAYER_MODE.LINE },
+    };
+    const openStrokeWithGreyFill: BedDrawable = newBedDrawable({
+      subpaths: [{ points: [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }], isClosed: false }],
+      paint: newDrawablePaint({ fill: newSvgPaint({ colour: '#808080' }), stroke: newSvgPaint({ colour: BLACK }) }),
+    });
+
+    const toolpath: Toolpath = getTestToolpath([openStrokeWithGreyFill], [], [lineShadingLayer]);
+
+    expect(getBurnMoves(toolpath).map((move: ToolpathMove): GeometryPoint => move.to)).toHaveLength(SQUARE_CORNERS - 1);
   });
 
   it('leaves a disabled layer out entirely', () => {
