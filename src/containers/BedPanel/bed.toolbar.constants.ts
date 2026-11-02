@@ -49,3 +49,7 @@ export const BED_VIEW_MODE_OPTION_KEYS: readonly BedViewModeOptionKey[] = [
   { value: BED_VIEW_MODE.TOOLPATH, labelKey: DEFAULT.BED_VIEW_TOOLPATH },
   { value: BED_VIEW_MODE.THREE_D, labelKey: DEFAULT.BED_VIEW_3D, soonDescriptionKey: DEFAULT.BED_VIEW_3D_DESCRIPTION },
 ];
+
+/** The radio group names of the two switches, so their radio inputs never share one group. */
+export const BED_TOOL_SWITCH_NAME = 'bed-tool';
+export const BED_VIEW_MODE_SWITCH_NAME = 'bed-view-mode';

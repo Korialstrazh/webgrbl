@@ -218,6 +218,16 @@ describe(BedPanel.name, () => {
     }
   });
 
+  it('shows the zoom, Fit and bed colour controls in the header, never over the bed drawing', () => {
+    renderPanel(newStore());
+
+    const zoomGroup: HTMLElement = screen.getByRole('group', { name: 'Bed zoom' });
+
+    expect(screen.getByTestId(BED_DROP_AREA_TEST_ID)).not.toContainElement(zoomGroup);
+    expect(within(zoomGroup).getByRole('button', { name: 'Bed colour' })).toBeInTheDocument();
+    expect(within(zoomGroup).getByRole('button', { name: /^Fit the bed/ })).toBeInTheDocument();
+  });
+
   it('offers Select and Move as an active tool switch with Select chosen', () => {
     renderPanel(newStore());
 

@@ -16,4 +16,6 @@ type BedViewportDrawingProps = Omit<BedViewProps, 'viewBox' | 'zoom'>;
 export interface BedViewportProps extends BedViewportDrawingProps {
   /** In a wide window the bed fills its panel and a plain wheel zooms; stacked, the wheel scrolls the page. */
   isWide: boolean;
+  /** The element in the bed header that shows the zoom, Fit and bed colour controls; null until it is mounted. */
+  controlsHost: HTMLElement | null;
 }

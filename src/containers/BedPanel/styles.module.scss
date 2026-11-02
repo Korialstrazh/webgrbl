@@ -45,8 +45,18 @@
   gap: var(--space-2);
 }
 
-.viewModeSwitch {
+// The view controls and the view switch stay together at the right end of the header.
+.viewTools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
   margin-left: auto;
+}
+
+.viewControlsHost {
+  display: flex;
 }
 
 // The positioned parent of the Toolpath view overlays drawn over the bed. Its minimum height keeps the drawing

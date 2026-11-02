@@ -47,8 +47,10 @@ import {
   BED_COMING_SOON_TOOLS,
   BED_TOOL,
   BED_TOOL_OPTION_KEYS,
+  BED_TOOL_SWITCH_NAME,
   BED_VIEW_MODE,
   BED_VIEW_MODE_OPTION_KEYS,
+  BED_VIEW_MODE_SWITCH_NAME,
 } from './bed.toolbar.constants';
 import type { BedTool, BedViewMode } from './bed.toolbar.constants';
 import type { BedComingSoonToolKeys } from './interfaces/BedComingSoonToolKeys';
@@ -72,6 +74,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const bedSurfaceStyle: BedSurfaceStyle = { '--color-bed-surface': bedColour };
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
   const [activeTool, setActiveTool] = useState<BedTool>(BED_TOOL.SELECT);
+  const [viewControlsHost, setViewControlsHost] = useState<HTMLDivElement | null>(null);
   const [toolpathDisplayMode, setToolpathDisplayMode] = useState<ToolpathDisplayMode>(DEFAULT_TOOLPATH_DISPLAY_MODE);
   const [isTravelShown, setIsTravelShown] = useState<boolean>(false);
   const { viewMode, changeBedViewMode }: BedViewModeControls = useBedViewMode();
@@ -107,6 +110,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
         ) : (
           <div className={styles.editingTools}>
             <Segmented<BedTool>
+              name={BED_TOOL_SWITCH_NAME}
               aria-label={t(DEFAULT.BED_TOOL_LABEL)}
               options={toolOptions}
               value={activeTool}
@@ -119,13 +123,17 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
             ))}
           </div>
         )}
-        <Segmented<BedViewMode>
-          className={styles.viewModeSwitch}
-          aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
-          options={viewModeOptions}
-          value={viewMode}
-          onChange={changeBedViewMode}
-        />
+        <div className={styles.viewTools}>
+          {/* A plain slot: the bed viewport renders its zoom, Fit and bed colour controls in here. */}
+          <div ref={setViewControlsHost} className={styles.viewControlsHost} />
+          <Segmented<BedViewMode>
+            name={BED_VIEW_MODE_SWITCH_NAME}
+            aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
+            options={viewModeOptions}
+            value={viewMode}
+            onChange={changeBedViewMode}
+          />
+        </div>
       </div>
       <div
         className={dropArea.isDropTarget ? [styles.bed, styles.dropTarget].join(' ') : styles.bed}
@@ -144,6 +152,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           key={[dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR)}
           dimensions={dimensions}
           isWide={isWide}
+          controlsHost={viewControlsHost}
           // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
           // add a second crosshair.
           headPosition={isToolpathView ? undefined : status?.machinePosition}

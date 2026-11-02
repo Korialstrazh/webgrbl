@@ -14,6 +14,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { PointerEvent, ReactNode } from 'react';
 import { BED_CURSOR_STORE } from '../../utils/bed/bed.cursor.store';
 import { BedZoomContext } from '../../utils/bed/bed.zoom.context';
@@ -49,7 +50,7 @@ const getDrawingAreaClassName = ({ isPanReady, isPanning }: BedPanGesture): stri
 };
 
 export const BedViewport = (props: BedViewportProps): ReactNode => {
-  const { dimensions, isWide, children, ...markerProps } = props;
+  const { dimensions, isWide, controlsHost, children, ...markerProps } = props;
   const viewRef = useRef<HTMLDivElement>(null);
   const screenSize: BedScreenSize = useBedScreenSize(viewRef);
   const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
@@ -85,6 +86,18 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
     BED_CURSOR_STORE.setBedCursorPoint(undefined);
   };
 
+  const zoomControlsComponent: ReactNode = (
+    <BedZoomControls
+      leadingControlComponent={<BedColourPicker />}
+      zoomPercent={Math.round(viewport.zoom * PERCENT_DIVISOR)}
+      canZoomIn={viewport.zoom < MAX_BED_ZOOM}
+      canZoomOut={viewport.zoom > MIN_BED_ZOOM}
+      onZoomIn={() => zoomBedBy(BED_ZOOM_STEP_FACTOR)}
+      onZoomOut={() => zoomBedBy(1 / BED_ZOOM_STEP_FACTOR)}
+      onFit={fitBedToView}
+    />
+  );
+
   return (
     // Plain elements: the outer box holds the ruler bands and the drawing area; the drawing area is the positioned box
     // of the drawing and its overlays, the box every pointer position is read in, and it takes the pan gesture.
@@ -106,16 +119,9 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
             {children}
           </BedView>
         </BedZoomContext>
-        <BedZoomControls
-          leadingControlComponent={<BedColourPicker />}
-          zoomPercent={Math.round(viewport.zoom * PERCENT_DIVISOR)}
-          canZoomIn={viewport.zoom < MAX_BED_ZOOM}
-          canZoomOut={viewport.zoom > MIN_BED_ZOOM}
-          onZoomIn={() => zoomBedBy(BED_ZOOM_STEP_FACTOR)}
-          onZoomOut={() => zoomBedBy(1 / BED_ZOOM_STEP_FACTOR)}
-          onFit={fitBedToView}
-        />
       </div>
+      {/* The view controls sit in the bed header, never over the drawing; the viewport keeps the zoom they change. */}
+      {controlsHost && createPortal(zoomControlsComponent, controlsHost)}
     </div>
   );
 };

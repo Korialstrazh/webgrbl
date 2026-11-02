@@ -56,12 +56,16 @@ const getViewElement = (): HTMLElement => {
 };
 
 const renderBedViewport = (store: AppStore = newStore(), isWide: boolean = true): void => {
+  const controlsHost: HTMLDivElement = document.createElement('div');
+
+  document.body.append(controlsHost);
   render(
     <Provider store={store}>
       <AntdTestProvider>
         <BedViewport
           dimensions={DIMENSIONS}
           isWide={isWide}
+          controlsHost={controlsHost}
           headPosition={undefined}
           workOriginPosition={undefined}
           placeholderLabel={undefined}
