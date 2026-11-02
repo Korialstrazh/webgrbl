@@ -25,7 +25,7 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { DEFAULT_MACHINE_ORIGIN_CORNER } from '../../utils/profiles/machine.profile.constants';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
-import { selectSimulationTimeS } from '../../utils/states/simulation.state';
+import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
 import { selectToolpathMotionTimeline } from '../../utils/states/toolpath.timeline.selectors';
 import { selectToolpath, selectToolpathStatus } from '../../utils/states/toolpath.state';
 import { TOOLPATH_STATUS } from '../../utils/states/toolpath.status.constants';
@@ -97,7 +97,7 @@ export const ToolpathLayer = ({ dimensions, displayMode, isTravelShown }: Toolpa
   const isToolpathCurrent: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.READY;
   const toolpath: Toolpath | undefined = useSelector(selectToolpath);
   const timeline: MotionTimeline | undefined = useSelector(selectToolpathMotionTimeline);
-  const currentTimeS: number = useSelector(selectSimulationTimeS);
+  const currentTimeS: number = useSelector(selectClampedSimulationTimeS);
   const profile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const currentToolpath: Toolpath | undefined = isToolpathCurrent ? toolpath : undefined;
   const drawing: ToolpathDrawing | undefined = useMemo(

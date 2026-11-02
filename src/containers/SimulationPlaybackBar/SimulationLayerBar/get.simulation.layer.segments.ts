@@ -1,6 +1,7 @@
 /**
  * Gets the segments of the layer bar: one per layer of the toolpath, in burn order, as wide as its share of the burn
- * time of all layers, named like the layer in the layer list. A toolpath that burns for no time gives no segments.
+ * time of all layers, named like the layer in the layer list. A layer that burns for no time gets no segment (a
+ * zero-width strip would still carry a tooltip), so a toolpath that burns for no time gives none.
  *
  * @author michael.morosov
  *
@@ -43,7 +44,9 @@ export const getSimulationLayerSegments = (input: SimulationLayerSegmentInput): 
     return [];
   }
 
-  return input.layerBurnTimes.map(({ layerKey, burnTimeS }: ToolpathLayerBurnTime): SimulationLayerSegment => ({
+  return input.layerBurnTimes.filter(
+    (layerBurnTime: ToolpathLayerBurnTime): boolean => layerBurnTime.burnTimeS > 0,
+  ).map(({ layerKey, burnTimeS }: ToolpathLayerBurnTime): SimulationLayerSegment => ({
     layerKey,
     layerName: getSegmentLayerName(layerKey, input),
     isShading: layerKey === SHADING_LAYER_COLOUR,

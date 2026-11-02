@@ -12,12 +12,12 @@
 import type { KeyboardEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '../../utils/states/new.store';
+import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
 import {
   SimulationPlayToggled,
   SimulationSpeedSet,
   SimulationTimeSet,
   selectIsSimulationPlaying,
-  selectSimulationTimeS,
 } from '../../utils/states/simulation.state';
 import type { SimulationSpeed } from '../../utils/states/simulation.speed.constants';
 import { selectIsSimulationPlayable, selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
@@ -41,7 +41,7 @@ export const useSimulationTransport = (): SimulationTransport => {
   const dispatch: AppDispatch = useDispatch();
   const isPlayable: boolean = useSelector(selectIsSimulationPlayable);
   const isPlaying: boolean = useSelector(selectIsSimulationPlaying);
-  const currentTimeS: number = useSelector(selectSimulationTimeS);
+  const currentTimeS: number = useSelector(selectClampedSimulationTimeS);
   const totalTimeS: number = useSelector(selectReadyToolpathTotalTimeS) ?? 0;
 
   const setSimulationTime = (timeS: number): void => {

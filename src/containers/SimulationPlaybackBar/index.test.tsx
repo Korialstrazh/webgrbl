@@ -6,9 +6,11 @@ import { MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
+import { ConnectionEstablished } from '../../utils/states/grbl.connection.state';
 import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
 import {
   SimulationPlayToggled,
+  SimulationReset,
   SimulationSpeedSet,
   SimulationTimeSet,
   selectIsSimulationPlaying,
@@ -25,6 +27,8 @@ import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake
 import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
 import { TOOLPATH_MOVE_KIND } from '../../utils/toolpath/toolpath.constants';
+import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
+import { GRBL_SETTING_X_MAX_RATE, GRBL_SETTING_Y_MAX_RATE } from '../../utils/grbl/grbl.constants';
 import { SIMULATION_LAYER_SEGMENT_TEST_ID } from './simulation.playback.constants';
 
 const PLAY_LABEL = 'Play';
@@ -76,6 +80,23 @@ const BACKGROUNDED_TAB_GAP_MS = 60_000;
 const LONGEST_FRAME_S = 0.25;
 const SPACE_KEY = ' ';
 const ANTD_SLIDER_SELECTOR = '.ant-slider';
+// A feed far above the machine's rate, so the default 6000 mm/min max rate sets the speed: 66 s at 100 mm/s. At a
+// max rate of 12000 mm/min (200 mm/s) the same move takes 0.4 s of ramps plus 6550 / 200 s, 33.15 s.
+const RATE_LIMITED_FEED_MM_PER_MIN = 60_000;
+const RATE_LIMITED_TOOLPATH: Toolpath = newToolpath({
+  moves: [newToolpathMove({ from: { x: 0, y: 0 }, to: { x: 6590, y: 0 }, feedMmPerMin: RATE_LIMITED_FEED_MM_PER_MIN })],
+  layers: [{ layerKey: RED_LAYER_KEY, firstMoveIndex: 0, lastMoveIndex: 0 }],
+});
+const FAST_MAX_RATE_MM_PER_MIN = '12000';
+const SHRUNK_TOTAL_TIME_S = 33.15;
+const SHRUNK_CLOCK_TEXT = '00:33 / 00:33';
+const LATE_TIME_S = 50;
+const FIRMWARE_IDENTITY: GrblFirmwareIdentity = { firmwareName: 'Grbl', version: '1.1h', vendorText: '' };
+const RX_BUFFER_SIZE = 128;
+const FAST_RATE_SETTINGS: Record<number, string> = {
+  [GRBL_SETTING_X_MAX_RATE]: FAST_MAX_RATE_MM_PER_MIN,
+  [GRBL_SETTING_Y_MAX_RATE]: FAST_MAX_RATE_MM_PER_MIN,
+};
 
 const newReadyStore = (toolpath: Toolpath = SIXTY_SIX_SECOND_TOOLPATH): AppStore => {
   const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
@@ -249,9 +270,68 @@ describe(SimulationPlaybackBar.name, () => {
     const store: AppStore = newReadyStore();
 
     renderBar(store);
-    fireEvent.keyDown(screen.getByRole('group', { name: BAR_LABEL }), { key: SPACE_KEY });
+
+    const focusedBar: HTMLElement = screen.getByRole('group', { name: BAR_LABEL });
+
+    focusedBar.focus();
+    fireEvent.keyDown(document.activeElement ?? focusedBar, { key: SPACE_KEY });
+
+    expect(document.activeElement).toBe(focusedBar);
+    expect(selectIsSimulationPlaying(store.getState())).toBe(true);
+  });
+
+  it('toggles once on Space on the focused Play button, which the button handles itself', () => {
+    const store: AppStore = newReadyStore();
+
+    renderBar(store);
+
+    const playButton: HTMLElement = getButton(PLAY_LABEL);
+
+    playButton.focus();
+    // A browser clicks a focused button on Space; jsdom does not, so the click follows the key by hand.
+    fireEvent.keyDown(playButton, { key: SPACE_KEY });
+    fireEvent.keyUp(playButton, { key: SPACE_KEY });
+    fireEvent.click(playButton);
 
     expect(selectIsSimulationPlaying(store.getState())).toBe(true);
+  });
+
+  it('keeps the clock and slider inside the job when new machine limits make the job shorter', () => {
+    const store: AppStore = newReadyStore(RATE_LIMITED_TOOLPATH);
+
+    store.dispatch(new SimulationTimeSet({ timeS: LATE_TIME_S }));
+    renderBar(store);
+    act(() => {
+      store.dispatch(new ConnectionEstablished({
+        connectionInfo: {
+          identity: FIRMWARE_IDENTITY,
+          rxBufferSize: RX_BUFFER_SIZE,
+          settings: FAST_RATE_SETTINGS,
+          buildInfoLines: [],
+        },
+      }));
+    });
+
+    expect(selectReadyToolpathTotalTimeS(store.getState())).toBeCloseTo(SHRUNK_TOTAL_TIME_S, SHARE_DECIMALS);
+    expect(screen.getByText(SHRUNK_CLOCK_TEXT)).toBeInTheDocument();
+    expect(Number(getSlider().getAttribute('aria-valuenow'))).toBeCloseTo(SHRUNK_TOTAL_TIME_S, SHARE_DECIMALS);
+  });
+
+  it('ignores a frame that runs after the store paused the playback, before the loop is stopped', () => {
+    const store: AppStore = newReadyStore();
+
+    renderBar(store);
+    fireEvent.click(getButton(PLAY_LABEL));
+    animationFrames.runFrame(FIRST_FRAME_MS);
+
+    const requestCountBeforeReset: number = animationFrames.getRequestCount();
+
+    // Outside act on purpose: the effect that stops the loop has not run yet when the waiting frame fires.
+    store.dispatch(new SimulationReset());
+    animationFrames.runFrame(FIRST_FRAME_MS + FRAME_STEP_MS);
+
+    expect(selectSimulationTimeS(store.getState())).toBe(0);
+    expect(animationFrames.getRequestCount()).toBe(requestCountBeforeReset);
   });
 
   it('disables play and ignores Space while the toolpath is out of date, and pauses a running playback', () => {

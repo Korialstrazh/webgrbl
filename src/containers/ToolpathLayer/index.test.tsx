@@ -7,6 +7,8 @@ import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProf
 import { MACHINE_ORIGIN_CORNER, MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.profile.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../utils/project/new.project.object';
+import { GRBL_SETTING_X_MAX_RATE, GRBL_SETTING_Y_MAX_RATE } from '../../utils/grbl/grbl.constants';
+import { ConnectionEstablished } from '../../utils/states/grbl.connection.state';
 import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
@@ -56,6 +58,21 @@ const TWO_LAYER_TOOLPATH: Toolpath = newToolpath({
   ],
   bounds: { minX: 10, minY: 10, maxX: 80, maxY: 90 },
 });
+
+// A feed far above the machine's rate, so the max rate sets the speed: 66 s at the default 6000 mm/min, about 33 s
+// at 12000 mm/min.
+const RATE_LIMITED_FEED_MM_PER_MIN = 60_000;
+const RATE_LIMITED_END_X_MM = 6590;
+const RATE_LIMITED_TOOLPATH: Toolpath = newToolpath({
+  moves: [newToolpathMove({ to: { x: RATE_LIMITED_END_X_MM, y: 0 }, feedMmPerMin: RATE_LIMITED_FEED_MM_PER_MIN })],
+  layers: [{ layerKey: RED_LAYER_KEY, firstMoveIndex: 0, lastMoveIndex: 0 }],
+});
+const FAST_MAX_RATE_MM_PER_MIN = '12000';
+const LATE_TIME_S = 50;
+const FAST_RATE_SETTINGS: Record<number, string> = {
+  [GRBL_SETTING_X_MAX_RATE]: FAST_MAX_RATE_MM_PER_MIN,
+  [GRBL_SETTING_Y_MAX_RATE]: FAST_MAX_RATE_MM_PER_MIN,
+};
 
 interface ToolpathLayerTestProps {
   displayMode?: ToolpathDisplayMode;
@@ -184,5 +201,26 @@ describe(ToolpathLayer.name, () => {
     });
 
     expect(screen.getByTestId(TOOLPATH_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(80 90)');
+  });
+
+  it('keeps the head at the end of the job when new machine limits make the job shorter than the time', () => {
+    const store: AppStore = newReadyStore(RATE_LIMITED_TOOLPATH);
+
+    store.dispatch(new SimulationTimeSet({ timeS: LATE_TIME_S }));
+    renderLayer(store);
+    act(() => {
+      store.dispatch(new ConnectionEstablished({
+        connectionInfo: {
+          identity: { firmwareName: 'Grbl', version: '1.1h', vendorText: '' },
+          rxBufferSize: 128,
+          settings: FAST_RATE_SETTINGS,
+          buildInfoLines: [],
+        },
+      }));
+    });
+
+    expect(screen.getByTestId(TOOLPATH_HEAD_TEST_ID))
+      .toHaveAttribute('transform', `translate(${RATE_LIMITED_END_X_MM} 0)`);
+    expect(getBurnStates()).toEqual([TOOLPATH_BURN_STATE.BURNT]);
   });
 });

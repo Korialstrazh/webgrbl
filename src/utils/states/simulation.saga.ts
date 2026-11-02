@@ -14,6 +14,7 @@ import { put, select, takeEvery } from 'redux-saga/effects';
 import { SimulationPaused, selectIsSimulationPlaying } from './simulation.state';
 import { selectIsSimulationPlayable } from './toolpath.timeline.selectors';
 
+// Every action, not a list: playability can change after any reducer pass, so it is checked after each one.
 const EVERY_ACTION_PATTERN = '*';
 
 function* pauseUnplayableSimulation(): Generator {

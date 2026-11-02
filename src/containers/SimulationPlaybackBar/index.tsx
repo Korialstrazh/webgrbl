@@ -15,13 +15,16 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button, Segmented, Slider } from 'antd';
+import type { SegmentedProps } from 'antd';
+import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
 import { BACK_TO_START_SYMBOL, PAUSE_SYMBOL, PLAY_SYMBOL, TO_END_SYMBOL } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { selectIsSimulationPlaying, selectSimulationSpeed, selectSimulationTimeS } from '../../utils/states/simulation.state';
+import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
+import { selectIsSimulationPlaying, selectSimulationSpeed } from '../../utils/states/simulation.state';
 import { SIMULATION_SPEEDS } from '../../utils/states/simulation.speed.constants';
 import type { SimulationSpeed } from '../../utils/states/simulation.speed.constants';
 import {
@@ -50,7 +53,7 @@ export const SimulationPlaybackBar = (): ReactNode => {
   const { t } = useTranslation();
   const isPlayable: boolean = useSelector(selectIsSimulationPlayable);
   const isPlaying: boolean = useSelector(selectIsSimulationPlaying);
-  const currentTimeS: number = useSelector(selectSimulationTimeS);
+  const currentTimeS: number = useSelector(selectClampedSimulationTimeS);
   const speed: SimulationSpeed = useSelector(selectSimulationSpeed);
   const totalTimeS: number = useSelector(selectReadyToolpathTotalTimeS) ?? 0;
   const toolpath: Toolpath | undefined = useSelector(selectToolpath);
@@ -60,6 +63,13 @@ export const SimulationPlaybackBar = (): ReactNode => {
   const position: TimelinePosition | undefined = isPlayable && toolpath && timeline
     ? getTimelinePosition(toolpath, timeline, currentTimeS)
     : undefined;
+  const speedOptions: SegmentedProps<SimulationSpeed>['options'] = useMemo(
+    () => SIMULATION_SPEEDS.map((speedOption: SimulationSpeed) => ({
+      value: speedOption,
+      label: t(DEFAULT.SIMULATION_SPEED_OPTION, { speed: speedOption }),
+    })),
+    [t],
+  );
   const playLabel: string = t(isPlaying ? DEFAULT.SIMULATION_PAUSE : DEFAULT.SIMULATION_PLAY);
 
   useSimulationPlayback();
@@ -119,10 +129,7 @@ export const SimulationPlaybackBar = (): ReactNode => {
       </span>
       <Segmented<SimulationSpeed>
         aria-label={t(DEFAULT.SIMULATION_SPEED_LABEL)}
-        options={SIMULATION_SPEEDS.map((speedOption: SimulationSpeed) => ({
-          value: speedOption,
-          label: t(DEFAULT.SIMULATION_SPEED_OPTION, { speed: speedOption }),
-        }))}
+        options={speedOptions}
         value={speed}
         disabled={!isPlayable}
         onChange={transport.setSimulationSpeed}

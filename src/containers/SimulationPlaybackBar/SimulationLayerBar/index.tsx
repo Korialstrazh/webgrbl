@@ -11,7 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Tooltip } from 'antd';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -47,7 +47,7 @@ const renderLayerSegment = (segment: SimulationLayerSegment): ReactNode => (
   </Tooltip>
 );
 
-export const SimulationLayerBar = (): ReactNode => {
+const SimulationLayerBarContent = (): ReactNode => {
   const { t } = useTranslation();
   const isToolpathCurrent: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.READY;
   const toolpath: Toolpath | undefined = useSelector(selectToolpath);
@@ -70,3 +70,6 @@ export const SimulationLayerBar = (): ReactNode => {
     </div>
   );
 };
+
+/** Kept apart from the bar's per-frame renders: it does not depend on the time. */
+export const SimulationLayerBar = memo(SimulationLayerBarContent);

@@ -33,6 +33,11 @@ export class AnimationFrameStub {
     });
   }
 
+  /** How many frames were requested since the stub was made, cancelled ones included. */
+  public getRequestCount(): number {
+    return this.nextRequestId - 1;
+  }
+
   /** How many callbacks wait for the next frame. */
   public getWaitingCallbackCount(): number {
     return this.waitingCallbacks.size;

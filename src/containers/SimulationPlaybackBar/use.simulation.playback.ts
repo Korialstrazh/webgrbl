@@ -15,14 +15,17 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { MILLISECONDS_PER_SECOND } from '../../utils/machine/machine.command.constants';
 import type { AppRootState, AppStore } from '../../utils/states/new.store';
+import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
 import {
   SimulationPaused,
   SimulationTimeSet,
   selectIsSimulationPlaying,
   selectSimulationSpeed,
-  selectSimulationTimeS,
 } from '../../utils/states/simulation.state';
-import { selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
+import {
+  selectIsSimulationPlayable,
+  selectReadyToolpathTotalTimeS,
+} from '../../utils/states/toolpath.timeline.selectors';
 import { useAppStore } from '../../utils/states/use.app.store';
 import { getClampedSimulationTimeS } from '../../utils/toolpath/get.clamped.simulation.time.s';
 import { LONGEST_FRAME_REAL_S } from './simulation.playback.constants';
@@ -33,7 +36,17 @@ const getFrameElapsedRealS = (previousTimestampMs: number, timestampMs: number):
 
 /** The simulation time one frame later, kept inside the job. */
 const getNextSimulationTimeS = (state: AppRootState, elapsedRealS: number, totalTimeS: number): number =>
-  getClampedSimulationTimeS(selectSimulationTimeS(state) + elapsedRealS * selectSimulationSpeed(state), totalTimeS);
+  getClampedSimulationTimeS(
+    selectClampedSimulationTimeS(state) + elapsedRealS * selectSimulationSpeed(state),
+    totalTimeS,
+  );
+
+/**
+ * Whether a frame may still advance the time. The store can pause or reset the playback (a document change, a new
+ * generation) between a frame request and the effect that cancels it; such a late frame must change nothing.
+ */
+const isSimulationFrameWanted = (state: AppRootState): boolean =>
+  selectIsSimulationPlaying(state) && selectIsSimulationPlayable(state);
 
 /** Runs the frame loop until the end of the job; gives the function that stops it. */
 const startSimulationFrameLoop = (store: AppStore): (() => void) => {
@@ -41,6 +54,10 @@ const startSimulationFrameLoop = (store: AppStore): (() => void) => {
   let previousTimestampMs: number | undefined;
 
   const advanceSimulationFrame = (timestampMs: number): void => {
+    if (!isSimulationFrameWanted(store.getState())) {
+      return;
+    }
+
     const elapsedRealS: number = getFrameElapsedRealS(previousTimestampMs ?? timestampMs, timestampMs);
     const totalTimeS: number = selectReadyToolpathTotalTimeS(store.getState()) ?? 0;
     const nextTimeS: number = getNextSimulationTimeS(store.getState(), elapsedRealS, totalTimeS);
