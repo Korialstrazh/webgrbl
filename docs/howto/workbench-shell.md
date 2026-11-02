@@ -28,7 +28,7 @@ The splitter sizes are controlled percentages, so the bars also work from the ke
 
 Empty readouts show one mark everywhere, the em dash (`MISSING_VALUE_TEXT`).
 
-The connection pill shows only the laser connection: state, firmware, machine profile, port ("No port chosen" until the user picks one: no port, not even the simulated laser, is preselected), and "Connect..." while no laser is connected, the same label as the Status card button; its `aria-label` reads "Connection: ... Open the connection menu." The browser's network state is not in the pill. The popover's open state lives in the `uiOverlay` slice (`ConnectionPopoverOpenChanged`, `selectIsConnectionPopoverOpen`), so the Status card's Connect button opens the same popover as the pill.
+The connection pill shows only the laser connection: state, firmware, machine profile, port ("No port chosen" until the user picks one: no port, not even the simulated laser, is preselected on a fresh start; a port, or the simulated laser, the user connected to before is chosen again), and "Connect..." while no laser is connected, the same label as the Status card button; its `aria-label` reads "Connection: ... Open the connection menu." The browser's network state is not in the pill. The popover's open state lives in the `uiOverlay` slice (`ConnectionPopoverOpenChanged`, `selectIsConnectionPopoverOpen`), so the Status card's Connect button opens the same popover as the pill.
 
 ## Add a feature to a region
 
