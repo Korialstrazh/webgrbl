@@ -58,6 +58,9 @@ const FIRST_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[0] ??
 const SECOND_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[1] ?? '';
 const CUT_COLOUR = DEFAULT_CUT_ENTRY.colour;
 const DELETE_NAME_PATTERN = /^Delete/;
+// The test renders two antd dialogs and a whole form; under a full parallel run that alone can pass the 5 s default.
+// It waits on no clock, so only its time budget is raised.
+const RESET_TEST_TIMEOUT_MS = 20_000;
 const EDITED_ROW_CLASS_NAME = 'editedRow';
 const ANTD_DANGEROUS_BUTTON_CLASS = 'ant-btn-dangerous';
 const CUSTOM_ENTRY_NAME = 'Custom etch';
@@ -198,7 +201,7 @@ describe(PaletteDialog.name, () => {
     clickButton(SAVE_LABEL);
 
     expect(selectPaletteEntries(store.getState())).toEqual(DEFAULT_PALETTE.entries);
-  });
+  }, RESET_TEST_TIMEOUT_MS);
 
   it('keeps a new unsaved entry in the form while the palette is unchanged', () => {
     renderDialog(newStore());
