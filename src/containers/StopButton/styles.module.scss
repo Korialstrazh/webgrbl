@@ -2,3 +2,23 @@
 .stopButton {
   min-height: var(--target-min);
 }
+
+// Disconnected, STOP cannot be pressed but still reads as the emergency control: a red outline and red text on the
+// surface, unlike the grey disabled look of every other button. The antd classes raise the weight above antd's own
+// disabled rule.
+.stopButton:global(.ant-btn.ant-btn-variant-solid):disabled {
+  border-color: var(--color-danger-button);
+  background-color: var(--color-surface-2);
+  color: var(--color-danger-text);
+}
+
+.shortcutHint {
+  padding: 0 var(--space-1);
+  border: 1px solid currentcolor;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  line-height: 1.125rem;
+  opacity: 0.85;
+}

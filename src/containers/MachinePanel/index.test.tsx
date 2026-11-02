@@ -162,4 +162,15 @@ describe(MachinePanel.name, () => {
 
     expect(screen.queryByRole('button', { name: STOP_LABEL })).not.toBeInTheDocument();
   });
+
+  it('puts STOP in a footer after the scrolling cards, never over them', () => {
+    renderMachinePanel();
+
+    const stopFooter: HTMLElement | null = screen.getByRole('button', { name: STOP_LABEL }).parentElement;
+    const cardsArea: Element | null | undefined = stopFooter?.previousElementSibling;
+
+    expect(stopFooter?.parentElement).toBe(cardsArea?.parentElement);
+    expect(cardsArea).toContainElement(screen.getByRole('button', { name: RESET_LABEL }));
+    expect(cardsArea).not.toContainElement(stopFooter ?? null);
+  });
 });

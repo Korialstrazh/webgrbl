@@ -45,7 +45,7 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
         <JobCard />
       </div>
       {isWide && (
-        <div className={styles.stopArea}>
+        <div className={styles.stopFooter}>
           <StopButton />
         </div>
       )}
