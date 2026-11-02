@@ -26,3 +26,15 @@ body {
   color: var(--color-text);
   font-family: var(--font-ui);
 }
+
+// One focus ring for every control, our own and antd's: antd draws its ring from the same token through the theme
+// (colorPrimaryBorder, lineWidthFocus), and this rule covers everything antd does not style.
+:focus-visible {
+  outline: var(--focus-outline-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-outline-offset);
+}
+
+// The splitter bars change colour smoothly between rest, hover and drag; the colours come from the antd theme.
+.ant-splitter-bar-dragger::before {
+  transition: background-color 0.12s;
+}

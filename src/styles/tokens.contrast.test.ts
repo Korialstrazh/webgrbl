@@ -5,6 +5,9 @@ import { getScssTokenValue } from '../utils/test.support/get.scss.token.value';
 
 const TOKENS_PATH = resolve(__dirname, 'tokens.scss');
 const MIN_TEXT_CONTRAST = 4.5;
+// WCAG 1.4.11: a focus indicator needs 3:1 against what it sits on.
+const MIN_FOCUS_RING_CONTRAST = 3;
+const FOCUS_RING_TOKEN = '--color-focus-ring';
 const HEX_RADIX = 16;
 const HEX_DIGITS_PER_CHANNEL = 2;
 const CHANNEL_MAX = 255;
@@ -95,6 +98,12 @@ describe('design token contrast', () => {
     const mutedHex: string = getScssTokenValue(source, MUTED_STRONG_TOKEN) ?? requireToken(MUTED_TOKEN);
 
     expect(getContrastRatio(mutedHex, requireToken(surfaceToken))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+  });
+
+  it.each([BG_TOKEN, ...SURFACE_TOKENS])('keeps the focus ring visible on %s', (surfaceToken: string) => {
+    expect(getContrastRatio(requireToken(FOCUS_RING_TOKEN), requireToken(surfaceToken))).toBeGreaterThanOrEqual(
+      MIN_FOCUS_RING_CONTRAST,
+    );
   });
 
   it.each(DANGER_BUTTON_TOKENS)('keeps the text readable on %s', (buttonToken: string) => {

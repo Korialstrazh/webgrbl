@@ -26,6 +26,7 @@ const COLOR_TOKEN_SOURCES = [
   ['colorWarning', '--color-warning'],
   ['colorSuccess', '--color-success'],
   ['colorInfo', '--color-info'],
+  ['colorPrimaryBorder', '--color-focus-ring'],
 ] as const;
 const LAYOUT_TOKEN_SOURCES = [
   ['bodyBg', '--color-bg'],
@@ -69,9 +70,16 @@ const SEGMENTED_TOKEN_SOURCES = [
   ['itemSelectedBg', '--color-surface-3'],
   ['itemSelectedColor', '--color-text'],
 ] as const;
+const SPLITTER_TOKEN_SOURCES = [
+  ['controlItemBgHover', '--color-border'],
+  ['controlItemBgActive', '--color-accent'],
+  ['controlItemBgActiveHover', '--color-accent-active'],
+  ['colorFill', '--color-text-muted'],
+] as const;
 const REM_TOKEN_SOURCES = [
   ['borderRadius', '--radius-md'],
   ['controlHeight', '--control-height'],
+  ['lineWidthFocus', '--focus-outline-width'],
 ] as const;
 
 const source: string = readFileSync(TOKENS_PATH, 'utf8');
@@ -82,6 +90,7 @@ const segmentedTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Seg
 const switchTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Switch };
 const sliderTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Slider };
 const selectTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Select };
+const splitterTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Splitter };
 
 const requireScssToken = (name: string): string => {
   const value: string | undefined = getScssTokenValue(source, name);
@@ -150,5 +159,9 @@ describe('ANTD_THEME', () => {
 
   it.each(SELECT_TOKEN_SOURCES)('paints the select %s from %s', (selectToken: string, scssToken: string) => {
     expect(selectTokens[selectToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(SPLITTER_TOKEN_SOURCES)('paints the splitter %s from %s', (splitterToken: string, scssToken: string) => {
+    expect(splitterTokens[splitterToken]).toBe(requireScssToken(scssToken));
   });
 });

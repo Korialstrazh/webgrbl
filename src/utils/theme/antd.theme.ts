@@ -35,6 +35,11 @@ const COLOR_DISABLED_TEXT = '#8b9097';
 const COLOR_WARNING = '#ffb547';
 const COLOR_SUCCESS = '#3fcf8e';
 const COLOR_INFO = '#4aa3ff';
+const COLOR_FOCUS_RING = '#ff8a1f';
+/** --focus-outline-width (0.125rem) in pixels. */
+const FOCUS_OUTLINE_WIDTH_PIXELS = 2;
+/** The grip on a splitter bar is 2rem long, so the bar is easy to find and to grab. */
+const SPLITTER_GRIP_LENGTH_PIXELS = 32;
 /** --radius-md (0.5rem) in pixels. */
 const BORDER_RADIUS_PIXELS = 8;
 /** --control-height (2.25rem) in pixels. */
@@ -71,6 +76,9 @@ export const ANTD_THEME: ThemeConfig = {
     fontFamily: FONT_FAMILY_UI,
     fontFamilyCode: FONT_FAMILY_CODE,
     controlHeight: CONTROL_HEIGHT_PIXELS,
+    // antd draws its focus outline in colorPrimaryBorder, which the dark algorithm derives as a dark brown (1.6:1).
+    colorPrimaryBorder: COLOR_FOCUS_RING,
+    lineWidthFocus: FOCUS_OUTLINE_WIDTH_PIXELS,
   },
   components: {
     // antd paints the header and siders navy by default; the regions use our surfaces instead.
@@ -113,6 +121,14 @@ export const ANTD_THEME: ThemeConfig = {
       hoverBorderColor: COLOR_ACCENT_HOVER,
       activeBorderColor: COLOR_ACCENT,
       optionSelectedBg: COLOR_SURFACE_3,
+    },
+    // At rest a bar is a border-coloured line with a muted grip; hovered and dragged it turns to the accent.
+    Splitter: {
+      controlItemBgHover: COLOR_BORDER,
+      controlItemBgActive: COLOR_ACCENT,
+      controlItemBgActiveHover: COLOR_ACCENT_ACTIVE,
+      colorFill: COLOR_TEXT_MUTED,
+      splitBarDraggableSize: SPLITTER_GRIP_LENGTH_PIXELS,
     },
     Segmented: {
       trackBg: COLOR_SURFACE_1,

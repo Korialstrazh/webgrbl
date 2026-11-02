@@ -14,11 +14,6 @@
   font-family: var(--font-ui);
 }
 
-.playbackBar:focus-visible {
-  outline: var(--focus-outline-width) solid var(--color-focus-ring);
-  outline-offset: var(--focus-outline-offset);
-}
-
 .transport {
   display: flex;
   gap: var(--space-1);

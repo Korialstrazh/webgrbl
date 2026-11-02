@@ -23,7 +23,8 @@
   --color-danger-text: #ff6b6b;
   --color-info: #4aa3ff;
   --color-laser-head: #ff3b3b;
-  --color-focus-ring: #4aa3ff;
+  // The one focus ring of every control: the bright accent, at least 3:1 against the background and every surface.
+  --color-focus-ring: #ff8a1f;
   // Hover and active surfaces stay dark enough for muted text (4.84:1 and 4.67:1).
   --color-surface-hover: #212429;
   --color-surface-active: #23272c;
