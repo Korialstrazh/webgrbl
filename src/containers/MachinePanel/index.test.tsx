@@ -11,6 +11,7 @@ import {
 } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
+import { selectIsConnectionPopoverOpen } from '../../utils/states/ui.overlay.state';
 
 const WORK_POSITION_TEXT = '8.000';
 const MACHINE_POSITION_TEXT = '10.500';
@@ -23,6 +24,7 @@ const RESET_LABEL = 'Reset';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
 const NOT_CONNECTED_TEXT = 'Not connected';
+const STATUS_CONNECT_LABEL = 'Connect...';
 const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
 const SOON_TAG_TEXT = 'Soon';
 const CONTROL_SELECTOR = 'button, input';
@@ -71,6 +73,22 @@ describe(MachinePanel.name, () => {
     expect(screen.queryByText(MISSING_VALUE_TEXT)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('offers Connect in the status card while not connected, which opens the connection popover of the pill', () => {
+    const store: AppStore = renderMachinePanel();
+
+    fireEvent.click(screen.getByRole('button', { name: STATUS_CONNECT_LABEL }));
+
+    expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
+  });
+
+  it('drops the Connect button from the status card once connected', () => {
+    const store: AppStore = renderMachinePanel();
+
+    connect(store);
+
+    expect(screen.queryByRole('button', { name: STATUS_CONNECT_LABEL })).not.toBeInTheDocument();
   });
 
   it('shows dashes while connected without a status yet', () => {

@@ -17,7 +17,7 @@ import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const CONSOLE_INPUT_LABEL = 'Console command';
-const DISCONNECTED_PATTERN = /Disconnected|Connected/;
+const DISCONNECTED_PATTERN = /^Connection: /;
 const POPOVER_LABEL = 'Laser connection';
 const PORT_LABEL = 'Port';
 const MODAL_TITLE = 'Test modal';

@@ -6,7 +6,7 @@ import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock'
 import { newStore } from '../../utils/states/new.store';
 
 const APP_TITLE = 'webgrbl';
-const CONNECTION_PILL_PATTERN = /Disconnected/;
+const CONNECTION_PILL_PATTERN = /^Connection: Not connected/;
 const STOP_LABEL = 'Stop';
 const CONSOLE_TITLE = 'Console';
 const CONSOLE_TOGGLE_LABEL = 'Console';

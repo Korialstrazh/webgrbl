@@ -1,6 +1,7 @@
 /**
- * The bottom region: the job size and the estimate of the ready toolpath, the bed point under the pointer, and the
- * console toggle. The console opens as a panel below the bed, which the workbench lays out.
+ * The bottom region: the job size and the estimate of the ready toolpath, the bed point under the pointer, an Offline
+ * note while the browser has no network, and the console toggle. The console opens as a panel below the bed, which the
+ * workbench lays out.
  *
  * @author michael.morosov
  *
@@ -9,12 +10,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Layout, Switch } from 'antd';
+import { Layout, Switch, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { selectIsOnline } from '../../utils/states/browser.environment.state';
 import { MISSING_VALUE_TEXT } from '../../utils/missing.value.constants';
+import { KEYBOARD_FOCUSABLE_TAB_INDEX } from '../../utils/tab.index.constants';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
 import { selectReadyToolpathBounds, selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
@@ -30,6 +33,8 @@ export const StatusStrip = (): ReactNode => {
   const isConsoleOpen: boolean = useSelector(selectIsConsoleOpen);
   const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
   const jobBounds: ToolpathBounds | undefined = useSelector(selectReadyToolpathBounds);
+  const isOnline: boolean = useSelector(selectIsOnline);
+  const isOffline: boolean = !isOnline;
 
   return (
     <Layout.Footer
@@ -52,6 +57,14 @@ export const StatusStrip = (): ReactNode => {
           <BedCursorReadout />
         </dl>
       </div>
+      {isOffline && (
+        <Tooltip title={t(DEFAULT.STATUS_STRIP_OFFLINE_HINT)}>
+          {/* Focusable, so a keyboard user can read the hint; it is a note, not a control. */}
+          <span className={styles.offlineNote} tabIndex={KEYBOARD_FOCUSABLE_TAB_INDEX}>
+            {t(DEFAULT.STATUS_STRIP_OFFLINE)}
+          </span>
+        </Tooltip>
+      )}
       <label className={styles.consoleSwitch}>
         <Switch
           checked={isConsoleOpen}

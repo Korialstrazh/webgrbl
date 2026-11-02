@@ -5,7 +5,7 @@ import { newStore } from '../../utils/states/new.store';
 
 const OFFLINE_READY_TEXT = 'webgrbl is ready to work offline.';
 const DISMISS_LABEL = 'Dismiss';
-const DISCONNECTED_PATTERN = /Disconnected/;
+const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const CHIP_CLASS_NAME = 'appUpdatePrompt';
 const MESSAGE_CLASS_NAME = 'message';
 

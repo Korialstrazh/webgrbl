@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { StatusStrip } from '.';
 import { BED_CURSOR_STORE } from '../../utils/bed/bed.cursor.store';
+import { OFFLINE_EVENT_NAME, ONLINE_EVENT_NAME } from '../../utils/browser/browser.events.constants';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
@@ -19,6 +20,7 @@ const ESTIMATE_LABEL = 'Estimate';
 const CURSOR_LABEL = 'Cursor';
 const JOB_SIZE_LABEL = 'Job size';
 const SOON_LABEL = 'Soon';
+const OFFLINE_LABEL = 'Offline';
 const MISSING_VALUE_TEXT = '-';
 const CURSOR_POINT = { xMm: 123.45, yMm: 6.7 };
 const CURSOR_TEXT = 'X 123.5 Y 6.7 mm';
@@ -37,6 +39,24 @@ const renderStatusStrip = (store: AppStore = newStore()): void => {
 };
 
 describe(StatusStrip.name, () => {
+  it('shows Offline only while the browser has no network', () => {
+    renderStatusStrip();
+
+    expect(screen.queryByText(OFFLINE_LABEL)).not.toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event(OFFLINE_EVENT_NAME));
+    });
+
+    expect(screen.getByText(OFFLINE_LABEL)).toBeInTheDocument();
+
+    act(() => {
+      window.dispatchEvent(new Event(ONLINE_EVENT_NAME));
+    });
+
+    expect(screen.queryByText(OFFLINE_LABEL)).not.toBeInTheDocument();
+  });
+
   it('keeps the console collapsed by default', () => {
     renderStatusStrip();
 

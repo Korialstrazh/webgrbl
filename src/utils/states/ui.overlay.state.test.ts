@@ -10,13 +10,20 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Action } from './action';
-import { OverlayClosed, OverlayOpened, selectIsAnyOverlayOpen, uiOverlayReducer } from './ui.overlay.state';
+import {
+  ConnectionPopoverOpenChanged,
+  OverlayClosed,
+  OverlayOpened,
+  selectIsAnyOverlayOpen,
+  selectIsConnectionPopoverOpen,
+  uiOverlayReducer,
+} from './ui.overlay.state';
 import type { UiOverlayState } from './ui.overlay.state';
 
 const UNKNOWN_ACTION_TYPE = 'unknown action';
 const FIRST_OVERLAY_ID = 'dialog-a';
 const SECOND_OVERLAY_ID = 'drawer-b';
-const NO_OVERLAYS_STATE: UiOverlayState = { openOverlayIds: [] };
+const NO_OVERLAYS_STATE: UiOverlayState = { openOverlayIds: [], isConnectionPopoverOpen: false };
 
 class UnknownAction extends Action {
   public static readonly type: string = UNKNOWN_ACTION_TYPE;
@@ -50,5 +57,17 @@ describe('uiOverlayReducer', () => {
     const state: UiOverlayState = uiOverlayReducer(NO_OVERLAYS_STATE, closeAction);
 
     expect(state).toBe(NO_OVERLAYS_STATE);
+  });
+
+  it('opens and closes the connection popover without touching the overlay registry', () => {
+    let state: UiOverlayState = uiOverlayReducer(NO_OVERLAYS_STATE, new OverlayOpened({ overlayId: FIRST_OVERLAY_ID }));
+    state = uiOverlayReducer(state, new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+
+    expect(selectIsConnectionPopoverOpen({ uiOverlay: state })).toBe(true);
+    expect(state.openOverlayIds).toEqual([FIRST_OVERLAY_ID]);
+
+    state = uiOverlayReducer(state, new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: false }));
+
+    expect(selectIsConnectionPopoverOpen({ uiOverlay: state })).toBe(false);
   });
 });

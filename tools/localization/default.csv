@@ -33,13 +33,13 @@ BED_ZOOM_OUT_HINT;Zoom out (-)
 BED_ZOOM_PAN_HINT;Drag with the middle mouse button, or hold Space and drag, to move the view.
 BED_ZOOM_PERCENT;{{percent}} %
 COMING_SOON;Soon
+CONNECTION_PILL_CONNECT;Connect
 CONNECTION_PILL_CONNECTED;Connected
 CONNECTION_PILL_CONNECTING;Connecting
-CONNECTION_PILL_DISCONNECTED;Disconnected
+CONNECTION_PILL_DISCONNECTED;Not connected
 CONNECTION_PILL_FIRMWARE;{{firmwareName}} {{version}}
+CONNECTION_PILL_LABEL;Connection: {{details}}. Open the connection menu.
 CONNECTION_PILL_LOST;Connection lost
-CONNECTION_PILL_OFFLINE;Offline
-CONNECTION_PILL_ONLINE;Online
 CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED;No Web Serial
 CONNECTION_POPOVER_BAUD;Baud rate
 CONNECTION_POPOVER_CHOOSE_PORT;Choose port...
@@ -245,10 +245,10 @@ MACHINE_STATE_IDLE;Idle
 MACHINE_STATE_JOG;Jog
 MACHINE_STATE_RUN;Run
 MACHINE_STATE_SLEEP;Sleep
+MACHINE_STATUS_CONNECT;Connect...
 MACHINE_STATUS_FEED;Feed
 MACHINE_STATUS_MACHINE_POSITION;Machine position
 MACHINE_STATUS_NOT_CONNECTED;Not connected
-MACHINE_STATUS_NOT_CONNECTED_HINT;Connect from the top bar.
 MACHINE_STATUS_POWER;Power
 MACHINE_STATUS_TITLE;Status
 MACHINE_STATUS_WORK_POSITION;Work position
@@ -332,6 +332,8 @@ STATUS_STRIP_CURSOR_VALUE;X {{x}}  Y {{y}} mm
 STATUS_STRIP_ESTIMATE;Estimate
 STATUS_STRIP_JOB_SIZE;Job size
 STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
+STATUS_STRIP_OFFLINE;Offline
+STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
 STATUS_STRIP_TITLE;Status
 TOAST_CONNECT_TIMEOUT;No response from the controller - check the baud rate and that the laser is powered.
 TOAST_CONNECTED;Connected to {{firmware}} {{version}}
