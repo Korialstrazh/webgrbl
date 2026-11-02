@@ -90,6 +90,11 @@ export const getObjectBedDrawableSet = (projectObject: ProjectObject, firstPaint
   const matrix: SvgMatrix = getObjectBedMatrix(projectObject, viewBox);
   const toleranceUserUnits: number = TOOLPATH_TOLERANCE_MM / getSvgMatrixMaxScale(matrix);
 
+  // Nothing is dropped silently: an object whose SVG cannot be read again is left out with a warning.
+  if (!expandedDocument) {
+    return { drawables: [], warnings: [{ objectId: projectObject.id, kind: SVG_UNSUPPORTED_KIND.UNREADABLE }] };
+  }
+
   if (!isDrawableObject(expandedDocument, toleranceUserUnits)) {
     return { drawables: [], warnings: [] };
   }

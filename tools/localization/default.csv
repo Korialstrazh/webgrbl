@@ -284,6 +284,7 @@ OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visi
 OBJECT_WARNING_IMAGE;Images are not engraved yet.
 OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.
 OBJECT_WARNING_TEXT;Text is not converted to paths. In Inkscape use Path > Object to Path.
+OBJECT_WARNING_UNREADABLE;The drawing could not be read, so nothing of it burns. Import the SVG again.
 OBJECT_WARNING_USE_LIMIT;The design repeats too many elements, so some repeated parts are left out.
 OBJECTS_DELETE;Delete {{name}}
 OBJECTS_EMPTY_HINT;No objects yet. Import an SVG or drop one on the bed.
@@ -414,6 +415,7 @@ TOOLPATH_WARNINGS_KIND_CLIPPED;clipped parts burn in full ({{count}})
 TOOLPATH_WARNINGS_KIND_IMAGE;images left out ({{count}})
 TOOLPATH_WARNINGS_KIND_OFF_PAGE;parts off the page ({{count}})
 TOOLPATH_WARNINGS_KIND_TEXT;text left out ({{count}})
+TOOLPATH_WARNINGS_KIND_UNREADABLE;drawings that could not be read ({{count}})
 TOOLPATH_WARNINGS_KIND_USE_LIMIT;repeats left out ({{count}})
 TOOLPATH_WARNINGS_SUMMARY;Warnings: {{kinds}}
 TOOLPATH_WARNINGS_TITLE;Toolpath warnings

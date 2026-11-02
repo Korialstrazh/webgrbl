@@ -97,6 +97,7 @@ Shown on the Job card ("Estimate") and in the playback bar clock, next to the jo
 - **Text** that is not converted to paths is skipped, with a warning. In Inkscape use Path > Object to Path.
 - **Images** are skipped, with a warning ("Images are not engraved yet.").
 - **`<use>`** copies are followed (so colours inside them make layers), up to 20 000 copied elements per SVG; beyond that, the extra parts are left out with a warning. Uses inside `defs`, `symbol`, `clipPath` and `mask` content are not expanded.
+- **Unreadable drawings.** An object whose SVG cannot be read again burns nothing and is listed with a warning ("drawings that could not be read"); import the SVG again.
 - **Off-page and clipped content** still burns in full, with a warning. The bed hides the parts outside the page, but the toolpath does not; clip paths and masks are not applied.
 - **A stale toolpath must be regenerated** before it can play or be estimated (export generates it for you).
 - **The Toolpath view hides the live machine head.**

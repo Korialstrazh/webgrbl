@@ -22,6 +22,8 @@ export const SVG_UNSUPPORTED_KIND = {
   OFF_PAGE: 'off-page',
   /** An element has a clip-path or mask; it still burns in full. */
   CLIPPED: 'clipped',
+  /** The SVG of the object could not be read again, so nothing of the object burns. */
+  UNREADABLE: 'unreadable',
 } as const;
 
 export type SvgUnsupportedKind = (typeof SVG_UNSUPPORTED_KIND)[keyof typeof SVG_UNSUPPORTED_KIND];
