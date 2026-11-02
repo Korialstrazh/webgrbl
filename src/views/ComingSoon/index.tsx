@@ -22,12 +22,14 @@ interface ComingSoonProps {
   description: string;
   /** The one control, rendered disabled by the caller. */
   children: ReactNode;
+  /** Whether the control fills the width it is given, with the tag at its end. */
+  isFullWidth?: boolean;
 }
 
 // A short wait, so the tooltip does not flash up while the pointer only passes over the control.
 const COMING_SOON_TOOLTIP_DELAY_S = 0.4;
 
-export const ComingSoon = ({ description, children }: ComingSoonProps): ReactNode => (
+export const ComingSoon = ({ description, children, isFullWidth = false }: ComingSoonProps): ReactNode => (
   // The tooltip sits on the wrapper: a disabled button fires no pointer events, so the wrapper takes the hover.
   <Tooltip
     title={description}
@@ -35,7 +37,7 @@ export const ComingSoon = ({ description, children }: ComingSoonProps): ReactNod
     placement={ANTD_TOOLTIP_PLACEMENT_BOTTOM}
     mouseEnterDelay={COMING_SOON_TOOLTIP_DELAY_S}
   >
-    <span className={styles.comingSoon}>
+    <span className={isFullWidth ? [styles.comingSoon, styles.fullWidth].join(' ') : styles.comingSoon}>
       <span className={styles.control}>{children}</span>
       <SoonTag description={description} />
     </span>

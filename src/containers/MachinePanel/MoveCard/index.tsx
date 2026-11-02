@@ -10,17 +10,15 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button } from 'antd';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
+import { CollapsedCardToggle } from '../../../views/CollapsedCardToggle';
 import { Panel } from '../../../views/Panel';
 import { MoveControls } from './MoveControls';
-import styles from './styles.module.scss';
 
 export const MoveCard = (): ReactNode => {
   const { t } = useTranslation();
@@ -32,19 +30,14 @@ export const MoveCard = (): ReactNode => {
     ? DEFAULT.MACHINE_MOVE_SHOW_CONTROLS_LABEL
     : DEFAULT.MACHINE_MOVE_HIDE_CONTROLS_LABEL;
   const collapseToggleComponent: ReactNode = isConnected ? undefined : (
-    <span className={styles.collapsedSummary}>
-      {isCollapsed && <span className={styles.collapsedHint}>{t(DEFAULT.MACHINE_MOVE_COLLAPSED_HINT)}</span>}
-      <Button
-        type={ANTD_BUTTON_TYPE_TEXT}
-        size={ANTD_BUTTON_SIZE_SMALL}
-        aria-expanded={!isCollapsed}
-        aria-controls={controlsId}
-        aria-label={t(toggleLabelKey)}
-        onClick={() => setIsShownWhileDisconnected(isCollapsed)}
-      >
-        {t(isCollapsed ? DEFAULT.MACHINE_MOVE_SHOW_CONTROLS : DEFAULT.MACHINE_MOVE_HIDE_CONTROLS)}
-      </Button>
-    </span>
+    <CollapsedCardToggle
+      isCollapsed={isCollapsed}
+      hintText={t(DEFAULT.MACHINE_MOVE_COLLAPSED_HINT)}
+      controlsId={controlsId}
+      toggleText={t(isCollapsed ? DEFAULT.MACHINE_CARD_SHOW : DEFAULT.MACHINE_CARD_HIDE)}
+      toggleLabel={t(toggleLabelKey)}
+      onToggle={() => setIsShownWhileDisconnected(isCollapsed)}
+    />
   );
 
   return (

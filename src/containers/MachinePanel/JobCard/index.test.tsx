@@ -29,6 +29,7 @@ import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpa
 
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
+const FRAME_JOB_LABEL = 'Frame job';
 const SOON_LABEL = 'Soon';
 const PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
 const ESTIMATE_PLACEHOLDER = EM_DASH;
@@ -114,6 +115,26 @@ describe(JobCard.name, () => {
     expect(startJobButton).toBeDisabled();
     expect(startJobButton).not.toHaveClass(PRIMARY_BUTTON_CLASS);
     expect(startJobButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_LABEL);
+  });
+
+  it('makes Export G-code the filled main action, the one job action that works today', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    expect(getExportButton()).toHaveClass(PRIMARY_BUTTON_CLASS);
+  });
+
+  it('offers Frame job as a disabled Soon action that dispatches nothing', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    renderJobCard(store);
+    const frameJobButton: HTMLElement = screen.getByRole('button', { name: FRAME_JOB_LABEL });
+
+    fireEvent.click(frameJobButton);
+
+    expect(frameJobButton).toBeDisabled();
+    expect(frameJobButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_LABEL);
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
   it('downloads the G-code from Export G-code', async () => {

@@ -161,12 +161,16 @@ LAYERS_NOT_IN_PALETTE;Not in the palette
 LAYERS_OPEN_PALETTE;Palette
 LAYERS_SUMMARY;{{mode}} · {{power}} % · {{speed}} mm/min · {{passes}}×
 LAYERS_TOGGLE;Send {{name}} to the laser
+MACHINE_CARD_HIDE;Hide
+MACHINE_CARD_SHOW;Show
 MACHINE_CONTROL_RESET;Reset
 MACHINE_CONTROL_STOP;Stop
 MACHINE_CONTROL_STOP_SHORTCUT;Esc
 MACHINE_CONTROL_UNLOCK;Unlock
 MACHINE_JOB_ESTIMATE_LABEL;Estimate
 MACHINE_JOB_EXPORT_GCODE;Export G-code
+MACHINE_JOB_FRAME;Frame job
+MACHINE_JOB_FRAME_DESCRIPTION;Traces the outline of the job with the pointer. Coming in a later release.
 MACHINE_JOB_LAYER_COUNT_one;{{count}} layer
 MACHINE_JOB_LAYER_COUNT_other;{{count}} layers
 MACHINE_JOB_LAYERS_LABEL;Layers
@@ -181,22 +185,21 @@ MACHINE_JOG_UP;Jog up
 MACHINE_JOG_UP_LEFT;Jog up and left
 MACHINE_JOG_UP_RIGHT;Jog up and right
 MACHINE_LASER_AIR_ASSIST;Air assist
+MACHINE_LASER_COLLAPSED_HINT;Connect to use
 MACHINE_LASER_FIRE;Hold to fire
 MACHINE_LASER_FIRMWARE_NOTE;Some firmwares keep the laser off while the head stands still. It switches off when you let go, when the window loses focus, after {{seconds}} seconds, or on any stop or alarm.
-MACHINE_LASER_FRAME;Frame job
-MACHINE_LASER_FRAME_DESCRIPTION;Trace the outline of the job with the pointer.
+MACHINE_LASER_HIDE_CONTROLS_LABEL;Hide the laser pointer controls
 MACHINE_LASER_ON;LASER ON
 MACHINE_LASER_POWER;Pointer power
 MACHINE_LASER_POWER_WATTS;About {{watts}} W
+MACHINE_LASER_SHOW_CONTROLS_LABEL;Show the laser pointer controls
 MACHINE_LASER_TITLE;Laser pointer
 MACHINE_MOVE_COLLAPSED_HINT;Connect to move
-MACHINE_MOVE_HIDE_CONTROLS;Hide
 MACHINE_MOVE_HIDE_CONTROLS_LABEL;Hide the move controls
 MACHINE_MOVE_HOME;Home
 MACHINE_MOVE_JOG_SPEED_LABEL;Jog speed
 MACHINE_MOVE_JOG_SPEED_UNIT;mm/min
 MACHINE_MOVE_SET_ZERO;Set zero
-MACHINE_MOVE_SHOW_CONTROLS;Show
 MACHINE_MOVE_SHOW_CONTROLS_LABEL;Show the move controls
 MACHINE_MOVE_STEP_LABEL;Step size
 MACHINE_MOVE_STEP_OPTION;{{distance}} mm

@@ -17,3 +17,17 @@
     pointer-events: none;
   }
 }
+
+// A full-width control: the control takes the row and the tag sits at its end.
+.fullWidth {
+  display: flex;
+  width: 100%;
+
+  .control {
+    flex: 1;
+
+    > * {
+      width: 100%;
+    }
+  }
+}

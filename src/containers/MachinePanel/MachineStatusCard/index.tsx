@@ -1,7 +1,7 @@
 /**
- * The Status card of the machine panel. While no laser is connected it is one line, "Not connected" with a Connect
- * button that opens the same connection popover as the top-bar pill, instead of empty readouts and buttons that cannot
- * act; once connected it shows the state, positions, feed and power with Reset and Unlock.
+ * The Status card of the machine panel. While no laser is connected it is its heading line only, with "Not connected"
+ * and a Connect button that opens the same connection popover as the top-bar pill, instead of empty readouts and
+ * buttons that cannot act; once connected it shows the state, positions, feed and power with Reset and Unlock.
  *
  * @author michael.morosov
  *
@@ -29,24 +29,27 @@ export const MachineStatusCard = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const isConnected: boolean = useSelector(selectIsConnected);
 
+  const notConnectedComponent: ReactNode = isConnected ? undefined : (
+    <span className={styles.notConnected}>
+      <span className={styles.notConnectedLabel}>{t(DEFAULT.MACHINE_STATUS_NOT_CONNECTED)}</span>
+      <Button
+        className={styles.connectButton}
+        type={ANTD_BUTTON_TYPE_PRIMARY}
+        onClick={() => dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }))}
+      >
+        {t(DEFAULT.MACHINE_STATUS_CONNECT)}
+      </Button>
+    </span>
+  );
+
   return (
-    <Panel title={t(DEFAULT.MACHINE_STATUS_TITLE)}>
+    <Panel title={t(DEFAULT.MACHINE_STATUS_TITLE)} headerActionComponent={notConnectedComponent}>
       {isConnected ? (
         <>
           <MachineStateReadout />
           <MachineResetUnlock />
         </>
-      ) : (
-        <div className={styles.notConnected}>
-          <span className={styles.notConnectedLabel}>{t(DEFAULT.MACHINE_STATUS_NOT_CONNECTED)}</span>
-          <Button
-            type={ANTD_BUTTON_TYPE_PRIMARY}
-            onClick={() => dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }))}
-          >
-            {t(DEFAULT.MACHINE_STATUS_CONNECT)}
-          </Button>
-        </div>
-      )}
+      ) : undefined}
     </Panel>
   );
 };

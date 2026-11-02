@@ -1,6 +1,7 @@
 /**
- * The Job card: the layers that go to the laser, the time estimate and the G-code export. Start job stays coming
- * soon, disabled and unfilled, until the job runs from the app.
+ * The Job card: the layers that go to the laser, the time estimate and the job actions. Export G-code is the main
+ * action, filled and full width, since it is the one that works today; Start job and Frame job stay coming soon,
+ * disabled and unfilled, until the job runs from the app.
  *
  * @author michael.morosov
  *
@@ -13,7 +14,7 @@ import { Button, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_LARGE } from '../../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
@@ -52,6 +53,8 @@ export const JobCard = (): ReactNode => {
           <span className={styles.exportButtonWrapper}>
             <Button
               block
+              type={ANTD_BUTTON_TYPE_PRIMARY}
+              size={ANTD_BUTTON_SIZE_LARGE}
               disabled={!isGcodeExportEnabled}
               onClick={() => dispatch(new GcodeExportRequested({ isWarningConfirmed: false }))}
             >
@@ -59,11 +62,14 @@ export const JobCard = (): ReactNode => {
             </Button>
           </span>
         </Tooltip>
-        <ComingSoon description={t(DEFAULT.MACHINE_START_JOB_DESCRIPTION)}>
+        <ComingSoon description={t(DEFAULT.MACHINE_START_JOB_DESCRIPTION)} isFullWidth>
           {/* Unfilled until streaming exists: a control that is not built yet never looks like the main action. */}
           <Button size={ANTD_BUTTON_SIZE_LARGE} disabled>
             {t(DEFAULT.MACHINE_START_JOB)}
           </Button>
+        </ComingSoon>
+        <ComingSoon description={t(DEFAULT.MACHINE_JOB_FRAME_DESCRIPTION)} isFullWidth>
+          <Button disabled>{t(DEFAULT.MACHINE_JOB_FRAME)}</Button>
         </ComingSoon>
       </div>
     </Panel>
