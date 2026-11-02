@@ -12,7 +12,6 @@
 import { Button, Space, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ANTD_BUTTON_SIZE_SMALL } from '../../utils/antd.constants';
 import { MINUS_SIGN, PLUS_SIGN } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { BedZoomControlsProps } from './interfaces/BedZoomControlsProps';
@@ -26,7 +25,7 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
     <Space.Compact className={styles.bedZoomControls} role="group" aria-label={t(DEFAULT.BED_ZOOM_CONTROLS_LABEL)}>
       <Tooltip title={t(DEFAULT.BED_ZOOM_OUT_HINT)}>
         <Button
-          size={ANTD_BUTTON_SIZE_SMALL}
+          className={styles.zoomButton}
           aria-label={t(DEFAULT.BED_ZOOM_OUT_HINT)}
           disabled={!canZoomOut}
           onClick={onZoomOut}
@@ -42,7 +41,7 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
       </Tooltip>
       <Tooltip title={t(DEFAULT.BED_ZOOM_IN_HINT)}>
         <Button
-          size={ANTD_BUTTON_SIZE_SMALL}
+          className={styles.zoomButton}
           aria-label={t(DEFAULT.BED_ZOOM_IN_HINT)}
           disabled={!canZoomIn}
           onClick={onZoomIn}
@@ -51,7 +50,7 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
         </Button>
       </Tooltip>
       <Tooltip title={t(DEFAULT.BED_ZOOM_FIT_HINT)}>
-        <Button size={ANTD_BUTTON_SIZE_SMALL} aria-label={t(DEFAULT.BED_ZOOM_FIT_HINT)} onClick={onFit}>
+        <Button className={styles.zoomButton} aria-label={t(DEFAULT.BED_ZOOM_FIT_HINT)} onClick={onFit}>
           {t(DEFAULT.BED_ZOOM_FIT)}
         </Button>
       </Tooltip>

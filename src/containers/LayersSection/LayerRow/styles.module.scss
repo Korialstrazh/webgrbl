@@ -107,6 +107,12 @@
   padding-right: var(--space-1);
   opacity: 0;
   transition: opacity 0.12s;
+
+  // A 2rem target each, though the arrows are small.
+  > :global(.ant-btn) {
+    width: 2rem;
+    height: 2rem;
+  }
 }
 
 .row:hover .moveButtons,

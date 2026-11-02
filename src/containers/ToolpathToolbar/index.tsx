@@ -12,7 +12,6 @@
 import { Segmented, Switch } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ANTD_SEGMENTED_SIZE_SMALL, ANTD_SWITCH_SIZE_SMALL } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayModeOption } from './interfaces/ToolpathDisplayModeOption';
@@ -36,12 +35,11 @@ export const ToolpathToolbar = ({
           value: option.value,
           label: t(option.labelKey),
         }))}
-        size={ANTD_SEGMENTED_SIZE_SMALL}
         value={displayMode}
         onChange={onDisplayModeChange}
       />
       <label className={styles.travelSwitch}>
-        <Switch size={ANTD_SWITCH_SIZE_SMALL} checked={isTravelShown} onChange={onTravelShownChange} />
+        <Switch checked={isTravelShown} onChange={onTravelShownChange} />
         {t(DEFAULT.TOOLPATH_SHOW_TRAVEL)}
       </label>
     </div>
