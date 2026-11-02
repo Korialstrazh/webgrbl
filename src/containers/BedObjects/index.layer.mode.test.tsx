@@ -13,6 +13,7 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
 import { selectSelectedObjectIds } from '../../utils/states/project.selection.state';
+import { SVG_DRAWN_ELEMENT, SVG_PROPERTY } from '../../utils/svg/geometry/svg.geometry.constants';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
 import { BED_TOOL } from '../BedPanel/bed.toolbar.constants';
 import { BED_OBJECT_HIT_AREA_TEST_ID } from './bed.objects.constants';
@@ -22,6 +23,9 @@ const RED = '#ff0000';
 const OBJECT_NAME = 'Square';
 const LAYER_MODE_ATTRIBUTE = 'data-layer-mode';
 const LAYER_ENABLED_ATTRIBUTE = 'data-layer-enabled';
+const IMAGE_ELEMENT_SELECTOR = 'image';
+const PATH_DATA_ATTRIBUTE = 'd';
+const SQUARE_PATH_DATA = 'M0 0L10 0L10 10L0 10Z';
 const POINTER_ID = 1;
 const ARTWORK_SIZE_MM = 10;
 // Inside the square: SVG y is the bed height minus the machine y.
@@ -74,16 +78,16 @@ describe(`${BedObjects.name} layer modes`, () => {
 
     const layerGroup: Element | null = getLayerGroup();
 
-    expect(document.querySelector('image')).toBeNull();
+    expect(document.querySelector(IMAGE_ELEMENT_SELECTOR)).toBeNull();
     expect(layerGroup).toHaveAttribute(LAYER_MODE_ATTRIBUTE, LAYER_MODE.LINE);
-    expect(layerGroup).toHaveAttribute('stroke', RED);
-    expect(layerGroup?.querySelector('path')).toHaveAttribute('d', 'M0 0L10 0L10 10L0 10Z');
+    expect(layerGroup).toHaveAttribute(SVG_PROPERTY.STROKE, RED);
+    expect(layerGroup?.querySelector(SVG_DRAWN_ELEMENT.PATH)).toHaveAttribute(PATH_DATA_ATTRIBUTE, SQUARE_PATH_DATA);
   });
 
   it('draws an object on a fill layer that is on as its filled artwork image', () => {
     renderWithLayer(getRedLayer(LAYER_MODE.FILL, true));
 
-    expect(document.querySelector('image')).not.toBeNull();
+    expect(document.querySelector(IMAGE_ELEMENT_SELECTOR)).not.toBeNull();
     expect(getLayerGroup()).toBeNull();
   });
 

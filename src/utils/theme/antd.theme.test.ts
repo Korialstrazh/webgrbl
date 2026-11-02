@@ -1,8 +1,8 @@
+import { theme } from 'antd';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { theme } from 'antd';
-import { ANTD_THEME } from './antd.theme';
 import { getScssTokenValue } from '../test.support/get.scss.token.value';
+import { ANTD_THEME } from './antd.theme';
 
 const TOKENS_PATH = resolve(__dirname, '../../styles/tokens.scss');
 const ROOT_FONT_SIZE_PIXELS = 16;
@@ -99,21 +99,21 @@ const selectTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Select
 const splitterTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Splitter };
 const menuTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Menu };
 
-const requireScssToken = (name: string): string => {
-  const value: string | undefined = getScssTokenValue(source, name);
+const requireScssToken = (tokenName: string): string => {
+  const value: string | undefined = getScssTokenValue(source, tokenName);
 
   if (!value) {
-    throw new Error(`Token ${name} is missing`);
+    throw new Error(`Token ${tokenName} is missing`);
   }
 
   return value;
 };
 
-const getRemTokenPixels = (name: string): number => {
-  const value: string = requireScssToken(name);
+const getRemTokenPixels = (tokenName: string): number => {
+  const value: string = requireScssToken(tokenName);
 
   if (!value.endsWith(REM_UNIT)) {
-    throw new Error(`Token ${name} is not in rem`);
+    throw new Error(`Token ${tokenName} is not in rem`);
   }
 
   return parseFloat(value) * ROOT_FONT_SIZE_PIXELS;

@@ -29,7 +29,7 @@ class UnknownAction extends Action {
   public static readonly type: string = UNKNOWN_ACTION_TYPE;
 }
 
-describe('uiOverlayReducer', () => {
+describe(uiOverlayReducer.name, () => {
   it('starts with no open overlay', () => {
     expect(uiOverlayReducer(undefined, new UnknownAction())).toEqual(NO_OVERLAYS_STATE);
   });

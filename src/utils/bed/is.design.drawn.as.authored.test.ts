@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { LAYER_MODE } from '../palette/palette.constants';
+import { SVG_FILL_RULE } from '../svg/geometry/svg.geometry.constants';
 import { DESIGN_PAINT_ROLE } from './bed.design.constants';
 import type { DesignLayerLook } from './interfaces/DesignLayerLook';
 import type { ObjectDesignDrawing } from './interfaces/ObjectDesignDrawing';
 import { isDesignDrawnAsAuthored } from './is.design.drawn.as.authored';
-import { LAYER_MODE } from '../palette/palette.constants';
-import { SVG_FILL_RULE } from '../svg/geometry/svg.geometry.constants';
 
 const RED = '#ff0000';
 

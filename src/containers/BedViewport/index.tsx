@@ -14,8 +14,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import type { PointerEvent, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { BED_CURSOR_STORE } from '../../utils/bed/bed.cursor.store';
 import { BedZoomContext } from '../../utils/bed/bed.zoom.context';
 import { BED_ZOOM_STEP_FACTOR, MAX_BED_ZOOM, MIN_BED_ZOOM } from '../../utils/bed/bed.zoom.constants';

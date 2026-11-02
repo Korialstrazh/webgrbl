@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { getSplitterKeyTargetPercent } from './get.splitter.key.target.percent';
-import type { SplitterBarRange } from './interfaces/SplitterBarRange';
 import {
   ARROW_DOWN_KEY,
   ARROW_LEFT_KEY,
@@ -10,6 +8,8 @@ import {
   ENTER_KEY,
   HOME_KEY,
 } from '../browser/browser.events.constants';
+import { getSplitterKeyTargetPercent } from './get.splitter.key.target.percent';
+import type { SplitterBarRange } from './interfaces/SplitterBarRange';
 
 const RANGE: SplitterBarRange = { positionPercent: 50, minPercent: 20, maxPercent: 70 };
 const STEP_PERCENT = 2;

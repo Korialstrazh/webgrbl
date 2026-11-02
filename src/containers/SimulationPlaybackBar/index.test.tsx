@@ -117,7 +117,7 @@ const renderBar = (store: AppStore): (() => void) => render(
   </Provider>,
 ).unmount;
 
-const getButton = (name: string): HTMLElement => screen.getByRole('button', { name });
+const getButton = (buttonName: string): HTMLElement => screen.getByRole('button', { name: buttonName });
 
 const getSlider = (): HTMLElement => screen.getByRole('slider', { name: SLIDER_LABEL });
 

@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { ARROW_RIGHT_KEY, ARROW_UP_KEY, END_KEY, HOME_KEY } from '../../utils/browser/browser.events.constants';
 import { Provider } from 'react-redux';
+import { ARROW_RIGHT_KEY, ARROW_UP_KEY, END_KEY, HOME_KEY } from '../../utils/browser/browser.events.constants';
 import { AppRoute } from '.';
 import { PANEL_SIZES_REPOSITORY } from '../../utils/project/panel.sizes.repository';
 import { newStore } from '../../utils/states/new.store';

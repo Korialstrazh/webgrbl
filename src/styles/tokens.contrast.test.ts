@@ -92,11 +92,11 @@ const getContrastRatio = (hexA: string, hexB: string): number => {
 
 describe('design token contrast', () => {
   const source: string = readFileSync(TOKENS_PATH, 'utf8');
-  const requireToken = (name: string): string => {
-    const value: string | undefined = getScssTokenValue(source, name);
+  const requireToken = (tokenName: string): string => {
+    const value: string | undefined = getScssTokenValue(source, tokenName);
 
     if (!value) {
-      throw new Error(`Token ${name} is missing`);
+      throw new Error(`Token ${tokenName} is missing`);
     }
 
     return value;

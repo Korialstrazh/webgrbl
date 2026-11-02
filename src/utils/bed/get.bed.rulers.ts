@@ -76,6 +76,9 @@ const getTopRulerLabels = (axis: BedRulerAxis, textSizes: BedRulerTextSizes, lab
   return labels;
 };
 
+const isOffsetInsideBand = (axis: BedRulerAxis, offsetPx: number): boolean =>
+  offsetPx <= axis.bandLengthPx + BED_RULER_EDGE_TOLERANCE_PX;
+
 /** Labels of machine Y, written upwards from their tick; each must start below the bed's back edge and the band top. */
 const getLeftRulerLabels = (
   axis: BedRulerAxis,
@@ -88,7 +91,7 @@ const getLeftRulerLabels = (
     const offsetPx: number = axis.getOffsetPx(valueMm);
     const labelTopPx: number = offsetPx - textSizes.labelOffsetPx - getLabelWidthPx(valueMm, textSizes.fontSizePx);
 
-    if (labelTopPx >= labelStartPx && offsetPx <= axis.bandLengthPx + BED_RULER_EDGE_TOLERANCE_PX) {
+    if (labelTopPx >= labelStartPx && isOffsetInsideBand(axis, offsetPx)) {
       labels.push({ valueMm, offsetPx });
     }
   }
@@ -96,18 +99,18 @@ const getLeftRulerLabels = (
   return labels;
 };
 
-export const getBedRulers = (request: BedRulersRequest): BedRulerLayout => {
-  const { screenSize, dimensions, rootFontSizePx } = request;
-  const pixelsPerMm: number = getBedViewPixelsPerMm(request);
-  const { xMm, yMm, widthMm, heightMm } = getBedViewBox(request);
-  const textSizes: BedRulerTextSizes = {
-    fontSizePx: BED_RULER_FONT_SIZE_REM * rootFontSizePx,
-    labelOffsetPx: BED_RULER_LABEL_OFFSET_REM * rootFontSizePx,
-    minSpacingPx: BED_RULER_MIN_LABEL_SPACING_REM * rootFontSizePx,
-    minMinorTickSpacingPx: BED_RULER_MIN_MINOR_TICK_SPACING_REM * rootFontSizePx,
-  };
-  const labelStepMm: number = pixelsPerMm > 0 ? getBedRulerLabelStepMm(pixelsPerMm, textSizes.minSpacingPx) : 0;
-  const topAxis: BedRulerAxis = {
+const getBedRulerTextSizes = (rootFontSizePx: number): BedRulerTextSizes => ({
+  fontSizePx: BED_RULER_FONT_SIZE_REM * rootFontSizePx,
+  labelOffsetPx: BED_RULER_LABEL_OFFSET_REM * rootFontSizePx,
+  minSpacingPx: BED_RULER_MIN_LABEL_SPACING_REM * rootFontSizePx,
+  minMinorTickSpacingPx: BED_RULER_MIN_MINOR_TICK_SPACING_REM * rootFontSizePx,
+});
+
+const getTopRulerAxis = (request: BedRulersRequest, pixelsPerMm: number, labelStepMm: number): BedRulerAxis => {
+  const { screenSize, dimensions } = request;
+  const { xMm, widthMm } = getBedViewBox(request);
+
+  return {
     visibleStartMm: xMm,
     visibleEndMm: xMm + widthMm,
     bedLengthMm: dimensions.widthMm,
@@ -116,8 +119,14 @@ export const getBedRulers = (request: BedRulersRequest): BedRulerLayout => {
     labelStepMm,
     getOffsetPx: (valueMm: number): number => (valueMm - xMm) * pixelsPerMm,
   };
-  // Machine Y grows up from the front edge, so the visible machine Y range is the SVG range turned over.
-  const leftAxis: BedRulerAxis = {
+};
+
+// Machine Y grows up from the front edge, so the visible machine Y range is the SVG range turned over.
+const getLeftRulerAxis = (request: BedRulersRequest, pixelsPerMm: number, labelStepMm: number): BedRulerAxis => {
+  const { screenSize, dimensions } = request;
+  const { yMm, heightMm } = getBedViewBox(request);
+
+  return {
     visibleStartMm: dimensions.heightMm - (yMm + heightMm),
     visibleEndMm: dimensions.heightMm - yMm,
     bedLengthMm: dimensions.heightMm,
@@ -126,6 +135,15 @@ export const getBedRulers = (request: BedRulersRequest): BedRulerLayout => {
     labelStepMm,
     getOffsetPx: (valueMm: number): number => (dimensions.heightMm - valueMm - yMm) * pixelsPerMm,
   };
+};
+
+export const getBedRulers = (request: BedRulersRequest): BedRulerLayout => {
+  const { screenSize, dimensions, rootFontSizePx } = request;
+  const pixelsPerMm: number = getBedViewPixelsPerMm(request);
+  const textSizes: BedRulerTextSizes = getBedRulerTextSizes(rootFontSizePx);
+  const labelStepMm: number = pixelsPerMm > 0 ? getBedRulerLabelStepMm(pixelsPerMm, textSizes.minSpacingPx) : 0;
+  const topAxis: BedRulerAxis = getTopRulerAxis(request, pixelsPerMm, labelStepMm);
+  const leftAxis: BedRulerAxis = getLeftRulerAxis(request, pixelsPerMm, labelStepMm);
   const bedRightPx: number = topAxis.getOffsetPx(dimensions.widthMm);
   const bedBackPx: number = leftAxis.getOffsetPx(dimensions.heightMm);
 

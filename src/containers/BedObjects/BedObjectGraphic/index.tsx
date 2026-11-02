@@ -88,7 +88,8 @@ const renderSelectionHandles = (
 const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
   const { projectObject, bedHeightMm, isSelected, hasHandles, isOutsideBed, handleSizes, layerLooks } = props;
   const { onPointerDown, onHandlePointerDown } = props;
-  const { id, name, svgText, widthMm, heightMm, intrinsicWidthMm, intrinsicHeightMm }: ProjectObject = projectObject;
+  const { id, name: objectName, svgText, widthMm, heightMm }: ProjectObject = projectObject;
+  const { intrinsicWidthMm, intrinsicHeightMm }: ProjectObject = projectObject;
   // Read once per artwork: a drag changes only the box, so it neither reads the SVG nor looks it up again.
   const designDrawing: ObjectDesignDrawing = useMemo(
     () => getObjectDesignDrawing({ svgText, intrinsicWidthMm, intrinsicHeightMm }),
@@ -115,7 +116,7 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
     <g
       className={styles.bedObject}
       role="img"
-      aria-label={name}
+      aria-label={objectName}
       data-selected={isSelected}
       data-outside-bed={isOutsideBed}
       transform={getObjectSvgTransform(projectObject, bedHeightMm)}
