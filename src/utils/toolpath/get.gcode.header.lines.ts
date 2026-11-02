@@ -18,8 +18,10 @@ import {
   GCODE_TITLE_SEPARATOR,
   GCODE_WORD_SEPARATOR,
 } from './gcode.constants';
+import { getGcodeCommentText } from './get.gcode.comment.text';
 import type { GcodeContext } from './interfaces/GcodeContext';
 
+// Every text field goes through the comment sanitiser, not only the names: a value read from a file is untrusted.
 export const getGcodeHeaderLines = (context: GcodeContext): string[] => {
   const titleText: string = [
     `${GCODE_APP_NAME}${GCODE_WORD_SEPARATOR}${context.appVersion}`,
@@ -32,5 +34,8 @@ export const getGcodeHeaderLines = (context: GcodeContext): string[] => {
     `${GCODE_ORIGIN_LABEL}${context.originCorner}`,
   ].join(GCODE_HEADER_FIELD_SEPARATOR);
 
-  return [`${GCODE_COMMENT_PREFIX}${titleText}`, `${GCODE_COMMENT_PREFIX}${profileText}`];
+  return [
+    `${GCODE_COMMENT_PREFIX}${getGcodeCommentText(titleText)}`,
+    `${GCODE_COMMENT_PREFIX}${getGcodeCommentText(profileText)}`,
+  ];
 };

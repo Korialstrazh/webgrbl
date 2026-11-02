@@ -54,7 +54,7 @@ G-code positions are measured from the **origin corner** of the active machine p
 The file is plain GRBL 1.1 laser G-code, for example:
 
 ```gcode
-; webgrbl 0.1.0 — My project — 2026-11-02T09:30:00.000Z
+; webgrbl 0.1.0 - My project - 2026-11-02T09:30:00.000Z
 ; profile: My laser, S max 1000, origin front-left
 G21 G90
 M4 S0
@@ -64,6 +64,7 @@ G1 X50 Y40
 M5 S0
 ```
 
+- The two header comment lines are printable ASCII only. Line breaks in a project or profile name become spaces, `(` `)` `;` become `[` `]` `,`, accented letters lose their accent and other characters outside ASCII become `?`. A name read from an imported file can therefore never add a G-code line, and no byte can reach GRBL as a realtime override.
 - Units are mm and positions are absolute (`G21 G90`).
 - `M4` is dynamic laser mode: the laser power follows the speed and is off during travel. It needs **`$32=1`** (laser mode) on the controller. webgrbl does not check or change `$32` when you export, so set it before you run the file; with `$32=0` the laser would stay on during moves.
 - Travel is `G0`, burning is `G1`. X and Y are written on every move; `S` (power) and `F` (feed) only when they change.

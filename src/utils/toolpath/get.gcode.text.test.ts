@@ -1,4 +1,3 @@
-import { EM_DASH } from '../characters.constants';
 import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
 import {
   GCODE_AIR_ASSIST_OFF,
@@ -59,7 +58,7 @@ describe(getGcodeText.name, () => {
 
     expect(getGcodeText(toolpath, getContext())).toBe(
       [
-        `; webgrbl 0.1.0 ${EM_DASH} Test ${EM_DASH} 2026-11-01T00:00:00.000Z`,
+        '; webgrbl 0.1.0 - Test - 2026-11-01T00:00:00.000Z',
         '; profile: My laser, S max 1000, origin front-left',
         'G21 G90',
         'M4 S0',
@@ -151,5 +150,31 @@ describe(getGcodeText.name, () => {
 
     expect(text).toContain('G0 X390 Y280');
     expect(text).toContain('origin back-right');
+  });
+
+  it('writes no executable line from a project or profile name that carries line breaks', () => {
+    const toolpath: Toolpath = getToolpath([]);
+    const context: GcodeContext = getContext({
+      projectName: 'Coasters\nG1 X10 S1000\r\nG1 X200 Y200 S1000 F100',
+      profileName: 'Laser\rM3 S1000',
+    });
+
+    const lines: string[] = getGcodeText(toolpath, context).split(LINE_BREAK_PATTERN);
+
+    expect(lines.slice(0, 2)).toEqual([
+      '; webgrbl 0.1.0 - Coasters G1 X10 S1000  G1 X200 Y200 S1000 F100 - 2026-11-01T00:00:00.000Z',
+      '; profile: Laser M3 S1000, S max 1000, origin front-left',
+    ]);
+    expect(lines.slice(2)).toEqual(['G21 G90', 'M4 S0', GCODE_LASER_OFF_END, '']);
+  });
+
+  it('writes the header as printable ASCII for names outside ASCII', () => {
+    const context: GcodeContext = getContext({ projectName: 'Caf\u00E9 \u041A\u043E\u0442 \u2014 (v2); end', profileName: 'Lasero \u00FC' });
+
+    const headerText: string = getGcodeText(getToolpath([]), context).split(LINE_BREAK_PATTERN).slice(0, 2).join('');
+
+    expect(headerText).toMatch(/^[\x20-\x7E]*$/);
+    expect(headerText).toContain('Cafe ??? ? [v2], end');
+    expect(headerText).toContain('profile: Lasero u,');
   });
 });

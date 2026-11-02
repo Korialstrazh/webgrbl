@@ -1,0 +1,36 @@
+/**
+ * Makes user text (a project, profile or layer name) safe to write inside a G-code comment. Line breaks and other
+ * control characters become spaces, so the comment cannot end and start an executable line. The characters that close
+ * a comment or start a new statement become look-alikes. Everything else is folded to printable ASCII: GRBL reads
+ * bytes 0x80 to 0xFF as realtime commands (feed and power overrides) even inside a comment.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-11-02
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+import {
+  GCODE_COMMENT_BREAKING_CHARACTER_REPLACEMENTS,
+  GCODE_COMMENT_CONTROL_REPLACEMENT,
+  GCODE_COMMENT_UNKNOWN_CHARACTER,
+} from './gcode.constants';
+
+const CONTROL_OR_LINE_BREAK_PATTERN = /[\p{Cc}\p{Zl}\p{Zp}]/gu;
+const COMBINING_MARK_PATTERN = /\p{M}/gu;
+const NON_PRINTABLE_ASCII_PATTERN = /[^\x20-\x7E]/g;
+const COMMENT_BREAKING_CHARACTER_PATTERN = /[();]/g;
+// NFKD splits accented letters into a base letter plus a mark, and maps width variants to their plain form.
+const COMPATIBILITY_DECOMPOSITION = 'NFKD';
+
+const getCommentBreakingCharacterReplacement = (character: string): string =>
+  GCODE_COMMENT_BREAKING_CHARACTER_REPLACEMENTS[character] ?? GCODE_COMMENT_CONTROL_REPLACEMENT;
+
+export const getGcodeCommentText = (userText: string): string =>
+  userText
+    .replace(CONTROL_OR_LINE_BREAK_PATTERN, GCODE_COMMENT_CONTROL_REPLACEMENT)
+    .normalize(COMPATIBILITY_DECOMPOSITION)
+    .replace(COMBINING_MARK_PATTERN, '')
+    .replace(NON_PRINTABLE_ASCII_PATTERN, GCODE_COMMENT_UNKNOWN_CHARACTER)
+    .replace(COMMENT_BREAKING_CHARACTER_PATTERN, getCommentBreakingCharacterReplacement);

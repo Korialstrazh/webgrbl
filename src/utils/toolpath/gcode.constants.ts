@@ -8,7 +8,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { EM_DASH } from '../characters.constants';
 
 export const GCODE_UNITS_AND_ABSOLUTE = 'G21 G90';
 export const GCODE_LASER_MODE_ON = 'M4 S0';
@@ -24,7 +23,7 @@ export const GCODE_F_PREFIX = 'F';
 export const GCODE_WORD_SEPARATOR = ' ';
 export const GCODE_LINE_SEPARATOR = '\n';
 export const GCODE_COMMENT_PREFIX = '; ';
-export const GCODE_TITLE_SEPARATOR = ` ${EM_DASH} `;
+export const GCODE_TITLE_SEPARATOR = ' - ';
 export const GCODE_APP_NAME = 'webgrbl';
 export const GCODE_PROFILE_LABEL = 'profile: ';
 export const GCODE_S_MAX_LABEL = 'S max ';
@@ -36,3 +35,16 @@ export const GCODE_FILE_EXTENSION = '.gcode';
 export const GCODE_MIME_TYPE = 'text/plain';
 /** The smallest S value that can stand for full power. */
 export const GCODE_S_VALUE_MAX_MIN = 1;
+/** Stands in for a character that has no plain ASCII form, so the header stays printable ASCII. */
+export const GCODE_COMMENT_UNKNOWN_CHARACTER = '?';
+/** Stands in for a line break or other control character, so a comment can never end early. */
+export const GCODE_COMMENT_CONTROL_REPLACEMENT = ' ';
+/**
+ * The characters that close a comment or start a new statement in G-code, each with a harmless look-alike.
+ * GRBL reads a bracket comment until `)` and a semicolon comment until the line end.
+ */
+export const GCODE_COMMENT_BREAKING_CHARACTER_REPLACEMENTS: Readonly<Record<string, string>> = Object.freeze({
+  '(': '[',
+  ')': ']',
+  ';': ',',
+});
