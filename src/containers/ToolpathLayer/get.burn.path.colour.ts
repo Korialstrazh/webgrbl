@@ -1,6 +1,6 @@
 /**
  * Gets how one burn path group is coloured: a power band class in power shading; otherwise its layer colour, or the
- * mid-grey class for the shading layer, whose black would vanish on the dark bed.
+ * bed ink class for the shading layer.
  *
  * @author michael.morosov
  *

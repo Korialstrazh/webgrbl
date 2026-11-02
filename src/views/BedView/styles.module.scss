@@ -27,30 +27,29 @@
 }
 
 .minorGrid {
-  stroke: var(--color-border);
-  stroke-opacity: 0.4;
+  stroke: var(--color-bed-grid-minor);
   stroke-width: 1;
 }
 
 .majorGrid {
-  stroke: var(--color-border);
+  stroke: var(--color-bed-grid-major);
   stroke-width: 1;
 }
 
 .workOrigin {
   fill: none;
-  stroke: var(--color-accent);
+  stroke: var(--color-bed-accent);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 
 .head path {
-  stroke: var(--color-laser-head);
+  stroke: var(--color-bed-laser-head);
   stroke-width: 2;
 }
 
 .placeholder {
-  fill: var(--color-text-muted);
+  fill: var(--color-bed-text);
   font-family: var(--font-ui);
   text-anchor: middle;
   dominant-baseline: middle;

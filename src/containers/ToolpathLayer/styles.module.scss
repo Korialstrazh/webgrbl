@@ -25,38 +25,39 @@
 
 .remaining {
   stroke-width: 1;
-  stroke-opacity: 0.45;
+  stroke-opacity: 0.6;
   stroke-dasharray: 3 3;
 }
 
 .travelPath {
-  stroke: var(--color-text-muted);
-  stroke-width: 0.5;
-  stroke-opacity: 0.6;
+  stroke: var(--color-bed-travel);
+  stroke-width: 1;
+  stroke-opacity: 0.7;
+  stroke-dasharray: 4 3;
 }
 
-// The shading layer is black, which the dark bed would hide; it is drawn in a mid grey instead.
+// The shading layer is drawn in the bed ink, the darkest mark, like a burn on the light surface.
 .shadingLayer {
-  stroke: var(--color-text-muted);
+  stroke: var(--color-bed-ink);
 }
 
-// Power shading: the higher the band, the stronger the contrast against the bed (darker on a real material).
+// Power shading: the higher the band, the darker the mark on the light bed, as on a real material.
 $power-band-count: 10;
 $weakest-band-share: 30%;
 $band-share-step: math.div(70%, $power-band-count - 1);
 
 @for $band from 0 to $power-band-count {
   .powerBand#{$band} {
-    stroke: color-mix(in srgb, var(--color-text) ($weakest-band-share + $band * $band-share-step), var(--color-bed-surface));
+    stroke: color-mix(in srgb, var(--color-bed-ink) ($weakest-band-share + $band * $band-share-step), var(--color-bed-surface));
   }
 }
 
 .head path {
-  stroke: var(--color-accent);
+  stroke: var(--color-bed-laser-head);
   stroke-width: 2;
 }
 
 .origin {
-  stroke: var(--color-accent);
+  stroke: var(--color-bed-accent);
   stroke-width: 1;
 }

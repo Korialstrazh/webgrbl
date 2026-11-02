@@ -18,13 +18,13 @@
 }
 
 .outsideOutline {
-  stroke: var(--color-danger);
+  stroke: var(--color-bed-danger);
   stroke-dasharray: 3 3;
 }
 
 .selectionBox,
 .rotateArm {
-  stroke: var(--color-accent);
+  stroke: var(--color-bed-accent);
 }
 
 .selectionBox {
@@ -33,7 +33,7 @@
 
 .selectionHandle {
   fill: var(--color-bed-surface);
-  stroke: var(--color-accent);
+  stroke: var(--color-bed-accent);
   pointer-events: all;
 }
 

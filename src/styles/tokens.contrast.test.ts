@@ -44,6 +44,16 @@ const HEX_PREFIX = '#';
 const ACCENT_BUTTON_TOKEN = '--color-accent';
 const DANGER_TEXT_TOKEN = '--color-danger-text';
 const DARK_TEXT_ON_ACCENT = '#121417';
+// Black artwork and the marks and text drawn on the light bed need 4.5:1; markers and outlines need 3:1.
+const BLACK_ARTWORK = '#000000';
+const BED_TEXT_TOKENS = ['--color-bed-ink', '--color-bed-text'] as const;
+const BED_MARKER_TOKENS = [
+  '--color-bed-accent',
+  '--color-bed-laser-head',
+  '--color-bed-danger',
+  '--color-bed-travel',
+] as const;
+const MIN_GRAPHIC_CONTRAST = 3;
 const DISABLED_TEXT_TOKEN = '--color-disabled-text';
 const DISABLED_BG_TOKEN = '--color-disabled-bg';
 const DISABLED_BORDER_TOKEN = '--color-disabled-border';
@@ -108,7 +118,7 @@ describe('design token contrast', () => {
     expect(getContrastRatio(mutedHex, requireToken(surfaceToken))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
   });
 
-  it.each([BG_TOKEN, BED_TOKEN, BED_SURFACE_TOKEN])('keeps the muted text readable on %s', (surfaceToken: string) => {
+  it.each([BG_TOKEN, BED_TOKEN])('keeps the muted text readable on %s', (surfaceToken: string) => {
     expect(getContrastRatio(requireToken(MUTED_TOKEN), requireToken(surfaceToken))).toBeGreaterThanOrEqual(
       MIN_TEXT_CONTRAST,
     );
@@ -162,5 +172,21 @@ describe('design token contrast', () => {
 
     expect(disabledBorderContrast).toBeLessThan(enabledBorderContrast);
     expect(disabledTextContrast).toBeLessThan(enabledTextContrast);
+  });
+
+  it('keeps black artwork clearly visible on the bed surface', () => {
+    expect(getContrastRatio(BLACK_ARTWORK, requireToken(BED_SURFACE_TOKEN))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+  });
+
+  it.each(BED_TEXT_TOKENS)('keeps %s readable on the bed surface', (bedToken: string) => {
+    expect(getContrastRatio(requireToken(bedToken), requireToken(BED_SURFACE_TOKEN))).toBeGreaterThanOrEqual(
+      MIN_TEXT_CONTRAST,
+    );
+  });
+
+  it.each(BED_MARKER_TOKENS)('keeps %s visible on the bed surface', (bedToken: string) => {
+    expect(getContrastRatio(requireToken(bedToken), requireToken(BED_SURFACE_TOKEN))).toBeGreaterThanOrEqual(
+      MIN_GRAPHIC_CONTRAST,
+    );
   });
 });

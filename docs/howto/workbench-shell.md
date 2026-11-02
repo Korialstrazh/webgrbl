@@ -84,6 +84,7 @@ Exactly one STOP is rendered: `StopButton`, an antd `Button` with `type="primary
 ## Tokens and fonts
 
 - All colours, radii, spacing, fonts and sizes are CSS custom properties in `src/styles/tokens.scss`; use `var(--...)` only (never raw hex or px). Notable ones: `--color-danger-button` for danger buttons (contrast), `--target-min` (2.75 rem machine-control target), `--control-height`, `--focus-outline-width` / `--focus-outline-offset` with `--color-focus-ring`, `--radius-pill`.
+- The bed work surface is a light grey (`--color-bed-surface`, black artwork 9.2:1) while the area around it, the ruler bands and the panel chrome stay dark. Anything drawn on the bed uses the `--color-bed-*` tokens (grid, accent, laser head, danger, travel, ink, text), never the chrome colours: marks and text keep 4.5:1 and markers 3:1 against the surface (`tokens.contrast.test.ts`).
 - New colours must keep 4.5:1 text contrast (`tokens.contrast.test.ts`). The focus ring (`--color-focus-ring`, the accent) must keep 3:1 on every surface; it is the one ring for every control: a global `:focus-visible` rule, and antd's `colorPrimaryBorder` and `lineWidthFocus` tokens.
 - Splitter bars take their colours from the `Splitter` component tokens: a border-coloured line with a muted 2 rem grip at rest, the accent on hover and drag.
 - Inter and JetBrains Mono are self-hosted in `src/styles/fonts/` (`fonts.scss`); do not load fonts from a CDN, the app works offline.
