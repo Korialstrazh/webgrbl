@@ -26,19 +26,6 @@
   flex-shrink: 0;
 }
 
-.comingSoonGroups {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: var(--space-4);
-  min-width: 0;
-  overflow: hidden;
-
-  > * {
-    flex-shrink: 0;
-  }
-}
-
 .heading {
   display: flex;
   flex-direction: column;
@@ -71,8 +58,7 @@
     padding: 0 var(--space-3);
   }
 
-  .secondaryItem:global(.ant-btn),
-  .comingSoonGroups.secondaryItem {
+  .secondaryItem:global(.ant-btn) {
     display: none;
   }
 

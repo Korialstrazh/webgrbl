@@ -23,10 +23,10 @@ const RESET_LABEL = 'Reset';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
 const NOT_CONNECTED_TEXT = 'Not connected';
-const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer', 'Pre-flight check'];
+const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
 const CONTROL_SELECTOR = 'button, input';
-const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Pre-flight check', 'Job'];
+const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.RUN,

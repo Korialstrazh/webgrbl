@@ -26,12 +26,6 @@ export const TopBarOverflowMenu = ({ onOpenMachineProfiles }: TopBarOverflowMenu
   const { t } = useTranslation();
   const menuItems: ProjectMenuItems = [
     { key: TOP_BAR_OVERFLOW_MENU_KEY.MACHINE_PROFILES, label: t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES) },
-    {
-      key: TOP_BAR_OVERFLOW_MENU_KEY.MATERIALS,
-      label: t(DEFAULT.TOP_BAR_MENU_MATERIALS),
-      extra: t(DEFAULT.COMING_SOON),
-      disabled: true,
-    },
   ];
 
   const handleMenuClick = ({ key }: ProjectMenuClickInfo): void => {

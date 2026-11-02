@@ -1,6 +1,6 @@
 /**
  * The top region: app name, the project name, the Project menu and autosave readout, the machine profiles dialog,
- * SVG import, undo and redo, the Materials menu that is not built yet, the connection pill and update notice.
+ * SVG import, undo and redo, the connection pill and update notice.
  *
  * @author michael.morosov
  *
@@ -19,7 +19,6 @@ import { REDO_ARROW, UNDO_ARROW } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
-import { ComingSoon } from '../../views/ComingSoon';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
 import { MachineProfilesDialog } from '../MachineProfilesDialog';
@@ -74,11 +73,6 @@ export const TopBar = (): ReactNode => {
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
         <TopBarOverflowMenu onOpenMachineProfiles={() => setIsProfilesDialogOpen(true)} />
-      </div>
-      <div className={[styles.comingSoonGroups, styles.secondaryItem].join(' ')}>
-        <ComingSoon description={t(DEFAULT.TOP_BAR_MATERIALS_DESCRIPTION)}>
-          <Button type={ANTD_BUTTON_TYPE_TEXT}>{t(DEFAULT.TOP_BAR_MENU_MATERIALS)}</Button>
-        </ComingSoon>
       </div>
       <div className={styles.trailing}>
         <AppUpdatePrompt />

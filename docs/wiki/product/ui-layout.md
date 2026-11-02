@@ -12,12 +12,12 @@ The approved screen layout of webgrbl and the order in which features get built.
 
 - **Workbench layout.** One screen, with no modes:
   - top bar: project, menus, undo/redo, connection pill, autosave state;
-  - left panel: layers (on/off; off is never sent), objects, material;
+  - left panel: layers (on/off; off is never sent), objects; the material panel is planned (roadmap item 6);
   - centre: the bed to scale, with a Design / Toolpath / 3D switch and a status strip with a collapsible console;
-  - right panel: machine state, jog, low-power pointer, frame, air assist, pre-flight, Start, and a large STOP that is always visible.
+  - right panel, main task first: machine state (one line while not connected), job (estimate, export, Start), jog, low-power pointer, frame, air assist, and a large STOP that is always visible; the pre-flight check is planned (roadmap item 5);
 - **Running a job** changes the Workbench's state (progress, overrides, jog locked); there is no separate screen.
 - **Secondary screens are drawers or dialogs:** layer settings, material library, machine profiles, the GRBL `$$` editor, projects. Drawers never cover the machine panel.
-- **Full Workbench from day one.** Regions for unbuilt features are greyed out ("coming soon") and never send anything to the machine.
+- **Planned features stay quiet.** A control that is not built yet shows as disabled with a small "Soon" tag and never sends anything to the machine; a panel or menu that would hold nothing but a placeholder (the material panel, the Materials menu, the pre-flight card) stays off the screen until it is built. The main screen shows at most about four Soon tags.
 - **Power by colour:** one range, black (layer max power) → white (no power). Real gradients are followed; off-grey colours are ignored within a tolerance.
 - **Any GRBL laser:** machine profiles hold bed size, maximum watts, `$30`, origin and air assist. Material presets are stored in watts per profile and rescaled on import.
 - **Design tokens:**

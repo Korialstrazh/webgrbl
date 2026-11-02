@@ -1,17 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import type { MockInstance } from 'vitest';
 import { DesignPanel } from '.';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 import { newStore } from '../../utils/states/new.store';
-import type { AppDispatch, AppStore } from '../../utils/states/new.store';
+import type { AppStore } from '../../utils/states/new.store';
 
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
-const CONTROL_SELECTOR = 'button, input';
-const PANEL_TITLES: readonly string[] = ['Layers', 'Objects', 'Material'];
-const COMING_SOON_PANEL_COUNT = 1;
+const PANEL_TITLES: readonly string[] = ['Layers', 'Objects'];
+const PLANNED_PANEL_TITLE = 'Material';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PALETTE_BUTTON_LABEL = 'Palette';
 const PALETTE_LIST_LABEL = 'Palette colours';
@@ -25,29 +23,15 @@ const renderDesignPanel = (store: AppStore): void => {
 };
 
 describe(DesignPanel.name, () => {
-  it('shows the three panels, with material as coming soon', () => {
+  it('shows the layers and objects panels and no placeholder panel for the planned material', () => {
     renderDesignPanel(newStore());
 
     for (const panelTitle of PANEL_TITLES) {
       expect(screen.getByRole('heading', { name: panelTitle })).toBeInTheDocument();
     }
 
-    expect(document.querySelectorAll(DISABLED_REGION_SELECTOR)).toHaveLength(COMING_SOON_PANEL_COUNT);
-  });
-
-  it('every coming-soon control in the design panel dispatches nothing', () => {
-    const store: AppStore = newStore();
-    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
-
-    renderDesignPanel(store);
-
-    for (const disabledRegion of document.querySelectorAll(DISABLED_REGION_SELECTOR)) {
-      for (const control of disabledRegion.querySelectorAll(CONTROL_SELECTOR)) {
-        fireEvent.click(control);
-      }
-    }
-
-    expect(dispatchSpy).not.toHaveBeenCalled();
+    expect(screen.queryByRole('heading', { name: PLANNED_PANEL_TITLE })).not.toBeInTheDocument();
+    expect(document.querySelectorAll(DISABLED_REGION_SELECTOR)).toHaveLength(0);
   });
 
   it('shows the objects section with an import button as an active control', () => {

@@ -58,8 +58,6 @@ CONSOLE_SHOW_STATUS_REPORTS;Show status reports
 CONSOLE_TITLE;Console
 CONSOLE_TOGGLE;Console
 DESIGN_LAYERS_TITLE;Layers
-DESIGN_MATERIAL_DESCRIPTION;The material on the bed and its ready-made speed and power settings.
-DESIGN_MATERIAL_TITLE;Material
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Design
 GCODE_EXPORT_NEEDS_LAYER;Switch on a layer to export G-code.
@@ -185,9 +183,6 @@ MACHINE_MOVE_STEP_LABEL;Step size
 MACHINE_MOVE_STEP_OPTION;{{distance}} mm
 MACHINE_MOVE_TITLE;Move
 MACHINE_PANEL_TITLE;Machine
-MACHINE_PREFLIGHT_DESCRIPTION;Checks the machine, the job and the material before the job starts.
-MACHINE_PREFLIGHT_RUN;Run pre-flight check
-MACHINE_PREFLIGHT_TITLE;Pre-flight check
 MACHINE_PROFILE_ERROR_JOG_FEED_RATE_INVALID;Jog feed must be between {{min}} and {{max}} mm/min
 MACHINE_PROFILE_ERROR_MAX_POWER_INVALID;Laser power must be greater than 0 W and at most {{max}} W
 MACHINE_PROFILE_ERROR_NAME_REQUIRED;Enter a name for the machine
@@ -230,7 +225,7 @@ MACHINE_PROFILES_SAVE;Save
 MACHINE_PROFILES_SET_ACTIVE;Set active
 MACHINE_PROFILES_TITLE;Machine profiles
 MACHINE_START_JOB;Start job
-MACHINE_START_JOB_DESCRIPTION;Starts the job once the pre-flight check has passed.
+MACHINE_START_JOB_DESCRIPTION;Sends the job to the laser and shows its progress. Coming in a later release.
 MACHINE_START_JOB_TITLE;Job
 MACHINE_STATE_ALARM;Alarm
 MACHINE_STATE_CHECK;Check
@@ -375,10 +370,8 @@ TOOLPATH_WARNINGS_TITLE;Left out of the job
 TOP_BAR_AUTOSAVE_SAVED;Saved
 TOP_BAR_AUTOSAVE_SAVING;Saving…
 TOP_BAR_AUTOSAVE_UNSAVED;Not saved
-TOP_BAR_MATERIALS_DESCRIPTION;Material presets.
 TOP_BAR_MENU_IMPORT_SVG;Import SVG
 TOP_BAR_MENU_MACHINE_PROFILES;Machine profiles
-TOP_BAR_MENU_MATERIALS;Materials
 TOP_BAR_MENU_PROJECT;Project
 TOP_BAR_MORE;More
 TOP_BAR_PROJECT_MENU_EXPORT_GCODE;Export G-code
