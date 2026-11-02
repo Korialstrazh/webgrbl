@@ -244,9 +244,11 @@ function* downloadGcode(toolpath: Toolpath, profile: MachineProfile): Generator 
 }
 
 function* exportGcode(action: GcodeExportRequested): Generator {
-  const profile: MachineProfile | undefined = (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
+  const startProfile: MachineProfile | undefined = (
+    yield select(selectActiveMachineProfile)
+  ) as MachineProfile | undefined;
 
-  if (!profile) {
+  if (!startProfile) {
     return;
   }
 
@@ -254,6 +256,14 @@ function* exportGcode(action: GcodeExportRequested): Generator {
   const toolpath: Toolpath | undefined = (yield call(waitForReadyToolpath, exportProjectId)) as Toolpath | undefined;
 
   if (!toolpath) {
+    return;
+  }
+
+  // A ready toolpath matches the machine area of the profile active now, and a profile switch during the wait
+  // regenerated it. So the origin mapping reads that same profile, not the one the export started with.
+  const profile: MachineProfile | undefined = (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
+
+  if (!profile) {
     return;
   }
 

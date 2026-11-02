@@ -22,7 +22,7 @@ import { AnsweringToolpathWorker } from '../toolpath/test.support/answering.tool
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
 import type { AppToast } from './interfaces/AppToast';
 import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
-import { MachineProfileSaved, selectActiveMachineProfile } from './machine.profile.state';
+import { ActiveMachineProfileSelected, MachineProfileSaved, selectActiveMachineProfile } from './machine.profile.state';
 import type { AppStore } from './new.store';
 import {
   LayerToggled,
@@ -66,6 +66,9 @@ const RED_SQUARE_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/></svg>';
 const RENAMED_PROFILE_NAME = 'Renamed laser';
 const NUDGE_STEP_MM = 1;
+const NARROW_WORK_AREA_MM = 100;
+const WIDE_WORK_AREA_MM = 400;
+const WIDE_AREA_OBJECT_X_MM = 200;
 const SECOND_SQUARE_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
   + '<rect fill="none" stroke="#0000ff" width="10" height="10"/></svg>';
 
@@ -448,5 +451,45 @@ describe(watchToolpath.name, () => {
     expect(downloadSpy).not.toHaveBeenCalled();
     expect(selectToasts(store.getState()).map((toast: AppToast) => toast.messageKey))
       .toContain(DEFAULT.TOAST_GCODE_EXPORT_DROPPED);
+  });
+
+  it('keeps the G-code of a waiting export inside the work area after a profile switch', async () => {
+    const downloadSpy = spyOnDownload();
+    const toolpathWorkerClient: FakeToolpathWorkerClient = new FakeToolpathWorkerClient(true);
+    const narrowProfile: MachineProfile = newMachineProfile({
+      workAreaXMm: NARROW_WORK_AREA_MM,
+      workAreaYMm: NARROW_WORK_AREA_MM,
+      originCorner: MACHINE_ORIGIN_CORNER.FRONT_RIGHT,
+    });
+    const wideProfile: MachineProfile = newMachineProfile({
+      workAreaXMm: WIDE_WORK_AREA_MM,
+      workAreaYMm: WIDE_WORK_AREA_MM,
+      originCorner: MACHINE_ORIGIN_CORNER.FRONT_RIGHT,
+    });
+    const store: AppStore = await newGcodeExportTestStore({
+      toolpathWorkerClient,
+      activeProfile: narrowProfile,
+      objects: [newProjectObject({ svgText: RED_SQUARE_SVG_TEXT, xMm: WIDE_AREA_OBJECT_X_MM, yMm: 0 })],
+    });
+
+    store.dispatch(new GcodeExportRequested({ isWarningConfirmed: false }));
+    store.dispatch(new MachineProfileSaved({ profile: wideProfile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: wideProfile.id }));
+    await vi.waitFor((): void => {
+      expect(toolpathWorkerClient.generationInputs.at(-1)?.machineArea.workAreaXMm).toBe(WIDE_WORK_AREA_MM);
+    });
+    toolpathWorkerClient.resolveHeldGeneration(toolpathWorkerClient.generationInputs.length - 1);
+    await vi.waitFor((): void => {
+      expect(downloadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    const gcodeXs: number[] = Array.from(
+      getDownloadedText(downloadSpy).matchAll(/^G[01] X(-?[\d.]+)/gm),
+      (match: RegExpMatchArray): number => Number(match[1]),
+    );
+
+    expect(gcodeXs.length).toBeGreaterThan(0);
+    expect(Math.min(...gcodeXs)).toBeGreaterThanOrEqual(0);
+    expect(Math.max(...gcodeXs)).toBeLessThanOrEqual(WIDE_WORK_AREA_MM);
   });
 });
