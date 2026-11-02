@@ -1,8 +1,8 @@
+import { theme } from 'antd';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { theme } from 'antd';
-import { ANTD_THEME } from './antd.theme';
 import { getScssTokenValue } from '../test.support/get.scss.token.value';
+import { ANTD_THEME } from './antd.theme';
 
 const TOKENS_PATH = resolve(__dirname, '../../styles/tokens.scss');
 const ROOT_FONT_SIZE_PIXELS = 16;
@@ -23,9 +23,11 @@ const COLOR_TOKEN_SOURCES = [
   ['colorErrorText', '--color-danger-text'],
   ['colorTextDisabled', '--color-disabled-text'],
   ['colorBgContainerDisabled', '--color-disabled-bg'],
+  ['colorBorderDisabled', '--color-disabled-border'],
   ['colorWarning', '--color-warning'],
   ['colorSuccess', '--color-success'],
   ['colorInfo', '--color-info'],
+  ['colorPrimaryBorder', '--color-focus-ring'],
 ] as const;
 const LAYOUT_TOKEN_SOURCES = [
   ['bodyBg', '--color-bg'],
@@ -45,6 +47,11 @@ const BUTTON_TOKEN_SOURCES = [
   ['defaultBg', '--color-surface-2'],
   ['defaultHoverBg', '--color-surface-hover'],
   ['defaultActiveBg', '--color-surface-active'],
+  ['borderColorDisabled', '--color-disabled-border'],
+] as const;
+const MENU_TOKEN_SOURCES = [
+  ['itemSelectedBg', '--color-surface-3'],
+  ['itemSelectedColor', '--color-text'],
 ] as const;
 const SWITCH_TOKEN_SOURCES = [
   ['colorPrimary', '--color-accent'],
@@ -69,9 +76,16 @@ const SEGMENTED_TOKEN_SOURCES = [
   ['itemSelectedBg', '--color-surface-3'],
   ['itemSelectedColor', '--color-text'],
 ] as const;
+const SPLITTER_TOKEN_SOURCES = [
+  ['controlItemBgHover', '--color-border'],
+  ['controlItemBgActive', '--color-accent'],
+  ['controlItemBgActiveHover', '--color-accent-active'],
+  ['colorFill', '--color-text-muted'],
+] as const;
 const REM_TOKEN_SOURCES = [
   ['borderRadius', '--radius-md'],
   ['controlHeight', '--control-height'],
+  ['lineWidthFocus', '--focus-outline-width'],
 ] as const;
 
 const source: string = readFileSync(TOKENS_PATH, 'utf8');
@@ -82,22 +96,24 @@ const segmentedTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Seg
 const switchTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Switch };
 const sliderTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Slider };
 const selectTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Select };
+const splitterTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Splitter };
+const menuTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Menu };
 
-const requireScssToken = (name: string): string => {
-  const value: string | undefined = getScssTokenValue(source, name);
+const requireScssToken = (tokenName: string): string => {
+  const value: string | undefined = getScssTokenValue(source, tokenName);
 
   if (!value) {
-    throw new Error(`Token ${name} is missing`);
+    throw new Error(`Token ${tokenName} is missing`);
   }
 
   return value;
 };
 
-const getRemTokenPixels = (name: string): number => {
-  const value: string = requireScssToken(name);
+const getRemTokenPixels = (tokenName: string): number => {
+  const value: string = requireScssToken(tokenName);
 
   if (!value.endsWith(REM_UNIT)) {
-    throw new Error(`Token ${name} is not in rem`);
+    throw new Error(`Token ${tokenName} is not in rem`);
   }
 
   return parseFloat(value) * ROOT_FONT_SIZE_PIXELS;
@@ -150,5 +166,13 @@ describe('ANTD_THEME', () => {
 
   it.each(SELECT_TOKEN_SOURCES)('paints the select %s from %s', (selectToken: string, scssToken: string) => {
     expect(selectTokens[selectToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(SPLITTER_TOKEN_SOURCES)('paints the splitter %s from %s', (splitterToken: string, scssToken: string) => {
+    expect(splitterTokens[splitterToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(MENU_TOKEN_SOURCES)('paints the menu %s from %s', (menuToken: string, scssToken: string) => {
+    expect(menuTokens[menuToken]).toBe(requireScssToken(scssToken));
   });
 });

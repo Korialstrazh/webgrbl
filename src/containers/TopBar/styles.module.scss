@@ -1,10 +1,11 @@
+@use '../../styles/accessibility' as accessibility;
 @use '../../styles/layout' as layout;
 
 .topBar {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: 0 var(--space-6);
+  padding: 0 var(--space-4);
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-surface-1);
   // antd sets the header line height to its own 72 px header height.
@@ -15,24 +16,15 @@
   @include layout.fixed-height-bar(layout.$top-bar-height);
 }
 
-// The title, the built menus and the connection pill always stay visible; the coming-soon groups give up space first.
-.heading,
-.activeMenus,
+// The connection pill always stays visible; the coming-soon groups give up space first, then the title and the menus.
 .trailing {
   flex-shrink: 0;
+  margin-left: auto;
 }
 
-.comingSoonGroups {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: var(--space-4);
-  min-width: 0;
-  overflow: hidden;
-
-  > * {
-    flex-shrink: 0;
-  }
+.heading,
+.activeMenus {
+  flex-shrink: 0;
 }
 
 .heading {
@@ -43,7 +35,8 @@
 
 .title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
+  line-height: 1.2;
 }
 
 .group {
@@ -56,4 +49,39 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+// In a narrow window the secondary entries move into the overflow menu and the gaps close up, so the connection pill
+// keeps its place; 62.5rem must match the TopBarOverflowMenu styles.
+@media (width < 62.5rem) {
+  .topBar {
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+  }
+
+  .secondaryItem:global(.ant-btn) {
+    display: none;
+  }
+
+  .heading {
+    flex-shrink: 1;
+    min-width: 0;
+    // The heading shrinks to make room, so its title and project name are cut instead of drawing over the menus.
+    overflow: hidden;
+  }
+
+  .title {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// At the narrowest widths (the 684 px window included) Import SVG keeps only its icon, so the app title and the
+// project name keep room to show. 46rem must match the AutosaveReadout styles.
+@media (width < 46rem) {
+  .compactHiddenLabel {
+    @include accessibility.visually-hidden;
+  }
 }

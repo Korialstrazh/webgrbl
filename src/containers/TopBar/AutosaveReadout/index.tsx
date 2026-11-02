@@ -30,7 +30,7 @@ export const AutosaveReadout = (): ReactNode => {
   return (
     <p className={styles.autosave} role="status">
       <span className={[styles.dot, DOT_CLASS_NAME[saveStatus]].join(' ')} aria-hidden />
-      {t(PROJECT_SAVE_STATUS_LABEL_KEY[saveStatus])}
+      <span className={styles.label}>{t(PROJECT_SAVE_STATUS_LABEL_KEY[saveStatus])}</span>
     </p>
   );
 };

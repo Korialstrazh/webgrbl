@@ -1,0 +1,64 @@
+@use 'sass:math';
+
+// The toolpath is only looked at: presses go through to the bed.
+.toolpathLayer {
+  pointer-events: none;
+}
+
+.burnPath,
+.travelPath,
+.head path,
+.origin {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.burnPath {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// Burnt paths are solid and drawn above the remaining ones, so they cover the remaining dashes under them.
+.burnt {
+  stroke-width: 1.5;
+}
+
+.remaining {
+  stroke-width: 1;
+  stroke-opacity: 0.6;
+  stroke-dasharray: 3 3;
+}
+
+// Travel moves in the contrasting travel colour of the bed tone, wide and opaque enough to read on any bed colour.
+.travelPath {
+  stroke: var(--color-bed-travel);
+  stroke-width: 1.5;
+  stroke-opacity: 0.9;
+  stroke-dasharray: 4 3;
+}
+
+// The shading layer is drawn in the bed ink, the darkest mark, like a burn on the light surface.
+.shadingLayer {
+  stroke: var(--color-bed-ink);
+}
+
+// Power shading: the higher the band, the darker the mark on the light bed, as on a real material.
+$power-band-count: 10;
+$weakest-band-share: 30%;
+$band-share-step: math.div(70%, $power-band-count - 1);
+
+@for $band from 0 to $power-band-count {
+  .powerBand#{$band} {
+    stroke: color-mix(in srgb, var(--color-bed-ink) ($weakest-band-share + $band * $band-share-step), var(--color-bed-surface));
+  }
+}
+
+.head path {
+  stroke: var(--color-bed-laser-head);
+  stroke-width: 2;
+}
+
+.origin {
+  stroke: var(--color-bed-accent);
+  stroke-width: 1;
+}

@@ -11,11 +11,15 @@
 
 // The machine panel sits at the right edge; overlays stop short of it so STOP stays visible.
 $machine-panel-width: 22rem;
-$design-panel-width: 17.5rem;
+$design-panel-width: 20.5rem;
+
+// The machine controls line up with the jog pad (three 4.5rem cells and two gaps) instead of stretching across a wide
+// machine panel.
+$machine-control-max-width: 14.5rem;
 
 // The top bar and the status strip keep these heights at any width, so the regions between them get a known space.
-$top-bar-height: 6rem;
-$status-strip-height: 4.75rem;
+$top-bar-height: 3.5rem;
+$status-strip-height: 3rem;
 
 // The sticky STOP bar at the bottom of a narrow window; the pinned toast stack stops short of it.
 $sticky-stop-bar-height: 4.5rem;
@@ -27,3 +31,6 @@ $sticky-stop-bar-height: 4.5rem;
   height: $height;
   overflow: hidden;
 }
+
+// The bed rulers have bands of their own along the top and left of the bed drawing; the drawing starts where they end.
+$bed-ruler-band-size: 1.25rem;

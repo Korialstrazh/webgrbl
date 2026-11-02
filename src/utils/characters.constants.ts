@@ -12,38 +12,14 @@
 /** The multiplication sign, shown before a repeat count. */
 export const MULTIPLICATION_SIGN = '\u00D7';
 
-/** The anticlockwise arrow that stands for undo. */
-export const UNDO_ARROW = '\u21B6';
-
-/** The clockwise arrow that stands for redo. */
-export const REDO_ARROW = '\u21B7';
-
-/** The arrow that points up, on the jog pad. */
-export const ARROW_UP = '\u2191';
-
-/** The arrow that points down, on the jog pad. */
-export const ARROW_DOWN = '\u2193';
-
-/** The arrow that points left, on the jog pad. */
-export const ARROW_LEFT = '\u2190';
-
-/** The arrow that points right, on the jog pad. */
+/** The arrow that points right, as in the shading palette entry name. */
 export const ARROW_RIGHT = '\u2192';
 
-/** The arrow that points up and left, on the jog pad. */
-export const ARROW_UP_LEFT = '\u2196';
+/** The middle dot that separates the parts of a one-line summary. */
+export const MIDDLE_DOT = '\u00B7';
 
-/** The arrow that points up and right, on the jog pad. */
-export const ARROW_UP_RIGHT = '\u2197';
+/** The three dots that show a button opens a dialog. */
+export const HORIZONTAL_ELLIPSIS = '\u2026';
 
-/** The arrow that points down and left, on the jog pad. */
-export const ARROW_DOWN_LEFT = '\u2199';
-
-/** The arrow that points down and right, on the jog pad. */
-export const ARROW_DOWN_RIGHT = '\u2198';
-
-/** The cross that marks the delete button of an object row. */
-export const DELETE_CROSS = '\u2715';
-
-/** The small triangle that marks a button as opening a dropdown menu. */
-export const DROPDOWN_CARET = '\u25BE';
+/** The long dash that stands for a missing value. */
+export const EM_DASH = '\u2014';

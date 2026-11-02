@@ -1,0 +1,71 @@
+// Two rows below the bed: the transport, the timeline, the clock and the speed on the first, the job size and the live
+// head readout on the second. The slider takes the space the other controls leave; a narrow bed wraps the first row.
+.playbackBar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-1);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+}
+
+.transport {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.timeline {
+  display: flex;
+  flex: 1 1 15rem;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 10rem;
+}
+
+// antd insets the rail by half the handle; the layer bar above it uses the same inset, so both strips line up.
+.timeline > :not(.slider) {
+  margin-inline: 0.5rem;
+}
+
+.slider {
+  margin-block: 0;
+}
+
+// Fixed-width digits, so the clock does not shift while it counts.
+.clock {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.details {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.jobSize {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+// The chosen speed is marked by the accent colour as well as the lighter fill, so it is found at a glance (6.4:1).
+.speedSwitch :global(.ant-segmented-item-selected) {
+  color: var(--color-accent);
+}
+
+// The speed chips get a 1.75rem target, easier to hit than antd's small segment.
+.speedSwitch :global(.ant-segmented-item-label) {
+  min-height: 1.75rem;
+  line-height: 1.75rem;
+}

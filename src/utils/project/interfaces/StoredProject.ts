@@ -8,6 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { ProjectLayer } from '../../layers/interfaces/ProjectLayer';
 import type { StoredProjectObject } from './StoredProjectObject';
 
 export interface StoredProject {
@@ -21,4 +22,6 @@ export interface StoredProject {
   updatedAt: string;
   /** The objects in drawing order. */
   objects: StoredProjectObject[];
+  /** The layers of the document; missing in a row stored before projects had layers. */
+  layers?: ProjectLayer[];
 }

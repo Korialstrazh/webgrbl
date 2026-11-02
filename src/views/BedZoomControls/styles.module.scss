@@ -1,0 +1,29 @@
+// One compact group in the bed header, beside the view switch, so no control ever covers the drawing.
+.bedZoomControls {
+  flex: none;
+}
+
+// At least a 2rem target each, the size of a comfortable pointer target in a pro tool.
+.zoomButton:global(.ant-btn) {
+  min-width: 2rem;
+  height: 2rem;
+  padding-inline: var(--space-2);
+}
+
+// Sits between the buttons like a disabled segment, so the cluster reads as one control.
+.zoomPercent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.5rem;
+  white-space: nowrap;
+  height: 2rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-inline: none;
+  background-color: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}

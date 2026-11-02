@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { PointerEvent } from 'react';
+import type { DesignLayerLooks } from '../../../../utils/bed/interfaces/DesignLayerLooks';
 import type { ProjectObject } from '../../../../utils/project/interfaces/ProjectObject';
 import type { BedObjectHandle } from '../../bed.objects.constants';
 import type { BedHandleSizes } from '../../interfaces/BedHandleSizes';
@@ -23,6 +24,8 @@ export interface BedObjectGraphicProps {
   hasHandles: boolean;
   /** The handle sizes in bed millimetres; the same object between renders while the bed's screen scale holds. */
   handleSizes: BedHandleSizes;
+  /** How each layer is drawn; the same object between renders while the layers do not change. */
+  layerLooks: DesignLayerLooks;
   /** Whether any corner of the object lies outside the bed. */
   isOutsideBed: boolean;
   /** Called for a press on the object outside its handles; stable between renders, so unchanged objects skip one. */

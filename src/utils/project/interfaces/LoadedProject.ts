@@ -16,4 +16,9 @@ export interface LoadedProject {
   project: StoredProject;
   /** The objects joined with their SVG text, ready for the editor. */
   document: ProjectDocument;
+  /**
+   * Whether stored layers failed validation and were left out. The layers derived again for their colours then start
+   * switched off, so a layer the user had turned off never comes back on.
+   */
+  hasDroppedLayers?: boolean;
 }

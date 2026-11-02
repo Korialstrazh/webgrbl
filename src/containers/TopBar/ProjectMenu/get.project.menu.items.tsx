@@ -1,5 +1,6 @@
 /**
- * The entries of the Project menu, with the Save shortcut hint and the Export G-code entry marked as coming soon.
+ * The entries of the Project menu, with the Save shortcut hint. Export G-code is disabled while it cannot start, with
+ * a tooltip that says what is missing.
  *
  * @author michael.morosov
  *
@@ -8,14 +9,16 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 import { ANTD_MENU_ITEM_TYPE_DIVIDER } from '../../../utils/antd.constants';
+import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { ProjectMenuItems } from '../interfaces/ProjectMenuItems';
 import { PROJECT_MENU_KEY } from './project.menu.constants';
 import styles from './styles.module.scss';
 
-export const getProjectMenuItems = (t: TFunction): ProjectMenuItems => [
+export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvailability): ProjectMenuItems => [
   { key: PROJECT_MENU_KEY.NEW, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_NEW) },
   { key: PROJECT_MENU_KEY.OPEN, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN) },
   {
@@ -33,12 +36,11 @@ export const getProjectMenuItems = (t: TFunction): ProjectMenuItems => [
   { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
   {
     key: PROJECT_MENU_KEY.EXPORT_GCODE,
-    disabled: true,
+    disabled: !gcodeExport.isGcodeExportEnabled,
     label: (
-      <span className={styles.menuEntry}>
+      <Tooltip title={gcodeExport.gcodeExportBlockedReasonKey && t(gcodeExport.gcodeExportBlockedReasonKey)}>
         <span>{t(DEFAULT.TOP_BAR_PROJECT_MENU_EXPORT_GCODE)}</span>
-        <span className={styles.hint}>{t(DEFAULT.TOP_BAR_PROJECT_MENU_SOON)}</span>
-      </span>
+      </Tooltip>
     ),
   },
 ];

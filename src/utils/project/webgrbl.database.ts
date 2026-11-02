@@ -1,6 +1,7 @@
 /**
- * The app's one IndexedDB database, opened through Dexie. Only the project repository reads or writes it; nothing
- * else constructs a Dexie instance.
+ * The app's one IndexedDB database, opened through Dexie. Only the repositories next to it read or write it: the
+ * project repository (projects, their SVG text and the last opened project) and the panel sizes repository (the
+ * workbench panel sizes in the app state table). Nothing else constructs a Dexie instance.
  *
  * @author michael.morosov
  *
@@ -28,7 +29,7 @@ class WebgrblDatabase extends Dexie {
   public readonly projects: Table<StoredProject, string>;
   /** The SVG text of every object, keyed by project id and object id. */
   public readonly svgAssets: Table<StoredSvgAsset, SvgAssetKey>;
-  /** App-wide values such as the last opened project id. */
+  /** App-wide values such as the last opened project id and the workbench panel sizes. */
   public readonly appState: Table<AppStateEntry, AppStateKey>;
 
   public constructor() {

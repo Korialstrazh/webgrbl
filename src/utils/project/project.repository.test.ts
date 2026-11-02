@@ -24,7 +24,7 @@ const MOVED_X_MM = 42;
 const FIRST_OPENED_PROJECT_ID = 'first-opened-project';
 const SECOND_OPENED_PROJECT_ID = 'second-opened-project';
 
-const getDocument = (objects: ProjectObject[]): ProjectDocument => ({ objects });
+const getDocument = (objects: ProjectObject[]): ProjectDocument => ({ objects, layers: [] });
 
 const getAssetCount = async (projectId: string): Promise<number> =>
   WEBGRBL_DATABASE.svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX).equals(projectId).count();

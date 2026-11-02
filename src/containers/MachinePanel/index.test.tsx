@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MachinePanel } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
@@ -11,20 +11,29 @@ import {
 } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
+import { selectIsConnectionPopoverOpen } from '../../utils/states/ui.overlay.state';
 
 const WORK_POSITION_TEXT = '8.000';
 const MACHINE_POSITION_TEXT = '10.500';
 const FEED_RATE = 1200;
 const SPINDLE_SPEED = 750;
-const MISSING_VALUE_TEXT = '-';
+// The one empty-readout mark, an em dash.
+const MISSING_VALUE_TEXT = '\u2014';
 const IDLE_LABEL = 'Idle';
 const RUN_LABEL = 'Run';
 const RESET_LABEL = 'Reset';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
-const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
+const NOT_CONNECTED_TEXT = 'Not connected';
+const STATUS_CARD_TITLE = 'Status';
+const STATUS_CONNECT_LABEL = 'Connect...';
+const ANTD_PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
+const EXPORT_GCODE_LABEL = 'Export G-code';
+const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
+const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
+const SOON_TAG_TEXT = 'Soon';
 const CONTROL_SELECTOR = 'button, input';
-const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Pre-flight check', 'Job'];
+const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.RUN,
@@ -62,16 +71,65 @@ const receiveState = (store: AppStore, machineState: GrblResolvedStatus['machine
 };
 
 describe(MachinePanel.name, () => {
-  it('shows dashes while there is no status', () => {
+  it('collapses the status card to one line while not connected, without readouts or buttons', () => {
     renderMachinePanel();
 
+    const statusCard: HTMLElement = screen.getByRole('region', { name: STATUS_CARD_TITLE });
+
+    expect(within(statusCard).getByText(NOT_CONNECTED_TEXT)).toBeInTheDocument();
+    expect(within(statusCard).queryByText(MISSING_VALUE_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('offers Connect in the status card while not connected, which opens the connection popover of the pill', () => {
+    const store: AppStore = renderMachinePanel();
+
+    fireEvent.click(screen.getByRole('button', { name: STATUS_CONNECT_LABEL }));
+
+    expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
+  });
+
+  it('keeps Export G-code the only filled primary button while not connected', () => {
+    renderMachinePanel();
+
+    expect(screen.getByRole('button', { name: STATUS_CONNECT_LABEL })).not.toHaveClass(ANTD_PRIMARY_BUTTON_CLASS);
+    // STOP is a danger button of its own, not a next step, so it is not counted.
+    expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(1);
+    expect(screen.getByRole('button', { name: EXPORT_GCODE_LABEL })).toHaveClass(ANTD_PRIMARY_BUTTON_CLASS);
+  });
+
+  it('drops the Connect button from the status card once connected', () => {
+    const store: AppStore = renderMachinePanel();
+
+    connect(store);
+
+    expect(screen.queryByRole('button', { name: STATUS_CONNECT_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('shows dashes while connected without a status yet', () => {
+    const store: AppStore = renderMachinePanel();
+
+    connect(store);
+
+    expect(screen.queryByText(NOT_CONNECTED_TEXT)).not.toBeInTheDocument();
     expect(screen.getAllByText(MISSING_VALUE_TEXT).length).toBeGreaterThan(0);
     expect(screen.queryByText(IDLE_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('puts the main task first: status, job, move, then the laser pointer', () => {
+    renderMachinePanel();
+
+    const cardTitles: (string | null)[] = screen.getAllByRole('heading')
+      .map((heading: HTMLElement) => heading.textContent);
+
+    expect(cardTitles).toEqual(CARD_TITLES_IN_ORDER);
   });
 
   it('shows the state, positions with three decimals, feed and power after a status report', () => {
     const store: AppStore = renderMachinePanel();
 
+    connect(store);
     act(() => {
       store.dispatch(new MachineStatusReceived({ status: NEW_STATUS }));
     });
@@ -81,13 +139,6 @@ describe(MachinePanel.name, () => {
     expect(screen.getByText(new RegExp(MACHINE_POSITION_TEXT))).toBeInTheDocument();
     expect(screen.getByText(String(FEED_RATE))).toBeInTheDocument();
     expect(screen.getByText(String(SPINDLE_SPEED))).toBeInTheDocument();
-  });
-
-  it('disables reset and unlock while disconnected', () => {
-    renderMachinePanel();
-
-    expect(screen.getByRole('button', { name: RESET_LABEL })).toBeDisabled();
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeDisabled();
   });
 
   it('enables reset when connected, and unlock only in alarm', () => {
@@ -126,25 +177,28 @@ describe(MachinePanel.name, () => {
     }
   });
 
-  it('every coming-soon control in the machine panel dispatches nothing', () => {
+  it('shows every control that is not built yet disabled, with one Soon tag each, and dispatches nothing', () => {
     const store: AppStore = newStore();
 
     renderMachinePanel(store);
     connect(store);
 
     const dispatchSpy = vi.spyOn(store, 'dispatch');
-    const disabledRegions: NodeListOf<Element> = document.querySelectorAll(DISABLED_REGION_SELECTOR);
-    let clickedControlCount = 0;
+    const soonTags: HTMLElement[] = screen.getAllByText(SOON_TAG_TEXT);
 
-    for (const disabledRegion of disabledRegions) {
-      for (const control of disabledRegion.querySelectorAll(CONTROL_SELECTOR)) {
-        fireEvent.click(control);
-        clickedControlCount++;
+    for (const soonTag of soonTags) {
+      const soonControls: NodeListOf<Element> | undefined =
+        soonTag.previousElementSibling?.querySelectorAll(CONTROL_SELECTOR);
+
+      expect(soonControls).toHaveLength(1);
+
+      for (const soonControl of soonControls ?? []) {
+        expect(soonControl).toBeDisabled();
+        fireEvent.click(soonControl);
       }
     }
 
-    expect(disabledRegions.length).toBeGreaterThan(0);
-    expect(clickedControlCount).toBeGreaterThan(0);
+    expect(soonTags.length).toBeGreaterThan(1);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
@@ -161,5 +215,16 @@ describe(MachinePanel.name, () => {
     renderMachinePanel(newStore(), false);
 
     expect(screen.queryByRole('button', { name: STOP_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('puts STOP in a footer after the scrolling cards, never over them', () => {
+    renderMachinePanel();
+
+    const stopFooter: HTMLElement | null = screen.getByRole('button', { name: STOP_LABEL }).parentElement;
+    const cardsArea: Element | null | undefined = stopFooter?.previousElementSibling;
+
+    expect(stopFooter?.parentElement).toBe(cardsArea?.parentElement);
+    expect(cardsArea).toContainElement(screen.getByText(NOT_CONNECTED_TEXT));
+    expect(cardsArea).not.toContainElement(stopFooter ?? null);
   });
 });

@@ -1,5 +1,6 @@
 /**
- * A titled section of the workbench with an optional action next to the heading.
+ * A titled section of the workbench with an optional action next to the heading. Without content it is the heading
+ * line only, for a section collapsed to one line.
  *
  * @author michael.morosov
  *
@@ -14,7 +15,8 @@ import styles from './styles.module.scss';
 
 interface PanelProps {
   title: string;
-  children: ReactNode;
+  /** The content below the heading; none leaves the section at its heading line. */
+  children?: ReactNode;
   headerActionComponent?: ReactNode;
 }
 
@@ -23,11 +25,11 @@ export const Panel = ({ title, children, headerActionComponent }: PanelProps): R
 
   return (
     <section className={styles.panel} aria-labelledby={headingId}>
-      <header className={styles.header}>
+      <header className={children ? [styles.header, styles.headerAboveBody].join(' ') : styles.header}>
         <h2 id={headingId} className={styles.title}>{title}</h2>
         {headerActionComponent}
       </header>
-      <div className={styles.body}>{children}</div>
+      {children && <div className={styles.body}>{children}</div>}
     </section>
   );
 };

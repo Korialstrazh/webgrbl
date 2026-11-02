@@ -11,11 +11,12 @@
   border-color: var(--color-accent);
 }
 
-// The button grows to the row width and stacks its name, size and note.
+// The button grows to the row width and stacks its name, size and notes, one per line, so a narrow panel still shows
+// the name.
 .selectButton {
   display: grid;
   flex: 1;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0 var(--space-2);
   align-items: center;
   height: auto;
@@ -31,13 +32,22 @@
 }
 
 .size {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }
 
 .outsideNote {
-  grid-column: 1 / -1;
   font-size: 0.75rem;
   color: var(--color-danger-text);
+}
+
+// Content the job leaves out; the text wraps, since it says what to do about it.
+.warningNote {
+  font-size: 0.75rem;
+  color: var(--color-warning);
+  white-space: normal;
 }

@@ -1,5 +1,11 @@
 /**
- * The project document and its undo history: the objects on the bed, with snapshot stacks for undo and redo.
+ * The project document and its undo history: the objects on the bed and their laser layers, with snapshot stacks for
+ * undo and redo.
+ *
+ * Layers are derived from the palette in the sagas, before the action is put, so this reducer stays pure: the added
+ * objects bring their layers in the payload and both land in one undo step. Undo and redo restore the snapshot as it
+ * was and never derive again. A layer whose colour no object draws any more stays in the document, hidden by
+ * selectProjectLayers, so an undo brings it back with its settings.
  *
  * @author michael.morosov
  *
@@ -8,6 +14,15 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { createSelector } from '@reduxjs/toolkit';
+import { getLayerKey } from '../layers/get.layer.key';
+import { getLayersInOrder } from '../layers/get.layers.in.order';
+import { getLayersWithEnabledState } from '../layers/get.layers.with.enabled.state';
+import { getLayersWithNewLayers } from '../layers/get.layers.with.new.layers';
+import { getLayersWithPaletteEntryLink } from '../layers/get.layers.with.palette.entry.link';
+import { getLayersWithSettings } from '../layers/get.layers.with.settings';
+import { getUsedLayerKeys } from '../layers/get.used.layer.keys';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import type { ProjectObjectTransform } from '../project/interfaces/ProjectObjectTransform';
@@ -15,6 +30,10 @@ import { MAX_UNDO_STEPS } from '../project/project.constants';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
+import type { LayerKeysPayload } from './interfaces/LayerKeysPayload';
+import type { LayerPaletteEntryLinkedPayload } from './interfaces/LayerPaletteEntryLinkedPayload';
+import type { LayerSettingsChangedPayload } from './interfaces/LayerSettingsChangedPayload';
+import type { LayerToggledPayload } from './interfaces/LayerToggledPayload';
 import type { ProjectDocumentPayload } from './interfaces/ProjectDocumentPayload';
 import type { ProjectObjectIdsPayload } from './interfaces/ProjectObjectIdsPayload';
 import type { ProjectObjectTransformsPayload } from './interfaces/ProjectObjectTransformsPayload';
@@ -65,6 +84,22 @@ export class ProjectDocumentLoaded extends Action<ProjectDocumentPayload> {
   public static readonly type: string = actionType('project document loaded');
 }
 
+export class LayerSettingsChanged extends Action<LayerSettingsChangedPayload> {
+  public static readonly type: string = actionType('layer settings changed');
+}
+
+export class LayerToggled extends Action<LayerToggledPayload> {
+  public static readonly type: string = actionType('layer toggled');
+}
+
+export class LayersReordered extends Action<LayerKeysPayload> {
+  public static readonly type: string = actionType('layers reordered');
+}
+
+export class LayerPaletteEntryLinked extends Action<LayerPaletteEntryLinkedPayload> {
+  public static readonly type: string = actionType('layer palette entry linked');
+}
+
 export class SvgFilesImportRequested extends Action<SvgFilesPayload> {
   public static readonly type: string = actionType('svg files import requested');
 }
@@ -72,7 +107,7 @@ export class SvgFilesImportRequested extends Action<SvgFilesPayload> {
 
 // #region Initial state
 const INITIAL_PROJECT_DOCUMENT_STATE: ProjectDocumentState = {
-  document: { objects: [] },
+  document: { objects: [], layers: [] },
   past: [],
   future: [],
 };
@@ -88,9 +123,20 @@ const getStateWithChange = (
   future: [],
 });
 
-const getStateWithAddedObjects = (state: ProjectDocumentState, addedObjects: ProjectObject[]): ProjectDocumentState =>
+const getStateWithLayers = (state: ProjectDocumentState, changedLayers: ProjectLayer[]): ProjectDocumentState =>
+  changedLayers === state.document.layers
+    ? state
+    : getStateWithChange(state, { ...state.document, layers: changedLayers });
+
+const getStateWithAddedObjects = (
+  state: ProjectDocumentState,
+  { objects: addedObjects, layers: derivedLayers }: ProjectObjectsPayload,
+): ProjectDocumentState =>
   addedObjects.length
-    ? getStateWithChange(state, { objects: [...state.document.objects, ...addedObjects] })
+    ? getStateWithChange(state, {
+      objects: [...state.document.objects, ...addedObjects],
+      layers: getLayersWithNewLayers(state.document.layers, derivedLayers),
+    })
     : state;
 
 const getTransformFields = (transform: ProjectObjectTransform): ProjectObjectTransform => ({
@@ -135,7 +181,7 @@ const getStateWithTransforms = (
       projectObject !== state.document.objects[objectIndex],
   );
 
-  return hasChangedObject ? getStateWithChange(state, { objects: transformedObjects }) : state;
+  return hasChangedObject ? getStateWithChange(state, { ...state.document, objects: transformedObjects }) : state;
 };
 
 const getStateWithoutObjects = (state: ProjectDocumentState, objectIds: string[]): ProjectDocumentState => {
@@ -145,7 +191,7 @@ const getStateWithoutObjects = (state: ProjectDocumentState, objectIds: string[]
 
   return remainingObjects.length === state.document.objects.length
     ? state
-    : getStateWithChange(state, { objects: remainingObjects });
+    : getStateWithChange(state, { ...state.document, objects: remainingObjects });
 };
 
 const getStateAfterUndo = (state: ProjectDocumentState): ProjectDocumentState => {
@@ -164,13 +210,39 @@ const getStateAfterRedo = (state: ProjectDocumentState): ProjectDocumentState =>
     : state;
 };
 
+const getStateWithLayerAction = (state: ProjectDocumentState, action: Action<unknown>): ProjectDocumentState => {
+  const { layers } = state.document;
+
+  switch (action.type) {
+  case LayerSettingsChanged.type: {
+    const { layerKey, settings } = (action as LayerSettingsChanged).payload;
+
+    return getStateWithLayers(state, getLayersWithSettings(layers, layerKey, settings));
+  }
+  case LayerToggled.type: {
+    const { layerKey, enabled } = (action as LayerToggled).payload;
+
+    return getStateWithLayers(state, getLayersWithEnabledState(layers, layerKey, enabled));
+  }
+  case LayerPaletteEntryLinked.type: {
+    const { layerKey, paletteEntryId } = (action as LayerPaletteEntryLinked).payload;
+
+    return getStateWithLayers(state, getLayersWithPaletteEntryLink(layers, layerKey, paletteEntryId));
+  }
+  case LayersReordered.type:
+    return getStateWithLayers(state, getLayersInOrder(layers, (action as LayersReordered).payload.layerKeys));
+  default:
+    return state;
+  }
+};
+
 export const projectDocumentReducer = (
   state: ProjectDocumentState = INITIAL_PROJECT_DOCUMENT_STATE,
   action: Action<unknown>,
 ): ProjectDocumentState => {
   switch (action.type) {
   case ProjectObjectsAdded.type:
-    return getStateWithAddedObjects(state, (action as ProjectObjectsAdded).payload.objects);
+    return getStateWithAddedObjects(state, (action as ProjectObjectsAdded).payload);
   case ProjectObjectsTransformed.type:
     return getStateWithTransforms(state, (action as ProjectObjectsTransformed).payload.transforms);
   case ProjectObjectsDeleted.type:
@@ -182,7 +254,7 @@ export const projectDocumentReducer = (
   case ProjectDocumentLoaded.type:
     return { document: (action as ProjectDocumentLoaded).payload.document, past: [], future: [] };
   default:
-    return state;
+    return getStateWithLayerAction(state, action);
   }
 };
 // #endregion
@@ -195,6 +267,27 @@ export const selectProjectDocument = (state: RootState): ProjectDocument =>
 
 export const selectProjectObjects = (state: RootState): ProjectObject[] =>
   state[PROJECT_DOCUMENT_STATE_NAME].document.objects;
+
+const selectDocumentLayers = (state: RootState): ProjectLayer[] => state[PROJECT_DOCUMENT_STATE_NAME].document.layers;
+
+/** The layers that at least one object draws with, in burn order; layers of colours no object uses are left out. */
+export const selectProjectLayers = createSelector(
+  [selectProjectObjects, selectDocumentLayers],
+  (projectObjects: ProjectObject[], documentLayers: ProjectLayer[]): ProjectLayer[] => {
+    const usedLayerKeys: Set<string> = getUsedLayerKeys(projectObjects);
+
+    return documentLayers
+      .filter((layer: ProjectLayer): boolean => usedLayerKeys.has(getLayerKey(layer)))
+      .sort((firstLayer: ProjectLayer, secondLayer: ProjectLayer): number => firstLayer.order - secondLayer.order);
+  },
+);
+
+/** The layers that at least one object draws with and that are sent to the laser, in burn order. */
+export const selectEnabledProjectLayers = createSelector(
+  [selectProjectLayers],
+  (projectLayers: ProjectLayer[]): ProjectLayer[] =>
+    projectLayers.filter((layer: ProjectLayer): boolean => layer.enabled),
+);
 
 export const selectCanUndo = (state: RootState): boolean => !!state[PROJECT_DOCUMENT_STATE_NAME].past.length;
 

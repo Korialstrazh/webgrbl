@@ -27,6 +27,10 @@ const NEW_JOG_FEED_RATE = 2400;
 const NEW_JOG_FEED_RATE_TEXT = String(NEW_JOG_FEED_RATE);
 const DEFAULT_JOG_FEED_RATE_TEXT = '1500';
 const EMPTY_INPUT_TEXT = '';
+const COLLAPSED_HINT_TEXT = 'Connect to move';
+const SHOW_CONTROLS_LABEL = 'Show the move controls';
+const HIDE_CONTROLS_LABEL = 'Hide the move controls';
+const ARIA_EXPANDED_ATTRIBUTE = 'aria-expanded';
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -72,6 +76,10 @@ const activateProfile = (store: AppStore, overrides: Partial<MachineProfile> = {
   return profile;
 };
 
+const showControlsWhileDisconnected = (): void => {
+  fireEvent.click(screen.getByRole('button', { name: SHOW_CONTROLS_LABEL }));
+};
+
 const getRequestedLines = (dispatchSpy: ReturnType<typeof vi.spyOn>): string[] => {
   const requestedLines: string[] = [];
 
@@ -85,6 +93,45 @@ const getRequestedLines = (dispatchSpy: ReturnType<typeof vi.spyOn>): string[] =
 };
 
 describe(MoveCard.name, () => {
+  it('collapses to one line with a hint while disconnected, without any move control', () => {
+    renderMoveCard(newStore());
+
+    expect(screen.getByText(COLLAPSED_HINT_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: SHOW_CONTROLS_LABEL })).toHaveAttribute(ARIA_EXPANDED_ATTRIBUTE, 'false');
+    expect(screen.queryByRole('button', { name: JOG_NORTH_EAST_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByRole('spinbutton', { name: JOG_SPEED_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('shows the disabled controls on Show while disconnected, still saying why, and hides them again on Hide', () => {
+    renderMoveCard(newStore());
+
+    showControlsWhileDisconnected();
+
+    const hideButton: HTMLElement = screen.getByRole('button', { name: HIDE_CONTROLS_LABEL });
+
+    expect(hideButton).toHaveAttribute(ARIA_EXPANDED_ATTRIBUTE, 'true');
+    expect(document.getElementById(hideButton.getAttribute('aria-controls') ?? '')).toContainElement(
+      screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL }),
+    );
+    expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeDisabled();
+    expect(screen.getByText(COLLAPSED_HINT_TEXT)).toBeInTheDocument();
+
+    fireEvent.click(hideButton);
+
+    expect(screen.queryByRole('button', { name: JOG_NORTH_EAST_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('opens the controls without a toggle once a laser is connected', () => {
+    const store: AppStore = newStore();
+
+    renderMoveCard(store);
+    connect(store);
+
+    expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: SHOW_CONTROLS_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByText(COLLAPSED_HINT_TEXT)).not.toBeInTheDocument();
+  });
+
   it('jogs north-east at step 1 with the default feed rate', () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
@@ -117,6 +164,7 @@ describe(MoveCard.name, () => {
     const store: AppStore = newStore();
 
     renderMoveCard(store);
+    showControlsWhileDisconnected();
 
     expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeDisabled();
 
@@ -208,6 +256,7 @@ describe(MoveCard.name, () => {
 
   it('disables the jog speed without a profile and shows the default', () => {
     renderMoveCard(newStore());
+    showControlsWhileDisconnected();
 
     const jogSpeedInput: HTMLElement = screen.getByRole('spinbutton', { name: JOG_SPEED_LABEL });
 
@@ -220,6 +269,7 @@ describe(MoveCard.name, () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
     renderMoveCard(store);
+    showControlsWhileDisconnected();
 
     const profile: MachineProfile = activateProfile(store);
     const jogSpeedInput: HTMLElement = screen.getByRole('spinbutton', { name: JOG_SPEED_LABEL });
@@ -236,6 +286,7 @@ describe(MoveCard.name, () => {
     const store: AppStore = newStore();
 
     renderMoveCard(store);
+    showControlsWhileDisconnected();
     activateProfile(store, { jogFeedRate: NEW_JOG_FEED_RATE });
 
     const dispatchSpy = vi.spyOn(store, 'dispatch');

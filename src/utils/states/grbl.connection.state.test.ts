@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GRBL_CONNECTION_STATUS, GRBL_DEFAULT_BAUD_RATE, SIMULATED_LASER_PORT_ID } from '../grbl/grbl.constants';
+import { GRBL_CONNECTION_STATUS, GRBL_DEFAULT_BAUD_RATE, NO_SERIAL_PORT_ID } from '../grbl/grbl.constants';
 import type { GrblConnectionInfo } from '../grbl/interfaces/GrblConnectionInfo';
 import type { SerialPortDescriptor } from '../grbl/interfaces/SerialPortDescriptor';
 import { Action } from './action';
@@ -35,11 +35,11 @@ class UnknownAction extends Action {
 const getInitialState = (): GrblConnectionState => grblConnectionReducer(undefined, new UnknownAction());
 
 describe(grblConnectionReducer.name, () => {
-  it('starts disconnected with the simulated laser and the default baud rate', () => {
+  it('starts disconnected with no port chosen and the default baud rate', () => {
     expect(getInitialState()).toEqual({
       connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED,
       availablePorts: [],
-      selectedPortId: SIMULATED_LASER_PORT_ID,
+      selectedPortId: NO_SERIAL_PORT_ID,
       baudRate: GRBL_DEFAULT_BAUD_RATE,
       firmwareIdentity: undefined,
       rxBufferSize: undefined,

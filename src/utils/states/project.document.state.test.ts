@@ -51,7 +51,7 @@ class UnknownAction extends Action {
 const getInitialState = (): ProjectDocumentState => projectDocumentReducer(undefined, new UnknownAction());
 
 const getStateWithObjects = (objects: ProjectObject[]): ProjectDocumentState =>
-  projectDocumentReducer(getInitialState(), new ProjectObjectsAdded({ objects }));
+  projectDocumentReducer(getInitialState(), new ProjectObjectsAdded({ objects, layers: [] }));
 
 type ProjectRootState = {
   [PROJECT_DOCUMENT_STATE_NAME]: ProjectDocumentState;
@@ -70,7 +70,7 @@ describe(projectDocumentReducer.name, () => {
   it('starts empty with no history', () => {
     const state: ProjectDocumentState = getInitialState();
 
-    expect(selectProjectDocument(getRootState(state, { selectedObjectIds: [] }))).toEqual({ objects: [] });
+    expect(selectProjectDocument(getRootState(state, { selectedObjectIds: [] }))).toEqual({ objects: [], layers: [] });
     expect(state.past).toEqual([]);
     expect(state.future).toEqual([]);
   });
@@ -80,7 +80,7 @@ describe(projectDocumentReducer.name, () => {
     const state: ProjectDocumentState = getStateWithObjects([added]);
 
     expect(state.document.objects).toEqual([added]);
-    expect(state.past).toEqual([{ objects: [] }]);
+    expect(state.past).toEqual([{ objects: [], layers: [] }]);
   });
 
   it('transforms objects as one undo step', () => {
@@ -114,7 +114,7 @@ describe(projectDocumentReducer.name, () => {
   it('does not create an undo step for changes that change nothing', () => {
     const state: ProjectDocumentState = getStateWithObjects([newProjectObject()]);
 
-    expect(projectDocumentReducer(state, new ProjectObjectsAdded({ objects: [] }))).toBe(state);
+    expect(projectDocumentReducer(state, new ProjectObjectsAdded({ objects: [], layers: [] }))).toBe(state);
     expect(projectDocumentReducer(state, new ProjectObjectsDeleted({ objectIds: [UNKNOWN_OBJECT_ID] }))).toBe(state);
     expect(
       projectDocumentReducer(
@@ -168,7 +168,7 @@ describe(projectDocumentReducer.name, () => {
     );
     const changed: ProjectDocumentState = projectDocumentReducer(
       undone,
-      new ProjectObjectsAdded({ objects: [newProjectObject()] }),
+      new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }),
     );
 
     expect(changed.future).toEqual([]);
@@ -178,7 +178,7 @@ describe(projectDocumentReducer.name, () => {
     let state: ProjectDocumentState = getInitialState();
 
     for (let changeIndex = 0; changeIndex < MAX_UNDO_STEPS + EXTRA_CHANGE_COUNT; changeIndex++) {
-      state = projectDocumentReducer(state, new ProjectObjectsAdded({ objects: [newProjectObject()] }));
+      state = projectDocumentReducer(state, new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
     }
 
     expect(state.past).toHaveLength(MAX_UNDO_STEPS);
@@ -193,10 +193,10 @@ describe(projectDocumentReducer.name, () => {
     const loadedObject: ProjectObject = newProjectObject();
     const loaded: ProjectDocumentState = projectDocumentReducer(
       undone,
-      new ProjectDocumentLoaded({ document: { objects: [loadedObject] } }),
+      new ProjectDocumentLoaded({ document: { objects: [loadedObject], layers: [] } }),
     );
 
-    expect(loaded).toEqual({ document: { objects: [loadedObject] }, past: [], future: [] });
+    expect(loaded).toEqual({ document: { objects: [loadedObject], layers: [] }, past: [], future: [] });
   });
 
   it('selects the objects of the document', () => {
@@ -230,7 +230,7 @@ describe(projectSelectionReducer.name, () => {
     const kept: ProjectObject = newProjectObject();
     const state: ProjectSelectionState = projectSelectionReducer(
       { selectedObjectIds: [kept.id, UNKNOWN_OBJECT_ID] },
-      new ProjectDocumentLoaded({ document: { objects: [kept] } }),
+      new ProjectDocumentLoaded({ document: { objects: [kept], layers: [] } }),
     );
 
     expect(state.selectedObjectIds).toEqual([kept.id]);

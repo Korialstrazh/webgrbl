@@ -1,0 +1,19 @@
+// The object takes the presses through its hit area, so a click inside a Line outline still selects it.
+.objectDesignArtwork {
+  pointer-events: none;
+}
+
+// A Line layer burns only the outlines, so its paths show as thin outlines in the layer colour, at one screen width
+// however far the bed is zoomed. The stylesheet outranks the fill and stroke each path was drawn with.
+.lineRun > path {
+  fill: none;
+  stroke: inherit;
+  stroke-opacity: 1;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+// An off layer does not burn, so its paths stay visible for editing but recede.
+.offRun {
+  opacity: 0.3;
+}

@@ -11,13 +11,19 @@
 import type {
   AlertProps,
   ButtonProps,
+  ColorPickerProps,
+  DrawerProps,
   DropdownProps,
   FormItemProps,
   FormProps,
   InputNumberProps,
   MenuProps,
   PopoverProps,
+  SegmentedProps,
+  SplitterProps,
   SwitchProps,
+  TagProps,
+  TooltipProps,
 } from 'antd';
 
 /** The compact button size, for actions inside a chip or a bar. */
@@ -67,3 +73,23 @@ export const ANTD_DROPDOWN_TRIGGER_CLICK: DropdownProps['trigger'] = ['click'];
 
 /** The `type` of a menu entry that draws a dividing line between two groups of items. */
 export const ANTD_MENU_ITEM_TYPE_DIVIDER = 'divider' as const;
+
+/** The colour picker value format: a six-digit hex colour. */
+export const ANTD_COLOR_PICKER_FORMAT_HEX: ColorPickerProps['format'] = 'hex';
+
+/** The drawer slides in from the left edge of its container. */
+export const ANTD_DRAWER_PLACEMENT_LEFT: DrawerProps['placement'] = 'left';
+
+/** The splitter stacks its panels top to bottom, with horizontal bars between them. */
+export const ANTD_SPLITTER_ORIENTATION_VERTICAL: SplitterProps['orientation'] = 'vertical';
+
+/** The compact segmented control size, for secondary choices next to larger controls. */
+export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
+
+/** A tag drawn as a soft filled chip without a border. */
+export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';
+
+/** The tooltip opens while its anchor is hovered or holds the keyboard focus. */
+export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['hover', 'focus'];
+
+export const ANTD_TOOLTIP_PLACEMENT_BOTTOM: TooltipProps['placement'] = 'bottom';

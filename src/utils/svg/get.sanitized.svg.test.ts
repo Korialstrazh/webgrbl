@@ -21,6 +21,13 @@ const getSanitized = (body: string): SanitizedSvg => {
 };
 
 describe(getSanitizedSvg.name, () => {
+  it('removes comments, also nested, so they add no work to later parses', () => {
+    const { svgText } = getSanitized('<!-- top --><g><!-- nested --><rect width="1" height="1"/></g>');
+
+    expect(svgText).not.toContain('<!--');
+    expect(svgText).toContain('<rect');
+  });
+
   it('removes script elements, also nested', () => {
     const { svgText } = getSanitized('<g><script>alert(1)</script></g><script>alert(2)</script>');
 

@@ -9,33 +9,15 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { getSvgLengthMm } from './get.svg.length.mm';
+import { getSvgViewBox } from './get.svg.view.box';
 import type { SvgPhysicalSize } from './interfaces/SvgPhysicalSize';
-import {
-  MM_PER_INCH,
-  SVG_HEIGHT_ATTRIBUTE,
-  SVG_PX_PER_INCH,
-  SVG_VIEW_BOX_ATTRIBUTE,
-  SVG_VIEW_BOX_HEIGHT_INDEX,
-  SVG_VIEW_BOX_SEPARATOR_PATTERN,
-  SVG_VIEW_BOX_VALUE_COUNT,
-  SVG_VIEW_BOX_WIDTH_INDEX,
-  SVG_WIDTH_ATTRIBUTE,
-} from './svg.constants';
+import type { SvgViewBox } from './interfaces/SvgViewBox';
+import { MM_PER_INCH, SVG_HEIGHT_ATTRIBUTE, SVG_PX_PER_INCH, SVG_WIDTH_ATTRIBUTE } from './svg.constants';
 
 const getViewBoxSize = (svgElement: Element): SvgPhysicalSize | undefined => {
-  const parts: string[] = (svgElement.getAttribute(SVG_VIEW_BOX_ATTRIBUTE) ?? '')
-    .trim()
-    .split(SVG_VIEW_BOX_SEPARATOR_PATTERN);
-  const numbers: number[] = parts.map((part: string): number => Number(part));
-  const hasFourNumbers: boolean = numbers.length === SVG_VIEW_BOX_VALUE_COUNT && numbers.every(Number.isFinite);
-  const widthUnits: number = numbers[SVG_VIEW_BOX_WIDTH_INDEX] ?? NaN;
-  const heightUnits: number = numbers[SVG_VIEW_BOX_HEIGHT_INDEX] ?? NaN;
+  const viewBox: SvgViewBox | undefined = getSvgViewBox(svgElement);
 
-  if (!hasFourNumbers || !(widthUnits > 0) || !(heightUnits > 0)) {
-    return undefined;
-  }
-
-  return { widthMm: widthUnits, heightMm: heightUnits };
+  return viewBox ? { widthMm: viewBox.width, heightMm: viewBox.height } : undefined;
 };
 
 const getViewBoxPixelsAsMm = (viewBoxSize: SvgPhysicalSize): SvgPhysicalSize => ({

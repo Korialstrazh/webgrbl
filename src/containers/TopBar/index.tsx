@@ -1,6 +1,6 @@
 /**
  * The top region: app name, the project name, the Project menu and autosave readout, the machine profiles dialog,
- * SVG import, undo and redo, the Materials menu that is not built yet, the connection pill and update notice.
+ * SVG import, undo and redo, the connection pill and update notice.
  *
  * @author michael.morosov
  *
@@ -9,17 +9,16 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { ImportOutlined, RedoOutlined, UndoOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
-import { REDO_ARROW, UNDO_ARROW } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
-import { ComingSoon } from '../../views/ComingSoon';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
 import { MachineProfilesDialog } from '../MachineProfilesDialog';
@@ -27,6 +26,7 @@ import { SvgImportButton } from '../SvgImportButton';
 import { AutosaveReadout } from './AutosaveReadout';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectNameButton } from './ProjectNameButton';
+import { TopBarOverflowMenu } from './TopBarOverflowMenu';
 import styles from './styles.module.scss';
 
 export const TopBar = (): ReactNode => {
@@ -46,16 +46,20 @@ export const TopBar = (): ReactNode => {
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <ProjectMenu />
         <AutosaveReadout />
-        <Button type={ANTD_BUTTON_TYPE_TEXT} onClick={() => setIsProfilesDialogOpen(true)}>
+        <Button
+          className={styles.secondaryItem}
+          type={ANTD_BUTTON_TYPE_TEXT}
+          onClick={() => setIsProfilesDialogOpen(true)}
+        >
           {t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
         </Button>
-        <SvgImportButton buttonType={ANTD_BUTTON_TYPE_TEXT} />
+        <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.compactHiddenLabel} />
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <Button
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_LARGE}
-          icon={UNDO_ARROW}
+          icon={<UndoOutlined />}
           aria-label={t(DEFAULT.TOP_BAR_UNDO)}
           disabled={!canUndo}
           onClick={() => dispatch(new ProjectUndoRequested())}
@@ -63,16 +67,12 @@ export const TopBar = (): ReactNode => {
         <Button
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_LARGE}
-          icon={REDO_ARROW}
+          icon={<RedoOutlined />}
           aria-label={t(DEFAULT.TOP_BAR_REDO)}
           disabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
-      </div>
-      <div className={styles.comingSoonGroups}>
-        <ComingSoon description={t(DEFAULT.TOP_BAR_MATERIALS_DESCRIPTION)}>
-          <Button type={ANTD_BUTTON_TYPE_TEXT}>{t(DEFAULT.TOP_BAR_MENU_MATERIALS)}</Button>
-        </ComingSoon>
+        <TopBarOverflowMenu onOpenMachineProfiles={() => setIsProfilesDialogOpen(true)} />
       </div>
       <div className={styles.trailing}>
         <AppUpdatePrompt />

@@ -1,10 +1,14 @@
 /**
- * The only access to the webgrbl database: projects, the SVG text of their objects, and the last opened project.
- * Feature code (containers, slices, sagas) goes through this module, which owns name validation and timestamps.
+ * Access to the projects in the webgrbl database: projects, the SVG text of their objects, and the last opened project.
+ * Feature code (containers, slices, sagas) goes through this module, which owns name validation and timestamps. The
+ * panel sizes have their own repository next to it.
  *
  * The SVG text of an object is written once, the first time a document with that object is saved, and is not touched
  * by later saves, so an autosave after a nudge writes only the small project row. A save never deletes SVG rows,
  * because undo can bring a removed object back; `pruneAssets` removes them at a point the caller chooses.
+ *
+ * The layers are saved in the project row. A row stored before projects had layers has none, and a stored layer that is
+ * malformed is left out; the open path then derives the missing layers from the palette.
  *
  * Storage errors (quota full, blocked database) are not caught here: every method rejects, and the caller decides
  * how to report it. Invalid names reject with `InvalidProjectNameError`, writes to a missing project with
@@ -18,6 +22,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { DEXIE_TRANSACTION_MODE_READ, DEXIE_TRANSACTION_MODE_READ_WRITE } from '../dexie.constants';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { isProjectLayer } from '../layers/is.project.layer';
 import { isString } from '../type.guards/is.string';
 import { getValidProjectName } from './get.valid.project.name';
 import type { AppStateEntry } from './interfaces/AppStateEntry';
@@ -63,6 +69,9 @@ const getProjectSummary = (storedProject: StoredProject): ProjectSummary => ({
   objectCount: storedProject.objects.length,
 });
 
+const getStoredProjectLayers = (storedProject: StoredProject): ProjectLayer[] =>
+  (storedProject.layers ?? []).filter(isProjectLayer);
+
 /** Joins the SVG text into the stored objects; an object whose SVG row is missing is left out, never a crash. */
 const getJoinedProjectDocument = (storedProject: StoredProject, svgAssetRows: StoredSvgAsset[]): ProjectDocument => {
   const svgTextByObjectId: Map<string, string> = new Map<string, string>();
@@ -81,7 +90,7 @@ const getJoinedProjectDocument = (storedProject: StoredProject, svgAssetRows: St
     }
   }
 
-  return { objects: joinedObjects };
+  return { objects: joinedObjects, layers: getStoredProjectLayers(storedProject) };
 };
 
 const getRequiredStoredProject = async (projectId: string): Promise<StoredProject> => {
@@ -131,6 +140,7 @@ export const PROJECT_REPOSITORY = {
       createdAt,
       updatedAt: createdAt,
       objects: [],
+      layers: [],
     };
 
     await WEBGRBL_DATABASE.projects.add(createdProject);
@@ -151,7 +161,13 @@ export const PROJECT_REPOSITORY = {
       const svgAssetRows: StoredSvgAsset[] = await svgAssets.where(SVG_ASSET_PROJECT_ID_INDEX).equals(projectId)
         .toArray();
 
-      return { project: storedProject, document: getJoinedProjectDocument(storedProject, svgAssetRows) };
+      const projectDocument: ProjectDocument = getJoinedProjectDocument(storedProject, svgAssetRows);
+
+      return {
+        project: storedProject,
+        document: projectDocument,
+        hasDroppedLayers: projectDocument.layers.length < (storedProject.layers?.length ?? 0),
+      };
     });
   },
 
@@ -174,6 +190,7 @@ export const PROJECT_REPOSITORY = {
       await projects.put({
         ...storedProject,
         objects: projectDocument.objects.map(getStoredProjectObject),
+        layers: projectDocument.layers,
         updatedAt: getCurrentUtcIsoTimestamp(),
       });
     });

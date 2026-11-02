@@ -6,31 +6,62 @@ The app is one screen, the Workbench, made of five regions plus overlays. This p
 
 `AppRoute` (`src/routes/AppRoute/`) composes the regions. From 1280 px they sit side by side (antd flex Layout); narrower they stack.
 
+From 1280 px the design panel, the bed and the machine panel sit in an antd `Splitter` (`src/routes/AppRoute/PanelSplitter/`): the user drags the bars between them to resize them. The top bar and the status strip are not part of it.
+
+The splitter sizes are controlled percentages, so the bars also work from the keyboard. antd's own drag bars cannot take the focus, so `SplitterHandles` (`src/views/SplitterHandles/`) lays one focusable `role="separator"` handle over each bar ("Resize the design panel", "Resize the machine panel", "Resize the console") with `aria-orientation` and the bar position, minimum and maximum in percent (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`, from `getSplitterBarRange`). The arrow keys along the bar direction move it one `SPLITTER_KEYBOARD_STEP_REM` (1 rem), Home and End move it to the ends of its range (`getSplitterKeyTargetPercent`, `getMovedSplitterSizes` in `src/utils/layout/`), and the new sizes are stored like a drag (`PanelSizesResized`, `ConsoleSizeResized`). The handles let the pointer through to the antd bars; the grip shows on hover over a bar and on focus of a handle with the shared focus ring.
+
+- Defaults: the design panel 20.5 rem (328 px, wide enough for a layer name such as "Shading (black)" on one line), the machine panel 22 rem, the bed takes the rest (`DESIGN_PANEL_DEFAULT_WIDTH_REM`, `MACHINE_PANEL_DEFAULT_WIDTH_REM` in `src/utils/layout.constants.ts`, matching `layout.scss`).
+- Minimum widths: design 16.25 rem, bed 30 rem, machine 20 rem (`*_MIN_WIDTH_REM`); maximum widths: design and machine 28 rem (`*_MAX_WIDTH_REM`), so a wide screen gives its extra width to the bed. All are turned into pixels with the root font size, so they follow the user's font size.
+- Stored sizes open as stored, except that a side panel whose share would break its minimum or maximum on this screen opens at that limit and the bed takes the difference (`getPanelDefaultSizes`). The limits also hold while dragging.
+- When a drag ends, the sizes are stored as percentages of the workbench width in IndexedDB (table `appState`, key `panelSizes`, `PANEL_SIZES_REPOSITORY`), through `PanelSizesResized` and `panel.layout.saga.ts`. They are not stored on every move.
+- At start the saga reads them (`PanelSizesLoaded`); the wide workbench waits for that read, so it opens with the stored sizes instead of jumping from the defaults. If the read neither resolves nor rejects within `PANEL_SIZES_READ_TIMEOUT_MS` (1,500 ms, a `race` with `delay`), the defaults apply, so the panels always appear. A stored value with the wrong count, a number that is not finite or not above 0, or a sum more than 1 away from 100 is ignored, and the defaults apply. A failed read or write is logged and the defaults or the current sizes stay.
+- The console is a panel, not an overlay. The Console switch in the status strip dispatches `ConsoleOpenChanged` (`selectIsConsoleOpen`, not stored). In a wide window the middle column is a vertical `Splitter` (`src/routes/AppRoute/BedColumnSplitter/`): the bed on top (minimum 22 rem, `BED_PANEL_MIN_HEIGHT_REM`) and, while open, the console below it (`ConsoleDock`, minimum 11.5 rem, `CONSOLE_PANEL_MIN_HEIGHT_REM`: the header, three log lines and the input). Its height is a controlled percentage of the column, default 30 % (`CONSOLE_PANEL_DEFAULT_SIZE_PERCENT`); a drag end stores it through `ConsoleSizeResized` (`appState` key `consolePanelSize`). The bed panel stays mounted while the console opens and closes. In a narrow window the regions stack with the bed first, then the open console, the design panel and the machine panel.
+- Below 1280 px there is no splitter: the regions stack as before. Crossing the breakpoint mounts the panels again.
+
 | Region | Container | Holds |
 | --- | --- | --- |
-| Top bar | `TopBar` | title, project and menus (coming soon), undo/redo, autosave, update prompt, `ConnectionPill` with its `ConnectionPopover` |
-| Left | `DesignPanel` | Layers, Objects, Material (coming soon) |
-| Centre | `BedPanel` | toolbar (coming soon), `BedView`, `ToastStack`; host element for dialogs and drawers |
-| Right | `MachinePanel` | status, reset/unlock, Move, Laser pointer, Pre-flight, Job cards, STOP when wide |
-| Bottom | `StatusStrip` | readouts (coming soon), Console toggle; the console opens as an overlay above the strip |
+| Top bar | `TopBar` | title, project and menus, undo/redo, autosave, update prompt, `ConnectionPill` with its `ConnectionPopover`; below 1000 px Machine profiles moves into `TopBarOverflowMenu` |
+| Left | `DesignPanel` | Layers, Objects (the Material panel is planned and not shown) |
+| Centre | `BedPanel` | header on one row at 1368 px in Design view (editing tools Select/Move in Design view, `ToolpathToolbar` in Toolpath view, the zoom cluster, the Design/Toolpath view switch, and `BedMoreToolsMenu`: a More button that lists the unbuilt Edit nodes, Align and 3D as disabled entries with a Soon tag and a one-line description), `BedViewport` (the zoomable `BedView` with `BedRulers` and `BedZoomControls`), `SimulationPlaybackBar` with the job size, `ToastStack`; host element for bed-region dialogs and drawers. The console panel sits below it |
+| Right | `MachinePanel` | main task first: Status (its heading line only, with "Not connected" and a secondary (outlined) Connect... button, while disconnected, so Export G-code is the panel's only filled primary; the top-bar pill is the main way to connect; in a narrow panel the header group drops under the title instead of being cut, else readout plus Reset/Unlock), Job (Export G-code as the full-width primary action, then Start job and Frame job as Soon), Move and Laser pointer (each one line, "Connect to move" or "Connect to use" with a Show button, while disconnected, through `CollapsedCardToggle`; the hint stays beside Hide when the card is open, so the disabled controls still say why), so the disconnected panel fits a 703 px window without scrolling, in a scrolling area that fades out at the bottom when cut off, and STOP in a footer below it when wide |
+| Bottom | `StatusStrip` | job size (a short "Open the Toolpath view" hint until the toolpath is ready) and estimate of the ready toolpath, the live bed cursor in mm, an Offline note while the browser has no network, Console toggle |
+
+Empty readouts show one mark everywhere, the em dash (`MISSING_VALUE_TEXT`).
+
+The connection pill shows only the laser connection: state, firmware, machine profile, port ("No port chosen" until the user picks one: no port, not even the simulated laser, is preselected on a fresh start; a port, or the simulated laser, the user connected to before is chosen again), and "Connect..." while no laser is connected, the same label as the Status card button; its `aria-label` reads "Connection: ... Open the connection menu." The browser's network state is not in the pill. The popover's open state lives in the `uiOverlay` slice (`ConnectionPopoverOpenChanged`, `selectIsConnectionPopoverOpen`), so the Status card's Connect button opens the same popover as the pill.
 
 ## Add a feature to a region
 
-Regions for unbuilt features are wrapped in `ComingSoon` (`src/views/ComingSoon/`). To build one:
+Every unbuilt control is wrapped, one control at a time, in `ComingSoon` (`src/views/ComingSoon/`): the control itself is a real antd control with `disabled`, shown as a ghost (no fill, a dashed outline, muted text) so it never reads as a working control, and a small neutral "Soon" tag (`SoonTag`, `src/views/SoonTag/`) sits right after it. The description shows in a tooltip below the control (so it never covers the top bar) on hover over the wrapper, because a disabled button fires no pointer events, or when the tag takes the keyboard focus. Unbuilt bed tools and views (Edit nodes, Align, 3D) are not shown one by one but listed in the bed header's More menu (`BED_COMING_SOON_TOOLS`), so the header stays one row. Never leave an enabled-looking control that does nothing on click, and never put two controls under one tag. Only real controls get a Soon tag: a Soon control is never a solid primary button (Start job is a disabled default button), and a card, panel or menu that would hold nothing but a placeholder is left off the screen and listed as planned in `docs/wiki/product/ui-layout.md`. Keep the main screen at about four Soon tags. To build one:
 
 1. Replace the `ComingSoon` block with your real component in the owning container (or a new child container next to it).
-2. Put state and dispatching in a container; keep pure drawing in `src/views/`. Build controls from antd (`Button`, `Switch`, `Checkbox`, `Input`, `Segmented`, `Popover`, and selects and sliders as needed; dialogs and drawers only through `BedRegionModal` / `BedRegionDrawer`) with prop values from `src/utils/antd.constants.ts`; do not write new self-built buttons or toggles. Machine controls use `size={ANTD_BUTTON_SIZE_LARGE}` (44 px), icon-only buttons need an `aria-label`, and a `Switch` sits in a `<label>` with visible text.
-3. Never dispatch from inside `ComingSoon`: it renders children inert and stops events, and its handlers are `doNothing`. Once a block is real, remove the wrapper.
+2. Put state and dispatching in a container; keep pure drawing in `src/views/`. Build controls from antd (`Button`, `Switch`, `Checkbox`, `Input`, `Segmented`, `Popover`, and selects and sliders as needed; dialogs and drawers only through `AppModal`, `BedRegionModal` or `BedRegionDrawer`) with prop values from `src/utils/antd.constants.ts`; do not write new self-built buttons or toggles. Machine controls use `size={ANTD_BUTTON_SIZE_LARGE}` (44 px), icon-only buttons need an `aria-label`, and a `Switch` sits in a `<label>` with visible text.
+3. A control inside `ComingSoon` is `disabled` and has no handler. Once it is real, remove the wrapper and the `disabled`.
 4. Add strings to the localization CSV (see `docs/howto/localization.md`) and use `t(DEFAULT.<KEY>)`.
+
+## Bed zoom and pan
+
+`BedViewport` (`src/containers/BedViewport/`) wraps `BedView` and owns the session-only viewport (`BedViewport` in `src/utils/bed/interfaces/`: zoom against the fitted bed and the view centre in bed SVG mm). It starts fitted and starts over when the bed size changes (`BedPanel` keys it by the bed size).
+
+- Mouse wheel: zooms around the pointer, gently (`BED_WHEEL_ZOOM_PER_PIXEL` 0.0006: 6 to 15 % per notch) in a wide window; in a narrow window, where the page scrolls, only Ctrl or Cmd plus the wheel zooms (`useBedWheelZoom`).
+- Pan: drag with the middle mouse button, or hold Space over the bed and drag (`useBedPanGesture`). The press is caught in the capture phase, so the Select and Move tools keep their own left drag.
+- Buttons and keys: the cluster in the bed header beside the view switch (`BedZoomControls`: bed colour, zoom out, the zoom in %, zoom in, Fit; `BedViewport` renders it through a portal into the header slot, so nothing floats over the drawing and Fit uses the whole bed box) and the keys `+` / `=`, `-` and `0` (`useBedZoomHotkeys`, same guards as the other app shortcuts).
+- Fit and the zoom label: Fit leaves `BED_FIT_MARGIN_PX` (16 px) free on each side of the bed. The zoom is relative to the fitted bed, and the readout says so: "100 % (fit)" when fitted, a plain percent otherwise, with a tooltip that explains it. It is not a real 1:1 scale.
+- Limits and steps: `MIN_BED_ZOOM` 0.5, `MAX_BED_ZOOM` 40, `BED_ZOOM_STEP_FACTOR` 1.25 (`src/utils/bed/bed.zoom.constants.ts`).
+
+The zoom is the SVG `viewBox` (`getBedViewBox`, shaped like the view so a zoomed bed fills it), so every pointer position read through the SVG's screen matrix (`getBedSvgPoint` in `BedObjects`) is already in bed mm; new pointer code must read positions the same way, or through `getBedViewPoint` from the viewport, never from raw pixels. Markers divide their size by the zoom (`BedZoomContext`), handles follow the view box through `useBedPixelsPerMm`. The rulers sit in bands of their own (`BedRulers`, `getBedRulers`): a 1.25 rem band along the top (bed X) and the left (machine Y, its labels turned to run upwards), each with its own background, long ticks at the labelled steps and short ticks at a fifth of a step, and a corner square that names the unit. The drawing area starts where the bands end (`$bed-ruler-band-size` in `layout.scss`), so no label sits on the grid or the artwork and the first X and Y labels never meet; it is the element that takes the pointer and that `useBedScreenSize` measures, so pointer positions stay in bed mm. The labels keep a fixed `0.6875rem` font and a step that keeps them 3 rem apart. The status strip's Cursor readout reads the bed point through `BED_CURSOR_STORE`, which hands it on at most once per animation frame, outside redux.
 
 ## Overlays and Escape
 
-- Always open a dialog with `BedRegionModal` (`src/containers/BedRegionModal/`) and a drawer with `BedRegionDrawer` (`src/containers/BedRegionDrawer/`); never use a raw antd `Modal` or `Drawer`. The wrappers render into the bed region with a mask over the bed only, so STOP stays visible and clickable; they register as open overlays themselves and close on Escape through `onClose`.
+- Never use a raw antd `Modal` or `Drawer`. Pick the wrapper by size:
+  - **Large editing dialogs** (palette, machine profiles, open project) use `AppModal` (`src/containers/AppModal/`): rendered into the page body with a mask over the whole window, centred, `width: min(maxWidth, 100vw - 2rem)` (`getAppModalWidth`), and the body scrolls inside the window height, so the form and the close button are never cut off. Their two-column content stacks below 48 rem.
+  - **Small confirmations** use `BedRegionModal` (`src/containers/BedRegionModal/`) and drawers use `BedRegionDrawer` (`src/containers/BedRegionDrawer/`): they render into the bed region below the bed header (the `bedBody` element of `BedPanel`), so they never cover the bed toolbar, with a mask over the bed only, so STOP stays visible and clickable (the drawer mask is clear, so the bed stays in view; a click on it still closes the drawer).
+  - All three register as open overlays themselves and close on Escape through `onClose`.
 
 ```tsx
-<BedRegionModal isOpen={isOpen} overlayIdPrefix={MATERIAL_DIALOG_OVERLAY_ID} title={titleText} onClose={closeDialog}>
+<AppModal isOpen={isOpen} overlayIdPrefix={MATERIAL_DIALOG_OVERLAY_ID} maxWidth={MATERIAL_DIALOG_WIDTH} title={titleText} onClose={closeDialog}>
   {contentComponent}
-</BedRegionModal>
+</AppModal>
 ```
 
 - Every container that owns an antd `Popover` must call `useOverlayRegistration(OVERLAY_ID_PREFIX, isOpen)` from `src/utils/hooks/use.overlay.registration.ts`, with the same `isOpen` it passes to the overlay's `open`. The hook adds a unique id (prefix plus `useId()`) to the `uiOverlay` slice while open and removes it on close or unmount.
@@ -46,20 +77,31 @@ return (
 ```
 
 - Escape rule: `StopHotkey` stops the machine only when connected **and** no overlay is registered open. antd closes the overlay on Escape after `StopHotkey` (capture phase) has already seen it registered, so one press never does both. A forgotten registration would make Escape stop the machine while the overlay is open.
-- antd `Popover` moves no focus: move focus into it on open and back to the opener on close, as `ConnectionPopover` does. The dialog and drawer wrappers handle focus themselves: the dialog closes on Escape and returns focus to the opener but does not trap Tab (rc-dialog only locks focus when its wrap is `position: fixed`, and the wrapper makes it absolute), so STOP stays reachable by keyboard; the drawer traps focus while open, and STOP stays clickable with the mouse.
+- antd `Popover` moves no focus: move focus into it on open and back to the opener on close, as `ConnectionPopover` does. The dialog and drawer wrappers handle focus themselves: `AppModal` traps focus like any antd modal (STOP is under its mask; Escape closes the dialog first, a second Escape stops); `BedRegionModal` closes on Escape and returns focus to the opener but does not trap Tab (rc-dialog only locks focus when its wrap is `position: fixed`, and the wrapper makes it absolute), so STOP stays reachable by keyboard; the drawer traps focus while open, and STOP stays clickable with the mouse.
 - Tests that open antd overlays render inside `AntdTestProvider` (`src/utils/test.support/antd.test.provider.tsx`), which turns antd motion off for jsdom.
 
 ## One STOP
 
-Exactly one STOP is rendered: `StopButton`, an antd `Button` with `type="primary"`, `danger` and `size="large"`. `AppRoute` calls `useIsWideLayout()` once and passes `isWide` to `MachinePanel`: wide shows `StopButton` pinned at the bottom of the panel, narrow shows `StickyStopBar` (rendered by `AppRoute`). Do not add further STOP buttons or call the hook elsewhere for this.
+Exactly one STOP is rendered: `StopButton`, an antd `Button` with `type="primary"`, `danger` and `size="large"`. `AppRoute` calls `useIsWideLayout()` once and passes `isWide` to `MachinePanel`: wide shows `StopButton` in a footer below the panel's scrolling cards (never over them), narrow shows `StickyStopBar` (rendered by `AppRoute`). Disconnected, STOP has the disabled look with a dark red outline (`--color-danger-disabled-border`) and turns solid red only when it can act; it shows its Esc shortcut (`aria-keyshortcuts="Escape"`). Do not add further STOP buttons or call the hook elsewhere for this.
 
 ## Tokens and fonts
 
 - All colours, radii, spacing, fonts and sizes are CSS custom properties in `src/styles/tokens.scss`; use `var(--...)` only (never raw hex or px). Notable ones: `--color-danger-button` for danger buttons (contrast), `--target-min` (2.75 rem machine-control target), `--control-height`, `--focus-outline-width` / `--focus-outline-offset` with `--color-focus-ring`, `--radius-pill`.
-- New colours must keep 4.5:1 text contrast (`tokens.contrast.test.ts`).
+- The bed work surface defaults to a light grey (`DEFAULT_BED_COLOUR`, `--color-bed-surface`, black artwork 9.2:1) while the area around it, the ruler bands and the panel chrome stay dark. Anything drawn on the bed uses the `--color-bed-*` tokens (grid, accent, laser head, danger, travel, ink, text, chip border), never the chrome colours. The grid tokens are mixed from the bed colour itself (darker on a light bed, lighter on a dark one), so the grid keeps the hue of any bed colour.
+
+## Bed colour
+
+The user picks the bed colour from the swatch button at the start of the zoom cluster in the bed header (`BedColourPicker`, an antd `ColorPicker` with named, keyboard-reachable preset buttons Grey (default), Light grey, White, Dark grey and Plywood (`BED_COLOUR_PRESETS`), a note that a very dark bed hides black artwork, and Reset to default).
+
+- State and storage: `bedAppearance` slice (`BedColourChanged`, `BedColourLoaded`, `selectBedColour`); `bed.appearance.saga.ts` reads `BED_COLOUR_REPOSITORY` at start under the panel sizes read timeout and stores changes app-wide (not per project) in `appState` key `bedColour`, debounced by `BED_COLOUR_STORE_DEBOUNCE_MS`. A missing or invalid stored value (`getValidBedColour`: six-digit hex only) keeps the default.
+- Applying it: `BedPanel` sets `--color-bed-surface` inline on the bed area and `data-bed-tone` from `getBedOverlayTone`, which compares the colour's relative luminance (`getColourRelativeLuminance`) with `BED_OVERLAY_TONE_LUMINANCE_THRESHOLD` (0.179, where black and white marks contrast equally). `tokens.scss` defines an `--color-bed-on-light-*` and an `--color-bed-on-dark-*` set; `[data-bed-tone='on-dark']` switches the `--color-bed-*` tokens to the light marks. Each set keeps 4.5:1 for marks and text and 3:1 for markers against the default bed of its side (`tokens.contrast.test.ts`).
+- A new mark on the bed must use a `--color-bed-*` token and get a value in both sets.
+- New colours must keep 4.5:1 text contrast (`tokens.contrast.test.ts`). The focus ring (`--color-focus-ring`, the accent) must keep 3:1 on every surface; it is the one ring for every control: a global `:focus-visible` rule, and antd's `colorPrimaryBorder` and `lineWidthFocus` tokens.
+- Splitter bars take their colours from the `Splitter` component tokens: a border-coloured line with a muted 2 rem grip at rest, the accent on hover and drag.
+- Icons come from `@ant-design/icons` (outline set, pinned to the version antd resolves) and keep the control's `aria-label`; never use Unicode glyphs (arrows, crosses, carets, playback symbols) as icons. The jog pad turns one `ArrowUpOutlined` with its `rotate` prop (`JOG_ARROW_ROTATION_DEG`).
 - Inter and JetBrains Mono are self-hosted in `src/styles/fonts/` (`fonts.scss`); do not load fonts from a CDN, the app works offline.
 - antd components get the same look through `ANTD_THEME` (`src/utils/theme/antd.theme.ts`), whose values mirror `tokens.scss` (checked by `antd.theme.test.ts`). A new colour used by antd goes into both files.
-- Panel widths shared with overlays (the console overlay avoids the machine panel) live in `src/styles/layout.scss`.
+- The default panel widths and the top bar (3.5 rem) and status strip (3 rem) heights live in `src/styles/layout.scss`.
 
 ## Bed sizing
 

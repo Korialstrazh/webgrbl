@@ -30,7 +30,8 @@ import type { AppStore } from '../../../utils/states/new.store';
 const FIRE_LABEL = 'Hold to fire';
 const LASER_ON_LABEL = 'LASER ON';
 const AIR_ASSIST_LABEL = 'Air assist';
-const FRAME_LABEL = 'Frame job';
+const SHOW_CONTROLS_LABEL = 'Show the laser pointer controls';
+const COLLAPSED_HINT = 'Connect to use';
 const POWER_LABEL = 'Pointer power';
 const SECONDARY_POINTER_BUTTON = 2;
 const ARROW_RIGHT_KEY_CODE = 39;
@@ -53,6 +54,10 @@ const NEW_STATUS: GrblResolvedStatus = {
   feedRate: 0,
   spindleSpeed: 0,
   overrides: undefined,
+};
+
+const showLaserControls = (): void => {
+  fireEvent.click(screen.getByRole('button', { name: SHOW_CONTROLS_LABEL }));
 };
 
 const renderLaserCard = (store: AppStore): void => {
@@ -229,6 +234,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
 
     renderLaserCard(store);
+    showLaserControls();
 
     expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeDisabled();
 
@@ -265,6 +271,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
 
     renderLaserCard(store);
+    showLaserControls();
     activateProfile(store, { maxPowerWatts: MAX_POWER_WATTS });
     act(() => {
       store.dispatch(new LaserPointerPowerChanged({ percent: POWER_PERCENT }));
@@ -280,6 +287,7 @@ describe(LaserCard.name, () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
     renderLaserCard(store);
+    showLaserControls();
     fireEvent.keyDown(screen.getByRole('slider', { name: POWER_LABEL }), {
       key: 'ArrowRight',
       keyCode: ARROW_RIGHT_KEY_CODE,
@@ -308,6 +316,7 @@ describe(LaserCard.name, () => {
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
     renderLaserCard(store);
+    showLaserControls();
     activateProfile(store, { hasAirAssist: true });
 
     expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).toBeDisabled();
@@ -350,19 +359,30 @@ describe(LaserCard.name, () => {
     expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).not.toBeChecked();
   });
 
-  it('keeps Frame job inert', () => {
+  it('collapses to one line with a Show button while disconnected and opens on Show', () => {
+    renderLaserCard(newStore());
+
+    expect(screen.getByText(COLLAPSED_HINT)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: FIRE_LABEL })).not.toBeInTheDocument();
+
+    showLaserControls();
+
+    expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeDisabled();
+  });
+
+  it('shows the controls without a Show button while connected', () => {
     const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
 
     renderLaserCard(store);
     connectIdle(store);
-    fireEvent.click(screen.getByText(FRAME_LABEL));
 
-    expect(getRequestedLines(dispatchSpy)).toEqual([]);
+    expect(screen.queryByRole('button', { name: SHOW_CONTROLS_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeEnabled();
   });
 
   it('shows the firmware note with the maximum hold time', () => {
     renderLaserCard(newStore());
+    showLaserControls();
 
     expect(screen.getByText(FIRMWARE_NOTE_TEXT)).toBeInTheDocument();
   });

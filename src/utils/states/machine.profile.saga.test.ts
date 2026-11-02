@@ -15,7 +15,11 @@ import type { SerialTransport } from '../grbl/interfaces/SerialTransport';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
 import { GrblSimulator } from '../grbl/simulator/grbl.simulator';
 import { ANSWER_SETTLE_MS } from '../grbl/test.support/grbl.answer.settle';
-import { GRBL_HOLD_COMPLETE_MAX_WAIT_MS, GRBL_STATUS_POLL_INTERVAL_MS } from '../grbl/grbl.constants';
+import {
+  GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
+  GRBL_STATUS_POLL_INTERVAL_MS,
+  SIMULATED_LASER_PORT_ID,
+} from '../grbl/grbl.constants';
 import { DEFAULT } from '../localization/default.locales';
 import { i18n } from '../localization/localization';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
@@ -27,7 +31,12 @@ import {
 import { MACHINE_PROFILES_STORAGE } from '../profiles/machine.profiles.storage';
 import { newMachineProfile } from '../profiles/new.machine.profile';
 import type { ConnectionPreferences } from '../storage/interfaces/ConnectionPreferences';
-import { ConnectRequested, ConnectionEstablished, DisconnectRequested } from './grbl.connection.state';
+import {
+  ConnectRequested,
+  ConnectionEstablished,
+  DisconnectRequested,
+  SerialPortSelected,
+} from './grbl.connection.state';
 import type { AppToast } from './interfaces/AppToast';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import { watchMachineProfiles } from './machine.profile.saga';
@@ -111,6 +120,7 @@ const getToast = (store: AppStore, messageKey: string): AppToast | undefined =>
   selectToasts(store.getState()).find((toast: AppToast) => toast.messageKey === messageKey);
 
 const connectStore = async (store: AppStore): Promise<void> => {
+  store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
   store.dispatch(new ConnectRequested());
   await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
 };

@@ -1,0 +1,28 @@
+// Covers the splitter it belongs to, so the handles can sit on its bars; it never takes the pointer.
+.splitterHandles {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+// A small grip centred on its bar. It shows only while focused; the antd bar underneath shows its own grip on hover.
+.handle {
+  position: absolute;
+  top: 50%;
+  width: 0.375rem;
+  height: 2.5rem;
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+
+  &:focus-visible {
+    background-color: var(--color-text-muted);
+  }
+}
+
+.vertical .handle {
+  left: 50%;
+  width: 2.5rem;
+  height: 0.375rem;
+}

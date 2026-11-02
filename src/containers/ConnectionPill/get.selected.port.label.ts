@@ -23,8 +23,12 @@ export const getSelectedPortLabel = (
     (port: SerialPortDescriptor) => port.portId === selectedPortId,
   );
 
-  if (selectedPortId === SIMULATED_LASER_PORT_ID || !selectedPort) {
+  if (selectedPortId === SIMULATED_LASER_PORT_ID) {
     return t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER);
+  }
+
+  if (!selectedPort) {
+    return t(DEFAULT.CONNECTION_NO_PORT_CHOSEN);
   }
 
   return getPortOptionLabel(selectedPort, t);

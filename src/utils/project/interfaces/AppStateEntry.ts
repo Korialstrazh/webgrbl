@@ -1,5 +1,5 @@
 /**
- * One app-wide value in the database, such as the id of the last opened project.
+ * One app-wide value in the database, such as the id of the last opened project or the panel sizes as JSON text.
  *
  * @author michael.morosov
  *

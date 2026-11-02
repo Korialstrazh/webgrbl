@@ -1,9 +1,8 @@
-@use '../../styles/layout' as layout;
-
 // The workbench fills the window and never scrolls as a page; the panels and the console scroll on their own.
 .appRoute {
-  --design-panel-width: #{layout.$design-panel-width};
-  --machine-panel-width: #{layout.$machine-panel-width};
+  // In a wide window the splitter sizes each column and the side panel fills its column.
+  --design-panel-width: 100%;
+  --machine-panel-width: 100%;
 
   height: 100vh;
   height: 100dvh;

@@ -36,6 +36,20 @@ const isSvgDocument = (svgDocument: Document): boolean =>
 const getRemovedKindsInOrder = (foundKinds: Set<SvgRemovedContentKind>): SvgRemovedContentKind[] =>
   Object.values(SVG_REMOVED_CONTENT_KIND).filter((kind: SvgRemovedContentKind): boolean => foundKinds.has(kind));
 
+/** Comments draw nothing; removing them keeps a crafted file from padding the stored SVG with work for every parse. */
+const removeSvgComments = (rootElement: Element): void => {
+  const commentWalker: TreeWalker = rootElement.ownerDocument.createTreeWalker(rootElement, NodeFilter.SHOW_COMMENT);
+  const commentNodes: Node[] = [];
+
+  for (let commentNode: Node | null = commentWalker.nextNode(); commentNode; commentNode = commentWalker.nextNode()) {
+    commentNodes.push(commentNode);
+  }
+
+  for (const commentNode of commentNodes) {
+    commentNode.parentNode?.removeChild(commentNode);
+  }
+};
+
 const sanitizeSvgTree = (rootElement: Element): SvgRemovedContentKind[] => {
   const foundKinds: Set<SvgRemovedContentKind> = new Set<SvgRemovedContentKind>(sanitizeSvgAttributes(rootElement));
 
@@ -66,6 +80,8 @@ export const getSanitizedSvg = (text: string): SanitizedSvg | SvgImportFailure =
 
   const rootElement: Element = svgDocument.documentElement;
   const removedContentKinds: SvgRemovedContentKind[] = sanitizeSvgTree(rootElement);
+
+  removeSvgComments(rootElement);
   const size: SvgPhysicalSize | undefined = getSvgPhysicalSize(rootElement);
 
   if (!size) {

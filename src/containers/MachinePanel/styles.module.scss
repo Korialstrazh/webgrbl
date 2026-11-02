@@ -1,33 +1,55 @@
-// The sider scrolls on its own; its body grows with the content so STOP can stick to the bottom while scrolling.
+// In a wide window the panel is a column of two parts: the cards scroll on their own, and STOP sits below them as a
+// footer that never covers a card.
 .region {
-  overflow: auto;
   border-left: 1px solid var(--color-border);
   background-color: var(--color-surface-1);
 
   .machinePanel {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
     min-width: 0;
-    height: auto;
-    min-height: 100%;
-    padding: var(--space-4);
+    height: 100%;
   }
 }
 
+// A thin scrollbar with a fixed gutter: the cards keep their width when the scrollbar appears, and the bar takes
+// little of a narrow panel.
 .cards {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-3);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
 }
 
-.stopArea {
-  position: sticky;
-  bottom: var(--space-4);
-  margin-top: auto;
+// Cards cut off above STOP fade out over the last stretch, so the list reads as one that scrolls on.
+.cardsCutOff {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2rem), transparent);
+}
+
+.stopFooter {
+  flex: none;
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface-1);
 
   > * {
     width: 100%;
+  }
+}
+
+// Stacked in a narrow window the panel grows with its cards and the page region scrolls; STOP is in the sticky bar.
+// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width < 80rem) {
+  .region .machinePanel {
+    height: auto;
+  }
+
+  .cards {
+    overflow: visible;
   }
 }

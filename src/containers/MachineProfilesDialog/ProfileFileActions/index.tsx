@@ -16,7 +16,6 @@ import type { ChangeEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { downloadTextFile } from '../../../utils/browser/download.text.file';
-import { doNothing } from '../../../utils/do.nothing';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getImportedProfilesDocument } from '../../../utils/profiles/get.imported.profiles.document';
 import { getProfilesExportText } from '../../../utils/profiles/get.profiles.export.text';
@@ -111,7 +110,7 @@ export const ProfileFileActions = (): ReactNode => {
         onChange={handleFileInputChange}
       />
       <ComingSoon description={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}>
-        <Button block onClick={doNothing}>{t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}</Button>
+        <Button disabled>{t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}</Button>
       </ComingSoon>
     </div>
   );

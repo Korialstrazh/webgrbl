@@ -40,7 +40,7 @@ describe(BedObjects.name, () => {
   it('leaves Delete, Backspace and the arrows to a text field rendered inside the objects layer', () => {
     const store: AppStore = newStore();
 
-    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [projectObject] } }));
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [projectObject], layers: [] } }));
     store.dispatch(new ProjectSelectionChanged({ objectIds: [projectObject.id] }));
     render(
       <Provider store={store}>

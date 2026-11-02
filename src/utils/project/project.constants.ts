@@ -30,7 +30,10 @@ export const MAX_OBJECT_NAME_LENGTH = 100;
 export const DEFAULT_PROJECT_NAME_KEY = DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER;
 
 export const PROJECT_FILE_FORMAT = 'webgrbl-project';
-export const PROJECT_FILE_VERSION = 1;
+/** The version written: files with layers. */
+export const PROJECT_FILE_VERSION = 2;
+/** The first version, without layers; still read, with the layers derived from the current palette. */
+export const PROJECT_FILE_VERSION_WITHOUT_LAYERS = 1;
 export const PROJECT_FILE_EXTENSION = '.webgrbl.json';
 export const PROJECT_FILE_MIME_TYPE = 'application/json';
 /** Characters Windows, macOS or Linux do not allow in a file name; they are left out of a downloaded file's name. */

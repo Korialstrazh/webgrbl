@@ -1,14 +1,41 @@
 :root {
   --color-bg: #121417;
   --color-bed: #0e1012;
-  --color-bed-surface: #15181b;
+  // The work surface: a light grey by default, like a sheet of material, so black artwork stays visible on it (9.2:1);
+  // the user can choose another colour, which the bed sets on its element. The area around it and the panel chrome
+  // stay dark.
+  --color-bed-surface: #a7acb1;
+  // Two sets of mark colours: dark marks for a light bed and light marks for a dark one; getBedOverlayTone picks the
+  // set from the bed colour's luminance. Markers keep 3:1 and marks and text 4.5:1 against the default bed of their
+  // side (tokens.contrast.test.ts).
+  --color-bed-on-light-accent: #8a3d00;
+  --color-bed-on-light-laser-head: #b0121a;
+  --color-bed-on-light-danger: #a8101a;
+  --color-bed-on-light-travel: #1d55a0;
+  --color-bed-on-light-ink: #111315;
+  --color-bed-on-light-text: #25292e;
+  --color-bed-on-light-chip-border: #2a2e34;
+  --color-bed-on-dark-accent: #ff8a1f;
+  --color-bed-on-dark-laser-head: #ff5a5a;
+  --color-bed-on-dark-danger: #ff6b6b;
+  --color-bed-on-dark-travel: #6fb1ff;
+  --color-bed-on-dark-ink: #f1f3f5;
+  --color-bed-on-dark-text: #d5d9de;
+  --color-bed-on-dark-chip-border: #6b7178;
+  --color-bed-accent: var(--color-bed-on-light-accent);
+  --color-bed-laser-head: var(--color-bed-on-light-laser-head);
+  --color-bed-danger: var(--color-bed-on-light-danger);
+  --color-bed-travel: var(--color-bed-on-light-travel);
+  --color-bed-ink: var(--color-bed-on-light-ink);
+  --color-bed-text: var(--color-bed-on-light-text);
+  --color-bed-chip-border: var(--color-bed-on-light-chip-border);
   --color-surface-1: #16191c;
   --color-surface-2: #1d2024;
   --color-surface-3: #23272c;
   --color-border: #2a2e34;
   --color-text: #e6e8eb;
-  // #8b9097 on surface-3 measures 4.67:1, so no separate strong variant is needed.
-  --color-text-muted: #8b9097;
+  // Labels and secondary text: 6.3:1 on surface-3 and 7.4:1 on surface-1, so muted text passes AA everywhere it is used.
+  --color-text-muted: #a3a9b0;
   --color-accent: #ff8a1f;
   --color-accent-hover: #ff9a3d;
   --color-accent-active: #e67a14;
@@ -23,12 +50,18 @@
   --color-danger-text: #ff6b6b;
   --color-info: #4aa3ff;
   --color-laser-head: #ff3b3b;
-  --color-focus-ring: #4aa3ff;
+  // The one focus ring of every control: the bright accent, at least 3:1 against the background and every surface.
+  --color-focus-ring: #ff8a1f;
   // Hover and active surfaces stay dark enough for muted text (4.84:1 and 4.67:1).
   --color-surface-hover: #212429;
   --color-surface-active: #23272c;
+  // One disabled look for every control: a darker fill than an enabled button, a border fainter than the enabled one,
+  // and grey text that stays readable (5.3:1), so a disabled control never looks more prominent than an enabled one.
   --color-disabled-bg: #1a1d21;
   --color-disabled-text: #8b9097;
+  --color-disabled-border: #23272c;
+  // STOP while it cannot act: the disabled look with a dark red outline, so it still reads as the emergency control.
+  --color-danger-disabled-border: #5a2a2c;
 
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
@@ -50,4 +83,28 @@
   --control-height: 2.25rem;
   --focus-outline-width: 0.125rem;
   --focus-outline-offset: 0.125rem;
+}
+
+// The grid lines are the bed colour itself, darkened on a light bed and lightened on a dark one, so the grid keeps the
+// hue of any bed colour (a warm grid on wood, a neutral one on grey). Set where the bed sets its colour and tone, so the
+// mix reads that element's bed colour. Must match BED_OVERLAY_TONE.
+[data-bed-tone='on-light'] {
+  --color-bed-grid-minor: color-mix(in oklab, var(--color-bed-surface), #000 14%);
+  --color-bed-grid-major: color-mix(in oklab, var(--color-bed-surface), #000 28%);
+}
+
+[data-bed-tone='on-dark'] {
+  --color-bed-grid-minor: color-mix(in oklab, var(--color-bed-surface), #fff 10%);
+  --color-bed-grid-major: color-mix(in oklab, var(--color-bed-surface), #fff 20%);
+}
+
+// A dark bed colour takes the light set of marks. Must match BED_OVERLAY_TONE.ON_DARK.
+[data-bed-tone='on-dark'] {
+  --color-bed-accent: var(--color-bed-on-dark-accent);
+  --color-bed-laser-head: var(--color-bed-on-dark-laser-head);
+  --color-bed-danger: var(--color-bed-on-dark-danger);
+  --color-bed-travel: var(--color-bed-on-dark-travel);
+  --color-bed-ink: var(--color-bed-on-dark-ink);
+  --color-bed-text: var(--color-bed-on-dark-text);
+  --color-bed-chip-border: var(--color-bed-on-dark-chip-border);
 }

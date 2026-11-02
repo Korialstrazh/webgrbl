@@ -123,7 +123,7 @@ const secondObject: ProjectObject = newProjectObject({
 const renderObjects = (projectObjects: ProjectObject[], activeTool: BedTool = BED_TOOL.SELECT): AppStore => {
   const store: AppStore = newStore();
 
-  store.dispatch(new ProjectDocumentLoaded({ document: { objects: projectObjects } }));
+  store.dispatch(new ProjectDocumentLoaded({ document: { objects: projectObjects, layers: [] } }));
   render(
     <Provider store={store}>
       <svg>
@@ -151,7 +151,7 @@ const renderSelectedObjects = (projectObjects: ProjectObject[], activeTool: BedT
 const renderObjectsWithHistoryHotkeys = (projectObjects: ProjectObject[]): AppStore => {
   const store: AppStore = newStore();
 
-  store.dispatch(new ProjectDocumentLoaded({ document: { objects: projectObjects } }));
+  store.dispatch(new ProjectDocumentLoaded({ document: { objects: projectObjects, layers: [] } }));
   store.dispatch(new ProjectSelectionChanged({
     objectIds: projectObjects.map((projectObject: ProjectObject): string => projectObject.id),
   }));
@@ -742,7 +742,7 @@ describe(BedObjects.name, () => {
     it('removes nothing on Delete while focus is in an input on the page', () => {
       const store: AppStore = newStore();
 
-      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [firstObject] } }));
+      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [firstObject], layers: [] } }));
       store.dispatch(new ProjectSelectionChanged({ objectIds: [firstObject.id] }));
       render(
         <Provider store={store}>

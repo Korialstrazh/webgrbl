@@ -1,0 +1,13 @@
+.intro {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text);
+}
+
+.warningList {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--color-text);
+}

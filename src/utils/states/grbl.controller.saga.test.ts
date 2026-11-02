@@ -16,6 +16,7 @@ import {
   GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
   GRBL_MACHINE_STATE,
   GRBL_STATUS_POLL_INTERVAL_MS,
+  NO_SERIAL_PORT_ID,
   SIMULATED_LASER_PORT_ID,
   WEB_SERIAL_OPEN_ERROR_NAME,
 } from '../grbl/grbl.constants';
@@ -165,6 +166,7 @@ const getLastTransport = (rig: GrblControllerSagaTestRig): SimulatedLaserTranspo
 };
 
 const connectStore = async (store: AppStore): Promise<void> => {
+  store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
   store.dispatch(new ConnectRequested());
   await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
 };
@@ -189,6 +191,8 @@ describe(watchGrblController.name, () => {
 
   it('connect request ends connected with firmware identity and a connected toast', async () => {
     store = newStore(newTestRig().dependencies);
+
+    store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
 
     store.dispatch(new ConnectRequested());
 
@@ -341,6 +345,8 @@ describe(watchGrblController.name, () => {
   it('handshake timeout shows the timeout toast and returns to disconnected', async () => {
     store = newStore(newTestRig({ simulatorFault: { kind: GRBL_SIMULATOR_FAULT_KIND.STOP_RESPONDING } }).dependencies);
 
+    store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+
     store.dispatch(new ConnectRequested());
     await vi.advanceTimersByTimeAsync(GRBL_HANDSHAKE_TIMEOUT_MS - 1);
 
@@ -405,7 +411,7 @@ describe(watchGrblController.name, () => {
     expect(selectBaudRate(store.getState())).toBe(STORED_BAUD_RATE);
   });
 
-  it('stored preferences without a matching granted port keep the simulated laser', async () => {
+  it('stored preferences without a matching granted port leave no port chosen', async () => {
     const rig: GrblControllerSagaTestRig = newTestRig({
       grantedPorts: [newUsbSerialPort(OTHER_USB_PRODUCT_ID)],
       storedPreferences: {
@@ -417,7 +423,36 @@ describe(watchGrblController.name, () => {
     store = newStore(rig.dependencies);
     await vi.advanceTimersByTimeAsync(0);
 
+    expect(selectSelectedPortId(store.getState())).toBe(NO_SERIAL_PORT_ID);
+  });
+
+  it('a stored simulated laser choice, which the user made by connecting to it, is chosen again at start', async () => {
+    const rig: GrblControllerSagaTestRig = newTestRig({
+      storedPreferences: {
+        baudRate: STORED_BAUD_RATE,
+        portChoice: { isSimulated: true, usbVendorId: undefined, usbProductId: undefined },
+      },
+    });
+
+    store = newStore(rig.dependencies);
+    await vi.advanceTimersByTimeAsync(0);
+
     expect(selectSelectedPortId(store.getState())).toBe(SIMULATED_LASER_PORT_ID);
+  });
+
+  it('a fresh start without a stored choice preselects no port, not even the simulated laser', async () => {
+    store = newStore(newTestRig().dependencies);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(selectSelectedPortId(store.getState())).toBe(NO_SERIAL_PORT_ID);
+  });
+
+  it('a connect request without a chosen port stays disconnected', async () => {
+    store = newStore(newTestRig().dependencies);
+    store.dispatch(new ConnectRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+    expect(selectConnectionStatus(store.getState())).toBe(GRBL_CONNECTION_STATUS.DISCONNECTED);
   });
 
   it('port picker lists and selects the newly granted port', async () => {

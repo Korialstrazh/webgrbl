@@ -1,0 +1,10 @@
+// Fixed-width digits, so the readout does not shift while the head moves.
+.readout {
+  display: flex;
+  margin-left: auto;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
