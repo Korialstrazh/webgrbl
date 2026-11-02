@@ -41,6 +41,12 @@ export const PaletteEntryRow = ({
   const { t } = useTranslation();
   const { name: entryName } = entry;
   const isShading: boolean = entry.id === SHADING_ENTRY_ID;
+  const summaryText: string = t(DEFAULT.LAYERS_SUMMARY, {
+    mode: t(LAYER_MODE_LABEL_KEY[entry.mode]),
+    power: entry.maxPowerPercent,
+    speed: entry.speedMmPerMin,
+    passes: entry.passes,
+  });
 
   return (
     <li
@@ -61,15 +67,8 @@ export const PaletteEntryRow = ({
         <span className={styles.swatch}>
           <LayerSwatch colour={entry.colour} isShading={isShading} />
         </span>
-        <span className={styles.name}>{entryName}</span>
-        <span className={styles.summary}>
-          {t(DEFAULT.LAYERS_SUMMARY, {
-            mode: t(LAYER_MODE_LABEL_KEY[entry.mode]),
-            power: entry.maxPowerPercent,
-            speed: entry.speedMmPerMin,
-            passes: entry.passes,
-          })}
-        </span>
+        <span className={styles.name} title={entryName}>{entryName}</span>
+        <span className={styles.summary} title={summaryText}>{summaryText}</span>
       </Button>
       <Button
         type={ANTD_BUTTON_TYPE_TEXT}

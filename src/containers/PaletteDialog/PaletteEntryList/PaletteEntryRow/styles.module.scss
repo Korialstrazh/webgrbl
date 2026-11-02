@@ -15,16 +15,18 @@
   cursor: grab;
 }
 
-// The button grows to the row width: the swatch beside the name, the summary below it.
+// The button takes the row width the handle and the icon buttons leave: the swatch beside the name, the summary below
+// it. Its text is cut with an ellipsis, so it never runs under the icon buttons.
 .selectButton {
   display: grid;
   flex: 1;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0 var(--space-2);
   align-items: center;
   height: auto;
   min-width: 0;
   padding: var(--space-2);
+  overflow: hidden;
   text-align: left;
 
   &[aria-current='true'] {
@@ -38,7 +40,9 @@
   height: 1.5rem;
 }
 
-.name {
+.name,
+.summary {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

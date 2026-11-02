@@ -10,7 +10,7 @@
  */
 export const PALETTE_DIALOG_OVERLAY_ID = 'palette-dialog';
 
-/** Room for the colour list beside the form; antd keeps the dialog inside a narrower window. */
+/** Room for the colour list beside the form; a narrower window makes the dialog narrower. */
 export const PALETTE_DIALOG_WIDTH = '56rem';
 
 /** The drag data type that carries the id of the dragged entry; Firefox only starts a drag when data is set. */
