@@ -1,3 +1,4 @@
+import { GCODE_COMMENT_UNKNOWN_CHARACTER } from './gcode.constants';
 import { getGcodeCommentText } from './get.gcode.comment.text';
 
 describe(getGcodeCommentText.name, () => {
@@ -13,8 +14,17 @@ describe(getGcodeCommentText.name, () => {
     expect(getGcodeCommentText('(a); b)')).toBe('[a], b]');
   });
 
-  it('folds accented and wide letters to ASCII and marks the rest with a question mark', () => {
-    expect(getGcodeCommentText('\u00C9t\u00E9 \uFF27\uFF11 \u041A \u00B5')).toBe('Ete G1 ? ?');
+  it('folds accented and wide letters to ASCII and marks the rest with a stand-in that is no realtime command', () => {
+    expect(getGcodeCommentText('\u00C9t\u00E9 \uFF27\uFF11 \u041A \u00B5'))
+      .toBe(`Ete G1 ${GCODE_COMMENT_UNKNOWN_CHARACTER} ${GCODE_COMMENT_UNKNOWN_CHARACTER}`);
+  });
+
+  it('replaces the GRBL realtime commands ! ~ and ? in a name such as Coasters! ~v2?', () => {
+    expect(getGcodeCommentText('Coasters! ~v2?')).toBe('Coasters| -v2_');
+  });
+
+  it('replaces a wide question mark that folds to the status request', () => {
+    expect(getGcodeCommentText('\uFF1F\uFF01')).toBe('_|');
   });
 
   it('neutralises a wide bracket that folds to a comment-closing character', () => {

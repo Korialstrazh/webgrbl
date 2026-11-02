@@ -35,8 +35,11 @@ export const GCODE_FILE_EXTENSION = '.gcode';
 export const GCODE_MIME_TYPE = 'text/plain';
 /** The smallest S value that can stand for full power. */
 export const GCODE_S_VALUE_MAX_MIN = 1;
-/** Stands in for a character that has no plain ASCII form, so the header stays printable ASCII. */
-export const GCODE_COMMENT_UNKNOWN_CHARACTER = '?';
+/**
+ * Stands in for a character that has no plain ASCII form, so the header stays printable ASCII. It is not `?`, which
+ * GRBL reads as a realtime status request.
+ */
+export const GCODE_COMMENT_UNKNOWN_CHARACTER = '_';
 /** Stands in for a line break or other control character, so a comment can never end early. */
 export const GCODE_COMMENT_CONTROL_REPLACEMENT = ' ';
 /**
@@ -47,4 +50,14 @@ export const GCODE_COMMENT_BREAKING_CHARACTER_REPLACEMENTS: Readonly<Record<stri
   '(': '[',
   ')': ']',
   ';': ',',
+});
+/**
+ * The GRBL realtime commands among the printable characters, each with a harmless look-alike: `!` (feed hold), `~`
+ * (cycle start) and `?` (status report). GRBL acts on them wherever they appear in a streamed line, even inside a
+ * comment, so a sender that streams comment lines as they are would pause or resume the job at the header.
+ */
+export const GCODE_COMMENT_REALTIME_CHARACTER_REPLACEMENTS: Readonly<Record<string, string>> = Object.freeze({
+  '!': '|',
+  '~': '-',
+  '?': '_',
 });

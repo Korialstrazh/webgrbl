@@ -178,7 +178,7 @@ describe(getGcodeText.name, () => {
     const headerText: string = getGcodeText(getToolpath([]), context).split(LINE_BREAK_PATTERN).slice(0, 2).join('');
 
     expect(headerText).toMatch(/^[\x20-\x7E]*$/);
-    expect(headerText).toContain('Cafe ??? ? [v2], end');
+    expect(headerText).toContain('Cafe ___ _ [v2], end');
     expect(headerText).toContain('profile: Lasero u,');
   });
 });
