@@ -1,0 +1,10 @@
+// Shown only in a narrow window, where the top bar hides the entries it holds; 62.5rem must match the TopBar styles.
+.overflowButton:global(.ant-btn) {
+  display: none;
+}
+
+@media (width < 62.5rem) {
+  .overflowButton:global(.ant-btn) {
+    display: inline-flex;
+  }
+}

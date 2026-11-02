@@ -15,10 +15,14 @@
   @include layout.fixed-height-bar(layout.$top-bar-height);
 }
 
-// The title, the built menus and the connection pill always stay visible; the coming-soon groups give up space first.
-.heading,
-.activeMenus,
+// The connection pill always stays visible; the coming-soon groups give up space first, then the title and the menus.
 .trailing {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.heading,
+.activeMenus {
   flex-shrink: 0;
 }
 
@@ -57,4 +61,23 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+// In a narrow window the secondary entries move into the overflow menu and the gaps close up, so the connection pill
+// keeps its place; 62.5rem must match the TopBarOverflowMenu styles.
+@media (width < 62.5rem) {
+  .topBar {
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+  }
+
+  .secondaryItem:global(.ant-btn),
+  .comingSoonGroups.secondaryItem {
+    display: none;
+  }
+
+  .heading {
+    flex-shrink: 1;
+    min-width: 0;
+  }
 }

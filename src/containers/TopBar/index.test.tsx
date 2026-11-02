@@ -52,6 +52,8 @@ const AUTOSAVE_TEXT = 'Saved';
 const DISCONNECTED_PATTERN = /Disconnected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const MACHINE_PROFILES_LABEL = 'Machine profiles';
+const MORE_LABEL = 'More';
+const MATERIALS_LABEL = 'Materials';
 const PROJECT_MENU_LABEL = 'Project';
 const PROJECT_ID = 'project-1';
 const PROJECT_NAME = 'Coasters';
@@ -150,6 +152,24 @@ describe(TopBar.name, () => {
 
     expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
+  });
+
+  it('opens the machine profiles dialog from the overflow menu of a narrow bar', async () => {
+    renderWorkbenchTopBar(newStore());
+
+    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL }));
+
+    expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
+  });
+
+  it('lists Materials in the overflow menu as a disabled planned entry', async () => {
+    renderWorkbenchTopBar(newStore());
+
+    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
+
+    expect(await screen.findByRole('menuitem', { name: new RegExp(`^${MATERIALS_LABEL}`) }))
+      .toHaveAttribute('aria-disabled', 'true');
   });
 
   it('closes the machine profiles dialog on Escape without stopping the machine', () => {

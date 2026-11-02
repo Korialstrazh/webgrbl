@@ -66,3 +66,17 @@
 .negative {
   color: var(--color-warning);
 }
+
+// In a narrow window the pill keeps the state and the machine name; the port, the firmware and the online state move
+// to its popover. 62.5rem must match the TopBar styles.
+@media (width < 62.5rem) {
+  .firmware,
+  .port,
+  .positive {
+    display: none;
+  }
+
+  .profile {
+    max-width: 7rem;
+  }
+}

@@ -10,8 +10,16 @@
   gap: var(--space-3);
 }
 
+// Fixed-size cells, so the arrows keep their places around Origin at any panel width instead of stretching apart.
 .jogPad {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 4.5rem);
+  grid-auto-rows: var(--target-min);
+  justify-content: start;
   gap: var(--space-2);
+
+  > :global(.ant-btn) {
+    width: 100%;
+    padding-inline: 0;
+  }
 }

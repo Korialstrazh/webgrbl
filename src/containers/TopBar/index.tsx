@@ -27,6 +27,7 @@ import { SvgImportButton } from '../SvgImportButton';
 import { AutosaveReadout } from './AutosaveReadout';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectNameButton } from './ProjectNameButton';
+import { TopBarOverflowMenu } from './TopBarOverflowMenu';
 import styles from './styles.module.scss';
 
 export const TopBar = (): ReactNode => {
@@ -46,10 +47,14 @@ export const TopBar = (): ReactNode => {
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <ProjectMenu />
         <AutosaveReadout />
-        <Button type={ANTD_BUTTON_TYPE_TEXT} onClick={() => setIsProfilesDialogOpen(true)}>
+        <Button
+          className={styles.secondaryItem}
+          type={ANTD_BUTTON_TYPE_TEXT}
+          onClick={() => setIsProfilesDialogOpen(true)}
+        >
           {t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
         </Button>
-        <SvgImportButton buttonType={ANTD_BUTTON_TYPE_TEXT} />
+        <SvgImportButton />
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <Button
@@ -68,8 +73,9 @@ export const TopBar = (): ReactNode => {
           disabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
+        <TopBarOverflowMenu onOpenMachineProfiles={() => setIsProfilesDialogOpen(true)} />
       </div>
-      <div className={styles.comingSoonGroups}>
+      <div className={[styles.comingSoonGroups, styles.secondaryItem].join(' ')}>
         <ComingSoon description={t(DEFAULT.TOP_BAR_MATERIALS_DESCRIPTION)}>
           <Button type={ANTD_BUTTON_TYPE_TEXT}>{t(DEFAULT.TOP_BAR_MENU_MATERIALS)}</Button>
         </ComingSoon>
