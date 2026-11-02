@@ -379,7 +379,7 @@ describe(watchToolpath.name, () => {
     expect(parseSpy).not.toHaveBeenCalled();
   });
 
-  it('parses only the moved object again after a nudge', async () => {
+  it('parses no SVG again after a nudge', async () => {
     const store: AppStore = await newGcodeExportTestStore({
       objects: [
         newProjectObject({ svgText: TEXT_SVG_TEXT }),
@@ -396,7 +396,7 @@ describe(watchToolpath.name, () => {
     store.dispatch(new ToolpathRequested());
     await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
 
-    expect(parseSpy.mock.calls).toEqual([[getFirstObject(store).svgText]]);
+    expect(parseSpy).toHaveBeenCalledTimes(0);
   });
 
   it('restarts a running generation once for several nudges within the debounce time', async () => {

@@ -4,7 +4,8 @@
  * - A request reads the drawables on the main thread (parsing needs DOMParser) and hands only plain
  *   data to the worker. takeLatest cancels the running generation on a new request or a cancel, and the generation's
  *   finally block cancels the worker.
- * - Parsed drawables are cached per object (BedDrawablesCache), so a layer change parses no SVG again.
+ * - Parsed drawables are cached per object (BedDrawablesCache), so a layer change, a move or a resize parses no SVG
+ *   again.
  * - The toolpath is kept current in the background: a document or machine area change restarts a running generation,
  *   and generates an idle or out-of-date toolpath, debounced by TOOLPATH_RESTART_DEBOUNCE_MS, so the result
  *   always matches the current document.
