@@ -326,9 +326,10 @@ SIMULATION_SPEED_OPTION;{{speed}}×
 SIMULATION_TIME_LABEL;Simulation time
 SIMULATION_TO_END;To end
 STATUS_STRIP_CURSOR;Cursor
+STATUS_STRIP_CURSOR_VALUE;X {{x}}  Y {{y}} mm
 STATUS_STRIP_ESTIMATE;Estimate
 STATUS_STRIP_JOB_SIZE;Job size
-STATUS_STRIP_READOUTS_DESCRIPTION;The cursor position, the job size and the time estimate.
+STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_TITLE;Status
 TOAST_CONNECT_TIMEOUT;No response from the controller - check the baud rate and that the laser is powered.
 TOAST_CONNECTED;Connected to {{firmware}} {{version}}

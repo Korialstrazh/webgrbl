@@ -15,6 +15,7 @@ import { getMachineMotionLimits } from '../toolpath/get.machine.motion.limits';
 import { getMotionTimeline } from '../toolpath/get.motion.timeline';
 import type { MotionTimeline } from '../toolpath/interfaces/MotionTimeline';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
+import type { ToolpathBounds } from '../toolpath/interfaces/ToolpathBounds';
 import { selectGrblSettings } from './grbl.connection.state';
 import { selectToolpath, selectToolpathStatus } from './toolpath.state';
 import { TOOLPATH_STATUS } from './toolpath.status.constants';
@@ -32,6 +33,13 @@ export const selectReadyToolpathTotalTimeS = createSelector(
   [selectToolpathStatus, selectToolpathMotionTimeline],
   (status: ToolpathStatus, timeline: MotionTimeline | undefined): number | undefined =>
     (status === TOOLPATH_STATUS.READY ? timeline?.totalTimeS : undefined),
+);
+
+/** The box around the ready toolpath, for the job size; undefined while the toolpath is not ready. */
+export const selectReadyToolpathBounds = createSelector(
+  [selectToolpathStatus, selectToolpath],
+  (status: ToolpathStatus, toolpath: Toolpath | undefined): ToolpathBounds | undefined =>
+    (status === TOOLPATH_STATUS.READY ? toolpath?.bounds : undefined),
 );
 
 /** Whether the simulation may play: only a ready toolpath that takes some time. */

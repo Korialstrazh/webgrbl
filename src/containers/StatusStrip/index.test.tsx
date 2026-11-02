@@ -1,10 +1,12 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { StatusStrip } from '.';
+import { BED_CURSOR_STORE } from '../../utils/bed/bed.cursor.store';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../utils/states/toolpath.state';
+import { AnimationFrameStub } from '../../utils/test.support/animation.frame.stub';
 import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
@@ -14,6 +16,14 @@ const INPUT_LABEL = 'Console command';
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const READOUT_LABELS: readonly string[] = ['Cursor', 'Job size', 'Estimate'];
 const ESTIMATE_LABEL = 'Estimate';
+const CURSOR_LABEL = 'Cursor';
+const JOB_SIZE_LABEL = 'Job size';
+const SOON_LABEL = 'Soon';
+const MISSING_VALUE_TEXT = '-';
+const CURSOR_POINT = { xMm: 123.45, yMm: 6.7 };
+const CURSOR_TEXT = 'X 123.5 Y 6.7 mm';
+const JOB_SIZE_TEXT = '196.0 \u00D7 196.6 mm';
+const FRAME_TIME_MS = 16;
 const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
 const SIXTY_SIX_SECOND_MOVE_END_X_MM = 6590;
@@ -34,12 +44,59 @@ describe(StatusStrip.name, () => {
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });
 
-  it('shows the coming-soon readouts', () => {
+  it('shows the cursor, job size and estimate readouts as real readouts, without a Soon tag', () => {
     renderStatusStrip();
 
     for (const readoutLabel of READOUT_LABELS) {
       expect(screen.getByText(readoutLabel)).toBeInTheDocument();
     }
+
+    expect(screen.queryByText(SOON_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('shows the bed point under the pointer once the next frame comes, and a dash after the pointer leaves', () => {
+    const animationFrames: AnimationFrameStub = new AnimationFrameStub();
+
+    animationFrames.install();
+    renderStatusStrip();
+    const cursorReadout: HTMLElement | null = screen.getByText(CURSOR_LABEL).closest('div');
+
+    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+
+    act(() => {
+      BED_CURSOR_STORE.setBedCursorPoint({ xMm: 12.34, yMm: 56.78 });
+      BED_CURSOR_STORE.setBedCursorPoint(CURSOR_POINT);
+    });
+
+    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+    expect(animationFrames.getRequestCount()).toBe(1);
+
+    animationFrames.runFrame(FRAME_TIME_MS);
+
+    expect(cursorReadout).toHaveTextContent(CURSOR_TEXT);
+
+    act(() => {
+      BED_CURSOR_STORE.setBedCursorPoint(undefined);
+    });
+    animationFrames.runFrame(FRAME_TIME_MS);
+
+    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+    vi.unstubAllGlobals();
+  });
+
+  it('shows the size of the ready toolpath as the job size', () => {
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+
+    act(() => {
+      store.dispatch(new ToolpathRequested());
+      store.dispatch(new ToolpathReady({
+        toolpath: newToolpath({ bounds: { minX: 10, minY: 20, maxX: 206, maxY: 216.6 } }),
+        documentVersion: selectToolpathDocumentVersion(store.getState()),
+      }));
+    });
+    renderStatusStrip(store);
+
+    expect(screen.getByText(JOB_SIZE_LABEL).closest('div')).toHaveTextContent(`${JOB_SIZE_LABEL}${JOB_SIZE_TEXT}`);
   });
 
   it('opens and closes the console panel with the toggle', () => {

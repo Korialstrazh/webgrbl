@@ -1,7 +1,8 @@
 /**
  * The bed view: the bed drawing, its rulers and the zoom cluster, with zoom and pan. The mouse wheel zooms around the
  * pointer, a middle drag or Space plus a drag pans, and the buttons and the plus, minus and zero keys zoom in, zoom
- * out and fit the bed. The view lives for the session and starts fitted. The zoom is the drawing's view box, so the
+ * out and fit the bed. The bed point under the pointer goes to the status strip through the bed cursor store. The view
+ * lives for the session and starts fitted. The zoom is the drawing's view box, so the
  * objects layer and the Toolpath layer read pointer positions through the SVG's screen matrix as before.
  *
  * @author michael.morosov
@@ -11,10 +12,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { PointerEvent, ReactNode } from 'react';
+import { BED_CURSOR_STORE } from '../../utils/bed/bed.cursor.store';
 import { BedZoomContext } from '../../utils/bed/bed.zoom.context';
 import { BED_ZOOM_STEP_FACTOR, MAX_BED_ZOOM, MIN_BED_ZOOM } from '../../utils/bed/bed.zoom.constants';
+import { getBedCursorPoint } from '../../utils/bed/get.bed.cursor.point';
 import { getBedRulers } from '../../utils/bed/get.bed.rulers';
 import { getBedViewBox } from '../../utils/bed/get.bed.view.box';
 import type { BedRulerLayout } from '../../utils/bed/interfaces/BedRulerLayout';
@@ -61,6 +64,24 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
 
   useBedWheelZoom(viewRef, isWide, zoomBedBy);
   useBedZoomHotkeys(zoomBedBy, fitBedToView);
+  useEffect(() => () => {
+    BED_CURSOR_STORE.setBedCursorPoint(undefined);
+  }, []);
+
+  const handlePointerMove = (pointerEvent: PointerEvent<HTMLElement>): void => {
+    const viewRect: DOMRect = pointerEvent.currentTarget.getBoundingClientRect();
+
+    onPointerMove(pointerEvent);
+    BED_CURSOR_STORE.setBedCursorPoint(getBedCursorPoint({ viewport, screenSize, dimensions }, {
+      xPx: pointerEvent.clientX - viewRect.left,
+      yPx: pointerEvent.clientY - viewRect.top,
+    }));
+  };
+
+  const handlePointerLeave = (): void => {
+    onPointerLeave();
+    BED_CURSOR_STORE.setBedCursorPoint(undefined);
+  };
 
   return (
     // A plain element: it is the positioned box of the drawing and its overlays, and it takes the pan gesture.
@@ -68,11 +89,11 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
       ref={viewRef}
       className={getViewClassName(panGesture)}
       onPointerDownCapture={onPointerDownCapture}
-      onPointerMove={onPointerMove}
+      onPointerMove={handlePointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
       onPointerEnter={onPointerEnter}
-      onPointerLeave={onPointerLeave}
+      onPointerLeave={handlePointerLeave}
       onMouseDownCapture={onMouseDownCapture}
     >
       <BedZoomContext value={viewport.zoom}>
