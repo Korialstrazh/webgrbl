@@ -14,6 +14,7 @@ import { useStorageSafeFakeTimers } from '../test.support/use.storage.safe.fake.
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
 import {
+  LayerPaletteEntryLinked,
   LayerSettingsChanged,
   LayerToggled,
   ProjectUndoRequested,
@@ -117,6 +118,23 @@ describe('project layers', () => {
       expect(selectProjectLayers(secondStore.getState())).toEqual(savedLayers);
     });
     expect(getVisibleLayer(secondStore, RED)?.settings.maxPowerPercent).toBe(CHANGED_POWER_PERCENT);
+  });
+
+  it('autosaves a palette link and keeps it after a reload through a second store', async () => {
+    const firstStore: AppStore = await newStartedStore();
+
+    await importRedAndBlueSvg(firstStore);
+    await autosave(firstStore);
+    firstStore.dispatch(new LayerPaletteEntryLinked({ layerKey: RED, paletteEntryId: DEFAULT_SCORE_ENTRY.id }));
+
+    expect(selectProjectSaveStatus(firstStore.getState())).toBe(PROJECT_SAVE_STATUS.UNSAVED);
+
+    await autosave(firstStore);
+    const secondStore: AppStore = await newStartedStore();
+
+    await vi.waitFor((): void => {
+      expect(getVisibleLayer(secondStore, RED)?.paletteEntryId).toBe(DEFAULT_SCORE_ENTRY.id);
+    });
   });
 
   it('derives the layers of a project stored without layers when it opens', async () => {

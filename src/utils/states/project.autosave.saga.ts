@@ -22,31 +22,10 @@ import {
 } from '../browser/browser.events.constants';
 import { AUTOSAVE_DEBOUNCE_MS, AUTOSAVE_MAX_WAIT_MS } from '../project/project.constants';
 import type { ProjectAutosaveWaitResult } from './interfaces/ProjectAutosaveWaitResult';
-import {
-  LayerSettingsChanged,
-  LayerToggled,
-  LayersReordered,
-  ProjectObjectsAdded,
-  ProjectObjectsDeleted,
-  ProjectObjectsTransformed,
-  ProjectRedoRequested,
-  ProjectUndoRequested,
-} from './project.document.state';
+import { PROJECT_AUTOSAVE_ACTION_TYPES } from './project.autosave.action.types';
 import { PROJECT_SAVE_STATUS } from './project.save.status.constants';
 import type { ProjectSaveStatus } from './project.save.status.constants';
 import { ProjectAutosaveDue, ProjectSaveStatusChanged, selectProjectSaveStatus } from './project.state';
-
-/** Actions that can change the document. One that changes nothing, such as undo with no history, costs one save. */
-const PROJECT_DOCUMENT_CHANGE_ACTION_TYPES: string[] = [
-  ProjectObjectsAdded.type,
-  ProjectObjectsTransformed.type,
-  ProjectObjectsDeleted.type,
-  ProjectUndoRequested.type,
-  ProjectRedoRequested.type,
-  LayerSettingsChanged.type,
-  LayerToggled.type,
-  LayersReordered.type,
-];
 
 /** Emits the name of the browser event after which the page may be gone before the next autosave. */
 const newProjectFlushChannel = (): EventChannel<string> => eventChannel((emit: (eventName: string) => void) => {
@@ -82,7 +61,7 @@ function* waitForAutosaveTime(flushChannel: EventChannel<string>): Generator {
   while (true) {
     const remainingWaitMs: number = maximumWaitEndMs - Date.now();
     const waitResult: ProjectAutosaveWaitResult = (yield race({
-      change: take(PROJECT_DOCUMENT_CHANGE_ACTION_TYPES),
+      change: take(PROJECT_AUTOSAVE_ACTION_TYPES),
       quiet: delay(Math.min(AUTOSAVE_DEBOUNCE_MS, remainingWaitMs), true),
       flush: take(flushChannel),
     })) as ProjectAutosaveWaitResult;
@@ -105,7 +84,7 @@ export function* watchProjectAutosave(): Generator {
   try {
     while (true) {
       const waitResult: ProjectAutosaveWaitResult = (yield race({
-        change: take(PROJECT_DOCUMENT_CHANGE_ACTION_TYPES),
+        change: take(PROJECT_AUTOSAVE_ACTION_TYPES),
         flush: take(flushChannel),
       })) as ProjectAutosaveWaitResult;
 
