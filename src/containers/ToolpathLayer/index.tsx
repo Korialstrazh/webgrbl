@@ -17,10 +17,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { BedZoomContext } from '../../utils/bed/bed.zoom.context';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { DEFAULT_MACHINE_ORIGIN_CORNER } from '../../utils/profiles/machine.profile.constants';
@@ -62,7 +63,8 @@ const BURN_STATE_CLASS_NAMES: Readonly<Record<ToolpathBurnState, string | undefi
   [TOOLPATH_BURN_STATE.REMAINING]: styles.remaining,
 };
 
-const getPointTransform = (point: GeometryPoint): string => `translate(${point.x} ${point.y})`;
+const getPointTransform = (point: GeometryPoint, markerScale: number = 1): string =>
+  `translate(${point.x} ${point.y}) scale(${markerScale})`;
 
 /** The bed's Y-up millimetres turned into the SVG's Y-down ones, in one transform for the whole drawing. */
 const getBedFlipTransform = (heightMm: number): string => `matrix(1 0 0 -1 0 ${heightMm})`;
@@ -93,6 +95,8 @@ const renderBurnPieces = (
 
 export const ToolpathLayer = ({ dimensions, displayMode, isTravelShown }: ToolpathLayerProps): ReactNode => {
   const { t } = useTranslation();
+  // The head and origin markers keep their size on screen at any bed zoom.
+  const markerScale: number = 1 / useContext(BedZoomContext);
   const { widthMm, heightMm } = dimensions;
   const isToolpathCurrent: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.READY;
   const toolpath: Toolpath | undefined = useSelector(selectToolpath);
@@ -130,14 +134,18 @@ export const ToolpathLayer = ({ dimensions, displayMode, isTravelShown }: Toolpa
           )}
           {renderBurnPieces(strokePaths, piecesOfPaths, TOOLPATH_BURN_STATE.REMAINING)}
           {renderBurnPieces(strokePaths, piecesOfPaths, TOOLPATH_BURN_STATE.BURNT)}
-          <g className={styles.head} transform={getPointTransform(position.point)} data-testid={TOOLPATH_HEAD_TEST_ID}>
+          <g
+            className={styles.head}
+            transform={getPointTransform(position.point, markerScale)}
+            data-testid={TOOLPATH_HEAD_TEST_ID}
+          >
             <path d={CROSSHAIR_PATH} />
           </g>
         </g>
       )}
       <circle
         className={styles.origin}
-        transform={getPointTransform({ x: originPoint.x, y: heightMm - originPoint.y })}
+        transform={getPointTransform({ x: originPoint.x, y: heightMm - originPoint.y }, markerScale)}
         r={WORK_ORIGIN_MARKER_RADIUS_MM}
         data-testid={TOOLPATH_ORIGIN_TEST_ID}
       />

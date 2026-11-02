@@ -73,3 +73,7 @@ export const PAUSE_SYMBOL = '\u23F8\uFE0E';
 
 /** The right triangles and bar that stand for to end. */
 export const TO_END_SYMBOL = '\u23ED\uFE0E';
+
+/** The plus and minus signs of the zoom buttons. */
+export const PLUS_SIGN = '+';
+export const MINUS_SIGN = '\u2212';

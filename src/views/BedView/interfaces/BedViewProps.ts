@@ -11,6 +11,7 @@
  */
 import type { ReactNode } from 'react';
 import type { BedDimensions } from '../../../utils/bed/interfaces/BedDimensions';
+import type { BedViewBox } from '../../../utils/bed/interfaces/BedViewBox';
 import type { GrblAxisPosition } from '../../../utils/grbl/interfaces/GrblAxisPosition';
 
 export interface BedViewProps {
@@ -21,6 +22,10 @@ export interface BedViewProps {
   workOriginPosition: GrblAxisPosition | undefined;
   /** Text centred on the bed, for example when there is no machine yet. */
   placeholderLabel: string | undefined;
+  /** The part of the bed in view; the whole bed when left out. */
+  viewBox?: BedViewBox;
+  /** How much larger than fitted the bed is drawn; markers shrink by it to keep their screen size. 1 if left out. */
+  zoom?: number;
   /**
    * Drawn above the grid and below the head and work zero markers, in the SVG's own units: millimetres from the bed's
    * top-left corner with Y pointing down, so content turns machine Y into SVG Y itself (Y = bed height - machine Y).

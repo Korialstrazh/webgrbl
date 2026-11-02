@@ -3,15 +3,16 @@ import type { ComponentProps } from 'react';
 import { BedView } from '.';
 import { BED_PLACEHOLDER_KIND } from '../../utils/bed/bed.constants';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
+import type { BedViewBox } from '../../utils/bed/interfaces/BedViewBox';
 import { BED_HEAD_TEST_ID, BED_WORK_ORIGIN_TEST_ID } from './bed.view.constants';
 
 const DIMENSIONS: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
 const HEAD_POSITION = { x: 100, y: 50, z: 0 };
 const PLACEHOLDER_TEXT = 'Nothing here yet';
-const WIDTH_LABEL_TEXT = '400';
-const HEIGHT_LABEL_TEXT = '300';
+const ZOOMED_VIEW_BOX: BedViewBox = { xMm: 50, yMm: 75, widthMm: 100, heightMm: 75 };
+const ZOOM_FOUR_TIMES = 4;
 const OUTSIDE_POSITION = { x: -50, y: 20, z: 0 };
-const OUTSIDE_SCREEN_TRANSFORM = 'translate(0 280)';
+const OUTSIDE_SCREEN_TRANSFORM = 'translate(0 280) scale(1)';
 const CHILD_TEST_ID = 'bed-child';
 const CHILD_NAME = 'Logo';
 const TRANSFORM_ATTRIBUTE = 'transform';
@@ -33,18 +34,6 @@ const renderBed = (overrides: Partial<ComponentProps<typeof BedView>>): HTMLElem
   return container;
 };
 
-const getRulerLabelCount = (container: HTMLElement, labelText: string): number => {
-  let count: number = 0;
-
-  for (const textElement of container.querySelectorAll('text')) {
-    if (textElement.textContent === labelText) {
-      count++;
-    }
-  }
-
-  return count;
-};
-
 describe(BedView.name, () => {
   it('exposes the bed as a labelled group, so the objects drawn on it keep their own names', () => {
     renderBed({ children: <g role="img" aria-label={CHILD_NAME} /> });
@@ -59,10 +48,17 @@ describe(BedView.name, () => {
     expect(screen.getByRole('group')).toHaveAttribute('viewBox', '0 0 400 300');
   });
 
+  it('shows the part of the bed in view when zoomed, with the markers kept at their screen size', () => {
+    renderBed({ headPosition: HEAD_POSITION, viewBox: ZOOMED_VIEW_BOX, zoom: ZOOM_FOUR_TIMES });
+
+    expect(screen.getByRole('group')).toHaveAttribute('viewBox', '50 75 100 75');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(100 250) scale(0.25)');
+  });
+
   it('puts the crosshair at the head position with the Y axis flipped', () => {
     renderBed({ headPosition: HEAD_POSITION });
 
-    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(100 250)');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(100 250) scale(1)');
   });
 
   it('names the size and head position in the accessible label', () => {
@@ -94,7 +90,7 @@ describe(BedView.name, () => {
   it('clamps a head beyond the far corner to the bed edge', () => {
     renderBed({ headPosition: { x: 450, y: 350, z: 0 } });
 
-    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(400 0)');
+    expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(TRANSFORM_ATTRIBUTE, 'translate(400 0) scale(1)');
     expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(OUTSIDE_ATTRIBUTE, TRUE_TEXT);
   });
 
@@ -102,14 +98,6 @@ describe(BedView.name, () => {
     renderBed({ headPosition: HEAD_POSITION });
 
     expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute(OUTSIDE_ATTRIBUTE, FALSE_TEXT);
-  });
-
-  it('skips the ruler labels at the far edges that would sit outside the view box', () => {
-    const container: HTMLElement = renderBed({});
-
-    expect(getRulerLabelCount(container, WIDTH_LABEL_TEXT)).toBe(0);
-    // 300 still labels the top ruler; only the top-most left label at the bed height is skipped.
-    expect(getRulerLabelCount(container, HEIGHT_LABEL_TEXT)).toBe(1);
   });
 
   it('keeps a work zero outside the bed visible at the edge in the outside style', () => {

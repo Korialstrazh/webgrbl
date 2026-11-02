@@ -1,0 +1,94 @@
+/**
+ * The bed view: the bed drawing, its rulers and the zoom cluster, with zoom and pan. The mouse wheel zooms around the
+ * pointer, a middle drag or Space plus a drag pans, and the buttons and the plus, minus and zero keys zoom in, zoom
+ * out and fit the bed. The view lives for the session and starts fitted. The zoom is the drawing's view box, so the
+ * objects layer and the Toolpath layer read pointer positions through the SVG's screen matrix as before.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-11-02
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+import { useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { BedZoomContext } from '../../utils/bed/bed.zoom.context';
+import { BED_ZOOM_STEP_FACTOR, MAX_BED_ZOOM, MIN_BED_ZOOM } from '../../utils/bed/bed.zoom.constants';
+import { getBedRulers } from '../../utils/bed/get.bed.rulers';
+import { getBedViewBox } from '../../utils/bed/get.bed.view.box';
+import type { BedRulerLayout } from '../../utils/bed/interfaces/BedRulerLayout';
+import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
+import type { BedViewBox } from '../../utils/bed/interfaces/BedViewBox';
+import { getRootFontSizePixels } from '../../utils/browser/get.root.font.size.pixels';
+import { PERCENT_DIVISOR } from '../../utils/percent.constants';
+import { BedRulers } from '../../views/BedRulers';
+import { BedView } from '../../views/BedView';
+import { BedZoomControls } from '../../views/BedZoomControls';
+import type { BedPanGesture } from './interfaces/BedPanGesture';
+import type { BedViewportControls } from './interfaces/BedViewportControls';
+import type { BedViewportProps } from './interfaces/BedViewportProps';
+import styles from './styles.module.scss';
+import { useBedPanGesture } from './use.bed.pan.gesture';
+import { useBedScreenSize } from './use.bed.screen.size';
+import { useBedViewportControls } from './use.bed.viewport.controls';
+import { useBedWheelZoom } from './use.bed.wheel.zoom';
+import { useBedZoomHotkeys } from './use.bed.zoom.hotkeys';
+
+const getViewClassName = ({ isPanReady, isPanning }: BedPanGesture): string | undefined => {
+  if (isPanning) {
+    return [styles.bedViewport, styles.panning].join(' ');
+  }
+
+  return isPanReady ? [styles.bedViewport, styles.panReady].join(' ') : styles.bedViewport;
+};
+
+export const BedViewport = (props: BedViewportProps): ReactNode => {
+  const { dimensions, isWide, children, ...markerProps } = props;
+  const viewRef = useRef<HTMLDivElement>(null);
+  const screenSize: BedScreenSize = useBedScreenSize(viewRef);
+  const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
+  const { viewport, zoomBedBy, panBedBy, fitBedToView }: BedViewportControls =
+    useBedViewportControls(dimensions, screenSize);
+  const panGesture: BedPanGesture = useBedPanGesture(panBedBy);
+  const viewBox: BedViewBox = getBedViewBox({ viewport, screenSize, dimensions });
+  const rulers: BedRulerLayout = useMemo(
+    () => getBedRulers({ viewport, screenSize, dimensions, rootFontSizePx }),
+    [viewport, screenSize, dimensions, rootFontSizePx],
+  );
+  const { onPointerDownCapture, onPointerMove, onPointerUp, onPointerEnter, onPointerLeave, onMouseDownCapture } =
+    panGesture;
+
+  useBedWheelZoom(viewRef, isWide, zoomBedBy);
+  useBedZoomHotkeys(zoomBedBy, fitBedToView);
+
+  return (
+    // A plain element: it is the positioned box of the drawing and its overlays, and it takes the pan gesture.
+    <div
+      ref={viewRef}
+      className={getViewClassName(panGesture)}
+      onPointerDownCapture={onPointerDownCapture}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+      onMouseDownCapture={onMouseDownCapture}
+    >
+      <BedZoomContext value={viewport.zoom}>
+        <BedView dimensions={dimensions} viewBox={viewBox} zoom={viewport.zoom} {...markerProps}>
+          {children}
+        </BedView>
+      </BedZoomContext>
+      <BedRulers rulers={rulers} />
+      <BedZoomControls
+        zoomPercent={Math.round(viewport.zoom * PERCENT_DIVISOR)}
+        canZoomIn={viewport.zoom < MAX_BED_ZOOM}
+        canZoomOut={viewport.zoom > MIN_BED_ZOOM}
+        onZoomIn={() => zoomBedBy(BED_ZOOM_STEP_FACTOR)}
+        onZoomOut={() => zoomBedBy(1 / BED_ZOOM_STEP_FACTOR)}
+        onFit={fitBedToView}
+      />
+    </div>
+  );
+};

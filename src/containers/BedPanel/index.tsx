@@ -5,6 +5,7 @@
  * - Toolpath view: the real job at the simulation time instead of the objects (no editing there), with its colour and
  *   travel toggles, the job size and estimate, the generation progress or out-of-date banner, the warnings, and the
  *   simulation playback bar below the bed.
+ * - The bed zooms and pans in both views (see BedViewport).
  * - The other tools and the 3D view are not built yet. SVG files dropped on the bed are imported.
  *
  * Its element is the host that dialogs and drawers render into.
@@ -29,16 +30,16 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
-import { BedView } from '../../views/BedView';
 import { ComingSoon } from '../../views/ComingSoon';
 import { BedObjects } from '../BedObjects';
+import { BedViewport } from '../BedViewport';
 import { SimulationPlaybackBar } from '../SimulationPlaybackBar';
 import { ToastStack } from '../ToastStack';
 import { ToolpathLayer } from '../ToolpathLayer';
 import { ToolpathStatusOverlay } from '../ToolpathStatusOverlay';
 import { ToolpathToolbar } from '../ToolpathToolbar';
 import { ToolpathWarningsPanel } from '../ToolpathWarningsPanel';
-import { BED_DROP_AREA_TEST_ID } from './bed.panel.constants';
+import { BED_DROP_AREA_TEST_ID, BED_VIEWPORT_KEY_SEPARATOR } from './bed.panel.constants';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
 import {
   BED_COMING_SOON_TOOL_LABEL_KEYS,
@@ -127,8 +128,11 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
         onDragLeave={dropArea.handleDragLeave}
         onDrop={dropArea.handleDrop}
       >
-        <BedView
+        <BedViewport
+          // A new bed size starts a new view, fitted to the new bed.
+          key={[dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR)}
           dimensions={dimensions}
+          isWide={isWide}
           // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
           // add a second crosshair.
           headPosition={isToolpathView ? undefined : status?.machinePosition}
@@ -140,7 +144,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           ) : (
             <BedObjects dimensions={dimensions} activeTool={activeTool} />
           )}
-        </BedView>
+        </BedViewport>
         {isToolpathView && <ToolpathStatusOverlay />}
         {isToolpathView && <ToolpathWarningsPanel />}
       </div>

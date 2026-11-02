@@ -189,7 +189,8 @@ describe(ToolpathLayer.name, () => {
     }));
     renderLayer(store);
 
-    expect(screen.getByTestId(TOOLPATH_ORIGIN_TEST_ID)).toHaveAttribute('transform', `translate(${BED_WIDTH_MM} 0)`);
+    expect(screen.getByTestId(TOOLPATH_ORIGIN_TEST_ID))
+      .toHaveAttribute('transform', `translate(${BED_WIDTH_MM} 0) scale(1)`);
   });
 
   it('puts the head at the end of the last move at the end of the job', () => {
@@ -200,7 +201,7 @@ describe(ToolpathLayer.name, () => {
       store.dispatch(new SimulationTimeSet({ timeS: getTotalTimeS(store) }));
     });
 
-    expect(screen.getByTestId(TOOLPATH_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(80 90)');
+    expect(screen.getByTestId(TOOLPATH_HEAD_TEST_ID)).toHaveAttribute('transform', 'translate(80 90) scale(1)');
   });
 
   it('keeps the head at the end of the job when new machine limits make the job shorter than the time', () => {
@@ -220,7 +221,7 @@ describe(ToolpathLayer.name, () => {
     });
 
     expect(screen.getByTestId(TOOLPATH_HEAD_TEST_ID))
-      .toHaveAttribute('transform', `translate(${RATE_LIMITED_END_X_MM} 0)`);
+      .toHaveAttribute('transform', `translate(${RATE_LIMITED_END_X_MM} 0) scale(1)`);
     expect(getBurnStates()).toEqual([TOOLPATH_BURN_STATE.BURNT]);
   });
 });

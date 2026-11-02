@@ -1,0 +1,21 @@
+// Fills the bed area; the drawing fills it and the rulers and zoom cluster float over it.
+.bedViewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+// Space is held over the bed: a left drag pans.
+.panReady {
+  cursor: grab;
+}
+
+.panning {
+  cursor: grabbing;
+}
+
+// The objects layer sets its own cursors; while a pan is ready or going on the hand wins.
+.panReady *,
+.panning * {
+  cursor: inherit !important;
+}

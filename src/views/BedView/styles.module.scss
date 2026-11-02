@@ -13,7 +13,6 @@
 .surface,
 .minorGrid,
 .majorGrid,
-.rulerLabel,
 .workOrigin,
 .head,
 .placeholder {
@@ -36,11 +35,6 @@
 .majorGrid {
   stroke: var(--color-border);
   stroke-width: 1;
-}
-
-.rulerLabel {
-  fill: var(--color-text-muted);
-  font-family: var(--font-mono);
 }
 
 .workOrigin {
