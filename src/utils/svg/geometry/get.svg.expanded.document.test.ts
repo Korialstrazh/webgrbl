@@ -1,11 +1,12 @@
+import { SVG_MIME_TYPE, SVG_NAMESPACE_URI } from '../svg.constants';
 import { getSvgExpandedDocument } from './get.svg.expanded.document';
 import type { SvgExpandedDocument } from './interfaces/SvgExpandedDocument';
 import { SVG_USE_INSPECTION_BUDGET, SVG_USE_MAX_COPIED_ELEMENTS } from './svg.shape.constants';
-import { SVG_MIME_TYPE, SVG_NAMESPACE_URI } from '../svg.constants';
 
 const RECT = '<rect width="1" height="1"/>';
 const SMALL_SHAPE_NAME = 'circle';
 const RECT_ELEMENT_NAME = 'rect';
+const UNREADABLE_SVG_MESSAGE = 'The test SVG is not readable';
 // jsdom takes several seconds just to parse the deeply nested probe file, and the test parses it twice.
 const HOSTILE_FILE_TEST_TIMEOUT_MS = 60_000;
 // Expansion work on top of parsing. It is loose so that a loaded CI machine passes; the quadratic work it guards
@@ -30,7 +31,7 @@ const getExpandedDocument = (content: string): SvgExpandedDocument => {
   const expandedDocument: SvgExpandedDocument | undefined = getSvgExpandedDocument(getSvgText(content));
 
   if (!expandedDocument) {
-    throw new Error('unreadable svg');
+    throw new Error(UNREADABLE_SVG_MESSAGE);
   }
 
   return expandedDocument;
@@ -66,7 +67,7 @@ const getTimedExpansion = (content: string): TimedSvgExpansion => {
   const expansionTimeMs: number = performance.now() - expandStartTime - parseTimeMs;
 
   if (!expandedDocument) {
-    throw new Error('unreadable svg');
+    throw new Error(UNREADABLE_SVG_MESSAGE);
   }
 
   return { expandedDocument, expansionTimeMs };

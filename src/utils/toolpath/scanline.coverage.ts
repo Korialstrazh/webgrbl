@@ -1,5 +1,9 @@
 import type { ScanlineSpan } from './interfaces/ScanlineSpan';
 
+/** Whether the two spans neither overlap nor touch. */
+const isSpanApart = (firstSpan: ScanlineSpan, secondSpan: ScanlineSpan): boolean =>
+  firstSpan.x1 < secondSpan.x0 || firstSpan.x0 > secondSpan.x1;
+
 /**
  * Tracks which pieces of one scanline are already covered while paint areas are laid on it from front to back.
  *
@@ -22,7 +26,7 @@ export class ScanlineCoverage {
     let visibleStartX: number = span.x0;
 
     for (const coveredSpan of this.coveredSpans) {
-      if (coveredSpan.x1 < span.x0 || coveredSpan.x0 > span.x1) {
+      if (isSpanApart(coveredSpan, span)) {
         separateSpans.push(coveredSpan);
 
         continue;

@@ -15,13 +15,13 @@ import { MACHINE_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { Panel } from '../../views/Panel';
 import { StopButton } from '../StopButton';
-import type { MachinePanelProps } from './interfaces/MachinePanelProps';
+import { JobCard } from './JobCard';
 import { LaserCard } from './LaserCard';
 import { MachineResetUnlock } from './MachineResetUnlock';
 import { MachineStateReadout } from './MachineStateReadout';
 import { MoveCard } from './MoveCard';
 import { PreflightCard } from './PreflightCard';
-import { JobCard } from './JobCard';
+import type { MachinePanelProps } from './interfaces/MachinePanelProps';
 import styles from './styles.module.scss';
 
 export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {

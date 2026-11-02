@@ -8,11 +8,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { ToolpathBounds } from './ToolpathBounds';
-import type { ToolpathEdgeIndex } from './ToolpathEdgeIndex';
 import type { SvgMatrix } from '../../svg/geometry/interfaces/SvgMatrix';
 import type { SvgPaint } from '../../svg/geometry/interfaces/SvgPaint';
 import type { SvgFillRule } from '../../svg/geometry/svg.geometry.constants';
+import type { ToolpathBounds } from './ToolpathBounds';
+import type { ToolpathEdgeIndex } from './ToolpathEdgeIndex';
 
 export interface ToolpathPaintArea {
   /** The outline edges in bed mm, sorted into horizontal bands; horizontal edges are left out. */

@@ -11,13 +11,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { getObjectBedMatrix } from './get.object.bed.matrix';
-import type { BedDrawable } from './interfaces/BedDrawable';
-import type { BedDrawableSet } from './interfaces/BedDrawableSet';
-import type { ObjectBedDrawableInput } from './interfaces/ObjectBedDrawableInput';
-import type { ObjectWarning } from './interfaces/ObjectWarning';
-import type { ObjectWarningInput } from './interfaces/ObjectWarningInput';
-import { TOOLPATH_TOLERANCE_MM } from './toolpath.constants';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { getSvgDocumentDrawables } from '../svg/geometry/get.svg.document.drawables';
 import { getSvgExpandedDocument } from '../svg/geometry/get.svg.expanded.document';
@@ -37,6 +30,13 @@ import { getSvgRootViewportBounds } from '../svg/get.svg.root.viewport.bounds';
 import { getSvgViewBox } from '../svg/get.svg.view.box';
 import type { SvgViewBox } from '../svg/interfaces/SvgViewBox';
 import type { SvgViewportBounds } from '../svg/interfaces/SvgViewportBounds';
+import { getObjectBedMatrix } from './get.object.bed.matrix';
+import type { BedDrawable } from './interfaces/BedDrawable';
+import type { BedDrawableSet } from './interfaces/BedDrawableSet';
+import type { ObjectBedDrawableInput } from './interfaces/ObjectBedDrawableInput';
+import type { ObjectWarning } from './interfaces/ObjectWarning';
+import type { ObjectWarningInput } from './interfaces/ObjectWarningInput';
+import { TOOLPATH_TOLERANCE_MM } from './toolpath.constants';
 
 /** The gradient matrix carried on from root user units to bed millimetres. */
 const getBedGradientMatrix = (gradientMatrix: SvgMatrix | undefined, matrix: SvgMatrix): SvgMatrix | undefined =>

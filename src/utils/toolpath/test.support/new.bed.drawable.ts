@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { newDrawablePaint } from './new.drawable.paint';
 import type { BedDrawable } from '../interfaces/BedDrawable';
+import { newDrawablePaint } from './new.drawable.paint';
 
 const TEST_OBJECT_ID = 'test-object';
 

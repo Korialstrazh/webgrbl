@@ -10,14 +10,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { doNothing } from '../../do.nothing';
 import { getToolpath } from '../get.toolpath';
-import type { HeldToolpathGeneration } from './interfaces/HeldToolpathGeneration';
 import type { Toolpath } from '../interfaces/Toolpath';
 import type { ToolpathGeneration } from '../interfaces/ToolpathGeneration';
 import type { ToolpathGenerationInput } from '../interfaces/ToolpathGenerationInput';
 import type { ToolpathProgressListener } from '../interfaces/ToolpathProgressListener';
 import type { ToolpathWorkerClient } from '../interfaces/ToolpathWorkerClient';
-import { doNothing } from '../../do.nothing';
+import type { HeldToolpathGeneration } from './interfaces/HeldToolpathGeneration';
 
 const NO_HELD_GENERATION_MESSAGE = 'No held toolpath generation at this index';
 
@@ -87,7 +87,10 @@ export class FakeToolpathWorkerClient implements ToolpathWorkerClient {
 
   private getHeldGeneration(input: ToolpathGenerationInput, onProgress: ToolpathProgressListener): ToolpathGeneration {
     let heldGeneration: HeldToolpathGeneration | undefined;
-    const promise: Promise<Toolpath> = new Promise<Toolpath>((resolve, reject) => {
+    const promise: Promise<Toolpath> = new Promise<Toolpath>((
+      resolve: (toolpath: Toolpath) => void,
+      reject: (reason: unknown) => void,
+    ) => {
       heldGeneration = { input, onProgress, resolve, reject, isRunning: true };
       this.heldGenerations.push(heldGeneration);
     });

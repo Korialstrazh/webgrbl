@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getNewLayer } from '../layers/get.new.layer';
+import { DEFAULT_CUT_ENTRY, DEFAULT_PALETTE, DEFAULT_SCORE_ENTRY } from '../palette/palette.constants';
 import * as getToolpathModule from './get.toolpath';
 import type { ToolpathWorkerMessage } from './interfaces/ToolpathWorkerMessage';
 import type { ToolpathWorkerRequest } from './interfaces/ToolpathWorkerRequest';
@@ -8,8 +10,6 @@ import { newBedDrawable } from './test.support/new.bed.drawable';
 import { newDrawablePaint } from './test.support/new.drawable.paint';
 import { newSvgPaint } from './test.support/new.svg.paint';
 import { TOOLPATH_WORKER_MESSAGE_KIND } from './toolpath.worker.constants';
-import { getNewLayer } from '../layers/get.new.layer';
-import { DEFAULT_CUT_ENTRY, DEFAULT_PALETTE, DEFAULT_SCORE_ENTRY } from '../palette/palette.constants';
 
 const REQUEST_ID = 7;
 const BOX_SIZE_MM = 10;

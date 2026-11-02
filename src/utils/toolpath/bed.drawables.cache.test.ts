@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { BedDrawablesCache } from './bed.drawables.cache';
-import { getBedDrawables } from './get.bed.drawables';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import { newProjectObject } from '../project/new.project.object';
+import { BedDrawablesCache } from './bed.drawables.cache';
+import { getBedDrawables } from './get.bed.drawables';
 
 const RED_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/><rect fill="#ff0000" width="2" height="2"/></svg>';

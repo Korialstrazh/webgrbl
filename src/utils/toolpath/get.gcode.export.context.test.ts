@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getGcodeExportContext } from './get.gcode.export.context';
 import { APP_VERSION } from '../app.version.constants';
 import { GRBL_SETTING_S_VALUE_MAX } from '../grbl/grbl.constants';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { DEFAULT_MACHINE_S_VALUE_MAX, MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
 import { newMachineProfile } from '../profiles/new.machine.profile';
+import { getGcodeExportContext } from './get.gcode.export.context';
 
 const PROJECT_NAME = 'Coaster set';
 const CREATED_AT_ISO = '2026-11-01T10:00:00.000Z';

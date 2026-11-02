@@ -9,17 +9,17 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { getGradientOffset } from './get.gradient.offset';
-import { getPaintLightness } from './get.paint.lightness';
-import type { GradientLightnessStop } from './interfaces/GradientLightnessStop';
-import type { GradientLightnessValue } from './interfaces/GradientLightnessValue';
-import { WHITE_LIGHTNESS } from './toolpath.constants';
 import { getColourLightness } from '../layers/get.colour.lightness';
 import { getSvgMatrixPoint } from '../svg/geometry/get.svg.matrix.point';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { SvgGradientStop } from '../svg/geometry/interfaces/SvgGradientStop';
 import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
+import { getGradientOffset } from './get.gradient.offset';
+import { getPaintLightness } from './get.paint.lightness';
+import type { GradientLightnessStop } from './interfaces/GradientLightnessStop';
+import type { GradientLightnessValue } from './interfaces/GradientLightnessValue';
+import { WHITE_LIGHTNESS } from './toolpath.constants';
 
 const STOPS_CACHE: WeakMap<SvgGradientStop[], GradientLightnessStop[]> = new WeakMap();
 

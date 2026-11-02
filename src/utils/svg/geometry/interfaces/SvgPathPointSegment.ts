@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { GeometryPoint } from './GeometryPoint';
 import type { SVG_PATH_SEGMENT_KIND } from '../svg.path.constants';
+import type { GeometryPoint } from './GeometryPoint';
 
 export interface SvgPathPointSegment {
   /** Move starts a new subpath; line draws a straight line from the current point. */

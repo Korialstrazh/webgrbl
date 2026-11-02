@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { ToolpathBounds } from './ToolpathBounds';
 import type { GeometryPoint } from '../../svg/geometry/interfaces/GeometryPoint';
+import type { ToolpathBounds } from './ToolpathBounds';
 
 export interface BoxedOutline {
   /** The outline points; a closed outline closes from the last point to the first. */

@@ -1,3 +1,8 @@
+import { getNewLayer } from '../layers/get.new.layer';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
+import { DEFAULT_PALETTE } from '../palette/palette.constants';
+import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 import { getToolpathPaintAreas } from './get.toolpath.paint.areas';
 import type { BedDrawable } from './interfaces/BedDrawable';
 import type { ScanlineRun } from './interfaces/ScanlineRun';
@@ -7,11 +12,6 @@ import { getBoxSubpath } from './test.support/get.box.subpath';
 import { newBedDrawable } from './test.support/new.bed.drawable';
 import { newDrawablePaint } from './test.support/new.drawable.paint';
 import { newSvgPaint } from './test.support/new.svg.paint';
-import { getNewLayer } from '../layers/get.new.layer';
-import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
-import { DEFAULT_PALETTE } from '../palette/palette.constants';
-import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 
 const GREEN = '#00a000';
 const RED = '#ff0000';

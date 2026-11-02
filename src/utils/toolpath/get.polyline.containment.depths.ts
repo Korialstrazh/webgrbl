@@ -10,11 +10,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getSubpathsBounds } from './get.subpaths.bounds';
 import type { BoxedOutline } from './interfaces/BoxedOutline';
 import type { LinePolyline } from './interfaces/LinePolyline';
 import type { ToolpathBounds } from './interfaces/ToolpathBounds';
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 
 const isBoxWithin = (innerBox: ToolpathBounds, outerBox: ToolpathBounds): boolean =>
   innerBox.minX >= outerBox.minX
@@ -38,13 +38,13 @@ const isRayCrossingEdge = (point: GeometryPoint, start: GeometryPoint, end: Geom
 const isPointInOutline = (point: GeometryPoint, outline: GeometryPoint[]): boolean => {
   let isInside = false;
 
-  outline.forEach((start: GeometryPoint, pointIndex: number) => {
+  for (const [pointIndex, start] of outline.entries()) {
     const end: GeometryPoint = outline[(pointIndex + 1) % outline.length] ?? start;
 
     if (isRayCrossingEdge(point, start, end)) {
       isInside = !isInside;
     }
-  });
+  }
 
   return isInside;
 };

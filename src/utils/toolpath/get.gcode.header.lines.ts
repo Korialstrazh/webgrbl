@@ -8,7 +8,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { GcodeContext } from './interfaces/GcodeContext';
 import {
   GCODE_APP_NAME,
   GCODE_COMMENT_PREFIX,
@@ -19,6 +18,7 @@ import {
   GCODE_TITLE_SEPARATOR,
   GCODE_WORD_SEPARATOR,
 } from './gcode.constants';
+import type { GcodeContext } from './interfaces/GcodeContext';
 
 export const getGcodeHeaderLines = (context: GcodeContext): string[] => {
   const titleText: string = [

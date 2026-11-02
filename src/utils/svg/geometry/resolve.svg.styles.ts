@@ -10,13 +10,16 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getParsedColour } from '../../palette/get.parsed.colour';
+import type { ParsedColour } from '../../palette/interfaces/ParsedColour';
+import { SVG_ALL_ELEMENTS_SELECTOR } from '../svg.constants';
 import { getSvgCssRules } from './get.svg.css.rules';
 import { getSvgElementDeclarations } from './get.svg.element.declarations';
-import { getSvgLengthUserUnits } from './get.svg.length.user.units';
 import { getSvgFraction } from './get.svg.fraction';
+import { getSvgLengthUserUnits } from './get.svg.length.user.units';
 import { getSvgPaintValue } from './get.svg.paint.value';
-import type { SvgResolvedPaint } from './interfaces/SvgResolvedPaint';
 import type { SvgCssRule } from './interfaces/SvgCssRule';
+import type { SvgResolvedPaint } from './interfaces/SvgResolvedPaint';
 import type { SvgResolvedStop } from './interfaces/SvgResolvedStop';
 import type { SvgResolvedStyle } from './interfaces/SvgResolvedStyle';
 import {
@@ -34,9 +37,6 @@ import {
   SVG_VISIBILITY_VISIBLE,
 } from './svg.geometry.constants';
 import type { SvgFillRule } from './svg.geometry.constants';
-import { getParsedColour } from '../../palette/get.parsed.colour';
-import type { ParsedColour } from '../../palette/interfaces/ParsedColour';
-import { SVG_ALL_ELEMENTS_SELECTOR } from '../svg.constants';
 
 const getVisibility = (visibilityValue: string | undefined, parentIsVisible: boolean): boolean => {
   if (visibilityValue === SVG_VISIBILITY_HIDDEN) {

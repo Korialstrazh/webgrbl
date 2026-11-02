@@ -59,7 +59,10 @@ export class BrowserToolpathWorkerClient implements ToolpathWorkerClient {
     const { signal } = listenerController;
 
     try {
-      return await new Promise<Toolpath>((resolve, reject) => {
+      return await new Promise<Toolpath>((
+        resolve: (toolpath: Toolpath) => void,
+        reject: (reason: unknown) => void,
+      ) => {
         const handleMessageEvent = (messageEvent: MessageEvent<ToolpathWorkerMessage>): void => {
           handleToolpathWorkerMessage(messageEvent.data, { requestId: request.requestId, onProgress, resolve, reject });
         };

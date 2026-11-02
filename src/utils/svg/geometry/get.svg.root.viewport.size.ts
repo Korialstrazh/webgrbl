@@ -9,11 +9,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { SvgViewportSize } from './interfaces/SvgViewportSize';
 import { getSvgPhysicalSize } from '../get.svg.physical.size';
 import { getSvgRootViewportBounds } from '../get.svg.root.viewport.bounds';
 import { getSvgViewBox } from '../get.svg.view.box';
 import type { SvgViewportBounds } from '../interfaces/SvgViewportBounds';
+import type { SvgViewportSize } from './interfaces/SvgViewportSize';
 
 export const getSvgRootViewportSize = (rootElement: Element): SvgViewportSize => {
   const bounds: SvgViewportBounds = getSvgRootViewportBounds(

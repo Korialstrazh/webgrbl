@@ -11,12 +11,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
+import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { getObjectBedDrawableSet } from './get.object.bed.drawable.set';
 import type { BedDrawable } from './interfaces/BedDrawable';
 import type { BedDrawableSet } from './interfaces/BedDrawableSet';
 import type { CachedObjectDrawableSet } from './interfaces/CachedObjectDrawableSet';
-import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
-import type { ProjectObject } from '../project/interfaces/ProjectObject';
 
 const OBJECT_KEY_SEPARATOR = '\u0000';
 

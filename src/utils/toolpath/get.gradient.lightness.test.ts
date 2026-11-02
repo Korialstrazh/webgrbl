@@ -1,10 +1,10 @@
-import { getGradientLightness } from './get.gradient.lightness';
-import { newSvgPaint } from './test.support/new.svg.paint';
 import type { SvgGreyGradient } from '../svg/geometry/interfaces/SvgGreyGradient';
 import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
 import { SVG_GRADIENT_KIND, SVG_GRADIENT_UNITS } from '../svg/geometry/svg.geometry.constants';
 import { SVG_IDENTITY_MATRIX } from '../svg/geometry/svg.transform.constants';
+import { getGradientLightness } from './get.gradient.lightness';
+import { newSvgPaint } from './test.support/new.svg.paint';
 
 const BLACK = '#000000';
 const WHITE = '#ffffff';

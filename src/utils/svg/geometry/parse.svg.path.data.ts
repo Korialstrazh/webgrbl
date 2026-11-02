@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { isFiniteNumber } from '../../type.guards/is.finite.number';
 import { getSvgPathCommandSegment } from './get.svg.path.command.segment';
 import type { GeometryPoint } from './interfaces/GeometryPoint';
 import type { SvgPathCommandValues } from './interfaces/SvgPathCommandValues';
@@ -18,7 +19,6 @@ import type { SvgPathSegment } from './interfaces/SvgPathSegment';
 import { SVG_PATH_COMMAND, SVG_PATH_COMMAND_VALUE_COUNT, SVG_PATH_SEGMENT_KIND } from './svg.path.constants';
 import type { SvgPathCommand } from './svg.path.constants';
 import { SvgPathDataReader } from './svg.path.data.reader';
-import { isFiniteNumber } from '../../type.guards/is.finite.number';
 
 const ARC_FLAG_INDEXES: readonly number[] = [3, 4];
 const START_POINT: GeometryPoint = { x: 0, y: 0 };

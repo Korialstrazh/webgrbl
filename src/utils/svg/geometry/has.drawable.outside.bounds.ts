@@ -9,10 +9,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { SvgViewportBounds } from '../interfaces/SvgViewportBounds';
 import type { GeometryPoint } from './interfaces/GeometryPoint';
 import type { SvgDrawable } from './interfaces/SvgDrawable';
 import type { SvgSubpath } from './interfaces/SvgSubpath';
-import type { SvgViewportBounds } from '../interfaces/SvgViewportBounds';
 
 const isPointOutsideBounds = (point: GeometryPoint, bounds: SvgViewportBounds, margin: number): boolean =>
   point.x < bounds.minX - margin

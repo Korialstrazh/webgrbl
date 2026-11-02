@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { GCODE_FILE_EXTENSION } from './gcode.constants';
 import { getProjectFileBaseName } from '../project/get.project.file.base.name';
+import { GCODE_FILE_EXTENSION } from './gcode.constants';
 
 export const getGcodeFileName = (projectName: string): string =>
   getProjectFileBaseName(projectName) + GCODE_FILE_EXTENSION;

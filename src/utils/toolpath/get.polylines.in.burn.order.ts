@@ -10,13 +10,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getPolylineContainmentDepths } from './get.polyline.containment.depths';
 import { getSubpathsBounds } from './get.subpaths.bounds';
 import type { BoxedPolyline } from './interfaces/BoxedPolyline';
 import type { LinePolyline } from './interfaces/LinePolyline';
 import type { PolylineEntry } from './interfaces/PolylineEntry';
 import type { ToolpathBounds } from './interfaces/ToolpathBounds';
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 
 /** The box of an outline without points; such outlines are filtered out before ordering. */
 const EMPTY_BOX: ToolpathBounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
@@ -84,7 +84,7 @@ const getNearestEntry = (candidates: BoxedPolyline[], position: GeometryPoint): 
   const distanceLimit: number = getFirstPointDistanceLimit(candidates, position);
   let nearestEntry: PolylineEntry | undefined;
 
-  candidates.forEach((candidate: BoxedPolyline, polylineIndex: number) => {
+  for (const [polylineIndex, candidate] of candidates.entries()) {
     const bestDistance: number = Math.min(distanceLimit, nearestEntry?.distanceMm ?? Infinity);
     const candidateEntry: PolylineEntry | undefined = getBoxDistance(candidate.box, position) <= bestDistance
       ? getPolylineNearestEntry(candidate.polyline, polylineIndex, position)
@@ -93,7 +93,7 @@ const getNearestEntry = (candidates: BoxedPolyline[], position: GeometryPoint): 
     if (isNearerEntry(candidateEntry, nearestEntry)) {
       nearestEntry = candidateEntry;
     }
-  });
+  }
 
   return nearestEntry;
 };

@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { SVG_ROOT_ELEMENT_NAME } from '../svg.constants';
 import { getSvgMatrixProduct } from './get.svg.matrix.product';
 import { getSvgNestedViewport } from './get.svg.nested.viewport';
 import type { SvgElementPlacement } from './interfaces/SvgElementPlacement';
@@ -17,7 +18,6 @@ import type { SvgMatrix } from './interfaces/SvgMatrix';
 import type { SvgNestedViewport } from './interfaces/SvgNestedViewport';
 import { getSvgTransformMatrix } from './parse.svg.transform';
 import { SVG_TRANSFORM_ATTRIBUTE_NAME } from './svg.transform.constants';
-import { SVG_ROOT_ELEMENT_NAME } from '../svg.constants';
 
 export const getSvgChildPlacement = (
   childElement: Element,

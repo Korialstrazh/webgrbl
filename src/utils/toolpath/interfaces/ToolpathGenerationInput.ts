@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { BedDrawableSet } from './BedDrawableSet';
 import type { ProjectLayer } from '../../layers/interfaces/ProjectLayer';
+import type { BedDrawableSet } from './BedDrawableSet';
 
 export interface ToolpathGenerationInput extends BedDrawableSet {
   /** The layers of the project in burn order; off layers are left out of the toolpath. */

@@ -8,9 +8,9 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { SvgFillRule } from '../svg.geometry.constants';
 import type { SvgMatrix } from './SvgMatrix';
 import type { SvgPaint } from './SvgPaint';
-import type { SvgFillRule } from '../svg.geometry.constants';
 
 export interface SvgDrawablePaint {
   /** The fill, or undefined when the shape has no visible fill. */

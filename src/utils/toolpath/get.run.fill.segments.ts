@@ -10,14 +10,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getGradientLightness } from './get.gradient.lightness';
 import { getLayerPowerPercent } from './get.layer.power.percent';
 import { getPaintPowerPercent } from './get.paint.power.percent';
 import type { FillSegment } from './interfaces/FillSegment';
 import type { ScanlineRun } from './interfaces/ScanlineRun';
 import { SHADING_POWER_QUANTUM_PERCENT } from './toolpath.constants';
-import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 
 const getGradientRunSegments = (run: ScanlineRun, layer: ProjectLayer, y: number): FillSegment[] => {
   const { paint, gradientMatrix } = run.paintArea;

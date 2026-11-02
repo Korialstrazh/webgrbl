@@ -11,6 +11,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getLayerKey } from '../layers/get.layer.key';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { LAYER_MODE } from '../palette/palette.constants';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getFillLines } from './get.fill.lines';
 import { getFillMoves } from './get.fill.moves';
 import { getLineMoves } from './get.line.moves';
@@ -25,10 +29,6 @@ import type { ToolpathMove } from './interfaces/ToolpathMove';
 import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
 import type { ToolpathProgressListener } from './interfaces/ToolpathProgressListener';
 import { TOOLPATH_START_POINT } from './toolpath.constants';
-import { getLayerKey } from '../layers/get.layer.key';
-import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { LAYER_MODE } from '../palette/palette.constants';
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 
 const getEnabledLayersInOrder = (layers: ProjectLayer[]): ProjectLayer[] =>
   layers

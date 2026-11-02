@@ -1,9 +1,16 @@
 import { EM_DASH } from '../characters.constants';
 import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
+import {
+  GCODE_AIR_ASSIST_OFF,
+  GCODE_AIR_ASSIST_ON,
+  GCODE_BURN_WORD,
+  GCODE_LASER_OFF_END,
+  GCODE_LINE_SEPARATOR,
+} from './gcode.constants';
+import { getGcodeText } from './get.gcode.text';
 import type { GcodeContext } from './interfaces/GcodeContext';
 import type { Toolpath } from './interfaces/Toolpath';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
-import { getGcodeText } from './get.gcode.text';
 import { TOOLPATH_MOVE_KIND } from './toolpath.constants';
 
 const LAYER_KEY = '#ff0000';
@@ -12,6 +19,7 @@ const S_VALUE_MAX = 1000;
 const NON_TRIVIAL_S_VALUE_MAX = 255;
 const FEED = 300;
 const OTHER_FEED = 600;
+const LINE_BREAK_PATTERN = /\r*\n\r*/;
 
 const getContext = (overrides: Partial<GcodeContext> = {}): GcodeContext => ({
   projectName: 'Test',
@@ -59,7 +67,7 @@ describe(getGcodeText.name, () => {
         'G1 X20 Y10 S1000 F300',
         'M5 S0',
         '',
-      ].join('\n'),
+      ].join(GCODE_LINE_SEPARATOR),
     );
   });
 
@@ -71,7 +79,7 @@ describe(getGcodeText.name, () => {
       getMove({ from: { x: 0, y: 5 }, to: { x: 0, y: 0 }, powerPercent: 50, feedMmPerMin: OTHER_FEED }),
     ]);
 
-    const lines: string[] = getGcodeText(toolpath, getContext()).split('\n');
+    const lines: string[] = getGcodeText(toolpath, getContext()).split(LINE_BREAK_PATTERN);
 
     expect(lines).toContain('G1 X5 Y0 S1000 F300');
     expect(lines).toContain('G1 X5 Y5');
@@ -98,8 +106,8 @@ describe(getGcodeText.name, () => {
   it('writes no burn line for a toolpath without moves', () => {
     const text: string = getGcodeText(getToolpath([]), getContext());
 
-    expect(text).not.toContain('G1');
-    expect(text.endsWith('M5 S0\n')).toBe(true);
+    expect(text).not.toContain(GCODE_BURN_WORD);
+    expect(text.endsWith(`${GCODE_LASER_OFF_END}${GCODE_LINE_SEPARATOR}`)).toBe(true);
   });
 
   it('switches air assist around a layer when the machine has it', () => {
@@ -109,20 +117,20 @@ describe(getGcodeText.name, () => {
       getMove({ from: { x: 2, y: 0 }, to: { x: 3, y: 0 }, layerKey: OTHER_LAYER_KEY }),
     ]);
 
-    const lines: string[] = getGcodeText(toolpath, getContext({ hasAirAssist: true })).split('\n');
+    const lines: string[] = getGcodeText(toolpath, getContext({ hasAirAssist: true })).split(LINE_BREAK_PATTERN);
 
-    expect(lines.filter((line: string): boolean => line === 'M8')).toHaveLength(1);
-    expect(lines.indexOf('M8')).toBeLessThan(lines.indexOf('G1 X1 Y0 S1000 F300'));
-    expect(lines.indexOf('M9')).toBeGreaterThan(lines.indexOf('G1 X2 Y0'));
-    expect(lines.indexOf('M9')).toBeLessThan(lines.indexOf('G1 X3 Y0'));
+    expect(lines.filter((line: string): boolean => line === GCODE_AIR_ASSIST_ON)).toHaveLength(1);
+    expect(lines.indexOf(GCODE_AIR_ASSIST_ON)).toBeLessThan(lines.indexOf('G1 X1 Y0 S1000 F300'));
+    expect(lines.indexOf(GCODE_AIR_ASSIST_OFF)).toBeGreaterThan(lines.indexOf('G1 X2 Y0'));
+    expect(lines.indexOf(GCODE_AIR_ASSIST_OFF)).toBeLessThan(lines.indexOf('G1 X3 Y0'));
   });
 
   it('closes air assist at the end when the last layer still has it on', () => {
     const toolpath: Toolpath = getToolpath([getMove({ to: { x: 1, y: 0 }, airAssist: true })]);
 
-    const lines: string[] = getGcodeText(toolpath, getContext({ hasAirAssist: true })).split('\n');
+    const lines: string[] = getGcodeText(toolpath, getContext({ hasAirAssist: true })).split(LINE_BREAK_PATTERN);
 
-    expect(lines.slice(-3)).toEqual(['M9', 'M5 S0', '']);
+    expect(lines.slice(-3)).toEqual([GCODE_AIR_ASSIST_OFF, GCODE_LASER_OFF_END, '']);
   });
 
   it('writes no air assist command without air assist on the machine', () => {
@@ -130,8 +138,8 @@ describe(getGcodeText.name, () => {
 
     const text: string = getGcodeText(toolpath, getContext({ hasAirAssist: false }));
 
-    expect(text).not.toContain('M8');
-    expect(text).not.toContain('M9');
+    expect(text).not.toContain(GCODE_AIR_ASSIST_ON);
+    expect(text).not.toContain(GCODE_AIR_ASSIST_OFF);
   });
 
   it('maps every point to the origin corner', () => {

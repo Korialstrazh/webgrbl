@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { GCODE_S_VALUE_MAX_MIN } from './gcode.constants';
 import { DEFAULT_MACHINE_S_VALUE_MAX } from '../profiles/machine.profile.constants';
+import { GCODE_S_VALUE_MAX_MIN } from './gcode.constants';
 
 export const getValidGcodeSValueMax = (sValueMax: number): number =>
   (Number.isFinite(sValueMax) && sValueMax >= GCODE_S_VALUE_MAX_MIN ? sValueMax : DEFAULT_MACHINE_S_VALUE_MAX);

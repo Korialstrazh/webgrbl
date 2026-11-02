@@ -8,10 +8,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { BedDrawable } from './BedDrawable';
-import type { ToolpathPaintArea } from './ToolpathPaintArea';
 import type { ProjectLayer } from '../../layers/interfaces/ProjectLayer';
 import type { GeometryPoint } from '../../svg/geometry/interfaces/GeometryPoint';
+import type { BedDrawable } from './BedDrawable';
+import type { ToolpathPaintArea } from './ToolpathPaintArea';
 
 export interface LayerMovesInput {
   /** The layer to burn. */

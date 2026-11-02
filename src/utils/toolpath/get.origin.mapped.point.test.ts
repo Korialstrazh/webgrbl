@@ -1,5 +1,5 @@
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getOriginMappedPoint } from './get.origin.mapped.point';
 
 const WORK_AREA = { workAreaXMm: 400, workAreaYMm: 300 };

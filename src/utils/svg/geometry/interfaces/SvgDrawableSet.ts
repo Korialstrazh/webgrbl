@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { SvgDrawable } from './SvgDrawable';
 import type { SvgUnsupportedKind } from '../svg.shape.constants';
+import type { SvgDrawable } from './SvgDrawable';
 
 export interface SvgDrawableSet {
   /** The painted shapes in drawing order. */

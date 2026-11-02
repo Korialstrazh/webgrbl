@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { ToolpathPaintArea } from './ToolpathPaintArea';
 import type { ProjectLayer } from '../../layers/interfaces/ProjectLayer';
+import type { ToolpathPaintArea } from './ToolpathPaintArea';
 
 export interface FillLinesInput {
   /** Every paint area of the project in paint order, back to front. */

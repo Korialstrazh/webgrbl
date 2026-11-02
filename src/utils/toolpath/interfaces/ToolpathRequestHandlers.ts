@@ -8,9 +8,9 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { ToolpathWorkerError } from '../toolpath.worker.error';
 import type { Toolpath } from './Toolpath';
 import type { ToolpathProgressListener } from './ToolpathProgressListener';
-import type { ToolpathWorkerError } from '../toolpath.worker.error';
 
 export interface ToolpathRequestHandlers {
   /** Id of the request; answers to other requests are ignored. */

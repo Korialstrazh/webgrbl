@@ -11,14 +11,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { getPaintAreaEdgeIndex } from './get.paint.area.edge.index';
-import { getPolygonEdges } from './get.polygon.edges';
-import { getStrokeOutlineSubpaths } from './get.stroke.outline.subpaths';
-import { getSubpathsBounds } from './get.subpaths.bounds';
-import type { BedDrawable } from './interfaces/BedDrawable';
-import type { PaintAreaInput } from './interfaces/PaintAreaInput';
-import type { ToolpathBounds } from './interfaces/ToolpathBounds';
-import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
 import { getLayerKey } from '../layers/get.layer.key';
 import { getPaintLayerKey } from '../layers/get.paint.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
@@ -27,6 +19,14 @@ import type { LayerMode } from '../palette/palette.constants';
 import { getSvgMatrixInverse } from '../svg/geometry/get.svg.matrix.inverse';
 import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
 import { SVG_FILL_RULE } from '../svg/geometry/svg.geometry.constants';
+import { getPaintAreaEdgeIndex } from './get.paint.area.edge.index';
+import { getPolygonEdges } from './get.polygon.edges';
+import { getStrokeOutlineSubpaths } from './get.stroke.outline.subpaths';
+import { getSubpathsBounds } from './get.subpaths.bounds';
+import type { BedDrawable } from './interfaces/BedDrawable';
+import type { PaintAreaInput } from './interfaces/PaintAreaInput';
+import type { ToolpathBounds } from './interfaces/ToolpathBounds';
+import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
 
 const getPaintArea = ({ subpaths, paint, gradientMatrix, fillRule }: PaintAreaInput): ToolpathPaintArea | undefined => {
   const bounds: ToolpathBounds | undefined = getSubpathsBounds(subpaths);

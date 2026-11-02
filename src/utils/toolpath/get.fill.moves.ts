@@ -68,11 +68,11 @@ export const getFillMoves = ({ fillLines, layer, startPoint }: FillMovesInput): 
   const moveList: ToolpathMoveList = new ToolpathMoveList(startPoint, getToolpathMoveStyle(layer));
 
   for (let passIndex = 0; passIndex < layer.settings.passes; passIndex++) {
-    fillLines.forEach((fillLine: FillLine, lineIndex: number) => {
+    for (const [lineIndex, fillLine] of fillLines.entries()) {
       const isLeftToRight: boolean = lineIndex % LINES_PER_DIRECTION_CYCLE === 0;
 
       addFillLineMoves(moveList, fillLine, isLeftToRight ? LEFT_TO_RIGHT_DIRECTION : RIGHT_TO_LEFT_DIRECTION);
-    });
+    }
   }
 
   return moveList.getMoves();

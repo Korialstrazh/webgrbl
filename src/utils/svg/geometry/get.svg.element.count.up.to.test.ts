@@ -1,5 +1,5 @@
-import { getSvgElementCountUpTo } from './get.svg.element.count.up.to';
 import { SVG_NAMESPACE_URI } from '../svg.constants';
+import { getSvgElementCountUpTo } from './get.svg.element.count.up.to';
 
 const GROUP_ELEMENT_NAME = 'g';
 const RECT_ELEMENT_NAME = 'rect';

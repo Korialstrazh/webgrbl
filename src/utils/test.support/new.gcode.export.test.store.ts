@@ -10,7 +10,6 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { act } from '@testing-library/react';
-import type { GcodeExportTestProject } from './interfaces/GcodeExportTestProject';
 import { getObjectsDerivedLayers } from '../layers/get.objects.derived.layers';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT_PALETTE } from '../palette/palette.constants';
@@ -22,6 +21,7 @@ import type { AppStore } from '../states/new.store';
 import { ProjectDocumentLoaded } from '../states/project.document.state';
 import { ProjectRenamed, selectProjectId } from '../states/project.state';
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
+import type { GcodeExportTestProject } from './interfaces/GcodeExportTestProject';
 
 const TEST_PROJECT_NAME = 'Coaster set';
 const RED_SQUARE_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'

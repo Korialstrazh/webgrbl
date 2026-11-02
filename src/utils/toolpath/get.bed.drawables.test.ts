@@ -1,14 +1,14 @@
-import { getBedDrawables } from './get.bed.drawables';
-import type { BedDrawable } from './interfaces/BedDrawable';
-import type { BedDrawableSet } from './interfaces/BedDrawableSet';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
 import { SVG_NAMESPACE_URI } from '../svg/svg.constants';
+import { getBedDrawables } from './get.bed.drawables';
+import type { BedDrawable } from './interfaces/BedDrawable';
+import type { BedDrawableSet } from './interfaces/BedDrawableSet';
+import { TOOLPATH_TOLERANCE_MM } from './toolpath.constants';
 
-const TOLERANCE_MM = 0.05;
 const FIRST_OBJECT_ID = 'first';
 const SECOND_OBJECT_ID = 'second';
 const OBJECT_SIZE_MM = 10;
@@ -78,7 +78,7 @@ describe(getBedDrawables.name, () => {
     );
 
     expect(points.length).toBeGreaterThan(0);
-    expect(Math.max(...radiusErrors)).toBeLessThanOrEqual(TOLERANCE_MM);
+    expect(Math.max(...radiusErrors)).toBeLessThanOrEqual(TOOLPATH_TOLERANCE_MM);
   });
 
   it('gives the stroke width in millimetres', () => {

@@ -10,6 +10,9 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getSvgViewBox } from '../get.svg.view.box';
+import { getSvgViewBoxMatrix } from '../get.svg.view.box.matrix';
+import type { SvgViewBox } from '../interfaces/SvgViewBox';
 import { getSvgMatrixProduct } from './get.svg.matrix.product';
 import { getSvgViewportLength } from './get.svg.viewport.length';
 import type { SvgMatrix } from './interfaces/SvgMatrix';
@@ -17,9 +20,6 @@ import type { SvgNestedViewport } from './interfaces/SvgNestedViewport';
 import type { SvgViewportSize } from './interfaces/SvgViewportSize';
 import { SVG_SHAPE_ATTRIBUTE } from './svg.shape.constants';
 import { SVG_IDENTITY_MATRIX } from './svg.transform.constants';
-import { getSvgViewBox } from '../get.svg.view.box';
-import { getSvgViewBoxMatrix } from '../get.svg.view.box.matrix';
-import type { SvgViewBox } from '../interfaces/SvgViewBox';
 
 const hasViewportArea = (size: SvgViewportSize): boolean => size.width > 0 && size.height > 0;
 

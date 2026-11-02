@@ -16,13 +16,13 @@ export const getPolygonEdges = (subpaths: SvgSubpath[]): Float64Array => {
   const edgeValues: number[] = [];
 
   for (const { points } of subpaths) {
-    points.forEach((start: GeometryPoint, pointIndex: number) => {
+    for (const [pointIndex, start] of points.entries()) {
       const end: GeometryPoint | undefined = points[(pointIndex + 1) % points.length];
 
       if (end && end.y !== start.y) {
         edgeValues.push(start.x, start.y, end.x, end.y);
       }
-    });
+    }
   }
 
   return Float64Array.from(edgeValues);

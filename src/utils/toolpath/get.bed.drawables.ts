@@ -11,11 +11,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import { getObjectBedDrawableSet } from './get.object.bed.drawable.set';
 import type { BedDrawable } from './interfaces/BedDrawable';
 import type { BedDrawableSet } from './interfaces/BedDrawableSet';
 import type { ObjectWarning } from './interfaces/ObjectWarning';
-import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 
 export const getBedDrawables = (projectDocument: ProjectDocument): BedDrawableSet => {
   const drawables: BedDrawable[] = [];

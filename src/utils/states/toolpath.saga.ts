@@ -28,10 +28,10 @@ import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import { BedDrawablesCache } from '../toolpath/bed.drawables.cache';
+import { GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
 import { getGcodeExportContext } from '../toolpath/get.gcode.export.context';
 import { getGcodeFileName } from '../toolpath/get.gcode.file.name';
 import { getGcodeText } from '../toolpath/get.gcode.text';
-import { GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
 import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathGeneration } from '../toolpath/interfaces/ToolpathGeneration';
@@ -43,10 +43,11 @@ import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
 import { selectActiveMachineProfile } from './machine.profile.state';
 import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 import { ProjectDocumentLoaded, selectProjectDocument, selectProjectLayers } from './project.document.state';
-import { ProjectOpened, selectProjectId, selectProjectName } from './project.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
+import { ProjectOpened, selectProjectId, selectProjectName } from './project.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
+import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import {
   GcodeExportConfirmationRequested,
   GcodeExportRequested,
@@ -60,7 +61,6 @@ import {
   selectToolpathStatus,
 } from './toolpath.state';
 import { TOOLPATH_STATUS } from './toolpath.status.constants';
-import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import type { ToolpathStatus } from './toolpath.status.constants';
 
 // Only the newest progress matters, so older ones the saga has not put yet are dropped.

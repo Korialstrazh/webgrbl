@@ -1,14 +1,15 @@
+import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 import { getSvgDrawables } from './get.svg.drawables';
 import type { SvgDrawable } from './interfaces/SvgDrawable';
 import type { SvgDrawableSet } from './interfaces/SvgDrawableSet';
 import { SVG_FILL_RULE } from './svg.geometry.constants';
 import { SVG_UNSUPPORTED_KIND, SVG_USE_MAX_COPIED_ELEMENTS } from './svg.shape.constants';
-import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 
 const TOLERANCE = 0.05;
 const RED = '#ff0000';
 const BLUE = '#0000ff';
 const UNIT_SQUARE = 'width="1" height="1"';
+const NO_DRAWABLE_MESSAGE = 'The SVG gave no drawable';
 // The budget allows 20,000 copied elements, which jsdom styles and walks in a few seconds.
 const USE_LIMIT_TEST_TIMEOUT_MS = 20_000;
 
@@ -33,7 +34,7 @@ const getOnlyViewportDrawable = (content: string): SvgDrawable => {
   expect(drawables).toHaveLength(1);
 
   if (!drawables[0]) {
-    throw new Error('no drawable');
+    throw new Error(NO_DRAWABLE_MESSAGE);
   }
 
   return drawables[0];
@@ -45,7 +46,7 @@ const getOnlyDrawable = (content: string): SvgDrawable => {
   expect(drawables).toHaveLength(1);
 
   if (!drawables[0]) {
-    throw new Error('no drawable');
+    throw new Error(NO_DRAWABLE_MESSAGE);
   }
 
   return drawables[0];

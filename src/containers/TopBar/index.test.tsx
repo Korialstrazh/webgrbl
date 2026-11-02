@@ -70,6 +70,7 @@ const SAVING_TEXT = 'Saving\u2026';
 const NOT_SAVED_TEXT = 'Not saved';
 const UNTITLED_PROJECT_NAME = 'Untitled project';
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
+const ARIA_DISABLED_TRUE = 'true';
 const GCODE_WARNINGS_DIALOG_LABEL = 'Export G-code with warnings?';
 const CANCEL_LABEL = 'Cancel';
 const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
@@ -269,7 +270,7 @@ describe(TopBar.name, () => {
 
       expect(screen.getByRole('menuitem', { name: EXPORT_GCODE_PATTERN })).toHaveAttribute(
         ARIA_DISABLED_ATTRIBUTE,
-        'true',
+        ARIA_DISABLED_TRUE,
       );
     });
 
@@ -279,7 +280,7 @@ describe(TopBar.name, () => {
 
       expect(screen.getByRole('menuitem', { name: EXPORT_GCODE_PATTERN })).toHaveAttribute(
         ARIA_DISABLED_ATTRIBUTE,
-        'true',
+        ARIA_DISABLED_TRUE,
       );
     });
 

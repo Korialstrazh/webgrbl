@@ -1,8 +1,8 @@
+import { SVG_MIME_TYPE, SVG_NAMESPACE_URI } from '../svg.constants';
 import { getSvgShapeSubpaths } from './get.svg.shape.subpaths';
 import type { GeometryPoint } from './interfaces/GeometryPoint';
 import type { SvgSubpath } from './interfaces/SvgSubpath';
 import { SVG_IDENTITY_MATRIX } from './svg.transform.constants';
-import { SVG_MIME_TYPE, SVG_NAMESPACE_URI } from '../svg.constants';
 
 const TOLERANCE = 0.05;
 const CORNER_RADIUS = 2;

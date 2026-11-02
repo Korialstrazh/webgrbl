@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getGcodeFileName } from './get.gcode.file.name';
 import { PROJECT_FILE_FALLBACK_BASE_NAME } from '../project/project.constants';
+import { getGcodeFileName } from './get.gcode.file.name';
 
 describe(getGcodeFileName.name, () => {
   it('names the file after the project with the .gcode extension', () => {

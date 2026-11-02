@@ -1,25 +1,25 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as downloadModule from '../browser/download.text.file';
-import type { ProjectObject } from '../project/interfaces/ProjectObject';
-import * as expandedDocumentModule from '../svg/geometry/get.svg.expanded.document';
-import { useStorageSafeFakeTimers } from '../test.support/use.storage.safe.fake.timers';
-import { BrowserToolpathWorkerClient } from '../toolpath/browser.toolpath.worker.client';
-import { AnsweringToolpathWorker } from '../toolpath/test.support/answering.toolpath.worker';
-import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
-import { ProjectOpened } from './project.state';
-import { selectToasts } from './toast.state';
 import { getLayerKey } from '../layers/get.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
 import { newMachineProfile } from '../profiles/new.machine.profile';
+import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
+import * as expandedDocumentModule from '../svg/geometry/get.svg.expanded.document';
 import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
 import { newGcodeExportTestStore } from '../test.support/new.gcode.export.test.store';
+import { useStorageSafeFakeTimers } from '../test.support/use.storage.safe.fake.timers';
+import { BrowserToolpathWorkerClient } from '../toolpath/browser.toolpath.worker.client';
+import { GCODE_LASER_MODE_ON, GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
 import { getBedDrawables } from '../toolpath/get.bed.drawables';
 import { getToolpath } from '../toolpath/get.toolpath';
-import { GCODE_LASER_MODE_ON, GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
 import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
+import type { ObjectWarning } from '../toolpath/interfaces/ObjectWarning';
+import { AnsweringToolpathWorker } from '../toolpath/test.support/answering.toolpath.worker';
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
+import type { AppToast } from './interfaces/AppToast';
+import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
 import type { AppStore } from './new.store';
 import {
   LayerToggled,
@@ -29,6 +29,8 @@ import {
   selectProjectLayers,
   selectProjectObjects,
 } from './project.document.state';
+import { ProjectOpened } from './project.state';
+import { selectToasts } from './toast.state';
 import { watchToolpath } from './toolpath.saga';
 import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import {
@@ -98,7 +100,7 @@ const getDownloadedText = (downloadSpy: ReturnType<typeof spyOnDownload>): strin
   downloadSpy.mock.calls[0]?.[0].text ?? '';
 
 const flushSagas = async (): Promise<void> => {
-  await new Promise((resolve) => {
+  await new Promise((resolve: (value: unknown) => void) => {
     setTimeout(resolve);
   });
 };
@@ -231,7 +233,7 @@ describe(watchToolpath.name, () => {
     await vi.waitFor((): void => {
       expect(selectIsGcodeExportConfirmationOpen(store.getState())).toBe(true);
     });
-    expect(selectToolpath(store.getState())?.warnings.map((warning) => warning.kind))
+    expect(selectToolpath(store.getState())?.warnings.map((warning: ObjectWarning) => warning.kind))
       .toEqual([SVG_UNSUPPORTED_KIND.TEXT]);
     expect(downloadSpy).not.toHaveBeenCalled();
   });
@@ -322,7 +324,9 @@ describe(watchToolpath.name, () => {
     await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
     LIVE_STORE_TASK_REGISTRY.cancelLiveStoreTasks();
 
-    expect(AnsweringToolpathWorker.createdWorkers.map((worker) => worker.isTerminated)).toEqual([true]);
+    expect(
+      AnsweringToolpathWorker.createdWorkers.map((worker: AnsweringToolpathWorker) => worker.isTerminated),
+    ).toEqual([true]);
   });
 
   it('drops a pending export when another project opens, and says so', async () => {
@@ -341,7 +345,7 @@ describe(watchToolpath.name, () => {
     await flushSagas();
 
     expect(downloadSpy).not.toHaveBeenCalled();
-    expect(selectToasts(store.getState()).map((toast) => toast.messageKey))
+    expect(selectToasts(store.getState()).map((toast: AppToast) => toast.messageKey))
       .toContain(DEFAULT.TOAST_GCODE_EXPORT_DROPPED);
   });
 });

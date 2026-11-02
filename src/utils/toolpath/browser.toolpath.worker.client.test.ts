@@ -1,17 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { BrowserToolpathWorkerClient } from './browser.toolpath.worker.client';
 import type { Toolpath } from './interfaces/Toolpath';
 import type { ToolpathGeneration } from './interfaces/ToolpathGeneration';
 import type { ToolpathGenerationInput } from './interfaces/ToolpathGenerationInput';
 import type { ToolpathWorkerClient } from './interfaces/ToolpathWorkerClient';
 import type { ToolpathWorkerMessage } from './interfaces/ToolpathWorkerMessage';
 import type { ToolpathWorkerRequest } from './interfaces/ToolpathWorkerRequest';
-import { BrowserToolpathWorkerClient } from './browser.toolpath.worker.client';
-import { TOOLPATH_WORKER_MESSAGE_KIND } from './toolpath.worker.constants';
+import {
+  TOOLPATH_WORKER_MESSAGE_KIND,
+  WORKER_ERROR_EVENT_NAME,
+  WORKER_MESSAGE_ERROR_EVENT_NAME,
+  WORKER_MESSAGE_EVENT_NAME,
+} from './toolpath.worker.constants';
 import { ToolpathWorkerError } from './toolpath.worker.error';
 
-const MESSAGE_EVENT_NAME = 'message';
-const ERROR_EVENT_NAME = 'error';
-const MESSAGE_ERROR_EVENT_NAME = 'messageerror';
 const HALF_DONE = 0.5;
 const WORKER_ERROR_TEXT = 'out of memory';
 const OTHER_REQUEST_ID = -1;
@@ -40,7 +42,7 @@ class FakeWorker extends EventTarget {
   }
 
   public answer(message: ToolpathWorkerMessage): void {
-    this.dispatchEvent(new MessageEvent(MESSAGE_EVENT_NAME, { data: message }));
+    this.dispatchEvent(new MessageEvent(WORKER_MESSAGE_EVENT_NAME, { data: message }));
   }
 
   public getLastRequestId(): number {
@@ -131,7 +133,7 @@ describe(BrowserToolpathWorkerClient.name, () => {
     const generation: ToolpathGeneration = client.generate(EMPTY_INPUT, vi.fn());
     const worker: FakeWorker = getOnlyWorker();
 
-    worker.dispatchEvent(new ErrorEvent(ERROR_EVENT_NAME, { message: WORKER_ERROR_TEXT }));
+    worker.dispatchEvent(new ErrorEvent(WORKER_ERROR_EVENT_NAME, { message: WORKER_ERROR_TEXT }));
 
     await expect(generation.promise).rejects.toBeInstanceOf(ToolpathWorkerError);
     expect(worker.isTerminated).toBe(true);
@@ -141,7 +143,7 @@ describe(BrowserToolpathWorkerClient.name, () => {
     const generation: ToolpathGeneration = client.generate(EMPTY_INPUT, vi.fn());
     const worker: FakeWorker = getOnlyWorker();
 
-    worker.dispatchEvent(new MessageEvent(MESSAGE_ERROR_EVENT_NAME));
+    worker.dispatchEvent(new MessageEvent(WORKER_MESSAGE_ERROR_EVENT_NAME));
 
     await expect(generation.promise).rejects.toBeInstanceOf(ToolpathWorkerError);
     expect(worker.isTerminated).toBe(true);

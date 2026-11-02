@@ -1,3 +1,10 @@
+import { getNewLayer } from '../layers/get.new.layer';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
+import { DEFAULT_PALETTE } from '../palette/palette.constants';
+import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
+import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
+import { SVG_FILL_RULE, SVG_GRADIENT_KIND, SVG_GRADIENT_UNITS } from '../svg/geometry/svg.geometry.constants';
 import { getFillLines } from './get.fill.lines';
 import { getToolpathPaintAreas } from './get.toolpath.paint.areas';
 import type { BedDrawable } from './interfaces/BedDrawable';
@@ -8,13 +15,6 @@ import { newBedDrawable } from './test.support/new.bed.drawable';
 import { newDrawablePaint } from './test.support/new.drawable.paint';
 import { newSvgPaint } from './test.support/new.svg.paint';
 import { SHADING_POWER_QUANTUM_PERCENT } from './toolpath.constants';
-import { getNewLayer } from '../layers/get.new.layer';
-import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
-import { DEFAULT_PALETTE } from '../palette/palette.constants';
-import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
-import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
-import { SVG_FILL_RULE, SVG_GRADIENT_KIND, SVG_GRADIENT_UNITS } from '../svg/geometry/svg.geometry.constants';
 
 const GREEN = '#00a000';
 const WHITE = '#ffffff';
@@ -86,14 +86,15 @@ describe(getFillLines.name, () => {
     expect(segments.length).toBeGreaterThan(SHADING_MAX_PERCENT / 2);
     expect(segments[0]?.x0).toBe(0);
     expect(segments[0]?.powerPercent).toBeCloseTo(SHADING_MAX_PERCENT, 9);
-    segments.slice(1).forEach((segment: FillSegment, index: number) => {
+
+    for (const [index, segment] of segments.slice(1).entries()) {
       const previousSegment: FillSegment | undefined = segments[index];
       const powerStep: number = (previousSegment?.powerPercent ?? 0) - segment.powerPercent;
 
       expect(segment.x0).toBe(previousSegment?.x1);
       expect(powerStep).toBeGreaterThan(SHADING_POWER_QUANTUM_PERCENT);
       expect(powerStep).toBeLessThan(2 * SHADING_POWER_QUANTUM_PERCENT);
-    });
+    }
   });
 
   it('gives no lines when no paint belongs to the layer', () => {

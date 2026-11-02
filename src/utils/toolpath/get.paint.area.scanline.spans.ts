@@ -1,5 +1,5 @@
 /**
- * Gets the pieces of a scanline inside a paint area under the nonzero rule: a point is inside when the edges around it
+ * Gets the pieces of a scanline inside a paint area under its fill rule: a point is inside when the edges around it
  * do not cancel out. Each edge counts from its lower end up to, but not including, its upper end, so a line through a
  * vertex counts the vertex once.
  *
@@ -10,14 +10,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { SVG_FILL_RULE } from '../svg/geometry/svg.geometry.constants';
+import type { SvgFillRule } from '../svg/geometry/svg.geometry.constants';
 import { getEdgeBandIndex } from './get.edge.band.index';
 import type { ScanlineCrossing } from './interfaces/ScanlineCrossing';
 import type { ScanlineSpan } from './interfaces/ScanlineSpan';
 import type { ToolpathEdgeIndex } from './interfaces/ToolpathEdgeIndex';
 import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
 import { EDGE_VALUE_COUNT, EDGE_X0_OFFSET, EDGE_X1_OFFSET, EDGE_Y0_OFFSET, EDGE_Y1_OFFSET } from './toolpath.constants';
-import { SVG_FILL_RULE } from '../svg/geometry/svg.geometry.constants';
-import type { SvgFillRule } from '../svg/geometry/svg.geometry.constants';
 
 const NO_EDGES: Float64Array = new Float64Array(0);
 const UPWARD_WINDING = 1;
@@ -73,9 +73,12 @@ export const getPaintAreaScanlineSpans = (paintArea: ToolpathPaintArea, y: numbe
 
     const isInside: boolean = isInsideWinding(windingSum, paintArea.fillRule);
 
-    if (!wasInside && isInside) {
+    const isEnteringArea: boolean = !wasInside && isInside;
+    const isLeavingArea: boolean = wasInside && !isInside;
+
+    if (isEnteringArea) {
       spanStartX = crossing.x;
-    } else if (wasInside && !isInside && crossing.x > spanStartX) {
+    } else if (isLeavingArea && crossing.x > spanStartX) {
       spans.push({ x0: spanStartX, x1: crossing.x });
     }
   }

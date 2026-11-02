@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { WHITE_LIGHTNESS } from './toolpath.constants';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { WHITE_LIGHTNESS } from './toolpath.constants';
 
 export const getLayerPowerPercent = (lightness: number, layer: ProjectLayer): number => {
   const { maxPowerPercent, minPowerPercent } = layer.settings;

@@ -1,3 +1,9 @@
+import { getNewLayer } from '../layers/get.new.layer';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
+import { LAYER_MODE, DEFAULT_PALETTE } from '../palette/palette.constants';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
+import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 import { getLineMoves } from './get.line.moves';
 import type { BedDrawable } from './interfaces/BedDrawable';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
@@ -6,15 +12,11 @@ import { newBedDrawable } from './test.support/new.bed.drawable';
 import { newDrawablePaint } from './test.support/new.drawable.paint';
 import { newSvgPaint } from './test.support/new.svg.paint';
 import { TOOLPATH_MOVE_KIND, TOOLPATH_START_POINT } from './toolpath.constants';
-import { getNewLayer } from '../layers/get.new.layer';
-import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
-import { LAYER_MODE, DEFAULT_PALETTE } from '../palette/palette.constants';
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
-import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 
 const RED = '#ff0000';
 const BLUE = '#0000ff';
+const BLACK = '#000000';
+const WHITE = '#ffffff';
 const CUT_POWER_PERCENT = 100;
 
 const CIRCLE_POINT_COUNT = 100;
@@ -131,7 +133,7 @@ describe(getLineMoves.name, () => {
     const square: SvgSubpath = getBoxSubpath({ minX: 0, minY: 0, maxX: 10, maxY: 10 });
 
     const moves: ToolpathMove[] = getLineMoves({
-      drawables: [getStrokedDrawable([square], '#000000', 0), getStrokedDrawable([square], '#ffffff', 1)],
+      drawables: [getStrokedDrawable([square], BLACK, 0), getStrokedDrawable([square], WHITE, 1)],
       layer: lineShadingLayer,
       startPoint: TOOLPATH_START_POINT,
     });
@@ -142,7 +144,7 @@ describe(getLineMoves.name, () => {
   it('burns the outline of a fill on the layer even when the stroke belongs to another layer', () => {
     const redFillBlackStroke: BedDrawable = newBedDrawable({
       subpaths: [getBoxSubpath({ minX: 0, minY: 0, maxX: 10, maxY: 10 })],
-      paint: newDrawablePaint({ fill: newSvgPaint({ colour: RED }), stroke: newSvgPaint({ colour: '#000000' }) }),
+      paint: newDrawablePaint({ fill: newSvgPaint({ colour: RED }), stroke: newSvgPaint({ colour: BLACK }) }),
     });
 
     const moves: ToolpathMove[] = getLineMoves({

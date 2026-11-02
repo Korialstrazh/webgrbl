@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { ToolpathBounds } from './interfaces/ToolpathBounds';
 import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
+import type { ToolpathBounds } from './interfaces/ToolpathBounds';
 
 export const getSubpathsBounds = (subpaths: SvgSubpath[]): ToolpathBounds | undefined => {
   let minX = Infinity;

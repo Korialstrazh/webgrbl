@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { SVG_ID_ATTRIBUTE_NAME } from './svg.geometry.constants';
 import { SVG_ALL_ELEMENTS_SELECTOR } from '../svg.constants';
+import { SVG_ID_ATTRIBUTE_NAME } from './svg.geometry.constants';
 
 export const getSvgElementsById = (svgDocument: Document): Map<string, Element> => {
   const elementsById: Map<string, Element> = new Map<string, Element>();

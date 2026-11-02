@@ -1,8 +1,8 @@
+import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 import { getSvgPaints } from './get.svg.paints';
 import type { SvgGradientStop } from './interfaces/SvgGradientStop';
 import type { SvgPaint } from './interfaces/SvgPaint';
 import { SVG_GRADIENT_KIND, SVG_INHERIT_KEYWORD, SVG_UNSET_KEYWORD } from './svg.geometry.constants';
-import { SVG_NAMESPACE_URI, XLINK_NAMESPACE_URI } from '../svg.constants';
 
 const RED = '#ff0000';
 const BLUE = '#0000ff';

@@ -12,6 +12,15 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import {
+  SVG_HREF_ATTRIBUTE_NAME,
+  SVG_MIME_TYPE,
+  SVG_NAMESPACE_URI,
+  SVG_PARSER_ERROR_ELEMENT_NAME,
+  SVG_ROOT_ELEMENT_NAME,
+  SVG_SAME_DOCUMENT_REFERENCE_PREFIX,
+  XLINK_NAMESPACE_URI,
+} from '../svg.constants';
 import { getSvgElementCountUpTo } from './get.svg.element.count.up.to';
 import { getSvgElementsById } from './get.svg.elements.by.id';
 import { getSvgLengthUserUnits } from './get.svg.length.user.units';
@@ -33,15 +42,6 @@ import {
   SVG_USE_VIEWPORT_ATTRIBUTE_NAMES,
 } from './svg.shape.constants';
 import { SVG_IDENTITY_MATRIX, SVG_TRANSFORM_ATTRIBUTE_NAME, SVG_TRANSFORM_FUNCTION } from './svg.transform.constants';
-import {
-  SVG_HREF_ATTRIBUTE_NAME,
-  SVG_MIME_TYPE,
-  SVG_NAMESPACE_URI,
-  SVG_PARSER_ERROR_ELEMENT_NAME,
-  SVG_ROOT_ELEMENT_NAME,
-  SVG_SAME_DOCUMENT_REFERENCE_PREFIX,
-  XLINK_NAMESPACE_URI,
-} from '../svg.constants';
 
 const MATRIX_VALUE_SEPARATOR = ' ';
 

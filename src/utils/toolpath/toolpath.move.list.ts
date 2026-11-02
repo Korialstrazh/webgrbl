@@ -1,7 +1,7 @@
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
 import type { ToolpathMoveStyle } from './interfaces/ToolpathMoveStyle';
 import { MOVE_MIN_LENGTH_MM, TOOLPATH_MOVE_KIND, TRAVEL_POWER_PERCENT } from './toolpath.constants';
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 
 /**
  * Collects the moves of one layer in order, always starting each move where the head is, and leaves out moves that

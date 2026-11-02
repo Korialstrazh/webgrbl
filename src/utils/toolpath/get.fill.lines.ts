@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getLayerKey } from '../layers/get.layer.key';
 import { getRunFillSegments } from './get.run.fill.segments';
 import type { FillLine } from './interfaces/FillLine';
 import type { FillLineHeight } from './interfaces/FillLineHeight';
@@ -19,7 +20,6 @@ import type { ToolpathBounds } from './interfaces/ToolpathBounds';
 import type { ToolpathPaintArea } from './interfaces/ToolpathPaintArea';
 import { getScanlineRuns } from './rasterize.scanline';
 import { FILL_LINE_COUNT_EPSILON, SCANLINE_EDGE_INSET_MM } from './toolpath.constants';
-import { getLayerKey } from '../layers/get.layer.key';
 
 const getLayerAreasBounds = (paintAreas: ToolpathPaintArea[], layerKey: string): ToolpathBounds | undefined => {
   let layerBounds: ToolpathBounds | undefined;

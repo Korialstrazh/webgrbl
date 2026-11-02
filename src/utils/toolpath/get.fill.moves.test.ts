@@ -1,10 +1,10 @@
+import { getNewLayer } from '../layers/get.new.layer';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { DEFAULT_PALETTE } from '../palette/palette.constants';
 import { getFillMoves } from './get.fill.moves';
 import type { FillLine } from './interfaces/FillLine';
 import type { ToolpathMove } from './interfaces/ToolpathMove';
 import { TOOLPATH_MOVE_KIND, TOOLPATH_START_POINT } from './toolpath.constants';
-import { getNewLayer } from '../layers/get.new.layer';
-import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { DEFAULT_PALETTE } from '../palette/palette.constants';
 
 const GREEN = '#00a000';
 const POWER_PERCENT = 50;

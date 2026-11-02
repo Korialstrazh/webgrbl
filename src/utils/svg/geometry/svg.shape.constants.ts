@@ -9,6 +9,9 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { SVG_HREF_ATTRIBUTE_NAME } from '../svg.constants';
+import { SVG_TRANSFORM_ATTRIBUTE_NAME } from './svg.transform.constants';
+
 /** Content that the job leaves out or that burns differently from how the bed shows it. */
 export const SVG_UNSUPPORTED_KIND = {
   TEXT: 'text',
@@ -56,9 +59,19 @@ export const SVG_USE_ELEMENT_NAME = 'use';
 export const SVG_GROUP_ELEMENT_NAME = 'g';
 export const SVG_SYMBOL_ELEMENT_NAME = 'symbol';
 /** Attributes of a use element that place or point to the content, so they are not copied to its stand-in group. */
-export const SVG_USE_OWN_ATTRIBUTE_NAMES: readonly string[] = ['x', 'y', 'width', 'height', 'href', 'transform'];
+export const SVG_USE_OWN_ATTRIBUTE_NAMES: readonly string[] = [
+  SVG_SHAPE_ATTRIBUTE.X,
+  SVG_SHAPE_ATTRIBUTE.Y,
+  SVG_SHAPE_ATTRIBUTE.WIDTH,
+  SVG_SHAPE_ATTRIBUTE.HEIGHT,
+  SVG_HREF_ATTRIBUTE_NAME,
+  SVG_TRANSFORM_ATTRIBUTE_NAME,
+];
 /** Use attributes that set the size of the symbol or svg it draws. */
-export const SVG_USE_VIEWPORT_ATTRIBUTE_NAMES: readonly string[] = ['width', 'height'];
+export const SVG_USE_VIEWPORT_ATTRIBUTE_NAMES: readonly string[] = [
+  SVG_SHAPE_ATTRIBUTE.WIDTH,
+  SVG_SHAPE_ATTRIBUTE.HEIGHT,
+];
 /** Symbol attributes with no meaning on the nested svg that stands in for a used symbol. */
 export const SVG_SYMBOL_OWN_ATTRIBUTE_NAMES: readonly string[] = ['refX', 'refY'];
 /**

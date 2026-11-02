@@ -1,14 +1,3 @@
-import { getBedDrawables } from './get.bed.drawables';
-import { getToolpath } from './get.toolpath';
-import type { BedDrawable } from './interfaces/BedDrawable';
-import type { BedDrawableSet } from './interfaces/BedDrawableSet';
-import type { Toolpath } from './interfaces/Toolpath';
-import type { ToolpathMove } from './interfaces/ToolpathMove';
-import { getBoxSubpath } from './test.support/get.box.subpath';
-import { newBedDrawable } from './test.support/new.bed.drawable';
-import { newDrawablePaint } from './test.support/new.drawable.paint';
-import { newSvgPaint } from './test.support/new.svg.paint';
-import { FILL_OVERSCAN_MM, TOOLPATH_MOVE_KIND, TRAVEL_POWER_PERCENT } from './toolpath.constants';
 import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
@@ -21,6 +10,18 @@ import { SVG_GRADIENT_KIND, SVG_GRADIENT_UNITS } from '../svg/geometry/svg.geome
 import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
 import { SVG_IDENTITY_MATRIX } from '../svg/geometry/svg.transform.constants';
 import { SVG_NAMESPACE_URI } from '../svg/svg.constants';
+import { getBedDrawables } from './get.bed.drawables';
+import { getToolpath } from './get.toolpath';
+import type { BedDrawable } from './interfaces/BedDrawable';
+import type { BedDrawableSet } from './interfaces/BedDrawableSet';
+import type { Toolpath } from './interfaces/Toolpath';
+import type { ToolpathLayerRange } from './interfaces/ToolpathLayerRange';
+import type { ToolpathMove } from './interfaces/ToolpathMove';
+import { getBoxSubpath } from './test.support/get.box.subpath';
+import { newBedDrawable } from './test.support/new.bed.drawable';
+import { newDrawablePaint } from './test.support/new.drawable.paint';
+import { newSvgPaint } from './test.support/new.svg.paint';
+import { FILL_OVERSCAN_MM, TOOLPATH_MOVE_KIND, TRAVEL_POWER_PERCENT } from './toolpath.constants';
 
 const RED = '#ff0000';
 const GREEN = '#00a000';
@@ -143,7 +144,8 @@ describe(getToolpath.name, () => {
 
     expect(getBurnLineHeights(toolpath)).toHaveLength(FILL_LINE_COUNT);
     expect(burnMoves).toHaveLength(FILL_LINE_COUNT);
-    burnMoves.forEach((burnMove: ToolpathMove, lineIndex: number) => {
+
+    for (const [lineIndex, burnMove] of burnMoves.entries()) {
       const moveIndex: number = toolpath.moves.indexOf(burnMove);
       const isLeftToRight: boolean = lineIndex % 2 === 0;
 
@@ -152,7 +154,8 @@ describe(getToolpath.name, () => {
       expect(burnMove.powerPercent).toBe(getFillLayer().settings.maxPowerPercent);
       expect(isOverscanMove(toolpath.moves[moveIndex - 1], burnMove.to.y)).toBe(true);
       expect(isOverscanMove(toolpath.moves[moveIndex + 1], burnMove.to.y)).toBe(true);
-    });
+    }
+
     expect(toolpath.bounds).toEqual({
       minX: -FILL_OVERSCAN_MM,
       minY: 0,
@@ -212,10 +215,11 @@ describe(getToolpath.name, () => {
 
     expect(firstLineBurns.length).toBeGreaterThan(SQUARE_CORNERS);
     expect(firstLinePowers[0]).toBeCloseTo(SHADING_MAX_PERCENT, 0);
-    firstLineBurns.slice(1).forEach((move: ToolpathMove, index: number) => {
+
+    for (const [index, move] of firstLineBurns.slice(1).entries()) {
       expect(move.from.x).toBeGreaterThan(firstLineBurns[index]?.from.x ?? Infinity);
       expect(move.powerPercent).toBeLessThan(firstLinePowers[index] ?? 0);
-    });
+    }
   });
 
   it('follows a user space gradient that covers only 40 to 60 % of the shape', () => {
@@ -292,7 +296,7 @@ describe(getToolpath.name, () => {
       [{ ...getCutLayer(), order: 1 }, { ...getFillLayer(), order: 0 }],
     );
 
-    expect(toolpath.layers.map(({ layerKey }) => layerKey)).toEqual([GREEN, RED]);
+    expect(toolpath.layers.map(({ layerKey }: ToolpathLayerRange) => layerKey)).toEqual([GREEN, RED]);
     expect(toolpath.layers[1]?.firstMoveIndex).toBe((toolpath.layers[0]?.lastMoveIndex ?? 0) + 1);
   });
 

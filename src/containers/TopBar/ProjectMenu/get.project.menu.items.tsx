@@ -12,8 +12,8 @@
 import { Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 import { ANTD_MENU_ITEM_TYPE_DIVIDER } from '../../../utils/antd.constants';
-import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
+import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { ProjectMenuItems } from '../interfaces/ProjectMenuItems';
 import { PROJECT_MENU_KEY } from './project.menu.constants';
 import styles from './styles.module.scss';

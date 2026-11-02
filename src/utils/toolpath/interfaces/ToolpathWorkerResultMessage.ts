@@ -8,8 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { Toolpath } from './Toolpath';
 import type { TOOLPATH_WORKER_MESSAGE_KIND } from '../toolpath.worker.constants';
+import type { Toolpath } from './Toolpath';
 
 export interface ToolpathWorkerResultMessage {
   /** Marks the message as the result. */

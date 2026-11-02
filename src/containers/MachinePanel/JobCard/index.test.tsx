@@ -15,11 +15,11 @@ import {
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../../utils/test.support/bed.region.test.host';
 import { newGcodeExportTestStore } from '../../../utils/test.support/new.gcode.export.test.store';
+import { GCODE_BURN_WORD } from '../../../utils/toolpath/gcode.constants';
 import { getBedDrawables } from '../../../utils/toolpath/get.bed.drawables';
 import { getGcodeExportContext } from '../../../utils/toolpath/get.gcode.export.context';
 import { getGcodeText } from '../../../utils/toolpath/get.gcode.text';
 import { getToolpath } from '../../../utils/toolpath/get.toolpath';
-import { GCODE_BURN_WORD } from '../../../utils/toolpath/gcode.constants';
 import type { BedDrawableSet } from '../../../utils/toolpath/interfaces/BedDrawableSet';
 
 const EXPORT_LABEL = 'Export G-code';
@@ -111,7 +111,7 @@ describe(JobCard.name, () => {
     expect(await screen.findByText(NEEDS_PROFILE_TOOLTIP)).toBeInTheDocument();
   });
 
-  // Review Focus 4: a job with every layer off cannot be exported and writes no burn move.
+  // A job with every layer off cannot be exported and writes no burn move.
   it('disables export with every layer off, and the G-code of that document burns nothing', async () => {
     const store: AppStore = await newGcodeExportTestStore({ areLayersEnabled: false });
     const drawableSet: BedDrawableSet = getBedDrawables(selectProjectDocument(store.getState()));

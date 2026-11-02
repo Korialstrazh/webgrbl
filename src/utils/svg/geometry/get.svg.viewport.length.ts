@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { getSvgLengthUserUnits } from './get.svg.length.user.units';
 import { PERCENT_DIVISOR, PERCENT_SUFFIX } from '../../percent.constants';
+import { getSvgLengthUserUnits } from './get.svg.length.user.units';
 
 export const getSvgViewportLength = (value: string | null, referenceLength: number): number | undefined => {
   const trimmedValue: string = value?.trim() ?? '';

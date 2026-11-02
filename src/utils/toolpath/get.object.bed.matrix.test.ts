@@ -1,4 +1,3 @@
-import { getObjectBedMatrix } from './get.object.bed.matrix';
 import { getObjectCorners } from '../project/get.object.corners';
 import type { ObjectCornerPoint } from '../project/interfaces/ObjectCornerPoint';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
@@ -9,6 +8,7 @@ import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
 import { getSvgViewBox } from '../svg/get.svg.view.box';
 import type { SvgViewBox } from '../svg/interfaces/SvgViewBox';
 import { SVG_MIME_TYPE, SVG_NAMESPACE_URI } from '../svg/svg.constants';
+import { getObjectBedMatrix } from './get.object.bed.matrix';
 
 const FLOAT_DIGITS = 9;
 const INTRINSIC_WIDTH_MM = 100;
@@ -53,9 +53,9 @@ describe(getObjectBedMatrix.name, () => {
       { x: 0, y: 0 },
     ];
 
-    svgCornersInCornerOrder.forEach((svgCorner: GeometryPoint, index: number) => {
+    for (const [index, svgCorner] of svgCornersInCornerOrder.entries()) {
       expectPointCloseTo(getSvgMatrixPoint(matrix, svgCorner), corners[index] ?? { x: NaN, y: NaN });
-    });
+    }
   });
 
   it('stretches the root viewBox to the intrinsic box, as the bed image does', () => {

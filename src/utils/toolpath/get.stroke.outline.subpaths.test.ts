@@ -1,7 +1,7 @@
-import { getStrokeOutlineSubpaths } from './get.stroke.outline.subpaths';
-import { STROKE_JOIN_SEGMENT_COUNT } from './toolpath.constants';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
+import { getStrokeOutlineSubpaths } from './get.stroke.outline.subpaths';
+import { STROKE_JOIN_SEGMENT_COUNT } from './toolpath.constants';
 
 const STROKE_WIDTH_MM = 2;
 
@@ -22,8 +22,10 @@ describe(getStrokeOutlineSubpaths.name, () => {
 
     expect(outlines[2]?.points).toContainEqual({ x: 10, y: 0 });
     expect(wedgeArcPoints).toHaveLength(STROKE_JOIN_SEGMENT_COUNT / 4 + 1);
-    expect(wedgeArcPoints.every(({ x, y }): boolean => Math.abs(Math.hypot(x - 10, y) - 1) < 1e-9)).toBe(true);
-    expect(wedgeArcPoints.every(({ x, y }): boolean => x >= 10 - 1e-9 && y <= 1e-9)).toBe(true);
+    expect(
+      wedgeArcPoints.every(({ x, y }: GeometryPoint): boolean => Math.abs(Math.hypot(x - 10, y) - 1) < 1e-9),
+    ).toBe(true);
+    expect(wedgeArcPoints.every(({ x, y }: GeometryPoint): boolean => x >= 10 - 1e-9 && y <= 1e-9)).toBe(true);
   });
 
   it('adds the closing segment and a join at every corner of a closed stroke', () => {

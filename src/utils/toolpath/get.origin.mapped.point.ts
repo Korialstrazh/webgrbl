@@ -9,9 +9,9 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
 import type { MachineOriginCorner } from '../profiles/machine.profile.constants';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { OriginWorkArea } from './interfaces/OriginWorkArea';
 
 const RIGHT_ORIGIN_CORNERS: readonly MachineOriginCorner[] = [

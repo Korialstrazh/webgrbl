@@ -1,7 +1,7 @@
-import { getResolvedSvgStyles } from './resolve.svg.styles';
-import type { SvgResolvedStyle } from './interfaces/SvgResolvedStyle';
-import { SVG_FILL_RULE } from './svg.geometry.constants';
 import { SVG_MIME_TYPE, SVG_NAMESPACE_URI } from '../svg.constants';
+import type { SvgResolvedStyle } from './interfaces/SvgResolvedStyle';
+import { getResolvedSvgStyles } from './resolve.svg.styles';
+import { SVG_FILL_RULE } from './svg.geometry.constants';
 
 const RED = '#ff0000';
 const BLUE = '#0000ff';

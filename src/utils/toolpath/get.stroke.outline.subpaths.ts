@@ -10,6 +10,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
+import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 import type { StrokeJoinCorner } from './interfaces/StrokeJoinCorner';
 import {
   FULL_TURN_RADIANS,
@@ -19,8 +21,6 @@ import {
   STROKE_HALF_WIDTH_FACTOR,
   STROKE_JOIN_SEGMENT_COUNT,
 } from './toolpath.constants';
-import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
-import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 
 /** The box around a segment, clockwise in the bed frame (Y up), like the join wedges. */
 const getSegmentBox = (start: GeometryPoint, end: GeometryPoint, halfWidth: number): SvgSubpath | undefined => {
@@ -48,11 +48,11 @@ const getSegmentBox = (start: GeometryPoint, end: GeometryPoint, halfWidth: numb
 const getDoubleSignedArea = (points: GeometryPoint[]): number => {
   let doubleArea = 0;
 
-  points.forEach((point: GeometryPoint, pointIndex: number) => {
+  for (const [pointIndex, point] of points.entries()) {
     const nextPoint: GeometryPoint = points[(pointIndex + 1) % points.length] ?? point;
 
     doubleArea += point.x * nextPoint.y - nextPoint.x * point.y;
-  });
+  }
 
   return doubleArea;
 };
@@ -134,12 +134,12 @@ const getSubpathOutline = (subpath: SvgSubpath, halfWidth: number): SvgSubpath[]
     outlines.push(start && end ? getSegmentBox(start, end, halfWidth) : undefined);
   }
 
-  points.forEach((vertex: GeometryPoint, pointIndex: number) => {
+  for (const [pointIndex, vertex] of points.entries()) {
     const previous: GeometryPoint | undefined = isClosedRing ? points.at(pointIndex - 1) : points[pointIndex - 1];
     const next: GeometryPoint | undefined = points[isClosedRing ? (pointIndex + 1) % points.length : pointIndex + 1];
 
     outlines.push(previous && next ? getJoinWedge({ previous, vertex, next }, halfWidth) : undefined);
-  });
+  }
 
   return outlines.filter((outline: SvgSubpath | undefined): outline is SvgSubpath => !!outline);
 };

@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { WHITE_LIGHTNESS } from './toolpath.constants';
 import { getColourLightness } from '../layers/get.colour.lightness';
+import { WHITE_LIGHTNESS } from './toolpath.constants';
 
 export const getPaintLightness = (colour: string, opacity: number): number =>
   WHITE_LIGHTNESS - opacity * (WHITE_LIGHTNESS - getColourLightness(colour));
