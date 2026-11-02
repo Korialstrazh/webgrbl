@@ -29,7 +29,7 @@ The approved screen layout of webgrbl and the order in which features get built.
   1. ~~App shell and design system.~~ Done: see [[app-shell]] and [[ui-components]].
   2. ~~Machine control and machine profiles.~~ Done: see [[machine-control]].
   3. ~~Projects and SVG import (Dexie autosave, undo/redo).~~ Done: see [[projects-and-svg-import]].
-  4. Layers and power mapping, G-code, toolpath preview.
+  4. Layers and power mapping, G-code, toolpath preview. 4a done: see [[layers-and-gcode]] (palette, layers from colours, G-code export, Toolpath view with simulation and time estimate); 4b next: 3D burn preview (engraving depth, orthographic and perspective cameras, a material model).
   5. Running jobs (pre-flight, progress, pause, overrides).
   6. Material library (import/export).
   7. Extras (node editing, 3D preview, more colour ranges).

@@ -466,7 +466,7 @@ LaserGRBL turns a bitmap (JPG/PNG/BMP/GIF) into a G-code program through a two-s
   4. The emitted block is `{lOn} S0` (or `M5 S{$30}`), `F{markSpeed}`, the L2L lines, then `M5`. The border G-code follows.
   - Antialiased edges get intermediate S values, scaled between S-MIN and S-MAX.
 - **Upstream source:** [`LaserGRBL/GrblFile.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblFile.cs) (`LoadImagePotrace`, `L2LConf.vectorfilling`), [`LaserGRBL/CsPotrace/CsPotraceExport.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/CsPotrace/CsPotraceExport.cs) (`Export2GDIPlus`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: in progress. Fill of vector shapes shipped in [[layers-and-gcode]], with exact scanline-polygon intersection instead of a raster: a Fill layer engraves its shapes line by line at the layer's line interval, with nonzero or even-odd parity, paint order, overscan, and gradient or grey power. Filling traced bitmaps (Vectorize!) does not exist yet. Original proposal:
   - Reuse the same L2L generator. Rasterise the paths with `Path2D` on an `OffscreenCanvas` (with antialiasing off for crisp on/off edges).
   - Prefer exact scanline-polygon intersection (vector hatch) for sharper edges when quality matters.
 
