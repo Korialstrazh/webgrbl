@@ -12,6 +12,7 @@ import type {
   AlertProps,
   ButtonProps,
   ColorPickerProps,
+  DrawerProps,
   DropdownProps,
   FormItemProps,
   FormProps,
@@ -71,3 +72,6 @@ export const ANTD_MENU_ITEM_TYPE_DIVIDER = 'divider' as const;
 
 /** The colour picker value format: a six-digit hex colour. */
 export const ANTD_COLOR_PICKER_FORMAT_HEX: ColorPickerProps['format'] = 'hex';
+
+/** The drawer slides in from the left edge of its container. */
+export const ANTD_DRAWER_PLACEMENT_LEFT: DrawerProps['placement'] = 'left';

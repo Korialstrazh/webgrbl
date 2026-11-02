@@ -49,6 +49,8 @@ const BLACK_END_TEXT = 'Black: 6.0 W';
 const WHITE_END_TEXT = 'White: 0.0 W';
 const BLACK_END_PERCENT_TEXT = 'Black: 60 %';
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
+const DRAWER_ROOT_SELECTOR = '.ant-drawer';
+const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
 
 const newColouredObject = (colour: string): ProjectObject => newProjectObject({
   svgText: `<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm"><rect fill="${colour}" width="5" height="5"/></svg>`,
@@ -107,8 +109,9 @@ const LiveDrawer = ({ layerKey, onEditPalette }: LiveDrawerProps): ReactNode => 
   );
 };
 
-const renderDrawer = (store: AppStore, layerKey: string, onEditPalette: () => void = vi.fn()): void => {
-  render(
+/** Renders the drawer for one layer and returns the bed region element it renders into. */
+const renderDrawer = (store: AppStore, layerKey: string, onEditPalette: () => void = vi.fn()): HTMLElement => {
+  const { container } = render(
     <Provider store={store}>
       <AntdTestProvider>
         <BedRegionTestHost>
@@ -117,6 +120,13 @@ const renderDrawer = (store: AppStore, layerKey: string, onEditPalette: () => vo
       </AntdTestProvider>
     </Provider>,
   );
+  const bedRegionHost: Element | null = container.firstElementChild;
+
+  if (!(bedRegionHost instanceof HTMLElement)) {
+    throw new Error('No bed region host');
+  }
+
+  return bedRegionHost;
 };
 
 const getActionCount = (dispatchSpy: MockInstance<AppDispatch>, actionType: string): number =>
@@ -125,6 +135,16 @@ const getActionCount = (dispatchSpy: MockInstance<AppDispatch>, actionType: stri
   ).length;
 
 describe(LayerSettingsDrawer.name, () => {
+  it('slides in from the left inside the bed region, next to the design panel', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    const bedRegionHost: HTMLElement = renderDrawer(store, CUT_COLOUR);
+    const drawerRoot: Element | null = screen.getByRole('dialog').closest(DRAWER_ROOT_SELECTOR);
+
+    expect(bedRegionHost).toContainElement(drawerRoot instanceof HTMLElement ? drawerRoot : null);
+    expect(drawerRoot).toHaveClass(DRAWER_LEFT_CLASS_NAME);
+  });
+
   it('shows the watts of the active profile next to the power', () => {
     const store: AppStore = newStore();
     loadColours(store, [FILL_COLOUR]);

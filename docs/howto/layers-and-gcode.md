@@ -5,7 +5,7 @@ Each colour in your drawing becomes a layer with laser settings. From the layers
 ## What the user gets
 
 - **Palette.** A list of laser colours (Cut, Score, Fill and Shading to start with), each with mode, power, speed, passes, air assist and line interval. Open it with the "Palette" button in the Layers section. The palette is kept in the browser (`localStorage`) and is the same for every project.
-- **Layers.** When you import a drawing, each colour it uses becomes a layer in the Layers section, in burn order. Drag a layer (or use its Move up / Move down buttons) to change the order. The checkbox sends the layer to the laser or leaves it off. The button on a row opens the Layer settings drawer.
+- **Layers.** When you import a drawing, each colour it uses becomes a layer in the Layers section, in burn order. Drag a layer (or use its Move up / Move down buttons) to change the order. The checkbox sends the layer to the laser or leaves it off. The button on a row opens the Layer settings drawer, which slides in from the left right next to the design panel, so the layer list stays visible.
 - **Layer settings.** Send to laser, Mode (Line or Fill), Max power and Min power in percent (with watts when the machine profile has a laser power), Speed in mm/min, Passes, Line interval (Fill only) and Air assist (only when the machine profile has air assist). "Save to palette" stores the settings as the palette entry; "Edit palette..." opens the palette.
 - **Toolpath view.** Switch the bed from Design to Toolpath to see the real job: burnt and remaining parts, optional travel moves, a head marker and a playback bar. Editing objects is not possible there. The "3D" option is not available yet.
 - **Export G-code.** In the Project menu and on the Job card.
