@@ -126,6 +126,16 @@ export const GRBL_SETTING_Y_MAX_TRAVEL = 131;
 export const GRBL_SETTING_HOMING_ENABLED = 22;
 /** `$32`: laser mode enabled. */
 export const GRBL_SETTING_LASER_MODE = 32;
+/** `$110`: maximum rate of the X axis in mm per minute. */
+export const GRBL_SETTING_X_MAX_RATE = 110;
+/** `$111`: maximum rate of the Y axis in mm per minute. */
+export const GRBL_SETTING_Y_MAX_RATE = 111;
+/** `$120`: acceleration of the X axis in mm per second squared. */
+export const GRBL_SETTING_X_ACCELERATION = 120;
+/** `$121`: acceleration of the Y axis in mm per second squared. */
+export const GRBL_SETTING_Y_ACCELERATION = 121;
+/** `$11`: junction deviation in mm. */
+export const GRBL_SETTING_JUNCTION_DEVIATION = 11;
 /** Value of a boolean setting that is switched on. */
 export const GRBL_SETTING_ON_VALUE = '1';
 // #endregion
