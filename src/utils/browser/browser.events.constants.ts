@@ -17,6 +17,8 @@ export const ONLINE_EVENT_NAME = 'online';
 export const OFFLINE_EVENT_NAME = 'offline';
 /** Fired when a key goes down; the Escape-to-STOP hotkey listens for it. */
 export const KEYDOWN_EVENT_NAME = 'keydown';
+/** Fired on an element when its content scrolls. */
+export const SCROLL_EVENT_NAME = 'scroll';
 /** The `key` value of the Escape key. */
 export const ESCAPE_KEY = 'Escape';
 /** The `key` value of the Enter key. */

@@ -26,6 +26,11 @@
   scrollbar-width: thin;
 }
 
+// Cards cut off above STOP fade out over the last stretch, so the list reads as one that scrolls on.
+.cardsCutOff {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2rem), transparent);
+}
+
 .stopFooter {
   flex: none;
   padding: var(--space-3);

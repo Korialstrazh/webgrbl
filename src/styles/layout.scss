@@ -13,6 +13,10 @@
 $machine-panel-width: 22rem;
 $design-panel-width: 18.75rem;
 
+// The machine controls line up with the jog pad (three 4.5rem cells and two gaps) instead of stretching across a wide
+// machine panel.
+$machine-control-max-width: 14.5rem;
+
 // The top bar and the status strip keep these heights at any width, so the regions between them get a known space.
 $top-bar-height: 3.5rem;
 $status-strip-height: 3rem;

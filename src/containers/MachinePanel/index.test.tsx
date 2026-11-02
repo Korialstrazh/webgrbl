@@ -22,6 +22,8 @@ const RUN_LABEL = 'Run';
 const RESET_LABEL = 'Reset';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
+const NOT_CONNECTED_TEXT = 'Not connected';
+const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer', 'Pre-flight check'];
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
 const CONTROL_SELECTOR = 'button, input';
 const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Pre-flight check', 'Job'];
@@ -62,16 +64,38 @@ const receiveState = (store: AppStore, machineState: GrblResolvedStatus['machine
 };
 
 describe(MachinePanel.name, () => {
-  it('shows dashes while there is no status', () => {
+  it('collapses the status card to one line while not connected, without readouts or buttons', () => {
     renderMachinePanel();
 
+    expect(screen.getByText(NOT_CONNECTED_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText(MISSING_VALUE_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('shows dashes while connected without a status yet', () => {
+    const store: AppStore = renderMachinePanel();
+
+    connect(store);
+
+    expect(screen.queryByText(NOT_CONNECTED_TEXT)).not.toBeInTheDocument();
     expect(screen.getAllByText(MISSING_VALUE_TEXT).length).toBeGreaterThan(0);
     expect(screen.queryByText(IDLE_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('puts the main task first: status, job, move, then the laser pointer', () => {
+    renderMachinePanel();
+
+    const cardTitles: (string | null)[] = screen.getAllByRole('heading')
+      .map((heading: HTMLElement) => heading.textContent);
+
+    expect(cardTitles).toEqual(CARD_TITLES_IN_ORDER);
   });
 
   it('shows the state, positions with three decimals, feed and power after a status report', () => {
     const store: AppStore = renderMachinePanel();
 
+    connect(store);
     act(() => {
       store.dispatch(new MachineStatusReceived({ status: NEW_STATUS }));
     });
@@ -81,13 +105,6 @@ describe(MachinePanel.name, () => {
     expect(screen.getByText(new RegExp(MACHINE_POSITION_TEXT))).toBeInTheDocument();
     expect(screen.getByText(String(FEED_RATE))).toBeInTheDocument();
     expect(screen.getByText(String(SPINDLE_SPEED))).toBeInTheDocument();
-  });
-
-  it('disables reset and unlock while disconnected', () => {
-    renderMachinePanel();
-
-    expect(screen.getByRole('button', { name: RESET_LABEL })).toBeDisabled();
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeDisabled();
   });
 
   it('enables reset when connected, and unlock only in alarm', () => {
@@ -170,7 +187,7 @@ describe(MachinePanel.name, () => {
     const cardsArea: Element | null | undefined = stopFooter?.previousElementSibling;
 
     expect(stopFooter?.parentElement).toBe(cardsArea?.parentElement);
-    expect(cardsArea).toContainElement(screen.getByRole('button', { name: RESET_LABEL }));
+    expect(cardsArea).toContainElement(screen.getByText(NOT_CONNECTED_TEXT));
     expect(cardsArea).not.toContainElement(stopFooter ?? null);
   });
 });
