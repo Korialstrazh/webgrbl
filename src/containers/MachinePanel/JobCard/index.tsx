@@ -1,6 +1,6 @@
 /**
  * The Job card: the layers that go to the laser, the time estimate and the G-code export. Start job stays coming
- * soon until the job runs from the app.
+ * soon, disabled and unfilled, until the job runs from the app.
  *
  * @author michael.morosov
  *
@@ -13,9 +13,8 @@ import { Button, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_LARGE } from '../../../utils/antd.constants';
 import { EM_DASH } from '../../../utils/characters.constants';
-import { doNothing } from '../../../utils/do.nothing';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
@@ -61,7 +60,8 @@ export const JobCard = (): ReactNode => {
           </span>
         </Tooltip>
         <ComingSoon description={t(DEFAULT.MACHINE_START_JOB_DESCRIPTION)}>
-          <Button type={ANTD_BUTTON_TYPE_PRIMARY} size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
+          {/* Disabled and unfilled until streaming exists: a coming-soon control never looks like the main action. */}
+          <Button size={ANTD_BUTTON_SIZE_LARGE} disabled>
             {t(DEFAULT.MACHINE_START_JOB)}
           </Button>
         </ComingSoon>

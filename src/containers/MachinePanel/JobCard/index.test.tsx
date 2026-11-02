@@ -29,6 +29,8 @@ import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpa
 
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
+const SOON_LABEL = 'Soon';
+const PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
 const ESTIMATE_PLACEHOLDER = EM_DASH;
 const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
@@ -105,10 +107,13 @@ describe(JobCard.name, () => {
     expect(screen.getByText(ONE_LAYER)).toBeInTheDocument();
   });
 
-  it('keeps Start job coming soon', async () => {
+  it('keeps Start job coming soon: disabled, not the filled main action, with the Soon tag', async () => {
     renderJobCard(await newGcodeExportTestStore());
+    const startJobButton: HTMLElement = screen.getByRole('button', { name: START_JOB_LABEL });
 
-    expect(screen.getByRole('button', { name: START_JOB_LABEL }).closest('[aria-disabled="true"]')).not.toBeNull();
+    expect(startJobButton).toBeDisabled();
+    expect(startJobButton).not.toHaveClass(PRIMARY_BUTTON_CLASS);
+    expect(startJobButton.closest('[aria-disabled="true"]')?.parentElement).toHaveTextContent(SOON_LABEL);
   });
 
   it('downloads the G-code from Export G-code', async () => {
