@@ -29,8 +29,8 @@ import {
 } from './toolpath.drawing.constants';
 import type { ToolpathBurnState } from './toolpath.drawing.constants';
 
-const getLineText = (from: GeometryPoint, to: GeometryPoint): string =>
-  SVG_PATH_MOVE_TO + getToolpathPathPointText(from) + SVG_PATH_LINE_TO + getToolpathPathPointText(to);
+const getLineText = (fromPoint: GeometryPoint, toPoint: GeometryPoint): string =>
+  SVG_PATH_MOVE_TO + getToolpathPathPointText(fromPoint) + SVG_PATH_LINE_TO + getToolpathPathPointText(toPoint);
 
 const getPieceKey = (chunkIndex: number, burnState: ToolpathBurnState): string =>
   [chunkIndex, burnState].join(TOOLPATH_PATH_KEY_SEPARATOR);

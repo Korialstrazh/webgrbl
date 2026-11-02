@@ -26,9 +26,9 @@ import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProf
 import { DEFAULT_MACHINE_ORIGIN_CORNER } from '../../utils/profiles/machine.profile.constants';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
-import { selectToolpathMotionTimeline } from '../../utils/states/toolpath.timeline.selectors';
 import { selectToolpath, selectToolpathStatus } from '../../utils/states/toolpath.state';
 import { TOOLPATH_STATUS } from '../../utils/states/toolpath.status.constants';
+import { selectToolpathMotionTimeline } from '../../utils/states/toolpath.timeline.selectors';
 import type { GeometryPoint } from '../../utils/svg/geometry/interfaces/GeometryPoint';
 import { getOriginMappedPoint } from '../../utils/toolpath/get.origin.mapped.point';
 import { getTimelinePosition } from '../../utils/toolpath/get.timeline.position';

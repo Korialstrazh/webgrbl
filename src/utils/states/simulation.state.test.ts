@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { newToolpath } from '../toolpath/test.support/new.toolpath';
 import { Action } from './action';
 import { ProjectObjectsDeleted } from './project.document.state';
+import { DEFAULT_SIMULATION_SPEED, SIMULATION_SPEED_FIFTY_TIMES } from './simulation.speed.constants';
 import {
   SimulationPaused,
   SimulationPlayToggled,
@@ -11,7 +12,6 @@ import {
   simulationReducer,
 } from './simulation.state';
 import type { SimulationState } from './simulation.state';
-import { DEFAULT_SIMULATION_SPEED, SIMULATION_SPEED_FIFTY_TIMES } from './simulation.speed.constants';
 import { ToolpathReady } from './toolpath.state';
 
 const MIDDLE_TIME_S = 12.5;

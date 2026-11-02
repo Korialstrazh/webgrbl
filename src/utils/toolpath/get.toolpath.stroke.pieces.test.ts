@@ -16,6 +16,10 @@ const HALF_MOVE_MM = 0.5;
 const NO_MOVE_INDEX = -1;
 const HALF_POWER_PERCENT = 50;
 const CHUNK_BOUNDARY_MOVE_INDEX = 1000;
+const FIRST_CHUNK_BURNT_KEY = '0:burnt';
+const SECOND_CHUNK_BURNT_KEY = '1:burnt';
+const SECOND_CHUNK_REMAINING_KEY = '1:remaining';
+const THIRD_CHUNK_REMAINING_KEY = '2:remaining';
 
 type MovesPathTextModule = typeof import('./get.toolpath.moves.path.text');
 
@@ -71,18 +75,23 @@ describe(getToolpathStrokePieces.name, () => {
     });
 
     expect(pieces).toEqual([
-      { pieceKey: '0:burnt', burnState: TOOLPATH_BURN_STATE.BURNT, pathText: strokePath.chunkTexts[0] },
+      { pieceKey: FIRST_CHUNK_BURNT_KEY, burnState: TOOLPATH_BURN_STATE.BURNT, pathText: strokePath.chunkTexts[0] },
       {
-        pieceKey: '1:burnt',
+        pieceKey: SECOND_CHUNK_BURNT_KEY,
         burnState: TOOLPATH_BURN_STATE.BURNT,
-        pathText: `M1000 0${strokePath.moveTexts.slice(1000, MIDDLE_MOVE_INDEX).join('')}M1500 0L1500.5 0`,
+        pathText: `M1000 0${strokePath.moveTexts.slice(CHUNK_BOUNDARY_MOVE_INDEX, MIDDLE_MOVE_INDEX).join('')}`
+          + 'M1500 0L1500.5 0',
       },
       {
-        pieceKey: '1:remaining',
+        pieceKey: SECOND_CHUNK_REMAINING_KEY,
         burnState: TOOLPATH_BURN_STATE.REMAINING,
         pathText: `M1500.5 0L1501 0M1501 0${strokePath.moveTexts.slice(MIDDLE_MOVE_INDEX + 1, 2000).join('')}`,
       },
-      { pieceKey: '2:remaining', burnState: TOOLPATH_BURN_STATE.REMAINING, pathText: strokePath.chunkTexts[2] },
+      {
+        pieceKey: THIRD_CHUNK_REMAINING_KEY,
+        burnState: TOOLPATH_BURN_STATE.REMAINING,
+        pathText: strokePath.chunkTexts[2],
+      },
     ]);
   });
 
@@ -109,9 +118,17 @@ describe(getToolpathStrokePieces.name, () => {
     });
 
     expect(pieces).toEqual([
-      { pieceKey: '0:burnt', burnState: TOOLPATH_BURN_STATE.BURNT, pathText: strokePath.chunkTexts[0] },
-      { pieceKey: '1:remaining', burnState: TOOLPATH_BURN_STATE.REMAINING, pathText: strokePath.chunkTexts[1] },
-      { pieceKey: '2:remaining', burnState: TOOLPATH_BURN_STATE.REMAINING, pathText: strokePath.chunkTexts[2] },
+      { pieceKey: FIRST_CHUNK_BURNT_KEY, burnState: TOOLPATH_BURN_STATE.BURNT, pathText: strokePath.chunkTexts[0] },
+      {
+        pieceKey: SECOND_CHUNK_REMAINING_KEY,
+        burnState: TOOLPATH_BURN_STATE.REMAINING,
+        pathText: strokePath.chunkTexts[1],
+      },
+      {
+        pieceKey: THIRD_CHUNK_REMAINING_KEY,
+        burnState: TOOLPATH_BURN_STATE.REMAINING,
+        pathText: strokePath.chunkTexts[2],
+      },
     ]);
     expect(getToolpathMovesPathText).not.toHaveBeenCalled();
   });

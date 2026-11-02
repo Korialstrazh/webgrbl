@@ -3,11 +3,14 @@ import { Provider } from 'react-redux';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SimulationPlaybackBar } from '.';
 import { MULTIPLICATION_SIGN } from '../../utils/characters.constants';
+import { GRBL_SETTING_X_MAX_RATE, GRBL_SETTING_Y_MAX_RATE } from '../../utils/grbl/grbl.constants';
+import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import { newProjectObject } from '../../utils/project/new.project.object';
+import { ConnectionEstablished } from '../../utils/states/grbl.connection.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
-import { ConnectionEstablished } from '../../utils/states/grbl.connection.state';
 import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
+import { SIMULATION_SPEED_FIFTY_TIMES, SIMULATION_SPEED_TWO_HUNDRED_TIMES } from '../../utils/states/simulation.speed.constants';
 import {
   SimulationPlayToggled,
   SimulationReset,
@@ -17,9 +20,8 @@ import {
   selectSimulationSpeed,
   selectSimulationTimeS,
 } from '../../utils/states/simulation.state';
-import { SIMULATION_SPEED_FIFTY_TIMES, SIMULATION_SPEED_TWO_HUNDRED_TIMES } from '../../utils/states/simulation.speed.constants';
-import { selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../utils/states/toolpath.state';
+import { selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
 import { AnimationFrameStub } from '../../utils/test.support/animation.frame.stub';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import type { Toolpath } from '../../utils/toolpath/interfaces/Toolpath';
@@ -27,8 +29,6 @@ import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake
 import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
 import { TOOLPATH_MOVE_KIND } from '../../utils/toolpath/toolpath.constants';
-import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
-import { GRBL_SETTING_X_MAX_RATE, GRBL_SETTING_Y_MAX_RATE } from '../../utils/grbl/grbl.constants';
 import { SIMULATION_LAYER_SEGMENT_TEST_ID } from './simulation.playback.constants';
 
 const PLAY_LABEL = 'Play';

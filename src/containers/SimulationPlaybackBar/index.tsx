@@ -24,15 +24,15 @@ import { ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
 import { BACK_TO_START_SYMBOL, PAUSE_SYMBOL, PLAY_SYMBOL, TO_END_SYMBOL } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
-import { selectIsSimulationPlaying, selectSimulationSpeed } from '../../utils/states/simulation.state';
 import { SIMULATION_SPEEDS } from '../../utils/states/simulation.speed.constants';
 import type { SimulationSpeed } from '../../utils/states/simulation.speed.constants';
+import { selectIsSimulationPlaying, selectSimulationSpeed } from '../../utils/states/simulation.state';
+import { selectToolpath } from '../../utils/states/toolpath.state';
 import {
   selectIsSimulationPlayable,
   selectReadyToolpathTotalTimeS,
   selectToolpathMotionTimeline,
 } from '../../utils/states/toolpath.timeline.selectors';
-import { selectToolpath } from '../../utils/states/toolpath.state';
 import { getSimulationClockText } from '../../utils/toolpath/get.simulation.clock.text';
 import { getTimelinePosition } from '../../utils/toolpath/get.timeline.position';
 import type { MotionTimeline } from '../../utils/toolpath/interfaces/MotionTimeline';

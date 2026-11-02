@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { BedPanel } from '.';
 import { DATA_TRANSFER_FILES_TYPE } from '../../utils/browser/browser.events.constants';
+import { HORIZONTAL_ELLIPSIS, MIDDLE_DOT, MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import { GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
 import { getResolvedGrblPositions } from '../../utils/grbl/grbl.position.resolver';
 import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
@@ -25,13 +26,9 @@ import {
   SvgFilesImportRequested,
 } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged } from '../../utils/states/project.selection.state';
+import { SimulationPlayToggled, selectIsSimulationPlaying } from '../../utils/states/simulation.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import { selectToasts, ToastShown } from '../../utils/states/toast.state';
-import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
-import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
-import { BED_HEAD_TEST_ID } from '../../views/BedView/bed.view.constants';
-import { SimulationPlayToggled, selectIsSimulationPlaying } from '../../utils/states/simulation.state';
-import { selectIsSimulationPlayable } from '../../utils/states/toolpath.timeline.selectors';
 import {
   ToolpathCancelled,
   ToolpathProgress,
@@ -39,11 +36,15 @@ import {
   ToolpathRequested,
   selectToolpathDocumentVersion,
 } from '../../utils/states/toolpath.state';
+import { selectIsSimulationPlayable } from '../../utils/states/toolpath.timeline.selectors';
+import { SVG_MIME_TYPE } from '../../utils/svg/svg.constants';
 import { newGcodeExportTestStore } from '../../utils/test.support/new.gcode.export.test.store';
+import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
 import type { Toolpath } from '../../utils/toolpath/interfaces/Toolpath';
 import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
+import { BED_HEAD_TEST_ID } from '../../views/BedView/bed.view.constants';
 import { BED_OBJECTS_SURFACE_TEST_ID } from '../BedObjects/bed.objects.constants';
 import { TOOLPATH_BURN_PATH_TEST_ID } from '../ToolpathLayer/toolpath.layer.constants';
 import { BED_DROP_AREA_TEST_ID } from './bed.panel.constants';
@@ -78,11 +79,11 @@ const TEXT_DRAG = { dataTransfer: { types: ['text/plain'] } };
 
 const PHOTO_FILE_NAME = 'photo.png';
 const TOOLPATH_VIEW_LABEL = 'Toolpath';
-const THREE_D_VIEW_LABEL = '3D · soon';
+const THREE_D_VIEW_LABEL = `3D ${MIDDLE_DOT} soon`;
 const REGENERATE_LABEL = 'Regenerate';
 const OUT_OF_DATE_TEXT = 'Out of date';
 const CANCEL_LABEL = 'Cancel';
-const GENERATING_TEXT = 'Generating… 40 %';
+const GENERATING_TEXT = `Generating${HORIZONTAL_ELLIPSIS} 40 %`;
 const GENERATION_PROGRESS = 0.4;
 const TEXT_WARNING = 'Text is not converted to paths. In Inkscape use Path > Object to Path.';
 const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
@@ -93,7 +94,7 @@ const SIXTY_SIX_SECOND_TOOLPATH: Toolpath = newToolpath({
   layers: [{ layerKey: '#ff0000', firstMoveIndex: 0, lastMoveIndex: 0 }],
   bounds: { minX: 10, minY: 20, maxX: 60, maxY: 50 },
 });
-const JOB_SUMMARY_TEXT = 'Job 50.0 × 30.0 mm · est. 1 min 6 s';
+const JOB_SUMMARY_TEXT = `Job 50.0 ${MULTIPLICATION_SIGN} 30.0 mm ${MIDDLE_DOT} est. 1 min 6 s`;
 const PLAYBACK_BAR_LABEL = 'Simulation playback';
 
 const newPhotoFile = (): File => new File(['png'], PHOTO_FILE_NAME, { type: 'image/png' });

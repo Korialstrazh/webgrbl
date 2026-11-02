@@ -13,13 +13,13 @@ import type { KeyboardEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
+import type { SimulationSpeed } from '../../utils/states/simulation.speed.constants';
 import {
   SimulationPlayToggled,
   SimulationSpeedSet,
   SimulationTimeSet,
   selectIsSimulationPlaying,
 } from '../../utils/states/simulation.state';
-import type { SimulationSpeed } from '../../utils/states/simulation.speed.constants';
 import { selectIsSimulationPlayable, selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
 import { getClampedSimulationTimeS } from '../../utils/toolpath/get.clamped.simulation.time.s';
 import type { SimulationTransport } from './interfaces/SimulationTransport';

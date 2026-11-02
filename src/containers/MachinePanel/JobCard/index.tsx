@@ -22,8 +22,8 @@ import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/states/project.document.state';
-import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.timeline.selectors';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
+import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.timeline.selectors';
 import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
 import { ComingSoon } from '../../../views/ComingSoon';
 import { Panel } from '../../../views/Panel';

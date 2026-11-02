@@ -12,8 +12,8 @@
 import { SHADING_LAYER_COLOUR } from '../../utils/layers/layer.constants';
 import type { ToolpathStrokePath } from '../../utils/toolpath/interfaces/ToolpathStrokePath';
 import type { BurnPathColour } from './interfaces/BurnPathColour';
-import { POWER_BAND_CLASS_NAME_PREFIX } from './toolpath.layer.constants';
 import styles from './styles.module.scss';
+import { POWER_BAND_CLASS_NAME_PREFIX } from './toolpath.layer.constants';
 
 export const getBurnPathColour = (strokePath: ToolpathStrokePath): BurnPathColour => {
   // eslint-disable-next-line no-restricted-syntax -- band 0 (the weakest power) is distinct from no band

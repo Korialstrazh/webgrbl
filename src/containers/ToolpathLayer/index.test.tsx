@@ -1,28 +1,28 @@
 import { act, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ToolpathLayer } from '.';
-import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { BED_PLACEHOLDER_KIND } from '../../utils/bed/bed.constants';
+import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
+import { GRBL_SETTING_X_MAX_RATE, GRBL_SETTING_Y_MAX_RATE } from '../../utils/grbl/grbl.constants';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { MACHINE_ORIGIN_CORNER, MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.profile.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../utils/project/new.project.object';
-import { GRBL_SETTING_X_MAX_RATE, GRBL_SETTING_Y_MAX_RATE } from '../../utils/grbl/grbl.constants';
 import { ConnectionEstablished } from '../../utils/states/grbl.connection.state';
 import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
 import { SimulationTimeSet } from '../../utils/states/simulation.state';
-import { selectToolpathMotionTimeline } from '../../utils/states/toolpath.timeline.selectors';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../utils/states/toolpath.state';
+import { selectToolpathMotionTimeline } from '../../utils/states/toolpath.timeline.selectors';
 import type { Toolpath } from '../../utils/toolpath/interfaces/Toolpath';
+import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
 import { TOOLPATH_MOVE_KIND } from '../../utils/toolpath/toolpath.constants';
 import { TOOLPATH_BURN_STATE, TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
-import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake.toolpath.worker.client';
 import {
   TOOLPATH_BURN_PATH_TEST_ID,
   TOOLPATH_BURN_STATE_ATTRIBUTE,

@@ -34,7 +34,8 @@ const getMoveCountBefore = (moveIndices: number[], moveIndex: number): number =>
   return low;
 };
 
-const getDistanceMm = (from: GeometryPoint, to: GeometryPoint): number => Math.hypot(to.x - from.x, to.y - from.y);
+const getDistanceMm = (fromPoint: GeometryPoint, toPoint: GeometryPoint): number =>
+  Math.hypot(toPoint.x - fromPoint.x, toPoint.y - fromPoint.y);
 
 /** Whether the head has left the start of the move. */
 const hasHeadLeftMoveStart = (move: ToolpathMove, headPoint: GeometryPoint): boolean =>
