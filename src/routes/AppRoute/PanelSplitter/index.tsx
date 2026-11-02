@@ -1,6 +1,7 @@
 /**
  * The wide workbench: the design panel, the bed and the machine panel side by side in an antd Splitter, so the user can
- * drag the bars between them. Each panel keeps a minimum width, in rem so it follows the user's font size. The panels
+ * drag the bars between them. Each panel keeps a minimum width, and the side panels a maximum width so the bed takes
+ * the extra width of a wide screen, in rem so they follow the user's font size. The panels
  * open with the stored sizes, or the default widths, and the new sizes are stored once a drag ends, not on every move.
  *
  * @author michael.morosov
@@ -18,7 +19,9 @@ import { getRootFontSizePixels } from '../../../utils/browser/get.root.font.size
 import { getPanelSizePercents } from '../../../utils/layout/get.panel.size.percents';
 import {
   BED_PANEL_MIN_WIDTH_REM,
+  DESIGN_PANEL_MAX_WIDTH_REM,
   DESIGN_PANEL_MIN_WIDTH_REM,
+  MACHINE_PANEL_MAX_WIDTH_REM,
   MACHINE_PANEL_MIN_WIDTH_REM,
 } from '../../../utils/layout.constants';
 import type { AppDispatch } from '../../../utils/states/new.store';
@@ -53,6 +56,7 @@ export const PanelSplitter = (props: PanelSplitterProps): ReactNode => {
         className={styles.splitterPanel}
         defaultSize={designDefaultSize}
         min={DESIGN_PANEL_MIN_WIDTH_REM * rootFontSizePx}
+        max={DESIGN_PANEL_MAX_WIDTH_REM * rootFontSizePx}
       >
         {designPanelComponent}
       </Splitter.Panel>
@@ -67,6 +71,7 @@ export const PanelSplitter = (props: PanelSplitterProps): ReactNode => {
         className={styles.splitterPanel}
         defaultSize={machineDefaultSize}
         min={MACHINE_PANEL_MIN_WIDTH_REM * rootFontSizePx}
+        max={MACHINE_PANEL_MAX_WIDTH_REM * rootFontSizePx}
       >
         {machinePanelComponent}
       </Splitter.Panel>

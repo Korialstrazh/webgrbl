@@ -10,8 +10,8 @@ import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock'
 // jsdom does no layout, so the splitter gets a fixed width and a ResizeObserver that reports it; without a width the
 // splitter cannot turn a drag into sizes.
 const WORKBENCH_WIDTH_PX = 1600;
-const DRAG_DISTANCE_PX = 100;
-// 18.75rem + 100 px, the rest, and 22rem, at a 16 px root font size, in percent of 1600 px.
+const DRAG_DISTANCE_PX = 72;
+// 20.5rem + 72 px, the rest, and 22rem, at a 16 px root font size, in percent of 1600 px.
 const DRAGGED_PERCENTS: number[] = [25, 53, 22];
 const DRAGGER_SELECTOR = '.ant-splitter-bar-dragger';
 // The bed column gets a fixed height too; dragging its bar 100 px up turns the default 30 % console into 40 %.
@@ -49,6 +49,14 @@ class ReportingResizeObserver implements ResizeObserver {
     // Nothing is tracked, so there is nothing to stop.
   }
 }
+
+/** The splitter works the sizes out in floating point, so they are compared to a few decimals. */
+const expectPanelSizePercents = (panelSizePercents: number[] | undefined): void => {
+  expect(panelSizePercents).toHaveLength(DRAGGED_PERCENTS.length);
+  DRAGGED_PERCENTS.forEach((expectedPercent: number, index: number) => {
+    expect(panelSizePercents?.[index]).toBeCloseTo(expectedPercent);
+  });
+};
 
 const getFirstDragger = (): HTMLElement => {
   const dragger: HTMLElement | null = document.querySelector(DRAGGER_SELECTOR);
@@ -122,9 +130,9 @@ describe('AppRoute panel resizing', () => {
     dragFirstSplitterBar();
     fireEvent.mouseUp(window);
 
-    expect(selectPanelSizePercents(store.getState())).toEqual(DRAGGED_PERCENTS);
+    expectPanelSizePercents(selectPanelSizePercents(store.getState()));
     await vi.waitFor(async (): Promise<void> => {
-      expect(await PANEL_SIZES_REPOSITORY.getPanelSizePercents()).toEqual(DRAGGED_PERCENTS);
+      expectPanelSizePercents(await PANEL_SIZES_REPOSITORY.getPanelSizePercents());
     });
   });
 

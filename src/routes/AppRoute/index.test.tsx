@@ -244,7 +244,7 @@ describe(AppRoute.name, () => {
     renderAppRoute();
     await waitForRegions();
 
-    expect(getSplitterPanelFlexBases()).toEqual(['300px', 'auto', '352px']);
+    expect(getSplitterPanelFlexBases()).toEqual(['328px', 'auto', '352px']);
   });
 
   it('shows no panels in a wide window until the stored sizes are read, so they never jump', async () => {
