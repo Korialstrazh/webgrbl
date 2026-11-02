@@ -10,22 +10,28 @@
 
 // A decoration only: the Move buttons are the keyboard path.
 .handle {
+  flex-shrink: 0;
   padding: 0 var(--space-1);
   color: var(--color-text-muted);
   cursor: grab;
 }
 
-// The button grows to the row width: the swatch beside the name, the summary and the note below.
+// The button grows to the row width: the swatch beside the name, the summary and the note below. antd centres a
+// button's content and keeps it on one line, so a narrow panel pushed the content out over the handle and the arrows:
+// start-align it, let the text wrap and keep it inside the button.
 .openButton {
   display: grid;
   flex: 1;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0 var(--space-2);
   align-items: center;
+  justify-content: stretch;
   height: auto;
   min-width: 0;
   padding: var(--space-2);
+  overflow: hidden;
   text-align: left;
+  white-space: normal;
 }
 
 .swatch {
@@ -45,6 +51,7 @@
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--color-text-muted);
+  overflow-wrap: anywhere;
 }
 
 .note {
