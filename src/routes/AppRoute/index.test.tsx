@@ -21,9 +21,9 @@ const CONTENT_CLASS_NAME = 'ant-layout-content';
 const FOOTER_CLASS_NAME = 'ant-layout-footer';
 const SPLITTER_SELECTOR = '.ant-splitter';
 const SPLITTER_PANEL_SELECTOR = '.ant-splitter-panel';
-// At the 1024 px jsdom window the side panels open at 307.2 px and 358.4 px, the bed takes the rest.
+// At the 1024 px jsdom window both side panels are within their limits, so they open at their stored shares.
 const STORED_PERCENTS: number[] = [30, 35, 35];
-const STORED_FLEX_BASES: readonly string[] = ['307.2px', 'auto', '358.4px'];
+const STORED_FLEX_BASES: readonly string[] = ['30%', '35%', '35%'];
 const STORED_CONSOLE_PERCENT = 40;
 const CONSOLE_INPUT_LABEL = 'Console command';
 const VERTICAL_SPLITTER_SELECTOR = '.ant-splitter-vertical';
@@ -234,7 +234,7 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('main')).toBeInTheDocument();
   });
 
-  it('opens the side panels at their stored share of the window width, the bed taking the rest', async () => {
+  it('opens the splitter with the stored panel sizes', async () => {
     await PANEL_SIZES_REPOSITORY.setPanelSizePercents(STORED_PERCENTS);
     renderAppRoute();
     await waitForRegions();
