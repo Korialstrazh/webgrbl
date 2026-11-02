@@ -17,7 +17,7 @@ export const BED_RULER_FONT_SIZE_REM = 0.6875;
 export const BED_RULER_LABEL_OFFSET_REM = 0.25;
 
 /** Two neighbouring labels are at least this far apart, so they never touch. */
-export const BED_RULER_MIN_LABEL_SPACING_REM = 3.5;
+export const BED_RULER_MIN_LABEL_SPACING_REM = 3;
 
 /** Upper bound of a monospace digit's width as a share of the font size, to estimate a label's length. */
 export const BED_RULER_DIGIT_WIDTH_FRACTION = 0.6;
