@@ -23,7 +23,6 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
-import { doNothing } from '../../utils/do.nothing';
 import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
 import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
@@ -42,13 +41,14 @@ import { ToolpathWarningsPanel } from '../ToolpathWarningsPanel';
 import { BED_DROP_AREA_TEST_ID, BED_VIEWPORT_KEY_SEPARATOR } from './bed.panel.constants';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
 import {
-  BED_COMING_SOON_TOOL_LABEL_KEYS,
+  BED_COMING_SOON_TOOLS,
   BED_TOOL,
   BED_TOOL_OPTION_KEYS,
   BED_VIEW_MODE,
   BED_VIEW_MODE_OPTION_KEYS,
 } from './bed.toolbar.constants';
 import type { BedTool, BedViewMode } from './bed.toolbar.constants';
+import type { BedComingSoonToolKeys } from './interfaces/BedComingSoonToolKeys';
 import type { BedPanelProps } from './interfaces/BedPanelProps';
 import type { BedToolOption } from './interfaces/BedToolOption';
 import type { BedToolOptionKey } from './interfaces/BedToolOptionKey';
@@ -77,8 +77,10 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   }));
   const viewModeOptions: BedViewModeOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option: BedViewModeOptionKey) => ({
     value: option.value,
-    label: t(option.labelKey),
-    disabled: option.isDisabled,
+    label: option.soonDescriptionKey
+      ? <ComingSoon description={t(option.soonDescriptionKey)}>{t(option.labelKey)}</ComingSoon>
+      : t(option.labelKey),
+    disabled: !!option.soonDescriptionKey,
   }));
 
   return (
@@ -104,15 +106,11 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               value={activeTool}
               onChange={setActiveTool}
             />
-            <ComingSoon description={t(DEFAULT.BED_TOOLBAR_DESCRIPTION)}>
-              <div className={styles.editingTools}>
-                {BED_COMING_SOON_TOOL_LABEL_KEYS.map((labelKey: string) => (
-                  <Button key={labelKey} onClick={doNothing}>
-                    {t(labelKey)}
-                  </Button>
-                ))}
-              </div>
-            </ComingSoon>
+            {BED_COMING_SOON_TOOLS.map(({ labelKey, descriptionKey }: BedComingSoonToolKeys) => (
+              <ComingSoon key={labelKey} description={t(descriptionKey)}>
+                <Button disabled>{t(labelKey)}</Button>
+              </ComingSoon>
+            ))}
           </div>
         )}
         <Segmented<BedViewMode>

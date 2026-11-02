@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { BedPanel } from '.';
 import { DATA_TRANSFER_FILES_TYPE } from '../../utils/browser/browser.events.constants';
-import { HORIZONTAL_ELLIPSIS, MIDDLE_DOT, MULTIPLICATION_SIGN } from '../../utils/characters.constants';
+import { HORIZONTAL_ELLIPSIS, MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import { GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
 import { getResolvedGrblPositions } from '../../utils/grbl/grbl.position.resolver';
 import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
@@ -79,7 +79,9 @@ const TEXT_DRAG = { dataTransfer: { types: ['text/plain'] } };
 
 const PHOTO_FILE_NAME = 'photo.png';
 const TOOLPATH_VIEW_LABEL = 'Toolpath';
-const THREE_D_VIEW_LABEL = `3D ${MIDDLE_DOT} soon`;
+// The name of the 3D option also carries its Soon tag and the hidden description.
+const THREE_D_VIEW_LABEL = /^3D/;
+const SOON_TAG_TEXT = 'Soon';
 const REGENERATE_LABEL = 'Regenerate';
 const OUT_OF_DATE_TEXT = 'Out of date';
 const CANCEL_LABEL = 'Cancel';
@@ -199,17 +201,20 @@ describe(BedPanel.name, () => {
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderPanel(store);
-    fireEvent.click(screen.getByRole('button', { name: EDIT_NODES_LABEL, hidden: true }));
-    fireEvent.click(screen.getByRole('button', { name: ALIGN_LABEL, hidden: true }));
+    fireEvent.click(screen.getByRole('button', { name: EDIT_NODES_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: ALIGN_LABEL }));
 
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it('keeps Edit nodes and Align inert inside the coming-soon wrapper', () => {
+  it('shows Edit nodes and Align as disabled buttons, each with its own Soon tag', () => {
     renderPanel(newStore());
 
-    for (const inertLabel of [EDIT_NODES_LABEL, ALIGN_LABEL]) {
-      expect(screen.getByRole('button', { name: inertLabel, hidden: true }).closest('[inert]')).not.toBeNull();
+    for (const soonLabel of [EDIT_NODES_LABEL, ALIGN_LABEL]) {
+      const soonButton: HTMLElement = screen.getByRole('button', { name: soonLabel });
+
+      expect(soonButton).toBeDisabled();
+      expect(soonButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_TAG_TEXT);
     }
   });
 
@@ -385,10 +390,13 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('group', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('offers 3D only as a disabled coming-soon view', () => {
+  it('offers 3D only as a disabled view with the same Soon tag as the other unbuilt controls', () => {
     renderPanel(newStore());
 
-    expect(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL })).toBeDisabled();
+    const threeDRadio: HTMLElement = screen.getByRole('radio', { name: THREE_D_VIEW_LABEL });
+
+    expect(threeDRadio).toBeDisabled();
+    expect(threeDRadio.closest('label')).toHaveTextContent(SOON_TAG_TEXT);
   });
 
   it('shows the job size in the playback bar in Toolpath view', () => {

@@ -24,7 +24,7 @@ const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
 const NOT_CONNECTED_TEXT = 'Not connected';
 const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
-const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
+const SOON_TAG_TEXT = 'Soon';
 const CONTROL_SELECTOR = 'button, input';
 const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
 
@@ -143,25 +143,28 @@ describe(MachinePanel.name, () => {
     }
   });
 
-  it('every coming-soon control in the machine panel dispatches nothing', () => {
+  it('shows every control that is not built yet disabled, with one Soon tag each, and dispatches nothing', () => {
     const store: AppStore = newStore();
 
     renderMachinePanel(store);
     connect(store);
 
     const dispatchSpy = vi.spyOn(store, 'dispatch');
-    const disabledRegions: NodeListOf<Element> = document.querySelectorAll(DISABLED_REGION_SELECTOR);
-    let clickedControlCount = 0;
+    const soonTags: HTMLElement[] = screen.getAllByText(SOON_TAG_TEXT);
 
-    for (const disabledRegion of disabledRegions) {
-      for (const control of disabledRegion.querySelectorAll(CONTROL_SELECTOR)) {
-        fireEvent.click(control);
-        clickedControlCount++;
+    for (const soonTag of soonTags) {
+      const soonControls: NodeListOf<Element> | undefined =
+        soonTag.previousElementSibling?.querySelectorAll(CONTROL_SELECTOR);
+
+      expect(soonControls).toHaveLength(1);
+
+      for (const soonControl of soonControls ?? []) {
+        expect(soonControl).toBeDisabled();
+        fireEvent.click(soonControl);
       }
     }
 
-    expect(disabledRegions.length).toBeGreaterThan(0);
-    expect(clickedControlCount).toBeGreaterThan(0);
+    expect(soonTags.length).toBeGreaterThan(1);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 

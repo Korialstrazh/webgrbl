@@ -7,8 +7,7 @@
   --color-surface-3: #23272c;
   --color-border: #2a2e34;
   --color-text: #e6e8eb;
-  // Labels and secondary text: 6.3:1 on surface-3 and 7.4:1 on surface-1, and still 4.6:1 on surface-3 at the 0.8
-  // opacity of a coming-soon control, so muted text passes AA everywhere it is used.
+  // Labels and secondary text: 6.3:1 on surface-3 and 7.4:1 on surface-1, so muted text passes AA everywhere it is used.
   --color-text-muted: #a3a9b0;
   --color-accent: #ff8a1f;
   --color-accent-hover: #ff9a3d;

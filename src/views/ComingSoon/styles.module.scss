@@ -1,39 +1,19 @@
-@use '../../styles/accessibility' as accessibility;
-
-// The feature and its tag on one line, so the notice never adds a row to a bar or a card.
+// The control and its tag on one line, so the notice never adds a row to a bar or a card.
 .comingSoon {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
   max-width: 100%;
+  cursor: not-allowed;
 }
 
-// Slightly dimmed, never below 0.8 opacity, so the label stays readable; inert, so it takes no clicks or focus.
-.content {
-  flex: 0 1 auto;
+// The disabled control lets the pointer through to the wrapper, which shows the tooltip.
+.control {
+  display: inline-flex;
   min-width: 0;
-  opacity: 0.8;
-  user-select: none;
-}
 
-// A small neutral chip: muted text on a subtle surface, so it does not compete with the real controls.
-.soonTag:global(.ant-tag) {
-  flex: none;
-  margin: 0;
-  padding: 0 var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background-color: var(--color-surface-2);
-  color: var(--color-text-muted);
-  font-family: var(--font-ui);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  line-height: 1.125rem;
-  cursor: help;
-}
-
-// The description for screen readers; sighted users get it from the tooltip.
-.description {
-  @include accessibility.visually-hidden;
+  > * {
+    pointer-events: none;
+  }
 }

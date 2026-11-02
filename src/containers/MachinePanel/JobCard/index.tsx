@@ -60,7 +60,7 @@ export const JobCard = (): ReactNode => {
           </span>
         </Tooltip>
         <ComingSoon description={t(DEFAULT.MACHINE_START_JOB_DESCRIPTION)}>
-          {/* Disabled and unfilled until streaming exists: a coming-soon control never looks like the main action. */}
+          {/* Unfilled until streaming exists: a control that is not built yet never looks like the main action. */}
           <Button size={ANTD_BUTTON_SIZE_LARGE} disabled>
             {t(DEFAULT.MACHINE_START_JOB)}
           </Button>

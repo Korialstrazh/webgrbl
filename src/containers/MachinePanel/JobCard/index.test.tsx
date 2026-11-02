@@ -113,7 +113,7 @@ describe(JobCard.name, () => {
 
     expect(startJobButton).toBeDisabled();
     expect(startJobButton).not.toHaveClass(PRIMARY_BUTTON_CLASS);
-    expect(startJobButton.closest('[aria-disabled="true"]')?.parentElement).toHaveTextContent(SOON_LABEL);
+    expect(startJobButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_LABEL);
   });
 
   it('downloads the G-code from Export G-code', async () => {

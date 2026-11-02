@@ -145,7 +145,7 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         </Button>
       </div>
       <ComingSoon description={t(DEFAULT.LAYER_SETTINGS_PRESET_DESCRIPTION)}>
-        <Button>{t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}</Button>
+        <Button disabled>{t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}</Button>
       </ComingSoon>
     </div>
   );

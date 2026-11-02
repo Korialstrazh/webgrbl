@@ -48,7 +48,7 @@ const BAR_LABEL = 'Power from black to white';
 const BLACK_END_TEXT = 'Black: 6.0 W';
 const WHITE_END_TEXT = 'White: 0.0 W';
 const BLACK_END_PERCENT_TEXT = 'Black: 60 %';
-const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
+const SOON_TAG_TEXT = 'Soon';
 const DRAWER_ROOT_SELECTOR = '.ant-drawer';
 const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
 const DRAWER_MASK_SELECTOR = '.ant-drawer-mask';
@@ -387,11 +387,14 @@ describe(LayerSettingsDrawer.name, () => {
     expect(getLayer(store, UNKNOWN_COLOUR).paletteEntryId).toBe(createdEntry?.id);
   });
 
-  it('shows Save as material preset as coming soon', () => {
+  it('shows Save as material preset as a disabled button with a Soon tag', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR]);
     renderDrawer(store, CUT_COLOUR);
 
-    expect(screen.getByText(PRESET_LABEL).closest(DISABLED_REGION_SELECTOR)).not.toBeNull();
+    const presetButton: HTMLElement = screen.getByRole('button', { name: PRESET_LABEL });
+
+    expect(presetButton).toBeDisabled();
+    expect(presetButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_TAG_TEXT);
   });
 });

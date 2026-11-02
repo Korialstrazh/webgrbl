@@ -40,8 +40,6 @@ const MUTED_STRONG_TOKEN = '--color-text-muted-strong';
 const BG_TOKEN = '--color-bg';
 const BED_TOKEN = '--color-bed';
 const BED_SURFACE_TOKEN = '--color-bed-surface';
-// Must match the opacity of the ComingSoon content.
-const COMING_SOON_OPACITY = 0.8;
 const HEX_PREFIX = '#';
 const ACCENT_BUTTON_TOKEN = '--color-accent';
 const DANGER_TEXT_TOKEN = '--color-danger-text';
@@ -56,7 +54,7 @@ const getChannelLuminance = (channelHex: string): number => {
 };
 
 const getRelativeLuminance = (hex: string): number => {
-  const digits: string = hex.replace('#', '');
+  const digits: string = hex.replace(HEX_PREFIX, '');
   const red: number = getChannelLuminance(digits.slice(0, HEX_DIGITS_PER_CHANNEL));
   const greenStart: number = GREEN_START_INDEX * HEX_DIGITS_PER_CHANNEL;
   const blueStart: number = BLUE_START_INDEX * HEX_DIGITS_PER_CHANNEL;
@@ -64,25 +62,6 @@ const getRelativeLuminance = (hex: string): number => {
   const blue: number = getChannelLuminance(digits.slice(blueStart));
 
   return LUMINANCE_RED * red + LUMINANCE_GREEN * green + LUMINANCE_BLUE * blue;
-};
-
-const getChannelValue = (hex: string, channelIndex: number): number => {
-  const start: number = channelIndex * HEX_DIGITS_PER_CHANNEL;
-
-  return parseInt(hex.replace(HEX_PREFIX, '').slice(start, start + HEX_DIGITS_PER_CHANNEL), HEX_RADIX);
-};
-
-/** The colour a foreground at the opacity shows over the background. */
-const getBlendedHex = (foregroundHex: string, backgroundHex: string, opacity: number): string => {
-  const channels: string[] = [0, GREEN_START_INDEX, BLUE_START_INDEX].map((channelIndex: number): string => {
-    const foregroundPart: number = getChannelValue(foregroundHex, channelIndex) * opacity;
-    const backgroundPart: number = getChannelValue(backgroundHex, channelIndex) * (1 - opacity);
-    const blended: number = Math.round(foregroundPart + backgroundPart);
-
-    return blended.toString(HEX_RADIX).padStart(HEX_DIGITS_PER_CHANNEL, '0');
-  });
-
-  return HEX_PREFIX + channels.join('');
 };
 
 const getContrastRatio = (hexA: string, hexB: string): number => {
@@ -124,16 +103,11 @@ describe('design token contrast', () => {
     expect(getContrastRatio(mutedHex, requireToken(surfaceToken))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
   });
 
-  it.each([BG_TOKEN, BED_TOKEN, BED_SURFACE_TOKEN, ...SURFACE_TOKENS])(
-    'keeps the muted text readable on %s, also dimmed like a coming-soon control',
-    (surfaceToken: string) => {
-      const surfaceHex: string = requireToken(surfaceToken);
-      const dimmedMutedHex: string = getBlendedHex(requireToken(MUTED_TOKEN), surfaceHex, COMING_SOON_OPACITY);
-
-      expect(getContrastRatio(requireToken(MUTED_TOKEN), surfaceHex)).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
-      expect(getContrastRatio(dimmedMutedHex, surfaceHex)).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
-    },
-  );
+  it.each([BG_TOKEN, BED_TOKEN, BED_SURFACE_TOKEN])('keeps the muted text readable on %s', (surfaceToken: string) => {
+    expect(getContrastRatio(requireToken(MUTED_TOKEN), requireToken(surfaceToken))).toBeGreaterThanOrEqual(
+      MIN_TEXT_CONTRAST,
+    );
+  });
 
   it.each([BG_TOKEN, ...SURFACE_TOKENS])('keeps the focus ring visible on %s', (surfaceToken: string) => {
     expect(getContrastRatio(requireToken(FOCUS_RING_TOKEN), requireToken(surfaceToken))).toBeGreaterThanOrEqual(

@@ -1,5 +1,5 @@
 /**
- * A bed view mode, the translation key of its label and whether it can be chosen yet.
+ * A bed view mode, the translation key of its label and, for a mode that is not built yet, what it will show.
  *
  * @author michael.morosov
  *
@@ -13,6 +13,6 @@ import type { BedViewMode } from '../bed.toolbar.constants';
 export interface BedViewModeOptionKey {
   value: BedViewMode;
   labelKey: string;
-  /** Whether the mode is not built yet and shown disabled. */
-  isDisabled: boolean;
+  /** What a mode that is not built yet will show; such a mode is disabled and carries a Soon tag. */
+  soonDescriptionKey?: string;
 }

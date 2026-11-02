@@ -14,12 +14,14 @@ BED_OBJECTS_LABEL;Design objects: arrow keys move the selection, Delete removes 
 BED_PANEL_TITLE;Bed
 BED_SIZE_UNKNOWN;Bed size unknown, showing a default bed
 BED_TOOL_ALIGN;Align
+BED_TOOL_ALIGN_DESCRIPTION;Line up the selected objects with each other or with the bed.
 BED_TOOL_EDIT_NODES;Edit nodes
+BED_TOOL_EDIT_NODES_DESCRIPTION;Move the points of a shape to change its outline.
 BED_TOOL_LABEL;Bed tool
 BED_TOOL_MOVE;Move
 BED_TOOL_SELECT;Select
-BED_TOOLBAR_DESCRIPTION;Edit nodes and align objects.
-BED_VIEW_3D;3D · soon
+BED_VIEW_3D;3D
+BED_VIEW_3D_DESCRIPTION;A 3D preview of the finished job.
 BED_VIEW_DESIGN;Design
 BED_VIEW_MODE_LABEL;Bed view
 BED_VIEW_TOOLPATH;Toolpath

@@ -1,6 +1,6 @@
 /**
- * The laser pointer card: pointer power, hold to fire, frame the job and air assist. Frame job is shown but inert
- * for now.
+ * The laser pointer card: pointer power, hold to fire, frame the job and air assist. Frame job is not built yet, so
+ * it is disabled with a Soon tag.
  *
  * @author michael.morosov
  *
@@ -15,7 +15,6 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE } from '../../../utils/antd.constants';
-import { doNothing } from '../../../utils/do.nothing';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getPointerApproximateWatts } from '../../../utils/machine/get.pointer.approximate.watts';
 import {
@@ -82,7 +81,7 @@ export const LaserCard = (): ReactNode => {
           {t(DEFAULT.MACHINE_LASER_FIRMWARE_NOTE, { seconds: MAX_POINTER_HOLD_MS / MILLISECONDS_PER_SECOND })}
         </p>
         <ComingSoon description={t(DEFAULT.MACHINE_LASER_FRAME_DESCRIPTION)}>
-          <Button size={ANTD_BUTTON_SIZE_LARGE} onClick={doNothing}>
+          <Button size={ANTD_BUTTON_SIZE_LARGE} disabled>
             {t(DEFAULT.MACHINE_LASER_FRAME)}
           </Button>
         </ComingSoon>

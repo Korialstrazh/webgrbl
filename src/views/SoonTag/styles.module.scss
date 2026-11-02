@@ -1,0 +1,22 @@
+@use '../../styles/accessibility' as accessibility;
+
+// A small neutral chip: muted text on a subtle surface, so it does not compete with the real controls.
+.soonTag:global(.ant-tag) {
+  flex: none;
+  margin: 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  cursor: help;
+}
+
+// The description for screen readers; sighted users get it from the tooltip.
+.description {
+  @include accessibility.visually-hidden;
+}

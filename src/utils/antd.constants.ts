@@ -91,3 +91,5 @@ export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';
 
 /** The tooltip opens while its anchor is hovered or holds the keyboard focus. */
 export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['hover', 'focus'];
+
+export const ANTD_TOOLTIP_PLACEMENT_BOTTOM: TooltipProps['placement'] = 'bottom';
