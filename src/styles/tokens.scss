@@ -1,20 +1,40 @@
 :root {
   --color-bg: #121417;
   --color-bed: #0e1012;
-  // The work surface is a light grey, like a sheet of material, so black artwork stays visible on it (9.2:1); the
-  // area around it and the panel chrome stay dark. Everything drawn on it uses the bed tokens below, darker than the
-  // chrome colours, so it stays legible on the light surface.
+  // The work surface: a light grey by default, like a sheet of material, so black artwork stays visible on it (9.2:1);
+  // the user can choose another colour, which the bed sets on its element. The area around it and the panel chrome
+  // stay dark.
   --color-bed-surface: #a7acb1;
-  --color-bed-grid-minor: #8d9399;
-  --color-bed-grid-major: #737a81;
-  // Markers and outlines on the bed: at least 3:1 against the surface.
-  --color-bed-accent: #8a3d00;
-  --color-bed-laser-head: #b0121a;
-  --color-bed-danger: #a8101a;
-  --color-bed-travel: #1d55a0;
-  // Burnt marks and text on the bed: at least 4.5:1 against the surface.
-  --color-bed-ink: #111315;
-  --color-bed-text: #25292e;
+  // Two sets of mark colours: dark marks for a light bed and light marks for a dark one; getBedOverlayTone picks the
+  // set from the bed colour's luminance. Markers keep 3:1 and marks and text 4.5:1 against the default bed of their
+  // side (tokens.contrast.test.ts).
+  --color-bed-on-light-grid-minor: #8d9399;
+  --color-bed-on-light-grid-major: #737a81;
+  --color-bed-on-light-accent: #8a3d00;
+  --color-bed-on-light-laser-head: #b0121a;
+  --color-bed-on-light-danger: #a8101a;
+  --color-bed-on-light-travel: #1d55a0;
+  --color-bed-on-light-ink: #111315;
+  --color-bed-on-light-text: #25292e;
+  --color-bed-on-light-chip-border: #2a2e34;
+  --color-bed-on-dark-grid-minor: #4a5056;
+  --color-bed-on-dark-grid-major: #636a71;
+  --color-bed-on-dark-accent: #ff8a1f;
+  --color-bed-on-dark-laser-head: #ff5a5a;
+  --color-bed-on-dark-danger: #ff6b6b;
+  --color-bed-on-dark-travel: #6fb1ff;
+  --color-bed-on-dark-ink: #f1f3f5;
+  --color-bed-on-dark-text: #d5d9de;
+  --color-bed-on-dark-chip-border: #6b7178;
+  --color-bed-grid-minor: var(--color-bed-on-light-grid-minor);
+  --color-bed-grid-major: var(--color-bed-on-light-grid-major);
+  --color-bed-accent: var(--color-bed-on-light-accent);
+  --color-bed-laser-head: var(--color-bed-on-light-laser-head);
+  --color-bed-danger: var(--color-bed-on-light-danger);
+  --color-bed-travel: var(--color-bed-on-light-travel);
+  --color-bed-ink: var(--color-bed-on-light-ink);
+  --color-bed-text: var(--color-bed-on-light-text);
+  --color-bed-chip-border: var(--color-bed-on-light-chip-border);
   --color-surface-1: #16191c;
   --color-surface-2: #1d2024;
   --color-surface-3: #23272c;
@@ -69,4 +89,17 @@
   --control-height: 2.25rem;
   --focus-outline-width: 0.125rem;
   --focus-outline-offset: 0.125rem;
+}
+
+// A dark bed colour takes the light set of marks. Must match BED_OVERLAY_TONE.ON_DARK.
+[data-bed-tone='on-dark'] {
+  --color-bed-grid-minor: var(--color-bed-on-dark-grid-minor);
+  --color-bed-grid-major: var(--color-bed-on-dark-grid-major);
+  --color-bed-accent: var(--color-bed-on-dark-accent);
+  --color-bed-laser-head: var(--color-bed-on-dark-laser-head);
+  --color-bed-danger: var(--color-bed-on-dark-danger);
+  --color-bed-travel: var(--color-bed-on-dark-travel);
+  --color-bed-ink: var(--color-bed-on-dark-ink);
+  --color-bed-text: var(--color-bed-on-dark-text);
+  --color-bed-chip-border: var(--color-bed-on-dark-chip-border);
 }

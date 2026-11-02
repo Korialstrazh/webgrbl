@@ -1,6 +1,7 @@
 /**
- * The small zoom cluster in the bottom-right corner of the bed: zoom out, the zoom as a percentage of the fitted bed,
- * zoom in and Fit. Each button names its keyboard shortcut in its tooltip, and the cluster tells how to pan.
+ * The small view cluster in the bottom-right corner of the bed: an optional leading control (the bed colour), zoom
+ * out, the zoom as a percentage of the fitted bed, zoom in and Fit. Each button names its keyboard shortcut in its
+ * tooltip, and the cluster tells how to pan.
  *
  * @author michael.morosov
  *
@@ -18,11 +19,12 @@ import type { BedZoomControlsProps } from './interfaces/BedZoomControlsProps';
 import styles from './styles.module.scss';
 
 export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
-  const { zoomPercent, canZoomIn, canZoomOut, onZoomIn, onZoomOut, onFit } = props;
+  const { leadingControlComponent, zoomPercent, canZoomIn, canZoomOut, onZoomIn, onZoomOut, onFit } = props;
   const { t } = useTranslation();
 
   return (
     <Space.Compact className={styles.bedZoomControls} role="group" aria-label={t(DEFAULT.BED_ZOOM_CONTROLS_LABEL)}>
+      {leadingControlComponent}
       <Tooltip title={t(DEFAULT.BED_ZOOM_OUT_HINT)}>
         <Button
           className={styles.zoomButton}

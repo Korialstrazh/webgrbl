@@ -46,13 +46,15 @@ const DANGER_TEXT_TOKEN = '--color-danger-text';
 const DARK_TEXT_ON_ACCENT = '#121417';
 // Black artwork and the marks and text drawn on the light bed need 4.5:1; markers and outlines need 3:1.
 const BLACK_ARTWORK = '#000000';
-const BED_TEXT_TOKENS = ['--color-bed-ink', '--color-bed-text'] as const;
-const BED_MARKER_TOKENS = [
-  '--color-bed-accent',
-  '--color-bed-laser-head',
-  '--color-bed-danger',
-  '--color-bed-travel',
-] as const;
+const BED_TONE_PREFIXES = ['--color-bed-on-light-', '--color-bed-on-dark-'] as const;
+// The darkest light bed and the lightest dark bed each set is meant for: the default grey and the dark grey preset.
+type BedTonePrefix = (typeof BED_TONE_PREFIXES)[number];
+const BED_SURFACE_OF_TONE: Readonly<Record<BedTonePrefix, string>> = {
+  '--color-bed-on-light-': '#a7acb1',
+  '--color-bed-on-dark-': '#3a3e43',
+};
+const BED_TEXT_TOKEN_NAMES = ['ink', 'text'] as const;
+const BED_MARKER_TOKEN_NAMES = ['accent', 'laser-head', 'danger', 'travel'] as const;
 const MIN_GRAPHIC_CONTRAST = 3;
 const DISABLED_TEXT_TOKEN = '--color-disabled-text';
 const DISABLED_BG_TOKEN = '--color-disabled-bg';
@@ -178,15 +180,17 @@ describe('design token contrast', () => {
     expect(getContrastRatio(BLACK_ARTWORK, requireToken(BED_SURFACE_TOKEN))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
   });
 
-  it.each(BED_TEXT_TOKENS)('keeps %s readable on the bed surface', (bedToken: string) => {
-    expect(getContrastRatio(requireToken(bedToken), requireToken(BED_SURFACE_TOKEN))).toBeGreaterThanOrEqual(
-      MIN_TEXT_CONTRAST,
-    );
+  it.each(BED_TONE_PREFIXES)('keeps the marks and text of %s readable on its bed', (tonePrefix: BedTonePrefix) => {
+    for (const tokenName of BED_TEXT_TOKEN_NAMES) {
+      expect(getContrastRatio(requireToken(tonePrefix + tokenName), BED_SURFACE_OF_TONE[tonePrefix]))
+        .toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+    }
   });
 
-  it.each(BED_MARKER_TOKENS)('keeps %s visible on the bed surface', (bedToken: string) => {
-    expect(getContrastRatio(requireToken(bedToken), requireToken(BED_SURFACE_TOKEN))).toBeGreaterThanOrEqual(
-      MIN_GRAPHIC_CONTRAST,
-    );
+  it.each(BED_TONE_PREFIXES)('keeps the markers of %s visible on its bed', (tonePrefix: BedTonePrefix) => {
+    for (const tokenName of BED_MARKER_TOKEN_NAMES) {
+      expect(getContrastRatio(requireToken(tonePrefix + tokenName), BED_SURFACE_OF_TONE[tonePrefix]))
+        .toBeGreaterThanOrEqual(MIN_GRAPHIC_CONTRAST);
+    }
   });
 });

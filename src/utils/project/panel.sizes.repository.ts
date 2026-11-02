@@ -13,35 +13,17 @@
  */
 import { getValidConsoleSizePercent } from '../layout/get.valid.console.size.percent';
 import { getValidPanelSizePercents } from '../layout/get.valid.panel.size.percents';
-import { isString } from '../type.guards/is.string';
-import type { AppStateEntry } from './interfaces/AppStateEntry';
+import { getStoredAppStateJson } from './get.stored.app.state.json';
 import { APP_STATE_KEY } from './project.database.constants';
-import type { AppStateKey } from './project.database.constants';
 import { WEBGRBL_DATABASE } from './webgrbl.database';
-
-const getParsedStoredValue = (storedText: string): unknown => {
-  try {
-    return JSON.parse(storedText);
-  } catch {
-    return undefined;
-  }
-};
-
-/** The parsed JSON of one app state row; unknown, because the row comes from storage and is checked, not trusted. */
-const getStoredJsonValue = async (appStateKey: AppStateKey): Promise<unknown> => {
-  const appStateEntry: AppStateEntry | undefined = await WEBGRBL_DATABASE.appState.get(appStateKey);
-  const storedText: unknown = appStateEntry?.value;
-
-  return isString(storedText) ? getParsedStoredValue(storedText) : undefined;
-};
 
 export const PANEL_SIZES_REPOSITORY = {
   async getPanelSizePercents(): Promise<number[] | undefined> {
-    return getValidPanelSizePercents(await getStoredJsonValue(APP_STATE_KEY.PANEL_SIZES));
+    return getValidPanelSizePercents(await getStoredAppStateJson(APP_STATE_KEY.PANEL_SIZES));
   },
 
   async getConsoleSizePercent(): Promise<number | undefined> {
-    return getValidConsoleSizePercent(await getStoredJsonValue(APP_STATE_KEY.CONSOLE_PANEL_SIZE));
+    return getValidConsoleSizePercent(await getStoredAppStateJson(APP_STATE_KEY.CONSOLE_PANEL_SIZE));
   },
 
   async setConsoleSizePercent(consoleSizePercent: number): Promise<void> {

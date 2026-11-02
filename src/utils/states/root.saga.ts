@@ -10,6 +10,7 @@
  */
 import { all, fork } from 'redux-saga/effects';
 import type { ToolpathWorkerClient } from '../toolpath/interfaces/ToolpathWorkerClient';
+import { watchBedAppearance } from './bed.appearance.saga';
 import { watchOnlineStatus } from './browser.environment.state';
 import { watchGrblController } from './grbl.controller.saga';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
@@ -32,6 +33,7 @@ export function* rootSaga(
     fork(watchMachineProfiles),
     fork(watchPalette),
     fork(watchPanelLayout),
+    fork(watchBedAppearance),
     fork(watchLaserPointer),
     fork(watchProjects),
     fork(watchGrblController, grblControllerSagaDependencies),

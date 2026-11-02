@@ -1,0 +1,80 @@
+/**
+ * The bed colour button of the bed's view controls: a swatch of the current bed colour that opens an antd ColorPicker
+ * with presets (the default grey, a light grey, white, a dark grey and a wood tone), a note that a very dark bed hides
+ * black artwork, and Reset to default. Every change goes to the bed at once and is stored app-wide.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-11-02
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+import { Button, ColorPicker, Tooltip } from 'antd';
+import type { ColorPickerProps } from 'antd';
+import type { Color } from 'antd/es/color-picker';
+import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_COLOR_PICKER_FORMAT_HEX } from '../../utils/antd.constants';
+import { BED_COLOUR_PRESETS, DEFAULT_BED_COLOUR } from '../../utils/bed/bed.colour.constants';
+import { getValidBedColour } from '../../utils/bed/get.valid.bed.colour';
+import { DEFAULT } from '../../utils/localization/default.locales';
+import { BedColourChanged, selectBedColour } from '../../utils/states/bed.appearance.state';
+import type { AppDispatch } from '../../utils/states/new.store';
+import styles from './styles.module.scss';
+
+type BedColourPickerPanelRender = NonNullable<ColorPickerProps['panelRender']>;
+
+export const BedColourPicker = (): ReactNode => {
+  const { t } = useTranslation();
+  const dispatch: AppDispatch = useDispatch();
+  const bedColour: string = useSelector(selectBedColour);
+  const labelText: string = t(DEFAULT.BED_COLOUR_LABEL);
+
+  const changeBedColour = (nextBedColour: string): void => {
+    dispatch(new BedColourChanged({ bedColour: nextBedColour }));
+  };
+
+  const handlePickerChange = (pickedColour: Color): void => {
+    const validBedColour: string | undefined = getValidBedColour(pickedColour.toHexString());
+
+    if (validBedColour) {
+      changeBedColour(validBedColour);
+    }
+  };
+
+  const renderPanel: BedColourPickerPanelRender = (panelComponent: ReactNode) => (
+    <div className={styles.panel}>
+      {panelComponent}
+      <p className={styles.darkNote}>{t(DEFAULT.BED_COLOUR_DARK_NOTE)}</p>
+      <Button block disabled={bedColour === DEFAULT_BED_COLOUR} onClick={() => changeBedColour(DEFAULT_BED_COLOUR)}>
+        {t(DEFAULT.BED_COLOUR_RESET)}
+      </Button>
+    </div>
+  );
+
+  return (
+    <ColorPicker
+      value={bedColour}
+      format={ANTD_COLOR_PICKER_FORMAT_HEX}
+      disabledAlpha
+      disabledFormat
+      presets={[{ label: t(DEFAULT.BED_COLOUR_PRESETS), colors: [...BED_COLOUR_PRESETS], defaultOpen: true }]}
+      panelRender={renderPanel}
+      onChange={handlePickerChange}
+    >
+      <Tooltip title={labelText}>
+        <Button className={styles.bedColourButton} aria-label={labelText}>
+          {/* A plain swatch of the current colour; only its fill changes at run time. */}
+          <span
+            className={styles.swatch}
+            aria-hidden="true"
+            // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
+            style={{ backgroundColor: bedColour }}
+          />
+        </Button>
+      </Tooltip>
+    </ColorPicker>
+  );
+};

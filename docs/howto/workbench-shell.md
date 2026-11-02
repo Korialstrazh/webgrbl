@@ -84,7 +84,15 @@ Exactly one STOP is rendered: `StopButton`, an antd `Button` with `type="primary
 ## Tokens and fonts
 
 - All colours, radii, spacing, fonts and sizes are CSS custom properties in `src/styles/tokens.scss`; use `var(--...)` only (never raw hex or px). Notable ones: `--color-danger-button` for danger buttons (contrast), `--target-min` (2.75 rem machine-control target), `--control-height`, `--focus-outline-width` / `--focus-outline-offset` with `--color-focus-ring`, `--radius-pill`.
-- The bed work surface is a light grey (`--color-bed-surface`, black artwork 9.2:1) while the area around it, the ruler bands and the panel chrome stay dark. Anything drawn on the bed uses the `--color-bed-*` tokens (grid, accent, laser head, danger, travel, ink, text), never the chrome colours: marks and text keep 4.5:1 and markers 3:1 against the surface (`tokens.contrast.test.ts`).
+- The bed work surface defaults to a light grey (`DEFAULT_BED_COLOUR`, `--color-bed-surface`, black artwork 9.2:1) while the area around it, the ruler bands and the panel chrome stay dark. Anything drawn on the bed uses the `--color-bed-*` tokens (grid, accent, laser head, danger, travel, ink, text, chip border), never the chrome colours.
+
+## Bed colour
+
+The user picks the bed colour from the swatch button at the start of the zoom cluster (`BedColourPicker`, an antd `ColorPicker` with the presets default grey, light grey, white, dark grey and wood, a note that a very dark bed hides black artwork, and Reset to default).
+
+- State and storage: `bedAppearance` slice (`BedColourChanged`, `BedColourLoaded`, `selectBedColour`); `bed.appearance.saga.ts` reads `BED_COLOUR_REPOSITORY` at start under the panel sizes read timeout and stores changes app-wide (not per project) in `appState` key `bedColour`, debounced by `BED_COLOUR_STORE_DEBOUNCE_MS`. A missing or invalid stored value (`getValidBedColour`: six-digit hex only) keeps the default.
+- Applying it: `BedPanel` sets `--color-bed-surface` inline on the bed area and `data-bed-tone` from `getBedOverlayTone`, which compares the colour's relative luminance (`getColourRelativeLuminance`) with `BED_OVERLAY_TONE_LUMINANCE_THRESHOLD` (0.179, where black and white marks contrast equally). `tokens.scss` defines an `--color-bed-on-light-*` and an `--color-bed-on-dark-*` set; `[data-bed-tone='on-dark']` switches the `--color-bed-*` tokens to the light marks. Each set keeps 4.5:1 for marks and text and 3:1 for markers against the default bed of its side (`tokens.contrast.test.ts`).
+- A new mark on the bed must use a `--color-bed-*` token and get a value in both sets.
 - New colours must keep 4.5:1 text contrast (`tokens.contrast.test.ts`). The focus ring (`--color-focus-ring`, the accent) must keep 3:1 on every surface; it is the one ring for every control: a global `:focus-visible` rule, and antd's `colorPrimaryBorder` and `lineWidthFocus` tokens.
 - Splitter bars take their colours from the `Splitter` component tokens: a border-coloured line with a muted 2 rem grip at rest, the accent on hover and drag.
 - Inter and JetBrains Mono are self-hosted in `src/styles/fonts/` (`fonts.scss`); do not load fonts from a CDN, the app works offline.

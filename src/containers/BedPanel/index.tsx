@@ -5,7 +5,8 @@
  * - Toolpath view: the real job at the simulation time instead of the objects (no editing there), with its colour and
  *   travel toggles, the warnings chip in the toolbar row, the job size and estimate, the generation progress or
  *   out-of-date banner, and the simulation playback bar below the bed.
- * - The bed zooms and pans in both views (see BedViewport).
+ * - The bed zooms and pans in both views (see BedViewport). Its work surface takes the colour the user chose, and the
+ *   marks drawn on it the matching light or dark set.
  * - The other tools and the 3D view are not built yet. SVG files dropped on the bed are imported.
  *
  * Its element is the host that dialogs and drawers render into.
@@ -22,10 +23,12 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { getBedOverlayTone } from '../../utils/bed/get.bed.overlay.tone';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
 import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { selectBedColour } from '../../utils/states/bed.appearance.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
@@ -50,6 +53,7 @@ import {
 import type { BedTool, BedViewMode } from './bed.toolbar.constants';
 import type { BedComingSoonToolKeys } from './interfaces/BedComingSoonToolKeys';
 import type { BedPanelProps } from './interfaces/BedPanelProps';
+import type { BedSurfaceStyle } from './interfaces/BedSurfaceStyle';
 import type { BedToolOption } from './interfaces/BedToolOption';
 import type { BedToolOptionKey } from './interfaces/BedToolOptionKey';
 import type { BedViewModeControls } from './interfaces/BedViewModeControls';
@@ -64,6 +68,8 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const { t } = useTranslation();
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
   const dimensions: BedDimensions = useBedDimensions();
+  const bedColour: string = useSelector(selectBedColour);
+  const bedSurfaceStyle: BedSurfaceStyle = { '--color-bed-surface': bedColour };
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
   const [activeTool, setActiveTool] = useState<BedTool>(BED_TOOL.SELECT);
   const [toolpathDisplayMode, setToolpathDisplayMode] = useState<ToolpathDisplayMode>(DEFAULT_TOOLPATH_DISPLAY_MODE);
@@ -125,6 +131,10 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
         className={dropArea.isDropTarget ? [styles.bed, styles.dropTarget].join(' ') : styles.bed}
         data-testid={BED_DROP_AREA_TEST_ID}
         data-drop-target={dropArea.isDropTarget}
+        // The chosen bed colour and the set of mark colours that stays legible on it; both change at run time.
+        data-bed-tone={getBedOverlayTone(bedColour)}
+        // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
+        style={bedSurfaceStyle}
         onDragOver={dropArea.handleDragOver}
         onDragLeave={dropArea.handleDragLeave}
         onDrop={dropArea.handleDrop}

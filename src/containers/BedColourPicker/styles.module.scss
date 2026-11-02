@@ -1,0 +1,28 @@
+// As tall as the zoom buttons it sits beside, a 2rem target.
+.bedColourButton:global(.ant-btn) {
+  min-width: 2rem;
+  height: 2rem;
+  padding-inline: var(--space-2);
+}
+
+.swatch {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--color-text-muted);
+  border-radius: var(--radius-sm);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.darkNote {
+  max-width: 14rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+}

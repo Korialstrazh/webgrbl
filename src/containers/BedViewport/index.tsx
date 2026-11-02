@@ -29,6 +29,7 @@ import { PERCENT_DIVISOR } from '../../utils/percent.constants';
 import { BedRulers } from '../../views/BedRulers';
 import { BedView } from '../../views/BedView';
 import { BedZoomControls } from '../../views/BedZoomControls';
+import { BedColourPicker } from '../BedColourPicker';
 import type { BedPanGesture } from './interfaces/BedPanGesture';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
 import type { BedViewportProps } from './interfaces/BedViewportProps';
@@ -106,6 +107,7 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
           </BedView>
         </BedZoomContext>
         <BedZoomControls
+          leadingControlComponent={<BedColourPicker />}
           zoomPercent={Math.round(viewport.zoom * PERCENT_DIVISOR)}
           canZoomIn={viewport.zoom < MAX_BED_ZOOM}
           canZoomOut={viewport.zoom > MIN_BED_ZOOM}
