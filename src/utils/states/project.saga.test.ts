@@ -542,7 +542,8 @@ describe(watchProjects.name, () => {
       const oldProjectId: string = selectProjectId(store.getState()) ?? '';
       const oldObject: ProjectObject = addObject(store);
       const fileObject: ProjectObject = newProjectObject({ svgText: ARTWORK_SVG_TEXT });
-      const fileText: string = getProjectFileText(IMPORTED_PROJECT_NAME, { objects: [fileObject], layers: [] });
+      const fileText: string =
+        getProjectFileText(IMPORTED_PROJECT_NAME, { objects: [fileObject], layers: [] }, undefined);
 
       store.dispatch(new ProjectFileImportRequested({ file: newProjectFile(fileText) }));
 
@@ -575,7 +576,7 @@ describe(watchProjects.name, () => {
     it('rejects a project file over the size limit before reading it', async () => {
       const store: AppStore = await newStartedStore();
       const projectId: string = selectProjectId(store.getState()) ?? '';
-      const oversizedFile: File = newProjectFile(getProjectFileText(IMPORTED_PROJECT_NAME, EMPTY_DOCUMENT));
+      const oversizedFile: File = newProjectFile(getProjectFileText(IMPORTED_PROJECT_NAME, EMPTY_DOCUMENT, undefined));
       Object.defineProperty(oversizedFile, 'size', { value: MAX_PROJECT_FILE_BYTES + 1 });
       const readSpy: MockInstance<File['text']> = vi.spyOn(oversizedFile, 'text');
 
@@ -592,7 +593,7 @@ describe(watchProjects.name, () => {
     it('opens a project file of exactly the size limit', async () => {
       const store: AppStore = await newStartedStore();
       const oldProjectId: string = selectProjectId(store.getState()) ?? '';
-      const limitSizedFile: File = newProjectFile(getProjectFileText(IMPORTED_PROJECT_NAME, EMPTY_DOCUMENT));
+      const limitSizedFile: File = newProjectFile(getProjectFileText(IMPORTED_PROJECT_NAME, EMPTY_DOCUMENT, undefined));
       Object.defineProperty(limitSizedFile, 'size', { value: MAX_PROJECT_FILE_BYTES });
 
       store.dispatch(new ProjectFileImportRequested({ file: limitSizedFile }));
@@ -673,7 +674,7 @@ describe(watchProjects.name, () => {
 
       await vi.waitFor((): void => {
         expect(downloadTextFile).toHaveBeenCalledWith({
-          text: getProjectFileText(NAME_WITH_FORBIDDEN_CHARACTERS, selectProjectDocument(store.getState())),
+          text: getProjectFileText(NAME_WITH_FORBIDDEN_CHARACTERS, selectProjectDocument(store.getState()), undefined),
           fileName: `Coasters roundsquare${PROJECT_FILE_EXTENSION}`,
           mimeType: PROJECT_FILE_MIME_TYPE,
         });
@@ -701,7 +702,7 @@ describe(watchProjects.name, () => {
       const store: AppStore = await newStartedStore();
       const oldProjectId: string = selectProjectId(store.getState()) ?? '';
       const lateObject: ProjectObject = newProjectObject({ svgText: ARTWORK_SVG_TEXT });
-      const fileText: string = getProjectFileText(IMPORTED_PROJECT_NAME, EMPTY_DOCUMENT);
+      const fileText: string = getProjectFileText(IMPORTED_PROJECT_NAME, EMPTY_DOCUMENT, undefined);
       runWhenProjectIsCreated((): void => {
         addObject(store, lateObject);
       });

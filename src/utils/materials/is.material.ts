@@ -1,5 +1,5 @@
 /**
- * Tells whether a value is a material: text id and name, a thickness in range, and only well-formed test results.
+ * Tells whether a value is a material: text id and name, a finite thickness, and only well-formed test results.
  *
  * @author michael.morosov
  *

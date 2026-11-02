@@ -24,4 +24,6 @@ export interface StoredProject {
   objects: StoredProjectObject[];
   /** The layers of the document; missing in a row stored before projects had layers. */
   layers?: ProjectLayer[];
+  /** The material of the document; missing until the user chooses one, and in a row stored before materials. */
+  materialId?: string;
 }

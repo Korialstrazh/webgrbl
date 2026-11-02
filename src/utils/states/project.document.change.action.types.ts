@@ -15,6 +15,7 @@ import {
   LayerToggled,
   LayersReordered,
   ProjectDocumentLoaded,
+  ProjectMaterialSelected,
   ProjectObjectsAdded,
   ProjectObjectsDeleted,
   ProjectObjectsTransformed,
@@ -33,4 +34,5 @@ export const PROJECT_DOCUMENT_CHANGE_ACTION_TYPES: readonly string[] = [
   LayerToggled.type,
   LayersReordered.type,
   LayerPaletteEntryLinked.type,
+  ProjectMaterialSelected.type,
 ];

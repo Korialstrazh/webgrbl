@@ -9,14 +9,17 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { call, select } from 'redux-saga/effects';
+import { call, put, select } from 'redux-saga/effects';
 import { DEFAULT } from '../localization/default.locales';
+import type { Material } from '../materials/interfaces/Material';
+import { MATERIAL_REPOSITORY } from '../materials/material.repository';
 import type { Palette } from '../palette/interfaces/Palette';
 import { getImportedProjectFile } from '../project/get.imported.project.file';
 import type { ImportedProjectFile } from '../project/interfaces/ImportedProjectFile';
 import type { StoredProject } from '../project/interfaces/StoredProject';
 import { MAX_PROJECT_FILE_BYTES } from '../project/project.constants';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
+import { MaterialsLoaded } from './material.state';
 import { selectPalette } from './palette.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import type { ProjectFileImportRequested } from './project.state';
@@ -36,8 +39,22 @@ const readProjectFile = async (projectFile: File, palette: Palette): Promise<Imp
   }
 };
 
+/** A material whose id is already stored stays as it is here, with its own name and test results. */
+function* storeImportedMaterial(importedMaterial: Material): Generator {
+  yield call([MATERIAL_REPOSITORY, MATERIAL_REPOSITORY.addMissingMaterial], importedMaterial);
+
+  const storedMaterials: Material[] =
+    (yield call([MATERIAL_REPOSITORY, MATERIAL_REPOSITORY.listMaterials])) as Material[];
+
+  yield put(new MaterialsLoaded({ materials: storedMaterials }));
+}
+
 /** The new project is stored before the open one closes, so no edit waits on storage between the close and the load. */
 function* storeAndOpenImportedProject(importedFile: ImportedProjectFile): Generator {
+  if (importedFile.material) {
+    yield call(storeImportedMaterial, importedFile.material);
+  }
+
   const createdProject: StoredProject =
     (yield call([PROJECT_REPOSITORY, PROJECT_REPOSITORY.createProject], importedFile.name)) as StoredProject;
 

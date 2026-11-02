@@ -35,6 +35,7 @@ import type { LayerPaletteEntryLinkedPayload } from './interfaces/LayerPaletteEn
 import type { LayerSettingsChangedPayload } from './interfaces/LayerSettingsChangedPayload';
 import type { LayerToggledPayload } from './interfaces/LayerToggledPayload';
 import type { ProjectDocumentPayload } from './interfaces/ProjectDocumentPayload';
+import type { ProjectMaterialSelectedPayload } from './interfaces/ProjectMaterialSelectedPayload';
 import type { ProjectObjectIdsPayload } from './interfaces/ProjectObjectIdsPayload';
 import type { ProjectObjectTransformsPayload } from './interfaces/ProjectObjectTransformsPayload';
 import type { ProjectObjectsPayload } from './interfaces/ProjectObjectsPayload';
@@ -100,6 +101,10 @@ export class LayerPaletteEntryLinked extends Action<LayerPaletteEntryLinkedPaylo
   public static readonly type: string = actionType('layer palette entry linked');
 }
 
+export class ProjectMaterialSelected extends Action<ProjectMaterialSelectedPayload> {
+  public static readonly type: string = actionType('project material selected');
+}
+
 export class SvgFilesImportRequested extends Action<SvgFilesPayload> {
   public static readonly type: string = actionType('svg files import requested');
 }
@@ -134,10 +139,14 @@ const getStateWithAddedObjects = (
 ): ProjectDocumentState =>
   addedObjects.length
     ? getStateWithChange(state, {
+      ...state.document,
       objects: [...state.document.objects, ...addedObjects],
       layers: getLayersWithNewLayers(state.document.layers, derivedLayers),
     })
     : state;
+
+const getStateWithMaterial = (state: ProjectDocumentState, materialId: string): ProjectDocumentState =>
+  materialId === state.document.materialId ? state : getStateWithChange(state, { ...state.document, materialId });
 
 const getTransformFields = (transform: ProjectObjectTransform): ProjectObjectTransform => ({
   xMm: transform.xMm,
@@ -247,6 +256,8 @@ export const projectDocumentReducer = (
     return getStateWithTransforms(state, (action as ProjectObjectsTransformed).payload.transforms);
   case ProjectObjectsDeleted.type:
     return getStateWithoutObjects(state, (action as ProjectObjectsDeleted).payload.objectIds);
+  case ProjectMaterialSelected.type:
+    return getStateWithMaterial(state, (action as ProjectMaterialSelected).payload.materialId);
   case ProjectUndoRequested.type:
     return getStateAfterUndo(state);
   case ProjectRedoRequested.type:

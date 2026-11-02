@@ -19,4 +19,6 @@ export interface ProjectDocument {
    * kept, so an undo brings them back with their settings.
    */
   layers: ProjectLayer[];
+  /** The material the project is burned on; missing until the user chooses one. */
+  materialId?: string;
 }
