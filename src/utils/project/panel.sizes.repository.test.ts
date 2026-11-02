@@ -40,3 +40,29 @@ describe(PANEL_SIZES_REPOSITORY.setPanelSizePercents.name, () => {
     expect((await WEBGRBL_DATABASE.appState.get(APP_STATE_KEY.LAST_OPENED_PROJECT_ID))?.value).toBe(projectId);
   });
 });
+
+describe(PANEL_SIZES_REPOSITORY.getConsoleSizePercent.name, () => {
+  const STORED_CONSOLE_PERCENT = 35;
+
+  it('gives nothing while no console height is stored', async () => {
+    expect(await PANEL_SIZES_REPOSITORY.getConsoleSizePercent()).toBeUndefined();
+  });
+
+  it('gives back the console height stored last, apart from the column widths', async () => {
+    await PANEL_SIZES_REPOSITORY.setPanelSizePercents(STORED_PERCENTS);
+    await PANEL_SIZES_REPOSITORY.setConsoleSizePercent(STORED_CONSOLE_PERCENT);
+
+    expect(await PANEL_SIZES_REPOSITORY.getConsoleSizePercent()).toBe(STORED_CONSOLE_PERCENT);
+    expect(await PANEL_SIZES_REPOSITORY.getPanelSizePercents()).toEqual(STORED_PERCENTS);
+  });
+
+  it.each([
+    ['text that is not JSON', '{not json'],
+    ['a list', '[35]'],
+    ['a height of the whole column', '100'],
+  ])('gives nothing for a stored row with %s', async (_caseName: string, storedValue: string) => {
+    await WEBGRBL_DATABASE.appState.put({ key: APP_STATE_KEY.CONSOLE_PANEL_SIZE, value: storedValue });
+
+    expect(await PANEL_SIZES_REPOSITORY.getConsoleSizePercent()).toBeUndefined();
+  });
+});

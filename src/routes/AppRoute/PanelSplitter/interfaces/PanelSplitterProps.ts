@@ -1,5 +1,5 @@
 /**
- * Props of PanelSplitter: the three workbench panels it places side by side, and the callback for live resizes.
+ * Props of PanelSplitter: the three workbench panels it places side by side.
  *
  * @author michael.morosov
  *
@@ -17,6 +17,4 @@ export interface PanelSplitterProps {
   bedPanelComponent: ReactNode;
   /** The right panel. */
   machinePanelComponent: ReactNode;
-  /** Called while a splitter bar is dragged, with the width of each panel in percent of the workbench width. */
-  onPanelResize: (panelSizePercents: number[]) => void;
 }

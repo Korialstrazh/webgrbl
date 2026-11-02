@@ -12,4 +12,6 @@
 export interface StoredPanelSizesPayload {
   /** The stored width of each workbench panel in percent, or undefined when the default sizes apply. */
   panelSizePercents: number[] | undefined;
+  /** The stored console height in percent of the bed column, or undefined when the default height applies. */
+  consoleSizePercent: number | undefined;
 }

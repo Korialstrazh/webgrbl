@@ -8,6 +8,6 @@ describe(getPanelDefaultSizes.name, () => {
   });
 
   it('opens with the fixed side panel widths and the bed taking the rest when nothing is stored', () => {
-    expect(getPanelDefaultSizes(undefined, ROOT_FONT_SIZE_PX)).toEqual([280, undefined, 352]);
+    expect(getPanelDefaultSizes(undefined, ROOT_FONT_SIZE_PX)).toEqual([300, undefined, 352]);
   });
 });

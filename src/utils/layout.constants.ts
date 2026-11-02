@@ -22,26 +22,20 @@ export const MACHINE_PANEL_WIDTH = 'var(--machine-panel-width)';
 /** The resizable columns of the wide workbench, left to right: design panel, bed, machine panel. */
 export const WORKBENCH_PANEL_COUNT = 3;
 
-/** Position of the design panel in the list of panel sizes. */
-export const DESIGN_PANEL_INDEX = 0;
-
-/** Position of the machine panel in the list of panel sizes. */
-export const MACHINE_PANEL_INDEX = 2;
-
 /** Width of the design panel until the user resizes it; must match $design-panel-width in layout.scss. */
-export const DESIGN_PANEL_DEFAULT_WIDTH_REM = 17.5;
+export const DESIGN_PANEL_DEFAULT_WIDTH_REM = 18.75;
 
 /** Width of the machine panel until the user resizes it; must match $machine-panel-width in layout.scss. */
 export const MACHINE_PANEL_DEFAULT_WIDTH_REM = 22;
 
-/** The design panel never gets narrower than this, so the layer rows and the object fields stay usable. */
-export const DESIGN_PANEL_MIN_WIDTH_REM = 14;
+/** The design panel never gets narrower than this, so a layer row keeps its name and a one-line summary. */
+export const DESIGN_PANEL_MIN_WIDTH_REM = 16.25;
 
 /** The bed never gets narrower than this, so its toolbar and the bed drawing stay usable. */
-export const BED_PANEL_MIN_WIDTH_REM = 20;
+export const BED_PANEL_MIN_WIDTH_REM = 30;
 
-/** The machine panel never gets narrower than this, so the jog buttons and STOP stay usable. */
-export const MACHINE_PANEL_MIN_WIDTH_REM = 18;
+/** The machine panel never gets narrower than this, so the cards fit without a sideways scrollbar. */
+export const MACHINE_PANEL_MIN_WIDTH_REM = 20;
 
 /** The panel sizes are stored as percentages of the workbench width, which add up to this. */
 export const PANEL_SIZE_PERCENT_TOTAL = 100;
@@ -49,8 +43,17 @@ export const PANEL_SIZE_PERCENT_TOTAL = 100;
 /** Stored percentages may add up to a little more or less than 100 through rounding; a bigger gap means bad data. */
 export const PANEL_SIZE_PERCENT_SUM_TOLERANCE = 1;
 
-/** Custom property with the width of the design column; the console overlay starts at its right edge. */
-export const DESIGN_COLUMN_WIDTH_PROPERTY = '--design-column-width';
+/** The bed above the console never gets lower than this, so the bed drawing and the playback bar stay visible. */
+export const BED_PANEL_MIN_HEIGHT_REM = 22;
 
-/** Custom property with the width of the machine column; the console overlay stops short of it. */
-export const MACHINE_COLUMN_WIDTH_PROPERTY = '--machine-column-width';
+/** The console never gets lower than this, so a few lines and the command input stay visible. */
+export const CONSOLE_PANEL_MIN_HEIGHT_REM = 7.5;
+
+/** Height of the console, in percent of the bed column, until the user resizes it. */
+export const CONSOLE_PANEL_DEFAULT_SIZE_PERCENT = 30;
+
+/**
+ * How long the workbench waits for the stored panel sizes. IndexedDB can hang without failing, for example while
+ * another tab upgrades the database; after this time the workbench opens with the default sizes instead.
+ */
+export const PANEL_SIZES_READ_TIMEOUT_MS = 1_500;

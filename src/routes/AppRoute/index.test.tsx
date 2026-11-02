@@ -1,7 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { AppRoute } from '.';
-import { DESIGN_COLUMN_WIDTH_PROPERTY, MACHINE_COLUMN_WIDTH_PROPERTY } from '../../utils/layout.constants';
 import { PANEL_SIZES_REPOSITORY } from '../../utils/project/panel.sizes.repository';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 import { newStore } from '../../utils/states/new.store';
@@ -23,6 +22,10 @@ const FOOTER_CLASS_NAME = 'ant-layout-footer';
 const SPLITTER_SELECTOR = '.ant-splitter';
 const SPLITTER_PANEL_SELECTOR = '.ant-splitter-panel';
 const STORED_PERCENTS: number[] = [20, 50, 30];
+const STORED_CONSOLE_PERCENT = 40;
+const CONSOLE_INPUT_LABEL = 'Console command';
+const VERTICAL_SPLITTER_SELECTOR = '.ant-splitter-vertical';
+const HORIZONTAL_SPLITTER_SELECTOR = '.ant-splitter-horizontal';
 
 const renderAppRoute = (): HTMLElement => {
   const { container } = render(
@@ -39,8 +42,16 @@ const waitForRegions = async (): Promise<void> => {
   await screen.findByRole('main');
 };
 
+/** The panels of the outer splitter only, not the bed column splitter nested in its middle panel. */
 const getSplitterPanels = (): HTMLElement[] =>
-  Array.from(document.querySelectorAll<HTMLElement>(SPLITTER_PANEL_SELECTOR));
+  Array.from(document.querySelectorAll<HTMLElement>(`${HORIZONTAL_SPLITTER_SELECTOR} > ${SPLITTER_PANEL_SELECTOR}`));
+
+const getBedColumnPanels = (): HTMLElement[] =>
+  Array.from(document.querySelectorAll<HTMLElement>(`${VERTICAL_SPLITTER_SELECTOR} > ${SPLITTER_PANEL_SELECTOR}`));
+
+const toggleConsole = (): void => {
+  fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+};
 
 const getSplitterPanelFlexBases = (): string[] =>
   getSplitterPanels().map((splitterPanel: HTMLElement): string => splitterPanel.style.flexBasis);
@@ -73,12 +84,70 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
   });
 
-  it('keeps the connection pill and the console working inside their regions', () => {
+  it('keeps the connection pill in the top bar', () => {
     renderAppRoute();
-    fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(within(getTopBar()).getByRole('button', { name: CONNECTION_PILL_PATTERN })).toBeInTheDocument();
-    expect(within(screen.getByRole('contentinfo')).getByRole('heading', { name: CONSOLE_TITLE })).toBeInTheDocument();
+  });
+
+  it('opens the console as a panel below the bed in a wide window, keeping the bed', async () => {
+    renderAppRoute();
+    await waitForRegions();
+
+    expect(getBedColumnPanels()).toHaveLength(1);
+
+    toggleConsole();
+
+    const [bedColumnPanel, consoleColumnPanel] = getBedColumnPanels();
+
+    expect(bedColumnPanel).toContainElement(screen.getByRole('main'));
+    expect(consoleColumnPanel).toContainElement(screen.getByRole('heading', { name: CONSOLE_TITLE }));
+    expect(screen.getByRole('contentinfo')).not.toContainElement(screen.getByLabelText(CONSOLE_INPUT_LABEL));
+  });
+
+  it('closes the console panel again and leaves the bed in place', async () => {
+    renderAppRoute();
+    await waitForRegions();
+    const bedRegion: HTMLElement = screen.getByRole('main');
+
+    toggleConsole();
+    toggleConsole();
+
+    expect(getBedColumnPanels()).toHaveLength(1);
+    expect(screen.queryByLabelText(CONSOLE_INPUT_LABEL)).not.toBeInTheDocument();
+    expect(screen.getByRole('main')).toBe(bedRegion);
+  });
+
+  it('opens the console with its stored height', async () => {
+    await PANEL_SIZES_REPOSITORY.setConsoleSizePercent(STORED_CONSOLE_PERCENT);
+    renderAppRoute();
+    await waitForRegions();
+
+    toggleConsole();
+
+    expect(getBedColumnPanels()[1]?.style.flexBasis).toBe('40%');
+  });
+
+  it('opens the console with the default height when none is stored', async () => {
+    renderAppRoute();
+    await waitForRegions();
+
+    toggleConsole();
+
+    expect(getBedColumnPanels()[1]?.style.flexBasis).toBe('30%');
+  });
+
+  it('stacks the open console below the bed in a narrow window', () => {
+    setMatchMediaMatches(false);
+    renderAppRoute();
+
+    toggleConsole();
+
+    const consoleHeading: HTMLElement = screen.getByRole('heading', { name: CONSOLE_TITLE });
+
+    expect(document.querySelector(SPLITTER_SELECTOR)).not.toBeInTheDocument();
+    expect(screen.getByRole('main').compareDocumentPosition(consoleHeading))
+      .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('wide layout renders exactly one STOP, in the machine panel', async () => {
@@ -123,7 +192,8 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('main')).toHaveClass(CONTENT_CLASS_NAME);
     expect(screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL })).toHaveClass(SIDER_CLASS_NAME);
     expect(screen.getByRole('contentinfo')).toHaveClass(FOOTER_CLASS_NAME);
-    expect(screen.getByRole('main').closest(SPLITTER_SELECTOR)?.parentElement).toHaveClass(LAYOUT_CLASS_NAME);
+    expect(screen.getByRole('main').closest(HORIZONTAL_SPLITTER_SELECTOR)?.parentElement)
+      .toHaveClass(LAYOUT_CLASS_NAME);
   });
 
   it('fits the root layout to the window so only the inner regions scroll', () => {
@@ -164,7 +234,7 @@ describe(AppRoute.name, () => {
     renderAppRoute();
     await waitForRegions();
 
-    expect(getSplitterPanelFlexBases()).toEqual(['280px', 'auto', '352px']);
+    expect(getSplitterPanelFlexBases()).toEqual(['300px', 'auto', '352px']);
   });
 
   it('shows no panels in a wide window until the stored sizes are read, so they never jump', async () => {
@@ -176,14 +246,5 @@ describe(AppRoute.name, () => {
     await waitForRegions();
 
     expect(getSplitterPanelFlexBases()).toEqual(['20%', '50%', '30%']);
-  });
-
-  it('lines the console overlay up with the stored column widths', async () => {
-    await PANEL_SIZES_REPOSITORY.setPanelSizePercents(STORED_PERCENTS);
-    const rootElement: HTMLElement = renderAppRoute();
-    await waitForRegions();
-
-    expect(rootElement.style.getPropertyValue(DESIGN_COLUMN_WIDTH_PROPERTY)).toBe('20%');
-    expect(rootElement.style.getPropertyValue(MACHINE_COLUMN_WIDTH_PROPERTY)).toBe('30%');
   });
 });

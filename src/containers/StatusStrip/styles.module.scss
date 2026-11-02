@@ -1,8 +1,6 @@
 @use '../../styles/layout' as layout;
 
-// The console overlay (z-index 30) is drawn over the bed; toasts use z-index 40 so they stay readable above it.
 .statusStrip {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,11 +11,8 @@
   background-color: var(--color-surface-1);
 }
 
-// Not clipped like the other fixed bars: the console overlay opens above the strip, outside its box.
 .fixedHeightBar {
-  flex-shrink: 0;
-  flex-wrap: nowrap;
-  height: layout.$status-strip-height;
+  @include layout.fixed-height-bar(layout.$status-strip-height);
 }
 
 // The readouts give up space first, so the console toggle always stays visible.
@@ -40,31 +35,6 @@
   font-family: var(--font-ui);
   font-size: 0.875rem;
   cursor: pointer;
-}
-
-.consoleOverlay {
-  position: absolute;
-  right: 0;
-  bottom: 100%;
-  left: 0;
-  z-index: 30;
-  display: flex;
-  height: 14rem;
-  overflow: auto;
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--color-border);
-  background-color: var(--color-surface-2);
-}
-
-// The status strip spans the full width, so in a wide window the console covers only the bed's lower part: it starts
-// at the design column's right edge and stops short of the machine column and STOP. The column widths follow the
-// panel sizes the user set with the splitter.
-// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
-@media (min-width: 80rem) {
-  .consoleOverlay {
-    right: var(--machine-column-width);
-    left: var(--design-column-width);
-  }
 }
 
 .readouts {

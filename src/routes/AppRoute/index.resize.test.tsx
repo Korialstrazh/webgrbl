@@ -1,20 +1,24 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { AppRoute } from '.';
-import { DESIGN_COLUMN_WIDTH_PROPERTY } from '../../utils/layout.constants';
 import { PANEL_SIZES_REPOSITORY } from '../../utils/project/panel.sizes.repository';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
-import { selectPanelSizePercents } from '../../utils/states/panel.layout.state';
+import { ConsoleOpenChanged, selectConsoleSizePercent, selectPanelSizePercents } from '../../utils/states/panel.layout.state';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 
 // jsdom does no layout, so the splitter gets a fixed width and a ResizeObserver that reports it; without a width the
 // splitter cannot turn a drag into sizes.
 const WORKBENCH_WIDTH_PX = 1600;
 const DRAG_DISTANCE_PX = 100;
-// 17.5rem + 100 px, the rest, and 22rem, at a 16 px root font size, in percent of 1600 px.
-const DRAGGED_PERCENTS: number[] = [23.75, 54.25, 22];
+// 18.75rem + 100 px, the rest, and 22rem, at a 16 px root font size, in percent of 1600 px.
+const DRAGGED_PERCENTS: number[] = [25, 53, 22];
 const DRAGGER_SELECTOR = '.ant-splitter-bar-dragger';
+// The bed column gets a fixed height too; dragging its bar 100 px up turns the default 30 % console into 40 %.
+const BED_COLUMN_HEIGHT_PX = 1000;
+const CONSOLE_DRAG_DISTANCE_PX = -100;
+const DRAGGED_CONSOLE_PERCENT = 40;
+const BED_COLUMN_DRAGGER_SELECTOR = `.ant-splitter-vertical > .ant-splitter-bar ${DRAGGER_SELECTOR}`;
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const ARIA_DISABLED_VALUE = 'true';
 
@@ -56,8 +60,18 @@ const getFirstDragger = (): HTMLElement => {
   return dragger;
 };
 
-const renderMeasuredAppRoute = async (store: AppStore): Promise<HTMLElement> => {
-  const { container } = render(
+const getBedColumnDragger = (): HTMLElement => {
+  const dragger: HTMLElement | null = document.querySelector(BED_COLUMN_DRAGGER_SELECTOR);
+
+  if (!dragger) {
+    throw new Error('No bed column dragger');
+  }
+
+  return dragger;
+};
+
+const renderMeasuredAppRoute = async (store: AppStore): Promise<void> => {
+  render(
     <Provider store={store}>
       <AppRoute />
     </Provider>,
@@ -67,14 +81,6 @@ const renderMeasuredAppRoute = async (store: AppStore): Promise<HTMLElement> => 
   await vi.waitFor((): void => {
     expect(getFirstDragger()).not.toHaveAttribute(ARIA_DISABLED_ATTRIBUTE, ARIA_DISABLED_VALUE);
   });
-
-  const rootElement: Element | null = container.firstElementChild;
-
-  if (!(rootElement instanceof HTMLElement)) {
-    throw new Error('No workbench root');
-  }
-
-  return rootElement;
 };
 
 const dragFirstSplitterBar = (): void => {
@@ -86,6 +92,7 @@ describe('AppRoute panel resizing', () => {
   beforeAll(() => {
     vi.stubGlobal('ResizeObserver', ReportingResizeObserver);
     vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(WORKBENCH_WIDTH_PX);
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(BED_COLUMN_HEIGHT_PX);
   });
 
   afterAll(() => {
@@ -97,14 +104,13 @@ describe('AppRoute panel resizing', () => {
     setMatchMediaMatches(true);
   });
 
-  it('moves the console overlay with the columns while dragging, without storing yet', async () => {
+  it('stores nothing while a bar is still being dragged', async () => {
     const store: AppStore = newStore();
     const setPanelSizesSpy = vi.spyOn(PANEL_SIZES_REPOSITORY, 'setPanelSizePercents');
-    const rootElement: HTMLElement = await renderMeasuredAppRoute(store);
+    await renderMeasuredAppRoute(store);
 
     dragFirstSplitterBar();
 
-    expect(rootElement.style.getPropertyValue(DESIGN_COLUMN_WIDTH_PROPERTY)).toBe('23.75%');
     expect(setPanelSizesSpy).not.toHaveBeenCalled();
     expect(selectPanelSizePercents(store.getState())).toBeUndefined();
   });
@@ -119,6 +125,26 @@ describe('AppRoute panel resizing', () => {
     expect(selectPanelSizePercents(store.getState())).toEqual(DRAGGED_PERCENTS);
     await vi.waitFor(async (): Promise<void> => {
       expect(await PANEL_SIZES_REPOSITORY.getPanelSizePercents()).toEqual(DRAGGED_PERCENTS);
+    });
+  });
+
+  it('stores the console height in percent when a drag of the bed column bar ends', async () => {
+    const store: AppStore = newStore();
+    await renderMeasuredAppRoute(store);
+    act(() => {
+      store.dispatch(new ConsoleOpenChanged({ isConsoleOpen: true }));
+    });
+    await vi.waitFor((): void => {
+      expect(getBedColumnDragger()).not.toHaveAttribute(ARIA_DISABLED_ATTRIBUTE, ARIA_DISABLED_VALUE);
+    });
+
+    fireEvent.mouseDown(getBedColumnDragger(), { clientX: 0, clientY: 0 });
+    fireEvent.mouseMove(window, { clientX: 0, clientY: CONSOLE_DRAG_DISTANCE_PX });
+    fireEvent.mouseUp(window);
+
+    expect(selectConsoleSizePercent(store.getState())).toBe(DRAGGED_CONSOLE_PERCENT);
+    await vi.waitFor(async (): Promise<void> => {
+      expect(await PANEL_SIZES_REPOSITORY.getConsoleSizePercent()).toBe(DRAGGED_CONSOLE_PERCENT);
     });
   });
 });

@@ -27,6 +27,7 @@ const FEED_HOLD_TEXT = '!';
 const ENTRY_TIMESTAMP = 1_000;
 const ANTD_INPUT_CLASS_NAME = 'ant-input';
 const ANTD_CHECKBOX_CLASS_NAME = 'ant-checkbox-input';
+const EMPTY_HINT_TEXT = 'No messages yet. Connect a machine to see what it sends.';
 
 const renderConsolePanel = (): AppStore => {
   const store: AppStore = newStore();
@@ -78,6 +79,23 @@ const submitCommand = async (commandText: string): Promise<void> => {
 };
 
 describe(ConsolePanel.name, () => {
+  it('says what will appear while the log is empty, and drops the hint at the first line', () => {
+    const store: AppStore = renderConsolePanel();
+
+    expect(screen.getByText(EMPTY_HINT_TEXT)).toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new ConsoleInfoAdded({
+        messageKey: DEFAULT.CONSOLE_RAW_ERROR,
+        isError: true,
+        timestamp: ENTRY_TIMESTAMP,
+        messageParameters: { detail: RAW_ERROR_DETAIL },
+      }));
+    });
+
+    expect(screen.queryByText(EMPTY_HINT_TEXT)).not.toBeInTheDocument();
+  });
+
   beforeEach(() => {
     vi.useFakeTimers();
   });

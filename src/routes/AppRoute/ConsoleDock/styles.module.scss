@@ -1,0 +1,17 @@
+// Fills the splitter panel in a wide window; stacked in a narrow window it gets a height of its own.
+.consoleDock {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface-2);
+}
+
+// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width < 80rem) {
+  .consoleDock {
+    height: 16rem;
+  }
+}

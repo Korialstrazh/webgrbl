@@ -29,7 +29,7 @@ import type { PanelSplitterProps } from './interfaces/PanelSplitterProps';
 import styles from './styles.module.scss';
 
 export const PanelSplitter = (props: PanelSplitterProps): ReactNode => {
-  const { designPanelComponent, bedPanelComponent, machinePanelComponent, onPanelResize } = props;
+  const { designPanelComponent, bedPanelComponent, machinePanelComponent } = props;
   const dispatch: AppDispatch = useDispatch();
   const storedPanelSizePercents: number[] | undefined = useSelector(selectPanelSizePercents);
   const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
@@ -38,14 +38,6 @@ export const PanelSplitter = (props: PanelSplitterProps): ReactNode => {
     () => getPanelDefaultSizes(storedPanelSizePercents, rootFontSizePx),
   );
   const [designDefaultSize, bedDefaultSize, machineDefaultSize] = panelDefaultSizes;
-
-  const handlePanelResize = (panelSizesPx: number[]): void => {
-    const panelSizePercents: number[] | undefined = getPanelSizePercents(panelSizesPx);
-
-    if (panelSizePercents) {
-      onPanelResize(panelSizePercents);
-    }
-  };
 
   const handlePanelResizeEnd = (panelSizesPx: number[]): void => {
     const panelSizePercents: number[] | undefined = getPanelSizePercents(panelSizesPx);
@@ -56,7 +48,7 @@ export const PanelSplitter = (props: PanelSplitterProps): ReactNode => {
   };
 
   return (
-    <Splitter className={styles.panelSplitter} onResize={handlePanelResize} onResizeEnd={handlePanelResizeEnd}>
+    <Splitter className={styles.panelSplitter} onResizeEnd={handlePanelResizeEnd}>
       <Splitter.Panel
         className={styles.splitterPanel}
         defaultSize={designDefaultSize}

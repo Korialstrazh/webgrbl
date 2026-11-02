@@ -1,0 +1,11 @@
+// Fills the middle splitter panel; each of its panels lays out the one region it holds to fill it.
+.bedColumnSplitter {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.splitterPanel {
+  display: flex;
+  flex-direction: column;
+}

@@ -3,9 +3,10 @@
  * plus the overlays. It fills the window as an antd Layout; in a narrow window the regions stack and STOP moves to a
  * sticky bar. It shares the bed region element, which dialogs and drawers render into.
  *
- * In a wide window the three panels sit in a splitter the user can resize. The splitter waits until the stored panel
- * sizes are read, a quick IndexedDB read, so the workbench opens with them instead of jumping from the defaults. The
- * resized column widths also go into custom properties, so the console overlay lines up with the columns.
+ * In a wide window the three panels sit in a splitter the user can resize, and the console, while open, sits below the
+ * bed in a second, vertical splitter. The splitters wait until the stored panel sizes are read, a quick IndexedDB read
+ * with a timeout, so the workbench opens with them instead of jumping from the defaults. In a narrow window the open
+ * console stacks below the bed.
  *
  * @author michael.morosov
  *
@@ -15,7 +16,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Layout } from 'antd';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { BedPanel } from '../../containers/BedPanel';
@@ -31,47 +32,39 @@ import { StopHotkey } from '../../containers/StopHotkey';
 import { TopBar } from '../../containers/TopBar';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
 import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
-import { setWorkbenchColumnWidthProperties } from '../../utils/layout/set.workbench.column.width.properties';
-import { selectIsPanelLayoutLoaded, selectPanelSizePercents } from '../../utils/states/panel.layout.state';
+import { selectIsConsoleOpen, selectIsPanelLayoutLoaded } from '../../utils/states/panel.layout.state';
+import { BedColumnSplitter } from './BedColumnSplitter';
+import { ConsoleDock } from './ConsoleDock';
 import { PanelSplitter } from './PanelSplitter';
 import styles from './styles.module.scss';
 
 export const AppRoute = (): ReactNode => {
   const isWide: boolean = useIsWideLayout();
   const [bedRegionHost, setBedRegionHost] = useState<HTMLElement | null>(null);
-  const appRouteRef = useRef<HTMLElement>(null);
-  const panelSizePercents: number[] | undefined = useSelector(selectPanelSizePercents);
   const isPanelLayoutLoaded: boolean = useSelector(selectIsPanelLayoutLoaded);
+  const isConsoleOpen: boolean = useSelector(selectIsConsoleOpen);
   const designPanelComponent: ReactNode = <DesignPanel />;
   const bedPanelComponent: ReactNode = <BedPanel hostRef={setBedRegionHost} isWide={isWide} />;
   const machinePanelComponent: ReactNode = <MachinePanel isWide={isWide} />;
 
-  useLayoutEffect(() => {
-    setWorkbenchColumnWidthProperties(appRouteRef.current, panelSizePercents);
-  }, [panelSizePercents]);
-
-  // Set on the element directly while dragging, so a drag does not render the whole workbench on every move.
-  const handlePanelResize = (resizedPanelSizePercents: number[]): void =>
-    setWorkbenchColumnWidthProperties(appRouteRef.current, resizedPanelSizePercents);
-
   return (
     <BedRegionHostContext value={bedRegionHost}>
-      <Layout ref={appRouteRef} className={styles.appRoute}>
+      <Layout className={styles.appRoute}>
         <TopBar />
         <Layout className={styles.regions} hasSider={isWide}>
           {isWide
             ? isPanelLayoutLoaded && (
               <PanelSplitter
                 designPanelComponent={designPanelComponent}
-                bedPanelComponent={bedPanelComponent}
+                bedPanelComponent={<BedColumnSplitter bedPanelComponent={bedPanelComponent} />}
                 machinePanelComponent={machinePanelComponent}
-                onPanelResize={handlePanelResize}
               />
             )
             : (
               <>
                 {designPanelComponent}
                 {bedPanelComponent}
+                {isConsoleOpen && <ConsoleDock />}
                 {machinePanelComponent}
               </>
             )}

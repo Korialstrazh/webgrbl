@@ -43,6 +43,7 @@ CONNECTION_POPOVER_SERIAL_PORT;Serial port
 CONNECTION_POPOVER_SIMULATED_LASER;Simulated laser
 CONNECTION_POPOVER_USB_PORT;USB {{vendorId}}:{{productId}}
 CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
+CONSOLE_EMPTY_HINT;No messages yet. Connect a machine to see what it sends.
 CONSOLE_INPUT_LABEL;Console command
 CONSOLE_INPUT_PLACEHOLDER;Type a command, for example $$
 CONSOLE_LOG_LABEL;Console output

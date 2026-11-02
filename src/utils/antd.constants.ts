@@ -19,6 +19,7 @@ import type {
   InputNumberProps,
   MenuProps,
   PopoverProps,
+  SplitterProps,
   SwitchProps,
 } from 'antd';
 
@@ -75,3 +76,6 @@ export const ANTD_COLOR_PICKER_FORMAT_HEX: ColorPickerProps['format'] = 'hex';
 
 /** The drawer slides in from the left edge of its container. */
 export const ANTD_DRAWER_PLACEMENT_LEFT: DrawerProps['placement'] = 'left';
+
+/** The splitter stacks its panels top to bottom, with horizontal bars between them. */
+export const ANTD_SPLITTER_ORIENTATION_VERTICAL: SplitterProps['orientation'] = 'vertical';

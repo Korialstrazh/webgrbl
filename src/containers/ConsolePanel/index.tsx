@@ -126,7 +126,9 @@ export const ConsolePanel = (): ReactNode => {
           }
         }}
       >
-        <ConsoleEntryList entries={entries} />
+        {entries.length
+          ? <ConsoleEntryList entries={entries} />
+          : <p className={styles.emptyHint}>{t(DEFAULT.CONSOLE_EMPTY_HINT)}</p>}
       </div>
       <Input
         className={styles.commandInput}

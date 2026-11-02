@@ -1,6 +1,6 @@
 /**
  * The bottom region: the coming-soon readouts for cursor and job size, the estimate of the ready toolpath, and the
- * console toggle. The console opens as an overlay above the strip, over the bed, without resizing it.
+ * console toggle. The console opens as a panel below the bed, which the workbench lays out.
  *
  * @author michael.morosov
  *
@@ -10,21 +10,22 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Layout, Switch } from 'antd';
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../utils/missing.value.constants';
+import type { AppDispatch } from '../../utils/states/new.store';
+import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
 import { selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
 import { getJobEstimateText } from '../../utils/toolpath/get.job.estimate.text';
 import { ComingSoon } from '../../views/ComingSoon';
-import { ConsolePanel } from '../ConsolePanel';
 import styles from './styles.module.scss';
 
 export const StatusStrip = (): ReactNode => {
   const { t } = useTranslation();
-  const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
+  const dispatch: AppDispatch = useDispatch();
+  const isConsoleOpen: boolean = useSelector(selectIsConsoleOpen);
   const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
 
   return (
@@ -32,11 +33,6 @@ export const StatusStrip = (): ReactNode => {
       className={[styles.statusStrip, styles.fixedHeightBar].join(' ')}
       aria-label={t(DEFAULT.STATUS_STRIP_TITLE)}
     >
-      {isConsoleOpen && (
-        <div className={styles.consoleOverlay}>
-          <ConsolePanel />
-        </div>
-      )}
       <div className={styles.readoutsArea}>
         <ComingSoon description={t(DEFAULT.STATUS_STRIP_READOUTS_DESCRIPTION)}>
           {/* A description list keeps the term and value pairing; antd Descriptions renders a table instead. */}
@@ -60,7 +56,10 @@ export const StatusStrip = (): ReactNode => {
         </dl>
       </div>
       <label className={styles.consoleSwitch}>
-        <Switch checked={isConsoleOpen} onChange={setIsConsoleOpen} />
+        <Switch
+          checked={isConsoleOpen}
+          onChange={(isChecked: boolean) => dispatch(new ConsoleOpenChanged({ isConsoleOpen: isChecked }))}
+        />
         {t(DEFAULT.CONSOLE_TOGGLE)}
       </label>
     </Layout.Footer>

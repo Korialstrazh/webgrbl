@@ -37,6 +37,8 @@ export const APP_STATE_KEY = {
   LAST_OPENED_PROJECT_ID: 'lastOpenedProjectId',
   /** The workbench panel sizes the user set, as a JSON list of percentages. */
   PANEL_SIZES: 'panelSizes',
+  /** The height of the console panel the user set, in percent of the bed column, as JSON. */
+  CONSOLE_PANEL_SIZE: 'consolePanelSize',
 } as const;
 
 export type AppStateKey = (typeof APP_STATE_KEY)[keyof typeof APP_STATE_KEY];
