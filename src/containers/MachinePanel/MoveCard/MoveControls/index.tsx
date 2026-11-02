@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { ArrowUpOutlined } from '@ant-design/icons';
 import { Button, Segmented } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -36,6 +37,9 @@ import type { MoveControlsProps } from '../interfaces/MoveControlsProps';
 import { JogSpeedInput } from '../JogSpeedInput';
 import { JOG_PAD_CELLS } from '../jog.pad.constants';
 import styles from './styles.module.scss';
+
+// eslint-disable-next-line no-restricted-syntax -- 0 degrees is a real turn, the up arrow
+const isJogArrowCell = (cell: JogPadCell): boolean => cell.arrowRotationDeg !== undefined;
 
 export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
   const { t } = useTranslation();
@@ -87,11 +91,11 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
             key={cell.labelKey}
             size={ANTD_BUTTON_SIZE_LARGE}
             disabled={!canJog}
-            icon={cell.arrowGlyph}
+            icon={isJogArrowCell(cell) ? <ArrowUpOutlined rotate={cell.arrowRotationDeg} /> : undefined}
             aria-label={t(cell.labelKey)}
             onClick={() => requestJogPadLine(cell)}
           >
-            {cell.arrowGlyph ? undefined : t(cell.labelKey)}
+            {isJogArrowCell(cell) ? undefined : t(cell.labelKey)}
           </Button>
         ))}
       </div>

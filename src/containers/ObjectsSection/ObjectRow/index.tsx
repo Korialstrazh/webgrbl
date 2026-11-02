@@ -9,13 +9,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { CloseOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
-import { DELETE_CROSS } from '../../../utils/characters.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectToolpath, selectToolpathStatus } from '../../../utils/states/toolpath.state';
 import { TOOLPATH_STATUS } from '../../../utils/states/toolpath.status.constants';
@@ -68,7 +68,7 @@ export const ObjectRow = ({
       <Button
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
-        icon={DELETE_CROSS}
+        icon={<CloseOutlined />}
         aria-label={t(DEFAULT.OBJECTS_DELETE, { name: projectObject.name })}
         onClick={() => onDelete(projectObject.id)}
       />

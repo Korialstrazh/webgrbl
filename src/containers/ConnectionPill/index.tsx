@@ -11,11 +11,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { DownOutlined } from '@ant-design/icons';
 import { useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { DROPDOWN_CARET } from '../../utils/characters.constants';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
@@ -95,7 +95,7 @@ export const ConnectionPill = (): ReactNode => {
         {isConnectOffered(connectionStatus) && (
           <span className={styles.connectVerb}>{t(DEFAULT.CONNECTION_PILL_CONNECT)}</span>
         )}
-        <span className={styles.caret} aria-hidden="true">{DROPDOWN_CARET}</span>
+        <DownOutlined className={styles.caret} aria-hidden="true" />
       </button>
     </ConnectionPopover>
   );

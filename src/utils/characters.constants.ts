@@ -12,44 +12,8 @@
 /** The multiplication sign, shown before a repeat count. */
 export const MULTIPLICATION_SIGN = '\u00D7';
 
-/** The anticlockwise arrow that stands for undo. */
-export const UNDO_ARROW = '\u21B6';
-
-/** The clockwise arrow that stands for redo. */
-export const REDO_ARROW = '\u21B7';
-
-/** The arrow that points up, on the jog pad. */
-export const ARROW_UP = '\u2191';
-
-/** The arrow that points down, on the jog pad. */
-export const ARROW_DOWN = '\u2193';
-
-/** The arrow that points left, on the jog pad. */
-export const ARROW_LEFT = '\u2190';
-
-/** The arrow that points right, on the jog pad. */
+/** The arrow that points right, as in the shading palette entry name. */
 export const ARROW_RIGHT = '\u2192';
-
-/** The arrow that points up and left, on the jog pad. */
-export const ARROW_UP_LEFT = '\u2196';
-
-/** The arrow that points up and right, on the jog pad. */
-export const ARROW_UP_RIGHT = '\u2197';
-
-/** The arrow that points down and left, on the jog pad. */
-export const ARROW_DOWN_LEFT = '\u2199';
-
-/** The arrow that points down and right, on the jog pad. */
-export const ARROW_DOWN_RIGHT = '\u2198';
-
-/** The cross that marks the delete button of an object row. */
-export const DELETE_CROSS = '\u2715';
-
-/** The small triangle that marks a button as opening a dropdown menu. */
-export const DROPDOWN_CARET = '\u25BE';
-
-/** The grip that marks the handle a layer row is dragged by. */
-export const DRAG_HANDLE_GRIP = '\u2630';
 
 /** The middle dot that separates the parts of a one-line summary. */
 export const MIDDLE_DOT = '\u00B7';
@@ -59,24 +23,3 @@ export const HORIZONTAL_ELLIPSIS = '\u2026';
 
 /** The long dash that separates the parts of the G-code title line. */
 export const EM_DASH = '\u2014';
-
-// The playback symbols end in the text variation selector (U+FE0E), so they draw as plain glyphs, not as emoji.
-
-/** The bar and left triangles that stand for back to start. */
-export const BACK_TO_START_SYMBOL = '\u23EE\uFE0E';
-
-/** The right triangle that stands for play. */
-export const PLAY_SYMBOL = '\u25B6\uFE0E';
-
-/** The two bars that stand for pause. */
-export const PAUSE_SYMBOL = '\u23F8\uFE0E';
-
-/** The right triangles and bar that stand for to end. */
-export const TO_END_SYMBOL = '\u23ED\uFE0E';
-
-/** Anticlockwise open circle arrow, the replay sign on Play once the simulation has reached the end; text style. */
-export const REPLAY_SYMBOL = '\u21BA\uFE0E';
-
-/** The plus and minus signs of the zoom buttons. */
-export const PLUS_SIGN = '+';
-export const MINUS_SIGN = '\u2212';

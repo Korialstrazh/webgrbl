@@ -9,13 +9,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { RedoOutlined, UndoOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
-import { REDO_ARROW, UNDO_ARROW } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
@@ -59,7 +59,7 @@ export const TopBar = (): ReactNode => {
         <Button
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_LARGE}
-          icon={UNDO_ARROW}
+          icon={<UndoOutlined />}
           aria-label={t(DEFAULT.TOP_BAR_UNDO)}
           disabled={!canUndo}
           onClick={() => dispatch(new ProjectUndoRequested())}
@@ -67,7 +67,7 @@ export const TopBar = (): ReactNode => {
         <Button
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_LARGE}
-          icon={REDO_ARROW}
+          icon={<RedoOutlined />}
           aria-label={t(DEFAULT.TOP_BAR_REDO)}
           disabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}

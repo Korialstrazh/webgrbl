@@ -10,10 +10,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Space, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MINUS_SIGN, PLUS_SIGN } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { BedZoomControlsProps } from './interfaces/BedZoomControlsProps';
 import styles from './styles.module.scss';
@@ -31,9 +31,8 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
           aria-label={t(DEFAULT.BED_ZOOM_OUT_HINT)}
           disabled={!canZoomOut}
           onClick={onZoomOut}
-        >
-          {MINUS_SIGN}
-        </Button>
+          icon={<MinusOutlined />}
+        />
       </Tooltip>
       <Tooltip title={t(DEFAULT.BED_ZOOM_PAN_HINT)}>
         {/* A plain readout: it shows the zoom and carries the pan hint, it is not a control. */}
@@ -47,9 +46,8 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
           aria-label={t(DEFAULT.BED_ZOOM_IN_HINT)}
           disabled={!canZoomIn}
           onClick={onZoomIn}
-        >
-          {PLUS_SIGN}
-        </Button>
+          icon={<PlusOutlined />}
+        />
       </Tooltip>
       <Tooltip title={t(DEFAULT.BED_ZOOM_FIT_HINT)}>
         <Button className={styles.zoomButton} aria-label={t(DEFAULT.BED_ZOOM_FIT_HINT)} onClick={onFit}>

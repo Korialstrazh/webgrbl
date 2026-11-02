@@ -20,6 +20,7 @@
     "check": "npm run lint && npm run typecheck && npm test && npm run locales:check && npm run build && npm audit --audit-level=moderate"
   },
   "dependencies": {
+    "@ant-design/icons": "6.3.4",
     "@reduxjs/toolkit": "2.13.0",
     "antd": "6.6.8",
     "dexie": "4.4.7",

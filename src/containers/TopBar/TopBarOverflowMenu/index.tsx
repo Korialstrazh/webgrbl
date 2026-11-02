@@ -10,11 +10,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { EllipsisOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT, ANTD_DROPDOWN_TRIGGER_CLICK } from '../../../utils/antd.constants';
-import { HORIZONTAL_ELLIPSIS } from '../../../utils/characters.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { ProjectMenuClickInfo } from '../interfaces/ProjectMenuClickInfo';
 import type { ProjectMenuItems } from '../interfaces/ProjectMenuItems';
@@ -40,7 +40,7 @@ export const TopBarOverflowMenu = ({ onOpenMachineProfiles }: TopBarOverflowMenu
         className={styles.overflowButton}
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_LARGE}
-        icon={HORIZONTAL_ELLIPSIS}
+        icon={<EllipsisOutlined />}
         aria-label={t(DEFAULT.TOP_BAR_MORE)}
       />
     </Dropdown>

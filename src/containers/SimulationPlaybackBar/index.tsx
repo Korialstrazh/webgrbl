@@ -14,6 +14,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import {
+  CaretRightOutlined,
+  PauseOutlined,
+  ReloadOutlined,
+  StepBackwardOutlined,
+  StepForwardOutlined,
+} from '@ant-design/icons';
 import { Button, Segmented, Slider } from 'antd';
 import type { SegmentedProps } from 'antd';
 import { useMemo } from 'react';
@@ -21,13 +28,6 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_SEGMENTED_SIZE_SMALL } from '../../utils/antd.constants';
-import {
-  BACK_TO_START_SYMBOL,
-  PAUSE_SYMBOL,
-  PLAY_SYMBOL,
-  REPLAY_SYMBOL,
-  TO_END_SYMBOL,
-} from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
 import { SIMULATION_SPEEDS } from '../../utils/states/simulation.speed.constants';
@@ -65,12 +65,12 @@ const getPlayLabelKey = (isPlaying: boolean, isAtEnd: boolean): string => {
   return isAtEnd ? DEFAULT.SIMULATION_REPLAY : DEFAULT.SIMULATION_PLAY;
 };
 
-const getPlayIcon = (isPlaying: boolean, isAtEnd: boolean): string => {
+const getPlayIconComponent = (isPlaying: boolean, isAtEnd: boolean): ReactNode => {
   if (isPlaying) {
-    return PAUSE_SYMBOL;
+    return <PauseOutlined />;
   }
 
-  return isAtEnd ? REPLAY_SYMBOL : PLAY_SYMBOL;
+  return isAtEnd ? <ReloadOutlined /> : <CaretRightOutlined />;
 };
 
 /** The slider tooltip shows the time under the handle as a clock. */
@@ -113,7 +113,7 @@ export const SimulationPlaybackBar = (): ReactNode => {
     >
       <div className={styles.transport}>
         <Button
-          icon={BACK_TO_START_SYMBOL}
+          icon={<StepBackwardOutlined />}
           aria-label={t(DEFAULT.SIMULATION_BACK_TO_START)}
           title={t(DEFAULT.SIMULATION_BACK_TO_START)}
           disabled={!isPlayable}
@@ -121,14 +121,14 @@ export const SimulationPlaybackBar = (): ReactNode => {
         />
         <Button
           type={ANTD_BUTTON_TYPE_PRIMARY}
-          icon={getPlayIcon(isPlaying, isAtEnd)}
+          icon={getPlayIconComponent(isPlaying, isAtEnd)}
           aria-label={playLabel}
           title={playLabel}
           disabled={!isPlayable}
           onClick={transport.toggleSimulationPlay}
         />
         <Button
-          icon={TO_END_SYMBOL}
+          icon={<StepForwardOutlined />}
           aria-label={t(DEFAULT.SIMULATION_TO_END)}
           title={t(DEFAULT.SIMULATION_TO_END)}
           disabled={!isPlayable}

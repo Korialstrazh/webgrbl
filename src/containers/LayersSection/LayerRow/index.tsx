@@ -10,12 +10,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { ArrowDownOutlined, ArrowUpOutlined, HolderOutlined } from '@ant-design/icons';
 import { Button, Checkbox } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
-import { ARROW_DOWN, ARROW_UP, DRAG_HANDLE_GRIP } from '../../../utils/characters.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
 import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
@@ -62,7 +62,7 @@ export const LayerRow = ({
       onDragOver={allowDropOnRow}
       onDrop={onDrop}
     >
-      <span className={styles.handle} aria-hidden="true">{DRAG_HANDLE_GRIP}</span>
+      <HolderOutlined className={styles.handle} aria-hidden="true" />
       <Checkbox
         checked={layer.enabled}
         aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
@@ -86,7 +86,7 @@ export const LayerRow = ({
         <Button
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
-          icon={ARROW_UP}
+          icon={<ArrowUpOutlined />}
           disabled={isFirst}
           aria-label={t(DEFAULT.LAYERS_MOVE_UP, { name: layerName })}
           onClick={onMoveUp}
@@ -94,7 +94,7 @@ export const LayerRow = ({
         <Button
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
-          icon={ARROW_DOWN}
+          icon={<ArrowDownOutlined />}
           disabled={isLast}
           aria-label={t(DEFAULT.LAYERS_MOVE_DOWN, { name: layerName })}
           onClick={onMoveDown}

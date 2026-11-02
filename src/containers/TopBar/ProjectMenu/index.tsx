@@ -9,13 +9,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { DownOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { ANTD_BUTTON_TYPE_TEXT, ANTD_DROPDOWN_TRIGGER_CLICK } from '../../../utils/antd.constants';
-import { DROPDOWN_CARET } from '../../../utils/characters.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
 import { DEFAULT } from '../../../utils/localization/default.locales';
@@ -73,7 +73,7 @@ export const ProjectMenu = (): ReactNode => {
       >
         <Button type={ANTD_BUTTON_TYPE_TEXT}>
           {t(DEFAULT.TOP_BAR_MENU_PROJECT)}
-          <span className={styles.caret} aria-hidden>{DROPDOWN_CARET}</span>
+          <DownOutlined className={styles.caret} aria-hidden="true" />
         </Button>
       </Dropdown>
       <ProjectFileInput inputRef={fileInputRef} />
