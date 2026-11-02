@@ -27,6 +27,7 @@ const VIEW_BOX_ATTRIBUTE = 'viewBox';
 const BED_GROUP_NAME = /Machine bed/;
 const FIT_PERCENT_TEXT = '100 % (fit)';
 const ZOOMED_PERCENT_TEXT = '125 %';
+const UNFITTED_FULL_PERCENT_TEXT = '100 %';
 const OVERLAY_ID = 'test-overlay';
 const POINTER_ID = 1;
 const RULER_LABEL_TEXT = '350';
@@ -117,6 +118,30 @@ describe(BedViewport.name, () => {
 
     expect(screen.queryByText(FIT_PERCENT_TEXT)).not.toBeInTheDocument();
     expect(screen.getByText(ZOOMED_PERCENT_TEXT)).toBeInTheDocument();
+  });
+
+  it('drops the fit note from 100 % once the view is panned away from the fitted centre', () => {
+    renderBedViewport();
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
+
+    const viewElement: HTMLElement = getViewElement();
+
+    fireEvent.pointerDown(viewElement, {
+      pointerId: POINTER_ID,
+      button: MIDDLE_POINTER_BUTTON,
+      clientX: 100,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+    fireEvent.pointerUp(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_OUT_LABEL }));
+
+    expect(screen.queryByText(FIT_PERCENT_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByText(UNFITTED_FULL_PERCENT_TEXT)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: FIT_LABEL }));
+
+    expect(screen.getByText(FIT_PERCENT_TEXT)).toBeInTheDocument();
   });
 
   it('draws the rulers in their own bands beside the drawing area, never on the drawing', () => {

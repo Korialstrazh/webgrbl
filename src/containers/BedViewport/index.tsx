@@ -25,6 +25,7 @@ import { getBedViewBox } from '../../utils/bed/get.bed.view.box';
 import type { BedRulerLayout } from '../../utils/bed/interfaces/BedRulerLayout';
 import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewBox } from '../../utils/bed/interfaces/BedViewBox';
+import { isBedViewportFitted } from '../../utils/bed/is.bed.viewport.fitted';
 import { getRootFontSizePixels } from '../../utils/browser/get.root.font.size.pixels';
 import { PERCENT_DIVISOR } from '../../utils/percent.constants';
 import { BedRulers } from '../../views/BedRulers';
@@ -90,6 +91,7 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
     <BedZoomControls
       leadingControlComponent={<BedColourPicker />}
       zoomPercent={Math.round(viewport.zoom * PERCENT_DIVISOR)}
+      isFitted={isBedViewportFitted(viewport, dimensions)}
       canZoomIn={viewport.zoom < MAX_BED_ZOOM}
       canZoomOut={viewport.zoom > MIN_BED_ZOOM}
       onZoomIn={() => zoomBedBy(BED_ZOOM_STEP_FACTOR)}

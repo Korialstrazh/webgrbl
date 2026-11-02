@@ -33,8 +33,5 @@ export const BED_WHEEL_LINE_HEIGHT_PX = 16;
  */
 export const BED_FIT_MARGIN_PX = 16;
 
-/** The zoom of the fitted bed, shown as 100 % with a fit note. */
-export const BED_FIT_ZOOM_PERCENT = 100;
-
 /** A share of a length that marks its middle. */
 export const BED_VIEW_CENTER_FRACTION = 0.5;
