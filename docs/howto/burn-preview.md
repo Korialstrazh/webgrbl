@@ -15,7 +15,7 @@ In 3D the left panel shows the **Cut check** above Layers; Objects is hidden. ST
 A depth estimate needs one real test per material and machine profile (lasers differ).
 
 1. In the 3D toolbar choose **Burn test sample...** (needs a material).
-2. Step 1: enter power, speed and passes (default: the project's first Line layer). The sample is a 5 x 5 cm square cut line with a black-to-white gradient inside. Press **Export sample G-code**; it uses the normal G-code download and does not touch the project's toolpath. Export is off, with a reason, without a machine profile or when the sample does not fit the work area.
+2. Step 1: enter power, speed and passes (default: the project's first Line layer). The sample is a 5 x 5 cm square cut line with a black-to-white gradient inside. Press **Export sample G-code**; it uses the normal G-code download and does not touch the project's toolpath. Export is off, with a reason, without a machine profile, when the sample does not fit the work area, or when a setting is out of range (power 1 to 100 %, speed 1 to 20000 mm/min, passes 1 to 50). If the export fails, a message says so.
 3. After Export the settings are locked, so the saved ones are the ones burnt.
 4. Burn it on the real laser (outside the app).
 5. Step 2: choose **Cut through**, or **Not through** with an optional depth in mm (above 0, at most the thickness). The depth always describes the square's cut line. **Save for this material** stores it for the active profile. Saving without exporting is allowed (you may have burnt the same settings earlier). Cancel stores nothing.
@@ -27,6 +27,8 @@ The gradient only helps you judge shading by eye. To change shading, change the 
 - Dose of a move = power x runs / speed. Depth is proportional to dose, scaled from the test result. A different thickness scales the through dose by thickness / test thickness.
 - "Cut through" is a lower bound: doses at or above the test dose count as through, below it the estimate is less sure. "Not through" without a depth is an upper bound.
 - A closed cut is through at depth >= thickness + 10 %, borderline within 10 % of the thickness, not through below. Ends within 0.1 mm count as closed; open paths enclose nothing. No kerf, char, focus or air assist is modelled.
+- Identical paths (passes, duplicate outlines, the same path on two layers) add their dose. Separate cuts that merely share a grid cell do not count as one deeper cut: if only their sum would reach through, the part shows **May stay attached** or **Attached** (not through), never **Free**.
+- Known limit: the grid cell grows with the sheet, about 0.4 mm on a 400 mm sheet and about 1 mm on a 1000 mm sheet (sheet size divided by the square root of 1,000,000 cells). Uncut tabs or bridges smaller than about a cell or two can be missed, so a part held by small tabs may show as "comes free". Measured: tabs up to 0.6 mm on a 400 mm sheet and up to 1.5 mm on a 1000 mm sheet.
 - No test: a default depth per dose is used, the view says it is a guess, and every part is borderline.
 - The sheet is the job bounds plus 10 mm, sampled on a grid of at least 0.1 mm and at most 1,000,000 cells. Above 2,000,000 triangles the surface gets coarser; cuts stay open but may look wider. The model builds in a worker and a change to the design or toolpath makes it stale.
 
@@ -50,6 +52,6 @@ The part count is always shown, which exposes too many separate parts. If WebGL 
 
 ## Extending it
 
-- Constants (margins, grid, caps, lift step, sample size) live in `src/utils/burn.model/burn.model.constants.ts`, `src/utils/materials/*.constants.ts`.
+- Constants (margins, grid, caps, lift step) live in `src/utils/burn.model/burn.model.constants.ts`; the sample size lives in `src/utils/materials/sample.job.constants.ts`.
 - Add a warning kind in `CUT_CHECK_WARNING_KIND` and its text in `getCutCheckWarningText`, with localization keys in `tools/localization/default.csv`.
 - Domain code goes through `MATERIAL_REPOSITORY` and the `material` and `burnModel` slices; see [[burn-preview]] in the wiki.

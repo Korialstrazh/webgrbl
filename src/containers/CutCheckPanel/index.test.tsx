@@ -168,6 +168,7 @@ describe(CutCheckPanel.name, () => {
       predictedDepthMm: 1,
       neededDepthMm: 3,
       isLessSure: false,
+      isDepthUpperBound: false,
     };
 
     act(() => {
@@ -200,6 +201,7 @@ describe(CutCheckPanel.name, () => {
             predictedDepthMm: 4,
             neededDepthMm: 3,
             isLessSure: false,
+            isDepthUpperBound: false,
           }],
         })),
       }));

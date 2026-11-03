@@ -22,6 +22,7 @@ import { getBurnDepthPrediction } from './get.burn.depth.prediction';
 import { getBurnGridOutsideCells } from './get.burn.grid.outside.cells';
 import { getBurnLiftingPart } from './get.burn.lifting.part';
 import { getBurnStoredCellDose } from './get.burn.stored.cell.dose';
+import { getBurnWallCellPrediction } from './get.burn.wall.cell.prediction';
 import type { BurnCellDepths } from './interfaces/BurnCellDepths';
 import type { BurnCellSurface } from './interfaces/BurnCellSurface';
 import type { BurnDepthPrediction } from './interfaces/BurnDepthPrediction';
@@ -126,7 +127,9 @@ const getCellDepths = (grid: BurnDoseGrid, { thicknessMm, basis }: BurnRegionMes
     const dose: number = getBurnStoredCellDose(grid, cell);
 
     if (dose) {
-      const { depthMm, level }: BurnDepthPrediction = getBurnDepthPrediction(dose, thicknessMm, basis);
+      const { depthMm, level }: BurnDepthPrediction = grid.closedCutMask[cell]
+        ? getBurnWallCellPrediction(grid, cell, thicknessMm, basis)
+        : getBurnDepthPrediction(dose, thicknessMm, basis);
 
       throughCells[cell] = level === CUT_DEPTH_LEVEL.THROUGH ? 1 : 0;
       depthSteps[cell] = Math.min(maxDepthStep, Math.round(depthMm / BURN_DEPTH_QUANTUM_MM));

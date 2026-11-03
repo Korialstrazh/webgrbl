@@ -186,6 +186,36 @@ describe(getCutCheck.name, () => {
     expect(warning?.predictedDepthMm).toBeGreaterThanOrEqual(THICKNESS_MM);
   });
 
+  describe('after a not-through test without a depth', () => {
+    const getNotThroughBasis = (speedMmPerMin: number): BurnDepthBasis => getBurnDepthBasis(newTestResultFixture({
+      powerPercent: TEST_POWER_PERCENT,
+      speedMmPerMin,
+      passes: 1,
+      thicknessMm: THICKNESS_MM,
+      outcome: MATERIAL_TEST_OUTCOME.NOT_THROUGH,
+    }));
+
+    it('does not call a fill at the tested dose a cut through, however the dose rounds', () => {
+      const layer: ProjectLayer = getFillLayer(RED, FILL_HIGH_SPEED_MM_PER_MIN);
+
+      const basis: BurnDepthBasis = getNotThroughBasis(FILL_HIGH_SPEED_MM_PER_MIN);
+
+      expect(getCheck([newFilledDrawable([PANEL], RED)], [layer], basis).warnings).toEqual([]);
+    });
+
+    it('warns above the tested dose and marks the depth as an upper bound', () => {
+      const layer: ProjectLayer = getFillLayer(RED, FILL_HIGH_SPEED_MM_PER_MIN);
+      const { warnings }: CutCheck = getCheck(
+        [newFilledDrawable([PANEL], RED)],
+        [layer],
+        getNotThroughBasis(FILL_HIGH_SPEED_MM_PER_MIN * 2),
+      );
+
+      expect(warnings.map(({ kind, isDepthUpperBound }: CutCheckWarning) => [kind, isDepthUpperBound]))
+        .toEqual([[CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH, true]]);
+    });
+  });
+
   it('does not warn about the same fill at normal settings', () => {
     const layer: ProjectLayer = getFillLayer(RED, FILL_NORMAL_SPEED_MM_PER_MIN);
 

@@ -23,4 +23,6 @@ export interface CutCheckWarning {
   neededDepthMm: number;
   /** Whether the prediction rests on little evidence from the test. */
   isLessSure: boolean;
+  /** Whether the predicted depth is only the most it can be, because the test did not cut through. */
+  isDepthUpperBound: boolean;
 }

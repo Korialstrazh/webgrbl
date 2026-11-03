@@ -10,8 +10,8 @@ const SHEET_BOUNDS: ToolpathBounds = { minX: 20, minY: -10, maxX: 220, maxY: 90 
 const WIDE_ASPECT_RATIO = 2;
 const TALL_ASPECT_RATIO = 0.5;
 // Two nested parts, each at full lift.
-const MAX_LIFT_MM = 2 * THICKNESS_MM * BURN_PART_FRAMED_LIFT_THICKNESSES;
-const HIGHEST_Z_MM = THICKNESS_MM + MAX_LIFT_MM;
+const FRAMED_LIFT_MM = 2 * THICKNESS_MM * BURN_PART_FRAMED_LIFT_THICKNESSES;
+const HIGHEST_Z_MM = THICKNESS_MM + FRAMED_LIFT_MM;
 
 const getLargestSheetCornerNdc = (camera: OrthographicCamera): number => {
   let largestNdc = 0;
@@ -36,7 +36,7 @@ describe(newBurnSceneCamera.name, () => {
     const camera: OrthographicCamera = newBurnSceneCamera({
       sheetBounds: SHEET_BOUNDS,
       thicknessMm: THICKNESS_MM,
-      maxLiftMm: MAX_LIFT_MM,
+      framedLiftMm: FRAMED_LIFT_MM,
       aspectRatio,
     });
 
@@ -49,7 +49,7 @@ describe(newBurnSceneCamera.name, () => {
     const camera: OrthographicCamera = newBurnSceneCamera({
       sheetBounds: smallSheetBounds,
       thicknessMm: THICKNESS_MM,
-      maxLiftMm: MAX_LIFT_MM,
+      framedLiftMm: FRAMED_LIFT_MM,
       aspectRatio: 1,
     });
     const topOfLift: Vector3 = new Vector3(0, 0, HIGHEST_Z_MM).project(camera);
@@ -61,7 +61,7 @@ describe(newBurnSceneCamera.name, () => {
     const camera: OrthographicCamera = newBurnSceneCamera({
       sheetBounds: SHEET_BOUNDS,
       thicknessMm: THICKNESS_MM,
-      maxLiftMm: MAX_LIFT_MM,
+      framedLiftMm: FRAMED_LIFT_MM,
       aspectRatio: 1,
     });
 
@@ -73,14 +73,14 @@ describe(newBurnSceneCamera.name, () => {
     const camera: OrthographicCamera = newBurnSceneCamera({
       sheetBounds: SHEET_BOUNDS,
       thicknessMm: THICKNESS_MM,
-      maxLiftMm: MAX_LIFT_MM,
+      framedLiftMm: FRAMED_LIFT_MM,
       aspectRatio: WIDE_ASPECT_RATIO,
     });
 
     setBurnSceneCameraFrustum(camera, {
       sheetBounds: SHEET_BOUNDS,
       thicknessMm: THICKNESS_MM,
-      maxLiftMm: MAX_LIFT_MM,
+      framedLiftMm: FRAMED_LIFT_MM,
       aspectRatio: TALL_ASPECT_RATIO,
     });
 

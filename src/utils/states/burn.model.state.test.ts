@@ -230,6 +230,17 @@ describe(selectBurnPartEffectiveLiftsMm.name, () => {
 });
 
 describe('height 0 of a lifted part', () => {
+  it('reads the own lift of a child as clamped, once a lowered parent leaves it stale', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: CHILD_ID, liftMm: -PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: 0 }),
+    ]));
+
+    expect(selectBurnPartLiftMm(CHILD_ID)(root)).toBe(0);
+  });
+
   it('is absolute: a child goes down to its place inside a lifted parent, and never below it', () => {
     const root = newRootState(reduceActions([
       ...READY_ACTIONS,

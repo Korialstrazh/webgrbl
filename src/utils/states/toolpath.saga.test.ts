@@ -537,6 +537,7 @@ describe('sample G-code export', () => {
   const SAMPLE_JOB_NAME = 'Plywood sample';
   const SMALL_AREA_MM = 40;
   const OVER_POWER_PERCENT = 150;
+  const SAMPLE_FAILURE_MESSAGE = 'no download';
   const SAMPLE_CUT_SETTINGS = { powerPercent: 80, speedMmPerMin: 600, passes: 1 };
 
   it('downloads <job name>.gcode with M4 S0 and no S above sMax, leaving the project alone', async () => {
@@ -597,6 +598,23 @@ describe('sample G-code export', () => {
 
     expect(Math.max(...sValues)).toBe(PROFILE_S_VALUE_MAX);
     expect(getDownloadedText(downloadSpy).trimEnd().endsWith(GCODE_LASER_OFF_END)).toBe(true);
+  });
+
+  it('shows an error toast when the sample cannot be written', async () => {
+    const downloadSpy = spyOnDownload().mockImplementation(() => {
+      throw new Error(SAMPLE_FAILURE_MESSAGE);
+    });
+    const logSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const store: AppStore = await newGcodeExportTestStore({ activeProfile: newMachineProfile({}) });
+
+    store.dispatch(new SampleGcodeExportRequested({ cutSettings: SAMPLE_CUT_SETTINGS, jobName: SAMPLE_JOB_NAME }));
+    await vi.waitFor((): void => {
+      expect(selectToasts(store.getState()).map((toast: AppToast) => toast.messageKey))
+        .toEqual([DEFAULT.TOAST_SAMPLE_EXPORT_FAILED]);
+    });
+
+    expect(downloadSpy).toHaveBeenCalledTimes(1);
+    expect(logSpy).toHaveBeenCalled();
   });
 
   it('downloads nothing with no active machine profile', async () => {

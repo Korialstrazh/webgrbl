@@ -1,6 +1,6 @@
 import { BURN_PART_FRAMED_LIFT_THICKNESSES, BURN_PART_STATUS } from './burn.model.constants';
 import type { BurnPartStatus } from './burn.model.constants';
-import { getBurnPartMaxLiftMm } from './get.burn.part.max.lift.mm';
+import { getBurnPartFramedLiftMm } from './get.burn.part.framed.lift.mm';
 import type { BurnPart } from './interfaces/BurnPart';
 
 const THICKNESS_MM = 3;
@@ -15,21 +15,21 @@ const newPart = (id: number, parentId?: number, status: BurnPartStatus = BURN_PA
   weakestDepthMm: undefined,
 });
 
-describe(getBurnPartMaxLiftMm.name, () => {
+describe(getBurnPartFramedLiftMm.name, () => {
   it('adds a full lift for each liftable part of the deepest chain', () => {
-    expect(getBurnPartMaxLiftMm([newPart(1), newPart(2, 1), newPart(3, 2), newPart(4)], THICKNESS_MM))
+    expect(getBurnPartFramedLiftMm([newPart(1), newPart(2, 1), newPart(3, 2), newPart(4)], THICKNESS_MM))
       .toBe(ONE_FULL_LIFT_MM * 3);
   });
 
   it('counts nothing for a part that cannot lift', () => {
-    expect(getBurnPartMaxLiftMm(
+    expect(getBurnPartFramedLiftMm(
       [newPart(1, undefined, BURN_PART_STATUS.NOT_THROUGH), newPart(2, 1)],
       THICKNESS_MM,
     )).toBe(ONE_FULL_LIFT_MM);
   });
 
   it('is zero with no parts, and ends on a loop of parents', () => {
-    expect(getBurnPartMaxLiftMm([], THICKNESS_MM)).toBe(0);
-    expect(getBurnPartMaxLiftMm([newPart(1, 2), newPart(2, 1)], THICKNESS_MM)).toBe(ONE_FULL_LIFT_MM * 2);
+    expect(getBurnPartFramedLiftMm([], THICKNESS_MM)).toBe(0);
+    expect(getBurnPartFramedLiftMm([newPart(1, 2), newPart(2, 1)], THICKNESS_MM)).toBe(ONE_FULL_LIFT_MM * 2);
   });
 });

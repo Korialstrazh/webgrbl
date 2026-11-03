@@ -23,6 +23,8 @@ export interface BurnDoseGrid {
   rowCount: number;
   /** Dose of Line-mode layers per cell; each chain adds once. */
   lineDose: Float32Array;
+  /** Dose of the strongest closed geometry alone, per cell: identical chains add, a chain counts its weakest move. */
+  closedGeometryDose: Float32Array;
   /** Dose of Fill-mode layers per cell; scan lines of one layer in one cell do not add. */
   fillDose: Float32Array;
   /** Fill dose of each enabled Fill-mode layer on its own; the layers add up to fillDose. */

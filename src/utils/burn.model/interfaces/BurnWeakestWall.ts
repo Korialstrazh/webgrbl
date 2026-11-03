@@ -1,5 +1,5 @@
 /**
- * The lowest-dose wall cell around one region.
+ * The wall cell that gives way first around one region.
  *
  * @author michael.morosov
  *
@@ -11,6 +11,8 @@
 export interface BurnWeakestWall {
   /** The wall cell. */
   cell: number;
-  /** Its stored total dose. */
-  dose: number;
+  /** Rank of its predicted level: the lower, the further from cutting through. */
+  levelRank: number;
+  /** Its predicted depth in mm. */
+  depthMm: number;
 }

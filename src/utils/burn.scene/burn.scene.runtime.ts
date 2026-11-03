@@ -11,7 +11,6 @@
  */
 import {
   AmbientLight,
-  Box3,
   DirectionalLight,
   Group,
   Mesh,
@@ -23,7 +22,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPartLiftsMm } from '../burn.model/interfaces/BurnPartLiftsMm';
 import type { ElementSizePx } from '../hooks/interfaces/ElementSizePx';
-import { getBurnPartMaxLiftMm } from '../burn.model/get.burn.part.max.lift.mm';
+import { getBurnPartFramedLiftMm } from '../burn.model/get.burn.part.framed.lift.mm';
 import { applyBurnPartHighlight } from './apply.burn.part.highlight';
 import { applyBurnPartLifts } from './apply.burn.part.lifts';
 import {
@@ -53,6 +52,7 @@ import { isBurnLiftAxisAtPoint } from './is.burn.lift.axis.at.point';
 import { newBurnLiftAxis } from './new.burn.lift.axis';
 import { newBurnSceneCamera } from './new.burn.scene.camera';
 import { newBurnSceneObjects } from './new.burn.scene.objects';
+import { placeBurnLiftAxis } from './place.burn.lift.axis';
 import { setBurnSceneCameraFrustum } from './set.burn.scene.camera.frustum';
 
 const BURN_SCENE_RENDERER_ERROR_LOG_MESSAGE = 'Starting the 3D renderer failed';
@@ -186,7 +186,7 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     const modelFraming: BurnSceneModelFraming = {
       sheetBounds,
       thicknessMm,
-      maxLiftMm: getBurnPartMaxLiftMm(parts, thicknessMm),
+      framedLiftMm: getBurnPartFramedLiftMm(parts, thicknessMm),
     };
     const framing: BurnSceneCameraFraming = { ...modelFraming, aspectRatio: this.aspectRatio };
 
@@ -218,14 +218,7 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
       ({ partId }: BurnSceneMesh): boolean => !!partId && partId === this.selectedPartId,
     )?.mesh;
 
-    this.liftAxis.visible = !!mesh;
-
-    if (mesh) {
-      const bounds: Box3 = new Box3().setFromObject(mesh);
-
-      bounds.getCenter(this.liftAxis.position);
-      this.liftAxis.position.z = bounds.max.z;
-    }
+    placeBurnLiftAxis(this.liftAxis, mesh);
   }
 
   private disposeLiftAxis(): void {
