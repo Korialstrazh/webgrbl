@@ -11,7 +11,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Alert, Button, Tag } from 'antd';
-import type { ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -29,8 +30,10 @@ import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import {
+  BurnPartHovered,
   BurnPartSelected,
   selectCurrentBurnModel,
+  selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
 import { BURN_PREVIEW_EMPTY_STATE_TEXT_KEYS } from '../../utils/states/burn.preview.empty.state.constants';
@@ -53,6 +56,7 @@ const PART_STATUS_TEXT_KEYS: Record<BurnPart['status'], string> = {
 };
 
 const WARNING_ROW_KEY_SEPARATOR = '-';
+const SELECTED_ROW_SCROLL: ScrollIntoViewOptions = { block: 'nearest' };
 
 const getWarningRowKey = ({ kind, layerKey, partId }: CutCheckWarning): string =>
   [kind, layerKey, partId].join(WARNING_ROW_KEY_SEPARATOR);
@@ -65,8 +69,15 @@ export const CutCheckPanel = (): ReactNode => {
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
   const emptyState: BurnPreviewEmptyState | undefined = useSelector(selectBurnPreviewEmptyState);
   const selectedPartId: number | undefined = useSelector(selectSelectedBurnPartId);
+  const hoveredPartId: number | undefined = useSelector(selectHoveredBurnPartId);
+  const selectedRowRef: RefObject<HTMLLIElement | null> = useRef<HTMLLIElement>(null);
   const projectLayers: ProjectLayer[] = useSelector(selectProjectLayers);
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
+
+  useEffect(() => {
+    // Nearest, so a click on a row in view moves nothing.
+    selectedRowRef.current?.scrollIntoView(SELECTED_ROW_SCROLL);
+  }, [selectedPartId]);
 
   if (!model) {
     return (
@@ -117,12 +128,14 @@ export const CutCheckPanel = (): ReactNode => {
         ))}
         <ul className={styles.list}>
           {model.parts.map(({ id, status }: BurnPart) => (
-            <li key={id}>
+            <li key={id} ref={id === selectedPartId ? selectedRowRef : undefined}>
               <Button
-                className={styles.partRow}
+                className={id === hoveredPartId ? [styles.partRow, styles.hoveredRow].join(' ') : styles.partRow}
                 type={ANTD_BUTTON_TYPE_TEXT}
                 aria-pressed={id === selectedPartId}
                 onClick={() => dispatch(new BurnPartSelected({ partId: id }))}
+                onMouseEnter={() => dispatch(new BurnPartHovered({ partId: id }))}
+                onMouseLeave={() => dispatch(new BurnPartHovered({ partId: undefined }))}
               >
                 <span>{t(DEFAULT.CUT_CHECK_PART_ROW, { part: id })}</span>
                 <BurnPartRowLift partId={id} />

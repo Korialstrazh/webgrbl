@@ -17,6 +17,10 @@ export const BURN_SCENE_BURNT_COLOUR = '#17110c';
 /** The glow of the selected part, the accent of the sketch. */
 export const BURN_SCENE_HIGHLIGHT_COLOUR = '#ff8a1f';
 export const BURN_SCENE_HIGHLIGHT_INTENSITY = 0.35;
+/** The softer glow of a part under the pointer or under its row. */
+export const BURN_SCENE_HOVER_INTENSITY = 0.15;
+/** A mouse move reads the part under it at most this often, because a ray through a big model takes real time. */
+export const BURN_SCENE_HOVER_MIN_INTERVAL_MS = 50;
 export const BURN_SCENE_BACKGROUND_COLOUR = '#1a1d21';
 export const BURN_SCENE_AMBIENT_LIGHT_COLOUR = '#ffffff';
 export const BURN_SCENE_AMBIENT_LIGHT_INTENSITY = 1.6;

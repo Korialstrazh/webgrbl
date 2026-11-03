@@ -73,6 +73,7 @@ const newFakeRenderer = (): BurnSceneRenderer => ({
   showBurnModel: vi.fn(),
   applyBurnPartLifts: vi.fn(),
   highlightBurnPart: vi.fn(),
+  hoverBurnPart: vi.fn(),
   resizeBurnScene: vi.fn(),
   getBurnPartIdAtPointer: vi.fn(() => PART_ID),
   isBurnLiftAxisAtPoint: vi.fn(() => false),
@@ -440,6 +441,43 @@ describe(BurnPreviewPane.name, () => {
       expect(reachedOrbitControls).not.toHaveBeenCalled();
       expect(renderer.getBurnPartIdAtPointer).not.toHaveBeenCalled();
       expect(selectSelectedBurnPartId(store.getState())).toBe(PART_ID);
+    });
+
+    describe('hover', () => {
+      const HOVER_WAIT_MS = 100;
+
+      it('highlights the part under a resting mouse with a pointer cursor, reading many moves as one', async () => {
+        const { canvas, renderer } = await renderPickablePane();
+
+        fireEvent.pointerMove(canvas, { clientX: 10, clientY: 10, buttons: 0 });
+        fireEvent.pointerMove(canvas, { clientX: 12, clientY: 10, buttons: 0 });
+
+        await vi.waitFor(() => {
+          expect(renderer.hoverBurnPart).toHaveBeenLastCalledWith(PART_ID);
+        });
+        expect(renderer.getBurnPartIdAtPointer).toHaveBeenCalledTimes(1);
+        expect(canvas.style.cursor).toBe('pointer');
+
+        fireEvent.pointerLeave(canvas);
+
+        await vi.waitFor(() => {
+          expect(renderer.hoverBurnPart).toHaveBeenLastCalledWith(undefined);
+        });
+        expect(canvas.style.cursor).toBe('');
+      });
+
+      it('reads nothing during a drag', async () => {
+        const { canvas, renderer } = await renderPickablePane();
+
+        fireEvent.pointerMove(canvas, { clientX: 10, clientY: 10, buttons: 1 });
+        await act(async () => {
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, HOVER_WAIT_MS);
+          });
+        });
+
+        expect(renderer.getBurnPartIdAtPointer).not.toHaveBeenCalled();
+      });
     });
 
     it('clears the selection on a click that hits no part', async () => {

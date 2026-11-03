@@ -96,6 +96,9 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
   // The part the lift axis stands on.
   private selectedPartId: number | undefined;
 
+  // The part that glows softly.
+  private hoveredPartId: number | undefined;
+
   // How far each part stands above its place, kept so that a new camera starts right.
   private liftsMm: BurnPartLiftsMm = {};
 
@@ -142,9 +145,17 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
 
   public highlightBurnPart(partId: number | undefined): void {
     if (this.objects) {
-      applyBurnPartHighlight(this.objects, partId);
+      applyBurnPartHighlight(this.objects, partId, this.hoveredPartId);
       this.selectedPartId = partId;
       this.placeLiftAxis();
+      this.drawScene();
+    }
+  }
+
+  public hoverBurnPart(partId: number | undefined): void {
+    if (this.objects && partId !== this.hoveredPartId) {
+      this.hoveredPartId = partId;
+      applyBurnPartHighlight(this.objects, this.selectedPartId, partId);
       this.drawScene();
     }
   }
@@ -285,6 +296,8 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
       this.scene.remove(this.objects.group);
       this.objects.material.dispose();
       this.objects.highlightMaterial.dispose();
+      this.objects.hoverMaterial.dispose();
+      this.objects.highlightOutlineMaterial.dispose();
       this.objects.toonBands.dispose();
       this.objects.outlineMaterial.dispose();
 

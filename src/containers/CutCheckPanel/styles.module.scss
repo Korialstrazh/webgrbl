@@ -41,6 +41,11 @@
   list-style: none;
 }
 
+// Answers the pointer over the part in the scene, as a row does under the pointer itself.
+.hoveredRow:global(.ant-btn) {
+  background-color: var(--color-surface-2);
+}
+
 .partRow {
   display: flex;
   gap: var(--space-2);

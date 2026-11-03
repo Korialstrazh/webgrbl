@@ -17,6 +17,8 @@ import {
   BurnModelReady,
   BurnModelRequested,
   BurnPartLifted,
+  BurnPartSelected,
+  selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
 import { MaterialSaved } from '../../utils/states/material.state';
@@ -241,6 +243,31 @@ describe(CutCheckPanel.name, () => {
 
     expect(screen.getAllByLabelText(/^Lifted /)).toHaveLength(1);
     expect(getPartRow(FREE_PART_ID)).toContainElement(screen.getByLabelText('Lifted 40.0 mm'));
+  });
+
+  it('tells the store which part a row is under the pointer, and clears it on leaving', () => {
+    const store: AppStore = newReadyStore();
+
+    renderPanel(store);
+    fireEvent.mouseEnter(getPartRow(BORDERLINE_PART_ID));
+    expect(selectHoveredBurnPartId(store.getState())).toBe(BORDERLINE_PART_ID);
+
+    fireEvent.mouseLeave(getPartRow(BORDERLINE_PART_ID));
+    expect(selectHoveredBurnPartId(store.getState())).toBeUndefined();
+  });
+
+  it('scrolls the row of a part selected in the scene into view', () => {
+    const store: AppStore = newReadyStore();
+    const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView');
+
+    renderPanel(store);
+    act(() => {
+      store.dispatch(new BurnPartSelected({ partId: ATTACHED_PART_ID }));
+    });
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    expect(scrollIntoView.mock.contexts.at(-1)).toContainElement(getPartRow(ATTACHED_PART_ID));
+    scrollIntoView.mockRestore();
   });
 
   it('keeps export enabled with warnings', async () => {

@@ -30,6 +30,7 @@ import {
   BURN_SCENE_COLOUR_VALUES_PER_VERTEX,
   BURN_SCENE_HIGHLIGHT_COLOUR,
   BURN_SCENE_HIGHLIGHT_INTENSITY,
+  BURN_SCENE_HOVER_INTENSITY,
   BURN_SCENE_INDEX_VALUES_PER_ITEM,
   BURN_SCENE_OUTLINE_COLOUR,
   BURN_SCENE_POSITION_VALUES_PER_VERTEX,
@@ -113,12 +114,17 @@ export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
     emissive: BURN_SCENE_HIGHLIGHT_COLOUR,
     emissiveIntensity: BURN_SCENE_HIGHLIGHT_INTENSITY,
   });
+  const hoverMaterial: MeshToonMaterial = highlightMaterial.clone();
+
+  hoverMaterial.emissiveIntensity = BURN_SCENE_HOVER_INTENSITY;
+
   const meshes: BurnSceneMesh[] = model.meshes.map((regionMesh: BurnRegionMesh): BurnSceneMesh => ({
     partId: regionMesh.partId,
     mesh: new Mesh(newBurnRegionGeometry(regionMesh), material),
   }));
 
   const outlineMaterial: LineBasicMaterial = new LineBasicMaterial({ color: BURN_SCENE_OUTLINE_COLOUR });
+  const highlightOutlineMaterial: LineBasicMaterial = new LineBasicMaterial({ color: BURN_SCENE_HIGHLIGHT_COLOUR });
   const outlines: LineSegments[] = [];
 
   for (const { mesh } of meshes) {
@@ -133,5 +139,15 @@ export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
     group.add(mesh);
   }
 
-  return { group, meshes, material, highlightMaterial, toonBands, outlines, outlineMaterial };
+  return {
+    group,
+    meshes,
+    material,
+    highlightMaterial,
+    hoverMaterial,
+    toonBands,
+    outlines,
+    outlineMaterial,
+    highlightOutlineMaterial,
+  };
 };

@@ -21,6 +21,8 @@ export interface BurnSceneRenderer {
   applyBurnPartLifts: (liftsMm: BurnPartLiftsMm) => void;
   /** Makes the mesh of a part glow and puts the lift axis on it, for no other; undefined does so for none. */
   highlightBurnPart: (partId: number | undefined) => void;
+  /** Makes the mesh of a part glow softly; undefined does so for none. Draws only when that changes anything. */
+  hoverBurnPart: (partId: number | undefined) => void;
   /** Sets the drawing size to the size of the view on screen. */
   resizeBurnScene: (size: ElementSizePx) => void;
   /** The part under a place in the view; undefined over the sheet or the background. */

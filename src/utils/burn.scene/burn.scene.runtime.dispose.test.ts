@@ -193,6 +193,20 @@ describe('the burn scene camera across models', () => {
     expect((BURN_SCENE_MAX_POLAR_ANGLE_RADIANS * 180) / Math.PI).toBeCloseTo(80);
   });
 
+  it('draws for a change of hover only, never for the same part again', () => {
+    const renderer: BurnSceneRenderer = newRenderer();
+
+    renderer.showBurnModel(newBurnSceneTestModel());
+    fakeWebGlRenderer.render.mockClear();
+
+    renderer.hoverBurnPart(1);
+    renderer.hoverBurnPart(1);
+    expect(fakeWebGlRenderer.render).toHaveBeenCalledTimes(1);
+
+    renderer.hoverBurnPart(undefined);
+    expect(fakeWebGlRenderer.render).toHaveBeenCalledTimes(2);
+  });
+
   it('draws again when the highlight changes', () => {
     const renderer: BurnSceneRenderer = newRenderer();
 

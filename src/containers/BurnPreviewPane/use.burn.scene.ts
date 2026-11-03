@@ -20,16 +20,19 @@ import type { BurnSceneRenderer } from '../../utils/burn.scene/interfaces/BurnSc
 import type { ElementSizePx } from '../../utils/hooks/interfaces/ElementSizePx';
 import { useElementSizePx } from '../../utils/hooks/use.element.size.px';
 import {
+  BurnPartHovered,
   BurnPartLifted,
   BurnPartSelected,
   selectBurnPartLiftMm,
   selectBurnPartEffectiveLiftsMm,
   selectCurrentBurnModel,
+  selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import { addBurnLiftDragListener } from './add.burn.lift.drag.listener';
 import { addBurnSceneClickListener } from './add.burn.scene.click.listener';
+import { addBurnSceneHoverListener } from './add.burn.scene.hover.listener';
 import { BURN_SCENE_RUNTIME_LOAD_STATUS } from './burn.preview.pane.constants';
 import type { BurnSceneRuntimeLoad } from './interfaces/BurnSceneRuntimeLoad';
 import type { BurnSceneUse } from './interfaces/BurnSceneUse';
@@ -47,6 +50,7 @@ export const useBurnScene = (
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
   const liftsMm: BurnPartLiftsMm = useSelector(selectBurnPartEffectiveLiftsMm);
   const selectedPartId: number | undefined = useSelector(selectSelectedBurnPartId);
+  const hoveredPartId: number | undefined = useSelector(selectHoveredBurnPartId);
   const size: ElementSizePx = useElementSizePx(hostRef);
   const [renderer, setRenderer] = useState<BurnSceneRenderer | undefined>(undefined);
   const [isSceneFailed, setIsSceneFailed] = useState<boolean>(false);
@@ -80,6 +84,13 @@ export const useBurnScene = (
     const removeClickListener: () => void = addBurnSceneClickListener(canvas, (pointer: BurnScenePointer): void => {
       dispatch(new BurnPartSelected({ partId: newRenderer.getBurnPartIdAtPointer(pointer) }));
     });
+    const removeHoverListener: () => void = addBurnSceneHoverListener(
+      canvas,
+      newRenderer,
+      (partId: number | undefined): void => {
+        dispatch(new BurnPartHovered({ partId }));
+      },
+    );
 
     const removeLiftDragListener: () => void = addBurnLiftDragListener(canvas, newRenderer, {
       getLiftMm: (): number => {
@@ -103,6 +114,7 @@ export const useBurnScene = (
       // Off before dispose(), whose own context loss is no failure.
       canvas.removeEventListener(WEBGL_CONTEXT_LOST_EVENT, handleContextLost);
       removeClickListener();
+      removeHoverListener();
       removeLiftDragListener();
       newRenderer.dispose();
       canvas.remove();
@@ -127,6 +139,10 @@ export const useBurnScene = (
   useEffect(() => {
     renderer?.highlightBurnPart(selectedPartId);
   }, [renderer, model, selectedPartId]);
+
+  useEffect(() => {
+    renderer?.hoverBurnPart(hoveredPartId);
+  }, [renderer, model, hoveredPartId]);
 
   return { isSceneFailed, renderer };
 };

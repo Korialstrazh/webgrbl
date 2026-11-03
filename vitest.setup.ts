@@ -10,6 +10,9 @@ import { installMatchMediaMock, resetMatchMediaMock } from './src/utils/test.sup
 import { installResizeObserverMock } from './src/utils/test.support/resize.observer.mock';
 import { installSvgScreenMatrixMock } from './src/utils/test.support/svg.screen.matrix.mock';
 
+// jsdom lays nothing out, so it has no scrolling to do.
+Element.prototype.scrollIntoView = (): void => undefined;
+
 // Awaited so the language switch cannot race i18next's own init.
 await i18n.changeLanguage(FALLBACK_LANGUAGE);
 
