@@ -18,11 +18,10 @@ import {
 } from './burn.model.constants';
 import type { BurnPartStatus, CutDepthLevel } from './burn.model.constants';
 import { getBurnAttachmentTrees } from './get.burn.attachment.trees';
-import { getBurnDepthPrediction } from './get.burn.depth.prediction';
 import { getBurnGridOutsideCells } from './get.burn.grid.outside.cells';
 import { getBurnGridRegions } from './get.burn.grid.regions';
 import { getBurnRegionParents } from './get.burn.region.parents';
-import { getBurnStoredCellDose } from './get.burn.stored.cell.dose';
+import { getBurnWallCellPrediction } from './get.burn.wall.cell.prediction';
 import { getBurnWallSides } from './get.burn.wall.sides';
 import type { BurnAttachmentTrees } from './interfaces/BurnAttachmentTrees';
 import type { BurnDepthPrediction } from './interfaces/BurnDepthPrediction';
@@ -39,9 +38,14 @@ import type { ToolpathBounds } from '../toolpath/interfaces/ToolpathBounds';
 
 /** A region's outermost cells touch its walls, so half a cell past them, on each side, is the middle of the wall. */
 const WALL_MIDDLE_CELL_OFFSET = 0.5;
+const WALL_LEVEL_RANKS: Record<CutDepthLevel, number> = {
+  [CUT_DEPTH_LEVEL.NOT_THROUGH]: 0,
+  [CUT_DEPTH_LEVEL.BORDERLINE]: 1,
+  [CUT_DEPTH_LEVEL.THROUGH]: 2,
+};
 
 const getWallCellPrediction = (grid: BurnDoseGrid, cell: number, input: BurnPartsInput): BurnDepthPrediction =>
-  getBurnDepthPrediction(getBurnStoredCellDose(grid, cell), input.thicknessMm, input.basis);
+  getBurnWallCellPrediction(grid, cell, input.thicknessMm, input.basis);
 
 const getWallLevelCells = (grid: BurnDoseGrid, input: BurnPartsInput): BurnWallLevelCells => {
   const throughCells: Uint8Array = new Uint8Array(grid.closedCutMask.length);
@@ -62,18 +66,31 @@ const getWallLevelCells = (grid: BurnDoseGrid, input: BurnPartsInput): BurnWallL
 const getRegionAreaMm2 = (region: BurnGridRegion, { cellMm }: BurnDoseGrid): number =>
   region.cellCount * cellMm * cellMm;
 
+/** Whether a wall gives way before another: a lower level first, then the shallower one at the same level. */
+const isWallWeaker = (wall: BurnWeakestWall, otherWall: BurnWeakestWall | undefined): boolean => {
+  if (!otherWall) {
+    return true;
+  }
+
+  return wall.levelRank === otherWall.levelRank
+    ? wall.depthMm < otherWall.depthMm
+    : wall.levelRank < otherWall.levelRank;
+};
+
 const getLowestDoseWall = (
   grid: BurnDoseGrid,
+  input: BurnPartsInput,
   wallCells: number[],
   isCellCounted: (cell: number) => boolean,
 ): BurnWeakestWall | undefined => {
   let lowestDoseWall: BurnWeakestWall | undefined;
 
   for (const cell of wallCells) {
-    const dose: number = getBurnStoredCellDose(grid, cell);
+    if (isCellCounted(cell)) {
+      const { depthMm, level }: BurnDepthPrediction = getWallCellPrediction(grid, cell, input);
+      const wall: BurnWeakestWall = { cell, levelRank: WALL_LEVEL_RANKS[level], depthMm };
 
-    if (isCellCounted(cell) && dose < (lowestDoseWall?.dose ?? Number.POSITIVE_INFINITY)) {
-      lowestDoseWall = { cell, dose };
+      lowestDoseWall = isWallWeaker(wall, lowestDoseWall) ? wall : lowestDoseWall;
     }
   }
 
@@ -189,6 +206,7 @@ export const getBurnParts = (grid: BurnDoseGrid, input: BurnPartsInput): BurnPar
       : undefined;
     const countedWall: BurnWeakestWall | undefined = getLowestDoseWall(
       grid,
+      input,
       wallSides.cellsByRegion.get(regionNumber) ?? [],
       (cell: number): boolean => {
         const sides: Set<number> | undefined = wallSides.sidesByCell.get(cell);

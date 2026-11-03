@@ -17,9 +17,11 @@ import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathMove } from '../toolpath/interfaces/ToolpathMove';
 import { TOOLPATH_MOVE_KIND } from '../toolpath/toolpath.constants';
 import { BURN_GRID_MAX_CELLS, BURN_GRID_MIN_CELL_MM, BURN_SHEET_MARGIN_MM } from './burn.model.constants';
+import { getBurnChainGeometryGroups } from './get.burn.chain.geometry.groups';
 import { getBurnChains } from './get.burn.chains';
 import { getMoveDose } from './get.move.dose';
 import type { BurnChain } from './interfaces/BurnChain';
+import type { BurnChainCellDoses } from './interfaces/BurnChainCellDoses';
 import type { BurnDoseGrid } from './interfaces/BurnDoseGrid';
 import type { BurnGridLayout } from './interfaces/BurnGridLayout';
 import type { BurnSegment } from './interfaces/BurnSegment';
@@ -54,13 +56,18 @@ const getBurnGridLayout = (toolpath: Toolpath): BurnGridLayout | undefined => {
   };
 };
 
-/** The dose per cell of one chain: a cell it crosses several times still counts once, at the largest move dose. */
-const getChainCellDoses = (layout: BurnGridLayout, chain: BurnChain): Map<number, number> => {
-  const cellDoses: Map<number, number> = new Map<number, number>();
+/**
+ * The dose per cell of one chain: a cell it crosses several times still counts once. The largest move dose is what the
+ * cell shows; the smallest is what a wall can rely on, because a weak stretch shorter than a cell can break the wall.
+ */
+const getChainCellDoses = (layout: BurnGridLayout, chain: BurnChain): BurnChainCellDoses => {
+  const largestDoses: Map<number, number> = new Map<number, number>();
+  const weakestDoses: Map<number, number> = new Map<number, number>();
 
   const addSegment = (segment: BurnSegment, dose: number): void => {
     visitBurnSegmentCells(layout, segment, (cell: number): void => {
-      cellDoses.set(cell, Math.max(cellDoses.get(cell) ?? 0, dose));
+      largestDoses.set(cell, Math.max(largestDoses.get(cell) ?? 0, dose));
+      weakestDoses.set(cell, Math.min(weakestDoses.get(cell) ?? dose, dose));
     });
   };
 
@@ -76,22 +83,37 @@ const getChainCellDoses = (layout: BurnGridLayout, chain: BurnChain): Map<number
     addSegment({ from: lastMove.to, to: firstMove.from }, getMoveDose(lastMove.powerPercent, lastMove.feedMmPerMin));
   }
 
-  return cellDoses;
+  return { largestDoses, weakestDoses };
 };
 
 const addLineDoses = (grid: BurnDoseGrid, chains: BurnChain[]): void => {
   const strongestChainDose: Float32Array = new Float32Array(grid.lineDose.length);
 
-  for (const chain of chains) {
-    const layerIndex: number = grid.layerKeys.indexOf(chain.layerKey);
+  for (const group of getBurnChainGeometryGroups(chains)) {
+    const groupDoses: Map<number, number> = new Map<number, number>();
 
-    for (const [cell, dose] of getChainCellDoses(grid, chain)) {
-      grid.lineDose[cell] = (grid.lineDose[cell] ?? 0) + dose;
+    for (const chain of group.chains) {
+      const layerIndex: number = grid.layerKeys.indexOf(chain.layerKey);
+      const { largestDoses, weakestDoses }: BurnChainCellDoses = getChainCellDoses(grid, chain);
 
-      if (chain.isClosed && dose > (strongestChainDose[cell] ?? 0)) {
-        strongestChainDose[cell] = dose;
-        grid.closedCutMask[cell] = 1;
-        grid.closedCutLayerIndex[cell] = layerIndex;
+      for (const [cell, dose] of largestDoses) {
+        grid.lineDose[cell] = (grid.lineDose[cell] ?? 0) + dose;
+
+        if (chain.isClosed && dose > (strongestChainDose[cell] ?? 0)) {
+          strongestChainDose[cell] = dose;
+          grid.closedCutMask[cell] = 1;
+          grid.closedCutLayerIndex[cell] = layerIndex;
+        }
+      }
+
+      for (const [cell, dose] of weakestDoses) {
+        groupDoses.set(cell, (groupDoses.get(cell) ?? 0) + dose);
+      }
+    }
+
+    if (group.isClosed) {
+      for (const [cell, dose] of groupDoses) {
+        grid.closedGeometryDose[cell] = Math.max(grid.closedGeometryDose[cell] ?? 0, dose);
       }
     }
   }
@@ -141,6 +163,7 @@ export const getBurnDoseGrid = (toolpath: Toolpath, layers: ProjectLayer[]): Bur
   const grid: BurnDoseGrid = {
     ...layout,
     lineDose: new Float32Array(cellCount),
+    closedGeometryDose: new Float32Array(cellCount),
     fillDose: new Float32Array(cellCount),
     fillLayerDoses: [],
     closedCutMask: new Uint8Array(cellCount),
