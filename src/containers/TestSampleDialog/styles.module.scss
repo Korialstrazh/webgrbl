@@ -1,0 +1,43 @@
+.burnSection {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+// A square stand-in for the sample: the cut outline around a gradient.
+.samplePicture {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 9rem;
+  height: 9rem;
+  padding: 1rem;
+  display: flex;
+  border: 0.125rem solid var(--color-accent);
+  background: #c9a26f;
+}
+
+.sampleGradient {
+  flex: 1 1 auto;
+  background: linear-gradient(90deg, #f0dcc0, #2a1a0c);
+}
+
+.burnDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.resultSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+
+.outcomeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
