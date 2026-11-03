@@ -34,6 +34,7 @@ import type { AppDispatch } from '../../../utils/states/new.store';
 import styles from './styles.module.scss';
 
 const NO_PART_ID = 0;
+const LIFT_STEPS_PER_MM = Math.round(1 / BURN_PART_LIFT_STEP_MM);
 const LIFT_RAISE_KEYS: readonly string[] = ['ArrowUp', 'ArrowRight'];
 const LIFT_LOWER_KEYS: readonly string[] = ['ArrowDown', 'ArrowLeft'];
 
@@ -69,10 +70,13 @@ export const BurnPartLiftControl = (): ReactNode => {
   const carryingPart: BurnPart | undefined = getCarryingBurnPart(part, model);
 
   const isLiftable: boolean = isBurnPartLiftable(part);
-  const handleLiftKeyDown = ({ key }: KeyboardEvent<HTMLDivElement>): void => {
+  const handleLiftKeyDown = (keyEvent: KeyboardEvent<HTMLDivElement>): void => {
+    const { key } = keyEvent;
     const isRaiseKey: boolean = LIFT_RAISE_KEYS.includes(key);
 
     if (isLiftable && (isRaiseKey || LIFT_LOWER_KEYS.includes(key))) {
+      keyEvent.preventDefault();
+
       const stepMm: number = isRaiseKey ? BURN_PART_LIFT_STEP_MM : -BURN_PART_LIFT_STEP_MM;
 
       dispatch(new BurnPartLifted({ partId: part.id, liftMm: liftMm + stepMm }));
@@ -86,7 +90,7 @@ export const BurnPartLiftControl = (): ReactNode => {
       tabIndex={0}
       aria-label={t(DEFAULT.BURN_PART_LIFT_LABEL)}
       aria-valuemin={0}
-      aria-valuenow={heightMm}
+      aria-valuenow={Math.round(heightMm / BURN_PART_LIFT_STEP_MM) / LIFT_STEPS_PER_MM}
       aria-disabled={!isLiftable}
       onKeyDown={handleLiftKeyDown}
     >

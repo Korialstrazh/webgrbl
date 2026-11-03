@@ -78,6 +78,19 @@ describe(BurnPartLiftControl.name, () => {
     expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBeCloseTo(STEP_MM);
   });
 
+  it('rounds the height it announces and takes the arrow key for itself', () => {
+    renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), PART_ID);
+
+    const isDefaultKept: boolean = fireEvent.keyDown(getLiftControl(), { key: 'ArrowUp' });
+
+    fireEvent.keyDown(getLiftControl(), { key: 'ArrowUp' });
+    fireEvent.keyDown(getLiftControl(), { key: 'ArrowUp' });
+
+    expect(isDefaultKept).toBe(false);
+    expect(getLiftControl()).toHaveAttribute('aria-valuenow', '0.3');
+    expect(fireEvent.keyDown(getLiftControl(), { key: 'Tab' })).toBe(true);
+  });
+
   it('lifts a borderline part too, and marks it as one that may stay attached', () => {
     const store: AppStore = renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.BORDERLINE)]), PART_ID);
 

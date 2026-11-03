@@ -124,7 +124,7 @@ const getBurnPartLowestLiftMm = ({ model, liftMmByPartId }: BurnModelState, part
   const parentId: number | undefined = partsById.get(partId)?.parentId;
   const parent: BurnPart | undefined = parentId ? partsById.get(parentId) : undefined;
 
-  return parent ? -getBurnPartEffectiveLiftMm(parent, partsById, liftMmByPartId) : 0;
+  return parent ? 0 - getBurnPartEffectiveLiftMm(parent, partsById, liftMmByPartId) : 0;
 };
 
 const getStateWithLift = (state: BurnModelState, { partId, liftMm }: BurnPartLiftedPayload): BurnModelState => {
@@ -199,8 +199,12 @@ export const selectBuiltBurnMaterialId = (state: RootState): string | undefined 
 export const selectSelectedBurnPartId = (state: RootState): number | undefined =>
   state[BURN_MODEL_STATE_NAME].selectedPartId;
 
-export const selectBurnPartLiftMm = (partId: number) => (state: RootState): number =>
-  state[BURN_MODEL_STATE_NAME].liftMmByPartId[partId] ?? 0;
+/** Clamped, because a parent lowered later leaves a child's stored lift below what can be seen and dragged. */
+export const selectBurnPartLiftMm = (partId: number) => (state: RootState): number => {
+  const burnModelState: BurnModelState = state[BURN_MODEL_STATE_NAME];
+
+  return Math.max(burnModelState.liftMmByPartId[partId] ?? 0, getBurnPartLowestLiftMm(burnModelState, partId));
+};
 
 export const selectBurnPartEffectiveLiftsMm = createSelector(
   [selectBurnModel, (state: RootState): BurnPartLiftsMm => state[BURN_MODEL_STATE_NAME].liftMmByPartId],
