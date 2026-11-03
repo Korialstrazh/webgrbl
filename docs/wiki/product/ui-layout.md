@@ -12,14 +12,14 @@ The approved screen layout of webgrbl and the order in which features get built.
 
 - **Workbench layout.** One screen, with no modes:
   - top bar: project, menus, undo/redo, connection pill, autosave state;
-  - left panel: layers (on/off; off is never sent), objects; in 3D the Cut check above Layers, Objects hidden; the material is chosen in the 3D toolbar, the material library panel is planned (roadmap item 6);
+  - left panel: material select (Design view), layers (on/off; off is never sent) with Add test sample below the list (Design view), objects; in 3D the Cut check above Layers, Objects hidden; the material library is planned (roadmap item 6);
   - centre: the bed to scale, with a Design / Toolpath / 3D switch and a status strip with a collapsible console;
   - right panel, main task first: machine state (one line while not connected), job (estimate, export, Start), jog, low-power pointer, frame, air assist, and a large STOP that is always visible; the pre-flight check is planned (roadmap item 5);
 - **Running a job** changes the Workbench's state (progress, overrides, jog locked); there is no separate screen.
 - **Secondary screens are drawers or dialogs:** layer settings, material library, machine profiles, the GRBL `$$` editor, projects. Drawers never cover the machine panel.
 - **A bed the user can colour.** The work surface is a light grey by default, like a sheet of material, so black artwork shows; the user can pick another colour (named presets: Grey (default), Light grey, White, Dark grey, Plywood, each a keyboard-reachable button) from the view controls in the bed header, which never float over the drawing, stored for the whole app. The marks on the bed switch to a light set on a dark bed, and the grid takes the hue of the bed colour.
 - **The Design view shows what burns.** Objects on a Line layer show as outlines in the layer colour, fill and shading layers show filled, and objects on an off layer are dimmed, matching the Toolpath view. A very dark bed hides black artwork, and the picker says so.
-- **Planned features stay quiet.** A control that is not built yet shows as disabled with a small "Soon" tag and never sends anything to the machine; a panel or menu that would hold nothing but a placeholder (the material panel, the Materials menu, the pre-flight card) stays off the screen until it is built. The main screen shows at most about four Soon tags.
+- **Planned features stay quiet.** A control that is not built yet shows as disabled with a small "Soon" tag and never sends anything to the machine; a panel or menu that would hold nothing but a placeholder (the Materials menu, the pre-flight card) stays off the screen until it is built. The main screen shows at most about four Soon tags.
 - **Power by colour:** one range, black (layer max power) → white (no power). Real gradients are followed; off-grey colours are ignored within a tolerance.
 - **Any GRBL laser:** machine profiles hold bed size, maximum watts, `$30`, origin and air assist. Material presets are stored in watts per profile and rescaled on import.
 - **Design tokens:**

@@ -86,6 +86,7 @@ const REGENERATE_LABEL = 'Regenerate';
 const OUT_OF_DATE_TEXT = 'Out of date';
 const BED_ZOOM_LABEL = 'Bed zoom';
 const MATERIAL_LABEL = 'Material';
+const ADD_TEST_SAMPLE_LABEL = 'Add test sample';
 const CANCEL_LABEL = 'Cancel';
 const GENERATING_TEXT = `Generating${HORIZONTAL_ELLIPSIS} 40 %`;
 const GENERATION_PROGRESS = 0.4;
@@ -532,14 +533,14 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('offers the material select in Design only; 3D shows the material as text', () => {
+  it('leaves the material select and the test sample to the design panel; 3D shows the material as text', () => {
     renderPanel(newHeldToolpathStore());
 
-    expect(screen.getByRole('combobox', { name: MATERIAL_LABEL })).toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: MATERIAL_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
 
     openThreeDView();
 
-    expect(screen.queryByRole('combobox', { name: MATERIAL_LABEL })).not.toBeInTheDocument();
     expect(screen.getByText('Material: none')).toBeInTheDocument();
   });
 

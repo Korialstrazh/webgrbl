@@ -1,6 +1,7 @@
 /**
- * The left region for the design tools: layers and objects. In the 3D view it shows the Cut check above the layers,
- * and the objects leave, as they cannot be edited there.
+ * The left region for the design tools: the material of the project, layers and objects. The material and the test
+ * sample are chosen and added in the Design view only. In the 3D view it shows the Cut check above the layers, and the
+ * objects leave, as they cannot be edited there.
  *
  * @author michael.morosov
  *
@@ -16,20 +17,25 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL } from '../../utils/antd.constants';
 import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
+import type { BedViewMode } from '../../utils/bed/bed.view.constants';
 import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedViewMode } from '../../utils/states/bed.view.state';
 import { Panel } from '../../views/Panel';
+import { AddTestSampleButton } from '../AddTestSampleButton';
 import { CutCheckPanel } from '../CutCheckPanel';
 import { LayersSection } from '../LayersSection';
 import { ObjectsSection } from '../ObjectsSection';
 import { PaletteDialog } from '../PaletteDialog';
+import { ProjectMaterialSelect } from '../ProjectMaterialSelect';
 import styles from './styles.module.scss';
 
 export const DesignPanel = (): ReactNode => {
   const { t } = useTranslation();
   const [isPaletteDialogOpen, setIsPaletteDialogOpen] = useState<boolean>(false);
-  const isThreeDView: boolean = useSelector(selectBedViewMode) === BED_VIEW_MODE.THREE_D;
+  const viewMode: BedViewMode = useSelector(selectBedViewMode);
+  const isDesignView: boolean = viewMode === BED_VIEW_MODE.DESIGN;
+  const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
 
   return (
     <Layout.Sider
@@ -39,6 +45,11 @@ export const DesignPanel = (): ReactNode => {
       aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}
     >
       {isThreeDView && <CutCheckPanel />}
+      {isDesignView && (
+        <Panel title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
+          <ProjectMaterialSelect />
+        </Panel>
+      )}
       <Panel
         title={t(DEFAULT.DESIGN_LAYERS_TITLE)}
         headerActionComponent={
@@ -47,7 +58,10 @@ export const DesignPanel = (): ReactNode => {
           </Button>
         }
       >
-        <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
+        <div className={styles.layersContent}>
+          <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
+          {isDesignView && <AddTestSampleButton />}
+        </div>
       </Panel>
       {!isThreeDView && (
         <Panel title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>

@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { DesignPanel } from '.';
 import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
+import type { BedViewMode } from '../../utils/bed/bed.view.constants';
 import { BedViewModeChanged } from '../../utils/states/bed.view.state';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
@@ -10,8 +11,10 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
-const PANEL_TITLES: readonly string[] = ['Layers', 'Objects'];
-const PLANNED_PANEL_TITLE = 'Material';
+const MATERIAL_TITLE = 'Material';
+const LAYERS_TITLE = 'Layers';
+const OBJECTS_TITLE = 'Objects';
+const ADD_TEST_SAMPLE_LABEL = 'Add test sample';
 const CUT_CHECK_TITLE = 'Cut check';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PALETTE_BUTTON_LABEL = 'Palette';
@@ -25,15 +28,16 @@ const renderDesignPanel = (store: AppStore): void => {
   );
 };
 
+const getHeadingNames = (): (string | null)[] => screen.getAllByRole('heading').map(
+  (heading: HTMLElement) => heading.textContent,
+);
+
 describe(DesignPanel.name, () => {
-  it('shows the layers and objects panels and no placeholder panel for the planned material', () => {
+  it('shows the material, layers and objects panels in that order in the Design view', () => {
     renderDesignPanel(newStore());
 
-    for (const panelTitle of PANEL_TITLES) {
-      expect(screen.getByRole('heading', { name: panelTitle })).toBeInTheDocument();
-    }
-
-    expect(screen.queryByRole('heading', { name: PLANNED_PANEL_TITLE })).not.toBeInTheDocument();
+    expect(getHeadingNames()).toEqual([MATERIAL_TITLE, LAYERS_TITLE, OBJECTS_TITLE]);
+    expect(screen.getByRole('combobox', { name: MATERIAL_TITLE })).toBeInTheDocument();
     expect(document.querySelectorAll(DISABLED_REGION_SELECTOR)).toHaveLength(0);
   });
 
@@ -56,12 +60,29 @@ describe(DesignPanel.name, () => {
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
     renderDesignPanel(store);
 
-    const headingNames: (string | null)[] = screen.getAllByRole('heading').map(
-      (heading: HTMLElement) => heading.textContent,
-    );
-
-    expect(headingNames).toEqual([CUT_CHECK_TITLE, PANEL_TITLES[0]]);
+    expect(getHeadingNames()).toEqual([CUT_CHECK_TITLE, LAYERS_TITLE]);
   });
+
+  it('puts Add test sample in the Layers panel', () => {
+    renderDesignPanel(newStore());
+
+    const layersPanel: HTMLElement = screen.getByRole('region', { name: LAYERS_TITLE });
+
+    expect(within(layersPanel).getByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).toBeInTheDocument();
+  });
+
+  it.each([BED_VIEW_MODE.TOOLPATH, BED_VIEW_MODE.THREE_D])(
+    'leaves the material select and Add test sample out of the %s view',
+    (viewMode: BedViewMode) => {
+      const store: AppStore = newStore();
+
+      store.dispatch(new BedViewModeChanged({ viewMode }));
+      renderDesignPanel(store);
+
+      expect(screen.queryByRole('combobox', { name: MATERIAL_TITLE })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
+    },
+  );
 
   it('opens the palette dialog from the Palette button in the Layers header', () => {
     const store: AppStore = newStore();

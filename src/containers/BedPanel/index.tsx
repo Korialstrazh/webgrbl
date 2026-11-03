@@ -35,12 +35,10 @@ import { selectBedColour } from '../../utils/states/bed.appearance.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
-import { AddTestSampleButton } from '../AddTestSampleButton';
 import { BedObjects } from '../BedObjects';
 import { BedViewport } from '../BedViewport';
 import { BurnPreviewPane } from '../BurnPreviewPane';
 import { BurnPreviewToolbar } from '../BurnPreviewToolbar';
-import { ProjectMaterialSelect } from '../ProjectMaterialSelect';
 import { SimulationPlaybackBar } from '../SimulationPlaybackBar';
 import { ToastStack } from '../ToastStack';
 import { ToolpathLayer } from '../ToolpathLayer';
@@ -91,12 +89,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
                   onTravelShownChange={setIsTravelShown}
                 />
                 <ToolpathWarningsPanel />
-              </>
-            )}
-            {viewMode === BED_VIEW_MODE.DESIGN && (
-              <>
-                <ProjectMaterialSelect />
-                <AddTestSampleButton />
               </>
             )}
             {isThreeDView && <BurnPreviewToolbar />}
