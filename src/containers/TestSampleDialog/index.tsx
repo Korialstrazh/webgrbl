@@ -83,6 +83,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
   const [depthMm, setDepthMm] = useState<number | undefined>(undefined);
   const [depthErrorKey, setDepthErrorKey] = useState<string | undefined>(undefined);
   const isNotThrough: boolean = outcome === MATERIAL_TEST_OUTCOME.NOT_THROUGH;
+  const isCutThrough: boolean = outcome === MATERIAL_TEST_OUTCOME.CUT_THROUGH;
   const exportBlockedReasonKey: string | undefined = (() => {
     if (!profile) {
       return DEFAULT.TEST_SAMPLE_DIALOG_EXPORT_NO_PROFILE;
@@ -90,6 +91,9 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
 
     return fitsWorkArea ? undefined : DEFAULT.TEST_SAMPLE_DIALOG_EXPORT_TOO_SMALL;
   })();
+  const hasValidSettings: boolean = hasValidCutSettings(cutSettings);
+  const canSaveResult: boolean = Boolean(profile) && hasValidSettings;
+  const canExportSample: boolean = !exportBlockedReasonKey && hasValidSettings;
   const getFieldId = (suffix: string): string => [formId, suffix].join(FIELD_ID_SEPARATOR);
 
   const changeCutSetting = (settingName: keyof SampleCutSettings, value: number | null): void =>
@@ -133,7 +137,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
       title={t(DEFAULT.TEST_SAMPLE_DIALOG_TITLE, { name: material.name })}
       okText={t(DEFAULT.TEST_SAMPLE_DIALOG_SAVE)}
       cancelText={t(DEFAULT.TEST_SAMPLE_DIALOG_CANCEL)}
-      okButtonProps={{ disabled: !profile || !hasValidCutSettings(cutSettings) }}
+      okButtonProps={{ disabled: !canSaveResult }}
       onOk={saveResult}
       onClose={onClose}
     >
@@ -173,7 +177,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
           </Form>
           {!isExported && <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_SETTINGS_HINT)}</span>}
           <Button
-            disabled={Boolean(exportBlockedReasonKey) || !hasValidCutSettings(cutSettings)}
+            disabled={!canExportSample}
             onClick={exportSample}
           >
             {t(DEFAULT.TEST_SAMPLE_DIALOG_EXPORT)}
@@ -186,7 +190,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
         <div className={styles.outcomeRow}>
           <Button
             type={isNotThrough ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
-            aria-pressed={!isNotThrough}
+            aria-pressed={isCutThrough}
             onClick={() => setOutcome(MATERIAL_TEST_OUTCOME.CUT_THROUGH)}
           >
             {t(DEFAULT.TEST_SAMPLE_DIALOG_CUT_THROUGH)}
