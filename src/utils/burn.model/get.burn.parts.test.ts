@@ -355,6 +355,12 @@ describe(getBurnParts.name, () => {
       expect(parts[0]?.status).toBe(BURN_PART_STATUS.BORDERLINE);
       expect(parts[0]?.weakestLayerKey).toBe(RED);
       expect(parts[0]?.weakestDepthMm).toBeCloseTo(BORDERLINE_DEPTH_MM, WALL_DEPTH_TOLERANCE_DIGITS);
+      expect([parts[1]?.parentId, parts[1]?.status, parts[1]?.weakestLayerKey]).toEqual([
+        1,
+        BURN_PART_STATUS.NOT_THROUGH,
+        BLUE,
+      ]);
+      expect(parts[1]?.weakestDepthMm).toBeCloseTo(SHALLOW_DEPTH_MM, WALL_DEPTH_TOLERANCE_DIGITS);
     });
 
     it('gives parent chains that always end', () => {

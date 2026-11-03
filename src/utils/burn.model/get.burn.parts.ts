@@ -128,9 +128,9 @@ const getFloodStatus = (isFloodFree: boolean, isFloodNearlyFree: boolean): BurnP
   return isFloodNearlyFree ? BURN_PART_STATUS.BORDERLINE : BURN_PART_STATUS.NOT_THROUGH;
 };
 
-/** A sealed group lifts as its representative; the others are only as free as the wall to their tree parent. */
-const getAttachedRegionStatus = (joiningWallLevel: CutDepthLevel | undefined): BurnPartStatus =>
-  (joiningWallLevel === CUT_DEPTH_LEVEL.NOT_THROUGH ? BURN_PART_STATUS.NOT_THROUGH : BURN_PART_STATUS.BORDERLINE);
+/** A part is never more free than the wall it names. */
+const getWallCappedStatus = (status: BurnPartStatus, wallLevel: CutDepthLevel | undefined): BurnPartStatus =>
+  (wallLevel === CUT_DEPTH_LEVEL.NOT_THROUGH ? BURN_PART_STATUS.NOT_THROUGH : status);
 
 const getPartRegionLabels = (regionNumbers: Int32Array, partIds: Map<number, number>): Int32Array => {
   const regionLabels: Int32Array = new Int32Array(regionNumbers.length);
@@ -202,7 +202,10 @@ export const getBurnParts = (grid: BurnDoseGrid, input: BurnPartsInput): BurnPar
     );
     const wallPrediction: BurnDepthPrediction | undefined = countedWall
       && getWallCellPrediction(grid, countedWall.cell, input);
-    const status: BurnPartStatus = treeParent ? getAttachedRegionStatus(wallPrediction?.level) : floodStatus;
+    const isWallCapped: boolean = !!treeParent || floodStatus !== BURN_PART_STATUS.FREE;
+    const status: BurnPartStatus = isWallCapped
+      ? getWallCappedStatus(treeParent ? BURN_PART_STATUS.BORDERLINE : floodStatus, wallPrediction?.level)
+      : floodStatus;
     const isFree: boolean = status === BURN_PART_STATUS.FREE;
 
     return {
