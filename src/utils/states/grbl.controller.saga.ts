@@ -33,6 +33,7 @@ import {
   BaudRateSelected,
   ConnectionEstablished,
   ConnectionStatusChanged,
+  ConnectFailed,
   ConnectRequested,
   DisconnectRequested,
   SerialPortPickerRequested,
@@ -191,9 +192,12 @@ function* reportGrblConnectFailure(error: unknown): Generator {
     return;
   }
 
+  const failureKey: string = getGrblConnectFailureToastKey(error);
+
+  yield put(new ConnectFailed({ failureKey }));
   yield put(new ToastShown({
     severity: TOAST_SEVERITY.ERROR,
-    messageKey: getGrblConnectFailureToastKey(error),
+    messageKey: failureKey,
     messageParameters: NO_TOAST_PARAMETERS,
   }));
   yield put(newConnectionStatusChanged(GRBL_CONNECTION_STATUS.DISCONNECTED));

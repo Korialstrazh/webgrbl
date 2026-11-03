@@ -40,6 +40,8 @@ export interface GrblConnectionState {
   grblSettings: Record<number, string>;
   /** The `$I` answer lines of the connected controller. */
   buildInfoLines: string[];
+  /** Translation key of why the last connect failed; undefined until one fails and again once a new one starts. */
+  connectFailureKey: string | undefined;
 }
 // #endregion
 
@@ -70,6 +72,11 @@ interface BaudRateSelectedPayload {
 interface ConnectionStatusChangedPayload {
   /** The status the connection just entered. */
   connectionStatus: GrblConnectionStatus;
+}
+
+interface ConnectFailedPayload {
+  /** Translation key of the reason, never the raw error. */
+  failureKey: string;
 }
 
 interface ConnectionEstablishedPayload {
@@ -105,6 +112,10 @@ export class ConnectionStatusChanged extends Action<ConnectionStatusChangedPaylo
   public static readonly type: string = actionType('connection status changed');
 }
 
+export class ConnectFailed extends Action<ConnectFailedPayload> {
+  public static readonly type: string = actionType('connect failed');
+}
+
 export class ConnectionEstablished extends Action<ConnectionEstablishedPayload> {
   public static readonly type: string = actionType('connection established');
 }
@@ -120,6 +131,7 @@ const INITIAL_GRBL_CONNECTION_STATE: GrblConnectionState = {
   rxBufferSize: undefined,
   grblSettings: {},
   buildInfoLines: [],
+  connectFailureKey: undefined,
 };
 // #endregion
 
@@ -135,6 +147,10 @@ export const grblConnectionReducer = (
     return { ...state, selectedPortId: (action as SerialPortSelected).payload.portId };
   case BaudRateSelected.type:
     return { ...state, baudRate: (action as BaudRateSelected).payload.baudRate };
+  case ConnectRequested.type:
+    return { ...state, connectFailureKey: undefined };
+  case ConnectFailed.type:
+    return { ...state, connectFailureKey: (action as ConnectFailed).payload.failureKey };
   case ConnectionStatusChanged.type:
     return { ...state, connectionStatus: (action as ConnectionStatusChanged).payload.connectionStatus };
   case ConnectionEstablished.type: {
@@ -154,6 +170,9 @@ type RootState = { [GRBL_CONNECTION_STATE_NAME]: GrblConnectionState };
 
 export const selectConnectionStatus = (state: RootState): GrblConnectionStatus =>
   state[GRBL_CONNECTION_STATE_NAME].connectionStatus;
+
+export const selectConnectFailureKey = (state: RootState): string | undefined =>
+  state[GRBL_CONNECTION_STATE_NAME].connectFailureKey;
 
 export const selectAvailablePorts = (state: RootState): SerialPortDescriptor[] =>
   state[GRBL_CONNECTION_STATE_NAME].availablePorts;
