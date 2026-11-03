@@ -14,7 +14,7 @@ import type { MockInstance } from 'vitest';
 
 const BUTTON_LABEL = 'Add test sample';
 const SMALL_AREA_MM = 40;
-const TOO_SMALL_REASON = 'The 5 × 5 cm sample does not fit the work area of this machine.';
+const TOO_SMALL_REASON = 'The 5 \u00d7 5 cm sample does not fit the work area of this machine.';
 const FULL_REASON = /most objects/;
 
 const renderButton = (store: AppStore): void => {

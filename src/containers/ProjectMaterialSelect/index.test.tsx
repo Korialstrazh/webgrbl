@@ -16,7 +16,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 
 const MATERIAL_LABEL = 'Material';
-const ADD_MATERIAL_LABEL = 'Add material…';
+const ADD_MATERIAL_LABEL = 'Add material\u2026';
 const SAVE_LABEL = 'Save';
 const DIALOG_TITLE = 'Add material';
 const SELECT_OPTION_SELECTOR = '.ant-select-item-option';

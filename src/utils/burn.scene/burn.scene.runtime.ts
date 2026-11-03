@@ -17,7 +17,7 @@ import {
   Scene,
   WebGLRenderer,
 } from 'three';
-import type { Material, Object3D, OrthographicCamera } from 'three';
+import type { OrthographicCamera } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPartLiftsMm } from '../burn.model/interfaces/BurnPartLiftsMm';
@@ -40,6 +40,8 @@ import {
   BURN_SCENE_MAX_POLAR_ANGLE_RADIANS,
   BURN_SCENE_TOP_CAMERA_DIRECTION,
 } from './burn.scene.constants';
+import { disposeBurnLiftAxis } from './dispose.burn.lift.axis';
+import { disposeBurnSceneObjects } from './dispose.burn.scene.objects';
 import { getBurnLiftChangeMm } from './get.burn.lift.change.mm';
 import { getBurnPartAtPointer } from './get.burn.part.at.pointer';
 import { getBurnSceneFitZoom } from './get.burn.scene.fit.zoom';
@@ -204,7 +206,7 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
 
   public dispose(): void {
     this.removeModelObjects();
-    this.disposeLiftAxis();
+    disposeBurnLiftAxis(this.liftAxis);
     this.removeCameraAndControls();
     // dispose() alone leaves the context alive until garbage collection, and browsers cap live WebGL contexts, so
     // switching the 3D view on and off again would soon push out the oldest one.
@@ -274,21 +276,6 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     placeBurnLiftAxis(this.liftAxis, mesh);
   }
 
-  private disposeLiftAxis(): void {
-    const axisMaterials: Set<Material> = new Set<Material>();
-
-    this.liftAxis.traverse((axisObject: Object3D): void => {
-      if (axisObject instanceof Mesh) {
-        axisObject.geometry.dispose();
-        axisMaterials.add(axisObject.material as Material);
-      }
-    });
-
-    for (const axisMaterial of axisMaterials) {
-      axisMaterial.dispose();
-    }
-  }
-
   private addCameraAndControls(framing: BurnSceneCameraFraming): void {
     const camera: OrthographicCamera = newBurnSceneCamera(framing);
     const controls: OrbitControls = new OrbitControls(camera, this.webGlRenderer.domElement);
@@ -314,20 +301,7 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
   private removeModelObjects(): void {
     if (this.objects) {
       this.scene.remove(this.objects.group);
-      this.objects.material.dispose();
-      this.objects.highlightMaterial.dispose();
-      this.objects.hoverMaterial.dispose();
-      this.objects.highlightOutlineMaterial.dispose();
-      this.objects.toonBands.dispose();
-      this.objects.outlineMaterial.dispose();
-
-      for (const outline of this.objects.outlines) {
-        outline.geometry.dispose();
-      }
-
-      for (const { mesh } of this.objects.meshes) {
-        mesh.geometry.dispose();
-      }
+      disposeBurnSceneObjects(this.objects);
     }
 
     this.objects = undefined;
