@@ -75,19 +75,31 @@
   }
 }
 
-// Each view is an icon alone, so it holds the full touch target itself.
-.viewSwitch :global(.ant-segmented-item-label) {
-  min-width: 2.75rem;
-  text-align: center;
-}
-
 // Too narrow for the widest view's tools beside the rest: the tools take a row of their own below, in every view alike.
 @container (width < 62rem) {
-  .header {
+  .header:not(.threeDHeader) {
     grid-template-areas:
       'extras view'
       'tools tools';
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+// The 3D view has no extras and few tools, so they share the top row with the switch, which stays where it is.
+.threeDHeader {
+  grid-template-areas: 'tools view';
+  grid-template-columns: minmax(0, 1fr) auto;
+
+  .viewTools {
+    display: none;
+  }
+}
+
+@container (width < 26rem) {
+  .header.threeDHeader {
+    grid-template-areas:
+      '. view'
+      'tools tools';
   }
 }
 

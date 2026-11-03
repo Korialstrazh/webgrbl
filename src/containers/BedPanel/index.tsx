@@ -20,13 +20,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Layout, Segmented } from 'antd';
+import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
-import type { BedViewMode } from '../../utils/bed/bed.view.constants';
 import { getBedOverlayTone } from '../../utils/bed/get.bed.overlay.tone';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
@@ -49,14 +48,12 @@ import { ToolpathStatusOverlay } from '../ToolpathStatusOverlay';
 import { ToolpathToolbar } from '../ToolpathToolbar';
 import { ToolpathWarningsPanel } from '../ToolpathWarningsPanel';
 import { BedMoreToolsMenu } from './BedMoreToolsMenu';
+import { BedViewModeSwitch } from './BedViewModeSwitch';
 import { BED_DROP_AREA_TEST_ID, BED_VIEWPORT_KEY_SEPARATOR } from './bed.panel.constants';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
-import { BED_VIEW_MODE_OPTION_KEYS, BED_VIEW_MODE_SWITCH_NAME } from './bed.toolbar.constants';
 import type { BedPanelProps } from './interfaces/BedPanelProps';
 import type { BedSurfaceStyle } from './interfaces/BedSurfaceStyle';
 import type { BedViewModeControls } from './interfaces/BedViewModeControls';
-import type { BedViewModeOption } from './interfaces/BedViewModeOption';
-import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
 import type { SvgFileDropArea } from './interfaces/SvgFileDropArea';
 import styles from './styles.module.scss';
 import { useBedViewMode } from './use.bed.view.mode';
@@ -76,13 +73,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const isToolpathView: boolean = viewMode === BED_VIEW_MODE.TOOLPATH;
   const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
   const dropArea: SvgFileDropArea = useSvgFileDrop(!isThreeDView);
-  const viewModeOptions: BedViewModeOption[] = BED_VIEW_MODE_OPTION_KEYS.map(
-    ({ value, labelKey, IconComponent }: BedViewModeOptionKey) => ({
-      value,
-      label: <IconComponent aria-label={t(labelKey)} />,
-      tooltip: t(labelKey),
-    }),
-  );
 
   return (
     <Layout.Content className={styles.bedPanel}>
@@ -90,7 +80,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       {/* One structure in every view: only the tools slot differs, so nothing beside the switch can move it. */}
       <div className={styles.headerContainer}>
-        <div className={styles.header}>
+        <div className={isThreeDView ? [styles.header, styles.threeDHeader].join(' ') : styles.header}>
           <div className={styles.editingTools}>
             {isToolpathView && (
               <>
@@ -118,14 +108,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
             {!isThreeDView && <BedMoreToolsMenu />}
           </div>
           <div className={styles.viewSwitchSlot}>
-            <Segmented<BedViewMode>
-              className={styles.viewSwitch}
-              name={BED_VIEW_MODE_SWITCH_NAME}
-              aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
-              options={viewModeOptions}
-              value={viewMode}
-              onChange={changeBedViewMode}
-            />
+            <BedViewModeSwitch viewMode={viewMode} changeBedViewMode={changeBedViewMode} />
           </div>
         </div>
       </div>

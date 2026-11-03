@@ -99,3 +99,4 @@ export const ANTD_TAG_COLOR_SUCCESS: TagProps['color'] = 'success';
 export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['hover', 'focus'];
 
 export const ANTD_TOOLTIP_PLACEMENT_BOTTOM: TooltipProps['placement'] = 'bottom';
+export const ANTD_TOOLTIP_PLACEMENT_LEFT: TooltipProps['placement'] = 'left';
