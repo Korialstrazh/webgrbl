@@ -8,6 +8,7 @@ import { MATERIAL_REPOSITORY } from '../../utils/materials/material.repository';
 import { newMaterial } from '../../utils/materials/new.material';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import { PASSES_MAX, SPEED_MM_PER_MIN_MAX } from '../../utils/palette/palette.constants';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
 import type { Action } from '../../utils/states/action';
@@ -39,6 +40,7 @@ const ENTERED_PASSES = 2;
 const ENTERED_DEPTH_MM = 2;
 const SMALL_AREA_MM = 40;
 const OVER_POWER_PERCENT = 500;
+const INVALID_SETTINGS_REASON = 'Enter power 1 to 100 %, speed 1 to 20000 mm/min and passes 1 to 50.';
 const SETTINGS_HINT = 'These must be the settings the sample was burnt with.';
 
 const newTestStore = (profile: MachineProfile | null = newMachineProfile()): AppStore => {
@@ -219,6 +221,27 @@ describe(TestSampleDialog.name, () => {
 
     expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeDisabled();
     expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
+  });
+
+  it.each<[string, string, number]>([
+    ['power', POWER_LABEL, OVER_POWER_PERCENT],
+    ['speed', SPEED_LABEL, SPEED_MM_PER_MIN_MAX + 1],
+    ['passes', PASSES_LABEL, PASSES_MAX + 1],
+  ])('disables Export and Save and says why for %s above the shared limit', (_name, label, value) => {
+    renderDialog(newTestStore());
+    enterNumber(label, value);
+
+    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
+    expect(screen.getByRole('note')).toHaveTextContent(INVALID_SETTINGS_REASON);
+  });
+
+  it('allows speed and passes at the shared limits', () => {
+    renderDialog(newTestStore());
+    enterNumber(SPEED_LABEL, SPEED_MM_PER_MIN_MAX);
+    enterNumber(PASSES_LABEL, PASSES_MAX);
+
+    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeEnabled();
   });
 
   it('saves nothing on Cancel', () => {

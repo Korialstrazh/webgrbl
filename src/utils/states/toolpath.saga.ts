@@ -281,27 +281,33 @@ function* exportGcode(action: GcodeExportRequested): Generator {
 
 /** Builds and downloads the test sample on the main thread; the project's document and toolpath are not touched. */
 function* exportSampleGcode(action: SampleGcodeExportRequested): Generator {
-  const profile: MachineProfile | undefined = (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
+  try {
+    const profile: MachineProfile | undefined = (
+      yield select(selectActiveMachineProfile)
+    ) as MachineProfile | undefined;
+    const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
 
-  const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
+    if (!profile || !fitsSampleJob(machineArea)) {
+      return;
+    }
 
-  if (!profile || !fitsSampleJob(machineArea)) {
-    return;
+    const palette: Palette = (yield select(selectPalette)) as Palette;
+    const sampleDocument: ProjectDocument = getSampleJobDocument({
+      cutSettings: action.payload.cutSettings,
+      palette,
+      machineArea,
+    });
+    const toolpath: Toolpath = getToolpath({
+      ...getBedDrawables(sampleDocument),
+      layers: sampleDocument.layers,
+      machineArea,
+    });
+
+    yield call(downloadJobGcode, toolpath, profile, action.payload.jobName);
+  } catch (error: unknown) {
+    logToolpathGenerationError(error);
+    yield call(showProjectErrorToast, DEFAULT.TOAST_SAMPLE_EXPORT_FAILED);
   }
-
-  const palette: Palette = (yield select(selectPalette)) as Palette;
-  const sampleDocument: ProjectDocument = getSampleJobDocument({
-    cutSettings: action.payload.cutSettings,
-    palette,
-    machineArea,
-  });
-  const toolpath: Toolpath = getToolpath({
-    ...getBedDrawables(sampleDocument),
-    layers: sampleDocument.layers,
-    machineArea,
-  });
-
-  yield call(downloadJobGcode, toolpath, profile, action.payload.jobName);
 }
 
 export function* watchToolpath(toolpathWorkerClient: ToolpathWorkerClient): Generator {

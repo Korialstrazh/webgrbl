@@ -414,6 +414,7 @@ TEST_SAMPLE_DIALOG_DEPTH;Depth (mm)
 TEST_SAMPLE_DIALOG_DEPTH_HINT;Depth is optional. Without it, the preview says it is less sure.
 TEST_SAMPLE_DIALOG_DEPTH_INVALID;Enter a depth above 0 and at most {{max}} mm.
 TEST_SAMPLE_DIALOG_EXPORT;Export sample G-code
+TEST_SAMPLE_DIALOG_EXPORT_INVALID_SETTINGS;Enter power {{powerMin}} to {{powerMax}} %, speed {{speedMin}} to {{speedMax}} mm/min and passes {{passesMin}} to {{passesMax}}.
 TEST_SAMPLE_DIALOG_EXPORT_NO_PROFILE;Choose a machine profile to export the sample.
 TEST_SAMPLE_DIALOG_EXPORT_TOO_SMALL;The sample does not fit the work area of this machine.
 TEST_SAMPLE_DIALOG_NOT_THROUGH;Not through
@@ -447,6 +448,7 @@ TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}
 TOAST_PROJECT_FILE_INVALID;The file is not a webgrbl project file. Nothing was opened.
 TOAST_PROJECT_SAVE_FAILED;The project could not be saved - the browser storage may be full. Your changes stay on screen, and the next change tries to save again.
 TOAST_PROJECT_STORAGE_FAILED;The saved projects could not be read or changed. Try again, or reload the page.
+TOAST_SAMPLE_EXPORT_FAILED;The test sample could not be exported.
 TOAST_SVG_CONTENT_REMOVED;Parts of {{fileName}} were left out: embedded web content, linked images or external styles.
 TOAST_SVG_IMPORT_FAILED_NO_SIZE;{{fileName}} was skipped: it has no size (width and height or a viewBox).
 TOAST_SVG_IMPORT_FAILED_NOT_SVG;{{fileName}} was skipped: it is not a usable SVG file.

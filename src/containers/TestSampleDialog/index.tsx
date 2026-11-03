@@ -1,8 +1,8 @@
 /**
  * The test sample of a material: step one exports the sample G-code with the entered cut settings, step two records
  * how far the cut went. Save stores the result for the active machine profile after the depth passes its check;
- * Cancel and closing store nothing. Export is off, with the reason, when there is no active profile or the sample does
- * not fit the work area. It starts over on every open.
+ * Cancel and closing store nothing. Export is off, with the reason, when there is no active profile, the sample does
+ * not fit the work area or the settings are out of range. It starts over on every open.
  *
  * @author michael.morosov
  *
@@ -31,6 +31,7 @@ import type { MaterialTestResult } from '../../utils/materials/interfaces/Materi
 import type { SampleCutSettings } from '../../utils/materials/interfaces/SampleCutSettings';
 import { MATERIAL_TEST_OUTCOME } from '../../utils/materials/material.constants';
 import type { MaterialTestOutcome } from '../../utils/materials/material.constants';
+import { PASSES_MAX, SPEED_MM_PER_MIN_MAX } from '../../utils/palette/palette.constants';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { MaterialTestResultSaved } from '../../utils/states/material.state';
@@ -58,14 +59,22 @@ const SPEED_FIELD_ID_SUFFIX = 'speed';
 const PASSES_FIELD_ID_SUFFIX = 'passes';
 const DEPTH_FIELD_ID_SUFFIX = 'depth';
 
+const isNumberInRange = (value: number, min: number, max: number): boolean =>
+  isFiniteNumber(value) && value >= min && value <= max;
+
+const EXPORT_LIMIT_TEXT_VALUES: Record<string, number> = {
+  powerMin: TEST_SAMPLE_POWER_PERCENT_MIN,
+  powerMax: TEST_SAMPLE_POWER_PERCENT_MAX,
+  speedMin: TEST_SAMPLE_SPEED_MM_PER_MIN_MIN,
+  speedMax: SPEED_MM_PER_MIN_MAX,
+  passesMin: TEST_SAMPLE_PASSES_MIN,
+  passesMax: PASSES_MAX,
+};
+
 const hasValidCutSettings = ({ powerPercent, speedMmPerMin, passes }: SampleCutSettings): boolean =>
-  isFiniteNumber(powerPercent)
-  && powerPercent >= TEST_SAMPLE_POWER_PERCENT_MIN
-  && powerPercent <= TEST_SAMPLE_POWER_PERCENT_MAX
-  && isFiniteNumber(speedMmPerMin)
-  && speedMmPerMin >= TEST_SAMPLE_SPEED_MM_PER_MIN_MIN
-  && isFiniteNumber(passes)
-  && passes >= TEST_SAMPLE_PASSES_MIN;
+  isNumberInRange(powerPercent, TEST_SAMPLE_POWER_PERCENT_MIN, TEST_SAMPLE_POWER_PERCENT_MAX)
+  && isNumberInRange(speedMmPerMin, TEST_SAMPLE_SPEED_MM_PER_MIN_MIN, SPEED_MM_PER_MIN_MAX)
+  && isNumberInRange(passes, TEST_SAMPLE_PASSES_MIN, PASSES_MAX);
 
 const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentProps): ReactNode => {
   const { t } = useTranslation();
@@ -84,16 +93,19 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
   const [depthErrorKey, setDepthErrorKey] = useState<string | undefined>(undefined);
   const isNotThrough: boolean = outcome === MATERIAL_TEST_OUTCOME.NOT_THROUGH;
   const isCutThrough: boolean = outcome === MATERIAL_TEST_OUTCOME.CUT_THROUGH;
+  const hasValidSettings: boolean = hasValidCutSettings(cutSettings);
   const exportBlockedReasonKey: string | undefined = (() => {
     if (!profile) {
       return DEFAULT.TEST_SAMPLE_DIALOG_EXPORT_NO_PROFILE;
     }
 
-    return fitsWorkArea ? undefined : DEFAULT.TEST_SAMPLE_DIALOG_EXPORT_TOO_SMALL;
+    if (!fitsWorkArea) {
+      return DEFAULT.TEST_SAMPLE_DIALOG_EXPORT_TOO_SMALL;
+    }
+
+    return hasValidSettings ? undefined : DEFAULT.TEST_SAMPLE_DIALOG_EXPORT_INVALID_SETTINGS;
   })();
-  const hasValidSettings: boolean = hasValidCutSettings(cutSettings);
   const canSaveResult: boolean = Boolean(profile) && hasValidSettings;
-  const canExportSample: boolean = !exportBlockedReasonKey && hasValidSettings;
   const getFieldId = (suffix: string): string => [formId, suffix].join(FIELD_ID_SEPARATOR);
 
   const changeCutSetting = (settingName: keyof SampleCutSettings, value: number | null): void =>
@@ -177,12 +189,12 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
           </Form>
           {!isExported && <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_SETTINGS_HINT)}</span>}
           <Button
-            disabled={!canExportSample}
+            disabled={!!exportBlockedReasonKey}
             onClick={exportSample}
           >
             {t(DEFAULT.TEST_SAMPLE_DIALOG_EXPORT)}
           </Button>
-          {exportBlockedReasonKey && <span role="note">{t(exportBlockedReasonKey)}</span>}
+          {exportBlockedReasonKey && <span role="note">{t(exportBlockedReasonKey, EXPORT_LIMIT_TEXT_VALUES)}</span>}
         </div>
       </section>
       <section className={styles.resultSection}>
