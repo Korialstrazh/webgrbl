@@ -49,7 +49,7 @@ const getLayersOf = (objects: ProjectObject[]): ProjectLayer[] =>
   getObjectsDerivedLayers(objects, DEFAULT_PALETTE, []);
 
 const getFileValue = (objects: ProjectObject[], layers: ProjectLayer[]): Record<string, unknown> =>
-  JSON.parse(getProjectFileText(PROJECT_NAME, { objects, layers }));
+  JSON.parse(getProjectFileText(PROJECT_NAME, { objects, layers }, undefined));
 
 const getImportedValue = (fileValue: unknown, palette: Palette = DEFAULT_PALETTE): ImportedProjectFile | undefined =>
   getImportedProjectFile(JSON.stringify(fileValue), palette);
@@ -58,16 +58,15 @@ const getImportedLayer = (importedFile: ImportedProjectFile | undefined, layerKe
   importedFile?.document.layers.find((layer: ProjectLayer): boolean => getLayerKey(layer) === layerKey);
 
 describe('project file layers', () => {
-  it('writes version 2 with the layers', () => {
+  it('writes the current version with the layers', () => {
     const objects: ProjectObject[] = [newColouredObject(RED)];
     const fileValue: Record<string, unknown> = getFileValue(objects, getLayersOf(objects));
 
     expect(fileValue.version).toBe(PROJECT_FILE_VERSION);
-    expect(PROJECT_FILE_VERSION).toBe(2);
     expect(Object.keys(fileValue)).toEqual(['format', 'version', 'name', 'objects', 'layers']);
   });
 
-  it('round-trips the layers of a version 2 file', () => {
+  it('round-trips the layers of a current file', () => {
     const objects: ProjectObject[] = [newColouredObject(RED), newColouredObject(BLUE)];
     const changedLayers: ProjectLayer[] = getLayersOf(objects).map((layer: ProjectLayer): ProjectLayer => ({
       ...layer,
@@ -75,7 +74,7 @@ describe('project file layers', () => {
       settings: { ...layer.settings, maxPowerPercent: CHANGED_POWER_PERCENT },
     }));
     const importedFile: ImportedProjectFile | undefined = getImportedProjectFile(
-      getProjectFileText(PROJECT_NAME, { objects, layers: changedLayers }),
+      getProjectFileText(PROJECT_NAME, { objects, layers: changedLayers }, undefined),
       DEFAULT_PALETTE,
     );
 

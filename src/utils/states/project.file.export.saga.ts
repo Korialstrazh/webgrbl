@@ -10,19 +10,22 @@
  */
 import { call, select } from 'redux-saga/effects';
 import { downloadTextFile } from '../browser/download.text.file';
+import type { Material } from '../materials/interfaces/Material';
 import { getProjectFileName } from '../project/get.project.file.name';
 import { getProjectFileText } from '../project/get.project.file.text';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import { PROJECT_FILE_MIME_TYPE } from '../project/project.constants';
+import { selectActiveMaterial } from './material.selectors';
 import { selectProjectDocument } from './project.document.state';
 import { selectProjectName } from './project.state';
 
 export function* exportProjectFile(): Generator {
   const projectName: string = (yield select(selectProjectName)) as string;
   const projectDocument: ProjectDocument = (yield select(selectProjectDocument)) as ProjectDocument;
+  const material: Material | undefined = (yield select(selectActiveMaterial)) as Material | undefined;
 
   yield call(downloadTextFile, {
-    text: getProjectFileText(projectName, projectDocument),
+    text: getProjectFileText(projectName, projectDocument, material),
     fileName: getProjectFileName(projectName),
     mimeType: PROJECT_FILE_MIME_TYPE,
   });

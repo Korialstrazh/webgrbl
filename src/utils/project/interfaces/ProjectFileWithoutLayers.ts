@@ -11,6 +11,6 @@
 import type { PROJECT_FILE_VERSION_WITHOUT_LAYERS } from '../project.constants';
 import type { ProjectFile } from './ProjectFile';
 
-export interface ProjectFileWithoutLayers extends Omit<ProjectFile, 'version' | 'layers'> {
+export interface ProjectFileWithoutLayers extends Omit<ProjectFile, 'version' | 'layers' | 'materialId' | 'material'> {
   version: typeof PROJECT_FILE_VERSION_WITHOUT_LAYERS;
 }

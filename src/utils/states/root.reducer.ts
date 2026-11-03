@@ -17,6 +17,7 @@ import { GRBL_CONSOLE_STATE_NAME, grblConsoleReducer } from './grbl.console.stat
 import { LASER_POINTER_STATE_NAME, laserPointerReducer } from './laser.pointer.state';
 import { MACHINE_PROFILE_STATE_NAME, machineProfileReducer } from './machine.profile.state';
 import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
+import { MATERIAL_STATE_NAME, materialReducer } from './material.state';
 import { PALETTE_STATE_NAME, paletteReducer } from './palette.state';
 import { PANEL_LAYOUT_STATE_NAME, panelLayoutReducer } from './panel.layout.state';
 import { PROJECT_DOCUMENT_STATE_NAME, projectDocumentReducer } from './project.document.state';
@@ -32,6 +33,7 @@ export const rootReducer = combineReducers({
   [GRBL_CONNECTION_STATE_NAME]: grblConnectionReducer,
   [MACHINE_STATUS_STATE_NAME]: machineStatusReducer,
   [MACHINE_PROFILE_STATE_NAME]: machineProfileReducer,
+  [MATERIAL_STATE_NAME]: materialReducer,
   [PALETTE_STATE_NAME]: paletteReducer,
   [PANEL_LAYOUT_STATE_NAME]: panelLayoutReducer,
   [LASER_POINTER_STATE_NAME]: laserPointerReducer,

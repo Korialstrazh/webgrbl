@@ -56,7 +56,7 @@ const newFileObject = (overrides: Partial<ProjectObject> = {}): ProjectObject =>
 
 /** The file of one object as a plain value a test can break field by field. */
 const getFileValue = (objects: ProjectObject[] = [newFileObject()]): Record<string, unknown> =>
-  JSON.parse(getProjectFileText(PROJECT_NAME, { objects, layers: [] }));
+  JSON.parse(getProjectFileText(PROJECT_NAME, { objects, layers: [] }, undefined));
 
 const getImportedValue = (fileValue: unknown): ImportedProjectFile | undefined =>
   getImportedProjectFile(JSON.stringify(fileValue), DEFAULT_PALETTE);
@@ -65,7 +65,7 @@ const getObjectWithoutId = ({ id: _id, ...objectFields }: ProjectObject): Omit<P
 
 describe(getProjectFileText.name, () => {
   it('writes pretty JSON with the format fields first and a stable field order per object', () => {
-    const fileText: string = getProjectFileText(PROJECT_NAME, { objects: [newFileObject()], layers: [] });
+    const fileText: string = getProjectFileText(PROJECT_NAME, { objects: [newFileObject()], layers: [] }, undefined);
     const fileValue: Record<string, unknown> = JSON.parse(fileText);
     const fileObjects: object[] = fileValue.objects as object[];
 
@@ -86,7 +86,7 @@ describe(getImportedProjectFile.name, () => {
     const projectDocument: ProjectDocument = { objects: [firstObject, secondObject], layers: [] };
 
     const importedFile: ImportedProjectFile | undefined = getImportedProjectFile(
-      getProjectFileText(PROJECT_NAME, projectDocument),
+      getProjectFileText(PROJECT_NAME, projectDocument, undefined),
       DEFAULT_PALETTE,
     );
 
@@ -214,7 +214,7 @@ describe(getImportedProjectFile.name, () => {
     const fileText: string = getProjectFileText(PROJECT_NAME, {
       objects: [newFileObject({ xMm: LARGE_X_MM })],
       layers: [],
-    });
+    }, undefined);
     const brokenFileText: string = fileText.replace(String(LARGE_X_MM), INFINITE_NUMBER_TEXT);
 
     expect(getImportedProjectFile(brokenFileText, DEFAULT_PALETTE)).toBeUndefined();

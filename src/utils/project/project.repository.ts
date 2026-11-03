@@ -90,7 +90,12 @@ const getJoinedProjectDocument = (storedProject: StoredProject, svgAssetRows: St
     }
   }
 
-  return { objects: joinedObjects, layers: getStoredProjectLayers(storedProject) };
+  return {
+    objects: joinedObjects,
+    layers: getStoredProjectLayers(storedProject),
+    // The row comes from storage, so its value is checked rather than trusted.
+    materialId: isString(storedProject.materialId) ? storedProject.materialId : undefined,
+  };
 };
 
 const getRequiredStoredProject = async (projectId: string): Promise<StoredProject> => {
@@ -191,6 +196,7 @@ export const PROJECT_REPOSITORY = {
         ...storedProject,
         objects: projectDocument.objects.map(getStoredProjectObject),
         layers: projectDocument.layers,
+        materialId: projectDocument.materialId,
         updatedAt: getCurrentUtcIsoTimestamp(),
       });
     });

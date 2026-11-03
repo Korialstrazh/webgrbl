@@ -1,6 +1,6 @@
 /**
- * The action types that change the project document, objects and layers alike. Each one makes a ready toolpath
- * out of date.
+ * The action types that change the project document. All of them are saved and can be undone; only the toolpath input
+ * ones make a ready toolpath out of date, because the toolpath is not made from the material.
  *
  * @author michael.morosov
  *
@@ -15,6 +15,7 @@ import {
   LayerToggled,
   LayersReordered,
   ProjectDocumentLoaded,
+  ProjectMaterialSelected,
   ProjectObjectsAdded,
   ProjectObjectsDeleted,
   ProjectObjectsTransformed,
@@ -22,7 +23,7 @@ import {
   ProjectUndoRequested,
 } from './project.document.state';
 
-export const PROJECT_DOCUMENT_CHANGE_ACTION_TYPES: readonly string[] = [
+export const PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES: readonly string[] = [
   ProjectObjectsAdded.type,
   ProjectObjectsTransformed.type,
   ProjectObjectsDeleted.type,
@@ -33,4 +34,9 @@ export const PROJECT_DOCUMENT_CHANGE_ACTION_TYPES: readonly string[] = [
   LayerToggled.type,
   LayersReordered.type,
   LayerPaletteEntryLinked.type,
+];
+
+export const PROJECT_DOCUMENT_CHANGE_ACTION_TYPES: readonly string[] = [
+  ...PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES,
+  ProjectMaterialSelected.type,
 ];

@@ -3,10 +3,14 @@
  * type-checked and every object's SVG is sanitised again like a fresh import, because a file can come from anywhere.
  * Imported objects get new ids, so a file never overwrites or shares rows with an existing project.
  *
- * Version 2 files carry their layers: each one is type-checked, its settings are clamped to the palette ranges, and a
- * layer whose colour no object draws is kept. Version 1 files have no layers. Either way, every colour the objects
- * draw that has no layer yet gets one from the given palette, so the function stays pure and the caller passes the
- * current palette in. Any other version is rejected.
+ * Version 2 and 3 files carry their layers: each one is type-checked, its settings are clamped to the palette ranges,
+ * and a layer whose colour no object draws is kept. Version 1 files have no layers. Either way, every colour the
+ * objects draw that has no layer yet gets one from the given palette, so the function stays pure and the caller passes
+ * the current palette in.
+ *
+ * Version 3 files can also carry a material, which is checked like the rest; a malformed one rejects the file. The
+ * document then points at the embedded material, whatever the id field says. Versions 1 and 2 open with no material.
+ * Any other version is rejected.
  *
  * @author michael.morosov
  *
@@ -19,6 +23,8 @@ import { getClampedLayerSettings } from '../layers/get.clamped.layer.settings';
 import { getLayerKey } from '../layers/get.layer.key';
 import { getObjectsDerivedLayers } from '../layers/get.objects.derived.layers';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { getImportedMaterial } from '../materials/get.imported.material';
+import type { Material } from '../materials/interfaces/Material';
 import type { Palette } from '../palette/interfaces/Palette';
 import { getNormalizedColour } from '../palette/normalize.colour';
 import { getSanitizedSvg } from '../svg/get.sanitized.svg';
@@ -31,10 +37,17 @@ import { getValidProjectName } from './get.valid.project.name';
 import type { ImportedProjectFile } from './interfaces/ImportedProjectFile';
 import type { ProjectFile } from './interfaces/ProjectFile';
 import type { ProjectFileWithoutLayers } from './interfaces/ProjectFileWithoutLayers';
+import type { ProjectFileWithoutMaterial } from './interfaces/ProjectFileWithoutMaterial';
 import type { ProjectObject } from './interfaces/ProjectObject';
 import { isProjectFile } from './is.project.file';
 import { isProjectFileWithoutLayers } from './is.project.file.without.layers';
-import { MAX_OBJECT_NAME_LENGTH, MAX_PROJECT_OBJECTS, PROJECT_FILE_VERSION } from './project.constants';
+import { isProjectFileWithoutMaterial } from './is.project.file.without.material';
+import {
+  MAX_OBJECT_NAME_LENGTH,
+  MAX_PROJECT_OBJECTS,
+  PROJECT_FILE_VERSION,
+  PROJECT_FILE_VERSION_WITHOUT_LAYERS,
+} from './project.constants';
 
 const getParsedJsonValue = (jsonText: string): unknown => {
   try {
@@ -44,10 +57,10 @@ const getParsedJsonValue = (jsonText: string): unknown => {
   }
 };
 
-type ReadableProjectFile = ProjectFile | ProjectFileWithoutLayers;
+type ReadableProjectFile = ProjectFile | ProjectFileWithoutMaterial | ProjectFileWithoutLayers;
 
 const isReadableProjectFile = (value: unknown): value is ReadableProjectFile =>
-  isProjectFile(value) || isProjectFileWithoutLayers(value);
+  isProjectFile(value) || isProjectFileWithoutMaterial(value) || isProjectFileWithoutLayers(value);
 
 const isImportableProjectFile = (value: unknown): value is ReadableProjectFile =>
   isReadableProjectFile(value) && value.objects.length <= MAX_PROJECT_OBJECTS;
@@ -121,7 +134,7 @@ const getImportedProjectLayers = (fileLayers: ProjectLayer[]): ProjectLayer[] | 
 };
 
 const getFileLayers = (fileValue: ReadableProjectFile): ProjectLayer[] | undefined =>
-  fileValue.version === PROJECT_FILE_VERSION ? getImportedProjectLayers(fileValue.layers) : [];
+  fileValue.version === PROJECT_FILE_VERSION_WITHOUT_LAYERS ? [] : getImportedProjectLayers(fileValue.layers);
 
 const getImportedProjectObjects = (fileObjects: ProjectObject[]): ProjectObject[] | undefined => {
   const importedObjects: ProjectObject[] = [];
@@ -138,6 +151,26 @@ const getImportedProjectObjects = (fileObjects: ProjectObject[]): ProjectObject[
 
   return importedObjects;
 };
+
+const getFileMaterial = (fileValue: ReadableProjectFile): Material | undefined =>
+  fileValue.version === PROJECT_FILE_VERSION && fileValue.material ? fileValue.material : undefined;
+
+const getFileMaterialId = (
+  fileValue: ReadableProjectFile,
+  importedMaterial: Material | undefined,
+): string | undefined => {
+  if (importedMaterial) {
+    return importedMaterial.id;
+  }
+
+  return fileValue.version === PROJECT_FILE_VERSION && fileValue.materialId ? fileValue.materialId : undefined;
+};
+
+const isFileMaterialUnreadable = (
+  fileMaterial: Material | undefined,
+  importedMaterial: Material | undefined,
+): boolean =>
+  !!fileMaterial && !importedMaterial;
 
 export const getImportedProjectFile = (fileText: string, palette: Palette): ImportedProjectFile | undefined => {
   const fileValue: unknown = getParsedJsonValue(fileText);
@@ -164,8 +197,20 @@ export const getImportedProjectFile = (fileText: string, palette: Palette): Impo
     return undefined;
   }
 
+  const fileMaterial: Material | undefined = getFileMaterial(fileValue);
+  const importedMaterial: Material | undefined = fileMaterial && getImportedMaterial(fileMaterial);
+
+  if (isFileMaterialUnreadable(fileMaterial, importedMaterial)) {
+    return undefined;
+  }
+
   return {
     name: projectName,
-    document: { objects: importedObjects, layers: getObjectsDerivedLayers(importedObjects, palette, fileLayers) },
+    document: {
+      objects: importedObjects,
+      layers: getObjectsDerivedLayers(importedObjects, palette, fileLayers),
+      materialId: getFileMaterialId(fileValue, importedMaterial),
+    },
+    material: importedMaterial,
   };
 };

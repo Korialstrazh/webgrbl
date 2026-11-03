@@ -30,8 +30,10 @@ export const MAX_OBJECT_NAME_LENGTH = 100;
 export const DEFAULT_PROJECT_NAME_KEY = DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER;
 
 export const PROJECT_FILE_FORMAT = 'webgrbl-project';
-/** The version written: files with layers. */
-export const PROJECT_FILE_VERSION = 2;
+/** The version written: files with layers and an optional material. */
+export const PROJECT_FILE_VERSION = 3;
+/** The version with layers and no material; still read, and the project opens with no material. */
+export const PROJECT_FILE_VERSION_WITHOUT_MATERIAL = 2;
 /** The first version, without layers; still read, with the layers derived from the current palette. */
 export const PROJECT_FILE_VERSION_WITHOUT_LAYERS = 1;
 export const PROJECT_FILE_EXTENSION = '.webgrbl.json';
