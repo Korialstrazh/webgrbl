@@ -46,9 +46,9 @@ BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
 BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached. Drag to see what would stay behind.
 BURN_PART_LIFT_HINT_FREE;Part {{part}} comes free. Drag to see what stays behind.
 BURN_PART_LIFT_HINT_NOT_THROUGH;Part {{part}} stays attached: the cut does not reach through, so it cannot be lifted.
-BURN_PART_LIFT_HINT_RISES_WITH_PARENT;Part {{part}} stays attached to part {{parent}}, so it rises with it and cannot be lifted on its own.
+BURN_PART_LIFT_HINT_RISES_WITH_PARENT;Part {{part}} stays attached to Part {{parent}}, so it rises with it and cannot be lifted on its own.
 BURN_PART_LIFT_LABEL;Lift selected part
-BURN_PART_LIFT_MAY_STAY_ATTACHED;may stay attached
+BURN_PART_LIFT_MAY_STAY_ATTACHED;May stay attached
 BURN_PREVIEW_ADD_MATERIAL;Add material…
 BURN_PREVIEW_BUILDING;Building the 3D view
 BURN_PREVIEW_BURN_TEST_SAMPLE;Burn test sample…
@@ -102,14 +102,18 @@ CUT_CHECK_PART_ROW;Part {{part}}
 CUT_CHECK_PART_STATUS_ATTACHED;Attached
 CUT_CHECK_PART_STATUS_FREE;Free
 CUT_CHECK_PART_STATUS_MAY_STAY_ATTACHED;May stay attached
-CUT_CHECK_SUMMARY;{{parts}}: {{free}} free, {{borderline}} may stay attached, {{attached}} attached
+CUT_CHECK_SUMMARY_ATTACHED;{{count}} attached
+CUT_CHECK_SUMMARY_FREE;{{count}} free
+CUT_CHECK_SUMMARY_MAY_STAY_ATTACHED;{{count}} may stay attached
 CUT_CHECK_TEST_SAMPLE_POINTER;Burn a test sample to get an estimate.
 CUT_CHECK_TITLE;Cut check
 CUT_CHECK_WARNING_DEPTH_AT_MOST;at most {{depth}}
 CUT_CHECK_WARNING_FILL_CUTS_THROUGH;Layer {{layer}}: the fill cuts through the sheet (predicted {{predicted}} mm, sheet {{needed}} mm). Suggestion: lower the power or raise the speed.
 CUT_CHECK_WARNING_LESS_SURE;This estimate is less sure.
-CUT_CHECK_WARNING_PART_ATTACHED;Layer {{layer}}: part {{part}} stays attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
-CUT_CHECK_WARNING_PART_MAY_STAY_ATTACHED;Layer {{layer}}: part {{part}} may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
+CUT_CHECK_WARNING_PART_ATTACHED;Layer {{layer}}: Part {{part}} stays attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
+CUT_CHECK_WARNING_PART_MAY_STAY_ATTACHED;Layer {{layer}}: Part {{part}} may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
+CUT_CHECK_WARNING_PARTS_ATTACHED;Layer {{layer}}: {{count}} parts stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
+CUT_CHECK_WARNING_PARTS_MAY_STAY_ATTACHED;Layer {{layer}}: {{count}} parts may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
 DESIGN_LAYERS_TITLE;Layers
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Design

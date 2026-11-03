@@ -5,6 +5,7 @@ import { BURN_PART_STATUS, CUT_CHECK_WARNING_KIND } from '../../utils/burn.model
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../utils/burn.model/interfaces/BurnPart';
 import type { CutCheck } from '../../utils/burn.model/interfaces/CutCheck';
+import type { CutCheckWarning } from '../../utils/burn.model/interfaces/CutCheckWarning';
 import { getLayerDisplayName } from '../../utils/layers/get.layer.display.name';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../utils/layers/get.layer.palette.entry';
@@ -36,7 +37,6 @@ const ATTACHED_PART_ID = 3;
 const UNKNOWN_LAYER_KEY = '#123456';
 const MATERIAL: Material = newMaterial();
 const EXPORT_LABEL = 'Export G-code';
-const SUMMARY_TEXT = '3 parts: 1 free, 1 may stay attached, 1 attached';
 const ESTIMATE_NOTE = 'Estimate from your test.';
 const GUESS_NOTE = 'This is a guess: no test has been made with this material on this machine.';
 const TEST_SAMPLE_POINTER = 'Burn a test sample to get an estimate.';
@@ -98,7 +98,10 @@ describe(CutCheckPanel.name, () => {
   it('shows the part counts and the estimate note, without the guess note, when there is a test', () => {
     renderPanel(newReadyStore());
 
-    expect(screen.getByText(SUMMARY_TEXT)).toBeInTheDocument();
+    for (const summaryText of ['3 parts', '1 free', '1 may stay attached', '1 attached']) {
+      expect(screen.getByText(summaryText)).toBeInTheDocument();
+    }
+
     expect(screen.getByText(ESTIMATE_NOTE)).toBeInTheDocument();
     expect(screen.queryByText(GUESS_NOTE)).not.toBeInTheDocument();
     expect(screen.queryByText(TEST_SAMPLE_POINTER)).not.toBeInTheDocument();
@@ -118,7 +121,7 @@ describe(CutCheckPanel.name, () => {
       parts: [newPart(FREE_PART_ID, BURN_PART_STATUS.FREE)],
     }));
 
-    expect(screen.getByText('1 part: 1 free, 0 may stay attached, 0 attached')).toBeInTheDocument();
+    expect(screen.getByText('1 part')).toBeInTheDocument();
   });
 
   it('lists every part with its status and marks the selected row', () => {
@@ -183,8 +186,50 @@ describe(CutCheckPanel.name, () => {
     });
     renderPanel(store);
 
-    expect(screen.getByText(new RegExp(`^Layer ${layerName}: part 3 stays attached`))).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(`^Layer ${UNKNOWN_LAYER_KEY}: part 3 stays attached`))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`^Layer ${layerName}: Part 3 stays attached`))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`^Layer ${UNKNOWN_LAYER_KEY}: Part 3 stays attached`))).toBeInTheDocument();
+  });
+
+  describe('warnings of many parts', () => {
+    const newMayStayWarning = (partId: number): CutCheckWarning => ({
+      kind: CUT_CHECK_WARNING_KIND.PART_MAY_STAY_ATTACHED,
+      layerKey: UNKNOWN_LAYER_KEY,
+      partId,
+      predictedDepthMm: 0.2,
+      neededDepthMm: 3,
+      isLessSure: false,
+      isDepthUpperBound: false,
+    });
+    const groupedModel: BurnModel = newModel(newCutCheck({
+      warnings: [
+        newMayStayWarning(FREE_PART_ID),
+        newMayStayWarning(BORDERLINE_PART_ID),
+        { ...newMayStayWarning(ATTACHED_PART_ID), kind: CUT_CHECK_WARNING_KIND.PART_ATTACHED },
+        { ...newMayStayWarning(0), partId: undefined, kind: CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH },
+      ],
+    }));
+
+    it('says one thing once with the count, layer, depths and suggestion, and keeps each kind in view', () => {
+      renderPanel(newReadyStore(groupedModel));
+
+      expect(screen.getAllByRole('alert')).toHaveLength(3);
+      expect(screen.getByText(new RegExp(
+        `^Layer ${UNKNOWN_LAYER_KEY}: 2 parts may stay attached \\(predicted 0\\.2 mm, needed 3\\.0 mm\\)\\. Suggestion`,
+      ))).toBeInTheDocument();
+      expect(screen.getByText(/Part 3 stays attached/)).toBeInTheDocument();
+      expect(screen.getByText(/the fill cuts through/)).toBeInTheDocument();
+    });
+
+    it('shows the warning of a part in its row only while that part is selected', () => {
+      renderPanel(newReadyStore(groupedModel));
+
+      expect(screen.queryByText(/Part 2 may stay attached/)).not.toBeInTheDocument();
+
+      fireEvent.click(getPartRow(BORDERLINE_PART_ID));
+
+      expect(screen.getByText(/Part 2 may stay attached/)).toBeInTheDocument();
+      expect(screen.queryByText(/Part 1 may stay attached/)).not.toBeInTheDocument();
+    });
   });
 
   it('keeps export enabled with warnings', async () => {
@@ -228,14 +273,17 @@ describe(CutCheckPanel.name, () => {
     store.dispatch(new ProjectMaterialSelected({ materialId: MATERIAL.id }));
     store.dispatch(new BurnModelReady({ model: newModel() }));
     renderPanel(store);
-    expect(screen.getByText(SUMMARY_TEXT)).toBeInTheDocument();
+    for (const summaryText of ['3 parts', '1 free', '1 may stay attached', '1 attached']) {
+      expect(screen.getByText(summaryText)).toBeInTheDocument();
+    }
+
 
     act(() => {
       store.dispatch(new LayerToggled({ layerKey: UNKNOWN_LAYER_KEY, enabled: false }));
     });
 
     expect(screen.getByText(OUT_OF_DATE_TEXT)).toBeInTheDocument();
-    expect(screen.queryByText(SUMMARY_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
     expect(screen.queryByText(ESTIMATE_NOTE)).not.toBeInTheDocument();
   });

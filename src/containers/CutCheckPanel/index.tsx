@@ -1,7 +1,7 @@
 /**
- * The Cut check of the 3D view: the part counts, one row per part that selects it, the warnings, and whether this is an
- * estimate from a test or a guess. Without a current model it says why and shows no old parts. Warnings never block
- * export.
+ * The Cut check of the 3D view: the part counts, the warnings put together by what they say, a scrolling list with one
+ * row per part that selects it and shows its own warning, and whether this is an estimate from a test or a guess.
+ * Without a current model it says why and shows no old parts. Warnings never block export.
  *
  * @author michael.morosov
  *
@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   ANTD_ALERT_TYPE_WARNING,
   ANTD_BUTTON_TYPE_TEXT,
+  ANTD_TAG_COLOR_SUCCESS,
   ANTD_TAG_COLOR_WARNING,
 } from '../../utils/antd.constants';
 import { BURN_PART_STATUS } from '../../utils/burn.model/burn.model.constants';
@@ -39,7 +40,9 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { selectProjectLayers } from '../../utils/states/project.document.state';
 import { Panel } from '../../views/Panel';
+import { getCutCheckWarningGroups } from './get.cut.check.warning.groups';
 import { getCutCheckWarningText } from './get.cut.check.warning.text';
+import type { CutCheckWarningGroup } from './interfaces/CutCheckWarningGroup';
 import styles from './styles.module.scss';
 
 const PART_STATUS_TEXT_KEYS: Record<BurnPart['status'], string> = {
@@ -52,6 +55,8 @@ const WARNING_ROW_KEY_SEPARATOR = '-';
 
 const getWarningRowKey = ({ kind, layerKey, partId }: CutCheckWarning): string =>
   [kind, layerKey, partId].join(WARNING_ROW_KEY_SEPARATOR);
+
+const getSummaryCountClassName = (count: number): string | undefined => (count ? undefined : styles.emptyCount);
 
 export const CutCheckPanel = (): ReactNode => {
   const { t } = useTranslation();
@@ -71,20 +76,44 @@ export const CutCheckPanel = (): ReactNode => {
   }
 
   const { freePartCount, borderlinePartCount, attachedPartCount, warnings, isGuess } = model.cutCheck;
+  const warningGroups: CutCheckWarningGroup[] = getCutCheckWarningGroups(warnings);
+  const getLayerName = (layerKey: string): string => getLayerNameByKey(layerKey, projectLayers, paletteEntries);
+  // A row repeats its warning only where the alert does not name the part.
+  const selectedPartWarnings: CutCheckWarning[] = warningGroups
+    .filter((group: CutCheckWarningGroup): boolean => group.warnings.length > 1)
+    .flatMap((group: CutCheckWarningGroup): CutCheckWarning[] => group.warnings)
+    .filter(({ partId }: CutCheckWarning): boolean => !!partId && partId === selectedPartId);
 
   return (
     <Panel title={t(DEFAULT.CUT_CHECK_TITLE)}>
       <div className={styles.cutCheckPanel}>
-        <p className={styles.summary}>
-          {t(DEFAULT.CUT_CHECK_SUMMARY, {
-            parts: t(DEFAULT.CUT_CHECK_PART_COUNT, { count: model.parts.length }),
-            free: freePartCount,
-            borderline: borderlinePartCount,
-            attached: attachedPartCount,
-          })}
-        </p>
+        <div className={styles.summary}>
+          <strong>{t(DEFAULT.CUT_CHECK_PART_COUNT, { count: model.parts.length })}</strong>
+          <Tag className={getSummaryCountClassName(freePartCount)} color={freePartCount ? ANTD_TAG_COLOR_SUCCESS : undefined}>
+            {t(DEFAULT.CUT_CHECK_SUMMARY_FREE, { count: freePartCount })}
+          </Tag>
+          <Tag
+            className={getSummaryCountClassName(borderlinePartCount)}
+            color={borderlinePartCount ? ANTD_TAG_COLOR_WARNING : undefined}
+          >
+            {t(DEFAULT.CUT_CHECK_SUMMARY_MAY_STAY_ATTACHED, { count: borderlinePartCount })}
+          </Tag>
+          <Tag
+            className={getSummaryCountClassName(attachedPartCount)}
+            color={attachedPartCount ? ANTD_TAG_COLOR_WARNING : undefined}
+          >
+            {t(DEFAULT.CUT_CHECK_SUMMARY_ATTACHED, { count: attachedPartCount })}
+          </Tag>
+        </div>
         <p className={styles.note}>{t(isGuess ? DEFAULT.CUT_CHECK_NOTE_GUESS : DEFAULT.CUT_CHECK_NOTE_ESTIMATE)}</p>
         {isGuess && <p className={styles.note}>{t(DEFAULT.CUT_CHECK_TEST_SAMPLE_POINTER)}</p>}
+        {warningGroups.map(({ groupKey, warnings: groupWarnings }: CutCheckWarningGroup) => (
+          <Alert
+            key={groupKey}
+            type={ANTD_ALERT_TYPE_WARNING}
+            title={getCutCheckWarningText(t, groupWarnings[0], getLayerName(groupWarnings[0].layerKey), groupWarnings.length)}
+          />
+        ))}
         <ul className={styles.list}>
           {model.parts.map(({ id, status }: BurnPart) => (
             <li key={id}>
@@ -99,20 +128,14 @@ export const CutCheckPanel = (): ReactNode => {
                   {t(PART_STATUS_TEXT_KEYS[status])}
                 </Tag>
               </Button>
+              {id === selectedPartId && selectedPartWarnings.map((warning: CutCheckWarning) => (
+                <p key={getWarningRowKey(warning)} className={styles.partDetail}>
+                  {getCutCheckWarningText(t, warning, getLayerName(warning.layerKey))}
+                </p>
+              ))}
             </li>
           ))}
         </ul>
-        {warnings.map((warning: CutCheckWarning) => (
-          <Alert
-            key={getWarningRowKey(warning)}
-            type={ANTD_ALERT_TYPE_WARNING}
-            title={getCutCheckWarningText(
-              t,
-              warning,
-              getLayerNameByKey(warning.layerKey, projectLayers, paletteEntries),
-            )}
-          />
-        ))}
       </div>
     </Panel>
   );

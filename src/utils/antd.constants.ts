@@ -92,6 +92,9 @@ export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';
 /** A tag that warns. */
 export const ANTD_TAG_COLOR_WARNING: TagProps['color'] = 'warning';
 
+/** A tag in the success colour, for something that turned out well. */
+export const ANTD_TAG_COLOR_SUCCESS: TagProps['color'] = 'success';
+
 /** The tooltip opens while its anchor is hovered or holds the keyboard focus. */
 export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['hover', 'focus'];
 

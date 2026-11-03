@@ -24,10 +24,10 @@ const PART_ID = 1;
 const CHILD_ID = 2;
 const OTHER_PART_ID = 3;
 const LIFT_LABEL = 'Lift selected part';
-const MAY_STAY_ATTACHED_TEXT = 'may stay attached';
+const MAY_STAY_ATTACHED_TEXT = 'May stay attached';
 const NOT_THROUGH_REASON = 'Part 1 stays attached: the cut does not reach through, so it cannot be lifted.';
 const RISES_WITH_PARENT_REASON =
-  'Part 2 stays attached to part 1, so it rises with it and cannot be lifted on its own.';
+  'Part 2 stays attached to Part 1, so it rises with it and cannot be lifted on its own.';
 const STEP_MM = 0.1;
 const LAYER_COLOUR = '#ff0000';
 
