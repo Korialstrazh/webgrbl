@@ -1,6 +1,6 @@
 /**
- * The material of the project, in the Design toolbar: a select that marks the materials tested on the active machine,
- * with an entry that adds one.
+ * The material of the project, in the Design toolbar: a select whose options also show the thickness and the
+ * test on the active machine, so materials of one name can be told apart, with an entry that adds one.
  *
  * @author michael.morosov
  *
@@ -9,13 +9,16 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { CheckOutlined } from '@ant-design/icons';
 import { Select } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { getMaterialTestDateText } from '../../utils/materials/get.material.test.date.text';
 import type { Material } from '../../utils/materials/interfaces/Material';
+import type { MaterialTestResult } from '../../utils/materials/interfaces/MaterialTestResult';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectActiveMaterial } from '../../utils/states/material.selectors';
 import { selectMaterials } from '../../utils/states/material.state';
@@ -28,12 +31,25 @@ import styles from './styles.module.scss';
 const ADD_MATERIAL_OPTION_VALUE = 'add-material';
 
 export const ProjectMaterialSelect = (): ReactNode => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const materials: Material[] = useSelector(selectMaterials);
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const activeProfileId: string | undefined = useSelector(selectActiveMachineProfile)?.id;
   const [isMaterialDialogOpen, setIsMaterialDialogOpen] = useState<boolean>(false);
+
+  const getMaterialDetailText = ({ thicknessMm, testResults }: Material): string => {
+    const testResult: MaterialTestResult | undefined = testResults.find(
+      ({ machineProfileId }: MaterialTestResult): boolean => machineProfileId === activeProfileId,
+    );
+
+    return testResult
+      ? t(DEFAULT.BURN_PREVIEW_MATERIAL_DETAIL_TESTED, {
+        thickness: thicknessMm,
+        date: getMaterialTestDateText(testResult.testedAtIso, i18n.language),
+      })
+      : t(DEFAULT.BURN_PREVIEW_MATERIAL_DETAIL_UNTESTED, { thickness: thicknessMm });
+  };
 
   const changeMaterial = (optionValue: string): void => {
     if (optionValue === ADD_MATERIAL_OPTION_VALUE) {
@@ -51,17 +67,20 @@ export const ProjectMaterialSelect = (): ReactNode => {
         placeholder={t(DEFAULT.BURN_PREVIEW_MATERIAL_PLACEHOLDER)}
         value={activeMaterial?.id}
         options={[
-          ...materials.map(({ id, name, testResults }: Material) => ({
-            value: id,
-            label: name,
-            isTested: testResults.some(({ machineProfileId }) => machineProfileId === activeProfileId),
+          ...materials.map((material: Material) => ({
+            value: material.id,
+            label: material.name,
+            detail: getMaterialDetailText(material),
           })),
           { value: ADD_MATERIAL_OPTION_VALUE, label: t(DEFAULT.BURN_PREVIEW_ADD_MATERIAL) },
         ]}
-        optionRender={({ label, data }) => (
+        optionRender={({ label, value, data }) => (
           <span className={styles.materialOption}>
-            <span className={styles.materialOptionName}>{label}</span>
-            {data.isTested && <span className={styles.testedMark}>{t(DEFAULT.BURN_PREVIEW_MATERIAL_TESTED)}</span>}
+            <span className={styles.materialOptionText}>
+              <span className={styles.materialOptionName}>{label}</span>
+              {data.detail && <span className={styles.materialOptionDetail}>{data.detail}</span>}
+            </span>
+            {value === activeMaterial?.id && <CheckOutlined className={styles.currentMark} />}
           </span>
         )}
         onChange={changeMaterial}

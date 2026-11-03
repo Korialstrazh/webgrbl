@@ -7,6 +7,7 @@ import { newTestResultFixture } from '../../utils/materials/new.test.result.fixt
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
+import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
 import { selectActiveMaterial } from '../../utils/states/material.selectors';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
@@ -74,7 +75,7 @@ describe(ProjectMaterialSelect.name, () => {
     expect(selectActiveMaterial(store.getState())).toBeDefined();
   });
 
-  it('marks a material tested on the active machine in the list', () => {
+  it('shows thickness and test date for a material tested on the active machine', () => {
     const store: AppStore = newStore();
     const profile: MachineProfile = newMachineProfile();
 
@@ -86,7 +87,19 @@ describe(ProjectMaterialSelect.name, () => {
     renderToolbar(store);
     fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
 
-    expect(screen.getByText('Tested')).toBeInTheDocument();
+    expect(screen.getByText(/^4 mm, tested /)).toBeInTheDocument();
+  });
+
+  it('tells a material not tested on the active machine, and marks the current one', () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new MaterialSaved({ material: BIRCH }));
+    store.dispatch(new ProjectMaterialSelected({ materialId: BIRCH.id }));
+    renderToolbar(store);
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
+
+    expect(screen.getByText('4 mm, not tested')).toBeInTheDocument();
+    expect(document.querySelector(`${SELECT_OPTION_SELECTOR} .anticon-check`)).toBeInTheDocument();
   });
 
   it('shows a material added later in the list', () => {

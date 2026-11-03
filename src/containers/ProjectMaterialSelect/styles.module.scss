@@ -10,13 +10,24 @@
   justify-content: space-between;
 }
 
-.materialOptionName {
+.materialOptionText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.materialOptionName,
+.materialOptionDetail {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.testedMark {
-  flex: none;
-  color: var(--color-success);
+.materialOptionDetail {
+  color: var(--color-text-muted);
   font-size: 0.75rem;
+}
+
+.currentMark {
+  flex: none;
+  color: var(--color-accent);
 }
