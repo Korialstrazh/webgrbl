@@ -10,7 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { ReactNode } from 'react';
-import type { BedViewMode } from '../bed.toolbar.constants';
+import type { BedViewMode } from '../../../utils/bed/bed.view.constants';
 
 export interface BedViewModeOption {
   /** The view mode id. */

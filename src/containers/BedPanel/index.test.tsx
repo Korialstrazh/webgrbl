@@ -9,12 +9,14 @@ import { getResolvedGrblPositions } from '../../utils/grbl/grbl.position.resolve
 import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
 import type { GrblResolvedPositions } from '../../utils/grbl/interfaces/GrblResolvedPositions';
 import type { GrblStatusReport } from '../../utils/grbl/interfaces/GrblStatusReport';
+import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.profile.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
+import { BedViewModeChanged, selectBedViewMode } from '../../utils/states/bed.view.state';
 import type { AppToast } from '../../utils/states/interfaces/AppToast';
 import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../utils/states/machine.status.state';
@@ -86,6 +88,7 @@ const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const SOON_TAG_TEXT = 'Soon';
 const REGENERATE_LABEL = 'Regenerate';
 const OUT_OF_DATE_TEXT = 'Out of date';
+const BED_ZOOM_LABEL = 'Bed zoom';
 const CANCEL_LABEL = 'Cancel';
 const GENERATING_TEXT = `Generating${HORIZONTAL_ELLIPSIS} 40 %`;
 const GENERATION_PROGRESS = 0.4;
@@ -101,6 +104,11 @@ const SIXTY_SIX_SECOND_TOOLPATH: Toolpath = newToolpath({
 const JOB_SIZE_TEXT = `Job 50.0 ${MULTIPLICATION_SIGN} 30.0 mm`;
 const PLAYBACK_BAR_LABEL = 'Simulation playback';
 
+// jsdom has no WebGL and three.js is not what these tests are about.
+vi.mock('../../utils/burn.scene/burn.scene.runtime', () => ({
+  newBurnSceneRenderer: () => ({ dispose: (): void => undefined }),
+}));
+
 const newPhotoFile = (): File => new File(['png'], PHOTO_FILE_NAME, { type: 'image/png' });
 
 const getNotSvgToasts = (store: AppStore): AppToast[] => selectToasts(store.getState()).filter(
@@ -112,6 +120,10 @@ const newHeldToolpathStore = (): AppStore => newStore(undefined, new FakeToolpat
 const putReadyToolpath = (store: AppStore, toolpath: Toolpath): void => {
   store.dispatch(new ToolpathRequested());
   store.dispatch(new ToolpathReady({ toolpath, documentVersion: selectToolpathDocumentVersion(store.getState()) }));
+};
+
+const openThreeDView = (): void => {
+  fireEvent.click(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL }));
 };
 
 const openToolpathView = (): void => {
@@ -198,16 +210,18 @@ describe(BedPanel.name, () => {
     expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).toBeChecked();
   });
 
-  it('lists Edit nodes, Align and 3D under More as disabled entries, each with a Soon tag', async () => {
+  it('lists Edit nodes and Align under More as disabled entries with a Soon tag, and no longer 3D', async () => {
     renderPanel(newStore());
     fireEvent.click(screen.getByRole('button', { name: MORE_TOOLS_LABEL }));
 
-    for (const soonLabel of [EDIT_NODES_LABEL, ALIGN_LABEL, THREE_D_VIEW_LABEL]) {
+    for (const soonLabel of [EDIT_NODES_LABEL, ALIGN_LABEL]) {
       const soonEntry: HTMLElement = await screen.findByRole('menuitem', { name: soonLabel });
 
       expect(soonEntry).toHaveAttribute(ARIA_DISABLED_ATTRIBUTE, 'true');
       expect(soonEntry).toHaveTextContent(SOON_TAG_TEXT);
     }
+
+    expect(screen.queryByRole('menuitem', { name: THREE_D_VIEW_LABEL })).not.toBeInTheDocument();
   });
 
   it('dispatches nothing from the coming-soon entries under More', async () => {
@@ -217,7 +231,6 @@ describe(BedPanel.name, () => {
     renderPanel(store);
     fireEvent.click(screen.getByRole('button', { name: MORE_TOOLS_LABEL }));
     fireEvent.click(await screen.findByRole('menuitem', { name: EDIT_NODES_LABEL }));
-    fireEvent.click(screen.getByRole('menuitem', { name: THREE_D_VIEW_LABEL }));
 
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
@@ -419,11 +432,71 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('group', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('offers only Design and Toolpath in the view switch', () => {
+  it('offers Design, Toolpath and 3D in the view switch', () => {
     renderPanel(newStore());
 
-    expect(screen.queryByRole('radio', { name: THREE_D_VIEW_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL })).toBeEnabled();
     expect(screen.getByRole('radio', { name: TOOLPATH_VIEW_LABEL })).toBeEnabled();
+    expect(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL })).toBeEnabled();
+  });
+
+  it('choosing 3D stores the view mode and requests a toolpath when there is none', () => {
+    const store: AppStore = newHeldToolpathStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderPanel(store);
+    openThreeDView();
+
+    expect(dispatchSpy).toHaveBeenCalledWith(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ToolpathRequested));
+    expect(selectBedViewMode(store.getState())).toBe(BED_VIEW_MODE.THREE_D);
+    expect(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL })).toBeChecked();
+  });
+
+  it('choosing 3D requests a new toolpath when the last one is out of date', () => {
+    const store: AppStore = newHeldToolpathStore();
+
+    act(() => {
+      putReadyToolpath(store, SIXTY_SIX_SECOND_TOOLPATH);
+      store.dispatch(new ProjectDocumentLoaded({ document: { objects: [newProjectObject()], layers: [] } }));
+    });
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderPanel(store);
+    openThreeDView();
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ToolpathRequested));
+  });
+
+  it('choosing 3D keeps a ready toolpath', () => {
+    const store: AppStore = newHeldToolpathStore();
+
+    act(() => {
+      putReadyToolpath(store, SIXTY_SIX_SECOND_TOOLPATH);
+    });
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderPanel(store);
+    openThreeDView();
+
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(ToolpathRequested));
+  });
+
+  it('shows the toolpath progress over the 3D view', () => {
+    renderPanel(newHeldToolpathStore());
+    openThreeDView();
+
+    expect(screen.getByText(/^Generating/)).toBeInTheDocument();
+  });
+
+  it('leaves the bed, its zoom and colour controls and the editing tools out of 3D', () => {
+    renderPanel(newHeldToolpathStore());
+    openThreeDView();
+
+    expect(screen.queryByRole('group', { name: BED_ZOOM_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByRole('radiogroup', { name: TOOL_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByTestId(BED_OBJECTS_SURFACE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
   it('shows the job size in the playback bar in Toolpath view', () => {

@@ -7,7 +7,9 @@
  *   out-of-date banner, and the simulation playback bar below the bed.
  * - The bed zooms and pans in both views (see BedViewport). Its work surface takes the colour the user chose, and the
  *   marks drawn on it the matching light or dark set.
- * - The other tools and the 3D view are not built yet. SVG files dropped on the bed are imported.
+ * - 3D view: the preview of the finished job in place of the bed, so the bed's zoom and colour controls and the
+ *   editing tools leave the header, with the same generation progress or out-of-date banner.
+ * - The other tools are not built yet. SVG files dropped on the bed are imported.
  *
  * Its element is the host that dialogs and drawers render into.
  *
@@ -23,6 +25,8 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
+import type { BedViewMode } from '../../utils/bed/bed.view.constants';
 import { getBedOverlayTone } from '../../utils/bed/get.bed.overlay.tone';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
@@ -34,6 +38,7 @@ import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.dra
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
 import { BedObjects } from '../BedObjects';
 import { BedViewport } from '../BedViewport';
+import { BurnPreviewPane } from '../BurnPreviewPane';
 import { SimulationPlaybackBar } from '../SimulationPlaybackBar';
 import { ToastStack } from '../ToastStack';
 import { ToolpathLayer } from '../ToolpathLayer';
@@ -47,11 +52,10 @@ import {
   BED_TOOL,
   BED_TOOL_OPTION_KEYS,
   BED_TOOL_SWITCH_NAME,
-  BED_VIEW_MODE,
   BED_VIEW_MODE_OPTION_KEYS,
   BED_VIEW_MODE_SWITCH_NAME,
 } from './bed.toolbar.constants';
-import type { BedTool, BedViewMode } from './bed.toolbar.constants';
+import type { BedTool } from './bed.toolbar.constants';
 import type { BedPanelProps } from './interfaces/BedPanelProps';
 import type { BedSurfaceStyle } from './interfaces/BedSurfaceStyle';
 import type { BedToolOption } from './interfaces/BedToolOption';
@@ -77,6 +81,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const [isTravelShown, setIsTravelShown] = useState<boolean>(false);
   const { viewMode, changeBedViewMode }: BedViewModeControls = useBedViewMode();
   const isToolpathView: boolean = viewMode === BED_VIEW_MODE.TOOLPATH;
+  const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
   const dropArea: SvgFileDropArea = useSvgFileDrop();
   const toolOptions: BedToolOption[] = BED_TOOL_OPTION_KEYS.map((option: BedToolOptionKey) => ({
     value: option.value,
@@ -92,7 +97,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
       {/* A plain heading, read by screen readers only: the panel's controls already say what it is. */}
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       <div className={styles.header}>
-        {isToolpathView ? (
+        {isToolpathView && (
           <div className={styles.editingTools}>
             <ToolpathToolbar
               displayMode={toolpathDisplayMode}
@@ -102,7 +107,8 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
             />
             <ToolpathWarningsPanel />
           </div>
-        ) : (
+        )}
+        {viewMode === BED_VIEW_MODE.DESIGN && (
           <div className={styles.editingTools}>
             <Segmented<BedTool>
               name={BED_TOOL_SWITCH_NAME}
@@ -140,25 +146,33 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           onDragLeave={dropArea.handleDragLeave}
           onDrop={dropArea.handleDrop}
         >
-          <BedViewport
-          // A new bed size starts a new view, fitted to the new bed.
-            key={[dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR)}
-            dimensions={dimensions}
-            isWide={isWide}
-            controlsHost={viewControlsHost}
-            // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
-            // add a second crosshair.
-            headPosition={isToolpathView ? undefined : status?.machinePosition}
-            workOriginPosition={isToolpathView ? undefined : status?.workCoordinateOffset}
-            placeholderLabel={placeholderKey && t(placeholderKey)}
-          >
-            {isToolpathView ? (
-              <ToolpathLayer dimensions={dimensions} displayMode={toolpathDisplayMode} isTravelShown={isTravelShown} />
-            ) : (
-              <BedObjects dimensions={dimensions} activeTool={activeTool} />
-            )}
-          </BedViewport>
-          {isToolpathView && <ToolpathStatusOverlay />}
+          {isThreeDView ? (
+            <BurnPreviewPane />
+          ) : (
+            <BedViewport
+            // A new bed size starts a new view, fitted to the new bed.
+              key={[dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR)}
+              dimensions={dimensions}
+              isWide={isWide}
+              controlsHost={viewControlsHost}
+              // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
+              // add a second crosshair.
+              headPosition={isToolpathView ? undefined : status?.machinePosition}
+              workOriginPosition={isToolpathView ? undefined : status?.workCoordinateOffset}
+              placeholderLabel={placeholderKey && t(placeholderKey)}
+            >
+              {isToolpathView ? (
+                <ToolpathLayer
+                  dimensions={dimensions}
+                  displayMode={toolpathDisplayMode}
+                  isTravelShown={isTravelShown}
+                />
+              ) : (
+                <BedObjects dimensions={dimensions} activeTool={activeTool} />
+              )}
+            </BedViewport>
+          )}
+          {(isToolpathView || isThreeDView) && <ToolpathStatusOverlay />}
         </div>
         {isToolpathView && <SimulationPlaybackBar />}
       </div>

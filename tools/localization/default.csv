@@ -32,7 +32,6 @@ BED_TOOL_LABEL;Bed tool
 BED_TOOL_MOVE;Move
 BED_TOOL_SELECT;Select
 BED_VIEW_3D;3D
-BED_VIEW_3D_DESCRIPTION;A 3D preview of the finished job.
 BED_VIEW_DESIGN;Design
 BED_VIEW_MODE_LABEL;Bed view
 BED_VIEW_TOOLPATH;Toolpath
@@ -44,6 +43,8 @@ BED_ZOOM_OUT_HINT;Zoom out (-)
 BED_ZOOM_PAN_HINT;Zoom relative to the fitted bed: 100 % (fit) shows the whole bed. Drag with the middle mouse button, or hold Space and drag, to move the view.
 BED_ZOOM_PERCENT;{{percent}} %
 BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
+BURN_PREVIEW_LOADING;Loading the 3D view
+BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
 COMING_SOON;Soon
 CONNECTION_CONNECT_MENU;Connect...
 CONNECTION_NO_PORT_CHOSEN;No port chosen
