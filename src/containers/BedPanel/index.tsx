@@ -36,6 +36,7 @@ import { selectBedColour } from '../../utils/states/bed.appearance.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
+import { AddTestSampleButton } from '../AddTestSampleButton';
 import { BedObjects } from '../BedObjects';
 import { BedViewport } from '../BedViewport';
 import { BurnPreviewPane } from '../BurnPreviewPane';
@@ -102,6 +103,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
         {viewMode === BED_VIEW_MODE.DESIGN && (
           <div className={styles.editingTools}>
             <ProjectMaterialSelect />
+            <AddTestSampleButton />
           </div>
         )}
         {isThreeDView && (

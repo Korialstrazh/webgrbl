@@ -1,40 +1,11 @@
-.samplePicture {
-  // The picture imitates a plywood sheet with a burnt gradient; these colours are not theme colours.
-  --sample-wood: #c9a26f;
-  --sample-gradient-light: #f0dcc0;
-  --sample-gradient-dark: #2a1a0c;
-}
-
-.burnSection {
-  display: flex;
-  gap: 1.25rem;
-  align-items: flex-start;
-}
-
-// A square stand-in for the sample: the cut outline around a gradient.
-.samplePicture {
-  flex: 0 0 auto;
-  box-sizing: border-box;
-  width: 7.5rem;
-  height: 7.5rem;
-  padding: 1rem;
-  display: flex;
-  border: 0.125rem solid var(--color-accent);
-  background: var(--sample-wood);
-}
-
-.sampleGradient {
-  flex: 1 1 auto;
-  background: linear-gradient(90deg, var(--sample-gradient-light), var(--sample-gradient-dark));
-}
-
-.burnDetails {
+.dialogSection {
   display: flex;
   flex-direction: column;
-  flex: 1 1 auto;
-  gap: 0.5rem;
-  align-items: flex-start;
-  min-width: 0;
+  gap: 0.625rem;
+}
+
+.settingsSection {
+  margin-top: 1rem;
 }
 
 // Three short fields side by side, so the dialog fits a short window without scrolling.
@@ -52,13 +23,6 @@
   :global(.ant-input-number) {
     width: 100%;
   }
-}
-
-.resultSection {
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  margin-top: 1rem;
 }
 
 .outcomeRow {

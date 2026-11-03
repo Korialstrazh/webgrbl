@@ -105,6 +105,11 @@ export class ProjectMaterialSelected extends Action<ProjectMaterialSelectedPaylo
   public static readonly type: string = actionType('project material selected');
 }
 
+/** Adds the test sample to the open project as a normal object, in one undo step. */
+export class SampleJobAddRequested extends Action {
+  public static readonly type: string = actionType('sample job add requested');
+}
+
 export class SvgFilesImportRequested extends Action<SvgFilesPayload> {
   public static readonly type: string = actionType('svg files import requested');
 }

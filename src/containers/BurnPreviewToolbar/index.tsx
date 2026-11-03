@@ -1,6 +1,6 @@
 /**
- * The header of the 3D view: the material of the project as read-only text, since it is chosen in Design, and the test
- * sample of that material.
+ * The header of the 3D view: the material of the project as read-only text, since it is chosen in Design, and the entry
+ * of the test result of that material.
  *
  * @author michael.morosov
  *
@@ -33,7 +33,7 @@ export const BurnPreviewToolbar = (): ReactNode => {
           : t(DEFAULT.BURN_PREVIEW_MATERIAL_NONE)}
       </span>
       <Button disabled={!activeMaterial} onClick={() => setIsTestSampleDialogOpen(true)}>
-        {t(DEFAULT.BURN_PREVIEW_BURN_TEST_SAMPLE)}
+        {t(DEFAULT.BURN_PREVIEW_ENTER_TEST_RESULT)}
       </Button>
       {activeMaterial && (
         <TestSampleDialog

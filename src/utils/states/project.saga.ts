@@ -28,7 +28,7 @@ import { ProjectNotFoundError } from '../project/project.not.found.error';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
 import type { Action } from './action';
 import { watchProjectAutosave } from './project.autosave.saga';
-import { SvgFilesImportRequested } from './project.document.state';
+import { SampleJobAddRequested, SvgFilesImportRequested } from './project.document.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import { exportProjectFile } from './project.file.export.saga';
 import { importProjectFile } from './project.file.import.saga';
@@ -55,6 +55,7 @@ import { storeDocumentInNewProject } from './project.store.in.new.saga';
 import { loadProjectSummaries } from './project.summaries.saga';
 import { switchToLoadedProject } from './project.switch.saga';
 import { switchToCreatedProject } from './project.switch.to.created.saga';
+import { addSampleJob } from './sample.job.add.saga';
 import { importSvgFiles } from './svg.import.saga';
 
 const PROJECT_COMMAND_ACTION_TYPES: string[] = [
@@ -70,6 +71,7 @@ const PROJECT_COMMAND_ACTION_TYPES: string[] = [
   // An SVG import waits in the same queue, so it never lands in a document that a project switch is replacing, and
   // one sent while the first project opens waits for it.
   SvgFilesImportRequested.type,
+  SampleJobAddRequested.type,
 ];
 
 /**
@@ -206,6 +208,8 @@ function* handleProjectCommand(action: Action<unknown>): Generator {
     return yield call(importProjectFile, action as ProjectFileImportRequested);
   case SvgFilesImportRequested.type:
     return yield call(importSvgFiles, action as SvgFilesImportRequested);
+  case SampleJobAddRequested.type:
+    return yield call(addSampleJob);
   default:
     return undefined;
   }

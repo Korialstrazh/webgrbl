@@ -14,11 +14,12 @@ In 3D the left panel shows the **Cut check** above Layers; Objects is hidden. ST
 
 A depth estimate needs one real test per material and machine profile (lasers differ).
 
-1. In the 3D toolbar choose **Burn test sample...** (needs a material).
-2. Step 1: enter power, speed and passes (default: the project's first Line layer). The sample is a 5 x 5 cm square cut line with a black-to-white gradient inside. Press **Export sample G-code**, the main button until the export; it uses the normal G-code download and does not touch the project's toolpath. Export is off, with a reason, without a machine profile, when the sample does not fit the work area, or when a setting is out of range (power 1 to 100 %, speed 1 to 20000 mm/min, passes 1 to 50). If the export fails, a message says so.
-3. After Export the settings are locked, so the saved ones are the ones burnt.
-4. Burn it on the real laser (outside the app).
-5. Step 2: choose **Cut through**, or **Not through** with an optional depth in mm (above 0, at most the thickness). The depth always describes the square's cut line. **Save for this material** stores it for the active profile. Saving without exporting is allowed (you may have burnt the same settings earlier). Cancel stores nothing.
+The sample lives in Design and burns through the normal job; it has no export of its own. This was the user's decision: "the template svg should be able to be added in the Design section, for cutting and burning."
+
+1. In the Design toolbar press **Add test sample**. A 5 x 5 cm square with a black-to-white gradient inside lands 5 mm from the machine's origin corner, selected, as one undo step. Nothing already in the project changes. The button is off, with the reason in its tooltip, when the sample does not fit the machine or the project is full.
+2. Layers follow colour, like an SVG import. The red square joins an existing `#ff0000` layer and the gradient joins the existing shading layer, each keeping its settings, mode and on/off state. A layer that does not exist yet is created from the palette and forced on, as Line for the square and Fill for the gradient. So check the Layers panel: an existing red layer in Fill mode or switched off burns as it is set.
+3. Move it if you like, then export the G-code as usual and burn it on the real laser.
+4. In 3D choose **Enter test result** (needs a material). Choose **Cut through**, or **Not through** with an optional depth in mm (above 0, at most the thickness). The depth always describes the square's cut line. Check power, speed and passes (prefilled from the sample's Line layer, or the project's first Line layer when no sample is in the project): they must match what was burnt (power 1 to 100 %, speed 1 to 20000 mm/min, passes 1 to 50). **Save for this material** stores the result for the active profile, with the thickness at test time, and the model rebuilds. Save waits for a result and valid values. Cancel stores nothing.
 
 The gradient only helps you judge shading by eye. To change shading, change the gradient in the design; the app has no shading control.
 

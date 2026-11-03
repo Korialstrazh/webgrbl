@@ -4,13 +4,15 @@ import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
 import { DEFAULT_CUT_ENTRY, DEFAULT_PALETTE, LAYER_MODE } from '../palette/palette.constants';
+import type { PaletteEntry } from '../palette/interfaces/PaletteEntry';
 import type { MachineOriginCorner } from '../profiles/machine.profile.constants';
 import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getBedDrawables } from '../toolpath/get.bed.drawables';
 import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
 import { getToolpath } from '../toolpath/get.toolpath';
-import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
+import type { ProjectObject } from '../project/interfaces/ProjectObject';
+import type { Palette } from '../palette/interfaces/Palette';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachineArea';
 import type { ToolpathMove } from '../toolpath/interfaces/ToolpathMove';
@@ -19,25 +21,24 @@ import { newToolpathMove } from '../toolpath/test.support/new.toolpath.move';
 import { TOOLPATH_MOVE_KIND } from '../toolpath/toolpath.constants';
 import { fitsSampleJob } from './fits.sample.job';
 import { getSampleCutSettings } from './get.sample.cut.settings';
-import { getSampleJobDocument } from './get.sample.job.document';
-import type { SampleCutSettings } from './interfaces/SampleCutSettings';
+import { getSampleJobLayers } from './get.sample.job.layers';
+import { getSampleJobObject } from './get.sample.job.object';
 import { SAMPLE_CUT_COLOUR, SAMPLE_GRADIENT_INSET_MM, SAMPLE_MARGIN_MM, SAMPLE_SIZE_MM } from './sample.job.constants';
 
-const CUT_SETTINGS: SampleCutSettings = { powerPercent: 70, speedMmPerMin: 450, passes: 2 };
 const SIDES_PER_PASS = 4;
 const NO_MOVE: ToolpathMove = newToolpathMove();
 const SMALL_MACHINE_MM = 40;
 const COORDINATE_TOLERANCE_MM = 1e-6;
 const ORIGIN_CORNERS: MachineOriginCorner[] = Object.values(MACHINE_ORIGIN_CORNER);
 
-const getSampleToolpath = (machineArea: ToolpathMachineArea = newToolpathMachineArea()): Toolpath => {
-  const projectDocument: ProjectDocument = getSampleJobDocument({
-    cutSettings: CUT_SETTINGS,
-    palette: DEFAULT_PALETTE,
-    machineArea,
-  });
+const getSampleLayers = (machineArea: ToolpathMachineArea, palette: Palette = DEFAULT_PALETTE): ProjectLayer[] =>
+  getSampleJobLayers([getSampleJobObject(machineArea)], palette, []);
 
-  return getToolpath({ ...getBedDrawables(projectDocument), layers: projectDocument.layers, machineArea });
+const getSampleToolpath = (machineArea: ToolpathMachineArea = newToolpathMachineArea()): Toolpath => {
+  const objects: ProjectObject[] = [getSampleJobObject(machineArea)];
+  const layers: ProjectLayer[] = getSampleJobLayers(objects, DEFAULT_PALETTE, []);
+
+  return getToolpath({ ...getBedDrawables({ objects, layers }), layers, machineArea });
 };
 
 const getLayerMoves = (toolpath: Toolpath, layerKey: string): ToolpathMove[] => {
@@ -49,15 +50,9 @@ const getLayerMoves = (toolpath: Toolpath, layerKey: string): ToolpathMove[] => 
 const getBurnMoves = (moves: ToolpathMove[]): ToolpathMove[] =>
   moves.filter((move: ToolpathMove): boolean => move.kind === TOOLPATH_MOVE_KIND.BURN && move.powerPercent > 0);
 
-const getSampleToolpathLayer = (layerColour: string): ProjectLayer => {
-  const sampleLayer: ProjectLayer | undefined = getSampleJobDocument({
-    cutSettings: CUT_SETTINGS,
-    palette: DEFAULT_PALETTE,
-    machineArea: newToolpathMachineArea(),
-  }).layers.find((layer: ProjectLayer): boolean => layer.colour === layerColour);
-
-  return sampleLayer ?? getNewLayer(layerColour, DEFAULT_PALETTE, 0);
-};
+const getSampleToolpathLayer = (layerColour: string): ProjectLayer =>
+  getSampleLayers(newToolpathMachineArea()).find((layer: ProjectLayer): boolean => layer.colour === layerColour)
+  ?? getNewLayer(layerColour, DEFAULT_PALETTE, 0);
 
 const shadingKey: string = getLayerKey(getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0));
 
@@ -71,17 +66,18 @@ const getLeftmostPower = (moves: ToolpathMove[]): number =>
 const getRightmostPower = (moves: ToolpathMove[]): number =>
   getPowerAtX(moves, (xs: number[]): number => Math.max(...xs));
 
-describe(getSampleJobDocument.name, () => {
-  it('burns a closed 50 x 50 mm loop at the entered power, speed and passes', () => {
+describe(getSampleJobObject.name, () => {
+  it('burns a closed 50 x 50 mm loop at the settings of its Line layer', () => {
     const cutMoves: ToolpathMove[] = getBurnMoves(getLayerMoves(getSampleToolpath(), SAMPLE_CUT_COLOUR));
     const xs: number[] = cutMoves.flatMap((move: ToolpathMove): number[] => [move.from.x, move.to.x]);
     const ys: number[] = cutMoves.flatMap((move: ToolpathMove): number[] => [move.from.y, move.to.y]);
 
-    expect(cutMoves).toHaveLength(SIDES_PER_PASS * CUT_SETTINGS.passes);
+    expect(cutMoves).toHaveLength(SIDES_PER_PASS * DEFAULT_CUT_ENTRY.passes);
     expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(SAMPLE_SIZE_MM);
     expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(SAMPLE_SIZE_MM);
     expect(cutMoves.every((move: ToolpathMove): boolean =>
-      move.powerPercent === CUT_SETTINGS.powerPercent && move.feedMmPerMin === CUT_SETTINGS.speedMmPerMin)).toBe(true);
+      move.powerPercent === DEFAULT_CUT_ENTRY.maxPowerPercent
+      && move.feedMmPerMin === DEFAULT_CUT_ENTRY.speedMmPerMin)).toBe(true);
     expect(cutMoves[0]?.from).toEqual(cutMoves[SIDES_PER_PASS - 1]?.to);
   });
 
@@ -132,12 +128,28 @@ describe(getSampleJobDocument.name, () => {
   });
 });
 
+describe(getSampleJobLayers.name, () => {
+  it('forces the new layers to Line and Fill, switched on, under a palette without the sample colours', () => {
+    const fillOnlyPalette: Palette = {
+      ...DEFAULT_PALETTE,
+      entries: DEFAULT_PALETTE.entries
+        .filter((entry: PaletteEntry): boolean => entry.colour !== SAMPLE_CUT_COLOUR)
+        .map((entry: PaletteEntry): PaletteEntry => ({ ...entry, mode: LAYER_MODE.FILL })),
+    };
+    const layers: ProjectLayer[] = getSampleLayers(newToolpathMachineArea(), fillOnlyPalette);
+    const cutLayer: ProjectLayer | undefined = layers.find((layer: ProjectLayer) => layer.colour === SAMPLE_CUT_COLOUR);
+
+    expect(cutLayer).toMatchObject({ enabled: true, settings: { mode: LAYER_MODE.LINE } });
+    expect(layers.find((layer: ProjectLayer) => layer.isShading)?.settings.mode).toBe(LAYER_MODE.FILL);
+  });
+});
+
 describe(getSampleCutSettings.name, () => {
   it('takes the first Line layer', () => {
     const lineLayer: ProjectLayer = getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 1);
     const layers: ProjectLayer[] = [getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0), lineLayer];
 
-    expect(getSampleCutSettings(layers)).toEqual({
+    expect(getSampleCutSettings(layers, [])).toEqual({
       powerPercent: lineLayer.settings.maxPowerPercent,
       speedMmPerMin: lineLayer.settings.speedMmPerMin,
       passes: lineLayer.settings.passes,
@@ -145,7 +157,7 @@ describe(getSampleCutSettings.name, () => {
   });
 
   it("falls back to Cut's values with no Line layer", () => {
-    expect(getSampleCutSettings([getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0)])).toEqual({
+    expect(getSampleCutSettings([getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0)], [])).toEqual({
       powerPercent: DEFAULT_CUT_ENTRY.maxPowerPercent,
       speedMmPerMin: DEFAULT_CUT_ENTRY.speedMmPerMin,
       passes: DEFAULT_CUT_ENTRY.passes,

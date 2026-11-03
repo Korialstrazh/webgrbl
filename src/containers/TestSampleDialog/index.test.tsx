@@ -1,47 +1,49 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { TestSampleDialog } from '.';
-import { DEFAULT_CUT_ENTRY } from '../../utils/palette/palette.constants';
+import { getSampleJobLayers } from '../../utils/materials/get.sample.job.layers';
+import { getSampleJobObject } from '../../utils/materials/get.sample.job.object';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import { MATERIAL_TEST_OUTCOME } from '../../utils/materials/material.constants';
 import { MATERIAL_REPOSITORY } from '../../utils/materials/material.repository';
 import { newMaterial } from '../../utils/materials/new.material';
+import { SAMPLE_CUT_COLOUR } from '../../utils/materials/sample.job.constants';
+import { DEFAULT_CUT_ENTRY, DEFAULT_PALETTE, DEFAULT_SCORE_ENTRY, PASSES_MAX, SPEED_MM_PER_MIN_MAX } from '../../utils/palette/palette.constants';
+import { getNewLayer } from '../../utils/layers/get.new.layer';
+import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
-import { PASSES_MAX, SPEED_MM_PER_MIN_MAX } from '../../utils/palette/palette.constants';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
-import type { Action } from '../../utils/states/action';
 import { newStore } from '../../utils/states/new.store';
-import type { AppDispatch, AppStore } from '../../utils/states/new.store';
-import { SampleGcodeExportRequested } from '../../utils/states/toolpath.state';
+import type { AppStore } from '../../utils/states/new.store';
+import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
-import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
-import type { MockInstance } from 'vitest';
+import { newToolpathMachineArea } from '../../utils/toolpath/test.support/new.toolpath.machine.area';
 
 const POWER_LABEL = 'Power (%)';
 const SPEED_LABEL = 'Speed (mm/min)';
 const PASSES_LABEL = 'Passes';
-const EXPORT_LABEL = 'Export sample G-code';
 const CUT_THROUGH_LABEL = 'Cut through';
 const NOT_THROUGH_LABEL = 'Not through';
 const DEPTH_LABEL = 'Depth (mm)';
 const SAVE_LABEL = 'Save for this material';
 const CANCEL_LABEL = 'Cancel';
 const DEPTH_ERROR = 'Enter a depth above 0 and at most 3 mm.';
-const NO_PROFILE_REASON = 'Choose a machine profile to export the sample.';
-const TOO_SMALL_REASON = 'The sample does not fit the work area of this machine.';
+const NO_PROFILE_REASON = 'Choose a machine profile to save the result.';
 const MATERIAL: Material = newMaterial({ name: 'Plywood 3 mm', thicknessMm: 3 });
 const ENTERED_POWER_PERCENT = 55;
 const ENTERED_SPEED_MM_PER_MIN = 420;
 const ENTERED_PASSES = 2;
 const ENTERED_DEPTH_MM = 2;
-const SMALL_AREA_MM = 40;
 const OVER_POWER_PERCENT = 500;
+const SAMPLE_LAYER_PASSES = 7;
 const INVALID_SETTINGS_REASON = 'Enter power 1 to 100 %, speed 1 to 20000 mm/min and passes 1 to 50.';
-const SETTINGS_HINT = 'These must be the settings the sample was burnt with.';
+const SETTINGS_HINT = 'These must match what was burnt.';
 
 const newTestStore = (profile: MachineProfile | null = newMachineProfile()): AppStore => {
   const store: AppStore = newStore();
@@ -80,58 +82,80 @@ const getSavedResults = (store: AppStore): Material['testResults'] =>
   selectMaterials(store.getState())[0]?.testResults ?? [];
 
 describe(TestSampleDialog.name, () => {
-  it('registers an overlay and starts from the settings of the first Line layer', () => {
+  it('holds the result only: no export, nothing chosen, and a line about matching what was burnt', () => {
     const store: AppStore = newTestStore();
 
     renderDialog(store);
 
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
+    expect(screen.queryByRole('button', { name: /export/i })).not.toBeInTheDocument();
+    expect(screen.getByText(SETTINGS_HINT)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: CUT_THROUGH_LABEL })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: NOT_THROUGH_LABEL })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
+
+    clickButton(NOT_THROUGH_LABEL);
+
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeEnabled();
+  });
+
+  it('prefills from the default Cut without a Line layer', () => {
+    renderDialog(newTestStore());
+
     expect(screen.getByLabelText(POWER_LABEL)).toHaveValue(String(DEFAULT_CUT_ENTRY.maxPowerPercent));
     expect(screen.getByLabelText(SPEED_LABEL)).toHaveValue(String(DEFAULT_CUT_ENTRY.speedMmPerMin));
     expect(screen.getByLabelText(PASSES_LABEL)).toHaveValue(String(DEFAULT_CUT_ENTRY.passes));
   });
 
-  it('requests the export with the entered settings', () => {
+  it("prefills from the sample's Line layer, not an earlier Line layer", () => {
     const store: AppStore = newTestStore();
-    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch').mockImplementation(
-      (action: unknown) => action as never,
+    const scoreLayer: ProjectLayer = getNewLayer(DEFAULT_SCORE_ENTRY.colour, DEFAULT_PALETTE, 0);
+    const scoreObject: ProjectObject = newProjectObject({
+      svgText: `<svg xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="none" stroke="${DEFAULT_SCORE_ENTRY.colour}"/></svg>`,
+    });
+    const sampleObject: ProjectObject = getSampleJobObject(newToolpathMachineArea());
+    const layers: ProjectLayer[] = getSampleJobLayers([scoreObject, sampleObject], DEFAULT_PALETTE, [scoreLayer]).map(
+      (layer: ProjectLayer): ProjectLayer => (layer.colour === SAMPLE_CUT_COLOUR
+        ? { ...layer, settings: { ...layer.settings, passes: SAMPLE_LAYER_PASSES } }
+        : layer),
     );
 
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [scoreObject, sampleObject], layers } }));
     renderDialog(store);
-    enterNumber(POWER_LABEL, ENTERED_POWER_PERCENT);
-    enterNumber(SPEED_LABEL, ENTERED_SPEED_MM_PER_MIN);
-    enterNumber(PASSES_LABEL, ENTERED_PASSES);
-    clickButton(EXPORT_LABEL);
 
-    const [exportCall] = getDispatchedActionCalls(dispatchSpy, SampleGcodeExportRequested);
-
-    expect((exportCall?.[0] as SampleGcodeExportRequested).payload.cutSettings).toEqual({
-      powerPercent: ENTERED_POWER_PERCENT,
-      speedMmPerMin: ENTERED_SPEED_MM_PER_MIN,
-      passes: ENTERED_PASSES,
-    });
+    expect(screen.getByLabelText(PASSES_LABEL)).toHaveValue(String(SAMPLE_LAYER_PASSES));
   });
 
-  it('disables the export and says why when there is no active profile', () => {
-    renderDialog(newTestStore(null));
+  it('prefills from the first Line layer when no sample is in the project', () => {
+    const store: AppStore = newTestStore();
+    const scoreObject: ProjectObject = newProjectObject({
+      svgText: `<svg xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5" fill="none" stroke="${DEFAULT_SCORE_ENTRY.colour}"/></svg>`,
+    });
+    const scoreLayer: ProjectLayer = getNewLayer(DEFAULT_SCORE_ENTRY.colour, DEFAULT_PALETTE, 0);
 
-    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeDisabled();
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [scoreObject], layers: [scoreLayer] } }));
+    renderDialog(store);
+
+    expect(screen.getByLabelText(SPEED_LABEL)).toHaveValue(String(DEFAULT_SCORE_ENTRY.speedMmPerMin));
+  });
+
+  it('keeps Save off and says why with no active profile', () => {
+    renderDialog(newTestStore(null));
+    clickButton(CUT_THROUGH_LABEL);
+
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
     expect(screen.getByText(NO_PROFILE_REASON)).toBeInTheDocument();
   });
 
-  it('disables the export and says why when the sample does not fit', () => {
-    renderDialog(newTestStore(newMachineProfile({ workAreaXMm: SMALL_AREA_MM, workAreaYMm: SMALL_AREA_MM })));
-
-    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeDisabled();
-    expect(screen.getByText(TOO_SMALL_REASON)).toBeInTheDocument();
-  });
-
-  it('saves Cut through without a depth, for the active profile, and closes', () => {
+  it('saves Cut through with the edited settings, the thickness and the profile, and closes', () => {
     const profile: MachineProfile = newMachineProfile();
     const store: AppStore = newTestStore(profile);
     const onClose = vi.fn();
 
     renderDialog(store, onClose);
+    enterNumber(POWER_LABEL, ENTERED_POWER_PERCENT);
+    enterNumber(SPEED_LABEL, ENTERED_SPEED_MM_PER_MIN);
+    enterNumber(PASSES_LABEL, ENTERED_PASSES);
     clickButton(CUT_THROUGH_LABEL);
     clickButton(SAVE_LABEL);
 
@@ -140,7 +164,9 @@ describe(TestSampleDialog.name, () => {
       outcome: MATERIAL_TEST_OUTCOME.CUT_THROUGH,
       depthMm: undefined,
       thicknessMm: MATERIAL.thicknessMm,
-      passes: DEFAULT_CUT_ENTRY.passes,
+      powerPercent: ENTERED_POWER_PERCENT,
+      speedMmPerMin: ENTERED_SPEED_MM_PER_MIN,
+      passes: ENTERED_PASSES,
     })]);
     expect(Number.isNaN(Date.parse(getSavedResults(store)[0]?.testedAtIso ?? ''))).toBe(false);
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -193,83 +219,26 @@ describe(TestSampleDialog.name, () => {
     });
   });
 
-  it('locks the settings after the export, so Save stores what was exported', () => {
-    const store: AppStore = newTestStore();
-
-    const dispatchStore = store.dispatch.bind(store);
-
-    vi.spyOn(store, 'dispatch').mockImplementation(
-      (action: Action<unknown>) =>
-        (action instanceof SampleGcodeExportRequested ? action : dispatchStore(action)) as Action<unknown>,
-    );
-    renderDialog(store);
-    enterNumber(POWER_LABEL, ENTERED_POWER_PERCENT);
-    expect(screen.getByText(SETTINGS_HINT)).toBeInTheDocument();
-    clickButton(EXPORT_LABEL);
-    enterNumber(POWER_LABEL, 10);
-    clickButton(CUT_THROUGH_LABEL);
-    clickButton(SAVE_LABEL);
-
-    expect(screen.getByLabelText(POWER_LABEL)).toBeDisabled();
-    expect(screen.getByLabelText(SPEED_LABEL)).toBeDisabled();
-    expect(screen.getByLabelText(PASSES_LABEL)).toBeDisabled();
-    expect(screen.queryByText(SETTINGS_HINT)).not.toBeInTheDocument();
-    expect(getSavedResults(store)[0]?.powerPercent).toBe(ENTERED_POWER_PERCENT);
-  });
-
-  it('disables Export and Save for a power above the limit', () => {
-    renderDialog(newTestStore());
-    enterNumber(POWER_LABEL, OVER_POWER_PERCENT);
-
-    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeDisabled();
-    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
-  });
-
   it.each<[string, string, number]>([
     ['power', POWER_LABEL, OVER_POWER_PERCENT],
     ['speed', SPEED_LABEL, SPEED_MM_PER_MIN_MAX + 1],
     ['passes', PASSES_LABEL, PASSES_MAX + 1],
-  ])('disables Export and Save and says why for %s above the shared limit', (_name, label, value) => {
+  ])('disables Save and says why for %s above the shared limit', (_name, label, value) => {
     renderDialog(newTestStore());
+    clickButton(CUT_THROUGH_LABEL);
     enterNumber(label, value);
 
-    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeDisabled();
     expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
     expect(screen.getByRole('note')).toHaveTextContent(INVALID_SETTINGS_REASON);
   });
 
   it('allows speed and passes at the shared limits', () => {
     renderDialog(newTestStore());
+    clickButton(CUT_THROUGH_LABEL);
     enterNumber(SPEED_LABEL, SPEED_MM_PER_MIN_MAX);
     enterNumber(PASSES_LABEL, PASSES_MAX);
 
-    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeEnabled();
-  });
-
-  it('has no result chosen at the start and keeps Save off until one is picked, with no export needed', () => {
-    renderDialog(newTestStore());
-
-    expect(screen.getByRole('button', { name: CUT_THROUGH_LABEL })).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('button', { name: NOT_THROUGH_LABEL })).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
-
-    clickButton(NOT_THROUGH_LABEL);
-
     expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeEnabled();
-  });
-
-  it('makes Export the main button until the export, and Save after it', () => {
-    const primaryClassName = 'ant-btn-primary';
-
-    renderDialog(newTestStore());
-
-    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toHaveClass(primaryClassName);
-    expect(screen.getByRole('button', { name: SAVE_LABEL })).not.toHaveClass(primaryClassName);
-
-    clickButton(EXPORT_LABEL);
-
-    expect(screen.getByRole('button', { name: EXPORT_LABEL })).not.toHaveClass(primaryClassName);
-    expect(screen.getByRole('button', { name: SAVE_LABEL })).toHaveClass(primaryClassName);
   });
 
   it('saves nothing on Cancel', () => {

@@ -1,5 +1,5 @@
 /**
- * Sizes, colours and burn order of the test sample job.
+ * Sizes and colours of the test sample job.
  *
  * @author michael.morosov
  *
@@ -17,6 +17,3 @@ export const SAMPLE_GRADIENT_ID = 'sample-gradient';
 export const SAMPLE_GRADIENT_START_COLOUR = '#000000';
 export const SAMPLE_GRADIENT_END_COLOUR = '#ffffff';
 export const SAMPLE_OBJECT_NAME = 'Test sample';
-/** The gradient burns first, so the part has not moved when it engraves. */
-export const SAMPLE_SHADING_LAYER_ORDER = 0;
-export const SAMPLE_CUT_LAYER_ORDER = 1;
