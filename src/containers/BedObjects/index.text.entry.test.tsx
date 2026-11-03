@@ -18,7 +18,6 @@ import {
   selectProjectObjects,
 } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged } from '../../utils/states/project.selection.state';
-import { BED_TOOL } from '../BedPanel/bed.toolbar.constants';
 
 const INPUT_LABEL = 'Object name';
 
@@ -45,7 +44,7 @@ describe(BedObjects.name, () => {
     render(
       <Provider store={store}>
         <svg>
-          <BedObjects dimensions={BED} activeTool={BED_TOOL.SELECT} />
+          <BedObjects dimensions={BED} />
         </svg>
       </Provider>,
     );

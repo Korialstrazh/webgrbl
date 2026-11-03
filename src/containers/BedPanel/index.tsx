@@ -1,7 +1,7 @@
 /**
  * The central region: a toolbar above the bed drawn to scale; the toasts are anchored to its top right.
  *
- * - Design view: the project objects on the bed, edited with the Select and Move tools.
+ * - Design view: the project objects on the bed, which a click selects and a drag moves.
  * - Toolpath view: the real job at the simulation time instead of the objects (no editing there), with its colour and
  *   travel toggles, the warnings chip in the toolbar row, the job size and estimate, the generation progress or
  *   out-of-date banner, and the simulation playback bar below the bed.
@@ -49,18 +49,9 @@ import { ToolpathWarningsPanel } from '../ToolpathWarningsPanel';
 import { BedMoreToolsMenu } from './BedMoreToolsMenu';
 import { BED_DROP_AREA_TEST_ID, BED_VIEWPORT_KEY_SEPARATOR } from './bed.panel.constants';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
-import {
-  BED_TOOL,
-  BED_TOOL_OPTION_KEYS,
-  BED_TOOL_SWITCH_NAME,
-  BED_VIEW_MODE_OPTION_KEYS,
-  BED_VIEW_MODE_SWITCH_NAME,
-} from './bed.toolbar.constants';
-import type { BedTool } from './bed.toolbar.constants';
+import { BED_VIEW_MODE_OPTION_KEYS, BED_VIEW_MODE_SWITCH_NAME } from './bed.toolbar.constants';
 import type { BedPanelProps } from './interfaces/BedPanelProps';
 import type { BedSurfaceStyle } from './interfaces/BedSurfaceStyle';
-import type { BedToolOption } from './interfaces/BedToolOption';
-import type { BedToolOptionKey } from './interfaces/BedToolOptionKey';
 import type { BedViewModeControls } from './interfaces/BedViewModeControls';
 import type { BedViewModeOption } from './interfaces/BedViewModeOption';
 import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
@@ -76,7 +67,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const bedColour: string = useSelector(selectBedColour);
   const bedSurfaceStyle: BedSurfaceStyle = { '--color-bed-surface': bedColour };
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
-  const [activeTool, setActiveTool] = useState<BedTool>(BED_TOOL.SELECT);
   const [viewControlsHost, setViewControlsHost] = useState<HTMLDivElement | null>(null);
   const [toolpathDisplayMode, setToolpathDisplayMode] = useState<ToolpathDisplayMode>(DEFAULT_TOOLPATH_DISPLAY_MODE);
   const [isTravelShown, setIsTravelShown] = useState<boolean>(false);
@@ -84,10 +74,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const isToolpathView: boolean = viewMode === BED_VIEW_MODE.TOOLPATH;
   const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
   const dropArea: SvgFileDropArea = useSvgFileDrop(!isThreeDView);
-  const toolOptions: BedToolOption[] = BED_TOOL_OPTION_KEYS.map((option: BedToolOptionKey) => ({
-    value: option.value,
-    label: t(option.labelKey),
-  }));
   const viewModeOptions: BedViewModeOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option: BedViewModeOptionKey) => ({
     value: option.value,
     label: t(option.labelKey),
@@ -107,17 +93,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               onTravelShownChange={setIsTravelShown}
             />
             <ToolpathWarningsPanel />
-          </div>
-        )}
-        {viewMode === BED_VIEW_MODE.DESIGN && (
-          <div className={styles.editingTools}>
-            <Segmented<BedTool>
-              name={BED_TOOL_SWITCH_NAME}
-              aria-label={t(DEFAULT.BED_TOOL_LABEL)}
-              options={toolOptions}
-              value={activeTool}
-              onChange={setActiveTool}
-            />
           </div>
         )}
         {isThreeDView && (
@@ -175,7 +150,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
                   isTravelShown={isTravelShown}
                 />
               ) : (
-                <BedObjects dimensions={dimensions} activeTool={activeTool} />
+                <BedObjects dimensions={dimensions} />
               )}
             </BedViewport>
           )}

@@ -27,7 +27,6 @@ import {
   selectProjectObjects,
   SvgFilesImportRequested,
 } from '../../utils/states/project.document.state';
-import { ProjectSelectionChanged } from '../../utils/states/project.selection.state';
 import { SimulationPlayToggled, selectIsSimulationPlaying } from '../../utils/states/simulation.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import { selectToasts, ToastShown } from '../../utils/states/toast.state';
@@ -62,9 +61,6 @@ const PROFILE_WIDTH_MM = 300;
 const PROFILE_HEIGHT_MM = 200;
 const PROFILE_BED_LABEL = 'Machine bed, 300 by 200 mm';
 const OBJECT_NAME = 'Logo';
-const TOOL_LABEL = 'Bed tool';
-const SELECT_TOOL_LABEL = 'Select';
-const MOVE_TOOL_LABEL = 'Move';
 const EDIT_NODES_LABEL = /^Edit nodes/;
 const ALIGN_LABEL = /^Align/;
 const SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
@@ -261,17 +257,7 @@ describe(BedPanel.name, () => {
     expect(regionElement).not.toContainElement(screen.getByRole('radiogroup', { name: 'Bed view' }));
   });
 
-  it('offers Select and Move as an active tool switch with Select chosen', () => {
-    renderPanel(newStore());
-
-    const toolGroup: HTMLElement = screen.getByRole('radiogroup', { name: TOOL_LABEL });
-
-    expect(toolGroup.closest('[inert]')).toBeNull();
-    expect(within(toolGroup).getByRole('radio', { name: SELECT_TOOL_LABEL })).toBeChecked();
-    expect(within(toolGroup).getByRole('radio', { name: MOVE_TOOL_LABEL })).not.toBeChecked();
-  });
-
-  it('hands the Move tool to the bed, so a drag on empty bed moves the selection', () => {
+  it('has no tool switch: a drag on an object moves it', () => {
     const store: AppStore = newStore();
     const projectObject: ProjectObject = newProjectObject({ name: OBJECT_NAME });
 
@@ -280,14 +266,19 @@ describe(BedPanel.name, () => {
     renderPanel(store);
     act(() => {
       store.dispatch(new ProjectDocumentLoaded({ document: { objects: [projectObject], layers: [] } }));
-      store.dispatch(new ProjectSelectionChanged({ objectIds: [projectObject.id] }));
     });
-    fireEvent.click(screen.getByRole('radio', { name: MOVE_TOOL_LABEL }));
 
-    const surface: HTMLElement = screen.getByTestId(BED_OBJECTS_SURFACE_TEST_ID);
+    expect(screen.queryByRole('radiogroup', { name: 'Bed tool' })).not.toBeInTheDocument();
 
-    fireEvent.pointerDown(surface, { pointerId: POINTER_ID, clientX: DRAG_START_X, clientY: DRAG_START_Y });
-    fireEvent.pointerUp(surface, {
+    const objectElement: HTMLElement = screen.getByRole('img', { name: OBJECT_NAME });
+
+    fireEvent.pointerDown(objectElement, { pointerId: POINTER_ID, clientX: DRAG_START_X, clientY: DRAG_START_Y });
+    fireEvent.pointerMove(objectElement, {
+      pointerId: POINTER_ID,
+      clientX: DRAG_START_X + DRAG_RIGHT_MM,
+      clientY: DRAG_START_Y,
+    });
+    fireEvent.pointerUp(objectElement, {
       pointerId: POINTER_ID,
       clientX: DRAG_START_X + DRAG_RIGHT_MM,
       clientY: DRAG_START_Y,
@@ -495,7 +486,6 @@ describe(BedPanel.name, () => {
     openThreeDView();
 
     expect(screen.queryByRole('group', { name: BED_ZOOM_LABEL })).not.toBeInTheDocument();
-    expect(screen.queryByRole('radiogroup', { name: TOOL_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByTestId(BED_OBJECTS_SURFACE_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
@@ -549,7 +539,6 @@ describe(BedPanel.name, () => {
 
     openToolpathView();
 
-    expect(screen.queryByRole('radiogroup', { name: TOOL_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: EDIT_NODES_LABEL, hidden: true })).not.toBeInTheDocument();
     expect(screen.getByRole('radiogroup', { name: VIEW_MODE_LABEL })).toBeInTheDocument();
   });

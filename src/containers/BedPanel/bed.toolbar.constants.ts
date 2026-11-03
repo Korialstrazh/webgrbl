@@ -1,5 +1,5 @@
 /**
- * The bed toolbar: the editing tools, the tool labels and the view modes.
+ * The bed toolbar: the tools not built yet and the view modes.
  *
  * @author michael.morosov
  *
@@ -11,22 +11,7 @@
 import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { BedComingSoonToolKeys } from './interfaces/BedComingSoonToolKeys';
-import type { BedToolOptionKey } from './interfaces/BedToolOptionKey';
 import type { BedViewModeOptionKey } from './interfaces/BedViewModeOptionKey';
-
-/** The editing tools of the bed; Select is the default. */
-export const BED_TOOL = {
-  SELECT: 'select',
-  MOVE: 'move',
-} as const;
-
-export type BedTool = typeof BED_TOOL[keyof typeof BED_TOOL];
-
-/** The working tools, offered in the tool switch. */
-export const BED_TOOL_OPTION_KEYS: readonly BedToolOptionKey[] = [
-  { value: BED_TOOL.SELECT, labelKey: DEFAULT.BED_TOOL_SELECT },
-  { value: BED_TOOL.MOVE, labelKey: DEFAULT.BED_TOOL_MOVE },
-];
 
 /**
  * The bed tools that are not built yet, listed disabled with a Soon tag in the More menu, so the bed header
@@ -44,6 +29,5 @@ export const BED_VIEW_MODE_OPTION_KEYS: readonly BedViewModeOptionKey[] = [
   { value: BED_VIEW_MODE.THREE_D, labelKey: DEFAULT.BED_VIEW_3D },
 ];
 
-/** The radio group names of the two switches, so their radio inputs never share one group. */
-export const BED_TOOL_SWITCH_NAME = 'bed-tool';
+/** The radio group name of the view switch. */
 export const BED_VIEW_MODE_SWITCH_NAME = 'bed-view-mode';
