@@ -17,7 +17,8 @@ export const applyBurnPartHighlight = (
   selectedPartId: number | undefined,
   hoveredPartId?: number,
 ): void => {
-  const { meshes, material, highlightMaterial, hoverMaterial, outlines, outlineMaterial, highlightOutlineMaterial } = objects;
+  const { meshes, material, highlightMaterial, hoverMaterial } = objects;
+  const { outlines, outlineMaterial, highlightOutlineMaterial } = objects;
 
   for (const [meshIndex, { partId, mesh }] of meshes.entries()) {
     const isSelected: boolean = !!partId && partId === selectedPartId;

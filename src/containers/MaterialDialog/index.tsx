@@ -1,8 +1,8 @@
 /**
- * Adds a material: the name starts empty with the focus on it, and the thickness at the default. Save waits for both to
- * pass their checks, stores the material and makes it the material of the project; a field the user has changed shows
- * its failed check below it. A name and thickness that match a saved material are allowed, with an offer to use that one.
- * It starts over on every open.
+ * Adds a material: the name starts empty with the focus on it, and the thickness at the default. Save waits for both
+ * to pass their checks, stores the material and makes it the material of the project; a field the user has changed
+ * shows its failed check below it. A name and thickness that match a saved material are allowed, with an offer to use
+ * that one. It starts over on every open.
  *
  * @author michael.morosov
  *

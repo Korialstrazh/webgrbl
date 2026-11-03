@@ -104,7 +104,10 @@ export const CutCheckPanel = (): ReactNode => {
       <div className={styles.cutCheckPanel}>
         <div className={styles.summary}>
           <strong>{t(DEFAULT.CUT_CHECK_PART_COUNT, { count: model.parts.length })}</strong>
-          <Tag className={getSummaryCountClassName(freePartCount)} color={freePartCount ? ANTD_TAG_COLOR_SUCCESS : undefined}>
+          <Tag
+            className={getSummaryCountClassName(freePartCount)}
+            color={freePartCount ? ANTD_TAG_COLOR_SUCCESS : undefined}
+          >
             {t(DEFAULT.CUT_CHECK_SUMMARY_FREE, { count: freePartCount })}
           </Tag>
           <Tag
@@ -126,7 +129,12 @@ export const CutCheckPanel = (): ReactNode => {
           <Alert
             key={groupKey}
             type={ANTD_ALERT_TYPE_WARNING}
-            title={getCutCheckWarningText(t, groupWarnings[0], getLayerName(groupWarnings[0].layerKey), groupWarnings.length)}
+            title={getCutCheckWarningText(
+              t,
+              groupWarnings[0],
+              getLayerName(groupWarnings[0].layerKey),
+              groupWarnings.length,
+            )}
           />
         ))}
         <ul ref={partListRef} className={styles.list}>

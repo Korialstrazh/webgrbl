@@ -1,7 +1,7 @@
 /**
- * The 3D view of the bed region: the element that hosts the scene, the lift bar below it, the loading state, why the scene
- * is empty, and a fixed message when the 3D runtime cannot load or the browser cannot run WebGL. The rest of the app
- * does not depend on it.
+ * The 3D view of the bed region: the element that hosts the scene, the lift bar below it, the loading state, why the
+ * scene is empty, and a fixed message when the 3D runtime cannot load or the browser cannot run WebGL. The rest of the
+ * app does not depend on it.
  *
  * @author michael.morosov
  *

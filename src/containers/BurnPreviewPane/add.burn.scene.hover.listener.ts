@@ -1,5 +1,7 @@
 /**
- * Tells which part a mouse is over in the 3D scene and shows the pointer cursor there. A ray through a big model costs real time, so it runs at most once per interval, never for a finger and never during a drag. Returns a function that stops listening.
+ * Tells which part a mouse is over in the 3D scene and shows the pointer cursor there. A ray through a big model costs
+ * real time, so it runs at most once per interval, never for a finger and never during a drag. Returns a function that
+ * stops listening.
  *
  * @author michael.morosov
  *

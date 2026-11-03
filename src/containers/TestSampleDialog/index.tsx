@@ -2,8 +2,9 @@
  * The test sample of a material: step one exports the sample G-code with the entered cut settings, step two records
  * how far the cut went. No result is chosen at the start, and Save waits for one, so it cannot record a burn nobody
  * looked at. It does not wait for an export, because the sample may have been burnt on an earlier visit. Save stores
- * the result for the active machine profile after the depth passes its check; Cancel and closing store nothing. Export is off, with the reason, when there is no active profile, the sample does
- * not fit the work area or the settings are out of range. It starts over on every open.
+ * the result for the active machine profile after the depth passes its check; Cancel and closing store nothing. Export
+ * is off, with the reason, when there is no active profile, the sample does not fit the work area or the settings are
+ * out of range. It starts over on every open.
  *
  * @author michael.morosov
  *
@@ -228,19 +229,19 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
         {isNotThrough && (
           <div className={styles.depthRow}>
             <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
-            <Form.Item
-              label={t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH)}
-              htmlFor={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
-              validateStatus={depthErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
-              help={depthErrorKey && t(depthErrorKey, { max: material.thicknessMm })}
-            >
-              <InputNumber
-                id={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
-                value={depthMm ?? null}
-                onChange={(value: number | null) => setDepthMm(value ?? undefined)}
-              />
-            </Form.Item>
-            <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH_HINT)}</span>
+              <Form.Item
+                label={t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH)}
+                htmlFor={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
+                validateStatus={depthErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
+                help={depthErrorKey && t(depthErrorKey, { max: material.thicknessMm })}
+              >
+                <InputNumber
+                  id={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
+                  value={depthMm ?? null}
+                  onChange={(value: number | null) => setDepthMm(value ?? undefined)}
+                />
+              </Form.Item>
+              <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH_HINT)}</span>
             </Form>
           </div>
         )}

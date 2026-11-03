@@ -216,7 +216,7 @@ describe(CutCheckPanel.name, () => {
 
       expect(screen.getAllByRole('alert')).toHaveLength(3);
       expect(screen.getByText(new RegExp(
-        `^Layer ${UNKNOWN_LAYER_KEY}: 2 parts may stay attached \\(predicted 0\\.2 mm, needed 3\\.0 mm\\)\\. Suggestion`,
+        `^Layer ${UNKNOWN_LAYER_KEY}: 2 parts may stay attached \\(predicted 0\\.2 mm, needed 3\\.0 mm\\)\\.`,
       ))).toBeInTheDocument();
       expect(screen.getByText(/Part 3 stays attached/)).toBeInTheDocument();
       expect(screen.getByText(/the fill cuts through/)).toBeInTheDocument();
@@ -296,10 +296,10 @@ describe(CutCheckPanel.name, () => {
     store.dispatch(new ProjectMaterialSelected({ materialId: MATERIAL.id }));
     store.dispatch(new BurnModelReady({ model: newModel() }));
     renderPanel(store);
+
     for (const summaryText of ['3 parts', '1 free', '1 may stay attached', '1 attached']) {
       expect(screen.getByText(summaryText)).toBeInTheDocument();
     }
-
 
     act(() => {
       store.dispatch(new LayerToggled({ layerKey: UNKNOWN_LAYER_KEY, enabled: false }));

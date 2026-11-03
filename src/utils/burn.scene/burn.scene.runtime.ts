@@ -41,7 +41,6 @@ import {
 } from './burn.scene.constants';
 import { getBurnLiftChangeMm } from './get.burn.lift.change.mm';
 import { getBurnPartAtPointer } from './get.burn.part.at.pointer';
-import { getBurnSceneCameraPosition } from './get.burn.scene.camera.position';
 import { getBurnSceneFrameCentre } from './get.burn.scene.frame.centre';
 import { getBurnSceneMmPerPx } from './get.burn.scene.mm.per.px';
 import type { BurnSceneCameraFraming } from './interfaces/BurnSceneCameraFraming';
@@ -52,6 +51,7 @@ import type { BurnScenePointPx } from './interfaces/BurnScenePointPx';
 import type { BurnScenePointer } from './interfaces/BurnScenePointer';
 import type { BurnSceneRenderer } from './interfaces/BurnSceneRenderer';
 import { isBurnLiftAxisAtPoint } from './is.burn.lift.axis.at.point';
+import { moveBurnSceneCamera } from './move.burn.scene.camera';
 import { newBurnLiftAxis } from './new.burn.lift.axis';
 import { newBurnSceneCamera } from './new.burn.scene.camera';
 import { newBurnSceneObjects } from './new.burn.scene.objects';
@@ -203,15 +203,9 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     this.webGlRenderer.dispose();
   }
 
-  private moveCameraToBurnSceneDirection(direction: readonly [number, number, number]): void {
+  private moveCameraToBurnSceneDirection(towards: readonly [number, number, number]): void {
     if (this.camera && this.controls && this.modelFraming) {
-      const framing: BurnSceneCameraFraming = { ...this.modelFraming, aspectRatio: this.aspectRatio };
-
-      this.controls.target.copy(getBurnSceneFrameCentre(framing));
-      this.camera.position.copy(getBurnSceneCameraPosition(framing, direction));
-      this.camera.zoom = 1;
-      this.camera.updateProjectionMatrix();
-      this.controls.update();
+      moveBurnSceneCamera(this.camera, this.controls, { ...this.modelFraming, aspectRatio: this.aspectRatio }, towards);
       this.drawScene();
     }
   }

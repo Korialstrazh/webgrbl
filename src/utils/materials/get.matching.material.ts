@@ -1,5 +1,6 @@
 /**
- * Finds the saved material a new one would copy, by name and thickness. Of several, the one with a test comes first, because that is the one worth using.
+ * Finds the saved material a new one would copy, by name and thickness. Of several, the one with a test comes first,
+ * because that is the one worth using.
  *
  * @author michael.morosov
  *
