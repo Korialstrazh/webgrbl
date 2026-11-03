@@ -105,9 +105,10 @@ export const machineStatusReducer = (
     return { ...state, status: (action as MachineStatusReceived).payload.status };
   case MachineAirAssistChanged.type:
     return { ...state, isAirAssistOn: (action as MachineAirAssistChanged).payload.isAirAssistOn };
-  // Stop and Reset end in a soft reset, which switches the coolant outputs off.
+  // Stop and Reset end in a soft reset, which switches the coolant outputs off, and so does a reset of its own.
   case MachineStopRequested.type:
   case MachineResetRequested.type:
+  case MachineControllerResetDetected.type:
     return { ...state, isAirAssistOn: false };
   case ConnectionStatusChanged.type:
     // Without a connection the laser's own air assist state is unknown, so the switch starts over as off.

@@ -107,7 +107,6 @@ function* sendPointerOffLine(): Generator {
 function* fireLaserPointer(): Generator {
   const isConnected: boolean = (yield select(selectIsConnected)) as boolean;
   const status: GrblResolvedStatus | undefined = (yield select(selectMachineStatus)) as GrblResolvedStatus | undefined;
-
   const isJobRunActive: boolean = (yield select(selectIsJobRunActive)) as boolean;
 
   if (!getCanFireLaserPointer(isConnected, status?.machineState, isJobRunActive)) {

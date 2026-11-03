@@ -11,12 +11,14 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button, Popconfirm, Tooltip } from 'antd';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
+import { useOverlayRegistration } from '../../../utils/hooks/use.overlay.registration';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
@@ -33,6 +35,8 @@ import { ComingSoon } from '../../../views/ComingSoon';
 import { Panel } from '../../../views/Panel';
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import styles from './styles.module.scss';
+
+const JOB_START_CONFIRM_OVERLAY_ID = 'job-start-confirm';
 
 const JOB_RUN_STATUS_TEXT_KEYS: Partial<Record<JobRunStatus, string>> = {
   [JOB_RUN_STATUS.SENDING]: DEFAULT.JOB_RUN_STATUS_SENDING,
@@ -51,6 +55,17 @@ export const JobCard = (): ReactNode => {
 
   const jobStartBlockedReasonKey: string | undefined = useSelector(selectJobStartBlockedReasonKey);
   const jobRunStatusKey: string | undefined = JOB_RUN_STATUS_TEXT_KEYS[useSelector(selectJobRunStatus)];
+  const [isStartConfirmOpen, setIsStartConfirmOpen] = useState<boolean>(false);
+
+  // Escape must only close the confirmation here, not also stop the machine.
+  useOverlayRegistration(JOB_START_CONFIRM_OVERLAY_ID, isStartConfirmOpen);
+
+  // A confirmation left open after the start got blocked would offer a button that does nothing.
+  useEffect(() => {
+    if (jobStartBlockedReasonKey) {
+      setIsStartConfirmOpen(false);
+    }
+  }, [jobStartBlockedReasonKey]);
 
   return (
     <Panel title={t(DEFAULT.MACHINE_START_JOB_TITLE)}>
@@ -70,7 +85,7 @@ export const JobCard = (): ReactNode => {
         </dl>
         <Tooltip title={gcodeExportBlockedReasonKey && t(gcodeExportBlockedReasonKey)}>
           {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}
-          <span className={styles.exportButtonWrapper}>
+          <span className={styles.fullWidthButtonWrapper}>
             <Button
               block
               type={ANTD_BUTTON_TYPE_PRIMARY}
@@ -89,11 +104,13 @@ export const JobCard = (): ReactNode => {
           cancelText={t(DEFAULT.JOB_START_CONFIRM_CANCEL)}
           okButtonProps={{ danger: true }}
           disabled={!!jobStartBlockedReasonKey}
+          open={isStartConfirmOpen}
+          onOpenChange={setIsStartConfirmOpen}
           onConfirm={() => dispatch(new JobStartRequested())}
         >
           <Tooltip title={jobStartBlockedReasonKey && t(jobStartBlockedReasonKey)}>
             {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}
-            <span className={styles.exportButtonWrapper}>
+            <span className={styles.fullWidthButtonWrapper}>
               <Button block size={ANTD_BUTTON_SIZE_LARGE} disabled={!!jobStartBlockedReasonKey}>
                 {t(DEFAULT.MACHINE_START_JOB)}
               </Button>

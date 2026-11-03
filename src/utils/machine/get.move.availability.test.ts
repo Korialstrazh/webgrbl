@@ -122,6 +122,15 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     isJobRunActive: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
+  {
+    caseName: 'locks everything while a job runs',
+    isConnected: true,
+    machineState: GRBL_MACHINE_STATE.IDLE,
+    hasHomingSwitches: true,
+    isPointerFiring: false,
+    isJobRunActive: true,
+    expectedAvailability: NOTHING_AVAILABLE,
+  },
 ];
 
 describe(getMoveAvailability.name, () => {
