@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
+import { DEFAULT } from '../localization/default.locales';
 import { getLayerKey } from '../layers/get.layer.key';
 import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
-import { SAMPLE_CUT_COLOUR, SAMPLE_OBJECT_NAME, SAMPLE_SIZE_MM } from '../materials/sample.job.constants';
+import { SAMPLE_CUT_COLOUR, SAMPLE_GRADIENT_ID, SAMPLE_OBJECT_NAME, SAMPLE_SIZE_MM } from '../materials/sample.job.constants';
 import { DEFAULT_PALETTE, LAYER_MODE } from '../palette/palette.constants';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
@@ -19,6 +20,7 @@ import {
 } from './project.document.state';
 import { selectSelectedObjectIds } from './project.selection.state';
 import { addSampleJob } from './sample.job.add.saga';
+import { selectToasts } from './toast.state';
 
 const CHANGED_SPEED_MM_PER_MIN = 123;
 const OTHER_OBJECT: ProjectObject = newProjectObject({ name: 'Keep me' });
@@ -49,7 +51,7 @@ describe(addSampleJob.name, () => {
     expect(getLayerOfKey(store, SHADING_LAYER_COLOUR)?.settings.mode).toBe(LAYER_MODE.FILL);
   });
 
-  it('keeps existing objects and joins an existing layer without changing its settings', async () => {
+  it('keeps existing objects, and takes a new Line layer when the red layer is off or in Fill', async () => {
     const store: AppStore = newStore();
     const redLayer: ProjectLayer = getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 0);
     const changedRedLayer: ProjectLayer = {
@@ -62,8 +64,28 @@ describe(addSampleJob.name, () => {
     store.dispatch(new SampleJobAddRequested());
     await waitForObjectCount(store, 2);
 
+    const { layers } = selectProjectDocument(store.getState());
+    const sampleLayer: ProjectLayer | undefined = layers.find((layer: ProjectLayer): boolean =>
+      !layer.isShading && layer.colour !== SAMPLE_CUT_COLOUR);
+
     expect(selectProjectObjects(store.getState())[0]).toEqual(OTHER_OBJECT);
     expect(getLayerOfKey(store, SAMPLE_CUT_COLOUR)).toEqual(changedRedLayer);
+    expect(sampleLayer).toMatchObject({ enabled: true, settings: { mode: LAYER_MODE.LINE } });
+    expect(selectProjectObjects(store.getState())[1]?.svgText).toContain(`stroke="${sampleLayer?.colour}"`);
+  });
+
+  it('leaves the gradient out and says so when the shading layer is off', async () => {
+    const store: AppStore = newStore();
+    const shadingLayer: ProjectLayer = { ...getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0), enabled: false };
+
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [OTHER_OBJECT], layers: [shadingLayer] } }));
+    store.dispatch(new SampleJobAddRequested());
+    await waitForObjectCount(store, 2);
+
+    expect(selectProjectObjects(store.getState())[1]?.svgText).not.toContain(SAMPLE_GRADIENT_ID);
+    expect(getLayerOfKey(store, SHADING_LAYER_COLOUR)).toEqual(shadingLayer);
+    expect(selectToasts(store.getState()).map(({ messageKey }) => messageKey))
+      .toContain(DEFAULT.TOAST_SAMPLE_WITHOUT_GRADIENT);
   });
 
   it('is one undo step that takes the object away, and redo brings it back', async () => {

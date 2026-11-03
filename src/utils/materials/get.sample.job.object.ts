@@ -14,10 +14,14 @@ import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
 import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachineArea';
 import { getSampleSvgText } from './get.sample.svg.text';
+import type { SampleSvgParts } from './interfaces/SampleSvgParts';
 import { SAMPLE_MARGIN_MM, SAMPLE_OBJECT_NAME, SAMPLE_SIZE_MM } from './sample.job.constants';
 
 /** The object's front-left corner in bed millimetres: the square spans the margin to margin + size from the corner. */
-export const getSampleJobObject = (machineArea: ToolpathMachineArea): ProjectObject => {
+export const getSampleJobObject = (
+  machineArea: ToolpathMachineArea,
+  svgParts?: SampleSvgParts,
+): ProjectObject => {
   const nearPoint: GeometryPoint = getOriginMappedPoint(
     { x: SAMPLE_MARGIN_MM, y: SAMPLE_MARGIN_MM },
     machineArea.originCorner,
@@ -31,7 +35,7 @@ export const getSampleJobObject = (machineArea: ToolpathMachineArea): ProjectObj
 
   return newProjectObject({
     name: SAMPLE_OBJECT_NAME,
-    svgText: getSampleSvgText(),
+    svgText: getSampleSvgText(svgParts),
     intrinsicWidthMm: SAMPLE_SIZE_MM,
     intrinsicHeightMm: SAMPLE_SIZE_MM,
     widthMm: SAMPLE_SIZE_MM,

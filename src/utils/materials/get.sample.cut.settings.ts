@@ -13,21 +13,24 @@ import { getLayerKey } from '../layers/get.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT_CUT_ENTRY, LAYER_MODE } from '../palette/palette.constants';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
-import { getSampleSvgText } from './get.sample.svg.text';
+import { getSampleCutColour } from './get.sample.cut.colour';
 import type { SampleCutSettings } from './interfaces/SampleCutSettings';
-import { SAMPLE_CUT_COLOUR } from './sample.job.constants';
 
 const isLineLayer = (layer: ProjectLayer): boolean => layer.settings.mode === LAYER_MODE.LINE;
 
 const getSampleLineLayer = (layers: ProjectLayer[], projectObjects: ProjectObject[]): ProjectLayer | undefined => {
-  const sampleSvgText: string = getSampleSvgText();
-  const hasSample: boolean = projectObjects.some(
-    (projectObject: ProjectObject): boolean => projectObject.svgText === sampleSvgText,
-  );
+  for (const { svgText } of projectObjects) {
+    const cutColour: string | undefined = getSampleCutColour(svgText);
+    const lineLayer: ProjectLayer | undefined = layers.find(
+      (layer: ProjectLayer): boolean => getLayerKey(layer) === cutColour && isLineLayer(layer),
+    );
 
-  return hasSample
-    ? layers.find((layer: ProjectLayer): boolean => getLayerKey(layer) === SAMPLE_CUT_COLOUR && isLineLayer(layer))
-    : undefined;
+    if (lineLayer) {
+      return lineLayer;
+    }
+  }
+
+  return undefined;
 };
 
 export const getSampleCutSettings = (layers: ProjectLayer[], projectObjects: ProjectObject[]): SampleCutSettings => {
