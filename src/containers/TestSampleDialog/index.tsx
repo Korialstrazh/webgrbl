@@ -45,6 +45,7 @@ import { BedRegionModal } from '../BedRegionModal';
 import type { TestSampleDialogProps } from './interfaces/TestSampleDialogProps';
 import {
   TEST_SAMPLE_DIALOG_OVERLAY_ID,
+  TEST_SAMPLE_DIALOG_WIDTH_PX,
   TEST_SAMPLE_PASSES_MIN,
   TEST_SAMPLE_POWER_PERCENT_MAX,
   TEST_SAMPLE_POWER_PERCENT_MIN,
@@ -157,6 +158,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
       onOk={saveResult}
       onClose={onClose}
       centered
+      width={TEST_SAMPLE_DIALOG_WIDTH_PX}
     >
       <section className={styles.burnSection}>
         <div className={styles.samplePicture} role="img" aria-label={t(DEFAULT.TEST_SAMPLE_DIALOG_PICTURE)}>
@@ -224,7 +226,8 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
           </Button>
         </div>
         {isNotThrough && (
-          <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
+          <div className={styles.depthRow}>
+            <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
             <Form.Item
               label={t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH)}
               htmlFor={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
@@ -237,8 +240,9 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
                 onChange={(value: number | null) => setDepthMm(value ?? undefined)}
               />
             </Form.Item>
-            <span>{t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH_HINT)}</span>
-          </Form>
+            <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH_HINT)}</span>
+            </Form>
+          </div>
         )}
       </section>
     </BedRegionModal>

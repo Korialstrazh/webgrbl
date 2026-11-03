@@ -44,6 +44,7 @@ import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { selectProjectLayers } from '../../utils/states/project.document.state';
 import { Panel } from '../../views/Panel';
 import { BurnPartRowLift } from './BurnPartRowLift';
+import { getCutCheckListScrollTopPx } from './get.cut.check.list.scroll.top.px';
 import { getCutCheckWarningGroups } from './get.cut.check.warning.groups';
 import { getCutCheckWarningText } from './get.cut.check.warning.text';
 import type { CutCheckWarningGroup } from './interfaces/CutCheckWarningGroup';
@@ -56,7 +57,6 @@ const PART_STATUS_TEXT_KEYS: Record<BurnPart['status'], string> = {
 };
 
 const WARNING_ROW_KEY_SEPARATOR = '-';
-const SELECTED_ROW_SCROLL: ScrollIntoViewOptions = { block: 'nearest' };
 
 const getWarningRowKey = ({ kind, layerKey, partId }: CutCheckWarning): string =>
   [kind, layerKey, partId].join(WARNING_ROW_KEY_SEPARATOR);
@@ -71,12 +71,15 @@ export const CutCheckPanel = (): ReactNode => {
   const selectedPartId: number | undefined = useSelector(selectSelectedBurnPartId);
   const hoveredPartId: number | undefined = useSelector(selectHoveredBurnPartId);
   const selectedRowRef: RefObject<HTMLLIElement | null> = useRef<HTMLLIElement>(null);
+  const partListRef: RefObject<HTMLUListElement | null> = useRef<HTMLUListElement>(null);
   const projectLayers: ProjectLayer[] = useSelector(selectProjectLayers);
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
 
   useEffect(() => {
-    // Nearest, so a click on a row in view moves nothing.
-    selectedRowRef.current?.scrollIntoView(SELECTED_ROW_SCROLL);
+    // Only the list moves: scrolling the panels too would take the scene away from a user who just clicked in it.
+    if (partListRef.current && selectedRowRef.current) {
+      partListRef.current.scrollTop = getCutCheckListScrollTopPx(partListRef.current, selectedRowRef.current);
+    }
   }, [selectedPartId]);
 
   if (!model) {
@@ -126,7 +129,7 @@ export const CutCheckPanel = (): ReactNode => {
             title={getCutCheckWarningText(t, groupWarnings[0], getLayerName(groupWarnings[0].layerKey), groupWarnings.length)}
           />
         ))}
-        <ul className={styles.list}>
+        <ul ref={partListRef} className={styles.list}>
           {model.parts.map(({ id, status }: BurnPart) => (
             <li key={id} ref={id === selectedPartId ? selectedRowRef : undefined}>
               <Button

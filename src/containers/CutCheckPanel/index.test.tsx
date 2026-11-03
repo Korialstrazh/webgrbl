@@ -17,7 +17,6 @@ import {
   BurnModelReady,
   BurnModelRequested,
   BurnPartLifted,
-  BurnPartSelected,
   selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
@@ -254,20 +253,6 @@ describe(CutCheckPanel.name, () => {
 
     fireEvent.mouseLeave(getPartRow(BORDERLINE_PART_ID));
     expect(selectHoveredBurnPartId(store.getState())).toBeUndefined();
-  });
-
-  it('scrolls the row of a part selected in the scene into view', () => {
-    const store: AppStore = newReadyStore();
-    const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView');
-
-    renderPanel(store);
-    act(() => {
-      store.dispatch(new BurnPartSelected({ partId: ATTACHED_PART_ID }));
-    });
-
-    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
-    expect(scrollIntoView.mock.contexts.at(-1)).toContainElement(getPartRow(ATTACHED_PART_ID));
-    scrollIntoView.mockRestore();
   });
 
   it('keeps export enabled with warnings', async () => {

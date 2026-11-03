@@ -18,7 +18,8 @@
   align-items: center;
   gap: var(--space-1) var(--space-2);
   min-width: 0;
-  min-height: 2.75rem;
+  // Two lines at all times, so the scene does not jump when the height appears.
+  min-height: 3.25rem;
   padding: var(--space-1);
   border-radius: var(--radius-md);
 
