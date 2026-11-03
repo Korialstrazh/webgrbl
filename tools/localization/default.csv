@@ -44,14 +44,12 @@ BED_ZOOM_PERCENT;{{percent}} %
 BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
 BURN_PART_LIFT_CLICK_HINT;Click a part to check it and lift it.
 BURN_PART_LIFT_HEIGHT;Lifted {{height}} mm
-BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached. Drag to see what would stay behind.
-BURN_PART_LIFT_HINT_FREE;Part {{part}} comes free. Drag to see what stays behind.
-BURN_PART_LIFT_HINT_LIFTED;Part {{part}} is up: the hole shows what stays behind.
+BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached.
+BURN_PART_LIFT_HINT_FREE;Part {{part}} comes free.
 BURN_PART_LIFT_HINT_NOT_THROUGH;Part {{part}} stays attached: the cut does not reach through, so it cannot be lifted.
 BURN_PART_LIFT_HINT_RISES_WITH_PARENT;Part {{part}} stays attached to Part {{parent}}, so it rises with it and cannot be lifted on its own.
 BURN_PART_LIFT_KEY_HINT;Up and down keys: {{step}} mm a step.
 BURN_PART_LIFT_LABEL;Lift selected part
-BURN_PART_LIFT_MAY_STAY_ATTACHED;May stay attached
 BURN_PART_LIFT_NOT_LIFTED;Not lifted
 BURN_PART_LIFT_PUT_ALL_BACK;Put all back
 BURN_PREVIEW_ADD_MATERIAL;Add material…
@@ -60,13 +58,15 @@ BURN_PREVIEW_ENTER_TEST_RESULT;Enter test result
 BURN_PREVIEW_FAILED;The 3D view could not be built. Switch to another view and back to try again.
 BURN_PREVIEW_LOADING;Loading the 3D view
 BURN_PREVIEW_MATERIAL_CURRENT;Material: {{name}}
+BURN_PREVIEW_MATERIAL_DETAIL_TESTED;{{thickness}} mm, tested {{date}}
+BURN_PREVIEW_MATERIAL_DETAIL_UNTESTED;{{thickness}} mm, not tested
 BURN_PREVIEW_MATERIAL_LABEL;Material
 BURN_PREVIEW_MATERIAL_NONE;Material: none
 BURN_PREVIEW_MATERIAL_PLACEHOLDER;Choose a material
-BURN_PREVIEW_MATERIAL_TESTED;Tested
 BURN_PREVIEW_NO_MATERIAL;Pick a material in Design to see how the cut will turn out.
 BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
 BURN_PREVIEW_OUT_OF_DATE;Out of date: the design changed. The 3D view comes back when the toolpath is generated again.
+BURN_SCENE_CANVAS_LABEL;3D view of the sheet. Drag to orbit, scroll to zoom, click a part to select it.
 BURN_SCENE_VIEW_FIT_HINT;Fit: back to the first view of the whole sheet
 BURN_SCENE_VIEW_LABEL;3D view
 BURN_SCENE_VIEW_TOP_HINT;Top: look straight down at the sheet
@@ -115,6 +115,8 @@ CUT_CHECK_PART_ROW;Part {{part}}
 CUT_CHECK_PART_STATUS_ATTACHED;Attached
 CUT_CHECK_PART_STATUS_FREE;Free
 CUT_CHECK_PART_STATUS_MAY_STAY_ATTACHED;May stay attached
+CUT_CHECK_SHOW_ALL_PARTS;Show all {{total}} parts
+CUT_CHECK_SHOW_FEWER_PARTS;Show fewer parts
 CUT_CHECK_SUMMARY_ATTACHED;{{count}} attached
 CUT_CHECK_SUMMARY_FREE;{{count}} free
 CUT_CHECK_SUMMARY_MAY_STAY_ATTACHED;{{count}} may stay attached
@@ -333,6 +335,7 @@ MATERIAL_DIALOG_DUPLICATE_NOTE;You already have {{name}} at this thickness.
 MATERIAL_DIALOG_NAME;Name
 MATERIAL_DIALOG_NAME_INVALID;Enter a name of {{min}} to {{max}} characters.
 MATERIAL_DIALOG_SAVE;Save
+MATERIAL_DIALOG_SAVE_HINT;Enter a name to save.
 MATERIAL_DIALOG_THICKNESS;Thickness (mm)
 MATERIAL_DIALOG_THICKNESS_INVALID;Enter a thickness from {{min}} to {{max}} mm.
 MATERIAL_DIALOG_TITLE;Add material
@@ -438,6 +441,7 @@ TEST_SAMPLE_DIALOG_PASSES;Passes
 TEST_SAMPLE_DIALOG_POWER;Power (%)
 TEST_SAMPLE_DIALOG_RESULT_HEADING;How far did the cut go?
 TEST_SAMPLE_DIALOG_SAVE;Save for this material
+TEST_SAMPLE_DIALOG_SAVE_HINT;Choose how far the cut went to save.
 TEST_SAMPLE_DIALOG_SETTINGS_HEADING;Burnt with
 TEST_SAMPLE_DIALOG_SETTINGS_HINT;These must match what was burnt.
 TEST_SAMPLE_DIALOG_SPEED;Speed (mm/min)
@@ -464,6 +468,7 @@ TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}
 TOAST_PROJECT_FILE_INVALID;The file is not a webgrbl project file. Nothing was opened.
 TOAST_PROJECT_SAVE_FAILED;The project could not be saved - the browser storage may be full. Your changes stay on screen, and the next change tries to save again.
 TOAST_PROJECT_STORAGE_FAILED;The saved projects could not be read or changed. Try again, or reload the page.
+TOAST_SAMPLE_WITHOUT_GRADIENT;The shading layer is off or not in Fill mode, so the test sample has its cut square only. Set that layer to Fill and on, then add the sample again for the gradient.
 TOAST_SVG_CONTENT_REMOVED;Parts of {{fileName}} were left out: embedded web content, linked images or external styles.
 TOAST_SVG_IMPORT_FAILED_NO_SIZE;{{fileName}} was skipped: it has no size (width and height or a viewBox).
 TOAST_SVG_IMPORT_FAILED_NOT_SVG;{{fileName}} was skipped: it is not a usable SVG file.
