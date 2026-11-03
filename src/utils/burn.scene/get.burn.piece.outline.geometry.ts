@@ -1,6 +1,6 @@
 /**
- * The dark lines around the pieces of the 3D preview: where a wall meets the top or the bottom of the sheet. It looks at
- * walls because flat faces are rows of quads of different lengths, whose edges do not match up and so cannot tell a
+ * The dark lines around the pieces of the 3D preview: where a wall meets the top or the bottom of the sheet. It looks
+ * at walls because flat faces are rows of quads of different lengths, whose edges do not match up and so cannot tell a
  * boundary from a seam. Walls inside an engraving are left out, or a gradient would turn black with lines.
  *
  * @author michael.morosov
