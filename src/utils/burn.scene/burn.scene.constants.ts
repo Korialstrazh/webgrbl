@@ -35,6 +35,12 @@ export const BURN_SCENE_MAX_PIXEL_RATIO = 2;
 export const BURN_SCENE_CAMERA_DIRECTION: readonly [number, number, number] = [0.35, -1, 1.1];
 /** Room around the framed sheet, as a share of its size. */
 export const BURN_SCENE_FRAME_MARGIN_RATIO = 1.05;
+/** Room around the sheet on Fit, as a share of its size on screen: the sheet fills most of the canvas. */
+export const BURN_SCENE_FIT_MARGIN_RATIO = 1.04;
+/** Kept free above and below the sheet on Fit, so the arrow on a part near the far edge stays on the canvas. */
+export const BURN_SCENE_FIT_ROOM_PX = 36;
+/** A very short canvas never gives more than this share of its height to that room. */
+export const BURN_SCENE_FIT_ROOM_MAX_SHARE = 0.4;
 /** The camera stands this many frame radiuses from the sheet, so nothing crosses the near plane while orbiting. */
 export const BURN_SCENE_CAMERA_DISTANCE_RADIUSES = 4;
 /** The far plane stands this many camera distances away, so the whole frame fits between the planes. */
@@ -75,3 +81,4 @@ export const BURN_SCENE_POSITION_VALUES_PER_VERTEX = 3;
 export const BURN_SCENE_COLOUR_VALUES_PER_VERTEX = 3;
 export const BURN_SCENE_INDEX_VALUES_PER_ITEM = 1;
 export const BURN_SCENE_CONTROLS_CHANGE_EVENT = 'change';
+export const BURN_SCENE_CONTROLS_START_EVENT = 'start';

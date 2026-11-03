@@ -31,6 +31,7 @@ import {
   BURN_SCENE_BACKGROUND_COLOUR,
   BURN_SCENE_CAMERA_DIRECTION,
   BURN_SCENE_CONTROLS_CHANGE_EVENT,
+  BURN_SCENE_CONTROLS_START_EVENT,
   BURN_SCENE_KEY_LIGHT_COLOUR,
   BURN_SCENE_KEY_LIGHT_DIRECTION,
   BURN_SCENE_KEY_LIGHT_INTENSITY,
@@ -41,6 +42,7 @@ import {
 } from './burn.scene.constants';
 import { getBurnLiftChangeMm } from './get.burn.lift.change.mm';
 import { getBurnPartAtPointer } from './get.burn.part.at.pointer';
+import { getBurnSceneFitZoom } from './get.burn.scene.fit.zoom';
 import { getBurnSceneFrameCentre } from './get.burn.scene.frame.centre';
 import { getBurnSceneMmPerPx } from './get.burn.scene.mm.per.px';
 import type { BurnSceneCameraFraming } from './interfaces/BurnSceneCameraFraming';
@@ -83,6 +85,9 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
 
   // What the camera is framed to, kept while the scene is empty so that a rebuild can keep the view.
   private modelFraming: BurnSceneModelFraming | undefined;
+
+  // Whether the view is still the fitted one, so a resize fits it again; the first touch of the orbit controls ends it.
+  private isViewFitted = true;
 
   // Width of the view divided by its height, known before the first model arrives.
   private aspectRatio = 1;
@@ -167,6 +172,10 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
 
     if (this.camera && this.modelFraming) {
       setBurnSceneCameraFrustum(this.camera, { ...this.modelFraming, aspectRatio: this.aspectRatio });
+
+      if (this.isViewFitted) {
+        this.applyBurnSceneFitZoom();
+      }
     }
 
     this.drawScene();
@@ -206,9 +215,22 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
   private moveCameraToBurnSceneDirection(towards: readonly [number, number, number]): void {
     if (this.camera && this.controls && this.modelFraming) {
       moveBurnSceneCamera(this.camera, this.controls, { ...this.modelFraming, aspectRatio: this.aspectRatio }, towards);
+      this.applyBurnSceneFitZoom();
       this.drawScene();
     }
   }
+
+  private applyBurnSceneFitZoom(): void {
+    if (this.camera && this.modelFraming) {
+      this.camera.zoom = getBurnSceneFitZoom(this.camera, this.modelFraming, this.sizePx.heightPx);
+      this.camera.updateProjectionMatrix();
+      this.isViewFitted = true;
+    }
+  }
+
+  private readonly markViewAsMoved = (): void => {
+    this.isViewFitted = false;
+  };
 
   /** A rebuild of the same sheet keeps the orbit, zoom and pan of the user. */
   private updateCameraForBurnModel({ parts, sheetBounds, thicknessMm }: BurnModel): void {
@@ -224,6 +246,8 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     } else {
       this.removeCameraAndControls();
       this.addCameraAndControls(framing);
+      this.modelFraming = modelFraming;
+      this.applyBurnSceneFitZoom();
     }
 
     this.modelFraming = modelFraming;
@@ -275,10 +299,12 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     controls.maxPolarAngle = BURN_SCENE_MAX_POLAR_ANGLE_RADIANS;
     controls.update();
     controls.addEventListener(BURN_SCENE_CONTROLS_CHANGE_EVENT, this.drawScene);
+    controls.addEventListener(BURN_SCENE_CONTROLS_START_EVENT, this.markViewAsMoved);
   }
 
   private removeCameraAndControls(): void {
     this.controls?.removeEventListener(BURN_SCENE_CONTROLS_CHANGE_EVENT, this.drawScene);
+    this.controls?.removeEventListener(BURN_SCENE_CONTROLS_START_EVENT, this.markViewAsMoved);
     this.controls?.dispose();
     this.camera = undefined;
     this.controls = undefined;

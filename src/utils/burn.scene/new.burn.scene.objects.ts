@@ -13,6 +13,7 @@ import {
   BufferGeometry,
   Color,
   DataTexture,
+  DoubleSide,
   Group,
   LineBasicMaterial,
   LineSegments,
@@ -97,10 +98,12 @@ const ignoreBurnOutlineRay = (): void => undefined;
 export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
   const group: Group = new Group();
   const toonBands: DataTexture = newBurnSceneToonBands();
-  // The offset keeps the ink lines from sinking into the faces they lie on.
+  // The offset keeps the ink lines from sinking into the faces they lie on. Flat faces are rows of quads of different
+  // lengths, whose joints let single pixels through: with both sides drawn those pixels show wood, not the dark scene.
   const material: MeshToonMaterial = new MeshToonMaterial({
     vertexColors: true,
     gradientMap: toonBands,
+    side: DoubleSide,
     polygonOffset: true,
     polygonOffsetFactor: 1,
     polygonOffsetUnits: 1,
@@ -108,6 +111,7 @@ export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
   const highlightMaterial: MeshToonMaterial = new MeshToonMaterial({
     vertexColors: true,
     gradientMap: toonBands,
+    side: DoubleSide,
     polygonOffset: true,
     polygonOffsetFactor: 1,
     polygonOffsetUnits: 1,

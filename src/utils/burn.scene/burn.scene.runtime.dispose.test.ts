@@ -170,13 +170,15 @@ describe('the burn scene camera across models', () => {
 
       const camera: OrthographicCamera = getDrawnCamera();
       const firstPosition: Vector3 = camera.position.clone();
+      const firstZoom: number = camera.zoom;
 
       renderer.showBurnSceneFromTop();
       camera.zoom = 3;
       renderer.fitBurnSceneView();
 
       expect(camera.position.distanceTo(firstPosition)).toBeCloseTo(0);
-      expect(camera.zoom).toBe(1);
+      expect(camera.zoom).toBeCloseTo(firstZoom);
+      expect(firstZoom).toBeGreaterThan(1);
     });
 
     it('does nothing with no model', () => {
