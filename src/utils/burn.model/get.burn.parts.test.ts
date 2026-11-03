@@ -178,6 +178,15 @@ describe(getBurnParts.name, () => {
     expect(getPartSet([getOpenSquare(0.2)]).parts).toHaveLength(0);
   });
 
+  it('leaves one part when a line burnt there and back crosses a square', () => {
+    const retracedLine: SvgSubpath = {
+      points: [{ x: 5, y: 15 }, { x: 25, y: 15 }, { x: 5, y: 15 }],
+      isClosed: false,
+    };
+
+    expect(getPartSet([SQUARE, retracedLine]).parts).toHaveLength(1);
+  });
+
   it('finds no part for an open path alone', () => {
     const openPath: SvgSubpath = { points: [{ x: 5, y: 15 }, { x: 25, y: 15 }], isClosed: false };
     const { parts, regionLabels }: BurnPartSet = getPartSet([openPath]);
@@ -226,6 +235,55 @@ describe(getBurnParts.name, () => {
       [undefined, BURN_PART_STATUS.NOT_THROUGH, BLUE],
       [1, BURN_PART_STATUS.FREE, undefined],
     ]);
+  });
+
+  describe('with outlines on layers of different depth', () => {
+    const getTwoLayerPartSet = (redSquare: SvgSubpath, blueSquare: SvgSubpath, bluePower: number): BurnPartSet => {
+      const layers: ProjectLayer[] = [
+        newTestLayer(RED, CUTTING_SETTINGS),
+        newTestLayer(BLUE, { ...CUTTING_SETTINGS, maxPowerPercent: bluePower }),
+      ];
+      const toolpath: Toolpath = getTestJobToolpath(
+        [newStrokedDrawable([redSquare], RED), newStrokedDrawable([blueSquare], BLUE)],
+        layers,
+      );
+      const grid: BurnDoseGrid | undefined = getBurnDoseGrid(toolpath, layers);
+
+      if (!grid) {
+        throw new Error('expected a dose grid');
+      }
+
+      return getBurnParts(grid, { thicknessMm: THICKNESS_MM, basis: CUT_THROUGH_BASIS });
+    };
+
+    it('holds back only the shallow child of a parent that cuts through', () => {
+      const { parts }: BurnPartSet = getTwoLayerPartSet(SQUARE, INNER_SQUARE, HALF_POWER_PERCENT);
+
+      expect(parts.map((part: BurnPart) => [part.parentId, part.status, part.weakestLayerKey])).toEqual([
+        [undefined, BURN_PART_STATUS.FREE, undefined],
+        [1, BURN_PART_STATUS.NOT_THROUGH, BLUE],
+      ]);
+      expect(parts[1]?.weakestDepthMm).toBeCloseTo(SHALLOW_DEPTH_MM, WALL_DEPTH_TOLERANCE_DIGITS);
+    });
+
+    it('makes a borderline child of a free parent borderline', () => {
+      const { parts }: BurnPartSet = getTwoLayerPartSet(SQUARE, INNER_SQUARE, BORDERLINE_POWER_PERCENT);
+
+      expect(parts.map((part: BurnPart) => [part.parentId, part.status, part.weakestLayerKey])).toEqual([
+        [undefined, BURN_PART_STATUS.FREE, undefined],
+        [1, BURN_PART_STATUS.BORDERLINE, BLUE],
+      ]);
+    });
+
+    it('holds back all three regions of overlapping through and shallow squares', () => {
+      const { parts }: BurnPartSet = getTwoLayerPartSet(SQUARE, OVERLAPPING_SQUARE, HALF_POWER_PERCENT);
+
+      expect(parts.map((part: BurnPart) => [part.status, part.weakestLayerKey])).toEqual([
+        [BURN_PART_STATUS.NOT_THROUGH, BLUE],
+        [BURN_PART_STATUS.NOT_THROUGH, BLUE],
+        [BURN_PART_STATUS.NOT_THROUGH, BLUE],
+      ]);
+    });
   });
 
   it('makes every enclosed part borderline without a test result', () => {

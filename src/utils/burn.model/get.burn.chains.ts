@@ -17,8 +17,10 @@ import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathMove } from '../toolpath/interfaces/ToolpathMove';
 import { MOVE_MIN_LENGTH_MM, TOOLPATH_MOVE_KIND } from '../toolpath/toolpath.constants';
-import { CUT_CLOSED_GAP_MM } from './burn.model.constants';
+import { CUT_CLOSED_GAP_MM, CUT_CLOSED_MIN_ENCLOSED_AREA_MM2 } from './burn.model.constants';
 import type { BurnChain } from './interfaces/BurnChain';
+
+const SHOELACE_AREA_DIVISOR = 2;
 
 const getEnabledLineLayerKeys = (layers: ProjectLayer[]): Set<string> => new Set<string>(
   layers
@@ -32,10 +34,28 @@ const isLineBurnMove = (move: ToolpathMove, lineLayerKeys: Set<string>): boolean
 const getPointDistanceMm = (firstPoint: GeometryPoint, secondPoint: GeometryPoint): number =>
   Math.hypot(secondPoint.x - firstPoint.x, secondPoint.y - firstPoint.y);
 
+/** The area the moves enclose, by the shoelace formula, with the gap back to the start counted as a straight line. */
+const getChainEnclosedAreaMm2 = (moves: ToolpathMove[], startPoint: GeometryPoint): number => {
+  let doubledSignedArea = 0;
+
+  for (const { from, to } of moves) {
+    const fromX: number = from.x - startPoint.x;
+    const fromY: number = from.y - startPoint.y;
+
+    doubledSignedArea += fromX * (to.y - startPoint.y) - (to.x - startPoint.x) * fromY;
+  }
+
+  return Math.abs(doubledSignedArea) / SHOELACE_AREA_DIVISOR;
+};
+
+const isChainClosed = (moves: ToolpathMove[], startPoint: GeometryPoint, endPoint: GeometryPoint): boolean =>
+  getPointDistanceMm(startPoint, endPoint) <= CUT_CLOSED_GAP_MM
+  && getChainEnclosedAreaMm2(moves, startPoint) > CUT_CLOSED_MIN_ENCLOSED_AREA_MM2;
+
 const newBurnChain = (moves: ToolpathMove[], firstMove: ToolpathMove, lastMove: ToolpathMove): BurnChain => ({
   layerKey: firstMove.layerKey,
   moves,
-  isClosed: getPointDistanceMm(firstMove.from, lastMove.to) <= CUT_CLOSED_GAP_MM,
+  isClosed: isChainClosed(moves, firstMove.from, lastMove.to),
 });
 
 export const getBurnChains = (toolpath: Toolpath, layers: ProjectLayer[]): BurnChain[] => {

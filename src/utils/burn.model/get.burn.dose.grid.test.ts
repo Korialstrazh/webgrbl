@@ -25,6 +25,7 @@ const FILL_POWER_PERCENT = 50;
 const FILL_SPEED_MM_PER_MIN = 2000;
 const FILL_LINE_DOSE: number = getMoveDose(FILL_POWER_PERCENT, FILL_SPEED_MM_PER_MIN);
 const FILL_PASSES = 2;
+const FILL_LINE_INTERVAL_MM = 0.1;
 const WALL_PASSES = 3;
 const FAR_BOX_MIN_X_MM = 2000;
 const HUGE_JOB_MM = 5000;
@@ -78,7 +79,7 @@ const getSquareGrid = (passes: number): BurnDoseGrid => {
 };
 
 const getFillGrid = (passes: number, subpaths: SvgSubpath[] = [FILL_BOX]): BurnDoseGrid => {
-  const layer: ProjectLayer = newTestLayer(GREEN, { passes });
+  const layer: ProjectLayer = newTestLayer(GREEN, { passes, lineIntervalMm: FILL_LINE_INTERVAL_MM });
 
   return getRequiredGrid(getBurnDoseGrid(getTestJobToolpath([newFilledDrawable(subpaths, GREEN)], [layer]), [layer]));
 };
@@ -131,6 +132,30 @@ describe(getBurnDoseGrid.name, () => {
 
     expect(getNonZeroValues(grid.lineDose).length).toBeGreaterThan(0);
     expect(getWallDoses(grid)).toEqual([]);
+  });
+
+  it('bridges a closing gap that falls diagonally between two cells, so the wall cells share sides', () => {
+    const layer: ProjectLayer = newTestLayer(RED, getCutSettings(1));
+    const outline: SvgSubpath = {
+      points: [
+        { x: 10.12, y: 10.12 },
+        { x: 20, y: 10.12 },
+        { x: 20, y: 20 },
+        { x: 5, y: 20 },
+        { x: 5, y: 5 },
+        { x: 10.08, y: 5 },
+        { x: 10.08, y: 10.08 },
+      ],
+      isClosed: false,
+    };
+    const toolpath: Toolpath = getTestJobToolpath([newStrokedDrawable([outline], RED)], [layer]);
+    const grid: BurnDoseGrid = getRequiredGrid(getBurnDoseGrid(toolpath, [layer]));
+    const getCellAt = (xMm: number, yMm: number): number =>
+      Math.floor((yMm - grid.originYMm) / grid.cellMm) * grid.columnCount
+      + Math.floor((xMm - grid.originXMm) / grid.cellMm);
+    const bridgeCells: number[] = [getCellAt(10.08, 10.12), getCellAt(10.12, 10.08)];
+
+    expect(bridgeCells.filter((cell: number): boolean => !!grid.closedCutMask[cell])).toHaveLength(1);
   });
 
   it('names the layer of each wall cell', () => {

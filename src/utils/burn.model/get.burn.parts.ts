@@ -17,12 +17,12 @@ import {
   CUT_DEPTH_LEVEL,
   CUT_PART_MIN_AREA_MM2,
 } from './burn.model.constants';
-import type { BurnPartStatus } from './burn.model.constants';
+import type { BurnPartStatus, CutDepthLevel } from './burn.model.constants';
 import { getBurnDepthPrediction } from './get.burn.depth.prediction';
 import { getBurnGridNeighbourCells } from './get.burn.grid.neighbour.cells';
 import { getBurnGridOutsideCells } from './get.burn.grid.outside.cells';
 import { getBurnGridRegions } from './get.burn.grid.regions';
-import { getBurnRegionParents } from './get.burn.region.parents';
+import { getBurnRegionNesting } from './get.burn.region.nesting';
 import type { BurnDepthPrediction } from './interfaces/BurnDepthPrediction';
 import type { BurnDoseGrid } from './interfaces/BurnDoseGrid';
 import type { BurnGridRegion } from './interfaces/BurnGridRegion';
@@ -30,24 +30,13 @@ import type { BurnGridRegionSet } from './interfaces/BurnGridRegionSet';
 import type { BurnPart } from './interfaces/BurnPart';
 import type { BurnPartSet } from './interfaces/BurnPartSet';
 import type { BurnPartsInput } from './interfaces/BurnPartsInput';
+import type { BurnRegionNesting } from './interfaces/BurnRegionNesting';
+import type { BurnWallLevelCells } from './interfaces/BurnWallLevelCells';
+import type { BurnWeakestWall } from './interfaces/BurnWeakestWall';
 import type { ToolpathBounds } from '../toolpath/interfaces/ToolpathBounds';
 
 /** A region's outermost cells touch its walls, so half a cell past them, on each side, is the middle of the wall. */
 const WALL_MIDDLE_CELL_OFFSET = 0.5;
-
-interface BurnWallLevelCells {
-  /** 1 for wall cells predicted to cut through. */
-  throughCells: Uint8Array;
-  /** 1 for wall cells predicted to cut through or nearly through. */
-  nearlyThroughCells: Uint8Array;
-}
-
-interface BurnWeakestWall {
-  /** The wall cell. */
-  cell: number;
-  /** Its stored total dose. */
-  dose: number;
-}
 
 /** Total dose of a cell, raised by what storing it as a 32-bit float can have rounded away. */
 const getStoredCellDose = (grid: BurnDoseGrid, cell: number): number =>
@@ -75,8 +64,15 @@ const getWallLevelCells = (grid: BurnDoseGrid, input: BurnPartsInput): BurnWallL
 const getRegionAreaMm2 = (region: BurnGridRegion, { cellMm }: BurnDoseGrid): number =>
   region.cellCount * cellMm * cellMm;
 
-/** The lowest-dose wall cell along each region, by region number. */
-const getWeakestWalls = (grid: BurnDoseGrid, regionNumbers: Int32Array): Map<number, BurnWeakestWall> => {
+/**
+ * The lowest-dose cell of each region's outer wall, by region number. Walls that only separate a region from its own
+ * children do not count: a shallow child does not hold back the part around it.
+ */
+const getWeakestWalls = (
+  grid: BurnDoseGrid,
+  regionNumbers: Int32Array,
+  { outerWallNumbers, wallNumbers }: BurnRegionNesting,
+): Map<number, BurnWeakestWall> => {
   const weakestWalls: Map<number, BurnWeakestWall> = new Map<number, BurnWeakestWall>();
 
   for (const [cell, isWall] of grid.closedCutMask.entries()) {
@@ -86,7 +82,9 @@ const getWeakestWalls = (grid: BurnDoseGrid, regionNumbers: Int32Array): Map<num
       for (const neighbourCell of getBurnGridNeighbourCells(cell, grid)) {
         const regionNumber: number = regionNumbers[neighbourCell] ?? BURN_REGION_LABEL_NONE;
 
-        if (dose < (weakestWalls.get(regionNumber)?.dose ?? Number.POSITIVE_INFINITY)) {
+        const isOuterWall: boolean = outerWallNumbers.get(regionNumber) === wallNumbers[cell];
+
+        if (isOuterWall && dose < (weakestWalls.get(regionNumber)?.dose ?? Number.POSITIVE_INFINITY)) {
           weakestWalls.set(regionNumber, { cell, dose });
         }
       }
@@ -118,16 +116,25 @@ const getParentPartId = (
   return parentNumber ? partIds.get(parentNumber) : undefined;
 };
 
+/** A part is never more free than its own outer wall: the flood alone cannot see a wall inside a sealed area. */
 const getRegionStatus = (
-  firstCell: number,
-  freeFloodCells: Uint8Array,
-  borderlineFloodCells: Uint8Array,
+  isFloodFree: boolean,
+  isFloodNearlyFree: boolean,
+  outerWallLevel: CutDepthLevel,
 ): BurnPartStatus => {
-  if (!freeFloodCells[firstCell]) {
-    return BURN_PART_STATUS.FREE;
+  if (!isFloodNearlyFree) {
+    return BURN_PART_STATUS.NOT_THROUGH;
   }
 
-  return borderlineFloodCells[firstCell] ? BURN_PART_STATUS.NOT_THROUGH : BURN_PART_STATUS.BORDERLINE;
+  if (outerWallLevel === CUT_DEPTH_LEVEL.NOT_THROUGH) {
+    return BURN_PART_STATUS.NOT_THROUGH;
+  }
+
+  if (!isFloodFree) {
+    return BURN_PART_STATUS.BORDERLINE;
+  }
+
+  return outerWallLevel === CUT_DEPTH_LEVEL.THROUGH ? BURN_PART_STATUS.FREE : BURN_PART_STATUS.BORDERLINE;
 };
 
 const getPartRegionLabels = (regionNumbers: Int32Array, partIds: Map<number, number>): Int32Array => {
@@ -157,22 +164,27 @@ export const getBurnParts = (grid: BurnDoseGrid, input: BurnPartsInput): BurnPar
   const { throughCells, nearlyThroughCells }: BurnWallLevelCells = getWallLevelCells(grid, input);
   const freeFloodCells: Uint8Array = getBurnGridOutsideCells(grid, throughCells);
   const borderlineFloodCells: Uint8Array = getBurnGridOutsideCells(grid, nearlyThroughCells);
-  const parents: Map<number, number> = getBurnRegionParents(grid, regionNumbers);
-  const weakestWalls: Map<number, BurnWeakestWall> = getWeakestWalls(grid, regionNumbers);
+  const nesting: BurnRegionNesting = getBurnRegionNesting(grid, regionNumbers);
+  const weakestWalls: Map<number, BurnWeakestWall> = getWeakestWalls(grid, regionNumbers, nesting);
 
   const parts: BurnPart[] = keptRegions.map((region: BurnGridRegion, regionIndex: number): BurnPart => {
-    const status: BurnPartStatus = getRegionStatus(region.firstCell, freeFloodCells, borderlineFloodCells);
-    const weakestWall: BurnWeakestWall | undefined = status === BURN_PART_STATUS.FREE
-      ? undefined
-      : weakestWalls.get(region.regionNumber);
+    const outerWall: BurnWeakestWall | undefined = weakestWalls.get(region.regionNumber);
+    const outerWallPrediction: BurnDepthPrediction | undefined = outerWall
+      && getWallCellPrediction(grid, outerWall.cell, input);
+    const status: BurnPartStatus = getRegionStatus(
+      !freeFloodCells[region.firstCell],
+      !borderlineFloodCells[region.firstCell],
+      outerWallPrediction?.level ?? CUT_DEPTH_LEVEL.THROUGH,
+    );
+    const weakestWall: BurnWeakestWall | undefined = status === BURN_PART_STATUS.FREE ? undefined : outerWall;
 
     return {
       id: regionIndex + 1,
-      parentId: getParentPartId(region.regionNumber, parents, partIds),
+      parentId: getParentPartId(region.regionNumber, nesting.parents, partIds),
       status,
       boundsMm: getRegionBoundsMm(region, grid),
       weakestLayerKey: weakestWall && grid.layerKeys[grid.closedCutLayerIndex[weakestWall.cell] ?? 0],
-      weakestDepthMm: weakestWall && getWallCellPrediction(grid, weakestWall.cell, input).depthMm,
+      weakestDepthMm: weakestWall && outerWallPrediction?.depthMm,
     };
   });
 

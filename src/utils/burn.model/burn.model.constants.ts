@@ -11,6 +11,8 @@
 export const CUT_THROUGH_SAFETY_MARGIN_RATIO = 0.1;
 export const CUT_BORDERLINE_MARGIN_RATIO = 0.1;
 export const CUT_CLOSED_GAP_MM = 0.1;
+/** A closed chain must enclose more than this, in mm2: a line burnt there and back encloses nothing. */
+export const CUT_CLOSED_MIN_ENCLOSED_AREA_MM2 = 1e-6;
 export const BURN_GRID_MIN_CELL_MM = 0.1;
 export const BURN_GRID_MAX_CELLS = 1000000;
 export const BURN_SHEET_MARGIN_MM = 10;
