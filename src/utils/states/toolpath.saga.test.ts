@@ -15,7 +15,7 @@ import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
 import { newGcodeExportTestStore } from '../test.support/new.gcode.export.test.store';
 import { useStorageSafeFakeTimers } from '../test.support/use.storage.safe.fake.timers';
 import { BrowserToolpathWorkerClient } from '../toolpath/browser.toolpath.worker.client';
-import { GCODE_LASER_MODE_ON, GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
+import { GCODE_LASER_MODE_ON, GCODE_LASER_OFF_END, GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
 import { getBedDrawables } from '../toolpath/get.bed.drawables';
 import { getToolpath } from '../toolpath/get.toolpath';
 import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
@@ -535,6 +535,8 @@ describe('sample G-code export', () => {
   });
 
   const SAMPLE_JOB_NAME = 'Plywood sample';
+  const SMALL_AREA_MM = 40;
+  const OVER_POWER_PERCENT = 150;
   const SAMPLE_CUT_SETTINGS = { powerPercent: 80, speedMmPerMin: 600, passes: 1 };
 
   it('downloads <job name>.gcode with M4 S0 and no S above sMax, leaving the project alone', async () => {
@@ -561,6 +563,40 @@ describe('sample G-code export', () => {
     expect(selectProjectDocument(store.getState())).toBe(documentBefore);
     expect(selectToolpathStatus(store.getState())).toBe(toolpathStateBefore);
     expect(selectToolpath(store.getState())).toBeUndefined();
+  });
+
+  it('downloads nothing when the work area is too small for the sample', async () => {
+    const downloadSpy = spyOnDownload();
+    const store: AppStore = await newGcodeExportTestStore({
+      activeProfile: newMachineProfile({ workAreaXMm: SMALL_AREA_MM, workAreaYMm: SMALL_AREA_MM }),
+    });
+
+    store.dispatch(new SampleGcodeExportRequested({ cutSettings: SAMPLE_CUT_SETTINGS, jobName: SAMPLE_JOB_NAME }));
+    await flushSagas();
+
+    expect(downloadSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps S at sMax and ends with the laser off for a power above 100 percent', async () => {
+    const downloadSpy = spyOnDownload();
+    const store: AppStore = await newGcodeExportTestStore({
+      activeProfile: newMachineProfile({ sValueMax: PROFILE_S_VALUE_MAX }),
+    });
+
+    store.dispatch(new SampleGcodeExportRequested({
+      cutSettings: { ...SAMPLE_CUT_SETTINGS, powerPercent: OVER_POWER_PERCENT },
+      jobName: SAMPLE_JOB_NAME,
+    }));
+    await vi.waitFor((): void => {
+      expect(downloadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    const sValues: number[] = [...getDownloadedText(downloadSpy).matchAll(/S(\d+)/g)].map(
+      (match: RegExpMatchArray): number => Number(match[1]),
+    );
+
+    expect(Math.max(...sValues)).toBe(PROFILE_S_VALUE_MAX);
+    expect(getDownloadedText(downloadSpy).trimEnd().endsWith(GCODE_LASER_OFF_END)).toBe(true);
   });
 
   it('downloads nothing with no active machine profile', async () => {

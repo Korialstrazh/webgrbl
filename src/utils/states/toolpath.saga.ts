@@ -25,9 +25,10 @@ import { buffers, channel } from 'redux-saga';
 import type { Channel, Task } from 'redux-saga';
 import { all, call, debounce, fork, join, put, race, select, take, takeLatest, takeLeading } from 'redux-saga/effects';
 import { downloadTextFile } from '../browser/download.text.file';
-import { getSampleJobDocument } from '../materials/get.sample.job.document';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
+import { fitsSampleJob } from '../materials/fits.sample.job';
+import { getSampleJobDocument } from '../materials/get.sample.job.document';
 import type { Palette } from '../palette/interfaces/Palette';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
@@ -49,6 +50,7 @@ import type { Action } from './action';
 import { selectGrblSettings } from './grbl.connection.state';
 import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
 import { selectActiveMachineProfile } from './machine.profile.state';
+import { selectPalette } from './palette.state';
 import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 import {
   ProjectDocumentLoaded,
@@ -56,7 +58,6 @@ import {
   selectProjectDocument,
   selectProjectLayers,
 } from './project.document.state';
-import { selectPalette } from './palette.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import { ProjectOpened, selectProjectId, selectProjectName } from './project.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
@@ -282,12 +283,13 @@ function* exportGcode(action: GcodeExportRequested): Generator {
 function* exportSampleGcode(action: SampleGcodeExportRequested): Generator {
   const profile: MachineProfile | undefined = (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
 
-  if (!profile) {
+  const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
+
+  if (!profile || !fitsSampleJob(machineArea)) {
     return;
   }
 
   const palette: Palette = (yield select(selectPalette)) as Palette;
-  const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
   const sampleDocument: ProjectDocument = getSampleJobDocument({
     cutSettings: action.payload.cutSettings,
     palette,

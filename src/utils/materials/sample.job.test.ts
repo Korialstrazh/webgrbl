@@ -3,9 +3,10 @@ import { getLayerKey } from '../layers/get.layer.key';
 import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
-import { DEFAULT_CUT_ENTRY, DEFAULT_PALETTE } from '../palette/palette.constants';
+import { DEFAULT_CUT_ENTRY, DEFAULT_PALETTE, LAYER_MODE } from '../palette/palette.constants';
 import type { MachineOriginCorner } from '../profiles/machine.profile.constants';
 import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { getBedDrawables } from '../toolpath/get.bed.drawables';
 import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
 import { getToolpath } from '../toolpath/get.toolpath';
@@ -48,7 +49,27 @@ const getLayerMoves = (toolpath: Toolpath, layerKey: string): ToolpathMove[] => 
 const getBurnMoves = (moves: ToolpathMove[]): ToolpathMove[] =>
   moves.filter((move: ToolpathMove): boolean => move.kind === TOOLPATH_MOVE_KIND.BURN && move.powerPercent > 0);
 
+const getSampleToolpathLayer = (layerColour: string): ProjectLayer => {
+  const sampleLayer: ProjectLayer | undefined = getSampleJobDocument({
+    cutSettings: CUT_SETTINGS,
+    palette: DEFAULT_PALETTE,
+    machineArea: newToolpathMachineArea(),
+  }).layers.find((layer: ProjectLayer): boolean => layer.colour === layerColour);
+
+  return sampleLayer ?? getNewLayer(layerColour, DEFAULT_PALETTE, 0);
+};
+
 const shadingKey: string = getLayerKey(getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0));
+
+const getPowerAtX = (moves: ToolpathMove[], pick: (xs: number[]) => number): number => {
+  const targetX: number = pick(moves.map((move: ToolpathMove): number => move.to.x));
+
+  return moves.find((move: ToolpathMove): boolean => move.to.x === targetX)?.powerPercent ?? 0;
+};
+const getLeftmostPower = (moves: ToolpathMove[]): number =>
+  getPowerAtX(moves, (xs: number[]): number => Math.min(...xs));
+const getRightmostPower = (moves: ToolpathMove[]): number =>
+  getPowerAtX(moves, (xs: number[]): number => Math.max(...xs));
 
 describe(getSampleJobDocument.name, () => {
   it('burns a closed 50 x 50 mm loop at the entered power, speed and passes', () => {
@@ -66,6 +87,7 @@ describe(getSampleJobDocument.name, () => {
 
   it('burns a gradient inside the square whose power falls along x, before the cut', () => {
     const toolpath: Toolpath = getSampleToolpath();
+    const shadingLayer: ProjectLayer = getSampleToolpathLayer(SHADING_LAYER_COLOUR);
     const shadingMoves: ToolpathMove[] = getBurnMoves(getLayerMoves(toolpath, shadingKey));
     const lowX: number = SAMPLE_MARGIN_MM + SAMPLE_GRADIENT_INSET_MM;
     const highX: number = SAMPLE_MARGIN_MM + SAMPLE_SIZE_MM - SAMPLE_GRADIENT_INSET_MM;
@@ -73,8 +95,13 @@ describe(getSampleJobDocument.name, () => {
     const firstCutMove: ToolpathMove | undefined = getLayerMoves(toolpath, SAMPLE_CUT_COLOUR)[0];
 
     expect(shadingMoves.length).toBeGreaterThan(0);
-    expect(shadingMoves.every((move: ToolpathMove): boolean =>
-      move.to.x >= lowX - COORDINATE_TOLERANCE_MM && move.to.x <= highX + COORDINATE_TOLERANCE_MM)).toBe(true);
+    expect(shadingLayer.settings.mode).toBe(LAYER_MODE.FILL);
+    expect(shadingMoves.every((move: ToolpathMove): boolean => [move.from, move.to].every(
+      (point: GeometryPoint): boolean => point.x >= lowX - COORDINATE_TOLERANCE_MM
+        && point.x <= highX + COORDINATE_TOLERANCE_MM
+        && point.y >= lowX - COORDINATE_TOLERANCE_MM
+        && point.y <= highX + COORDINATE_TOLERANCE_MM,
+    ))).toBe(true);
     expect(Math.min(...shadingMoves.map((move: ToolpathMove): number => move.powerPercent)))
       .toBeLessThan(Math.max(...shadingMoves.map((move: ToolpathMove): number => move.powerPercent)));
     expect(getLeftmostPower(shadingMoves)).toBeGreaterThan(getRightmostPower(shadingMoves));
@@ -86,7 +113,8 @@ describe(getSampleJobDocument.name, () => {
 
   it.each(ORIGIN_CORNERS)('keeps every move in the work area, 5 mm from the %s corner', (originCorner) => {
     const machineArea: ToolpathMachineArea = newToolpathMachineArea({ originCorner });
-    const burnMoves: ToolpathMove[] = getBurnMoves(getSampleToolpath(machineArea).moves);
+    const allMoves: ToolpathMove[] = getSampleToolpath(machineArea).moves;
+    const burnMoves: ToolpathMove[] = getBurnMoves(allMoves);
     const cutMoves: ToolpathMove[] = burnMoves.filter(
       (move: ToolpathMove): boolean => move.layerKey === SAMPLE_CUT_COLOUR,
     );
@@ -95,25 +123,14 @@ describe(getSampleJobDocument.name, () => {
     const mappedYs: number[] = cutMoves.map((move: ToolpathMove): number =>
       getOriginMappedPoint(move.to, originCorner, machineArea).y);
 
-    expect(burnMoves.every((move: ToolpathMove): boolean =>
-      move.to.x >= 0 && move.to.y >= 0 && move.to.x <= machineArea.workAreaXMm && move.to.y <= machineArea.workAreaYMm))
-      .toBe(true);
+    expect(allMoves.every((move: ToolpathMove): boolean => [move.from, move.to].every(
+      (point: GeometryPoint): boolean => point.x >= 0 && point.y >= 0
+        && point.x <= machineArea.workAreaXMm && point.y <= machineArea.workAreaYMm,
+    ))).toBe(true);
     expect(Math.min(...mappedXs)).toBeCloseTo(SAMPLE_MARGIN_MM);
     expect(Math.min(...mappedYs)).toBeCloseTo(SAMPLE_MARGIN_MM);
   });
 });
-
-const getPowerAtX = (moves: ToolpathMove[], pick: (xs: number[]) => number): number => {
-  const targetX: number = pick(moves.map((move: ToolpathMove): number => move.to.x));
-
-  return moves.find((move: ToolpathMove): boolean => move.to.x === targetX)?.powerPercent ?? 0;
-};
-function getLeftmostPower(moves: ToolpathMove[]): number {
-  return getPowerAtX(moves, (xs: number[]): number => Math.min(...xs));
-}
-function getRightmostPower(moves: ToolpathMove[]): number {
-  return getPowerAtX(moves, (xs: number[]): number => Math.max(...xs));
-}
 
 describe(getSampleCutSettings.name, () => {
   it('takes the first Line layer', () => {

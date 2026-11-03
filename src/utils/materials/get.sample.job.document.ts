@@ -15,8 +15,9 @@ import { LAYER_MODE } from '../palette/palette.constants';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { SVG_NAMESPACE_URI } from '../svg/svg.constants';
-import { MACHINE_ORIGIN_CORNER } from '../profiles/machine.profile.constants';
+import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
 import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachineArea';
 import type { SampleJobInput } from './interfaces/SampleJobInput';
 import {
@@ -47,24 +48,30 @@ const getSampleSvgText = (): string => {
     + ` stroke="${SAMPLE_CUT_COLOUR}" stroke-width="${SAMPLE_OUTLINE_WIDTH_MM}"/></svg>`;
 };
 
-const RIGHT_ORIGIN_CORNERS: readonly string[] = [MACHINE_ORIGIN_CORNER.FRONT_RIGHT, MACHINE_ORIGIN_CORNER.BACK_RIGHT];
-const BACK_ORIGIN_CORNERS: readonly string[] = [MACHINE_ORIGIN_CORNER.BACK_LEFT, MACHINE_ORIGIN_CORNER.BACK_RIGHT];
+/** The object's front-left corner in bed millimetres: the square spans the margin to margin + size from the corner. */
+const getSampleObject = (machineArea: ToolpathMachineArea): ProjectObject => {
+  const nearPoint: GeometryPoint = getOriginMappedPoint(
+    { x: SAMPLE_MARGIN_MM, y: SAMPLE_MARGIN_MM },
+    machineArea.originCorner,
+    machineArea,
+  );
+  const farPoint: GeometryPoint = getOriginMappedPoint(
+    { x: SAMPLE_MARGIN_MM + SAMPLE_SIZE_MM, y: SAMPLE_MARGIN_MM + SAMPLE_SIZE_MM },
+    machineArea.originCorner,
+    machineArea,
+  );
 
-const getSampleOffsetMm = (isFarSideOrigin: boolean, workAreaMm: number): number =>
-  isFarSideOrigin ? workAreaMm - SAMPLE_MARGIN_MM - SAMPLE_SIZE_MM : SAMPLE_MARGIN_MM;
-
-/** The object's front-left corner in bed millimetres, so the square sits the margin away from the origin corner. */
-const getSampleObject = ({ workAreaXMm, workAreaYMm, originCorner }: ToolpathMachineArea): ProjectObject =>
-  newProjectObject({
+  return newProjectObject({
     name: SAMPLE_OBJECT_NAME,
     svgText: getSampleSvgText(),
     intrinsicWidthMm: SAMPLE_SIZE_MM,
     intrinsicHeightMm: SAMPLE_SIZE_MM,
     widthMm: SAMPLE_SIZE_MM,
     heightMm: SAMPLE_SIZE_MM,
-    xMm: getSampleOffsetMm(RIGHT_ORIGIN_CORNERS.includes(originCorner), workAreaXMm),
-    yMm: getSampleOffsetMm(BACK_ORIGIN_CORNERS.includes(originCorner), workAreaYMm),
+    xMm: Math.min(nearPoint.x, farPoint.x),
+    yMm: Math.min(nearPoint.y, farPoint.y),
   });
+};
 
 export const getSampleJobDocument = ({ cutSettings, palette, machineArea }: SampleJobInput): ProjectDocument => {
   const shadingLayer: ProjectLayer = getNewLayer(SHADING_LAYER_COLOUR, palette, SAMPLE_SHADING_LAYER_ORDER);
