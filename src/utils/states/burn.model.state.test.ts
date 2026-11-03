@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BED_VIEW_MODE } from '../bed/bed.view.constants';
-import { BURN_PART_LIFT_MAX_THICKNESSES, BURN_PART_STATUS } from '../burn.model/burn.model.constants';
+import { BURN_PART_STATUS } from '../burn.model/burn.model.constants';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../burn.model/interfaces/BurnPart';
 import { BedViewModeChanged } from './bed.view.state';
@@ -15,12 +15,15 @@ import {
   selectBurnModel,
   selectBurnModelStatus,
   selectBurnPartEffectiveLiftMm,
+  selectBurnPartEffectiveLiftsMm,
   selectBurnPartLiftMm,
+  selectCurrentBurnModel,
   selectSelectedBurnPartId,
 } from './burn.model.state';
 import type { BurnModelState } from './burn.model.state';
-import { MaterialSaved } from './material.state';
+import { MaterialSaved, MaterialTestResultSaved } from './material.state';
 import { newMaterial } from '../materials/new.material';
+import { newTestResultFixture } from '../materials/new.test.result.fixture';
 import { LayerToggled, ProjectMaterialSelected, ProjectUndoRequested } from './project.document.state';
 import { ToolpathMachineAreaChanged, ToolpathRequested } from './toolpath.state';
 import type { Action } from './action';
@@ -33,7 +36,10 @@ const UNKNOWN_PART_ID = 9;
 const PARENT_LIFT_MM = 2;
 const CHILD_LIFT_MM = 1.5;
 const LAYER_KEY = '#ff0000';
-const MATERIAL_ID = 'material-1';
+const BUILT_MATERIAL_ID = 'material-1';
+const OTHER_MATERIAL_ID = 'material-2';
+
+const newBuildRequest = (): BurnModelRequested => new BurnModelRequested({ materialId: BUILT_MATERIAL_ID });
 
 const newPart = (id: number, parentId: number | undefined): BurnPart => ({
   id,
@@ -59,22 +65,22 @@ const reduceActions = (actions: Action<unknown>[]): BurnModelState => actions.re
 
 const newRootState = (burnModel: BurnModelState): { burnModel: BurnModelState } => ({ burnModel });
 
-const READY_ACTIONS: Action<unknown>[] = [new BurnModelRequested(), new BurnModelReady({ model: newModel() })];
+const READY_ACTIONS: Action<unknown>[] = [newBuildRequest(), new BurnModelReady({ model: newModel() })];
 
 describe(burnModelReducer.name, () => {
   it('goes from idle to building to ready, keeping the model', () => {
     const model: BurnModel = newModel();
-    const root = newRootState(reduceActions([new BurnModelRequested(), new BurnModelReady({ model })]));
+    const root = newRootState(reduceActions([newBuildRequest(), new BurnModelReady({ model })]));
 
     expect(selectBurnModelStatus(newRootState(reduceActions([])))).toBe(BURN_MODEL_STATUS.IDLE);
-    expect(selectBurnModelStatus(newRootState(reduceActions([new BurnModelRequested()]))))
+    expect(selectBurnModelStatus(newRootState(reduceActions([newBuildRequest()]))))
       .toBe(BURN_MODEL_STATUS.BUILDING);
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.READY);
     expect(selectBurnModel(root)).toBe(model);
   });
 
   it('marks a failure', () => {
-    expect(selectBurnModelStatus(newRootState(reduceActions([new BurnModelRequested(), new BurnModelFailed()]))))
+    expect(selectBurnModelStatus(newRootState(reduceActions([newBuildRequest(), new BurnModelFailed()]))))
       .toBe(BURN_MODEL_STATUS.FAILED);
   });
 
@@ -95,13 +101,26 @@ describe(burnModelReducer.name, () => {
     ['a machine area change', new ToolpathMachineAreaChanged()],
     ['a layer change', new LayerToggled({ layerKey: LAYER_KEY, enabled: false })],
     ['an undo', new ProjectUndoRequested()],
-    ['a material selection', new ProjectMaterialSelected({ materialId: MATERIAL_ID })],
-    ['a material edit', new MaterialSaved({ material: newMaterial() })],
+    ['another material being selected', new ProjectMaterialSelected({ materialId: OTHER_MATERIAL_ID })],
+    ['an edit of its material', new MaterialSaved({ material: newMaterial({ id: BUILT_MATERIAL_ID }) })],
   ])('makes a ready model stale on %s', (_title: string, action: Action<unknown>) => {
     const root = newRootState(reduceActions([...READY_ACTIONS, action]));
 
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.STALE);
     expect(selectBurnModel(root)).toBeDefined();
+  });
+
+  it.each([
+    ['the same material being selected', new ProjectMaterialSelected({ materialId: BUILT_MATERIAL_ID })],
+    ['an edit of another material', new MaterialSaved({ material: newMaterial({ id: OTHER_MATERIAL_ID }) })],
+    ['a test of another material', new MaterialTestResultSaved({
+      materialId: OTHER_MATERIAL_ID,
+      testResult: newTestResultFixture(),
+    })],
+  ])('keeps a ready model ready on %s', (_title: string, action: Action<unknown>) => {
+    const root = newRootState(reduceActions([...READY_ACTIONS, action]));
+
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.READY);
   });
 
   it('leaves a failed model failed on a document change', () => {
@@ -111,7 +130,7 @@ describe(burnModelReducer.name, () => {
   });
 
   it('stops building without a model when the input changes, so the saga can cancel', () => {
-    const root = newRootState(reduceActions([new BurnModelRequested(), new ToolpathRequested()]));
+    const root = newRootState(reduceActions([newBuildRequest(), new ToolpathRequested()]));
 
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.IDLE);
   });
@@ -119,7 +138,7 @@ describe(burnModelReducer.name, () => {
   it('stops building when the view leaves 3D and keeps an older model as stale', () => {
     const root = newRootState(reduceActions([
       ...READY_ACTIONS,
-      new BurnModelRequested(),
+      newBuildRequest(),
       new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }),
     ]));
 
@@ -135,16 +154,39 @@ describe(burnModelReducer.name, () => {
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.READY);
   });
 
-  it('keeps the lift of a part within the lift range', () => {
-    const tooHigh = THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES + 1;
+  it('lets a part lift as high as the user wants, and no lower than its place', () => {
+    const veryHigh = THICKNESS_MM * 1000;
     const root = newRootState(reduceActions([
       ...READY_ACTIONS,
-      new BurnPartLifted({ partId: PARENT_ID, liftMm: tooHigh }),
-      new BurnPartLifted({ partId: CHILD_ID, liftMm: -1 }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: veryHigh }),
+    ]));
+    const loweredRoot = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: -1 }),
     ]));
 
-    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES);
-    expect(selectBurnPartLiftMm(CHILD_ID)(root)).toBe(0);
+    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(veryHigh);
+    expect(selectBurnPartLiftMm(PARENT_ID)(loweredRoot)).toBe(0);
+  });
+
+  it('refuses to lift a part that does not cut through', () => {
+    const notThroughPart: BurnPart = { ...newPart(PARENT_ID, undefined), status: BURN_PART_STATUS.NOT_THROUGH };
+    const root = newRootState(reduceActions([
+      new BurnModelReady({ model: newModel([notThroughPart]) }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(0);
+  });
+
+  it('lifts a borderline part', () => {
+    const borderlinePart: BurnPart = { ...newPart(PARENT_ID, undefined), status: BURN_PART_STATUS.BORDERLINE };
+    const root = newRootState(reduceActions([
+      new BurnModelReady({ model: newModel([borderlinePart]) }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(PARENT_LIFT_MM);
   });
 
   it('selects and clears the selected part', () => {
@@ -157,6 +199,57 @@ describe(burnModelReducer.name, () => {
 
     expect(selectSelectedBurnPartId(selectedRoot)).toBe(CHILD_ID);
     expect(selectSelectedBurnPartId(clearedRoot)).toBeUndefined();
+  });
+});
+
+describe(selectCurrentBurnModel.name, () => {
+  it('gives the model only while it is ready', () => {
+    const model: BurnModel = newModel();
+    const readyActions: Action<unknown>[] = [new BurnModelReady({ model })];
+
+    expect(selectCurrentBurnModel(newRootState(reduceActions(readyActions)))).toBe(model);
+    expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, new ProjectUndoRequested()]))))
+      .toBeUndefined();
+    expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, newBuildRequest()]))))
+      .toBeUndefined();
+    expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, new BurnModelFailed()]))))
+      .toBeUndefined();
+  });
+});
+
+describe(selectBurnPartEffectiveLiftsMm.name, () => {
+  it('gives the lift of every part with what its parents add, and the same object until something changes', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftsMm(root)).toEqual({ [PARENT_ID]: PARENT_LIFT_MM, [CHILD_ID]: PARENT_LIFT_MM });
+    expect(selectBurnPartEffectiveLiftsMm(root)).toBe(selectBurnPartEffectiveLiftsMm(root));
+  });
+});
+
+describe('height 0 of a lifted part', () => {
+  it('is absolute: a child goes down to its place inside a lifted parent, and never below it', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: CHILD_ID, liftMm: -PARENT_LIFT_MM * 10 }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftMm(PARENT_ID)(root)).toBe(PARENT_LIFT_MM);
+    expect(selectBurnPartEffectiveLiftMm(CHILD_ID)(root)).toBe(0);
+  });
+
+  it('holds when the parent comes down after the child was lowered', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: CHILD_ID, liftMm: -PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: 0 }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftMm(CHILD_ID)(root)).toBe(0);
   });
 });
 

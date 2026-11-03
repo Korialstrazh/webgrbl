@@ -89,6 +89,9 @@ export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
 /** A tag drawn as a soft filled chip without a border. */
 export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';
 
+/** A tag that warns. */
+export const ANTD_TAG_COLOR_WARNING: TagProps['color'] = 'warning';
+
 /** The tooltip opens while its anchor is hovered or holds the keyboard focus. */
 export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['hover', 'focus'];
 

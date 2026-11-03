@@ -20,6 +20,7 @@ import {
 } from './burn.model.constants';
 import { getBurnDepthPrediction } from './get.burn.depth.prediction';
 import { getBurnGridOutsideCells } from './get.burn.grid.outside.cells';
+import { getBurnLiftingPart } from './get.burn.lifting.part';
 import { getBurnStoredCellDose } from './get.burn.stored.cell.dose';
 import type { BurnCellDepths } from './interfaces/BurnCellDepths';
 import type { BurnCellSurface } from './interfaces/BurnCellSurface';
@@ -33,23 +34,6 @@ import { visitBurnGridNeighbourCells } from './visit.burn.grid.neighbour.cells';
 
 /** A remaining wall cell before the flood gives it a mesh. */
 const CELL_MESH_NOT_DECIDED = -2;
-
-/** The nearest part up the tree, the part itself first, that can be lifted; undefined means the sheet. */
-const getLiftingPart = (part: BurnPart, partsById: Map<number, BurnPart>): BurnPart | undefined => {
-  const seenPartIds: Set<number> = new Set<number>();
-  let currentPart: BurnPart | undefined = part;
-
-  while (currentPart && !seenPartIds.has(currentPart.id)) {
-    if (isBurnPartLiftable(currentPart)) {
-      return currentPart;
-    }
-
-    seenPartIds.add(currentPart.id);
-    currentPart = currentPart.parentId ? partsById.get(currentPart.parentId) : undefined;
-  }
-
-  return undefined;
-};
 
 const getPartTreeDepth = (part: BurnPart, partsById: Map<number, BurnPart>): number => {
   const seenPartIds: Set<number> = new Set<number>([part.id]);
@@ -161,7 +145,7 @@ const getMeshIndexByPartId = (parts: BurnPart[], partsById: Map<number, BurnPart
   const meshIndexByPartId: Map<number, number> = new Map<number, number>();
 
   for (const part of parts) {
-    const liftingPart: BurnPart | undefined = getLiftingPart(part, partsById);
+    const liftingPart: BurnPart | undefined = getBurnLiftingPart(part, partsById);
 
     const liftingPartId: number = liftingPart?.id ?? BURN_REGION_LABEL_NONE;
 

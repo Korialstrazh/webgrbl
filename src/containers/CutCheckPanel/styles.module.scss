@@ -1,0 +1,36 @@
+.cutCheckPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.summary {
+  margin: 0;
+  font-weight: 600;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.partRow {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+
+  &[aria-pressed='true'] {
+    background-color: var(--color-surface-2);
+    font-weight: 600;
+  }
+}

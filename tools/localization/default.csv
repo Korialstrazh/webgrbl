@@ -32,7 +32,6 @@ BED_TOOL_LABEL;Bed tool
 BED_TOOL_MOVE;Move
 BED_TOOL_SELECT;Select
 BED_VIEW_3D;3D
-BED_VIEW_3D_DESCRIPTION;A 3D preview of the finished job.
 BED_VIEW_DESIGN;Design
 BED_VIEW_MODE_LABEL;Bed view
 BED_VIEW_TOOLPATH;Toolpath
@@ -44,6 +43,22 @@ BED_ZOOM_OUT_HINT;Zoom out (-)
 BED_ZOOM_PAN_HINT;Zoom relative to the fitted bed: 100 % (fit) shows the whole bed. Drag with the middle mouse button, or hold Space and drag, to move the view.
 BED_ZOOM_PERCENT;{{percent}} %
 BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
+BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached. Drag to see what would stay behind.
+BURN_PART_LIFT_HINT_FREE;Part {{part}} comes free. Drag to see what stays behind.
+BURN_PART_LIFT_HINT_NOT_THROUGH;Part {{part}} stays attached: the cut does not reach through, so it cannot be lifted.
+BURN_PART_LIFT_HINT_RISES_WITH_PARENT;Part {{part}} stays attached to part {{parent}}, so it rises with it and cannot be lifted on its own.
+BURN_PART_LIFT_LABEL;Lift selected part
+BURN_PART_LIFT_MAY_STAY_ATTACHED;may stay attached
+BURN_PREVIEW_ADD_MATERIAL;Add material…
+BURN_PREVIEW_BUILDING;Building the 3D view
+BURN_PREVIEW_BURN_TEST_SAMPLE;Burn test sample…
+BURN_PREVIEW_FAILED;The 3D view could not be built. Switch to another view and back to try again.
+BURN_PREVIEW_LOADING;Loading the 3D view
+BURN_PREVIEW_MATERIAL_LABEL;Material
+BURN_PREVIEW_MATERIAL_PLACEHOLDER;Choose a material
+BURN_PREVIEW_NO_MATERIAL;Choose a material or add one to see how the cut will turn out.
+BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
+BURN_PREVIEW_OUT_OF_DATE;Out of date: the design changed. The 3D view comes back when the toolpath is generated again.
 COMING_SOON;Soon
 CONNECTION_CONNECT_MENU;Connect...
 CONNECTION_NO_PORT_CHOSEN;No port chosen
@@ -79,6 +94,21 @@ CONSOLE_REALTIME_STATUS_QUERY;Status query
 CONSOLE_SHOW_STATUS_REPORTS;Show status reports
 CONSOLE_TITLE;Console
 CONSOLE_TOGGLE;Console
+CUT_CHECK_NOTE_ESTIMATE;Estimate from your test.
+CUT_CHECK_NOTE_GUESS;This is a guess: no test has been made with this material on this machine.
+CUT_CHECK_PART_COUNT_one;{{count}} part
+CUT_CHECK_PART_COUNT_other;{{count}} parts
+CUT_CHECK_PART_ROW;Part {{part}}
+CUT_CHECK_PART_STATUS_ATTACHED;Attached
+CUT_CHECK_PART_STATUS_FREE;Free
+CUT_CHECK_PART_STATUS_MAY_STAY_ATTACHED;May stay attached
+CUT_CHECK_SUMMARY;{{parts}}: {{free}} free, {{borderline}} may stay attached, {{attached}} attached
+CUT_CHECK_TEST_SAMPLE_POINTER;Burn a test sample to get an estimate.
+CUT_CHECK_TITLE;Cut check
+CUT_CHECK_WARNING_FILL_CUTS_THROUGH;Layer {{layer}}: the fill cuts through the sheet (predicted {{predicted}} mm, sheet {{needed}} mm). Suggestion: lower the power or raise the speed.
+CUT_CHECK_WARNING_LESS_SURE;This estimate is less sure.
+CUT_CHECK_WARNING_PART_ATTACHED;Layer {{layer}}: part {{part}} stays attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
+CUT_CHECK_WARNING_PART_MAY_STAY_ATTACHED;Layer {{layer}}: part {{part}} may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
 DESIGN_LAYERS_TITLE;Layers
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Design
@@ -280,6 +310,13 @@ MACHINE_STATUS_NOT_CONNECTED;Not connected
 MACHINE_STATUS_POWER;Power
 MACHINE_STATUS_TITLE;Status
 MACHINE_STATUS_WORK_POSITION;Work position
+MATERIAL_DIALOG_CANCEL;Cancel
+MATERIAL_DIALOG_NAME;Name
+MATERIAL_DIALOG_NAME_INVALID;Enter a name of {{min}} to {{max}} characters.
+MATERIAL_DIALOG_SAVE;Save
+MATERIAL_DIALOG_THICKNESS;Thickness (mm)
+MATERIAL_DIALOG_THICKNESS_INVALID;Enter a thickness from {{min}} to {{max}} mm.
+MATERIAL_DIALOG_TITLE;Add material
 OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visible part.
 OBJECT_WARNING_IMAGE;Images are not engraved yet.
 OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.

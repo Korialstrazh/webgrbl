@@ -20,7 +20,7 @@ import {
 import type { AppToast } from './interfaces/AppToast';
 import { LIVE_STORE_TASK_REGISTRY } from './live.store.tasks';
 import { ActiveMachineProfileSelected } from './machine.profile.state';
-import { MaterialSaved, MaterialTestResultSaved } from './material.state';
+import { MaterialSaved, MaterialTestResultSaved, MaterialsLoaded } from './material.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
 import { LayerToggled, ProjectMaterialSelected } from './project.document.state';
@@ -34,6 +34,7 @@ const PART_ID = 1;
 const LIFT_MM = 2;
 const LAYER_KEY = '#ff0000';
 const OTHER_PROFILE_ID = 'other-profile';
+const OTHER_MATERIAL_ID = 'other-material';
 const FIRST_GENERATION = 0;
 const SECOND_GENERATION = 1;
 const GENERATION_ERROR = new Error('worker crashed');
@@ -177,9 +178,6 @@ describe(watchBurnModel.name, () => {
       materialId: TEST_MATERIAL.id,
       testResult: newTestResultFixture(),
     })],
-    ['a material selection', (): ProjectMaterialSelected => new ProjectMaterialSelected({
-      materialId: TEST_MATERIAL.id,
-    })],
     ['a machine profile selection', (): ActiveMachineProfileSelected => new ActiveMachineProfileSelected({
       profileId: OTHER_PROFILE_ID,
     })],
@@ -189,6 +187,82 @@ describe(watchBurnModel.name, () => {
 
     await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
     store.dispatch(newAction());
+    await flushSagas();
+
+    expect(client.generationInputs).toHaveLength(2);
+    expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.READY);
+  });
+
+  it.each([
+    ['a save of another material', (): MaterialSaved => new MaterialSaved({ material: newMaterial() })],
+    ['a test result of another material', (): MaterialTestResultSaved => new MaterialTestResultSaved({
+      materialId: OTHER_MATERIAL_ID,
+      testResult: newTestResultFixture(),
+    })],
+    ['a selection of the same material', (): ProjectMaterialSelected => new ProjectMaterialSelected({
+      materialId: TEST_MATERIAL.id,
+    })],
+    ['the materials being read again', (): MaterialsLoaded => new MaterialsLoaded({ materials: [TEST_MATERIAL] })],
+  ])('keeps a ready model, its lifts and its status on %s', async (_title, newAction) => {
+    const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
+    const store: AppStore = await newHeld3dStore(client);
+
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+    store.dispatch(new BurnPartLifted({ partId: PART_ID, liftMm: LIFT_MM }));
+    store.dispatch(newAction());
+    await flushSagas();
+
+    expect(client.generationInputs).toHaveLength(1);
+    expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.READY);
+    expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBe(LIFT_MM);
+  });
+
+  it.each([
+    ['a save of another material', (): MaterialSaved => new MaterialSaved({ material: newMaterial() })],
+    ['a selection of the same material', (): ProjectMaterialSelected => new ProjectMaterialSelected({
+      materialId: TEST_MATERIAL.id,
+    })],
+    ['the materials being read again', (): MaterialsLoaded => new MaterialsLoaded({ materials: [TEST_MATERIAL] })],
+  ])('does not restart a running build on %s', async (_title, newAction) => {
+    const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient(true);
+    const store: AppStore = await newHeld3dStore(client);
+
+    store.dispatch(newAction());
+    await flushSagas();
+
+    expect(client.cancelledGenerationCount).toBe(0);
+    expect(client.generationInputs).toHaveLength(1);
+    expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.BUILDING);
+  });
+
+  it('builds when the materials arrive after 3D opened', async () => {
+    const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true), client);
+
+    await vi.waitFor((): void => {
+      expect(selectProjectId(store.getState())).toBeDefined();
+    });
+    store.dispatch(new ProjectMaterialSelected({ materialId: TEST_MATERIAL.id }));
+    putReadyToolpath(store);
+    store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
+    await flushSagas();
+    expect(client.generationInputs).toEqual([]);
+
+    store.dispatch(new MaterialsLoaded({ materials: [TEST_MATERIAL] }));
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+
+    expect(client.generationInputs).toHaveLength(1);
+    expect(client.generationInputs[0]?.thicknessMm).toBe(THICKNESS_MM);
+  });
+
+  it('rebuilds on selecting another material', async () => {
+    const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
+    const store: AppStore = await newHeld3dStore(client);
+    const otherMaterial: Material = newMaterial({ thicknessMm: OTHER_THICKNESS_MM });
+
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+    store.dispatch(new MaterialSaved({ material: otherMaterial }));
+    store.dispatch(new ProjectMaterialSelected({ materialId: otherMaterial.id }));
     await flushSagas();
 
     expect(client.generationInputs).toHaveLength(2);

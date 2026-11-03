@@ -10,10 +10,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BURN_PART_LIFT_MAX_THICKNESSES } from '../burn.model/burn.model.constants';
+import { createSelector } from '@reduxjs/toolkit';
+import { getBurnPartEffectiveLiftMm } from '../burn.model/get.burn.part.effective.lift.mm';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../burn.model/interfaces/BurnPart';
-import { getNumberInRange } from '../get.number.in.range';
+import type { BurnPartLiftsMm } from '../burn.model/interfaces/BurnPartLiftsMm';
+import { isBurnPartLiftable } from '../burn.model/is.burn.part.liftable';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import { BedViewModeChanged } from './bed.view.state';
@@ -21,11 +23,13 @@ import { BURN_MODEL_STATUS } from './burn.model.status.constants';
 import type { BurnModelStatus } from './burn.model.status.constants';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { BurnModelReadyPayload } from './interfaces/BurnModelReadyPayload';
+import type { BurnModelRequestedPayload } from './interfaces/BurnModelRequestedPayload';
 import type { BurnPartLiftedPayload } from './interfaces/BurnPartLiftedPayload';
 import type { BurnPartSelectedPayload } from './interfaces/BurnPartSelectedPayload';
 import { ActiveMachineProfileSelected } from './machine.profile.state';
 import { MaterialSaved, MaterialTestResultSaved } from './material.state';
-import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
+import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
+import { ProjectMaterialSelected } from './project.document.state';
 import { ToolpathMachineAreaChanged, ToolpathRequested } from './toolpath.state';
 
 // #region State
@@ -36,8 +40,10 @@ export interface BurnModelState {
   model: BurnModel | undefined;
   /** The part selected in the 3D preview. */
   selectedPartId: number | undefined;
+  /** The material of the latest build; undefined before the first one. */
+  builtMaterialId: string | undefined;
   /** How far the user lifted each part above its place, in mm, not counting what lifts its parents. */
-  liftMmByPartId: Record<number, number>;
+  liftMmByPartId: BurnPartLiftsMm;
 }
 // #endregion
 
@@ -50,7 +56,7 @@ const actionType: ActionTypeFormatter = actionTypePrefixer(BURN_MODEL_STATE_NAME
 // #endregion
 
 // #region Actions
-export class BurnModelRequested extends Action {
+export class BurnModelRequested extends Action<BurnModelRequestedPayload> {
   public static readonly type: string = actionType('burn model requested');
 }
 
@@ -76,16 +82,16 @@ const INITIAL_BURN_MODEL_STATE: BurnModelState = {
   status: BURN_MODEL_STATUS.IDLE,
   model: undefined,
   selectedPartId: undefined,
+  builtMaterialId: undefined,
   liftMmByPartId: {},
 };
 
-// The test result, the thickness and the machine feed the model without changing the toolpath.
+// The machine feeds the model without changing the toolpath. The material actions are not here: only those that touch
+// the material of the model count, see the reducer.
 const BURN_MODEL_INPUT_CHANGE_ACTION_TYPES: readonly string[] = [
-  ...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES,
+  ...PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES,
   ToolpathRequested.type,
   ToolpathMachineAreaChanged.type,
-  MaterialSaved.type,
-  MaterialTestResultSaved.type,
   ActiveMachineProfileSelected.type,
 ];
 // #endregion
@@ -104,13 +110,36 @@ const getStateAfterInputChange = (state: BurnModelState): BurnModelState =>
     ? { ...state, status: BURN_MODEL_STATUS.STALE }
     : getStateAfterBuildStopped(state));
 
-const getStateWithLift = (state: BurnModelState, { partId, liftMm }: BurnPartLiftedPayload): BurnModelState => ({
-  ...state,
-  liftMmByPartId: {
-    ...state.liftMmByPartId,
-    [partId]: getNumberInRange(liftMm, 0, (state.model?.thicknessMm ?? 0) * BURN_PART_LIFT_MAX_THICKNESSES),
-  },
-});
+const getStateAfterMaterialChange = (state: BurnModelState, changedMaterialId: string): BurnModelState =>
+  (changedMaterialId === state.builtMaterialId ? getStateAfterInputChange(state) : state);
+
+const isBurnPartHeldToTheSheet = ({ model }: BurnModelState, partId: number): boolean =>
+  !!model?.parts.some((part: BurnPart): boolean => part.id === partId && !isBurnPartLiftable(part));
+
+/** The own lift that brings a part down to height 0: below its parent, when that parent stands lifted. */
+const getBurnPartLowestLiftMm = ({ model, liftMmByPartId }: BurnModelState, partId: number): number => {
+  const partsById: Map<number, BurnPart> = new Map<number, BurnPart>(
+    (model?.parts ?? []).map((part: BurnPart): [number, BurnPart] => [part.id, part]),
+  );
+  const parentId: number | undefined = partsById.get(partId)?.parentId;
+  const parent: BurnPart | undefined = parentId ? partsById.get(parentId) : undefined;
+
+  return parent ? -getBurnPartEffectiveLiftMm(parent, partsById, liftMmByPartId) : 0;
+};
+
+const getStateWithLift = (state: BurnModelState, { partId, liftMm }: BurnPartLiftedPayload): BurnModelState => {
+  if (isBurnPartHeldToTheSheet(state, partId)) {
+    return state;
+  }
+
+  return {
+    ...state,
+    liftMmByPartId: {
+      ...state.liftMmByPartId,
+      [partId]: Math.max(liftMm, getBurnPartLowestLiftMm(state, partId)),
+    },
+  };
+};
 
 export const burnModelReducer = (
   state: BurnModelState = INITIAL_BURN_MODEL_STATE,
@@ -118,9 +147,14 @@ export const burnModelReducer = (
 ): BurnModelState => {
   switch (action.type) {
   case BurnModelRequested.type:
-    return { ...state, status: BURN_MODEL_STATUS.BUILDING };
+    return {
+      ...state,
+      status: BURN_MODEL_STATUS.BUILDING,
+      builtMaterialId: (action as BurnModelRequested).payload.materialId,
+    };
   case BurnModelReady.type:
     return {
+      ...state,
       status: BURN_MODEL_STATUS.READY,
       model: (action as BurnModelReady).payload.model,
       selectedPartId: undefined,
@@ -134,6 +168,14 @@ export const burnModelReducer = (
     return getStateWithLift(state, (action as BurnPartLifted).payload);
   case BedViewModeChanged.type:
     return getStateAfterBuildStopped(state);
+  case MaterialSaved.type:
+    return getStateAfterMaterialChange(state, (action as MaterialSaved).payload.material.id);
+  case MaterialTestResultSaved.type:
+    return getStateAfterMaterialChange(state, (action as MaterialTestResultSaved).payload.materialId);
+  case ProjectMaterialSelected.type:
+    return (action as ProjectMaterialSelected).payload.materialId === state.builtMaterialId
+      ? state
+      : getStateAfterInputChange(state);
   default:
     return BURN_MODEL_INPUT_CHANGE_ACTION_TYPES.includes(action.type) ? getStateAfterInputChange(state) : state;
   }
@@ -145,7 +187,14 @@ type RootState = { [BURN_MODEL_STATE_NAME]: BurnModelState };
 
 export const selectBurnModel = (state: RootState): BurnModel | undefined => state[BURN_MODEL_STATE_NAME].model;
 
+/** The model only while it matches the project: a stale one may even come from a project opened before this one. */
+export const selectCurrentBurnModel = (state: RootState): BurnModel | undefined =>
+  (state[BURN_MODEL_STATE_NAME].status === BURN_MODEL_STATUS.READY ? selectBurnModel(state) : undefined);
+
 export const selectBurnModelStatus = (state: RootState): BurnModelStatus => state[BURN_MODEL_STATE_NAME].status;
+
+export const selectBuiltBurnMaterialId = (state: RootState): string | undefined =>
+  state[BURN_MODEL_STATE_NAME].builtMaterialId;
 
 export const selectSelectedBurnPartId = (state: RootState): number | undefined =>
   state[BURN_MODEL_STATE_NAME].selectedPartId;
@@ -153,20 +202,21 @@ export const selectSelectedBurnPartId = (state: RootState): number | undefined =
 export const selectBurnPartLiftMm = (partId: number) => (state: RootState): number =>
   state[BURN_MODEL_STATE_NAME].liftMmByPartId[partId] ?? 0;
 
-export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootState): number => {
-  const parts: BurnPart[] = selectBurnModel(state)?.parts ?? [];
-  const seenPartIds: Set<number> = new Set<number>();
-  let currentPart: BurnPart | undefined = parts.find((part: BurnPart): boolean => part.id === partId);
-  let effectiveLiftMm = 0;
+export const selectBurnPartEffectiveLiftsMm = createSelector(
+  [selectBurnModel, (state: RootState): BurnPartLiftsMm => state[BURN_MODEL_STATE_NAME].liftMmByPartId],
+  (model: BurnModel | undefined, liftsMm: BurnPartLiftsMm): BurnPartLiftsMm => {
+    const parts: BurnPart[] = model?.parts ?? [];
+    const partsById: Map<number, BurnPart> = new Map<number, BurnPart>(
+      parts.map((part: BurnPart): [number, BurnPart] => [part.id, part]),
+    );
 
-  while (currentPart && !seenPartIds.has(currentPart.id)) {
-    const { id, parentId }: BurnPart = currentPart;
+    return Object.fromEntries(parts.map((part: BurnPart): [number, number] => [
+      part.id,
+      getBurnPartEffectiveLiftMm(part, partsById, liftsMm),
+    ]));
+  },
+);
 
-    seenPartIds.add(id);
-    effectiveLiftMm += selectBurnPartLiftMm(id)(state);
-    currentPart = parts.find((part: BurnPart): boolean => part.id === parentId);
-  }
-
-  return effectiveLiftMm;
-};
+export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootState): number =>
+  selectBurnPartEffectiveLiftsMm(state)[partId] ?? 0;
 // #endregion
