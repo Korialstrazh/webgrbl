@@ -16,6 +16,7 @@ const newWarning = (overrides: Partial<CutCheckWarning>): CutCheckWarning => ({
   predictedDepthMm: 1.26,
   neededDepthMm: 3,
   isLessSure: false,
+  isDepthUpperBound: false,
   ...overrides,
 });
 
@@ -49,6 +50,12 @@ describe(getCutCheckWarningText.name, () => {
     expect(warningText).toContain('sheet 3.0 mm');
     expect(warningText).toContain(FILL_SUGGESTION);
     expect(warningText).not.toContain(PART_SUGGESTION);
+  });
+
+  it('says at most for a depth that is only an upper bound', () => {
+    const warningText: string = getText(newWarning({ isDepthUpperBound: true, predictedDepthMm: 3 }));
+
+    expect(warningText).toContain('predicted at most 3.0 mm');
   });
 
   it('rounds a predicted depth below the needed one down, so the two numbers differ', () => {

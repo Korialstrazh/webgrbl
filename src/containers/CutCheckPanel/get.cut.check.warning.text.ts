@@ -35,10 +35,13 @@ const getPredictedDepthText = (predictedDepthMm: number, neededDepthMm: number):
 };
 
 export const getCutCheckWarningText = (t: TFunction, warning: CutCheckWarning, layerName: string): string => {
+  const predictedDepthText: string = getPredictedDepthText(warning.predictedDepthMm, warning.neededDepthMm);
   const warningText: string = t(WARNING_TEXT_KEYS[warning.kind], {
     layer: layerName,
     part: warning.partId,
-    predicted: getPredictedDepthText(warning.predictedDepthMm, warning.neededDepthMm),
+    predicted: warning.isDepthUpperBound
+      ? t(DEFAULT.CUT_CHECK_WARNING_DEPTH_AT_MOST, { depth: predictedDepthText })
+      : predictedDepthText,
     needed: warning.neededDepthMm.toFixed(DEPTH_DECIMALS),
   });
 

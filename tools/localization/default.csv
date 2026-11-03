@@ -105,6 +105,7 @@ CUT_CHECK_PART_STATUS_MAY_STAY_ATTACHED;May stay attached
 CUT_CHECK_SUMMARY;{{parts}}: {{free}} free, {{borderline}} may stay attached, {{attached}} attached
 CUT_CHECK_TEST_SAMPLE_POINTER;Burn a test sample to get an estimate.
 CUT_CHECK_TITLE;Cut check
+CUT_CHECK_WARNING_DEPTH_AT_MOST;at most {{depth}}
 CUT_CHECK_WARNING_FILL_CUTS_THROUGH;Layer {{layer}}: the fill cuts through the sheet (predicted {{predicted}} mm, sheet {{needed}} mm). Suggestion: lower the power or raise the speed.
 CUT_CHECK_WARNING_LESS_SURE;This estimate is less sure.
 CUT_CHECK_WARNING_PART_ATTACHED;Layer {{layer}}: part {{part}} stays attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.

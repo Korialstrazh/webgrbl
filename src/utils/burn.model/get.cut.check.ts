@@ -11,8 +11,10 @@
  */
 import {
   BURN_DEPTH_BASIS_KIND,
+  BURN_DOSE_STORAGE_TOLERANCE_RATIO,
   BURN_PART_STATUS,
   CUT_CHECK_WARNING_KIND,
+  CUT_DEPTH_LEVEL,
 } from './burn.model.constants';
 import type { CutCheckWarningKind } from './burn.model.constants';
 import { getBurnDepthPrediction } from './get.burn.depth.prediction';
@@ -30,6 +32,8 @@ const getPartWarningKind = (part: BurnPart): CutCheckWarningKind | undefined => 
 
   return part.status === BURN_PART_STATUS.BORDERLINE ? CUT_CHECK_WARNING_KIND.PART_MAY_STAY_ATTACHED : undefined;
 };
+
+const isDepthUpperBound = ({ kind }: BurnDepthBasis): boolean => kind === BURN_DEPTH_BASIS_KIND.NOT_THROUGH;
 
 const getDoseOfDepth = (depthMm: number, basis: BurnDepthBasis): number =>
   basis.depthMmPerDose ? depthMm / basis.depthMmPerDose : 0;
@@ -54,11 +58,26 @@ const getPartWarnings = ({ parts, thicknessMm, basis }: CutCheckInput): CutCheck
         predictedDepthMm,
         neededDepthMm: thicknessMm,
         isLessSure: getBurnDepthPrediction(getDoseOfDepth(predictedDepthMm, basis), thicknessMm, basis).isLessSure,
+        isDepthUpperBound: isDepthUpperBound(basis),
       });
     }
   }
 
   return warnings;
+};
+
+/**
+ * A test that did not cut through gives only the most a dose can reach, so that dose itself stays attached: only a dose
+ * above it can reach through. Storing the dose can have rounded it up, which must not count as above.
+ */
+const isFillDoseThrough = (dose: number, thicknessMm: number, basis: BurnDepthBasis): boolean => {
+  if (!isDepthUpperBound(basis)) {
+    return basis.depthMmPerDose * dose >= thicknessMm;
+  }
+
+  const unroundedDose: number = dose * (1 - BURN_DOSE_STORAGE_TOLERANCE_RATIO);
+
+  return getBurnDepthPrediction(unroundedDose, thicknessMm, basis).level !== CUT_DEPTH_LEVEL.NOT_THROUGH;
 };
 
 const getHottestThroughDose = (
@@ -70,7 +89,7 @@ const getHottestThroughDose = (
   for (const [cell, dose] of layerDose.dose.entries()) {
     const totalDose: number = grid.fillDose[cell] ?? 0;
 
-    if (dose && basis.depthMmPerDose * totalDose >= thicknessMm) {
+    if (dose && isFillDoseThrough(totalDose, thicknessMm, basis)) {
       hottestDose = Math.max(hottestDose, totalDose);
     }
   }
@@ -98,6 +117,7 @@ const getFillWarnings = (input: CutCheckInput): CutCheckWarning[] => {
         predictedDepthMm: basis.depthMmPerDose * hottestDose,
         neededDepthMm: thicknessMm,
         isLessSure: getBurnDepthPrediction(hottestDose, thicknessMm, basis).isLessSure,
+        isDepthUpperBound: isDepthUpperBound(basis),
       });
     }
   }
