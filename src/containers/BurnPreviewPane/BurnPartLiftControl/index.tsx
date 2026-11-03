@@ -10,11 +10,10 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Tag } from 'antd';
+import { Button } from 'antd';
 import type { KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_TAG_COLOR_WARNING } from '../../../utils/antd.constants';
 import {
   BURN_PART_LIFT_DISPLAY_DECIMALS,
   BURN_PART_LIFT_STEP_MM,
@@ -108,9 +107,7 @@ export const BurnPartLiftControl = (): ReactNode => {
       return t(DEFAULT.BURN_PART_LIFT_HINT_RISES_WITH_PARENT, { part: part.id, parent: carryingPart.id });
     }
 
-    return isAboveSheet
-      ? t(DEFAULT.BURN_PART_LIFT_HINT_LIFTED, { part: part.id })
-      : t(LIFT_HINT_KEYS[part.status], { part: part.id });
+    return t(LIFT_HINT_KEYS[part.status], { part: part.id });
   };
 
   return (
@@ -127,11 +124,6 @@ export const BurnPartLiftControl = (): ReactNode => {
         onKeyDown={handleLiftKeyDown}
       >
         {isAboveSheet && <strong className={styles.height}>{heightLabel}</strong>}
-        {part.status === BURN_PART_STATUS.BORDERLINE && (
-          <Tag className={styles.attachedTag} color={ANTD_TAG_COLOR_WARNING}>
-            {t(DEFAULT.BURN_PART_LIFT_MAY_STAY_ATTACHED)}
-          </Tag>
-        )}
         <span className={styles.hint}>{getHintText()}</span>
         {isLiftable && (
           <span className={styles.keyHint}>{t(DEFAULT.BURN_PART_LIFT_KEY_HINT, { step: BURN_PART_LIFT_STEP_MM })}</span>

@@ -10,11 +10,11 @@ describe(getCutCheckListScrollTopPx.name, () => {
     expect(getCutCheckListScrollTopPx(LIST, newBox(150, 190))).toBe(50);
   });
 
-  it('moves up just enough for a row above', () => {
-    expect(getCutCheckListScrollTopPx(LIST, newBox(80, 120))).toBe(30);
+  it('moves up far enough for a row above and its margin', () => {
+    expect(getCutCheckListScrollTopPx(LIST, newBox(80, 120))).toBe(14);
   });
 
-  it('moves down just enough for a row below', () => {
-    expect(getCutCheckListScrollTopPx(LIST, newBox(290, 330))).toBe(80);
+  it('moves down far enough for a row below and its margin', () => {
+    expect(getCutCheckListScrollTopPx(LIST, newBox(290, 330))).toBe(96);
   });
 });

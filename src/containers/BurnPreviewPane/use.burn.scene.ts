@@ -12,6 +12,7 @@
  */
 import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPartLiftsMm } from '../../utils/burn.model/interfaces/BurnPartLiftsMm';
@@ -29,6 +30,7 @@ import {
   selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
+import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import { addBurnLiftDragListener } from './add.burn.lift.drag.listener';
 import { addBurnSceneClickListener } from './add.burn.scene.click.listener';
@@ -39,12 +41,14 @@ import type { BurnSceneUse } from './interfaces/BurnSceneUse';
 import styles from './styles.module.scss';
 
 const CANVAS_ELEMENT_NAME = 'canvas';
+const ARIA_LABEL_ATTRIBUTE = 'aria-label';
 const WEBGL_CONTEXT_LOST_EVENT = 'webglcontextlost';
 
 export const useBurnScene = (
   runtimeLoad: BurnSceneRuntimeLoad,
   hostRef: RefObject<HTMLDivElement | null>,
 ): BurnSceneUse => {
+  const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const store: AppStore = useStore() as AppStore;
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
@@ -121,6 +125,13 @@ export const useBurnScene = (
       setRenderer(undefined);
     };
   }, [dispatch, hostRef, isSceneFailed, runtimeLoad, store]);
+
+  // Apart from the effect that makes the canvas: a new language must not rebuild the renderer.
+  useEffect(() => {
+    hostRef.current
+      ?.querySelector(CANVAS_ELEMENT_NAME)
+      ?.setAttribute(ARIA_LABEL_ATTRIBUTE, t(DEFAULT.BURN_SCENE_CANVAS_LABEL));
+  }, [hostRef, renderer, t]);
 
   useEffect(() => {
     if (renderer && size.widthPx && size.heightPx) {

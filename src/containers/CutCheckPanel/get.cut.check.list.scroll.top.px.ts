@@ -1,5 +1,5 @@
 /**
- * The scroll position of the part list that shows a row, moving as little as it can.
+ * The scroll position of a scrolling panel that shows a row with a margin around it, moving as little as it can.
  *
  * @author michael.morosov
  *
@@ -8,18 +8,22 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-type ListBox = Pick<HTMLElement, 'scrollTop' | 'clientHeight' | 'getBoundingClientRect'>;
+type ScrollerBox = Pick<HTMLElement, 'scrollTop' | 'clientHeight' | 'getBoundingClientRect'>;
 type RowBox = Pick<HTMLElement, 'getBoundingClientRect'>;
 
-export const getCutCheckListScrollTopPx = (list: ListBox, row: RowBox): number => {
-  const listRect: Pick<DOMRect, 'top'> = list.getBoundingClientRect();
+const ROW_MARGIN_PX = 16;
+
+export const getCutCheckListScrollTopPx = (scroller: ScrollerBox, row: RowBox): number => {
+  const scrollerRect: Pick<DOMRect, 'top'> = scroller.getBoundingClientRect();
   const rowRect: Pick<DOMRect, 'top' | 'bottom'> = row.getBoundingClientRect();
-  const rowTopPx: number = rowRect.top - listRect.top;
-  const rowBottomPx: number = rowRect.bottom - listRect.top;
+  const rowTopPx: number = rowRect.top - scrollerRect.top - ROW_MARGIN_PX;
+  const rowBottomPx: number = rowRect.bottom - scrollerRect.top + ROW_MARGIN_PX;
 
   if (rowTopPx < 0) {
-    return list.scrollTop + rowTopPx;
+    return scroller.scrollTop + rowTopPx;
   }
 
-  return rowBottomPx > list.clientHeight ? list.scrollTop + rowBottomPx - list.clientHeight : list.scrollTop;
+  return rowBottomPx > scroller.clientHeight
+    ? scroller.scrollTop + rowBottomPx - scroller.clientHeight
+    : scroller.scrollTop;
 };

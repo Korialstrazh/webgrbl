@@ -27,7 +27,7 @@ const OTHER_PART_ID = 3;
 const LIFT_LABEL = 'Lift selected part';
 const PUT_ALL_BACK_LABEL = 'Put all back';
 const CLICK_HINT = 'Click a part to check it and lift it.';
-const MAY_STAY_ATTACHED_TEXT = 'May stay attached';
+const MAY_STAY_ATTACHED_TEXT = `Part ${1} may stay attached.`;
 const NOT_THROUGH_REASON = 'Part 1 stays attached: the cut does not reach through, so it cannot be lifted.';
 const RISES_WITH_PARENT_REASON =
   'Part 2 stays attached to Part 1, so it rises with it and cannot be lifted on its own.';

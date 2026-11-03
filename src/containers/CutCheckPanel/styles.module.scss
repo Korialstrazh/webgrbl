@@ -16,10 +16,17 @@
   color: var(--color-text-muted);
 }
 
-.partDetail {
-  margin: var(--space-1) var(--space-2);
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
+// A list cut to nothing takes no room and no gap.
+.list:empty {
+  display: none;
+}
+
+.partListToggle:global(.ant-btn) {
+  align-self: flex-start;
+
+  @media (pointer: coarse) {
+    min-height: 2.75rem;
+  }
 }
 
 .note {
@@ -32,12 +39,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  // Its own scroll, so a job with many parts leaves Layers below within reach.
-  max-height: 12rem;
   margin: 0;
   padding: 0;
-  overflow-y: auto;
-  scrollbar-width: thin;
   list-style: none;
 }
 

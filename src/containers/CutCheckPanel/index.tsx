@@ -1,8 +1,8 @@
 /**
- * The Cut check of the 3D view: the part counts, the warnings put together by what they say, a scrolling list with one
- * row per part that selects it and shows its own warning, and whether this is an estimate from a test or a guess.
- * Without a current model it says why and shows no old parts. Warnings never block export.
- *
+ * The Cut check of the 3D view: the part counts, the warnings put together by what they say, a list with one row per
+ * part that selects it, cut down to the selected row when it is long so Layers stays near, and whether this is an
+ * estimate from a test or a guess. Without a current model it says why and shows no old parts. Warnings never block
+ * export.
  * @author michael.morosov
  *
  * @since 2026-11-03
@@ -11,7 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Alert, Button, Tag } from 'antd';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,7 +24,6 @@ import {
 import { BURN_PART_STATUS } from '../../utils/burn.model/burn.model.constants';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../utils/burn.model/interfaces/BurnPart';
-import type { CutCheckWarning } from '../../utils/burn.model/interfaces/CutCheckWarning';
 import { getLayerNameByKey } from '../../utils/layers/get.layer.name.by.key';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../utils/localization/default.locales';
@@ -56,10 +55,19 @@ const PART_STATUS_TEXT_KEYS: Record<BurnPart['status'], string> = {
   [BURN_PART_STATUS.NOT_THROUGH]: DEFAULT.CUT_CHECK_PART_STATUS_ATTACHED,
 };
 
-const WARNING_ROW_KEY_SEPARATOR = '-';
+/** More rows than this start cut down to the selected row: the counts above already sum them up. */
+const PART_LIST_FULL_ROW_LIMIT = 4;
+const SCROLLING_OVERFLOW_VALUES: readonly string[] = ['auto', 'scroll'];
 
-const getWarningRowKey = ({ kind, layerKey, partId }: CutCheckWarning): string =>
-  [kind, layerKey, partId].join(WARNING_ROW_KEY_SEPARATOR);
+const getScrollingAncestor = (element: HTMLElement): HTMLElement | undefined => {
+  for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+    if (SCROLLING_OVERFLOW_VALUES.includes(getComputedStyle(ancestor).overflowY)) {
+      return ancestor;
+    }
+  }
+
+  return undefined;
+};
 
 const getSummaryCountClassName = (count: number): string | undefined => (count ? undefined : styles.emptyCount);
 
@@ -71,16 +79,19 @@ export const CutCheckPanel = (): ReactNode => {
   const selectedPartId: number | undefined = useSelector(selectSelectedBurnPartId);
   const hoveredPartId: number | undefined = useSelector(selectHoveredBurnPartId);
   const selectedRowRef: RefObject<HTMLLIElement | null> = useRef<HTMLLIElement>(null);
-  const partListRef: RefObject<HTMLUListElement | null> = useRef<HTMLUListElement>(null);
+  const [isPartListExpanded, setIsPartListExpanded] = useState<boolean>(false);
   const projectLayers: ProjectLayer[] = useSelector(selectProjectLayers);
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
 
   useEffect(() => {
-    // Only the list moves: scrolling the panels too would take the scene away from a user who just clicked in it.
-    if (partListRef.current && selectedRowRef.current) {
-      partListRef.current.scrollTop = getCutCheckListScrollTopPx(partListRef.current, selectedRowRef.current);
+    // Only the panel moves: stacked, that panel does not scroll, so the scene stays with a user who clicked in it.
+    const selectedRow: HTMLLIElement | null = selectedRowRef.current;
+    const scroller: HTMLElement | undefined = selectedRow ? getScrollingAncestor(selectedRow) : undefined;
+
+    if (scroller && selectedRow) {
+      scroller.scrollTop = getCutCheckListScrollTopPx(scroller, selectedRow);
     }
-  }, [selectedPartId]);
+  }, [selectedPartId, isPartListExpanded]);
 
   if (!model) {
     return (
@@ -93,11 +104,10 @@ export const CutCheckPanel = (): ReactNode => {
   const { freePartCount, borderlinePartCount, attachedPartCount, warnings, isGuess } = model.cutCheck;
   const warningGroups: CutCheckWarningGroup[] = getCutCheckWarningGroups(warnings);
   const getLayerName = (layerKey: string): string => getLayerNameByKey(layerKey, projectLayers, paletteEntries);
-  // A row repeats its warning only where the alert does not name the part.
-  const selectedPartWarnings: CutCheckWarning[] = warningGroups
-    .filter((group: CutCheckWarningGroup): boolean => group.warnings.length > 1)
-    .flatMap((group: CutCheckWarningGroup): CutCheckWarning[] => group.warnings)
-    .filter(({ partId }: CutCheckWarning): boolean => !!partId && partId === selectedPartId);
+  const isPartListLong: boolean = model.parts.length > PART_LIST_FULL_ROW_LIMIT;
+  const shownParts: BurnPart[] = isPartListLong && !isPartListExpanded
+    ? model.parts.filter(({ id }: BurnPart): boolean => id === selectedPartId)
+    : model.parts;
 
   return (
     <Panel title={t(DEFAULT.CUT_CHECK_TITLE)}>
@@ -137,8 +147,8 @@ export const CutCheckPanel = (): ReactNode => {
             )}
           />
         ))}
-        <ul ref={partListRef} className={styles.list}>
-          {model.parts.map(({ id, status }: BurnPart) => (
+        <ul className={styles.list}>
+          {shownParts.map(({ id, status }: BurnPart) => (
             <li key={id} ref={id === selectedPartId ? selectedRowRef : undefined}>
               <Button
                 className={id === hoveredPartId ? [styles.partRow, styles.hoveredRow].join(' ') : styles.partRow}
@@ -154,14 +164,20 @@ export const CutCheckPanel = (): ReactNode => {
                   {t(PART_STATUS_TEXT_KEYS[status])}
                 </Tag>
               </Button>
-              {id === selectedPartId && selectedPartWarnings.map((warning: CutCheckWarning) => (
-                <p key={getWarningRowKey(warning)} className={styles.partDetail}>
-                  {getCutCheckWarningText(t, warning, getLayerName(warning.layerKey))}
-                </p>
-              ))}
             </li>
           ))}
         </ul>
+        {isPartListLong && (
+          <Button
+            className={styles.partListToggle}
+            aria-expanded={isPartListExpanded}
+            onClick={() => setIsPartListExpanded(!isPartListExpanded)}
+          >
+            {isPartListExpanded
+              ? t(DEFAULT.CUT_CHECK_SHOW_FEWER_PARTS)
+              : t(DEFAULT.CUT_CHECK_SHOW_ALL_PARTS, { total: model.parts.length })}
+          </Button>
+        )}
       </div>
     </Panel>
   );

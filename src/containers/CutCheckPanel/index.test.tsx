@@ -17,6 +17,7 @@ import {
   BurnModelReady,
   BurnModelRequested,
   BurnPartLifted,
+  BurnPartSelected,
   selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
@@ -222,15 +223,45 @@ describe(CutCheckPanel.name, () => {
       expect(screen.getByText(/the fill cuts through/)).toBeInTheDocument();
     });
 
-    it('shows the warning of a part in its row only while that part is selected', () => {
+    it('keeps the numbers and the suggestion in the callout, never in a selected row', () => {
       renderPanel(newReadyStore(groupedModel));
-
-      expect(screen.queryByText(/Part 2 may stay attached/)).not.toBeInTheDocument();
-
       fireEvent.click(getPartRow(BORDERLINE_PART_ID));
 
-      expect(screen.getByText(/Part 2 may stay attached/)).toBeInTheDocument();
-      expect(screen.queryByText(/Part 1 may stay attached/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Part 2 may stay attached/)).not.toBeInTheDocument();
+      expect(screen.getAllByText(/predicted 0\.2 mm/)).toHaveLength(3);
+    });
+  });
+
+  describe('a long part list', () => {
+    const LONG_PART_IDS: number[] = [1, 2, 3, 4, 5];
+    const longModel: BurnModel = {
+      ...newModel(),
+      parts: LONG_PART_IDS.map((id: number): BurnPart => newPart(id, BURN_PART_STATUS.BORDERLINE)),
+    };
+    const SHOW_ALL_LABEL = 'Show all 5 parts';
+
+    it('starts with no rows and a control that shows them all and hides them again', () => {
+      renderPanel(newReadyStore(longModel));
+
+      expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: SHOW_ALL_LABEL }));
+
+      expect(screen.getAllByRole('button', { name: /^Part / })).toHaveLength(LONG_PART_IDS.length);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show fewer parts' }));
+
+      expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
+    });
+
+    it('keeps the selected row while cut down', () => {
+      const store: AppStore = newReadyStore(longModel);
+
+      store.dispatch(new BurnPartSelected({ partId: BORDERLINE_PART_ID }));
+      renderPanel(store);
+
+      expect(screen.getAllByRole('button', { name: /^Part / })).toHaveLength(1);
+      expect(getPartRow(BORDERLINE_PART_ID)).toHaveAttribute('aria-pressed', 'true');
     });
   });
 
