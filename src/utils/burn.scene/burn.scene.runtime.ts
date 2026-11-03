@@ -29,6 +29,7 @@ import {
   BURN_SCENE_AMBIENT_LIGHT_COLOUR,
   BURN_SCENE_AMBIENT_LIGHT_INTENSITY,
   BURN_SCENE_BACKGROUND_COLOUR,
+  BURN_SCENE_CAMERA_DIRECTION,
   BURN_SCENE_CONTROLS_CHANGE_EVENT,
   BURN_SCENE_KEY_LIGHT_COLOUR,
   BURN_SCENE_KEY_LIGHT_DIRECTION,
@@ -36,9 +37,11 @@ import {
   BURN_SCENE_LIFT_AXIS_LENGTH_PX,
   BURN_SCENE_MAX_PIXEL_RATIO,
   BURN_SCENE_MAX_POLAR_ANGLE_RADIANS,
+  BURN_SCENE_TOP_CAMERA_DIRECTION,
 } from './burn.scene.constants';
 import { getBurnLiftChangeMm } from './get.burn.lift.change.mm';
 import { getBurnPartAtPointer } from './get.burn.part.at.pointer';
+import { getBurnSceneCameraPosition } from './get.burn.scene.camera.position';
 import { getBurnSceneFrameCentre } from './get.burn.scene.frame.centre';
 import { getBurnSceneMmPerPx } from './get.burn.scene.mm.per.px';
 import type { BurnSceneCameraFraming } from './interfaces/BurnSceneCameraFraming';
@@ -171,6 +174,14 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     return this.camera ? getBurnLiftChangeMm(this.camera, this.sizePx, move) : 0;
   }
 
+  public fitBurnSceneView(): void {
+    this.moveCameraToBurnSceneDirection(BURN_SCENE_CAMERA_DIRECTION);
+  }
+
+  public showBurnSceneFromTop(): void {
+    this.moveCameraToBurnSceneDirection(BURN_SCENE_TOP_CAMERA_DIRECTION);
+  }
+
   public dispose(): void {
     this.removeModelObjects();
     this.disposeLiftAxis();
@@ -179,6 +190,19 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     // switching the 3D view on and off again would soon push out the oldest one.
     this.webGlRenderer.forceContextLoss();
     this.webGlRenderer.dispose();
+  }
+
+  private moveCameraToBurnSceneDirection(direction: readonly [number, number, number]): void {
+    if (this.camera && this.controls && this.modelFraming) {
+      const framing: BurnSceneCameraFraming = { ...this.modelFraming, aspectRatio: this.aspectRatio };
+
+      this.controls.target.copy(getBurnSceneFrameCentre(framing));
+      this.camera.position.copy(getBurnSceneCameraPosition(framing, direction));
+      this.camera.zoom = 1;
+      this.camera.updateProjectionMatrix();
+      this.controls.update();
+      this.drawScene();
+    }
   }
 
   /** A rebuild of the same sheet keeps the orbit, zoom and pan of the user. */

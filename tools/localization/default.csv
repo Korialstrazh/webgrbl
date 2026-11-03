@@ -59,6 +59,11 @@ BURN_PREVIEW_MATERIAL_PLACEHOLDER;Choose a material
 BURN_PREVIEW_NO_MATERIAL;Choose a material or add one to see how the cut will turn out.
 BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
 BURN_PREVIEW_OUT_OF_DATE;Out of date: the design changed. The 3D view comes back when the toolpath is generated again.
+BURN_SCENE_VIEW_FIT;Fit
+BURN_SCENE_VIEW_FIT_HINT;Back to the first view of the whole sheet
+BURN_SCENE_VIEW_LABEL;3D view
+BURN_SCENE_VIEW_TOP;Top
+BURN_SCENE_VIEW_TOP_HINT;Look straight down at the sheet
 COMING_SOON;Soon
 CONNECTION_CONNECT_MENU;Connect...
 CONNECTION_NO_PORT_CHOSEN;No port chosen

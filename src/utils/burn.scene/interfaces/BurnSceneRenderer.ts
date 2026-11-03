@@ -29,6 +29,10 @@ export interface BurnSceneRenderer {
   isBurnLiftAxisAtPoint: (point: BurnScenePointPx) => boolean;
   /** How many mm a pointer move along the lift axis lifts a part. */
   getBurnLiftChangeMm: (move: BurnScenePointPx) => number;
+  /** Brings back the first view of the whole sheet, undoing orbit, zoom and pan. */
+  fitBurnSceneView: () => void;
+  /** Looks straight down at the whole sheet, undoing orbit, zoom and pan. */
+  showBurnSceneFromTop: () => void;
   /** Frees the objects and the controls and gives the WebGL context back; its canvas cannot be drawn on again. */
   dispose: () => void;
 }

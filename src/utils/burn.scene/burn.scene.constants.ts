@@ -35,8 +35,10 @@ export const BURN_SCENE_FRAME_MARGIN_RATIO = 1.05;
 export const BURN_SCENE_CAMERA_DISTANCE_RADIUSES = 4;
 /** The far plane stands this many camera distances away, so the whole frame fits between the planes. */
 export const BURN_SCENE_CAMERA_FAR_DISTANCES = 2;
-/** Stops the orbit at the horizon: the underside of the sheet shows nothing worth seeing. */
-export const BURN_SCENE_MAX_POLAR_ANGLE_RADIANS = Math.PI / 2;
+/** Stops the orbit before the sheet goes edge-on, 80 degrees from straight down: a line shows nothing to work with. */
+export const BURN_SCENE_MAX_POLAR_ANGLE_RADIANS = (80 * Math.PI) / 180;
+/** Direction from the sheet to the camera in the top view: a hair towards the front, so that +Y is up on screen. */
+export const BURN_SCENE_TOP_CAMERA_DIRECTION: readonly [number, number, number] = [0, -0.001, 1];
 /** A pointer that moved further than this between press and release dragged the scene instead of clicking. */
 export const BURN_SCENE_CLICK_MAX_MOVE_PX = 4;
 

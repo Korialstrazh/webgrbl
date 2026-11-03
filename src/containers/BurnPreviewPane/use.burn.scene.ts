@@ -32,12 +32,16 @@ import { addBurnLiftDragListener } from './add.burn.lift.drag.listener';
 import { addBurnSceneClickListener } from './add.burn.scene.click.listener';
 import { BURN_SCENE_RUNTIME_LOAD_STATUS } from './burn.preview.pane.constants';
 import type { BurnSceneRuntimeLoad } from './interfaces/BurnSceneRuntimeLoad';
+import type { BurnSceneUse } from './interfaces/BurnSceneUse';
 import styles from './styles.module.scss';
 
 const CANVAS_ELEMENT_NAME = 'canvas';
 const WEBGL_CONTEXT_LOST_EVENT = 'webglcontextlost';
 
-export const useBurnScene = (runtimeLoad: BurnSceneRuntimeLoad, hostRef: RefObject<HTMLDivElement | null>): boolean => {
+export const useBurnScene = (
+  runtimeLoad: BurnSceneRuntimeLoad,
+  hostRef: RefObject<HTMLDivElement | null>,
+): BurnSceneUse => {
   const dispatch: AppDispatch = useDispatch();
   const store: AppStore = useStore() as AppStore;
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
@@ -124,5 +128,5 @@ export const useBurnScene = (runtimeLoad: BurnSceneRuntimeLoad, hostRef: RefObje
     renderer?.highlightBurnPart(selectedPartId);
   }, [renderer, model, selectedPartId]);
 
-  return isSceneFailed;
+  return { isSceneFailed, renderer };
 };

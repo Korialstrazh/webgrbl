@@ -77,6 +77,8 @@ const newFakeRenderer = (): BurnSceneRenderer => ({
   getBurnPartIdAtPointer: vi.fn(() => PART_ID),
   isBurnLiftAxisAtPoint: vi.fn(() => false),
   getBurnLiftChangeMm: vi.fn(({ yPx }: { yPx: number }) => -yPx),
+  fitBurnSceneView: vi.fn(),
+  showBurnSceneFromTop: vi.fn(),
   dispose: vi.fn(),
 });
 
@@ -323,6 +325,26 @@ describe(BurnPreviewPane.name, () => {
 
     expect(await screen.findByText(NO_WEBGL_TEXT)).toBeInTheDocument();
     expect(screen.getByText(NO_MATERIAL_TEXT)).toBeInTheDocument();
+  });
+
+  it('offers Fit and Top once a model is on show, and they move the view', async () => {
+    const renderer: BurnSceneRenderer = newFakeRenderer();
+    const store: AppStore = newStore();
+
+    vi.mocked(newBurnSceneRenderer).mockReturnValue(renderer);
+    const { container } = renderPane(store);
+
+    await getSceneCanvas(container);
+    expect(screen.queryByRole('button', { name: 'Fit' })).not.toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new BurnModelReady({ model: newModel() }));
+    });
+    fireEvent.click(await screen.findByRole('button', { name: 'Top' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Fit' }));
+
+    expect(renderer.showBurnSceneFromTop).toHaveBeenCalledTimes(1);
+    expect(renderer.fitBurnSceneView).toHaveBeenCalledTimes(1);
   });
 
   it('tells the renderer the size of the view', async () => {

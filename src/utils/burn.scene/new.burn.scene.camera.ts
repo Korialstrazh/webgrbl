@@ -8,12 +8,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { OrthographicCamera, Vector3 } from 'three';
+import { OrthographicCamera } from 'three';
+import type { Vector3 } from 'three';
 import {
   BURN_SCENE_CAMERA_DIRECTION,
   BURN_SCENE_CAMERA_DISTANCE_RADIUSES,
   BURN_SCENE_CAMERA_FAR_DISTANCES,
 } from './burn.scene.constants';
+import { getBurnSceneCameraPosition } from './get.burn.scene.camera.position';
 import { getBurnSceneFrameCentre } from './get.burn.scene.frame.centre';
 import { getBurnSceneFrameRadiusMm } from './get.burn.scene.frame.radius.mm';
 import type { BurnSceneCameraFraming } from './interfaces/BurnSceneCameraFraming';
@@ -24,11 +26,9 @@ export const newBurnSceneCamera = (framing: BurnSceneCameraFraming): Orthographi
   const radiusMm: number = getBurnSceneFrameRadiusMm(framing);
   const distanceMm: number = radiusMm * BURN_SCENE_CAMERA_DISTANCE_RADIUSES;
   const centre: Vector3 = getBurnSceneFrameCentre(framing);
-  const [directionX, directionY, directionZ] = BURN_SCENE_CAMERA_DIRECTION;
-  const offset: Vector3 = new Vector3(directionX, directionY, directionZ).setLength(distanceMm);
 
   camera.up.set(0, 0, 1);
-  camera.position.copy(centre).add(offset);
+  camera.position.copy(getBurnSceneCameraPosition(framing, BURN_SCENE_CAMERA_DIRECTION));
   camera.near = 0;
   camera.far = distanceMm * BURN_SCENE_CAMERA_FAR_DISTANCES;
   camera.lookAt(centre);
