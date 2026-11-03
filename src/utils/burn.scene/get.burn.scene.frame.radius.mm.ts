@@ -13,9 +13,11 @@ import type { BurnSceneCameraFraming } from './interfaces/BurnSceneCameraFraming
 
 const HALF = 0.5;
 
-export const getBurnSceneFrameRadiusMm = ({ sheetBounds, thicknessMm, maxLiftMm }: BurnSceneCameraFraming): number => {
+export const getBurnSceneFrameRadiusMm = (
+  { sheetBounds, thicknessMm, framedLiftMm }: BurnSceneCameraFraming,
+): number => {
   const { minX, minY, maxX, maxY } = sheetBounds;
-  const fullHeightMm: number = thicknessMm + maxLiftMm;
+  const fullHeightMm: number = thicknessMm + framedLiftMm;
 
   return Math.hypot(maxX - minX, maxY - minY, fullHeightMm) * HALF * BURN_SCENE_FRAME_MARGIN_RATIO;
 };

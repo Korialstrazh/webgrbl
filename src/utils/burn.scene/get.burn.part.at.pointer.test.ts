@@ -30,7 +30,7 @@ const model: BurnModel = newBurnSceneTestModel();
 const newCamera = (): OrthographicCamera => newBurnSceneCamera({
   sheetBounds: model.sheetBounds,
   thicknessMm: model.thicknessMm,
-  maxLiftMm: 0,
+  framedLiftMm: 0,
   aspectRatio: 1,
 });
 

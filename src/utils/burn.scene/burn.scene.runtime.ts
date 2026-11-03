@@ -22,7 +22,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPartLiftsMm } from '../burn.model/interfaces/BurnPartLiftsMm';
 import type { ElementSizePx } from '../hooks/interfaces/ElementSizePx';
-import { getBurnPartMaxLiftMm } from '../burn.model/get.burn.part.max.lift.mm';
+import { getBurnPartFramedLiftMm } from '../burn.model/get.burn.part.framed.lift.mm';
 import { applyBurnPartHighlight } from './apply.burn.part.highlight';
 import { applyBurnPartLifts } from './apply.burn.part.lifts';
 import {
@@ -186,7 +186,7 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     const modelFraming: BurnSceneModelFraming = {
       sheetBounds,
       thicknessMm,
-      maxLiftMm: getBurnPartMaxLiftMm(parts, thicknessMm),
+      framedLiftMm: getBurnPartFramedLiftMm(parts, thicknessMm),
     };
     const framing: BurnSceneCameraFraming = { ...modelFraming, aspectRatio: this.aspectRatio };
 

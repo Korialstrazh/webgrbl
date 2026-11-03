@@ -1,6 +1,6 @@
 /**
- * The highest a part can stand above its place: lifts of nested parts add up, so a full lift for each liftable part
- * of the deepest chain.
+ * How much height above the sheet the first view of the camera leaves room for. It is no limit: a part can be lifted
+ * further. Lifts of nested parts add up, so it allows a full lift for each liftable part of the deepest chain.
  *
  * @author michael.morosov
  *
@@ -27,7 +27,7 @@ const getLiftablePartCountUpTheTree = (part: BurnPart, partsById: Map<number, Bu
   return liftablePartCount;
 };
 
-export const getBurnPartMaxLiftMm = (parts: BurnPart[], thicknessMm: number): number => {
+export const getBurnPartFramedLiftMm = (parts: BurnPart[], thicknessMm: number): number => {
   const partsById: Map<number, BurnPart> = new Map<number, BurnPart>(
     parts.map((part: BurnPart): [number, BurnPart] => [part.id, part]),
   );

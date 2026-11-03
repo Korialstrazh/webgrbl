@@ -14,9 +14,9 @@ import type { BurnSceneCameraFraming } from './interfaces/BurnSceneCameraFraming
 const HALF = 0.5;
 
 export const getBurnSceneFrameCentre = (
-  { sheetBounds, thicknessMm, maxLiftMm }: BurnSceneCameraFraming,
+  { sheetBounds, thicknessMm, framedLiftMm }: BurnSceneCameraFraming,
 ): Vector3 => new Vector3(
   (sheetBounds.minX + sheetBounds.maxX) * HALF,
   (sheetBounds.minY + sheetBounds.maxY) * HALF,
-  (thicknessMm + maxLiftMm) * HALF,
+  (thicknessMm + framedLiftMm) * HALF,
 );

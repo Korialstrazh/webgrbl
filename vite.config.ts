@@ -37,8 +37,8 @@ const ANTD_RC_MODULE_PATTERN = /[\\/]node_modules[\\/]@rc-component[\\/]/;
 const ANTD_BASE_CHUNK_PRIORITY = 30;
 const ANTD_RC_CHUNK_PRIORITY = 20;
 const ANTD_CHUNK_PRIORITY = 10;
-// three.js is about 520 kB after minification and cannot be split further. It loads only when the 3D view opens, so
-// it does not slow the start of the app; every chunk loaded at start stays below the default of 500 kB.
+// The 3D scene chunk with three.js is about 566 kB after minification and cannot be split further. It loads only when
+// the 3D view opens, so it does not slow the start of the app. The main chunk, about 527 kB, also passes this limit.
 const CHUNK_SIZE_WARNING_LIMIT_KB = 600;
 
 export default defineConfig({
