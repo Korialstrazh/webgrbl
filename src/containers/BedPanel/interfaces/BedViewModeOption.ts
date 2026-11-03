@@ -1,6 +1,5 @@
 /**
- * One bed view mode offered in the view mode selector: the mode it reports, the text it shows, and whether it is
- * disabled.
+ * One bed view mode offered in the view mode selector: the mode it reports and the text it shows.
  *
  * @author michael.morosov
  *

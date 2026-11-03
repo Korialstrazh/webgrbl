@@ -1,5 +1,5 @@
 /**
- * A bed view mode, the translation key of its label and, for a mode that is not built yet, what it will show.
+ * A bed view mode and the translation key of its label.
  *
  * @author michael.morosov
  *

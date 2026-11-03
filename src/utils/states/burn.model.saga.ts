@@ -2,8 +2,9 @@
  * Builds the burn model through the injected worker client while the 3D view is open, a material is set and the
  * toolpath is ready.
  *
- * - takeLatest also listens for every change that makes the toolpath out of date. Nothing is built then, but the
- *   running build is cancelled, because its result would look current for a job that has changed.
+ * - The watcher is a take loop, not takeLatest. It also listens for every change that makes the toolpath out of date.
+ *   Nothing is built then, but the running build is cancelled, because its result would look current for a job that
+ *   has changed.
  * - Coming back to a view with a ready model builds nothing, so the lifts stay. A ready model is current, because the
  *   state makes it stale when any of its inputs change, whatever the view.
  * - A material change rebuilds at once, as it is not a toolpath input: the toolpath stays ready.

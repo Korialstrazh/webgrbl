@@ -31,7 +31,7 @@ describe(getCutCheckWarningText.name, () => {
 
     expect(warningText).toContain(LAYER_NAME);
     expect(warningText).toContain(partText);
-    expect(warningText).toContain('predicted 1.3 mm');
+    expect(warningText).toContain('predicted 1.2 mm');
     expect(warningText).toContain('needed 3.0 mm');
     expect(warningText).toContain(suggestion);
     expect(warningText).not.toContain(LESS_SURE_TEXT);
@@ -49,6 +49,13 @@ describe(getCutCheckWarningText.name, () => {
     expect(warningText).toContain('sheet 3.0 mm');
     expect(warningText).toContain(FILL_SUGGESTION);
     expect(warningText).not.toContain(PART_SUGGESTION);
+  });
+
+  it('rounds a predicted depth below the needed one down, so the two numbers differ', () => {
+    const warningText: string = getText(newWarning({ predictedDepthMm: 2.96 }));
+
+    expect(warningText).toContain('predicted 2.9 mm');
+    expect(warningText).toContain('needed 3.0 mm');
   });
 
   it('says when the estimate is less sure', () => {

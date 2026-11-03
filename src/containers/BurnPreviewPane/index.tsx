@@ -28,6 +28,7 @@ export const BurnPreviewPane = (): ReactNode => {
   const { t } = useTranslation();
   const runtimeLoad: BurnSceneRuntimeLoad = useBurnSceneRuntime();
   const sceneHostRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+  // The pane remounts on each entry to 3D, so a failure is never carried over from an earlier visit.
   const isSceneFailed: boolean = useBurnScene(runtimeLoad, sceneHostRef);
   const isSceneUnavailable: boolean = isSceneFailed
     || runtimeLoad.status === BURN_SCENE_RUNTIME_LOAD_STATUS.FAILED;
@@ -45,7 +46,7 @@ export const BurnPreviewPane = (): ReactNode => {
           <span>{t(DEFAULT.BURN_PREVIEW_LOADING)}</span>
         </div>
       )}
-      <BurnPreviewStateMessage />
+      <BurnPreviewStateMessage isSceneUnavailable={isSceneUnavailable} />
       {!isSceneUnavailable && <BurnPartLiftControl />}
     </div>
   );

@@ -178,7 +178,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               )}
             </BedViewport>
           )}
-          {(isToolpathView || isThreeDView) && <ToolpathStatusOverlay />}
+          {(isToolpathView || isThreeDView) && <ToolpathStatusOverlay isGeneratingOrFailedOnly={isThreeDView} />}
         </div>
         {isToolpathView && <SimulationPlaybackBar />}
       </div>

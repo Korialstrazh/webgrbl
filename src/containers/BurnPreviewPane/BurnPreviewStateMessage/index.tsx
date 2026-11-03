@@ -23,30 +23,33 @@ import {
 import type { BurnPreviewEmptyState } from '../../../utils/states/burn.preview.empty.state.constants';
 import { selectBurnPreviewEmptyState } from '../../../utils/states/burn.preview.selectors';
 import { MaterialDialog } from '../../MaterialDialog';
+import type { BurnPreviewStateMessageProps } from './interfaces/BurnPreviewStateMessageProps';
 import styles from './styles.module.scss';
 
-export const BurnPreviewStateMessage = (): ReactNode => {
+export const BurnPreviewStateMessage = ({ isSceneUnavailable }: BurnPreviewStateMessageProps): ReactNode => {
   const { t } = useTranslation();
   const emptyState: BurnPreviewEmptyState | undefined = useSelector(selectBurnPreviewEmptyState);
   const [isMaterialDialogOpen, setIsMaterialDialogOpen] = useState<boolean>(false);
-
-  if (!emptyState) {
-    return null;
-  }
-
-  if (emptyState === BURN_PREVIEW_EMPTY_STATE.BUILDING) {
-    return (
-      <div className={styles.building} role="status">
-        <Spin aria-hidden="true" />
-        <span>{t(DEFAULT.BURN_PREVIEW_BUILDING)}</span>
-      </div>
-    );
-  }
-
   const isMaterialMissing: boolean = emptyState === BURN_PREVIEW_EMPTY_STATE.NO_MATERIAL;
+  const isMessageShown: boolean = !!emptyState && (isMaterialMissing || !isSceneUnavailable);
 
-  return (
-    <>
+  const messageComponent: ReactNode = getMessageComponent();
+
+  function getMessageComponent(): ReactNode {
+    if (!emptyState || !isMessageShown) {
+      return null;
+    }
+
+    if (emptyState === BURN_PREVIEW_EMPTY_STATE.BUILDING) {
+      return (
+        <div className={styles.building} role="status">
+          <Spin aria-hidden="true" />
+          <span>{t(DEFAULT.BURN_PREVIEW_BUILDING)}</span>
+        </div>
+      );
+    }
+
+    return (
       <Alert
         className={styles.message}
         type={isMaterialMissing ? ANTD_ALERT_TYPE_INFO : ANTD_ALERT_TYPE_WARNING}
@@ -57,6 +60,13 @@ export const BurnPreviewStateMessage = (): ReactNode => {
           </Button>
         )}
       />
+    );
+  }
+
+  // The dialog stays mounted whatever the state, so it cannot vanish and come back while the flag is still set.
+  return (
+    <>
+      {messageComponent}
       <MaterialDialog isOpen={isMaterialDialogOpen} onClose={() => setIsMaterialDialogOpen(false)} />
     </>
   );

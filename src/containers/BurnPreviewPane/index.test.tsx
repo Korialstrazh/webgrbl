@@ -138,6 +138,19 @@ describe(BurnPreviewPane.name, () => {
     expect(container.querySelector(SCENE_CANVAS_SELECTOR)).not.toBeInTheDocument();
   });
 
+  it('shows only the no-material message besides the fixed one when the scene is unavailable', async () => {
+    vi.mocked(newBurnSceneRenderer).mockReturnValue(undefined);
+    const store: ReturnType<typeof newStore> = newStore();
+
+    store.dispatch(new MaterialSaved({ material: TEST_MATERIAL }));
+    store.dispatch(new BurnModelRequested({ materialId: TEST_MATERIAL.id }));
+    renderPane(store);
+
+    expect(await screen.findByText(NO_WEBGL_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText(BUILDING_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByText(OUT_OF_DATE_TEXT)).not.toBeInTheDocument();
+  });
+
   it('releases the renderer when the pane closes', async () => {
     const renderer: BurnSceneRenderer = newFakeRenderer();
 

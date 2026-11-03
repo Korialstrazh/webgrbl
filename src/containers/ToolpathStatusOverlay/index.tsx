@@ -28,6 +28,7 @@ import {
 import { TOOLPATH_STATUS } from '../../utils/states/toolpath.status.constants';
 import type { ToolpathStatus } from '../../utils/states/toolpath.status.constants';
 import type { ToolpathRequestBanner } from './interfaces/ToolpathRequestBanner';
+import type { ToolpathStatusOverlayProps } from './interfaces/ToolpathStatusOverlayProps';
 import styles from './styles.module.scss';
 
 /**
@@ -52,12 +53,15 @@ const TOOLPATH_REQUEST_BANNERS: Readonly<Partial<Record<ToolpathStatus, Toolpath
   },
 };
 
-export const ToolpathStatusOverlay = (): ReactNode => {
+export const ToolpathStatusOverlay = ({ isGeneratingOrFailedOnly = false }: ToolpathStatusOverlayProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const status: ToolpathStatus = useSelector(selectToolpathStatus);
   const percent: number = Math.round(useSelector(selectToolpathProgress) * PERCENT_DIVISOR);
-  const requestBanner: ToolpathRequestBanner | undefined = TOOLPATH_REQUEST_BANNERS[status];
+  const isBannerHiddenByPane: boolean = isGeneratingOrFailedOnly && status !== TOOLPATH_STATUS.FAILED;
+  const requestBanner: ToolpathRequestBanner | undefined = isBannerHiddenByPane
+    ? undefined
+    : TOOLPATH_REQUEST_BANNERS[status];
 
   if (status === TOOLPATH_STATUS.GENERATING) {
     return (
