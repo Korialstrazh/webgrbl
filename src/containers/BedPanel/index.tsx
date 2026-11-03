@@ -135,7 +135,8 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
             value={viewMode}
             onChange={changeBedViewMode}
           />
-          <BedMoreToolsMenu />
+          {/* Its entries are about editing, which the 3D view does not do. */}
+          {!isThreeDView && <BedMoreToolsMenu />}
         </div>
       </div>
       {/* The region dialogs and drawers open in: everything below the header, so they never cover the toolbar. */}

@@ -55,6 +55,11 @@
 
 .viewControlsHost {
   display: flex;
+
+  // The 3D view puts nothing here, and an empty slot must not add a gap.
+  &:empty {
+    display: none;
+  }
 }
 
 // Dialogs and drawers render in here, absolutely positioned, so they fill this box only: below the header, so the bed

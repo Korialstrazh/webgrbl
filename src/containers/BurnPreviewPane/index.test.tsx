@@ -285,6 +285,7 @@ describe(BurnPreviewPane.name, () => {
     expect(burnModelClient.generationInputs).toEqual([]);
 
     fireEvent.click(screen.getByRole('button', { name: ADD_MATERIAL_LABEL }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Oak' } });
     fireEvent.click(screen.getByRole('button', { name: SAVE_LABEL }));
 
     await vi.waitFor((): void => {

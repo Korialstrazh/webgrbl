@@ -3,6 +3,10 @@ import { Provider } from 'react-redux';
 import { BurnPreviewToolbar } from '.';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import { newMaterial } from '../../utils/materials/new.material';
+import { newTestResultFixture } from '../../utils/materials/new.test.result.fixture';
+import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { selectActiveMaterial } from '../../utils/states/material.selectors';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
@@ -63,11 +67,27 @@ describe(BurnPreviewToolbar.name, () => {
     expect(selectActiveMaterial(store.getState())).toBeUndefined();
     expect(screen.getByRole('dialog', { name: DIALOG_TITLE })).toBeInTheDocument();
 
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Oak' } });
     fireEvent.click(screen.getByRole('button', { name: SAVE_LABEL }));
 
     expect(selectMaterials(store.getState())).toHaveLength(2);
     expect(selectActiveMaterial(store.getState())?.id).not.toBe(BIRCH.id);
     expect(selectActiveMaterial(store.getState())).toBeDefined();
+  });
+
+  it('marks a material tested on the active machine in the list', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile();
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    store.dispatch(new MaterialSaved({
+      material: { ...BIRCH, testResults: [newTestResultFixture({ machineProfileId: profile.id })] },
+    }));
+    renderToolbar(store);
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
+
+    expect(screen.getByText('Tested')).toBeInTheDocument();
   });
 
   it('shows a material added later in the list', () => {

@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { Material } from '../../utils/materials/interfaces/Material';
+import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectActiveMaterial } from '../../utils/states/material.selectors';
 import { selectMaterials } from '../../utils/states/material.state';
 import type { AppDispatch } from '../../utils/states/new.store';
@@ -32,6 +33,7 @@ export const BurnPreviewToolbar = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const materials: Material[] = useSelector(selectMaterials);
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
+  const activeProfileId: string | undefined = useSelector(selectActiveMachineProfile)?.id;
   const [isMaterialDialogOpen, setIsMaterialDialogOpen] = useState<boolean>(false);
   const [isTestSampleDialogOpen, setIsTestSampleDialogOpen] = useState<boolean>(false);
 
@@ -51,9 +53,19 @@ export const BurnPreviewToolbar = (): ReactNode => {
         placeholder={t(DEFAULT.BURN_PREVIEW_MATERIAL_PLACEHOLDER)}
         value={activeMaterial?.id}
         options={[
-          ...materials.map(({ id, name }: Material) => ({ value: id, label: name })),
+          ...materials.map(({ id, name, testResults }: Material) => ({
+            value: id,
+            label: name,
+            isTested: testResults.some(({ machineProfileId }) => machineProfileId === activeProfileId),
+          })),
           { value: ADD_MATERIAL_OPTION_VALUE, label: t(DEFAULT.BURN_PREVIEW_ADD_MATERIAL) },
         ]}
+        optionRender={({ label, data }) => (
+          <span className={styles.materialOption}>
+            <span className={styles.materialOptionName}>{label}</span>
+            {data.isTested && <span className={styles.testedMark}>{t(DEFAULT.BURN_PREVIEW_MATERIAL_TESTED)}</span>}
+          </span>
+        )}
         onChange={changeMaterial}
       />
       <Button disabled={!activeMaterial} onClick={() => setIsTestSampleDialogOpen(true)}>

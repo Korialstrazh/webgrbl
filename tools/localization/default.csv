@@ -62,6 +62,7 @@ BURN_PREVIEW_FAILED;The 3D view could not be built. Switch to another view and b
 BURN_PREVIEW_LOADING;Loading the 3D view
 BURN_PREVIEW_MATERIAL_LABEL;Material
 BURN_PREVIEW_MATERIAL_PLACEHOLDER;Choose a material
+BURN_PREVIEW_MATERIAL_TESTED;Tested
 BURN_PREVIEW_NO_MATERIAL;Choose a material or add one to see how the cut will turn out.
 BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
 BURN_PREVIEW_OUT_OF_DATE;Out of date: the design changed. The 3D view comes back when the toolpath is generated again.
@@ -329,12 +330,14 @@ MACHINE_STATUS_POWER;Power
 MACHINE_STATUS_TITLE;Status
 MACHINE_STATUS_WORK_POSITION;Work position
 MATERIAL_DIALOG_CANCEL;Cancel
+MATERIAL_DIALOG_DUPLICATE_NOTE;You already have {{name}} at this thickness.
 MATERIAL_DIALOG_NAME;Name
 MATERIAL_DIALOG_NAME_INVALID;Enter a name of {{min}} to {{max}} characters.
 MATERIAL_DIALOG_SAVE;Save
 MATERIAL_DIALOG_THICKNESS;Thickness (mm)
 MATERIAL_DIALOG_THICKNESS_INVALID;Enter a thickness from {{min}} to {{max}} mm.
 MATERIAL_DIALOG_TITLE;Add material
+MATERIAL_DIALOG_USE_EXISTING;Use that one
 OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visible part.
 OBJECT_WARNING_IMAGE;Images are not engraved yet.
 OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.
