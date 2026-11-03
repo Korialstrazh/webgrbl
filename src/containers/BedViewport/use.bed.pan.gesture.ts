@@ -1,6 +1,6 @@
 /**
  * Pans the bed by dragging with the middle mouse button, or with the left button while Space is held over the bed. The
- * press is caught before it reaches the objects layer, so selecting and dragging objects keep their own left drag otherwise.
+ * press is caught before it reaches the objects layer, so selecting and dragging keep their left drag.
  * Space only counts while the pointer is over the bed and no text field, overlay or IME composition owns the keyboard;
  * it is then kept from scrolling the page or pressing a focused button.
  *
