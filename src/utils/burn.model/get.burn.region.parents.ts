@@ -13,26 +13,21 @@
 import { BURN_REGION_LABEL_NONE } from './burn.model.constants';
 import { getBurnGridNeighbourCells } from './get.burn.grid.neighbour.cells';
 import type { BurnDoseGrid } from './interfaces/BurnDoseGrid';
-import type { BurnRegionNesting } from './interfaces/BurnRegionNesting';
 import { visitBurnGridConnectedCells } from './visit.burn.grid.connected.cells';
 
 /** For each group of connected wall cells, the numbers of the regions along it. */
-const getRegionNumbersAlongWalls = (
-  grid: BurnDoseGrid,
-  regionNumbers: Int32Array,
-  wallNumbers: Int32Array,
-): Set<number>[] => {
+const getRegionNumbersAlongWalls = (grid: BurnDoseGrid, regionNumbers: Int32Array): Set<number>[] => {
+  const seenWallCells: Uint8Array = new Uint8Array(regionNumbers.length);
   const regionNumbersAlongWalls: Set<number>[] = [];
 
-  const isWallCellOpen = (cell: number): boolean => !!grid.closedCutMask[cell] && !wallNumbers[cell];
+  const isWallCellOpen = (cell: number): boolean => !!grid.closedCutMask[cell] && !seenWallCells[cell];
 
   for (let firstCell = 0; firstCell < regionNumbers.length; firstCell++) {
     if (isWallCellOpen(firstCell)) {
       const regionNumbersAlongWall: Set<number> = new Set<number>();
-      const wallNumber: number = regionNumbersAlongWalls.length + 1;
 
       visitBurnGridConnectedCells(grid, [firstCell], isWallCellOpen, (cell: number): void => {
-        wallNumbers[cell] = wallNumber;
+        seenWallCells[cell] = 1;
 
         for (const neighbourCell of getBurnGridNeighbourCells(cell, grid)) {
           if (!grid.closedCutMask[neighbourCell]) {
@@ -47,11 +42,9 @@ const getRegionNumbersAlongWalls = (
   return regionNumbersAlongWalls;
 };
 
-export const getBurnRegionNesting = (grid: BurnDoseGrid, regionNumbers: Int32Array): BurnRegionNesting => {
-  const wallNumbers: Int32Array = new Int32Array(regionNumbers.length);
-  const regionNumbersAlongWalls: Set<number>[] = getRegionNumbersAlongWalls(grid, regionNumbers, wallNumbers);
+export const getBurnRegionParents = (grid: BurnDoseGrid, regionNumbers: Int32Array): Map<number, number> => {
+  const regionNumbersAlongWalls: Set<number>[] = getRegionNumbersAlongWalls(grid, regionNumbers);
   const parents: Map<number, number> = new Map<number, number>();
-  const outerWallNumbers: Map<number, number> = new Map<number, number>();
   const peelOrder: number[] = [BURN_REGION_LABEL_NONE];
   const seenRegionNumbers: Set<number> = new Set<number>(peelOrder);
   const peeledWallIndexes: Set<number> = new Set<number>();
@@ -65,7 +58,6 @@ export const getBurnRegionNesting = (grid: BurnDoseGrid, regionNumbers: Int32Arr
           if (!seenRegionNumbers.has(regionNumber)) {
             seenRegionNumbers.add(regionNumber);
             parents.set(regionNumber, peeledRegionNumber);
-            outerWallNumbers.set(regionNumber, wallIndex + 1);
             peelOrder.push(regionNumber);
           }
         }
@@ -73,5 +65,5 @@ export const getBurnRegionNesting = (grid: BurnDoseGrid, regionNumbers: Int32Arr
     }
   }
 
-  return { parents, outerWallNumbers, wallNumbers };
+  return parents;
 };

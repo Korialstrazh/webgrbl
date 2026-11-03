@@ -266,6 +266,26 @@ describe(getBurnParts.name, () => {
       expect(parts[1]?.weakestDepthMm).toBeCloseTo(SHALLOW_DEPTH_MM, WALL_DEPTH_TOLERANCE_DIGITS);
     });
 
+    it('holds back only a shallow child that shares an edge with its parent, and keeps its parent', () => {
+      const touchingChild: SvgSubpath = getBoxSubpath({ minX: SQUARE_MIN_MM, minY: 13, maxX: 15, maxY: 17 });
+      const { parts }: BurnPartSet = getTwoLayerPartSet(SQUARE, touchingChild, HALF_POWER_PERCENT);
+
+      expect(parts.map((part: BurnPart) => [part.id, part.parentId, part.status, part.weakestLayerKey])).toEqual([
+        [1, undefined, BURN_PART_STATUS.FREE, undefined],
+        [2, 1, BURN_PART_STATUS.NOT_THROUGH, BLUE],
+      ]);
+    });
+
+    it('holds back only a shallow child whose wall lies in the wall cells of its parent, and keeps its parent', () => {
+      const touchingChild: SvgSubpath = getBoxSubpath({ minX: 10.05, minY: 13, maxX: 15, maxY: 17 });
+      const { parts }: BurnPartSet = getTwoLayerPartSet(SQUARE, touchingChild, HALF_POWER_PERCENT);
+
+      expect(parts.map((part: BurnPart) => [part.id, part.parentId, part.status, part.weakestLayerKey])).toEqual([
+        [1, undefined, BURN_PART_STATUS.FREE, undefined],
+        [2, 1, BURN_PART_STATUS.NOT_THROUGH, BLUE],
+      ]);
+    });
+
     it('makes a borderline child of a free parent borderline', () => {
       const { parts }: BurnPartSet = getTwoLayerPartSet(SQUARE, INNER_SQUARE, BORDERLINE_POWER_PERCENT);
 
@@ -275,13 +295,13 @@ describe(getBurnParts.name, () => {
       ]);
     });
 
-    it('holds back all three regions of overlapping through and shallow squares', () => {
+    it('lifts the through square of an overlap whole and holds back what only the shallow square cuts', () => {
       const { parts }: BurnPartSet = getTwoLayerPartSet(SQUARE, OVERLAPPING_SQUARE, HALF_POWER_PERCENT);
 
-      expect(parts.map((part: BurnPart) => [part.status, part.weakestLayerKey])).toEqual([
-        [BURN_PART_STATUS.NOT_THROUGH, BLUE],
-        [BURN_PART_STATUS.NOT_THROUGH, BLUE],
-        [BURN_PART_STATUS.NOT_THROUGH, BLUE],
+      expect(parts.map((part: BurnPart) => [part.id, part.parentId, part.status, part.weakestLayerKey])).toEqual([
+        [1, undefined, BURN_PART_STATUS.FREE, undefined],
+        [2, 1, BURN_PART_STATUS.NOT_THROUGH, BLUE],
+        [3, undefined, BURN_PART_STATUS.NOT_THROUGH, BLUE],
       ]);
     });
   });
