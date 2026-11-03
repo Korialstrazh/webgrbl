@@ -134,11 +134,14 @@ const MaterialDialogContent = ({ onClose }: MaterialDialogContentProps): ReactNo
           {/* An emptied input holds NaN, which the checks reject; the input then shows nothing. */}
           <InputNumber
             id={thicknessFieldId}
+            className={styles.thicknessInput}
             value={isFiniteNumber(thicknessMm) ? thicknessMm : null}
             onChange={(value: number | null) => setThicknessMm(value ?? Number.NaN)}
           />
         </Form.Item>
       </Form>
+      {/* The room stays reserved, so the text going away does not move the buttons. */}
+      <p className={styles.saveHint} role="note">{isSaveAllowed ? undefined : t(DEFAULT.MATERIAL_DIALOG_SAVE_HINT)}</p>
       {matchingMaterial && (
         <div className={styles.duplicateNote} role="note">
           <span>{t(DEFAULT.MATERIAL_DIALOG_DUPLICATE_NOTE, { name: matchingMaterial.name })}</span>

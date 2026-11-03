@@ -6,3 +6,14 @@
   color: var(--color-text-muted);
   font-size: 0.8125rem;
 }
+
+.saveHint {
+  min-height: 1.25rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.thicknessInput:global(.ant-input-number) {
+  width: 100%;
+}

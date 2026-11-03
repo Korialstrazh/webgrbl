@@ -32,13 +32,14 @@
   align-items: center;
 }
 
-// Not the filled look: that belongs to the one main action of the dialog.
+// Filled, but only with a tint: the full accent belongs to the one main action of the dialog.
 .outcomeChosen:global(.ant-btn) {
   border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
   color: var(--color-accent);
 }
 
-// The depth and its hint side by side, so choosing Not through keeps the dialog inside a short window.
+// The depth and its hint side by side, so the dialog fits a short window.
 .depthRow {
   display: flex;
   flex-wrap: wrap;
@@ -52,4 +53,11 @@
 
 .mutedHint {
   color: var(--color-text-muted);
+}
+
+// Two lines, the longest reason Save can be off.
+.saveHint {
+  min-height: 2.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
 }

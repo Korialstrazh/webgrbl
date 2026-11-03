@@ -92,6 +92,18 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
   const canSaveResult: boolean = Boolean(profile && outcome) && hasValidSettings;
   const getFieldId = (suffix: string): string => [formId, suffix].join(FIELD_ID_SEPARATOR);
 
+  const getSaveHintText = (): string | undefined => {
+    if (!profile) {
+      return t(DEFAULT.TEST_SAMPLE_DIALOG_NO_PROFILE);
+    }
+
+    if (!hasValidSettings) {
+      return t(DEFAULT.TEST_SAMPLE_DIALOG_INVALID_SETTINGS, SETTINGS_LIMIT_TEXT_VALUES);
+    }
+
+    return outcome ? undefined : t(DEFAULT.TEST_SAMPLE_DIALOG_SAVE_HINT);
+  };
+
   const changeCutSetting = (settingName: keyof SampleCutSettings, value: number | null): void =>
     setCutSettings({ ...cutSettings, [settingName]: value ?? Number.NaN });
 
@@ -152,25 +164,25 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
             {t(DEFAULT.TEST_SAMPLE_DIALOG_NOT_THROUGH)}
           </Button>
         </div>
-        {isNotThrough && (
-          <div className={styles.depthRow}>
-            <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
-              <Form.Item
-                label={t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH)}
-                htmlFor={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
-                validateStatus={depthErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
-                help={depthErrorKey && t(depthErrorKey, { max: material.thicknessMm })}
-              >
-                <InputNumber
-                  id={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
-                  value={depthMm ?? null}
-                  onChange={(value: number | null) => setDepthMm(value ?? undefined)}
-                />
-              </Form.Item>
-              <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH_HINT)}</span>
-            </Form>
-          </div>
-        )}
+        {/* Always there, so choosing Not through moves nothing, least of all the buttons below. */}
+        <div className={styles.depthRow}>
+          <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
+            <Form.Item
+              label={t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH)}
+              htmlFor={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
+              validateStatus={depthErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
+              help={depthErrorKey && t(depthErrorKey, { max: material.thicknessMm })}
+            >
+              <InputNumber
+                id={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
+                disabled={!isNotThrough}
+                value={depthMm ?? null}
+                onChange={(value: number | null) => setDepthMm(value ?? undefined)}
+              />
+            </Form.Item>
+            <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_DEPTH_HINT)}</span>
+          </Form>
+        </div>
       </section>
       <section className={[styles.dialogSection, styles.settingsSection].join(' ')}>
         <strong>{t(DEFAULT.TEST_SAMPLE_DIALOG_SETTINGS_HEADING)}</strong>
@@ -201,10 +213,8 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
           </Form>
         </div>
         <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_SETTINGS_HINT)}</span>
-        {!hasValidSettings && (
-          <span role="note">{t(DEFAULT.TEST_SAMPLE_DIALOG_INVALID_SETTINGS, SETTINGS_LIMIT_TEXT_VALUES)}</span>
-        )}
-        {!profile && <span role="note">{t(DEFAULT.TEST_SAMPLE_DIALOG_NO_PROFILE)}</span>}
+        {/* The room for why Save is off stays reserved, so the text coming and going does not move the buttons. */}
+        <span className={styles.saveHint} role="note">{getSaveHintText()}</span>
       </section>
     </BedRegionModal>
   );
