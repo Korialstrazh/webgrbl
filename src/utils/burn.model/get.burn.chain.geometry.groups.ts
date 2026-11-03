@@ -131,7 +131,13 @@ export const getBurnChainGeometryGroups = (chains: BurnChain[]): BurnChainGeomet
       const key: string = getBucketKey(points.length, getBucketCoordinate(minimum.x), getBucketCoordinate(minimum.y));
 
       groups.push(group);
-      buckets.set(key, [...(buckets.get(key) ?? []), group]);
+      const bucket: BurnChainGeometryGroup[] | undefined = buckets.get(key);
+
+      if (bucket) {
+        bucket.push(group);
+      } else {
+        buckets.set(key, [group]);
+      }
     }
   }
 
