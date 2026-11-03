@@ -89,7 +89,14 @@ export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
 /** A tag drawn as a soft filled chip without a border. */
 export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';
 
+/** A tag that warns. */
+export const ANTD_TAG_COLOR_WARNING: TagProps['color'] = 'warning';
+
+/** A tag in the success colour, for something that turned out well. */
+export const ANTD_TAG_COLOR_SUCCESS: TagProps['color'] = 'success';
+
 /** The tooltip opens while its anchor is hovered or holds the keyboard focus. */
 export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['hover', 'focus'];
 
 export const ANTD_TOOLTIP_PLACEMENT_BOTTOM: TooltipProps['placement'] = 'bottom';
+export const ANTD_TOOLTIP_PLACEMENT_LEFT: TooltipProps['placement'] = 'left';

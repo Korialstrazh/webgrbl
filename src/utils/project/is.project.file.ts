@@ -1,6 +1,6 @@
 /**
  * Tells whether a parsed value is a project file of the current format and version, with well-typed objects
- * and layers.
+ * and layers, and a well-typed material when there is one.
  *
  * @author michael.morosov
  *
@@ -10,6 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { isProjectLayer } from '../layers/is.project.layer';
+import { isMaterial } from '../materials/is.material';
 import { isRecord } from '../type.guards/is.record';
 import { isString } from '../type.guards/is.string';
 import type { ProjectFile } from './interfaces/ProjectFile';
@@ -24,4 +25,6 @@ export const isProjectFile = (value: unknown): value is ProjectFile =>
   Array.isArray(value.objects) &&
   value.objects.every(isProjectObject) &&
   Array.isArray(value.layers) &&
-  value.layers.every(isProjectLayer);
+  value.layers.every(isProjectLayer) &&
+  (!value.materialId || isString(value.materialId)) &&
+  (!value.material || isMaterial(value.material));

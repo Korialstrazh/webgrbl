@@ -26,35 +26,81 @@
   @include accessibility.visually-hidden;
 }
 
-// One row that never grows into the bed: the editing tools, or the Toolpath controls, on the left and the view switch at
-// the right end. On a narrow bed the left group moves to a row of its own instead of being squeezed.
+// One grid in every view. The switch is the last column and the top row, so what the other cells hold cannot move it.
+// Items align to the top for the same reason: a taller toolbar grows its row downwards only.
 .header {
-  display: flex;
+  display: grid;
   flex: none;
-  flex-wrap: wrap;
-  align-items: center;
+  grid-template-areas: 'tools extras view';
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: start;
   gap: var(--space-2);
+}
+
+// A container query cannot restyle its own container, so the grid sits inside this one.
+.headerContainer {
+  flex: none;
+  container-type: inline-size;
 }
 
 .editingTools {
   display: flex;
   flex-wrap: wrap;
+  grid-area: tools;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
 }
 
-// The view controls and the view switch stay together at the right end of the header.
 .viewTools {
   display: flex;
   flex-wrap: wrap;
+  grid-area: extras;
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-2);
-  margin-left: auto;
+  min-width: 0;
+}
+
+.viewSwitchSlot {
+  grid-area: view;
 }
 
 .viewControlsHost {
   display: flex;
+
+  // The 3D view puts nothing here, and an empty slot must not add a gap.
+  &:empty {
+    display: none;
+  }
+}
+
+// Too narrow for the widest view's tools beside the rest: the tools take a row of their own below, in every view alike.
+@container (width < 62rem) {
+  .header:not(.threeDHeader) {
+    grid-template-areas:
+      'extras view'
+      'tools tools';
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+// The 3D view has no extras and few tools, so they share the top row with the switch, which stays where it is.
+.threeDHeader {
+  grid-template-areas: 'tools view';
+  grid-template-columns: minmax(0, 1fr) auto;
+
+  .viewTools {
+    display: none;
+  }
+}
+
+@container (width < 26rem) {
+  .header.threeDHeader {
+    grid-template-areas:
+      '. view'
+      'tools tools';
+  }
 }
 
 // Dialogs and drawers render in here, absolutely positioned, so they fill this box only: below the header, so the bed

@@ -15,7 +15,6 @@ import { ProjectDocumentLoaded } from '../../utils/states/project.document.state
 import { selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { SVG_DRAWN_ELEMENT, SVG_PROPERTY } from '../../utils/svg/geometry/svg.geometry.constants';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
-import { BED_TOOL } from '../BedPanel/bed.toolbar.constants';
 import { BED_OBJECT_HIT_AREA_TEST_ID } from './bed.objects.constants';
 
 const BED: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
@@ -54,7 +53,7 @@ const renderWithLayer = (layer: ProjectLayer): AppStore => {
   render(
     <Provider store={store}>
       <svg>
-        <BedObjects dimensions={BED} activeTool={BED_TOOL.SELECT} />
+        <BedObjects dimensions={BED} />
       </svg>
     </Provider>,
   );

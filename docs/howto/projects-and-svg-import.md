@@ -5,7 +5,7 @@ A project is the design on the bed: SVG objects with a size, position and rotati
 ## What the user gets
 
 - **Import.** The "Import SVG" button (top bar, and in the empty Objects section) and a drop of one or more files on the bed (`SvgImportButton`, `useSvgFileDrop` in `BedPanel`). Each file becomes an object named after the file, placed on a cascade: accepted file `i` of an import lands at `((existingCount + i) mod 10) × 10` mm on X and Y, where `existingCount` is the number of objects already in the project, so the first import starts at 0,0 and later imports carry on down the diagonal instead of landing on top; a dropped file that is not an SVG (a PNG, say) is named in an error toast. A project holds up to 50 objects, a file may be up to 10 MB.
-- **Edit.** Select (click, Shift-click, click on empty bed to clear), drag, scale and rotate with the handles, nudge with the arrow keys (1 mm, Shift 10 mm), Delete or Backspace to remove, and X / Y / Width / Height / Rotation fields in the Objects section. The Move tool drags the whole selection from anywhere.
+- **Edit.** Select (click, Shift-click, click on empty bed to clear), drag, scale and rotate with the handles, nudge with the arrow keys (1 mm, Shift 10 mm), Delete or Backspace to remove, and X / Y / Width / Height / Rotation fields in the Objects section.
 - **Undo and redo.** Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y, and the top bar buttons. 100 steps. One gesture is one step: a drag, a handle gesture, one field commit, and an import of several files. The undo and redo keys do nothing while a drag or handle gesture is still under way.
 - **Project menu** (top bar): New project, Open..., Save (Ctrl/Cmd+S), Save as file, Open file.... Click the name to rename it. The autosave readout shows Saved, Saving... or Not saved. Export G-code is still "soon".
 
@@ -60,7 +60,7 @@ The split keeps an autosave after a nudge small: only the project row is rewritt
 ```json
 {
   "format": "webgrbl-project",
-  "version": 2,
+  "version": 3,
   "name": "Coaster",
   "objects": [
     {
@@ -82,7 +82,7 @@ The split keeps an autosave after a nudge small: only the project row is rewritt
 
 "Open file..." (also in the Open dialog) always creates a **new** project with new ids, so a file never overwrites a stored project. A file over `MAX_PROJECT_FILE_BYTES` (50 objects of 10 MB plus 50 MB for the JSON around them) is rejected before it is read. Import (`getImportedProjectFile`) rejects the whole file when the format or version is wrong, there are more than 50 objects, a field has the wrong type, or any SVG fails sanitising; it sanitises every SVG again, re-measures the size, clamps the box, brings the rotation into [0, 360) and trims each object name and cuts it to 100 characters. An invalid file shows "The file is not a webgrbl project file. Nothing was opened." and changes nothing. A new file version needs `PROJECT_FILE_VERSION` raised and a reader for the old one.
 
-Layers in a file: a version 2 file carries `layers`; each one is type-checked (`isProjectLayer`), its settings are clamped to the palette ranges, and a layer whose colour no object draws is kept. A version 1 file (written before layers) opens with its layers derived from the current palette. Any other version is rejected. Either way, a colour the objects draw that has no layer gets one from the palette.
+Layers in a file: a version 2 or 3 file carries `layers`; each one is type-checked (`isProjectLayer`), its settings are clamped to the palette ranges, and a layer whose colour no object draws is kept. A version 1 file (written before layers) opens with its layers derived from the current palette. Any other version is rejected. Either way, a colour the objects draw that has no layer gets one from the palette.
 
 ## Layers in the document
 

@@ -1,0 +1,69 @@
+.cutCheckPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+// A count of 0 stays in place, so the summary keeps its shape, but asks for no attention.
+.emptyCount {
+  color: var(--color-text-muted);
+}
+
+// A list cut to nothing takes no room and no gap.
+.list:empty {
+  display: none;
+}
+
+.partListToggle:global(.ant-btn) {
+  align-self: flex-start;
+
+  @media (pointer: coarse) {
+    min-height: 2.75rem;
+  }
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Answers the pointer over the part in the scene, as a row does under the pointer itself.
+.hoveredRow:global(.ant-btn) {
+  background-color: var(--color-surface-2);
+}
+
+.partRow:global(.ant-btn) {
+  display: flex;
+  gap: var(--space-1);
+  // Room for the name, the height of a lifted part and the status in a narrow panel.
+  padding-inline: var(--space-2);
+  align-items: center;
+  width: 100%;
+
+  // The name at the left, the status at the right, and the height of a lifted part next to the status.
+  > :first-child {
+    margin-inline-end: auto;
+  }
+
+  &[aria-pressed='true'] {
+    background-color: var(--color-surface-2);
+    font-weight: 600;
+  }
+}

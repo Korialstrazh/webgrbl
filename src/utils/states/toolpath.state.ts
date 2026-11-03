@@ -20,7 +20,7 @@ import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { GcodeExportRequestPayload } from './interfaces/GcodeExportRequestPayload';
 import type { ToolpathProgressPayload } from './interfaces/ToolpathProgressPayload';
 import type { ToolpathReadyPayload } from './interfaces/ToolpathReadyPayload';
-import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
+import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 import { TOOLPATH_STATUS } from './toolpath.status.constants';
 import type { ToolpathStatus } from './toolpath.status.constants';
 
@@ -125,7 +125,7 @@ const getStateAfterCancel = (state: ToolpathState): ToolpathState => {
 
 /** Whether the action changes what the toolpath is made from: the project document or the machine area. */
 const isToolpathInputChange = (action: Action<unknown>): boolean =>
-  PROJECT_DOCUMENT_CHANGE_ACTION_TYPES.includes(action.type) || action.type === ToolpathMachineAreaChanged.type;
+  PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES.includes(action.type) || action.type === ToolpathMachineAreaChanged.type;
 
 const getStateWithExportAction = (state: ToolpathState, action: Action<unknown>): ToolpathState => {
   switch (action.type) {

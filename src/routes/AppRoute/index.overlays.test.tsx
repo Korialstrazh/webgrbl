@@ -103,11 +103,12 @@ describe.each([
     setMatchMediaMatches(isWide);
 
     const { countStopRequests } = await renderWorkbench(newOverlayComponent(vi.fn()));
-    await screen.findByRole('dialog', { name: title });
+    // In tests antd gives every useId the same id, so the Material select in the header takes over the dialog's name.
+    await screen.findByText(title);
     const overlayRoot: HTMLElement = getOverlayRoot(rootSelector);
     const stopButton: HTMLElement = screen.getByRole('button', { name: STOP_LABEL });
 
-    expect(screen.getByRole('dialog', { name: title })).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toContainElement(screen.getByText(title));
     expect(screen.getByRole('main')).toContainElement(overlayRoot);
     expect(screen.getByRole('main')).toContainElement(overlayRoot.querySelector(maskSelector));
     expect(overlayRoot).not.toContainElement(stopButton);
@@ -124,7 +125,7 @@ describe.each([
 
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
 
-    fireEvent.keyDown(screen.getByRole('dialog', { name: title }), { key: ESCAPE_KEY });
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: ESCAPE_KEY });
 
     expect(countStopRequests()).toBe(0);
     expect(closeSpy).toHaveBeenCalledTimes(1);

@@ -1,0 +1,48 @@
+// Fills the bed area, like the bed viewport it stands in for.
+.burnPreviewPane {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  overflow: hidden;
+  color: var(--color-text);
+}
+
+// Takes what the lift bar leaves; the messages and the view buttons sit on top of the scene in here.
+.sceneArea {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+.message {
+  position: relative;
+  max-width: calc(100% - 2 * var(--space-3));
+}
+
+// Behind the messages and the view buttons, which sit on top of the scene.
+.sceneHost {
+  position: absolute;
+  inset: 0;
+}
+
+.loading {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+// Takes its drawing size from the renderer, and fills the pane on screen.
+.sceneCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

@@ -1,6 +1,7 @@
 /**
  * Port, baud rate and connect controls of the laser connection, shown in an antd popover under its anchor (the
  * connection pill). Opening moves focus into the popover; closing it while focus is inside returns focus to the opener.
+ * It closes by itself once a connect it started succeeds; a failed connect keeps it open with the reason.
  *
  * @author michael.morosov
  *
@@ -11,7 +12,7 @@
  */
 import { Button, Popover, Select } from 'antd';
 import type { SelectProps } from 'antd';
-import { useId, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import type { ReactElement, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -35,6 +36,7 @@ import {
   SerialPortSelected,
   selectAvailablePorts,
   selectBaudRate,
+  selectConnectFailureKey,
   selectConnectionStatus,
   selectIsConnected,
   selectSelectedPortId,
@@ -90,9 +92,11 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
   const availablePorts: SerialPortDescriptor[] = useSelector(selectAvailablePorts);
   const selectedPortId: string = useSelector(selectSelectedPortId);
   const baudRate: number = useSelector(selectBaudRate);
+  const connectFailureKey: string | undefined = useSelector(selectConnectFailureKey);
   const isConnecting: boolean = connectionStatus === GRBL_CONNECTION_STATUS.CONNECTING;
   const isLinkLocked: boolean = isConnected || isConnecting;
   const contentRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
+  const wasConnectingRef: RefObject<boolean> = useRef<boolean>(isConnecting);
   const portSelectId: string = useId();
   const baudSelectId: string = useId();
   const portOptions: SelectProps<string>['options'] = [
@@ -114,6 +118,21 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
 
     onOpenChange(isNextOpen);
   };
+
+  // Only the step from connecting to connected: opened later, while connected, it stays open for Disconnect.
+  useEffect(() => {
+    const hasJustConnected: boolean = wasConnectingRef.current && isConnected;
+
+    wasConnectingRef.current = isConnecting;
+
+    if (hasJustConnected && isFocusInsideElement(contentRef.current)) {
+      anchorRef.current?.focus();
+    }
+
+    if (hasJustConnected) {
+      onOpenChange(false);
+    }
+  }, [anchorRef, isConnected, isConnecting, onOpenChange]);
 
   const handleAfterOpenChange = (isNowOpen: boolean): void => {
     if (isNowOpen) {
@@ -175,6 +194,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       >
         {t(getConnectButtonKey(isConnected, isConnecting))}
       </Button>
+      {connectFailureKey && <p className={styles.failureNotice} role="alert">{t(connectFailureKey)}</p>}
     </div>
   );
 

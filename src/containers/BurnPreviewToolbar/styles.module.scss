@@ -1,0 +1,8 @@
+// A long material name is cut off with an ellipsis, so the header stays one row.
+.materialText {
+  overflow: hidden;
+  max-width: 16rem;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

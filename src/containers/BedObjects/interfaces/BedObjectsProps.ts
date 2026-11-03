@@ -9,11 +9,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { BedDimensions } from '../../../utils/bed/interfaces/BedDimensions';
-import type { BedTool } from '../../BedPanel/bed.toolbar.constants';
 
 export interface BedObjectsProps {
   /** The bed the objects are drawn on; its height turns machine Y into SVG Y. */
   dimensions: BedDimensions;
-  /** The bed tool that decides what a pointer press does. */
-  activeTool: BedTool;
 }

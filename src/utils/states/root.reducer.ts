@@ -11,12 +11,15 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import { BED_APPEARANCE_STATE_NAME, bedAppearanceReducer } from './bed.appearance.state';
 import { BED_GESTURE_STATE_NAME, bedGestureReducer } from './bed.gesture.state';
+import { BED_VIEW_STATE_NAME, bedViewReducer } from './bed.view.state';
 import { BROWSER_ENVIRONMENT_STATE_NAME, browserEnvironmentReducer } from './browser.environment.state';
+import { BURN_MODEL_STATE_NAME, burnModelReducer } from './burn.model.state';
 import { GRBL_CONNECTION_STATE_NAME, grblConnectionReducer } from './grbl.connection.state';
 import { GRBL_CONSOLE_STATE_NAME, grblConsoleReducer } from './grbl.console.state';
 import { LASER_POINTER_STATE_NAME, laserPointerReducer } from './laser.pointer.state';
 import { MACHINE_PROFILE_STATE_NAME, machineProfileReducer } from './machine.profile.state';
 import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
+import { MATERIAL_STATE_NAME, materialReducer } from './material.state';
 import { PALETTE_STATE_NAME, paletteReducer } from './palette.state';
 import { PANEL_LAYOUT_STATE_NAME, panelLayoutReducer } from './panel.layout.state';
 import { PROJECT_DOCUMENT_STATE_NAME, projectDocumentReducer } from './project.document.state';
@@ -32,6 +35,7 @@ export const rootReducer = combineReducers({
   [GRBL_CONNECTION_STATE_NAME]: grblConnectionReducer,
   [MACHINE_STATUS_STATE_NAME]: machineStatusReducer,
   [MACHINE_PROFILE_STATE_NAME]: machineProfileReducer,
+  [MATERIAL_STATE_NAME]: materialReducer,
   [PALETTE_STATE_NAME]: paletteReducer,
   [PANEL_LAYOUT_STATE_NAME]: panelLayoutReducer,
   [LASER_POINTER_STATE_NAME]: laserPointerReducer,
@@ -44,5 +48,7 @@ export const rootReducer = combineReducers({
   [BED_GESTURE_STATE_NAME]: bedGestureReducer,
   [BED_APPEARANCE_STATE_NAME]: bedAppearanceReducer,
   [TOOLPATH_STATE_NAME]: toolpathReducer,
+  [BURN_MODEL_STATE_NAME]: burnModelReducer,
+  [BED_VIEW_STATE_NAME]: bedViewReducer,
   [SIMULATION_STATE_NAME]: simulationReducer,
 });

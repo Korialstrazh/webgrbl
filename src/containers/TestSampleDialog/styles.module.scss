@@ -1,0 +1,63 @@
+.dialogSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.settingsSection {
+  margin-top: 1rem;
+}
+
+// Three short fields side by side, so the dialog fits a short window without scrolling.
+.settingsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: var(--space-2);
+  align-items: end;
+  width: 100%;
+
+  :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+
+  :global(.ant-input-number) {
+    width: 100%;
+  }
+}
+
+.outcomeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+// Filled, but only with a tint: the full accent belongs to the one main action of the dialog.
+.outcomeChosen:global(.ant-btn) {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  color: var(--color-accent);
+}
+
+// The depth and its hint side by side, so the dialog fits a short window.
+.depthRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: flex-end;
+
+  :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+}
+
+.mutedHint {
+  color: var(--color-text-muted);
+}
+
+// Two lines, the longest reason Save can be off.
+.saveHint {
+  min-height: 2.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}

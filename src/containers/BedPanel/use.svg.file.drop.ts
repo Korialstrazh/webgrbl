@@ -1,7 +1,8 @@
 /**
  * Makes the bed area a drop target for SVG files. A drag over it shows a highlight, and a drop asks for an import of
  * every dropped file; the import names each file that is not a usable SVG in an error toast. A drop with no file asks
- * for nothing, and a drag of anything but files is not accepted.
+ * for nothing, and a drag of anything but files is not accepted. While imports are off (the 3D view has no bed to drop
+ * on) a dragged file is refused with no highlight, but the browser still must not open it in place of the app.
  *
  * @author michael.morosov
  *
@@ -18,13 +19,15 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { SvgFilesImportRequested } from '../../utils/states/project.document.state';
 import type { SvgFileDropArea } from './interfaces/SvgFileDropArea';
 
+const DROP_EFFECT_NONE = 'none';
+
 const isFileDrag = (dragEvent: DragEvent<HTMLElement>): boolean =>
   dragEvent.dataTransfer.types.includes(DATA_TRANSFER_FILES_TYPE);
 
 const isDragStillInsideArea = (dragEvent: DragEvent<HTMLElement>): boolean =>
   dragEvent.relatedTarget instanceof Node && dragEvent.currentTarget.contains(dragEvent.relatedTarget);
 
-export const useSvgFileDrop = (): SvgFileDropArea => {
+export const useSvgFileDrop = (isImportEnabled: boolean): SvgFileDropArea => {
   const dispatch: AppDispatch = useDispatch();
   const [isDropTarget, setIsDropTarget] = useState<boolean>(false);
 
@@ -35,7 +38,12 @@ export const useSvgFileDrop = (): SvgFileDropArea => {
     }
 
     dragEvent.preventDefault();
-    setIsDropTarget(true);
+
+    if (isImportEnabled) {
+      setIsDropTarget(true);
+    } else {
+      dragEvent.dataTransfer.dropEffect = DROP_EFFECT_NONE;
+    }
   };
 
   const handleDragLeave = (dragEvent: DragEvent<HTMLElement>): void => {
@@ -52,10 +60,10 @@ export const useSvgFileDrop = (): SvgFileDropArea => {
     // Every file goes to the import, which names each one that is not a usable SVG in an error toast.
     const droppedFiles: File[] = Array.from(dragEvent.dataTransfer.files);
 
-    if (droppedFiles.length) {
+    if (isImportEnabled && droppedFiles.length) {
       dispatch(new SvgFilesImportRequested({ files: droppedFiles }));
     }
   };
 
-  return { isDropTarget, handleDragOver, handleDragLeave, handleDrop };
+  return { isDropTarget: isImportEnabled && isDropTarget, handleDragOver, handleDragLeave, handleDrop };
 };

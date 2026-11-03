@@ -11,13 +11,19 @@ import { ConnectionStatusChanged, SerialPortSelected } from '../../utils/states/
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
-import { ConnectionPopoverOpenChanged, selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
+import {
+  ConnectionPopoverOpenChanged,
+  selectIsAnyOverlayOpen,
+  selectIsConnectionPopoverOpen,
+} from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const ONLINE_OR_OFFLINE_PATTERN = /Online|Offline/;
 const DISCONNECTED_PATTERN = /^Connection: Not connected.*Open the connection menu\.$/;
 const CONNECT_VERB_TEXT = 'Connect...';
 const CONNECT_LABEL = 'Connect';
+const DISCONNECT_LABEL = 'Disconnect';
+const UNGRANTED_PORT_ID = 'serial-ungranted';
 const FIRMWARE_TEXT = 'Grbl 1.1h';
 const CONNECTED_WITH_FIRMWARE_PATTERN = /Connected.*Grbl 1\.1h/;
 const POPOVER_LABEL = 'Laser connection';
@@ -101,6 +107,68 @@ describe(ConnectionPill.name, () => {
 
       expect(screen.getByText(FIRMWARE_TEXT)).toBeInTheDocument();
       expect(within(pillButton).queryByText(CONNECT_VERB_TEXT)).not.toBeInTheDocument();
+    });
+
+    it('closes the popover by itself after the laser connects, with focus back on the pill', async () => {
+      const store: AppStore = renderConnectionPill();
+
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      });
+      fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+
+      const connectButton: HTMLElement = screen.getByRole('button', { name: CONNECT_LABEL });
+
+      connectButton.focus();
+      fireEvent.click(connectButton);
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
+
+      await settle();
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
+      expect(screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN })).toHaveFocus();
+    });
+
+    it('leaves the popover open when opened again while connected', async () => {
+      const store: AppStore = renderConnectionPill();
+
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      });
+      fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      await settle();
+      fireEvent.click(screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN }));
+      await settle();
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
+      expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toBeInTheDocument();
+    });
+
+    it('stays open and shows the error when connecting fails, and clears it on the next try', async () => {
+      const store: AppStore = renderConnectionPill();
+
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: UNGRANTED_PORT_ID }));
+      });
+      fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      await settle();
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
+      expect(within(screen.getByRole('dialog', { name: POPOVER_LABEL })).getByRole('alert')).not.toBeEmptyDOMElement();
+
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      });
+      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+      await settle();
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
     });
   });
 

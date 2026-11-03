@@ -15,7 +15,7 @@ import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { SimulationSpeedPayload } from './interfaces/SimulationSpeedPayload';
 import type { SimulationTimePayload } from './interfaces/SimulationTimePayload';
-import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
+import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 import { DEFAULT_SIMULATION_SPEED } from './simulation.speed.constants';
 import type { SimulationSpeed } from './simulation.speed.constants';
 import { ToolpathFailed, ToolpathReady, ToolpathRequested } from './toolpath.state';
@@ -74,7 +74,7 @@ const SIMULATION_RESET_ACTION_TYPES: readonly string[] = [
   ToolpathRequested.type,
   ToolpathReady.type,
   ToolpathFailed.type,
-  ...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES,
+  ...PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES,
 ];
 // #endregion
 

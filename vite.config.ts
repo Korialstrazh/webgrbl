@@ -37,6 +37,9 @@ const ANTD_RC_MODULE_PATTERN = /[\\/]node_modules[\\/]@rc-component[\\/]/;
 const ANTD_BASE_CHUNK_PRIORITY = 30;
 const ANTD_RC_CHUNK_PRIORITY = 20;
 const ANTD_CHUNK_PRIORITY = 10;
+// The 3D scene chunk with three.js is about 566 kB after minification and cannot be split further. It loads only when
+// the 3D view opens, so it does not slow the start of the app. The main chunk, about 527 kB, also passes this limit.
+const CHUNK_SIZE_WARNING_LIMIT_KB = 600;
 
 export default defineConfig({
   // The app version is read from package.json once, at build time, and written into the code as a text constant.
@@ -44,6 +47,7 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(packageManifest.version),
   },
   build: {
+    chunkSizeWarningLimit: CHUNK_SIZE_WARNING_LIMIT_KB,
     rolldownOptions: {
       output: {
         codeSplitting: {

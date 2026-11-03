@@ -160,6 +160,26 @@ describe(MoveCard.name, () => {
     expect(getRequestedLines(dispatchSpy)).toEqual([DEFAULT_JOG_NORTH_EAST_LINE, GO_TO_ZERO_LINE]);
   });
 
+  it('shows Origin as a home icon with its name in the aria-label and tooltip, and keeps the Home text', async () => {
+    const store: AppStore = newStore();
+
+    activateProfile(store, { hasHomingSwitches: true });
+    renderMoveCard(store);
+    connect(store);
+    receiveState(store, GRBL_MACHINE_STATE.IDLE);
+
+    expect(screen.getByRole('button', { name: HOME_LABEL })).toHaveTextContent(HOME_LABEL);
+
+    const originButton: HTMLElement = screen.getByRole('button', { name: JOG_ORIGIN_LABEL });
+
+    expect(originButton).not.toHaveTextContent(JOG_ORIGIN_LABEL);
+    expect(originButton.querySelector('.anticon-home')).not.toBeNull();
+
+    fireEvent.mouseEnter(originButton);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(JOG_ORIGIN_LABEL);
+  });
+
   it('disables the jog pad while disconnected and in Run, enables it in Idle and Jog', () => {
     const store: AppStore = newStore();
 
