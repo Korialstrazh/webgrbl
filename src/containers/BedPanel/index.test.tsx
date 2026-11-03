@@ -511,14 +511,15 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('shows the material toolbar in the 3D header only', () => {
+  it('offers the material select in Design only; 3D shows the material as text', () => {
     renderPanel(newHeldToolpathStore());
 
-    expect(screen.queryByRole('combobox', { name: MATERIAL_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: MATERIAL_LABEL })).toBeInTheDocument();
 
     openThreeDView();
 
-    expect(screen.getByRole('combobox', { name: MATERIAL_LABEL })).toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: MATERIAL_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByText('Material: none')).toBeInTheDocument();
   });
 
   it('takes no SVG drop in 3D, where there is no bed to drop on, and keeps the browser from opening the file', () => {

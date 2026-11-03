@@ -56,10 +56,12 @@ BURN_PREVIEW_BUILDING;Building the 3D view
 BURN_PREVIEW_BURN_TEST_SAMPLE;Burn test sample…
 BURN_PREVIEW_FAILED;The 3D view could not be built. Switch to another view and back to try again.
 BURN_PREVIEW_LOADING;Loading the 3D view
+BURN_PREVIEW_MATERIAL_CURRENT;Material: {{name}}
 BURN_PREVIEW_MATERIAL_LABEL;Material
+BURN_PREVIEW_MATERIAL_NONE;Material: none
 BURN_PREVIEW_MATERIAL_PLACEHOLDER;Choose a material
 BURN_PREVIEW_MATERIAL_TESTED;Tested
-BURN_PREVIEW_NO_MATERIAL;Choose a material or add one to see how the cut will turn out.
+BURN_PREVIEW_NO_MATERIAL;Pick a material in Design to see how the cut will turn out.
 BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
 BURN_PREVIEW_OUT_OF_DATE;Out of date: the design changed. The 3D view comes back when the toolpath is generated again.
 BURN_SCENE_VIEW_FIT_HINT;Fit: back to the first view of the whole sheet

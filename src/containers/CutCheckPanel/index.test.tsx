@@ -45,7 +45,7 @@ const TEST_SAMPLE_POINTER = 'Burn a test sample to get an estimate.';
 const OUT_OF_DATE_TEXT = /^Out of date: the design changed/;
 const BUILDING_TEXT = 'Building the 3D view';
 const FAILED_TEXT = /^The 3D view could not be built/;
-const NO_MATERIAL_TEXT = /^Choose a material or add one/;
+const NO_MATERIAL_TEXT = /^Pick a material in Design/;
 const NOT_THROUGH_HINT = 'Part 3 stays attached: the cut does not reach through, so it cannot be lifted.';
 
 const newPart = (id: number, status: BurnPart['status']): BurnPart => ({
