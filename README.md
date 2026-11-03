@@ -11,7 +11,7 @@ A browser version of LaserGRBL: control a GRBL laser cutter or engraver straight
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Start the Vite dev server |
+| `npm run dev` | Pick a checkout and start the Vite dev server there, reachable from the local network |
 | `npm run build` | Typecheck and build the production bundle with the service worker |
 | `npm run preview` | Serve the production build locally (use this to test offline mode) |
 | `npm run lint` | Run ESLint |

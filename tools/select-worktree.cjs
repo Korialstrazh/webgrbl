@@ -9,7 +9,10 @@
 //   node tools/select-worktree.cjs [target] [-- dev server flags]
 //
 // Arguments after the target (or all arguments, when the first starts with a
-// dash) are forwarded to the dev server, so `npm run dev -- --host` reaches Vite.
+// dash) are forwarded to the dev server, so `npm run dev -- --port 3000` reaches
+// Vite. The server is reachable from the local network unless a --host flag says
+// otherwise. The flag is added here, not in the checkout's own scripts, so it also
+// covers worktrees whose branch predates it.
 
 const fs = require('fs');
 const path = require('path');
@@ -36,6 +39,7 @@ const BRANCH_LINE_PREFIX = 'branch ';
 const DETACHED_LINE = 'detached';
 const MAX_SELECTION_ATTEMPTS = 3;
 
+const HOST_FLAG = '--host';
 const FLAG_PREFIX = '-';
 const ARGUMENT_SEPARATOR = '--';
 const DOUBLE_QUOTE = '"';
@@ -73,6 +77,13 @@ const getForwardedArguments = () => {
   }
 
   return forwardedArguments;
+};
+
+// Appended, because Vite's --host takes an optional value and would swallow a following positional argument.
+const withNetworkAccess = (forwardedArguments) => {
+  const hasHostFlag = forwardedArguments.some((argument) => argument === HOST_FLAG || argument.startsWith(`${HOST_FLAG}=`));
+
+  return hasHostFlag ? forwardedArguments : [...forwardedArguments, HOST_FLAG];
 };
 
 const getGitOutput = (args, cwd) => {
@@ -245,7 +256,7 @@ const startDevServer = (target, choice, forwardedArguments) => {
 
 const main = async () => {
   const target = resolveTarget();
-  const forwardedArguments = getForwardedArguments();
+  const forwardedArguments = withNetworkAccess(getForwardedArguments());
   const repositoryRoot = getRepositoryRoot();
   const branchByPath = getBranchByWorktreePath(repositoryRoot);
   const rootChoice = {
