@@ -32,13 +32,31 @@ const BORDERLINE_POWER_PERCENT = 95;
 const FILL_HIGH_SPEED_MM_PER_MIN = 200;
 const FILL_NORMAL_SPEED_MM_PER_MIN = 3000;
 const FILL_SHALLOW_SPEED_MM_PER_MIN = 500;
-const PANEL: SvgSubpath = getBoxSubpath({ minX: 10, minY: 10, maxX: 40, maxY: 20 });
-const CUT_A: SvgSubpath = { points: [{ x: 20, y: 10 }, { x: 20, y: 20 }], isClosed: false };
-const CUT_B: SvgSubpath = { points: [{ x: 30, y: 10 }, { x: 30, y: 20 }], isClosed: false };
+const FAR_LEFT_MM = 60;
+const FAR_RIGHT_MM = 90;
+const PANEL_PART_COUNT = 3;
+const PANEL_LEFT_MM = 10;
+const PANEL_FRONT_MM = 10;
+const PANEL_BACK_MM = 20;
+const PANEL_RIGHT_MM = 40;
+const PANEL_SPLIT_FIRST_MM = 20;
+const PANEL_SPLIT_SECOND_MM = 30;
+const getStripSubpath = (minX: number, maxX: number): SvgSubpath =>
+  getBoxSubpath({ minX, minY: PANEL_FRONT_MM, maxX, maxY: PANEL_BACK_MM });
+const PANEL: SvgSubpath = getStripSubpath(PANEL_LEFT_MM, PANEL_RIGHT_MM);
+const FAR_PANEL: SvgSubpath = getStripSubpath(FAR_LEFT_MM, FAR_RIGHT_MM);
+const CUT_A: SvgSubpath = {
+  points: [{ x: PANEL_SPLIT_FIRST_MM, y: PANEL_FRONT_MM }, { x: PANEL_SPLIT_FIRST_MM, y: PANEL_BACK_MM }],
+  isClosed: false,
+};
+const CUT_B: SvgSubpath = {
+  points: [{ x: PANEL_SPLIT_SECOND_MM, y: PANEL_FRONT_MM }, { x: PANEL_SPLIT_SECOND_MM, y: PANEL_BACK_MM }],
+  isClosed: false,
+};
 const PANEL_OUTLINES: SvgSubpath[] = [
-  getBoxSubpath({ minX: 10, minY: 10, maxX: 20, maxY: 20 }),
-  getBoxSubpath({ minX: 20, minY: 10, maxX: 30, maxY: 20 }),
-  getBoxSubpath({ minX: 30, minY: 10, maxX: 40, maxY: 20 }),
+  getStripSubpath(PANEL_LEFT_MM, PANEL_SPLIT_FIRST_MM),
+  getStripSubpath(PANEL_SPLIT_FIRST_MM, PANEL_SPLIT_SECOND_MM),
+  getStripSubpath(PANEL_SPLIT_SECOND_MM, PANEL_RIGHT_MM),
 ];
 const CUTTING_SETTINGS: Partial<LayerSettings> = {
   maxPowerPercent: TEST_POWER_PERCENT,
@@ -67,6 +85,11 @@ const getFillLayer = (colour: string, speedMmPerMin: number): ProjectLayer => {
   return { ...layer, enabled: true };
 };
 
+const SHALLOW_LAYERS: ProjectLayer[] = [
+  getFillLayer(RED, FILL_SHALLOW_SPEED_MM_PER_MIN),
+  getFillLayer(BLUE, FILL_SHALLOW_SPEED_MM_PER_MIN),
+];
+
 const getCheck = (
   drawables: BedDrawable[],
   layers: ProjectLayer[],
@@ -86,6 +109,21 @@ const getCheck = (
     thicknessMm: THICKNESS_MM,
     basis,
   });
+};
+
+const getTwoFillCheck = (layers: ProjectLayer[], firstArea: SvgSubpath, secondArea: SvgSubpath): CutCheck => {
+  const [firstLayer = newTestLayer(RED), secondLayer = newTestLayer(BLUE)]: ProjectLayer[] = layers;
+  const firstToolpath: Toolpath = getTestJobToolpath(
+    [newFilledDrawable([firstArea], RED)],
+    [firstLayer],
+  );
+  const secondToolpath: Toolpath = getTestJobToolpath(
+    [newFilledDrawable([secondArea], BLUE)],
+    [secondLayer],
+  );
+  const bothToolpath: Toolpath = { ...firstToolpath, moves: [...firstToolpath.moves, ...secondToolpath.moves] };
+
+  return getCheck([], layers, CUT_THROUGH_BASIS, bothToolpath);
 };
 
 const getLineCheck = (subpaths: SvgSubpath[], maxPowerPercent: number, basis?: BurnDepthBasis): CutCheck => {
@@ -120,7 +158,7 @@ describe(getCutCheck.name, () => {
   it('counts three free parts of a panel cut by closed outlines, and warns about none', () => {
     const check: CutCheck = getLineCheck(PANEL_OUTLINES, TEST_POWER_PERCENT);
 
-    expect(check.freePartCount).toBe(3);
+    expect(check.freePartCount).toBe(PANEL_PART_COUNT);
     expect(check.warnings).toEqual([]);
     expect(check.isGuess).toBe(false);
   });
@@ -129,10 +167,10 @@ describe(getCutCheck.name, () => {
     const check: CutCheck = getLineCheck(PANEL_OUTLINES, HALF_POWER_PERCENT);
 
     expect(check.freePartCount).toBe(0);
-    expect(check.warnings.length).toBeGreaterThan(0);
+    expect(new Set(getKinds(check))).toEqual(new Set([CUT_CHECK_WARNING_KIND.PART_ATTACHED]));
   });
 
-  it('keeps the part count when open cuts only divide nothing', () => {
+  it('counts one part when open cuts inside a panel do not close any region', () => {
     expect(getLineCheck([PANEL, CUT_A, CUT_B], TEST_POWER_PERCENT).freePartCount).toBe(1);
   });
 
@@ -155,18 +193,31 @@ describe(getCutCheck.name, () => {
   });
 
   it('names both of two shallow fill layers that reach through together', () => {
-    const layers: ProjectLayer[] = [
-      getFillLayer(RED, FILL_SHALLOW_SPEED_MM_PER_MIN),
-      getFillLayer(BLUE, FILL_SHALLOW_SPEED_MM_PER_MIN),
-    ];
-    const redToolpath: Toolpath = getTestJobToolpath([newFilledDrawable([PANEL], RED)], [layers[0] as ProjectLayer]);
-    const blueToolpath: Toolpath = getTestJobToolpath([newFilledDrawable([PANEL], BLUE)], [layers[1] as ProjectLayer]);
-    const bothToolpath: Toolpath = { ...redToolpath, moves: [...redToolpath.moves, ...blueToolpath.moves] };
-    const check: CutCheck = getCheck([], layers, CUT_THROUGH_BASIS, bothToolpath);
+    const [redLayer, blueLayer]: ProjectLayer[] = SHALLOW_LAYERS;
+    const check: CutCheck = getTwoFillCheck(SHALLOW_LAYERS, PANEL, PANEL);
 
     expect(check.warnings.map((warning: CutCheckWarning) => warning.layerKey).sort())
-      .toEqual(layers.map(getLayerKey).sort());
-    expect(getCheck([newFilledDrawable([PANEL], RED)], [layers[0] as ProjectLayer]).warnings).toEqual([]);
+      .toEqual(SHALLOW_LAYERS.map(getLayerKey).sort());
+    expect(getCheck([newFilledDrawable([PANEL], RED)], [redLayer ?? blueLayer ?? newTestLayer(RED)]).warnings)
+      .toEqual([]);
+  });
+
+  it('does not name a cool fill layer elsewhere on the sheet', () => {
+    const check: CutCheck = getTwoFillCheck(SHALLOW_LAYERS, PANEL, FAR_PANEL);
+
+    expect(check.warnings).toEqual([]);
+  });
+
+  it('names only the layers on the cell that reaches through, with its depth', () => {
+    const hotLayers: ProjectLayer[] = [
+      getFillLayer(RED, FILL_SHALLOW_SPEED_MM_PER_MIN),
+      getFillLayer(BLUE, FILL_HIGH_SPEED_MM_PER_MIN),
+    ];
+    const check: CutCheck = getTwoFillCheck(hotLayers, FAR_PANEL, PANEL);
+
+    expect(check.warnings.map((warning: CutCheckWarning) => warning.layerKey))
+      .toEqual([getLayerKey(hotLayers[1] ?? newTestLayer(RED))]);
+    expect(check.warnings[0]?.predictedDepthMm).toBeGreaterThanOrEqual(THICKNESS_MM);
   });
 
   it('is a guess with every part borderline and no fill warning when nothing was tested', () => {
@@ -176,9 +227,10 @@ describe(getCutCheck.name, () => {
     const fillCheck: CutCheck = getCheck([newFilledDrawable([PANEL], RED)], [layer], guessBasis);
 
     expect(check.isGuess).toBe(true);
-    expect(check.borderlinePartCount).toBe(3);
+    expect(check.borderlinePartCount).toBe(PANEL_PART_COUNT);
     expect(new Set(getKinds(check))).toEqual(new Set([CUT_CHECK_WARNING_KIND.PART_MAY_STAY_ATTACHED]));
     expect(check.warnings.every((warning: CutCheckWarning) => warning.isLessSure)).toBe(true);
+    expect(check.warnings.every((warning: CutCheckWarning) => warning.predictedDepthMm > 0)).toBe(true);
     expect(fillCheck.warnings).toEqual([]);
   });
 });

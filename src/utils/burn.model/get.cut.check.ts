@@ -9,9 +9,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { getLayerKey } from '../layers/get.layer.key';
-import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { LAYER_MODE } from '../palette/palette.constants';
 import {
   BURN_DEPTH_BASIS_KIND,
   BURN_PART_STATUS,
@@ -19,8 +16,8 @@ import {
 } from './burn.model.constants';
 import type { CutCheckWarningKind } from './burn.model.constants';
 import { getBurnDepthPrediction } from './get.burn.depth.prediction';
-import { getMoveDose } from './get.move.dose';
 import type { BurnDepthBasis } from './interfaces/BurnDepthBasis';
+import type { BurnFillLayerDose } from './interfaces/BurnFillLayerDose';
 import type { BurnPart } from './interfaces/BurnPart';
 import type { CutCheck } from './interfaces/CutCheck';
 import type { CutCheckInput } from './interfaces/CutCheckInput';
@@ -37,10 +34,14 @@ const getPartWarningKind = (part: BurnPart): CutCheckWarningKind | undefined => 
 const getDoseOfDepth = (depthMm: number, basis: BurnDepthBasis): number =>
   basis.depthMmPerDose ? depthMm / basis.depthMmPerDose : 0;
 
+type NamedWallPart = BurnPart & { weakestLayerKey: string };
+
+const hasWeakestLayer = (part: BurnPart): part is NamedWallPart => !!part.weakestLayerKey;
+
 const getPartWarnings = ({ parts, thicknessMm, basis }: CutCheckInput): CutCheckWarning[] => {
   const warnings: CutCheckWarning[] = [];
 
-  for (const part of parts) {
+  for (const part of parts.filter(hasWeakestLayer)) {
     const kind: CutCheckWarningKind | undefined = getPartWarningKind(part);
 
     if (kind) {
@@ -48,7 +49,7 @@ const getPartWarnings = ({ parts, thicknessMm, basis }: CutCheckInput): CutCheck
 
       warnings.push({
         kind,
-        layerKey: part.weakestLayerKey ?? '',
+        layerKey: part.weakestLayerKey,
         partId: part.id,
         predictedDepthMm,
         neededDepthMm: thicknessMm,
@@ -60,36 +61,48 @@ const getPartWarnings = ({ parts, thicknessMm, basis }: CutCheckInput): CutCheck
   return warnings;
 };
 
-const hasFillDose = (layer: ProjectLayer): boolean =>
-  layer.enabled
-  && layer.settings.mode === LAYER_MODE.FILL
-  && getMoveDose(layer.settings.maxPowerPercent, layer.settings.speedMmPerMin) > 0;
+const getHottestThroughDose = (
+  { grid, thicknessMm, basis }: CutCheckInput,
+  layerDose: BurnFillLayerDose,
+): number => {
+  let hottestDose = 0;
 
-const getFillWarnings = ({ grid, layers, thicknessMm, basis }: CutCheckInput): CutCheckWarning[] => {
+  for (const [cell, dose] of layerDose.dose.entries()) {
+    const totalDose: number = grid.fillDose[cell] ?? 0;
+
+    if (dose && basis.depthMmPerDose * totalDose >= thicknessMm) {
+      hottestDose = Math.max(hottestDose, totalDose);
+    }
+  }
+
+  return hottestDose;
+};
+
+const getFillWarnings = (input: CutCheckInput): CutCheckWarning[] => {
+  const { grid, thicknessMm, basis } = input;
+
   if (basis.kind === BURN_DEPTH_BASIS_KIND.GUESS) {
     return [];
   }
 
-  const peakFillDose: number = grid.fillDose.reduce(
-    (peak: number, dose: number): number => Math.max(peak, dose),
-    0,
-  );
-  const predictedDepthMm: number = basis.depthMmPerDose * peakFillDose;
+  const warnings: CutCheckWarning[] = [];
 
-  if (predictedDepthMm < thicknessMm) {
-    return [];
+  for (const layerDose of grid.fillLayerDoses) {
+    const hottestDose: number = getHottestThroughDose(input, layerDose);
+
+    if (hottestDose) {
+      warnings.push({
+        kind: CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH,
+        layerKey: layerDose.layerKey,
+        partId: undefined,
+        predictedDepthMm: basis.depthMmPerDose * hottestDose,
+        neededDepthMm: thicknessMm,
+        isLessSure: getBurnDepthPrediction(hottestDose, thicknessMm, basis).isLessSure,
+      });
+    }
   }
 
-  const isLessSure: boolean = getBurnDepthPrediction(peakFillDose, thicknessMm, basis).isLessSure;
-
-  return layers.filter(hasFillDose).map((layer: ProjectLayer): CutCheckWarning => ({
-    kind: CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH,
-    layerKey: getLayerKey(layer),
-    partId: undefined,
-    predictedDepthMm,
-    neededDepthMm: thicknessMm,
-    isLessSure,
-  }));
+  return warnings;
 };
 
 const countPartsWithStatus = (parts: BurnPart[], status: BurnPart['status']): number =>

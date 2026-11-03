@@ -105,6 +105,7 @@ const isFillBurnMove = (move: ToolpathMove, layerKey: string): boolean =>
 
 const addFillLayerDoses = (grid: BurnDoseGrid, moves: ToolpathMove[], layer: ProjectLayer): void => {
   const layerKey: string = getLayerKey(layer);
+  const layerDose: Float32Array = new Float32Array(grid.fillDose.length);
   const largestMoveDose: Float32Array = new Float32Array(grid.fillDose.length);
 
   for (const move of moves) {
@@ -119,9 +120,14 @@ const addFillLayerDoses = (grid: BurnDoseGrid, moves: ToolpathMove[], layer: Pro
 
   for (const [cell, dose] of largestMoveDose.entries()) {
     if (dose) {
-      grid.fillDose[cell] = (grid.fillDose[cell] ?? 0) + dose * layer.settings.passes;
+      const passesDose: number = dose * layer.settings.passes;
+
+      grid.fillDose[cell] = (grid.fillDose[cell] ?? 0) + passesDose;
+      layerDose[cell] = passesDose;
     }
   }
+
+  grid.fillLayerDoses.push({ layerKey, dose: layerDose });
 };
 
 export const getBurnDoseGrid = (toolpath: Toolpath, layers: ProjectLayer[]): BurnDoseGrid | undefined => {
@@ -136,6 +142,7 @@ export const getBurnDoseGrid = (toolpath: Toolpath, layers: ProjectLayer[]): Bur
     ...layout,
     lineDose: new Float32Array(cellCount),
     fillDose: new Float32Array(cellCount),
+    fillLayerDoses: [],
     closedCutMask: new Uint8Array(cellCount),
     closedCutLayerIndex: new Uint16Array(cellCount),
     layerKeys: layers.map((layer: ProjectLayer): string => getLayerKey(layer)),
