@@ -39,6 +39,8 @@ import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake
 import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
 
+const FIT_LABEL = /^Fit/;
+const TOP_LABEL = /^Top/;
 const NO_WEBGL_TEXT = 'The 3D view could not start in this browser. The Cut check still works.';
 const LOADING_TEXT = 'Loading the 3D view';
 const SCENE_CANVAS_SELECTOR = 'canvas';
@@ -337,14 +339,17 @@ describe(BurnPreviewPane.name, () => {
     const { container } = renderPane(store);
 
     await getSceneCanvas(container);
-    expect(screen.queryByRole('button', { name: 'Fit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: FIT_LABEL })).not.toBeInTheDocument();
 
     act(() => {
       store.dispatch(new BurnModelReady({ model: newModel() }));
     });
-    fireEvent.click(await screen.findByRole('button', { name: 'Top' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Fit' }));
+    fireEvent.click(await screen.findByRole('button', { name: TOP_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: FIT_LABEL }));
 
+    expect(screen.getByRole('button', { name: FIT_LABEL }).querySelector('.anticon')).not.toBeNull();
+    expect(screen.getByRole('button', { name: TOP_LABEL }).querySelector('.anticon')).not.toBeNull();
+    expect(screen.getByRole('button', { name: FIT_LABEL })).not.toHaveTextContent('Fit');
     expect(renderer.showBurnSceneFromTop).toHaveBeenCalledTimes(1);
     expect(renderer.fitBurnSceneView).toHaveBeenCalledTimes(1);
   });

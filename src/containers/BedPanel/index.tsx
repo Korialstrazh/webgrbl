@@ -74,10 +74,13 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const isToolpathView: boolean = viewMode === BED_VIEW_MODE.TOOLPATH;
   const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
   const dropArea: SvgFileDropArea = useSvgFileDrop(!isThreeDView);
-  const viewModeOptions: BedViewModeOption[] = BED_VIEW_MODE_OPTION_KEYS.map((option: BedViewModeOptionKey) => ({
-    value: option.value,
-    label: t(option.labelKey),
-  }));
+  const viewModeOptions: BedViewModeOption[] = BED_VIEW_MODE_OPTION_KEYS.map(
+    ({ value, labelKey, IconComponent }: BedViewModeOptionKey) => ({
+      value,
+      label: <IconComponent aria-label={t(labelKey)} />,
+      tooltip: t(labelKey),
+    }),
+  );
 
   return (
     <Layout.Content className={styles.bedPanel}>
@@ -104,6 +107,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           {/* A plain slot: the bed viewport renders its zoom, Fit and bed colour controls in here. */}
           <div ref={setViewControlsHost} className={styles.viewControlsHost} />
           <Segmented<BedViewMode>
+            className={styles.viewSwitch}
             name={BED_VIEW_MODE_SWITCH_NAME}
             aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
             options={viewModeOptions}

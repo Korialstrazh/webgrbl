@@ -8,6 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { ExpandOutlined, VerticalAlignTopOutlined } from '@ant-design/icons';
 import { Button, Space, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,10 +22,20 @@ export const BurnSceneViewControls = ({ onFit, onTop }: BurnSceneViewControlsPro
   return (
     <Space.Compact className={styles.burnSceneViewControls} role="group" aria-label={t(DEFAULT.BURN_SCENE_VIEW_LABEL)}>
       <Tooltip title={t(DEFAULT.BURN_SCENE_VIEW_FIT_HINT)}>
-        <Button className={styles.viewButton} onClick={onFit}>{t(DEFAULT.BURN_SCENE_VIEW_FIT)}</Button>
+        <Button
+          className={styles.viewButton}
+          aria-label={t(DEFAULT.BURN_SCENE_VIEW_FIT_HINT)}
+          onClick={onFit}
+          icon={<ExpandOutlined />}
+        />
       </Tooltip>
       <Tooltip title={t(DEFAULT.BURN_SCENE_VIEW_TOP_HINT)}>
-        <Button className={styles.viewButton} onClick={onTop}>{t(DEFAULT.BURN_SCENE_VIEW_TOP)}</Button>
+        <Button
+          className={styles.viewButton}
+          aria-label={t(DEFAULT.BURN_SCENE_VIEW_TOP_HINT)}
+          onClick={onTop}
+          icon={<VerticalAlignTopOutlined />}
+        />
       </Tooltip>
     </Space.Compact>
   );

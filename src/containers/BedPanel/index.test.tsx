@@ -257,6 +257,27 @@ describe(BedPanel.name, () => {
     expect(regionElement).not.toContainElement(screen.getByRole('radiogroup', { name: 'Bed view' }));
   });
 
+  it('shows the views and Fit as icons with accessible names and tooltips, not text', async () => {
+    renderPanel(newStore());
+
+    for (const label of [DESIGN_VIEW_LABEL, TOOLPATH_VIEW_LABEL, '3D']) {
+      const radio: HTMLElement = screen.getByRole('radio', { name: label });
+      const option: HTMLElement | null = radio.closest('label');
+
+      expect(option?.querySelector('.anticon')).not.toBeNull();
+      expect(option).not.toHaveTextContent(label);
+    }
+
+    const fitButton: HTMLElement = screen.getByRole('button', { name: /^Fit the bed/ });
+
+    expect(fitButton.querySelector('.anticon')).not.toBeNull();
+    expect(fitButton).not.toHaveTextContent('Fit');
+
+    fireEvent.mouseEnter(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL }).closest('label') as HTMLElement);
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(DESIGN_VIEW_LABEL);
+  });
+
   it('has no tool switch: a drag on an object moves it', () => {
     const store: AppStore = newStore();
     const projectObject: ProjectObject = newProjectObject({ name: OBJECT_NAME });

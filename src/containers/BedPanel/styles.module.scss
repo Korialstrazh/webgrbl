@@ -62,6 +62,12 @@
   }
 }
 
+// Each view is an icon alone, so it holds the full touch target itself.
+.viewSwitch :global(.ant-segmented-item-label) {
+  min-width: 2.75rem;
+  text-align: center;
+}
+
 // Dialogs and drawers render in here, absolutely positioned, so they fill this box only: below the header, so the bed
 // toolbar stays uncovered, and reaching the panel edges, so a drawer continues the panel border. The regions container
 // clips them, so they never reach the machine panel or the sticky stop bar.
