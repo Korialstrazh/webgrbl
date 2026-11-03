@@ -3,6 +3,7 @@
  * part that selects it, cut down to the selected row when it is long so Layers stays near, and whether this is an
  * estimate from a test or a guess. Without a current model it says why and shows no old parts. Warnings never block
  * export.
+ *
  * @author michael.morosov
  *
  * @since 2026-11-03

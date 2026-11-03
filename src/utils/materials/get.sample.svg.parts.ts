@@ -1,6 +1,7 @@
 /**
  * Chooses what a new test sample draws so that it burns as a test. The square joins the red layer only when that
- * layer is on, in Line mode and burns after the gradient; otherwise it takes a colour of its own, whose new layer comes last.
+ * layer is on, in Line mode and burns after the gradient; otherwise it takes a colour of its own, whose new layer
+ * comes last.
  * A project has one shading layer and only that layer burns a gradient, so with that layer off or in Line mode there is
  * no layer to use and the sample leaves the gradient out: the result it records is about the square alone.
  *
