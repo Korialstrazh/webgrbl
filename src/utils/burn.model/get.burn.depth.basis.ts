@@ -21,7 +21,7 @@ const GUESS_BASIS: BurnDepthBasis = {
 };
 
 const hasUsableDose = (testDose: number, testResult: MaterialTestResult): boolean =>
-  testDose > 0 && testResult.thicknessMm > 0;
+  Number.isFinite(testDose) && testDose > 0 && testResult.thicknessMm > 0;
 
 export const getBurnDepthBasis = (testResult: MaterialTestResult | undefined): BurnDepthBasis => {
   if (!testResult) {

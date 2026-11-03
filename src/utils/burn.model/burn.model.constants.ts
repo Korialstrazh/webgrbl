@@ -48,3 +48,20 @@ export const BURN_DEPTH_BASIS_KIND = {
 } as const;
 
 export type BurnDepthBasisKind = (typeof BURN_DEPTH_BASIS_KIND)[keyof typeof BURN_DEPTH_BASIS_KIND];
+
+/** Region label of a cell that belongs to no part: part ids start at 1. */
+export const BURN_REGION_LABEL_NONE = 0;
+/** Doses are stored as 32-bit floats, which can round a dose just below the dose it must reach. */
+export const BURN_DOSE_STORAGE_TOLERANCE_RATIO = 1e-6;
+
+export const BURN_PART_STATUS_FREE = 'free';
+export const BURN_PART_STATUS_BORDERLINE = 'borderline';
+export const BURN_PART_STATUS_NOT_THROUGH = 'notThrough';
+
+export const BURN_PART_STATUS = {
+  FREE: BURN_PART_STATUS_FREE,
+  BORDERLINE: BURN_PART_STATUS_BORDERLINE,
+  NOT_THROUGH: BURN_PART_STATUS_NOT_THROUGH,
+} as const;
+
+export type BurnPartStatus = (typeof BURN_PART_STATUS)[keyof typeof BURN_PART_STATUS];
