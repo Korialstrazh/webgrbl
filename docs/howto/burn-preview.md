@@ -5,7 +5,7 @@ The 3D view shows how a job will turn out before material is spent: the engraved
 ## Open it
 
 1. Switch the bed to **3D** (third entry of the Design / Toolpath switch). It needs a material and a ready toolpath; the toolpath is requested for you.
-2. Pick a material in the 3D toolbar, or choose **Add material...** and enter a name and a thickness (0.1 to 100 mm). The material belongs to the project; the project file carries a copy, so it opens elsewhere.
+2. Pick a material in the 3D toolbar, or choose **Add material...** and enter a name and a thickness (0.1 to 100 mm). Save waits for both to be valid. A name and thickness you already have bring a note and **Use that one**; saving a copy stays allowed. The list marks materials tested on the active machine as **Tested**. The material belongs to the project; the project file carries a copy, so it opens elsewhere.
 3. Orbit, zoom and pan the sheet. The camera is orthographic only.
 
 In 3D the left panel shows the **Cut check** above Layers; Objects is hidden. STOP stays visible. Dropping an SVG onto the bed does nothing in 3D.
@@ -15,7 +15,7 @@ In 3D the left panel shows the **Cut check** above Layers; Objects is hidden. ST
 A depth estimate needs one real test per material and machine profile (lasers differ).
 
 1. In the 3D toolbar choose **Burn test sample...** (needs a material).
-2. Step 1: enter power, speed and passes (default: the project's first Line layer). The sample is a 5 x 5 cm square cut line with a black-to-white gradient inside. Press **Export sample G-code**; it uses the normal G-code download and does not touch the project's toolpath. Export is off, with a reason, without a machine profile, when the sample does not fit the work area, or when a setting is out of range (power 1 to 100 %, speed 1 to 20000 mm/min, passes 1 to 50). If the export fails, a message says so.
+2. Step 1: enter power, speed and passes (default: the project's first Line layer). The sample is a 5 x 5 cm square cut line with a black-to-white gradient inside. Press **Export sample G-code**, the main button until the export; it uses the normal G-code download and does not touch the project's toolpath. Export is off, with a reason, without a machine profile, when the sample does not fit the work area, or when a setting is out of range (power 1 to 100 %, speed 1 to 20000 mm/min, passes 1 to 50). If the export fails, a message says so.
 3. After Export the settings are locked, so the saved ones are the ones burnt.
 4. Burn it on the real laser (outside the app).
 5. Step 2: choose **Cut through**, or **Not through** with an optional depth in mm (above 0, at most the thickness). The depth always describes the square's cut line. **Save for this material** stores it for the active profile. Saving without exporting is allowed (you may have burnt the same settings earlier). Cancel stores nothing.
@@ -35,14 +35,15 @@ The gradient only helps you judge shading by eye. To change shading, change the 
 ## Parts and lifting
 
 - A part is a region enclosed by through cuts. Status: **Free**, **May stay attached** (borderline) or **Attached** (not through).
-- Click a part, or its row in the Cut check, to select it. Free and borderline parts show an orange arrow: drag it up or down. With the part's status card focused, the arrow keys lift too (0.1 mm a step).
+- Hover a part or its row to highlight it; click either to select it, which also scrolls its row into view in the list. Free and borderline parts show an orange arrow: drag it up or down. The bar below the scene shows the height ("Lifted 40.0 mm"); with it focused, the arrow keys lift too (1 mm a step). Lifted parts show their height in their row, and **Put all back** resets every lift.
+- Orbit stops about 80 degrees from vertical. **Fit** brings back the first view and **Top** looks straight down.
 - No upper limit. 0.0 is absolute: the part's place in the sheet, also for a part nested in a lifted parent. Nested parts rise with their parent.
 - Attached parts cannot lift; their row gives the reason and is the only way to select them.
 - Pieces are cel-shaded with an ink outline. Lifts are preview only, change nothing in the project and reset when the toolpath changes.
 
 ## Warnings
 
-Warnings name the layer and part, give predicted against needed depth, and suggest a direction in words. They never block export.
+Warnings of the same kind, layer and shown depths form one alert with the part count, the depths and a suggestion. The selected row shows its own part's warning. They never block export.
 
 1. A part stays attached (not enough power or runs).
 2. A part may stay attached (borderline).
