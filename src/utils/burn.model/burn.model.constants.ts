@@ -67,3 +67,15 @@ export const BURN_PART_STATUS = {
 } as const;
 
 export type BurnPartStatus = (typeof BURN_PART_STATUS)[keyof typeof BURN_PART_STATUS];
+
+export const CUT_CHECK_WARNING_KIND_PART_ATTACHED = 'partAttached';
+export const CUT_CHECK_WARNING_KIND_PART_MAY_STAY_ATTACHED = 'partMayStayAttached';
+export const CUT_CHECK_WARNING_KIND_FILL_CUTS_THROUGH = 'fillCutsThrough';
+
+export const CUT_CHECK_WARNING_KIND = {
+  PART_ATTACHED: CUT_CHECK_WARNING_KIND_PART_ATTACHED,
+  PART_MAY_STAY_ATTACHED: CUT_CHECK_WARNING_KIND_PART_MAY_STAY_ATTACHED,
+  FILL_CUTS_THROUGH: CUT_CHECK_WARNING_KIND_FILL_CUTS_THROUGH,
+} as const;
+
+export type CutCheckWarningKind = (typeof CUT_CHECK_WARNING_KIND)[keyof typeof CUT_CHECK_WARNING_KIND];
