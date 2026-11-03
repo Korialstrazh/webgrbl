@@ -12,7 +12,22 @@
 }
 
 .message {
+  position: relative;
   max-width: calc(100% - 2 * var(--space-3));
+}
+
+// Behind the messages and the lift control, which sit on top of the scene.
+.sceneHost {
+  position: absolute;
+  inset: 0;
+}
+
+.loading {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 // Takes its drawing size from the renderer, and fills the pane on screen.

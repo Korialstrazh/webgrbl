@@ -15,7 +15,9 @@ import {
   selectBurnModel,
   selectBurnModelStatus,
   selectBurnPartEffectiveLiftMm,
+  selectBurnPartEffectiveLiftsMm,
   selectBurnPartLiftMm,
+  selectCurrentBurnModel,
   selectSelectedBurnPartId,
 } from './burn.model.state';
 import type { BurnModelState } from './burn.model.state';
@@ -147,6 +149,26 @@ describe(burnModelReducer.name, () => {
     expect(selectBurnPartLiftMm(CHILD_ID)(root)).toBe(0);
   });
 
+  it('refuses to lift a part that does not cut through', () => {
+    const notThroughPart: BurnPart = { ...newPart(PARENT_ID, undefined), status: BURN_PART_STATUS.NOT_THROUGH };
+    const root = newRootState(reduceActions([
+      new BurnModelReady({ model: newModel([notThroughPart]) }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(0);
+  });
+
+  it('lifts a borderline part', () => {
+    const borderlinePart: BurnPart = { ...newPart(PARENT_ID, undefined), status: BURN_PART_STATUS.BORDERLINE };
+    const root = newRootState(reduceActions([
+      new BurnModelReady({ model: newModel([borderlinePart]) }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(PARENT_LIFT_MM);
+  });
+
   it('selects and clears the selected part', () => {
     const selectedRoot = newRootState(reduceActions([...READY_ACTIONS, new BurnPartSelected({ partId: CHILD_ID })]));
     const clearedRoot = newRootState(reduceActions([
@@ -157,6 +179,33 @@ describe(burnModelReducer.name, () => {
 
     expect(selectSelectedBurnPartId(selectedRoot)).toBe(CHILD_ID);
     expect(selectSelectedBurnPartId(clearedRoot)).toBeUndefined();
+  });
+});
+
+describe(selectCurrentBurnModel.name, () => {
+  it('gives the model only while it is ready', () => {
+    const model: BurnModel = newModel();
+    const readyActions: Action<unknown>[] = [new BurnModelReady({ model })];
+
+    expect(selectCurrentBurnModel(newRootState(reduceActions(readyActions)))).toBe(model);
+    expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, new ProjectUndoRequested()]))))
+      .toBeUndefined();
+    expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, new BurnModelRequested()]))))
+      .toBeUndefined();
+    expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, new BurnModelFailed()]))))
+      .toBeUndefined();
+  });
+});
+
+describe(selectBurnPartEffectiveLiftsMm.name, () => {
+  it('gives the lift of every part with what its parents add, and the same object until something changes', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftsMm(root)).toEqual({ [PARENT_ID]: PARENT_LIFT_MM, [CHILD_ID]: PARENT_LIFT_MM });
+    expect(selectBurnPartEffectiveLiftsMm(root)).toBe(selectBurnPartEffectiveLiftsMm(root));
   });
 });
 

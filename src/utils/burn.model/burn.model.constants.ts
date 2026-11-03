@@ -18,6 +18,7 @@ export const BURN_GRID_MAX_CELLS = 1000000;
 export const BURN_SHEET_MARGIN_MM = 10;
 export const CUT_PART_MIN_AREA_MM2 = 1;
 export const BURN_PART_LIFT_MAX_THICKNESSES = 4;
+export const BURN_PART_LIFT_STEP_MM = 0.1;
 export const BURN_SAMPLE_SIZE_MM = 50;
 export const BURN_SAMPLE_ORIGIN_OFFSET_MM = 5;
 export const BURN_SAMPLE_GRADIENT_INSET_MM = 5;

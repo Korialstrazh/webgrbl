@@ -10,9 +10,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { createSelector } from '@reduxjs/toolkit';
 import { BURN_PART_LIFT_MAX_THICKNESSES } from '../burn.model/burn.model.constants';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../burn.model/interfaces/BurnPart';
+import type { BurnPartLiftsMm } from '../burn.model/interfaces/BurnPartLiftsMm';
+import { isBurnPartLiftable } from '../burn.model/is.burn.part.liftable';
 import { getNumberInRange } from '../get.number.in.range';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
@@ -37,7 +40,7 @@ export interface BurnModelState {
   /** The part selected in the 3D preview. */
   selectedPartId: number | undefined;
   /** How far the user lifted each part above its place, in mm, not counting what lifts its parents. */
-  liftMmByPartId: Record<number, number>;
+  liftMmByPartId: BurnPartLiftsMm;
 }
 // #endregion
 
@@ -104,13 +107,22 @@ const getStateAfterInputChange = (state: BurnModelState): BurnModelState =>
     ? { ...state, status: BURN_MODEL_STATUS.STALE }
     : getStateAfterBuildStopped(state));
 
-const getStateWithLift = (state: BurnModelState, { partId, liftMm }: BurnPartLiftedPayload): BurnModelState => ({
-  ...state,
-  liftMmByPartId: {
-    ...state.liftMmByPartId,
-    [partId]: getNumberInRange(liftMm, 0, (state.model?.thicknessMm ?? 0) * BURN_PART_LIFT_MAX_THICKNESSES),
-  },
-});
+const isBurnPartHeldToTheSheet = ({ model }: BurnModelState, partId: number): boolean =>
+  !!model?.parts.some((part: BurnPart): boolean => part.id === partId && !isBurnPartLiftable(part));
+
+const getStateWithLift = (state: BurnModelState, { partId, liftMm }: BurnPartLiftedPayload): BurnModelState => {
+  if (isBurnPartHeldToTheSheet(state, partId)) {
+    return state;
+  }
+
+  return {
+    ...state,
+    liftMmByPartId: {
+      ...state.liftMmByPartId,
+      [partId]: getNumberInRange(liftMm, 0, (state.model?.thicknessMm ?? 0) * BURN_PART_LIFT_MAX_THICKNESSES),
+    },
+  };
+};
 
 export const burnModelReducer = (
   state: BurnModelState = INITIAL_BURN_MODEL_STATE,
@@ -145,6 +157,10 @@ type RootState = { [BURN_MODEL_STATE_NAME]: BurnModelState };
 
 export const selectBurnModel = (state: RootState): BurnModel | undefined => state[BURN_MODEL_STATE_NAME].model;
 
+/** The model only while it matches the project: a stale one may even come from a project opened before this one. */
+export const selectCurrentBurnModel = (state: RootState): BurnModel | undefined =>
+  (state[BURN_MODEL_STATE_NAME].status === BURN_MODEL_STATUS.READY ? selectBurnModel(state) : undefined);
+
 export const selectBurnModelStatus = (state: RootState): BurnModelStatus => state[BURN_MODEL_STATE_NAME].status;
 
 export const selectSelectedBurnPartId = (state: RootState): number | undefined =>
@@ -153,8 +169,7 @@ export const selectSelectedBurnPartId = (state: RootState): number | undefined =
 export const selectBurnPartLiftMm = (partId: number) => (state: RootState): number =>
   state[BURN_MODEL_STATE_NAME].liftMmByPartId[partId] ?? 0;
 
-export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootState): number => {
-  const parts: BurnPart[] = selectBurnModel(state)?.parts ?? [];
+const getBurnPartEffectiveLiftMm = (partId: number, parts: BurnPart[], liftsMm: BurnPartLiftsMm): number => {
   const seenPartIds: Set<number> = new Set<number>();
   let currentPart: BurnPart | undefined = parts.find((part: BurnPart): boolean => part.id === partId);
   let effectiveLiftMm = 0;
@@ -163,10 +178,29 @@ export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootSta
     const { id, parentId }: BurnPart = currentPart;
 
     seenPartIds.add(id);
-    effectiveLiftMm += selectBurnPartLiftMm(id)(state);
+    effectiveLiftMm += liftsMm[id] ?? 0;
     currentPart = parts.find((part: BurnPart): boolean => part.id === parentId);
   }
 
   return effectiveLiftMm;
 };
+
+export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootState): number =>
+  getBurnPartEffectiveLiftMm(
+    partId,
+    selectBurnModel(state)?.parts ?? [],
+    state[BURN_MODEL_STATE_NAME].liftMmByPartId,
+  );
+
+export const selectBurnPartEffectiveLiftsMm = createSelector(
+  [selectBurnModel, (state: RootState): BurnPartLiftsMm => state[BURN_MODEL_STATE_NAME].liftMmByPartId],
+  (model: BurnModel | undefined, liftsMm: BurnPartLiftsMm): BurnPartLiftsMm => {
+    const parts: BurnPart[] = model?.parts ?? [];
+
+    return Object.fromEntries(parts.map(({ id }: BurnPart): [number, number] => [
+      id,
+      getBurnPartEffectiveLiftMm(id, parts, liftsMm),
+    ]));
+  },
+);
 // #endregion

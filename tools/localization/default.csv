@@ -43,6 +43,12 @@ BED_ZOOM_OUT_HINT;Zoom out (-)
 BED_ZOOM_PAN_HINT;Zoom relative to the fitted bed: 100 % (fit) shows the whole bed. Drag with the middle mouse button, or hold Space and drag, to move the view.
 BED_ZOOM_PERCENT;{{percent}} %
 BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
+BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached. Drag to see what would stay behind.
+BURN_PART_LIFT_HINT_FREE;Part {{part}} comes free. Drag to see what stays behind.
+BURN_PART_LIFT_HINT_NOT_THROUGH;Part {{part}} stays attached: the cut does not reach through, so it cannot be lifted.
+BURN_PART_LIFT_HINT_RISES_WITH_PARENT;Part {{part}} stays attached to part {{parent}}, so it rises with it and cannot be lifted on its own.
+BURN_PART_LIFT_LABEL;Lift selected part
+BURN_PART_LIFT_MAY_STAY_ATTACHED;may stay attached
 BURN_PREVIEW_LOADING;Loading the 3D view
 BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
 COMING_SOON;Soon

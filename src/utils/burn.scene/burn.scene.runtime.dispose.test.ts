@@ -1,0 +1,110 @@
+import { BufferGeometry } from 'three';
+import type { BurnModel } from '../burn.model/interfaces/BurnModel';
+import { newBurnSceneRenderer } from './burn.scene.runtime';
+import type { BurnSceneRenderer } from './interfaces/BurnSceneRenderer';
+import { newBurnSceneTestModel } from './test.support/new.burn.scene.test.model';
+
+const HIGH_DEVICE_PIXEL_RATIO = 3;
+const CAPPED_PIXEL_RATIO = 2;
+const VIEW_WIDTH_PX = 400;
+const VIEW_HEIGHT_PX = 200;
+
+const fakeWebGlRenderer = vi.hoisted(() => ({
+  domElement: document.createElement('canvas'),
+  setPixelRatio: vi.fn(),
+  setClearColor: vi.fn(),
+  setSize: vi.fn(),
+  render: vi.fn(),
+  clear: vi.fn(),
+  dispose: vi.fn(),
+  forceContextLoss: vi.fn(),
+}));
+
+vi.mock('three', async (importOriginal: () => Promise<object>) => ({
+  ...(await importOriginal()),
+  WebGLRenderer: vi.fn(function fakeRendererConstructor() {
+    return fakeWebGlRenderer;
+  }),
+}));
+
+const newRenderer = (): BurnSceneRenderer => {
+  const renderer: BurnSceneRenderer | undefined = newBurnSceneRenderer(document.createElement('canvas'));
+
+  if (!renderer) {
+    throw new Error('expected a renderer');
+  }
+
+  return renderer;
+};
+
+describe('the burn scene renderer', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubGlobal('devicePixelRatio', HIGH_DEVICE_PIXEL_RATIO);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('caps the device pixel ratio', () => {
+    newRenderer();
+
+    expect(fakeWebGlRenderer.setPixelRatio).toHaveBeenCalledWith(CAPPED_PIXEL_RATIO);
+  });
+
+  it('renders only on demand: for a model, a lift and a resize, and never by itself', () => {
+    const renderer: BurnSceneRenderer = newRenderer();
+    const model: BurnModel = newBurnSceneTestModel();
+
+    expect(fakeWebGlRenderer.render).not.toHaveBeenCalled();
+
+    renderer.showBurnModel(model);
+    expect(fakeWebGlRenderer.render).toHaveBeenCalledTimes(1);
+
+    renderer.applyBurnPartLifts({ 1: 1 });
+    expect(fakeWebGlRenderer.render).toHaveBeenCalledTimes(2);
+
+    renderer.resizeBurnScene({ widthPx: VIEW_WIDTH_PX, heightPx: VIEW_HEIGHT_PX });
+    expect(fakeWebGlRenderer.setSize).toHaveBeenCalledWith(VIEW_WIDTH_PX, VIEW_HEIGHT_PX, false);
+    expect(fakeWebGlRenderer.render).toHaveBeenCalledTimes(3);
+  });
+
+  it('draws nothing and picks nothing once the model is taken away', () => {
+    const renderer: BurnSceneRenderer = newRenderer();
+
+    renderer.showBurnModel(newBurnSceneTestModel());
+    fakeWebGlRenderer.render.mockClear();
+    renderer.showBurnModel(undefined);
+
+    expect(fakeWebGlRenderer.render).not.toHaveBeenCalled();
+    expect(fakeWebGlRenderer.clear).toHaveBeenCalledTimes(1);
+    expect(renderer.getBurnPartIdAtPointer({ xNdc: 0, yNdc: 0 })).toBeUndefined();
+  });
+
+  it('gives the WebGL context back on dispose, because browsers cap live contexts', () => {
+    const renderer: BurnSceneRenderer = newRenderer();
+
+    renderer.showBurnModel(newBurnSceneTestModel());
+    renderer.dispose();
+
+    expect(fakeWebGlRenderer.forceContextLoss).toHaveBeenCalledTimes(1);
+    expect(fakeWebGlRenderer.dispose).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('the burn scene renderer memory', () => {
+  it('frees the geometry of each mesh when the model changes', () => {
+    const disposeSpy = vi.spyOn(BufferGeometry.prototype, 'dispose');
+    const renderer: BurnSceneRenderer = newRenderer();
+    const model: BurnModel = newBurnSceneTestModel();
+
+    renderer.showBurnModel(model);
+    expect(disposeSpy).not.toHaveBeenCalled();
+
+    renderer.showBurnModel(undefined);
+
+    expect(disposeSpy).toHaveBeenCalledTimes(model.meshes.length);
+    disposeSpy.mockRestore();
+  });
+});
