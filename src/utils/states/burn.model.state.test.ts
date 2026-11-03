@@ -159,11 +159,14 @@ describe(burnModelReducer.name, () => {
     const root = newRootState(reduceActions([
       ...READY_ACTIONS,
       new BurnPartLifted({ partId: PARENT_ID, liftMm: veryHigh }),
-      new BurnPartLifted({ partId: CHILD_ID, liftMm: -1 }),
+    ]));
+    const loweredRoot = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: -1 }),
     ]));
 
     expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(veryHigh);
-    expect(selectBurnPartLiftMm(CHILD_ID)(root)).toBe(0);
+    expect(selectBurnPartLiftMm(PARENT_ID)(loweredRoot)).toBe(0);
   });
 
   it('refuses to lift a part that does not cut through', () => {
@@ -223,6 +226,30 @@ describe(selectBurnPartEffectiveLiftsMm.name, () => {
 
     expect(selectBurnPartEffectiveLiftsMm(root)).toEqual({ [PARENT_ID]: PARENT_LIFT_MM, [CHILD_ID]: PARENT_LIFT_MM });
     expect(selectBurnPartEffectiveLiftsMm(root)).toBe(selectBurnPartEffectiveLiftsMm(root));
+  });
+});
+
+describe('height 0 of a lifted part', () => {
+  it('is absolute: a child goes down to its place inside a lifted parent, and never below it', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: CHILD_ID, liftMm: -PARENT_LIFT_MM * 10 }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftMm(PARENT_ID)(root)).toBe(PARENT_LIFT_MM);
+    expect(selectBurnPartEffectiveLiftMm(CHILD_ID)(root)).toBe(0);
+  });
+
+  it('holds when the parent comes down after the child was lowered', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: CHILD_ID, liftMm: -PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: 0 }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftMm(CHILD_ID)(root)).toBe(0);
   });
 });
 

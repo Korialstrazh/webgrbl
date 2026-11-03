@@ -268,6 +268,12 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
       this.scene.remove(this.objects.group);
       this.objects.material.dispose();
       this.objects.highlightMaterial.dispose();
+      this.objects.toonBands.dispose();
+      this.objects.outlineMaterial.dispose();
+
+      for (const outline of this.objects.outlines) {
+        outline.geometry.dispose();
+      }
 
       for (const { mesh } of this.objects.meshes) {
         mesh.geometry.dispose();

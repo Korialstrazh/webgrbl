@@ -11,6 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { createSelector } from '@reduxjs/toolkit';
+import { getBurnPartEffectiveLiftMm } from '../burn.model/get.burn.part.effective.lift.mm';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../burn.model/interfaces/BurnPart';
 import type { BurnPartLiftsMm } from '../burn.model/interfaces/BurnPartLiftsMm';
@@ -115,6 +116,17 @@ const getStateAfterMaterialChange = (state: BurnModelState, changedMaterialId: s
 const isBurnPartHeldToTheSheet = ({ model }: BurnModelState, partId: number): boolean =>
   !!model?.parts.some((part: BurnPart): boolean => part.id === partId && !isBurnPartLiftable(part));
 
+/** The own lift that brings a part down to height 0: below its parent, when that parent stands lifted. */
+const getBurnPartLowestLiftMm = ({ model, liftMmByPartId }: BurnModelState, partId: number): number => {
+  const partsById: Map<number, BurnPart> = new Map<number, BurnPart>(
+    (model?.parts ?? []).map((part: BurnPart): [number, BurnPart] => [part.id, part]),
+  );
+  const parentId: number | undefined = partsById.get(partId)?.parentId;
+  const parent: BurnPart | undefined = parentId ? partsById.get(parentId) : undefined;
+
+  return parent ? -getBurnPartEffectiveLiftMm(parent, partsById, liftMmByPartId) : 0;
+};
+
 const getStateWithLift = (state: BurnModelState, { partId, liftMm }: BurnPartLiftedPayload): BurnModelState => {
   if (isBurnPartHeldToTheSheet(state, partId)) {
     return state;
@@ -124,7 +136,7 @@ const getStateWithLift = (state: BurnModelState, { partId, liftMm }: BurnPartLif
     ...state,
     liftMmByPartId: {
       ...state.liftMmByPartId,
-      [partId]: Math.max(liftMm, 0),
+      [partId]: Math.max(liftMm, getBurnPartLowestLiftMm(state, partId)),
     },
   };
 };
@@ -189,26 +201,6 @@ export const selectSelectedBurnPartId = (state: RootState): number | undefined =
 
 export const selectBurnPartLiftMm = (partId: number) => (state: RootState): number =>
   state[BURN_MODEL_STATE_NAME].liftMmByPartId[partId] ?? 0;
-
-const getBurnPartEffectiveLiftMm = (
-  part: BurnPart,
-  partsById: Map<number, BurnPart>,
-  liftsMm: BurnPartLiftsMm,
-): number => {
-  const seenPartIds: Set<number> = new Set<number>();
-  let currentPart: BurnPart | undefined = part;
-  let effectiveLiftMm = 0;
-
-  while (currentPart && !seenPartIds.has(currentPart.id)) {
-    const { id, parentId }: BurnPart = currentPart;
-
-    seenPartIds.add(id);
-    effectiveLiftMm += liftsMm[id] ?? 0;
-    currentPart = parentId ? partsById.get(parentId) : undefined;
-  }
-
-  return effectiveLiftMm;
-};
 
 export const selectBurnPartEffectiveLiftsMm = createSelector(
   [selectBurnModel, (state: RootState): BurnPartLiftsMm => state[BURN_MODEL_STATE_NAME].liftMmByPartId],

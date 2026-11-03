@@ -8,7 +8,19 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BufferAttribute, BufferGeometry, Color, Group, Mesh, MeshLambertMaterial } from 'three';
+import {
+  BufferAttribute,
+  BufferGeometry,
+  Color,
+  DataTexture,
+  Group,
+  LineBasicMaterial,
+  LineSegments,
+  Mesh,
+  MeshToonMaterial,
+  NearestFilter,
+  RedFormat,
+} from 'three';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnRegionMesh } from '../burn.model/interfaces/BurnRegionMesh';
 import {
@@ -19,8 +31,11 @@ import {
   BURN_SCENE_HIGHLIGHT_COLOUR,
   BURN_SCENE_HIGHLIGHT_INTENSITY,
   BURN_SCENE_INDEX_VALUES_PER_ITEM,
+  BURN_SCENE_OUTLINE_COLOUR,
   BURN_SCENE_POSITION_VALUES_PER_VERTEX,
+  BURN_SCENE_TOON_BANDS,
 } from './burn.scene.constants';
+import { getBurnPieceOutlineGeometry } from './get.burn.piece.outline.geometry';
 import type { BurnSceneMesh } from './interfaces/BurnSceneMesh';
 import type { BurnSceneObjects } from './interfaces/BurnSceneObjects';
 
@@ -59,11 +74,42 @@ const newBurnRegionGeometry = ({ positions, shades, indices }: BurnRegionMesh): 
   return geometry;
 };
 
+const newBurnSceneToonBands = (): DataTexture => {
+  const toonBands: DataTexture = new DataTexture(
+    new Uint8Array(BURN_SCENE_TOON_BANDS),
+    BURN_SCENE_TOON_BANDS.length,
+    1,
+    RedFormat,
+  );
+
+  // Nearest, so that the bands meet in a hard step.
+  toonBands.minFilter = NearestFilter;
+  toonBands.magFilter = NearestFilter;
+  toonBands.needsUpdate = true;
+
+  return toonBands;
+};
+
+// A line is thin, but a ray takes it for a wide target: it must not hide its part from a click.
+const ignoreBurnOutlineRay = (): void => undefined;
+
 export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
   const group: Group = new Group();
-  const material: MeshLambertMaterial = new MeshLambertMaterial({ vertexColors: true });
-  const highlightMaterial: MeshLambertMaterial = new MeshLambertMaterial({
+  const toonBands: DataTexture = newBurnSceneToonBands();
+  // The offset keeps the ink lines from sinking into the faces they lie on.
+  const material: MeshToonMaterial = new MeshToonMaterial({
     vertexColors: true,
+    gradientMap: toonBands,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
+  const highlightMaterial: MeshToonMaterial = new MeshToonMaterial({
+    vertexColors: true,
+    gradientMap: toonBands,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
     emissive: BURN_SCENE_HIGHLIGHT_COLOUR,
     emissiveIntensity: BURN_SCENE_HIGHLIGHT_INTENSITY,
   });
@@ -72,9 +118,20 @@ export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
     mesh: new Mesh(newBurnRegionGeometry(regionMesh), material),
   }));
 
+  const outlineMaterial: LineBasicMaterial = new LineBasicMaterial({ color: BURN_SCENE_OUTLINE_COLOUR });
+  const outlines: LineSegments[] = [];
+
   for (const { mesh } of meshes) {
+    const outline: LineSegments = new LineSegments(
+      getBurnPieceOutlineGeometry(mesh.geometry, model.thicknessMm),
+      outlineMaterial,
+    );
+
+    outline.raycast = ignoreBurnOutlineRay;
+    mesh.add(outline);
+    outlines.push(outline);
     group.add(mesh);
   }
 
-  return { group, meshes, material, highlightMaterial };
+  return { group, meshes, material, highlightMaterial, toonBands, outlines, outlineMaterial };
 };

@@ -144,17 +144,17 @@ describe('the burn scene camera across models', () => {
 });
 
 describe('the burn scene renderer memory', () => {
-  it('frees the geometry of each mesh when the model changes', () => {
+  it('frees the geometry of each mesh and its outline when the model changes', () => {
     const disposeSpy = vi.spyOn(BufferGeometry.prototype, 'dispose');
     const renderer: BurnSceneRenderer = newRenderer();
     const model: BurnModel = newBurnSceneTestModel();
 
     renderer.showBurnModel(model);
-    expect(disposeSpy).not.toHaveBeenCalled();
+    disposeSpy.mockClear();
 
     renderer.showBurnModel(undefined);
 
-    expect(disposeSpy).toHaveBeenCalledTimes(model.meshes.length);
+    expect(disposeSpy).toHaveBeenCalledTimes(model.meshes.length * 2);
     disposeSpy.mockRestore();
   });
 });

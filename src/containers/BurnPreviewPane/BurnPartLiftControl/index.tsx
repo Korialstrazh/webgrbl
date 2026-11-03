@@ -25,6 +25,7 @@ import { isBurnPartLiftable } from '../../../utils/burn.model/is.burn.part.lifta
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import {
   BurnPartLifted,
+  selectBurnPartEffectiveLiftMm,
   selectBurnPartLiftMm,
   selectCurrentBurnModel,
   selectSelectedBurnPartId,
@@ -58,6 +59,7 @@ export const BurnPartLiftControl = (): ReactNode => {
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
   const selectedPartId: number | undefined = useSelector(selectSelectedBurnPartId);
   const liftMm: number = useSelector(selectBurnPartLiftMm(selectedPartId ?? NO_PART_ID));
+  const heightMm: number = useSelector(selectBurnPartEffectiveLiftMm(selectedPartId ?? NO_PART_ID));
   const part: BurnPart | undefined = model?.parts.find(({ id }: BurnPart): boolean => id === selectedPartId);
 
   if (!model || !part) {
@@ -84,7 +86,7 @@ export const BurnPartLiftControl = (): ReactNode => {
       tabIndex={0}
       aria-label={t(DEFAULT.BURN_PART_LIFT_LABEL)}
       aria-valuemin={0}
-      aria-valuenow={liftMm}
+      aria-valuenow={heightMm}
       aria-disabled={!isLiftable}
       onKeyDown={handleLiftKeyDown}
     >
