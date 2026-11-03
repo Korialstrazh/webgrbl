@@ -43,8 +43,14 @@
 
 .partRow {
   display: flex;
-  justify-content: space-between;
+  gap: var(--space-2);
+  align-items: center;
   width: 100%;
+
+  // The name at the left, the status at the right, and the height of a lifted part next to the status.
+  > :first-child {
+    margin-inline-end: auto;
+  }
 
   &[aria-pressed='true'] {
     background-color: var(--color-surface-2);

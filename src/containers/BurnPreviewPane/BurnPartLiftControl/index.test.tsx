@@ -12,6 +12,7 @@ import { newTestLayer } from '../../../utils/burn.model/test.support/new.test.la
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import {
   BurnModelReady,
+  BurnPartLifted,
   BurnPartSelected,
   selectBurnPartLiftMm,
 } from '../../../utils/states/burn.model.state';
@@ -24,11 +25,13 @@ const PART_ID = 1;
 const CHILD_ID = 2;
 const OTHER_PART_ID = 3;
 const LIFT_LABEL = 'Lift selected part';
+const PUT_ALL_BACK_LABEL = 'Put all back';
+const CLICK_HINT = 'Click a part to check it and lift it.';
 const MAY_STAY_ATTACHED_TEXT = 'May stay attached';
 const NOT_THROUGH_REASON = 'Part 1 stays attached: the cut does not reach through, so it cannot be lifted.';
 const RISES_WITH_PARENT_REASON =
   'Part 2 stays attached to Part 1, so it rises with it and cannot be lifted on its own.';
-const STEP_MM = 0.1;
+const STEP_MM = 1;
 const LAYER_COLOUR = '#ff0000';
 
 const newPart = (id: number, status: BurnPartStatus, parentId?: number): BurnPart => ({
@@ -50,7 +53,7 @@ const newModel = (parts: BurnPart[]): BurnModel => ({
 
 type AppStore = ReturnType<typeof newStore>;
 
-const renderControl = (model: BurnModel, partId: number): AppStore => {
+const renderControl = (model: BurnModel, partId: number | undefined): AppStore => {
   const store: AppStore = newStore();
 
   store.dispatch(new BurnModelReady({ model }));
@@ -87,7 +90,7 @@ describe(BurnPartLiftControl.name, () => {
     fireEvent.keyDown(getLiftControl(), { key: 'ArrowUp' });
 
     expect(isDefaultKept).toBe(false);
-    expect(getLiftControl()).toHaveAttribute('aria-valuenow', '0.3');
+    expect(getLiftControl()).toHaveAttribute('aria-valuenow', String(3 * STEP_MM));
     expect(fireEvent.keyDown(getLiftControl(), { key: 'Tab' })).toBe(true);
   });
 
@@ -143,12 +146,45 @@ describe(BurnPartLiftControl.name, () => {
     expect(getLiftControl()).not.toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('shows nothing with no part selected, or for a part the model does not have', () => {
-    const model: BurnModel = newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]);
+  it('shows the height once above 0, announces it with its unit, and offers to put all back', () => {
+    const store: AppStore = renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), PART_ID);
 
-    renderControl(model, OTHER_PART_ID);
+    expect(getLiftControl()).toHaveAttribute('aria-valuetext', 'Not lifted');
+    expect(screen.queryByRole('button', { name: PUT_ALL_BACK_LABEL })).not.toBeInTheDocument();
 
-    expect(screen.queryByText(LIFT_LABEL)).not.toBeInTheDocument();
+    act(() => {
+      store.dispatch(new BurnPartLifted({ partId: PART_ID, liftMm: 142.74 }));
+    });
+
+    expect(screen.getByText('Lifted 142.7 mm')).toBeInTheDocument();
+    expect(getLiftControl()).toHaveAttribute('aria-valuetext', 'Lifted 142.7 mm');
+    expect(getLiftControl()).toHaveAttribute('aria-valuenow', '142.7');
+
+    fireEvent.click(screen.getByRole('button', { name: PUT_ALL_BACK_LABEL }));
+
+    expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBe(0);
+    expect(screen.queryByText('Lifted 142.7 mm')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: PUT_ALL_BACK_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('asks for a click before any selection, and still offers to put all back', () => {
+    const store: AppStore = renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), undefined);
+
+    expect(screen.getByText(CLICK_HINT)).toBeInTheDocument();
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new BurnPartLifted({ partId: PART_ID, liftMm: 1 }));
+    });
+
+    expect(screen.getByRole('button', { name: PUT_ALL_BACK_LABEL })).toBeInTheDocument();
+  });
+
+  it('asks for a click for a part the model does not have', () => {
+    renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), OTHER_PART_ID);
+
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+    expect(screen.getByText(CLICK_HINT)).toBeInTheDocument();
   });
 
   it('hides once the model is out of date', () => {

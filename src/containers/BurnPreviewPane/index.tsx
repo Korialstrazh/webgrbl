@@ -1,5 +1,5 @@
 /**
- * The 3D view of the bed region: the element that hosts the scene, the lift control, the loading state, why the scene
+ * The 3D view of the bed region: the element that hosts the scene, the lift bar below it, the loading state, why the scene
  * is empty, and a fixed message when the 3D runtime cannot load or the browser cannot run WebGL. The rest of the app
  * does not depend on it.
  *
@@ -41,24 +41,26 @@ export const BurnPreviewPane = (): ReactNode => {
 
   return (
     <div className={styles.burnPreviewPane}>
-      {/* Plain and always there: the scene hook measures it and puts the WebGL canvas in it. */}
-      <div ref={sceneHostRef} className={styles.sceneHost} />
-      {isSceneUnavailable && (
-        <Alert className={styles.message} type={ANTD_ALERT_TYPE_WARNING} title={t(DEFAULT.BURN_PREVIEW_NO_WEBGL)} />
-      )}
-      {!isSceneUnavailable && runtimeLoad.status === BURN_SCENE_RUNTIME_LOAD_STATUS.LOADING && (
-        <div className={styles.loading} role="status">
-          <Spin aria-hidden="true" />
-          <span>{t(DEFAULT.BURN_PREVIEW_LOADING)}</span>
-        </div>
-      )}
-      {renderer && model && (
-        <BurnSceneViewControls
-          onFit={() => renderer.fitBurnSceneView()}
-          onTop={() => renderer.showBurnSceneFromTop()}
-        />
-      )}
-      <BurnPreviewStateMessage isSceneUnavailable={isSceneUnavailable} />
+      <div className={styles.sceneArea}>
+        {/* Plain and always there: the scene hook measures it and puts the WebGL canvas in it. */}
+        <div ref={sceneHostRef} className={styles.sceneHost} />
+        {isSceneUnavailable && (
+          <Alert className={styles.message} type={ANTD_ALERT_TYPE_WARNING} title={t(DEFAULT.BURN_PREVIEW_NO_WEBGL)} />
+        )}
+        {!isSceneUnavailable && runtimeLoad.status === BURN_SCENE_RUNTIME_LOAD_STATUS.LOADING && (
+          <div className={styles.loading} role="status">
+            <Spin aria-hidden="true" />
+            <span>{t(DEFAULT.BURN_PREVIEW_LOADING)}</span>
+          </div>
+        )}
+        {renderer && model && (
+          <BurnSceneViewControls
+            onFit={() => renderer.fitBurnSceneView()}
+            onTop={() => renderer.showBurnSceneFromTop()}
+          />
+        )}
+        <BurnPreviewStateMessage isSceneUnavailable={isSceneUnavailable} />
+      </div>
       {!isSceneUnavailable && <BurnPartLiftControl />}
     </div>
   );

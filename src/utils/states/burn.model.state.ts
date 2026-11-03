@@ -75,6 +75,10 @@ export class BurnPartSelected extends Action<BurnPartSelectedPayload> {
 export class BurnPartLifted extends Action<BurnPartLiftedPayload> {
   public static readonly type: string = actionType('burn part lifted');
 }
+
+export class BurnPartLiftsReset extends Action {
+  public static readonly type: string = actionType('burn part lifts reset');
+}
 // #endregion
 
 // #region Initial state
@@ -166,6 +170,8 @@ export const burnModelReducer = (
     return { ...state, selectedPartId: (action as BurnPartSelected).payload.partId };
   case BurnPartLifted.type:
     return getStateWithLift(state, (action as BurnPartLifted).payload);
+  case BurnPartLiftsReset.type:
+    return { ...state, liftMmByPartId: {} };
   case BedViewModeChanged.type:
     return getStateAfterBuildStopped(state);
   case MaterialSaved.type:
@@ -220,6 +226,9 @@ export const selectBurnPartEffectiveLiftsMm = createSelector(
     ]));
   },
 );
+
+export const selectHasLiftedBurnPart = (state: RootState): boolean =>
+  Object.values(selectBurnPartEffectiveLiftsMm(state)).some((liftMm: number): boolean => liftMm > 0);
 
 export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootState): number =>
   selectBurnPartEffectiveLiftsMm(state)[partId] ?? 0;

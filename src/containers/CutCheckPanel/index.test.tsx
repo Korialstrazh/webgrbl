@@ -16,6 +16,7 @@ import {
   BurnModelFailed,
   BurnModelReady,
   BurnModelRequested,
+  BurnPartLifted,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
 import { MaterialSaved } from '../../utils/states/material.state';
@@ -230,6 +231,16 @@ describe(CutCheckPanel.name, () => {
       expect(screen.getByText(/Part 2 may stay attached/)).toBeInTheDocument();
       expect(screen.queryByText(/Part 1 may stay attached/)).not.toBeInTheDocument();
     });
+  });
+
+  it('marks a lifted part in its row with its height, and no other', () => {
+    const store: AppStore = newReadyStore();
+
+    store.dispatch(new BurnPartLifted({ partId: FREE_PART_ID, liftMm: 40 }));
+    renderPanel(store);
+
+    expect(screen.getAllByLabelText(/^Lifted /)).toHaveLength(1);
+    expect(getPartRow(FREE_PART_ID)).toContainElement(screen.getByLabelText('Lifted 40.0 mm'));
   });
 
   it('keeps export enabled with warnings', async () => {

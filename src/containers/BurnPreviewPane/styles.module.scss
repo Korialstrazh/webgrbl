@@ -4,11 +4,21 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: var(--space-2);
   overflow: hidden;
   color: var(--color-text);
+}
+
+// Takes what the lift bar leaves; the messages and the view buttons sit on top of the scene in here.
+.sceneArea {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 0;
 }
 
 .message {
@@ -16,7 +26,7 @@
   max-width: calc(100% - 2 * var(--space-3));
 }
 
-// Behind the messages and the lift control, which sit on top of the scene.
+// Behind the messages and the view buttons, which sit on top of the scene.
 .sceneHost {
   position: absolute;
   inset: 0;

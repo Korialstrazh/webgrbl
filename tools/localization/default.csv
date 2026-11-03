@@ -43,12 +43,18 @@ BED_ZOOM_OUT_HINT;Zoom out (-)
 BED_ZOOM_PAN_HINT;Zoom relative to the fitted bed: 100 % (fit) shows the whole bed. Drag with the middle mouse button, or hold Space and drag, to move the view.
 BED_ZOOM_PERCENT;{{percent}} %
 BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
+BURN_PART_LIFT_CLICK_HINT;Click a part to check it and lift it.
+BURN_PART_LIFT_HEIGHT;Lifted {{height}} mm
 BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached. Drag to see what would stay behind.
 BURN_PART_LIFT_HINT_FREE;Part {{part}} comes free. Drag to see what stays behind.
+BURN_PART_LIFT_HINT_LIFTED;Part {{part}} is up: the hole shows what stays behind.
 BURN_PART_LIFT_HINT_NOT_THROUGH;Part {{part}} stays attached: the cut does not reach through, so it cannot be lifted.
 BURN_PART_LIFT_HINT_RISES_WITH_PARENT;Part {{part}} stays attached to Part {{parent}}, so it rises with it and cannot be lifted on its own.
+BURN_PART_LIFT_KEY_HINT;Up and down keys: {{step}} mm a step.
 BURN_PART_LIFT_LABEL;Lift selected part
 BURN_PART_LIFT_MAY_STAY_ATTACHED;May stay attached
+BURN_PART_LIFT_NOT_LIFTED;Not lifted
+BURN_PART_LIFT_PUT_ALL_BACK;Put all back
 BURN_PREVIEW_ADD_MATERIAL;Add material…
 BURN_PREVIEW_BUILDING;Building the 3D view
 BURN_PREVIEW_BURN_TEST_SAMPLE;Burn test sample…
@@ -103,6 +109,8 @@ CUT_CHECK_NOTE_ESTIMATE;Estimate from your test.
 CUT_CHECK_NOTE_GUESS;This is a guess: no test has been made with this material on this machine.
 CUT_CHECK_PART_COUNT_one;{{count}} part
 CUT_CHECK_PART_COUNT_other;{{count}} parts
+CUT_CHECK_PART_LIFTED;{{height}} mm
+CUT_CHECK_PART_LIFTED_LABEL;Lifted {{height}} mm
 CUT_CHECK_PART_ROW;Part {{part}}
 CUT_CHECK_PART_STATUS_ATTACHED;Attached
 CUT_CHECK_PART_STATUS_FREE;Free

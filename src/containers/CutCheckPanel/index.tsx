@@ -40,6 +40,7 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { selectProjectLayers } from '../../utils/states/project.document.state';
 import { Panel } from '../../views/Panel';
+import { BurnPartRowLift } from './BurnPartRowLift';
 import { getCutCheckWarningGroups } from './get.cut.check.warning.groups';
 import { getCutCheckWarningText } from './get.cut.check.warning.text';
 import type { CutCheckWarningGroup } from './interfaces/CutCheckWarningGroup';
@@ -124,6 +125,7 @@ export const CutCheckPanel = (): ReactNode => {
                 onClick={() => dispatch(new BurnPartSelected({ partId: id }))}
               >
                 <span>{t(DEFAULT.CUT_CHECK_PART_ROW, { part: id })}</span>
+                <BurnPartRowLift partId={id} />
                 <Tag color={status === BURN_PART_STATUS.FREE ? undefined : ANTD_TAG_COLOR_WARNING}>
                   {t(PART_STATUS_TEXT_KEYS[status])}
                 </Tag>

@@ -21,7 +21,10 @@ export const BURN_SHEET_MARGIN_MM = 10;
 export const CUT_PART_MIN_AREA_MM2 = 1;
 /** The first view leaves room for a part lifted this many sheet thicknesses; the user can lift it further. */
 export const BURN_PART_FRAMED_LIFT_THICKNESSES = 4;
-export const BURN_PART_LIFT_STEP_MM = 0.1;
+/** One press of an arrow key on the lift control: big enough to see on the sheet. */
+export const BURN_PART_LIFT_STEP_MM = 1;
+/** Decimals of a part height shown or announced to the user. */
+export const BURN_PART_LIFT_DISPLAY_DECIMALS = 1;
 
 /** Burn depths in a mesh are rounded to this, in mm, so that nearby depths merge into one flat face. */
 export const BURN_DEPTH_QUANTUM_MM = 0.05;
