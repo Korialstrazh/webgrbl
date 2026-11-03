@@ -369,6 +369,7 @@ STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
 STATUS_STRIP_TITLE;Status
+TOAST_BURN_MODEL_FAILED;The 3D preview could not be built. Try again, or simplify the design.
 TOAST_CONNECT_TIMEOUT;No response from the controller - check the baud rate and that the laser is powered.
 TOAST_CONNECTED;Connected to {{firmware}} {{version}}
 TOAST_CONNECTION_LOST;Connection lost. The laser may still finish moves it had already received.
