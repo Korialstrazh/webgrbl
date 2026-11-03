@@ -278,6 +278,27 @@ describe(BedPanel.name, () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent(DESIGN_VIEW_LABEL);
   });
 
+  it('keeps the view switch in one fixed slot at the end of the header in all three views', () => {
+    renderPanel(newHeldToolpathStore());
+
+    const getSwitchSlot = (): HTMLElement | null =>
+      screen.getByRole('radiogroup', { name: VIEW_MODE_LABEL }).parentElement;
+    const designSlot: HTMLElement | null = getSwitchSlot();
+    const headerElement: HTMLElement | null | undefined = designSlot?.parentElement;
+
+    expect(headerElement?.lastElementChild).toBe(designSlot);
+    expect(designSlot?.childElementCount).toBe(1);
+
+    openToolpathView();
+
+    expect(getSwitchSlot()).toBe(designSlot);
+
+    openThreeDView();
+
+    expect(getSwitchSlot()).toBe(designSlot);
+    expect(designSlot?.childElementCount).toBe(1);
+  });
+
   it('has no tool switch: a drag on an object moves it', () => {
     const store: AppStore = newStore();
     const projectObject: ProjectObject = newProjectObject({ name: OBJECT_NAME });

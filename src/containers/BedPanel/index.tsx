@@ -88,42 +88,45 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
     <Layout.Content className={styles.bedPanel}>
       {/* A plain heading, read by screen readers only: the panel's controls already say what it is. */}
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
-      <div className={styles.header}>
-        {isToolpathView && (
+      {/* One structure in every view: only the tools slot differs, so nothing beside the switch can move it. */}
+      <div className={styles.headerContainer}>
+        <div className={styles.header}>
           <div className={styles.editingTools}>
-            <ToolpathToolbar
-              displayMode={toolpathDisplayMode}
-              onDisplayModeChange={setToolpathDisplayMode}
-              isTravelShown={isTravelShown}
-              onTravelShownChange={setIsTravelShown}
+            {isToolpathView && (
+              <>
+                <ToolpathToolbar
+                  displayMode={toolpathDisplayMode}
+                  onDisplayModeChange={setToolpathDisplayMode}
+                  isTravelShown={isTravelShown}
+                  onTravelShownChange={setIsTravelShown}
+                />
+                <ToolpathWarningsPanel />
+              </>
+            )}
+            {viewMode === BED_VIEW_MODE.DESIGN && (
+              <>
+                <ProjectMaterialSelect />
+                <AddTestSampleButton />
+              </>
+            )}
+            {isThreeDView && <BurnPreviewToolbar />}
+          </div>
+          <div className={styles.viewTools}>
+            {/* A plain slot: the bed viewport renders its zoom, Fit and bed colour controls in here. */}
+            <div ref={setViewControlsHost} className={styles.viewControlsHost} />
+            {/* Its entries are about editing, which the 3D view does not do. */}
+            {!isThreeDView && <BedMoreToolsMenu />}
+          </div>
+          <div className={styles.viewSwitchSlot}>
+            <Segmented<BedViewMode>
+              className={styles.viewSwitch}
+              name={BED_VIEW_MODE_SWITCH_NAME}
+              aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
+              options={viewModeOptions}
+              value={viewMode}
+              onChange={changeBedViewMode}
             />
-            <ToolpathWarningsPanel />
           </div>
-        )}
-        {viewMode === BED_VIEW_MODE.DESIGN && (
-          <div className={styles.editingTools}>
-            <ProjectMaterialSelect />
-            <AddTestSampleButton />
-          </div>
-        )}
-        {isThreeDView && (
-          <div className={styles.editingTools}>
-            <BurnPreviewToolbar />
-          </div>
-        )}
-        <div className={styles.viewTools}>
-          {/* A plain slot: the bed viewport renders its zoom, Fit and bed colour controls in here. */}
-          <div ref={setViewControlsHost} className={styles.viewControlsHost} />
-          <Segmented<BedViewMode>
-            className={styles.viewSwitch}
-            name={BED_VIEW_MODE_SWITCH_NAME}
-            aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
-            options={viewModeOptions}
-            value={viewMode}
-            onChange={changeBedViewMode}
-          />
-          {/* Its entries are about editing, which the 3D view does not do. */}
-          {!isThreeDView && <BedMoreToolsMenu />}
         </div>
       </div>
       {/* The region dialogs and drawers open in: everything below the header, so they never cover the toolbar. */}
