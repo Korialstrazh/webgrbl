@@ -27,7 +27,8 @@ The gradient only helps you judge shading by eye. To change shading, change the 
 - Dose of a move = power x runs / speed. Depth is proportional to dose, scaled from the test result. A different thickness scales the through dose by thickness / test thickness.
 - "Cut through" is a lower bound: doses at or above the test dose count as through, below it the estimate is less sure. "Not through" without a depth is an upper bound.
 - A closed cut is through at depth >= thickness + 10 %, borderline within 10 % of the thickness, not through below. Ends within 0.1 mm count as closed; open paths enclose nothing. No kerf, char, focus or air assist is modelled.
-- Identical paths (passes, duplicate outlines, the same path on two layers) add their dose. Separate cuts that merely share a grid cell do not count as one deeper cut: if only their sum would reach through, the part is marked **May stay attached**.
+- Identical paths (passes, duplicate outlines, the same path on two layers) add their dose. Separate cuts that merely share a grid cell do not count as one deeper cut: if only their sum would reach through, the part shows **May stay attached** or **Attached** (not through), never **Free**.
+- Known limit: the grid cell grows with the sheet, about 0.4 mm on a 400 mm sheet and about 1 mm on a 1000 mm sheet (sheet size divided by the square root of 1,000,000 cells). Uncut tabs or bridges smaller than about a cell or two can be missed, so a part held by small tabs may show as "comes free". Measured: tabs up to 0.6 mm on a 400 mm sheet and up to 1.5 mm on a 1000 mm sheet.
 - No test: a default depth per dose is used, the view says it is a guess, and every part is borderline.
 - The sheet is the job bounds plus 10 mm, sampled on a grid of at least 0.1 mm and at most 1,000,000 cells. Above 2,000,000 triangles the surface gets coarser; cuts stay open but may look wider. The model builds in a worker and a change to the design or toolpath makes it stale.
 
