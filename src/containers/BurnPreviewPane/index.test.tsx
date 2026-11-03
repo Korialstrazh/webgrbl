@@ -39,6 +39,8 @@ import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake
 import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
 
+const FIT_LABEL = /^Fit/;
+const TOP_LABEL = /^Top/;
 const NO_WEBGL_TEXT = 'The 3D view could not start in this browser. The Cut check still works.';
 const LOADING_TEXT = 'Loading the 3D view';
 const SCENE_CANVAS_SELECTOR = 'canvas';
@@ -52,7 +54,7 @@ const CLICK_Y_PX = 25;
 const DRAG_DISTANCE_PX = 40;
 const LAYER_KEY = '#ff0000';
 const OUT_OF_DATE_TEXT = /^Out of date: the design changed/;
-const NO_MATERIAL_TEXT = /^Choose a material or add one/;
+const NO_MATERIAL_TEXT = /^Pick a material in Design/;
 const BUILDING_TEXT = 'Building the 3D view';
 const FAILED_TEXT = /^The 3D view could not be built/;
 const ADD_MATERIAL_LABEL = 'Add material\u2026';
@@ -73,10 +75,13 @@ const newFakeRenderer = (): BurnSceneRenderer => ({
   showBurnModel: vi.fn(),
   applyBurnPartLifts: vi.fn(),
   highlightBurnPart: vi.fn(),
+  hoverBurnPart: vi.fn(),
   resizeBurnScene: vi.fn(),
   getBurnPartIdAtPointer: vi.fn(() => PART_ID),
   isBurnLiftAxisAtPoint: vi.fn(() => false),
   getBurnLiftChangeMm: vi.fn(({ yPx }: { yPx: number }) => -yPx),
+  fitBurnSceneView: vi.fn(),
+  showBurnSceneFromTop: vi.fn(),
   dispose: vi.fn(),
 });
 
@@ -282,6 +287,7 @@ describe(BurnPreviewPane.name, () => {
     expect(burnModelClient.generationInputs).toEqual([]);
 
     fireEvent.click(screen.getByRole('button', { name: ADD_MATERIAL_LABEL }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Oak' } });
     fireEvent.click(screen.getByRole('button', { name: SAVE_LABEL }));
 
     await vi.waitFor((): void => {
@@ -323,6 +329,29 @@ describe(BurnPreviewPane.name, () => {
 
     expect(await screen.findByText(NO_WEBGL_TEXT)).toBeInTheDocument();
     expect(screen.getByText(NO_MATERIAL_TEXT)).toBeInTheDocument();
+  });
+
+  it('offers Fit and Top once a model is on show, and they move the view', async () => {
+    const renderer: BurnSceneRenderer = newFakeRenderer();
+    const store: AppStore = newStore();
+
+    vi.mocked(newBurnSceneRenderer).mockReturnValue(renderer);
+    const { container } = renderPane(store);
+
+    await getSceneCanvas(container);
+    expect(screen.queryByRole('button', { name: FIT_LABEL })).not.toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new BurnModelReady({ model: newModel() }));
+    });
+    fireEvent.click(await screen.findByRole('button', { name: TOP_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: FIT_LABEL }));
+
+    expect(screen.getByRole('button', { name: FIT_LABEL }).querySelector('.anticon')).not.toBeNull();
+    expect(screen.getByRole('button', { name: TOP_LABEL }).querySelector('.anticon')).not.toBeNull();
+    expect(screen.getByRole('button', { name: FIT_LABEL })).not.toHaveTextContent('Fit');
+    expect(renderer.showBurnSceneFromTop).toHaveBeenCalledTimes(1);
+    expect(renderer.fitBurnSceneView).toHaveBeenCalledTimes(1);
   });
 
   it('tells the renderer the size of the view', async () => {
@@ -418,6 +447,43 @@ describe(BurnPreviewPane.name, () => {
       expect(reachedOrbitControls).not.toHaveBeenCalled();
       expect(renderer.getBurnPartIdAtPointer).not.toHaveBeenCalled();
       expect(selectSelectedBurnPartId(store.getState())).toBe(PART_ID);
+    });
+
+    describe('hover', () => {
+      const HOVER_WAIT_MS = 100;
+
+      it('highlights the part under a resting mouse with a pointer cursor, reading many moves as one', async () => {
+        const { canvas, renderer } = await renderPickablePane();
+
+        fireEvent.pointerMove(canvas, { clientX: 10, clientY: 10, buttons: 0 });
+        fireEvent.pointerMove(canvas, { clientX: 12, clientY: 10, buttons: 0 });
+
+        await vi.waitFor(() => {
+          expect(renderer.hoverBurnPart).toHaveBeenLastCalledWith(PART_ID);
+        });
+        expect(renderer.getBurnPartIdAtPointer).toHaveBeenCalledTimes(1);
+        expect(canvas.style.cursor).toBe('pointer');
+
+        fireEvent.pointerLeave(canvas);
+
+        await vi.waitFor(() => {
+          expect(renderer.hoverBurnPart).toHaveBeenLastCalledWith(undefined);
+        });
+        expect(canvas.style.cursor).toBe('');
+      });
+
+      it('reads nothing during a drag', async () => {
+        const { canvas, renderer } = await renderPickablePane();
+
+        fireEvent.pointerMove(canvas, { clientX: 10, clientY: 10, buttons: 1 });
+        await act(async () => {
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, HOVER_WAIT_MS);
+          });
+        });
+
+        expect(renderer.getBurnPartIdAtPointer).not.toHaveBeenCalled();
+      });
     });
 
     it('clears the selection on a click that hits no part', async () => {

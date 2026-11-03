@@ -1,7 +1,6 @@
 /**
- * The project objects on the bed and the pointer and key editing of them. With the Select tool a click selects,
- * Shift-click adds or removes, a click on empty bed clears, and a drag moves the selection. With the Move tool a drag
- * that starts anywhere on the bed moves the current selection and never changes it. The one selected object gets
+ * The project objects on the bed and the pointer and key editing of them. A click selects, Shift-click adds or
+ * removes, a click on empty bed clears, and a drag moves the selection. The one selected object gets
  * handles that scale and turn it. Every drag and handle gesture is held locally while the pointer is down and becomes
  * one transform action, so one undo step, when it comes up. The layer takes keyboard focus for the nudge and delete
  * keys.
@@ -27,7 +26,6 @@ import { isObjectOutsideBed } from '../../utils/project/is.object.outside.bed';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectProjectLayers, selectProjectObjects } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
-import { BED_TOOL } from '../BedPanel/bed.toolbar.constants';
 import { BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
 import type { BedObjectHandle } from './bed.objects.constants';
 import { BedObjectGraphic } from './BedObjectGraphic';
@@ -52,14 +50,7 @@ const LAYER_TAB_INDEX = 0;
 
 const isPrimaryPress = (pointerEvent: PointerEvent): boolean => pointerEvent.button === PRIMARY_POINTER_BUTTON;
 
-/** What a Move tool press does: drag the whole selection as it is, with no change to it now or on a click. */
-const getMoveToolOutcome = (selectedObjectIds: string[]): SelectToolPointerDownOutcome => ({
-  selectionNow: undefined,
-  draggedObjectIds: selectedObjectIds,
-  selectionAfterClick: undefined,
-});
-
-export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNode => {
+export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const projectObjects: ProjectObject[] = useSelector(selectProjectObjects);
@@ -74,7 +65,6 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
   const handleSizes: BedHandleSizes = useMemo(() => getBedHandleSizes(pixelsPerMm), [pixelsPerMm]);
   const { startObjectDrag, drag } = dragControls;
   const { startHandleGesture, handleGesture } = gestureControls;
-  const isMoveToolActive: boolean = activeTool === BED_TOOL.MOVE;
   const hasSingleSelection: boolean = selectedObjectIds.length === 1;
 
   useBedGestureActivity(Boolean(drag ?? handleGesture));
@@ -84,24 +74,12 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
     layerRef.current?.focus({ preventScroll: true });
   }, []);
 
-  const moveSelectionFromPress = useCallback((pointerEvent: PointerEvent): void => {
-    if (selectedObjectIds.length) {
-      startObjectDrag(pointerEvent, getMoveToolOutcome(selectedObjectIds));
-    }
-  }, [selectedObjectIds, startObjectDrag]);
-
   const handleObjectPointerDown = useCallback((pointerEvent: PointerEvent<SVGGElement>, objectId: string): void => {
     if (!isPrimaryPress(pointerEvent)) {
       return;
     }
 
     focusLayer();
-
-    if (isMoveToolActive) {
-      moveSelectionFromPress(pointerEvent);
-
-      return;
-    }
 
     const outcome: SelectToolPointerDownOutcome = getSelectToolPointerDownOutcome({
       selectedObjectIds,
@@ -116,7 +94,7 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
     if (outcome.draggedObjectIds.length) {
       startObjectDrag(pointerEvent, outcome);
     }
-  }, [dispatch, focusLayer, isMoveToolActive, moveSelectionFromPress, selectedObjectIds, startObjectDrag]);
+  }, [dispatch, focusLayer, selectedObjectIds, startObjectDrag]);
 
   const handleHandlePointerDown = useCallback(
     (pointerEvent: PointerEvent<SVGElement>, objectId: string, handle: BedObjectHandle): void => {
@@ -140,12 +118,6 @@ export const BedObjects = ({ dimensions, activeTool }: BedObjectsProps): ReactNo
     }
 
     focusLayer();
-
-    if (isMoveToolActive) {
-      moveSelectionFromPress(pointerEvent);
-
-      return;
-    }
 
     if (selectedObjectIds.length) {
       dispatch(new ProjectSelectionChanged({ objectIds: [] }));

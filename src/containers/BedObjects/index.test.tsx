@@ -28,9 +28,7 @@ import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/st
 import { OverlayOpened } from '../../utils/states/ui.overlay.state';
 import type { SvgScreenMatrixMock } from '../../utils/test.support/interfaces/SvgScreenMatrixMock';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
-import { BED_TOOL } from '../BedPanel/bed.toolbar.constants';
 import { HistoryHotkeys } from '../HistoryHotkeys';
-import type { BedTool } from '../BedPanel/bed.toolbar.constants';
 import {
   BED_OBJECT_HANDLE,
   BED_OBJECT_HANDLE_TEST_ID,
@@ -120,14 +118,14 @@ const secondObject: ProjectObject = newProjectObject({
   heightMm: OBJECT_SIZE_MM,
 });
 
-const renderObjects = (projectObjects: ProjectObject[], activeTool: BedTool = BED_TOOL.SELECT): AppStore => {
+const renderObjects = (projectObjects: ProjectObject[]): AppStore => {
   const store: AppStore = newStore();
 
   store.dispatch(new ProjectDocumentLoaded({ document: { objects: projectObjects, layers: [] } }));
   render(
     <Provider store={store}>
       <svg>
-        <BedObjects dimensions={BED} activeTool={activeTool} />
+        <BedObjects dimensions={BED} />
       </svg>
     </Provider>,
   );
@@ -135,8 +133,8 @@ const renderObjects = (projectObjects: ProjectObject[], activeTool: BedTool = BE
   return store;
 };
 
-const renderSelectedObjects = (projectObjects: ProjectObject[], activeTool: BedTool = BED_TOOL.SELECT): AppStore => {
-  const store: AppStore = renderObjects(projectObjects, activeTool);
+const renderSelectedObjects = (projectObjects: ProjectObject[]): AppStore => {
+  const store: AppStore = renderObjects(projectObjects);
 
   act(() => {
     store.dispatch(new ProjectSelectionChanged({
@@ -159,7 +157,7 @@ const renderObjectsWithHistoryHotkeys = (projectObjects: ProjectObject[]): AppSt
     <Provider store={store}>
       <HistoryHotkeys />
       <svg>
-        <BedObjects dimensions={BED} activeTool={BED_TOOL.SELECT} />
+        <BedObjects dimensions={BED} />
       </svg>
     </Provider>,
   );
@@ -748,7 +746,7 @@ describe(BedObjects.name, () => {
         <Provider store={store}>
           <input aria-label={INPUT_LABEL} />
           <svg>
-            <BedObjects dimensions={BED} activeTool={BED_TOOL.SELECT} />
+            <BedObjects dimensions={BED} />
           </svg>
         </Provider>,
       );
@@ -787,46 +785,6 @@ describe(BedObjects.name, () => {
       renderObjects([firstObject]);
 
       expect(getObjectsLayer()).toHaveAttribute('tabindex', '0');
-    });
-  });
-
-  describe('Move tool', () => {
-    it('moves the selection from a drag on empty bed without changing the selection', () => {
-      const store: AppStore = renderSelectedObjects([firstObject], BED_TOOL.MOVE);
-      const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
-
-      dragElement(screen.getByTestId(BED_OBJECTS_SURFACE_TEST_ID), SECOND_GRAB_X, SECOND_GRAB_Y);
-
-      expect(getTransformedDispatchCount(dispatchSpy)).toBe(1);
-      expect(getStoredObject(store, firstObject.id)).toMatchObject({
-        xMm: FIRST_X_MM + DRAG_RIGHT_MM,
-        yMm: FIRST_Y_MM + DRAG_UP_MM,
-      });
-      expect(selectSelectedObjectIds(store.getState())).toEqual([firstObject.id]);
-    });
-
-    it('moves the selection, not the object, from a drag on an unselected object', () => {
-      const store: AppStore = renderObjects([firstObject, secondObject], BED_TOOL.MOVE);
-
-      act(() => {
-        store.dispatch(new ProjectSelectionChanged({ objectIds: [firstObject.id] }));
-      });
-      dragElement(getObjectElement(SECOND_NAME), SECOND_GRAB_X, SECOND_GRAB_Y);
-
-      expect(getStoredObject(store, firstObject.id)).toMatchObject({ xMm: FIRST_X_MM + DRAG_RIGHT_MM });
-      expect(getStoredObject(store, secondObject.id)).toMatchObject({ xMm: SECOND_X_MM, yMm: SECOND_Y_MM });
-      expect(selectSelectedObjectIds(store.getState())).toEqual([firstObject.id]);
-    });
-
-    it('does nothing with nothing selected', () => {
-      const store: AppStore = renderObjects([firstObject], BED_TOOL.MOVE);
-      const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
-
-      dragElement(screen.getByTestId(BED_OBJECTS_SURFACE_TEST_ID), SECOND_GRAB_X, SECOND_GRAB_Y);
-      dragElement(getObjectElement(FIRST_NAME), FIRST_GRAB_X, FIRST_GRAB_Y);
-
-      expect(dispatchSpy).not.toHaveBeenCalled();
-      expect(getStoredObject(store, firstObject.id)).toMatchObject({ xMm: FIRST_X_MM, yMm: FIRST_Y_MM });
     });
   });
 });

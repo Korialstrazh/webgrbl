@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ArrowUpOutlined } from '@ant-design/icons';
-import { Button, Segmented } from 'antd';
+import { ArrowUpOutlined, HomeOutlined } from '@ant-design/icons';
+import { Button, Segmented, Tooltip } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -87,16 +87,15 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
       </div>
       <div className={styles.jogPad}>
         {JOG_PAD_CELLS.map((cell: JogPadCell) => (
-          <Button
-            key={cell.labelKey}
-            size={ANTD_BUTTON_SIZE_LARGE}
-            disabled={!canJog}
-            icon={isJogArrowCell(cell) ? <ArrowUpOutlined rotate={cell.arrowRotationDeg} /> : undefined}
-            aria-label={t(cell.labelKey)}
-            onClick={() => requestJogPadLine(cell)}
-          >
-            {isJogArrowCell(cell) ? undefined : t(cell.labelKey)}
-          </Button>
+          <Tooltip key={cell.labelKey} title={isJogArrowCell(cell) ? undefined : t(cell.labelKey)}>
+            <Button
+              size={ANTD_BUTTON_SIZE_LARGE}
+              disabled={!canJog}
+              icon={isJogArrowCell(cell) ? <ArrowUpOutlined rotate={cell.arrowRotationDeg} /> : <HomeOutlined />}
+              aria-label={t(cell.labelKey)}
+              onClick={() => requestJogPadLine(cell)}
+            />
+          </Tooltip>
         ))}
       </div>
       <div className={styles.stepAndSpeed}>

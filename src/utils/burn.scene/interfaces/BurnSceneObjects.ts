@@ -20,10 +20,14 @@ export interface BurnSceneObjects {
   material: MeshToonMaterial;
   /** The material of the mesh of the selected part. */
   highlightMaterial: MeshToonMaterial;
-  /** The brightness bands both materials use. */
+  /** The material of the mesh of the part under the pointer or its row. */
+  hoverMaterial: MeshToonMaterial;
+  /** The brightness bands all these materials use. */
   toonBands: DataTexture;
-  /** The ink lines of the meshes, each a child of its mesh so that it rises with it. */
+  /** The ink lines of the meshes, in the order of the meshes, each a child of its mesh so that it rises with it. */
   outlines: LineSegments[];
-  /** The material of every ink line. */
+  /** The material of every ink line but that of the selected part. */
   outlineMaterial: LineBasicMaterial;
+  /** The material of the ink line of the selected part. */
+  highlightOutlineMaterial: LineBasicMaterial;
 }

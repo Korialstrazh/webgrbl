@@ -1,0 +1,17 @@
+.burnSceneViewControls {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+// The size of the bed zoom buttons, and a full touch target under a finger.
+.viewButton:global(.ant-btn) {
+  min-width: 2rem;
+  height: 2rem;
+  padding-inline: var(--space-2);
+
+  @media (pointer: coarse) {
+    min-width: 2.75rem;
+    height: 2.75rem;
+  }
+}

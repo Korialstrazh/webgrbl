@@ -5,6 +5,7 @@ import { BURN_PART_STATUS, CUT_CHECK_WARNING_KIND } from '../../utils/burn.model
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../utils/burn.model/interfaces/BurnPart';
 import type { CutCheck } from '../../utils/burn.model/interfaces/CutCheck';
+import type { CutCheckWarning } from '../../utils/burn.model/interfaces/CutCheckWarning';
 import { getLayerDisplayName } from '../../utils/layers/get.layer.display.name';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../utils/layers/get.layer.palette.entry';
@@ -15,6 +16,9 @@ import {
   BurnModelFailed,
   BurnModelReady,
   BurnModelRequested,
+  BurnPartLifted,
+  BurnPartSelected,
+  selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
 import { MaterialSaved } from '../../utils/states/material.state';
@@ -36,14 +40,13 @@ const ATTACHED_PART_ID = 3;
 const UNKNOWN_LAYER_KEY = '#123456';
 const MATERIAL: Material = newMaterial();
 const EXPORT_LABEL = 'Export G-code';
-const SUMMARY_TEXT = '3 parts: 1 free, 1 may stay attached, 1 attached';
 const ESTIMATE_NOTE = 'Estimate from your test.';
 const GUESS_NOTE = 'This is a guess: no test has been made with this material on this machine.';
-const TEST_SAMPLE_POINTER = 'Burn a test sample to get an estimate.';
+const TEST_SAMPLE_POINTER = 'Add the test sample in Design, burn it, then enter the result to get an estimate.';
 const OUT_OF_DATE_TEXT = /^Out of date: the design changed/;
 const BUILDING_TEXT = 'Building the 3D view';
 const FAILED_TEXT = /^The 3D view could not be built/;
-const NO_MATERIAL_TEXT = /^Choose a material or add one/;
+const NO_MATERIAL_TEXT = /^Pick a material in Design/;
 const NOT_THROUGH_HINT = 'Part 3 stays attached: the cut does not reach through, so it cannot be lifted.';
 
 const newPart = (id: number, status: BurnPart['status']): BurnPart => ({
@@ -98,7 +101,10 @@ describe(CutCheckPanel.name, () => {
   it('shows the part counts and the estimate note, without the guess note, when there is a test', () => {
     renderPanel(newReadyStore());
 
-    expect(screen.getByText(SUMMARY_TEXT)).toBeInTheDocument();
+    for (const summaryText of ['3 parts', '1 free', '1 may stay attached', '1 attached']) {
+      expect(screen.getByText(summaryText)).toBeInTheDocument();
+    }
+
     expect(screen.getByText(ESTIMATE_NOTE)).toBeInTheDocument();
     expect(screen.queryByText(GUESS_NOTE)).not.toBeInTheDocument();
     expect(screen.queryByText(TEST_SAMPLE_POINTER)).not.toBeInTheDocument();
@@ -118,7 +124,7 @@ describe(CutCheckPanel.name, () => {
       parts: [newPart(FREE_PART_ID, BURN_PART_STATUS.FREE)],
     }));
 
-    expect(screen.getByText('1 part: 1 free, 0 may stay attached, 0 attached')).toBeInTheDocument();
+    expect(screen.getByText('1 part')).toBeInTheDocument();
   });
 
   it('lists every part with its status and marks the selected row', () => {
@@ -183,8 +189,101 @@ describe(CutCheckPanel.name, () => {
     });
     renderPanel(store);
 
-    expect(screen.getByText(new RegExp(`^Layer ${layerName}: part 3 stays attached`))).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(`^Layer ${UNKNOWN_LAYER_KEY}: part 3 stays attached`))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`^Layer ${layerName}: Part 3 stays attached`))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`^Layer ${UNKNOWN_LAYER_KEY}: Part 3 stays attached`))).toBeInTheDocument();
+  });
+
+  describe('warnings of many parts', () => {
+    const newMayStayWarning = (partId: number): CutCheckWarning => ({
+      kind: CUT_CHECK_WARNING_KIND.PART_MAY_STAY_ATTACHED,
+      layerKey: UNKNOWN_LAYER_KEY,
+      partId,
+      predictedDepthMm: 0.2,
+      neededDepthMm: 3,
+      isLessSure: false,
+      isDepthUpperBound: false,
+    });
+    const groupedModel: BurnModel = newModel(newCutCheck({
+      warnings: [
+        newMayStayWarning(FREE_PART_ID),
+        newMayStayWarning(BORDERLINE_PART_ID),
+        { ...newMayStayWarning(ATTACHED_PART_ID), kind: CUT_CHECK_WARNING_KIND.PART_ATTACHED },
+        { ...newMayStayWarning(0), partId: undefined, kind: CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH },
+      ],
+    }));
+
+    it('says one thing once with the count, layer, depths and suggestion, and keeps each kind in view', () => {
+      renderPanel(newReadyStore(groupedModel));
+
+      expect(screen.getAllByRole('alert')).toHaveLength(3);
+      expect(screen.getByText(new RegExp(
+        `^Layer ${UNKNOWN_LAYER_KEY}: 2 parts may stay attached \\(predicted 0\\.2 mm, needed 3\\.0 mm\\)\\.`,
+      ))).toBeInTheDocument();
+      expect(screen.getByText(/Part 3 stays attached/)).toBeInTheDocument();
+      expect(screen.getByText(/the fill cuts through/)).toBeInTheDocument();
+    });
+
+    it('keeps the numbers and the suggestion in the callout, never in a selected row', () => {
+      renderPanel(newReadyStore(groupedModel));
+      fireEvent.click(getPartRow(BORDERLINE_PART_ID));
+
+      expect(screen.queryByText(/Part 2 may stay attached/)).not.toBeInTheDocument();
+      expect(screen.getAllByText(/predicted 0\.2 mm/)).toHaveLength(3);
+    });
+  });
+
+  describe('a long part list', () => {
+    const LONG_PART_IDS: number[] = [1, 2, 3, 4, 5];
+    const longModel: BurnModel = {
+      ...newModel(),
+      parts: LONG_PART_IDS.map((id: number): BurnPart => newPart(id, BURN_PART_STATUS.BORDERLINE)),
+    };
+    const SHOW_ALL_LABEL = 'Show all 5 parts';
+
+    it('starts with no rows and a control that shows them all and hides them again', () => {
+      renderPanel(newReadyStore(longModel));
+
+      expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: SHOW_ALL_LABEL }));
+
+      expect(screen.getAllByRole('button', { name: /^Part / })).toHaveLength(LONG_PART_IDS.length);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show fewer parts' }));
+
+      expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
+    });
+
+    it('keeps the selected row while cut down', () => {
+      const store: AppStore = newReadyStore(longModel);
+
+      store.dispatch(new BurnPartSelected({ partId: BORDERLINE_PART_ID }));
+      renderPanel(store);
+
+      expect(screen.getAllByRole('button', { name: /^Part / })).toHaveLength(1);
+      expect(getPartRow(BORDERLINE_PART_ID)).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
+  it('marks a lifted part in its row with its height, and no other', () => {
+    const store: AppStore = newReadyStore();
+
+    store.dispatch(new BurnPartLifted({ partId: FREE_PART_ID, liftMm: 40 }));
+    renderPanel(store);
+
+    expect(screen.getAllByLabelText(/^Lifted /)).toHaveLength(1);
+    expect(getPartRow(FREE_PART_ID)).toContainElement(screen.getByLabelText('Lifted 40.0 mm'));
+  });
+
+  it('tells the store which part a row is under the pointer, and clears it on leaving', () => {
+    const store: AppStore = newReadyStore();
+
+    renderPanel(store);
+    fireEvent.mouseEnter(getPartRow(BORDERLINE_PART_ID));
+    expect(selectHoveredBurnPartId(store.getState())).toBe(BORDERLINE_PART_ID);
+
+    fireEvent.mouseLeave(getPartRow(BORDERLINE_PART_ID));
+    expect(selectHoveredBurnPartId(store.getState())).toBeUndefined();
   });
 
   it('keeps export enabled with warnings', async () => {
@@ -228,14 +327,17 @@ describe(CutCheckPanel.name, () => {
     store.dispatch(new ProjectMaterialSelected({ materialId: MATERIAL.id }));
     store.dispatch(new BurnModelReady({ model: newModel() }));
     renderPanel(store);
-    expect(screen.getByText(SUMMARY_TEXT)).toBeInTheDocument();
+
+    for (const summaryText of ['3 parts', '1 free', '1 may stay attached', '1 attached']) {
+      expect(screen.getByText(summaryText)).toBeInTheDocument();
+    }
 
     act(() => {
       store.dispatch(new LayerToggled({ layerKey: UNKNOWN_LAYER_KEY, enabled: false }));
     });
 
     expect(screen.getByText(OUT_OF_DATE_TEXT)).toBeInTheDocument();
-    expect(screen.queryByText(SUMMARY_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
     expect(screen.queryByText(ESTIMATE_NOTE)).not.toBeInTheDocument();
   });

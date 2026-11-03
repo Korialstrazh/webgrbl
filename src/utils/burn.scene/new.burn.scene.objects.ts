@@ -13,6 +13,7 @@ import {
   BufferGeometry,
   Color,
   DataTexture,
+  DoubleSide,
   Group,
   LineBasicMaterial,
   LineSegments,
@@ -30,6 +31,7 @@ import {
   BURN_SCENE_COLOUR_VALUES_PER_VERTEX,
   BURN_SCENE_HIGHLIGHT_COLOUR,
   BURN_SCENE_HIGHLIGHT_INTENSITY,
+  BURN_SCENE_HOVER_INTENSITY,
   BURN_SCENE_INDEX_VALUES_PER_ITEM,
   BURN_SCENE_OUTLINE_COLOUR,
   BURN_SCENE_POSITION_VALUES_PER_VERTEX,
@@ -96,10 +98,12 @@ const ignoreBurnOutlineRay = (): void => undefined;
 export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
   const group: Group = new Group();
   const toonBands: DataTexture = newBurnSceneToonBands();
-  // The offset keeps the ink lines from sinking into the faces they lie on.
+  // The offset keeps the ink lines from sinking into the faces they lie on. Flat faces are rows of quads of different
+  // lengths, whose joints let single pixels through: with both sides drawn those pixels show wood, not the dark scene.
   const material: MeshToonMaterial = new MeshToonMaterial({
     vertexColors: true,
     gradientMap: toonBands,
+    side: DoubleSide,
     polygonOffset: true,
     polygonOffsetFactor: 1,
     polygonOffsetUnits: 1,
@@ -107,18 +111,24 @@ export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
   const highlightMaterial: MeshToonMaterial = new MeshToonMaterial({
     vertexColors: true,
     gradientMap: toonBands,
+    side: DoubleSide,
     polygonOffset: true,
     polygonOffsetFactor: 1,
     polygonOffsetUnits: 1,
     emissive: BURN_SCENE_HIGHLIGHT_COLOUR,
     emissiveIntensity: BURN_SCENE_HIGHLIGHT_INTENSITY,
   });
+  const hoverMaterial: MeshToonMaterial = highlightMaterial.clone();
+
+  hoverMaterial.emissiveIntensity = BURN_SCENE_HOVER_INTENSITY;
+
   const meshes: BurnSceneMesh[] = model.meshes.map((regionMesh: BurnRegionMesh): BurnSceneMesh => ({
     partId: regionMesh.partId,
     mesh: new Mesh(newBurnRegionGeometry(regionMesh), material),
   }));
 
   const outlineMaterial: LineBasicMaterial = new LineBasicMaterial({ color: BURN_SCENE_OUTLINE_COLOUR });
+  const highlightOutlineMaterial: LineBasicMaterial = new LineBasicMaterial({ color: BURN_SCENE_HIGHLIGHT_COLOUR });
   const outlines: LineSegments[] = [];
 
   for (const { mesh } of meshes) {
@@ -133,5 +143,15 @@ export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
     group.add(mesh);
   }
 
-  return { group, meshes, material, highlightMaterial, toonBands, outlines, outlineMaterial };
+  return {
+    group,
+    meshes,
+    material,
+    highlightMaterial,
+    hoverMaterial,
+    toonBands,
+    outlines,
+    outlineMaterial,
+    highlightOutlineMaterial,
+  };
 };

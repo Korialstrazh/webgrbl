@@ -1,5 +1,6 @@
-import { BufferGeometry } from 'three';
+import { BufferGeometry, OrthographicCamera, Vector3 } from 'three';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
+import { BURN_SCENE_MAX_POLAR_ANGLE_RADIANS } from './burn.scene.constants';
 import { newBurnSceneRenderer } from './burn.scene.runtime';
 import type { BurnSceneRenderer } from './interfaces/BurnSceneRenderer';
 import { newBurnSceneTestModel } from './test.support/new.burn.scene.test.model';
@@ -130,6 +131,82 @@ describe('the burn scene camera across models', () => {
 
     expect(thickerSheetCamera).not.toBe(firstCamera);
     expect(getLastDrawnCamera()).not.toBe(thickerSheetCamera);
+  });
+
+  describe('the view buttons', () => {
+    const getDrawnCamera = (): OrthographicCamera => {
+      const camera: unknown = getLastDrawnCamera();
+
+      if (!(camera instanceof OrthographicCamera)) {
+        throw new Error('expected an orthographic camera');
+      }
+
+      return camera;
+    };
+    const getAngleFromVerticalDegrees = (camera: OrthographicCamera): number => {
+      const viewDirection: Vector3 = camera.getWorldDirection(new Vector3()).negate();
+
+      return (viewDirection.angleTo(new Vector3(0, 0, 1)) * 180) / Math.PI;
+    };
+
+    it('looks straight down from Top, with +Y up on screen, and draws on demand', () => {
+      const renderer: BurnSceneRenderer = newRenderer();
+
+      renderer.showBurnModel(newBurnSceneTestModel());
+      fakeWebGlRenderer.render.mockClear();
+      renderer.showBurnSceneFromTop();
+
+      const camera: OrthographicCamera = getDrawnCamera();
+
+      expect(fakeWebGlRenderer.render).toHaveBeenCalled();
+      expect(getAngleFromVerticalDegrees(camera)).toBeLessThan(1);
+      expect(new Vector3(0, 1, 0).transformDirection(camera.matrixWorld).y).toBeGreaterThan(0);
+    });
+
+    it('brings back the first view and the first zoom from Fit', () => {
+      const renderer: BurnSceneRenderer = newRenderer();
+
+      renderer.showBurnModel(newBurnSceneTestModel());
+
+      const camera: OrthographicCamera = getDrawnCamera();
+      const firstPosition: Vector3 = camera.position.clone();
+      const firstZoom: number = camera.zoom;
+
+      renderer.showBurnSceneFromTop();
+      camera.zoom = 3;
+      renderer.fitBurnSceneView();
+
+      expect(camera.position.distanceTo(firstPosition)).toBeCloseTo(0);
+      expect(camera.zoom).toBeCloseTo(firstZoom);
+      expect(firstZoom).toBeGreaterThan(1);
+    });
+
+    it('does nothing with no model', () => {
+      const renderer: BurnSceneRenderer = newRenderer();
+
+      renderer.fitBurnSceneView();
+      renderer.showBurnSceneFromTop();
+
+      expect(fakeWebGlRenderer.render).not.toHaveBeenCalled();
+    });
+  });
+
+  it('stops the orbit above edge-on', () => {
+    expect((BURN_SCENE_MAX_POLAR_ANGLE_RADIANS * 180) / Math.PI).toBeCloseTo(80);
+  });
+
+  it('draws for a change of hover only, never for the same part again', () => {
+    const renderer: BurnSceneRenderer = newRenderer();
+
+    renderer.showBurnModel(newBurnSceneTestModel());
+    fakeWebGlRenderer.render.mockClear();
+
+    renderer.hoverBurnPart(1);
+    renderer.hoverBurnPart(1);
+    expect(fakeWebGlRenderer.render).toHaveBeenCalledTimes(1);
+
+    renderer.hoverBurnPart(undefined);
+    expect(fakeWebGlRenderer.render).toHaveBeenCalledTimes(2);
   });
 
   it('draws again when the highlight changes', () => {

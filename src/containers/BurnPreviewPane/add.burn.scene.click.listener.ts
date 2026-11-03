@@ -11,22 +11,13 @@
  */
 import { BURN_SCENE_CLICK_MAX_MOVE_PX } from '../../utils/burn.scene/burn.scene.constants';
 import type { BurnScenePointer } from '../../utils/burn.scene/interfaces/BurnScenePointer';
+import { getBurnScenePointer } from './get.burn.scene.pointer';
 
 const POINTER_DOWN_EVENT = 'pointerdown';
 const POINTER_MOVE_EVENT = 'pointermove';
 const POINTER_UP_EVENT = 'pointerup';
 const POINTER_CANCEL_EVENT = 'pointercancel';
 const MAIN_POINTER_BUTTON = 0;
-const NDC_SPAN = 2;
-
-const getBurnScenePointer = (canvas: HTMLCanvasElement, { clientX, clientY }: PointerEvent): BurnScenePointer => {
-  const { left, top, width, height }: DOMRect = canvas.getBoundingClientRect();
-
-  return {
-    xNdc: ((clientX - left) / width) * NDC_SPAN - 1,
-    yNdc: 1 - ((clientY - top) / height) * NDC_SPAN,
-  };
-};
 
 export const addBurnSceneClickListener = (
   canvas: HTMLCanvasElement,

@@ -24,6 +24,7 @@ import type { BurnModelStatus } from './burn.model.status.constants';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { BurnModelReadyPayload } from './interfaces/BurnModelReadyPayload';
 import type { BurnModelRequestedPayload } from './interfaces/BurnModelRequestedPayload';
+import type { BurnPartHoveredPayload } from './interfaces/BurnPartHoveredPayload';
 import type { BurnPartLiftedPayload } from './interfaces/BurnPartLiftedPayload';
 import type { BurnPartSelectedPayload } from './interfaces/BurnPartSelectedPayload';
 import { ActiveMachineProfileSelected } from './machine.profile.state';
@@ -44,6 +45,8 @@ export interface BurnModelState {
   builtMaterialId: string | undefined;
   /** How far the user lifted each part above its place, in mm, not counting what lifts its parents. */
   liftMmByPartId: BurnPartLiftsMm;
+  /** The part under the pointer in the scene, or under it in the part list. */
+  hoveredPartId: number | undefined;
 }
 // #endregion
 
@@ -75,6 +78,14 @@ export class BurnPartSelected extends Action<BurnPartSelectedPayload> {
 export class BurnPartLifted extends Action<BurnPartLiftedPayload> {
   public static readonly type: string = actionType('burn part lifted');
 }
+
+export class BurnPartHovered extends Action<BurnPartHoveredPayload> {
+  public static readonly type: string = actionType('burn part hovered');
+}
+
+export class BurnPartLiftsReset extends Action {
+  public static readonly type: string = actionType('burn part lifts reset');
+}
 // #endregion
 
 // #region Initial state
@@ -84,6 +95,7 @@ const INITIAL_BURN_MODEL_STATE: BurnModelState = {
   selectedPartId: undefined,
   builtMaterialId: undefined,
   liftMmByPartId: {},
+  hoveredPartId: undefined,
 };
 
 // The machine feeds the model without changing the toolpath. The material actions are not here: only those that touch
@@ -159,6 +171,7 @@ export const burnModelReducer = (
       model: (action as BurnModelReady).payload.model,
       selectedPartId: undefined,
       liftMmByPartId: {},
+      hoveredPartId: undefined,
     };
   case BurnModelFailed.type:
     return { ...state, status: BURN_MODEL_STATUS.FAILED };
@@ -166,8 +179,13 @@ export const burnModelReducer = (
     return { ...state, selectedPartId: (action as BurnPartSelected).payload.partId };
   case BurnPartLifted.type:
     return getStateWithLift(state, (action as BurnPartLifted).payload);
+  case BurnPartHovered.type:
+    return { ...state, hoveredPartId: (action as BurnPartHovered).payload.partId };
+  case BurnPartLiftsReset.type:
+    return { ...state, liftMmByPartId: {} };
   case BedViewModeChanged.type:
-    return getStateAfterBuildStopped(state);
+    // The row or the canvas under the pointer goes away without saying so.
+    return { ...getStateAfterBuildStopped(state), hoveredPartId: undefined };
   case MaterialSaved.type:
     return getStateAfterMaterialChange(state, (action as MaterialSaved).payload.material.id);
   case MaterialTestResultSaved.type:
@@ -199,6 +217,9 @@ export const selectBuiltBurnMaterialId = (state: RootState): string | undefined 
 export const selectSelectedBurnPartId = (state: RootState): number | undefined =>
   state[BURN_MODEL_STATE_NAME].selectedPartId;
 
+export const selectHoveredBurnPartId = (state: RootState): number | undefined =>
+  state[BURN_MODEL_STATE_NAME].hoveredPartId;
+
 /** Clamped, because a parent lowered later leaves a child's stored lift below what can be seen and dragged. */
 export const selectBurnPartLiftMm = (partId: number) => (state: RootState): number => {
   const burnModelState: BurnModelState = state[BURN_MODEL_STATE_NAME];
@@ -220,6 +241,9 @@ export const selectBurnPartEffectiveLiftsMm = createSelector(
     ]));
   },
 );
+
+export const selectHasLiftedBurnPart = (state: RootState): boolean =>
+  Object.values(selectBurnPartEffectiveLiftsMm(state)).some((liftMm: number): boolean => liftMm > 0);
 
 export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootState): number =>
   selectBurnPartEffectiveLiftsMm(state)[partId] ?? 0;

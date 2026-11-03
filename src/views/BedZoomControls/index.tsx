@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { ExpandOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Space, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -52,9 +52,12 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
         />
       </Tooltip>
       <Tooltip title={t(DEFAULT.BED_ZOOM_FIT_HINT)}>
-        <Button className={styles.zoomButton} aria-label={t(DEFAULT.BED_ZOOM_FIT_HINT)} onClick={onFit}>
-          {t(DEFAULT.BED_ZOOM_FIT)}
-        </Button>
+        <Button
+          className={styles.zoomButton}
+          aria-label={t(DEFAULT.BED_ZOOM_FIT_HINT)}
+          onClick={onFit}
+          icon={<ExpandOutlined />}
+        />
       </Tooltip>
     </Space.Compact>
   );

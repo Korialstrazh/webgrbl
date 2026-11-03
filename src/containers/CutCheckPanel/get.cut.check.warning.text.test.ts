@@ -25,8 +25,8 @@ const getText = (warning: CutCheckWarning): string =>
 
 describe(getCutCheckWarningText.name, () => {
   it.each<[CutCheckWarningKind, string, string]>([
-    [CUT_CHECK_WARNING_KIND.PART_ATTACHED, 'part 2 stays attached', PART_SUGGESTION],
-    [CUT_CHECK_WARNING_KIND.PART_MAY_STAY_ATTACHED, 'part 2 may stay attached', PART_SUGGESTION],
+    [CUT_CHECK_WARNING_KIND.PART_ATTACHED, 'Part 2 stays attached', PART_SUGGESTION],
+    [CUT_CHECK_WARNING_KIND.PART_MAY_STAY_ATTACHED, 'Part 2 may stay attached', PART_SUGGESTION],
   ])('words %s with the layer, the part, both depths and the suggestion', (kind, partText, suggestion) => {
     const warningText: string = getText(newWarning({ kind }));
 

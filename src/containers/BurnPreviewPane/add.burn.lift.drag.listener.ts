@@ -55,9 +55,12 @@ export const addBurnLiftDragListener = (
   };
   const handlePointerMove = (pointerEvent: PointerEvent): void => {
     if (!dragStart) {
-      canvas.style.cursor = renderer.isBurnLiftAxisAtPoint(getScenePointPx(canvas, pointerEvent))
-        ? LIFT_AXIS_CURSOR
-        : DEFAULT_CURSOR;
+      // Off the arrow the hover listener sets the cursor, so only leaving the arrow clears it here.
+      if (renderer.isBurnLiftAxisAtPoint(getScenePointPx(canvas, pointerEvent))) {
+        canvas.style.cursor = LIFT_AXIS_CURSOR;
+      } else if (canvas.style.cursor === LIFT_AXIS_CURSOR) {
+        canvas.style.cursor = DEFAULT_CURSOR;
+      }
 
       return;
     }

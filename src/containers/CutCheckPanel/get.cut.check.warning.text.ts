@@ -13,10 +13,8 @@ import { CUT_CHECK_WARNING_KIND } from '../../utils/burn.model/burn.model.consta
 import type { CutCheckWarningKind } from '../../utils/burn.model/burn.model.constants';
 import type { CutCheckWarning } from '../../utils/burn.model/interfaces/CutCheckWarning';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { getCutCheckNeededDepthText, getCutCheckPredictedDepthText } from './get.cut.check.depth.text';
 
-const DEPTH_DECIMALS = 1;
-const DECIMAL_BASE = 10;
-const DEPTH_DECIMALS_FACTOR = DECIMAL_BASE ** DEPTH_DECIMALS;
 const WARNING_SENTENCE_SEPARATOR = ' ';
 
 const WARNING_TEXT_KEYS: Record<CutCheckWarningKind, string> = {
@@ -25,24 +23,28 @@ const WARNING_TEXT_KEYS: Record<CutCheckWarningKind, string> = {
   [CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH]: DEFAULT.CUT_CHECK_WARNING_FILL_CUTS_THROUGH,
 };
 
-/** Rounds down when below the needed depth, so a part that stays attached never reads as equal to the needed depth. */
-const getPredictedDepthText = (predictedDepthMm: number, neededDepthMm: number): string => {
-  const roundedDepthMm: number = predictedDepthMm < neededDepthMm
-    ? Math.floor(predictedDepthMm * DEPTH_DECIMALS_FACTOR) / DEPTH_DECIMALS_FACTOR
-    : predictedDepthMm;
-
-  return roundedDepthMm.toFixed(DEPTH_DECIMALS);
+const GROUP_TEXT_KEYS: Partial<Record<CutCheckWarningKind, string>> = {
+  [CUT_CHECK_WARNING_KIND.PART_ATTACHED]: DEFAULT.CUT_CHECK_WARNING_PARTS_ATTACHED,
+  [CUT_CHECK_WARNING_KIND.PART_MAY_STAY_ATTACHED]: DEFAULT.CUT_CHECK_WARNING_PARTS_MAY_STAY_ATTACHED,
 };
 
-export const getCutCheckWarningText = (t: TFunction, warning: CutCheckWarning, layerName: string): string => {
-  const predictedDepthText: string = getPredictedDepthText(warning.predictedDepthMm, warning.neededDepthMm);
-  const warningText: string = t(WARNING_TEXT_KEYS[warning.kind], {
+/** With a part count above 1 the text speaks of that many parts instead of naming one. */
+export const getCutCheckWarningText = (
+  t: TFunction,
+  warning: CutCheckWarning,
+  layerName: string,
+  partCount: number = 1,
+): string => {
+  const predictedDepthText: string = getCutCheckPredictedDepthText(warning);
+  const textKey: string = (partCount > 1 && GROUP_TEXT_KEYS[warning.kind]) || WARNING_TEXT_KEYS[warning.kind];
+  const warningText: string = t(textKey, {
     layer: layerName,
     part: warning.partId,
+    count: partCount,
     predicted: warning.isDepthUpperBound
       ? t(DEFAULT.CUT_CHECK_WARNING_DEPTH_AT_MOST, { depth: predictedDepthText })
       : predictedDepthText,
-    needed: warning.neededDepthMm.toFixed(DEPTH_DECIMALS),
+    needed: getCutCheckNeededDepthText(warning),
   });
 
   return warning.isLessSure

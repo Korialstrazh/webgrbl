@@ -17,6 +17,10 @@ export const BURN_SCENE_BURNT_COLOUR = '#17110c';
 /** The glow of the selected part, the accent of the sketch. */
 export const BURN_SCENE_HIGHLIGHT_COLOUR = '#ff8a1f';
 export const BURN_SCENE_HIGHLIGHT_INTENSITY = 0.35;
+/** The softer glow of a part under the pointer or under its row. */
+export const BURN_SCENE_HOVER_INTENSITY = 0.15;
+/** A mouse move reads the part under it at most this often, because a ray through a big model takes real time. */
+export const BURN_SCENE_HOVER_MIN_INTERVAL_MS = 50;
 export const BURN_SCENE_BACKGROUND_COLOUR = '#1a1d21';
 export const BURN_SCENE_AMBIENT_LIGHT_COLOUR = '#ffffff';
 export const BURN_SCENE_AMBIENT_LIGHT_INTENSITY = 1.6;
@@ -31,12 +35,20 @@ export const BURN_SCENE_MAX_PIXEL_RATIO = 2;
 export const BURN_SCENE_CAMERA_DIRECTION: readonly [number, number, number] = [0.35, -1, 1.1];
 /** Room around the framed sheet, as a share of its size. */
 export const BURN_SCENE_FRAME_MARGIN_RATIO = 1.05;
+/** Room around the sheet on Fit, as a share of its size on screen: the sheet fills most of the canvas. */
+export const BURN_SCENE_FIT_MARGIN_RATIO = 1.04;
+/** Kept free above and below the sheet on Fit, so the arrow on a part near the far edge stays on the canvas. */
+export const BURN_SCENE_FIT_ROOM_PX = 36;
+/** A very short canvas never gives more than this share of its height to that room. */
+export const BURN_SCENE_FIT_ROOM_MAX_SHARE = 0.4;
 /** The camera stands this many frame radiuses from the sheet, so nothing crosses the near plane while orbiting. */
 export const BURN_SCENE_CAMERA_DISTANCE_RADIUSES = 4;
 /** The far plane stands this many camera distances away, so the whole frame fits between the planes. */
 export const BURN_SCENE_CAMERA_FAR_DISTANCES = 2;
-/** Stops the orbit at the horizon: the underside of the sheet shows nothing worth seeing. */
-export const BURN_SCENE_MAX_POLAR_ANGLE_RADIANS = Math.PI / 2;
+/** Stops the orbit before the sheet goes edge-on, 80 degrees from straight down: a line shows nothing to work with. */
+export const BURN_SCENE_MAX_POLAR_ANGLE_RADIANS = (80 * Math.PI) / 180;
+/** Direction from the sheet to the camera in the top view: a hair towards the front, so that +Y is up on screen. */
+export const BURN_SCENE_TOP_CAMERA_DIRECTION: readonly [number, number, number] = [0, -0.001, 1];
 /** A pointer that moved further than this between press and release dragged the scene instead of clicking. */
 export const BURN_SCENE_CLICK_MAX_MOVE_PX = 4;
 
@@ -69,3 +81,4 @@ export const BURN_SCENE_POSITION_VALUES_PER_VERTEX = 3;
 export const BURN_SCENE_COLOUR_VALUES_PER_VERTEX = 3;
 export const BURN_SCENE_INDEX_VALUES_PER_ITEM = 1;
 export const BURN_SCENE_CONTROLS_CHANGE_EVENT = 'change';
+export const BURN_SCENE_CONTROLS_START_EVENT = 'start';

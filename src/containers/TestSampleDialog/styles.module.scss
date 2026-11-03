@@ -1,45 +1,28 @@
-.samplePicture {
-  // The picture imitates a plywood sheet with a burnt gradient; these colours are not theme colours.
-  --sample-wood: #c9a26f;
-  --sample-gradient-light: #f0dcc0;
-  --sample-gradient-dark: #2a1a0c;
-}
-
-.burnSection {
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-}
-
-// A square stand-in for the sample: the cut outline around a gradient.
-.samplePicture {
-  flex: 0 0 auto;
-  box-sizing: border-box;
-  width: 9rem;
-  height: 9rem;
-  padding: 1rem;
-  display: flex;
-  border: 0.125rem solid var(--color-accent);
-  background: var(--sample-wood);
-}
-
-.sampleGradient {
-  flex: 1 1 auto;
-  background: linear-gradient(90deg, var(--sample-gradient-light), var(--sample-gradient-dark));
-}
-
-.burnDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: flex-start;
-}
-
-.resultSection {
+.dialogSection {
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
-  margin-top: 1.25rem;
+}
+
+.settingsSection {
+  margin-top: 1rem;
+}
+
+// Three short fields side by side, so the dialog fits a short window without scrolling.
+.settingsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: var(--space-2);
+  align-items: end;
+  width: 100%;
+
+  :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+
+  :global(.ant-input-number) {
+    width: 100%;
+  }
 }
 
 .outcomeRow {
@@ -49,6 +32,32 @@
   align-items: center;
 }
 
+// Filled, but only with a tint: the full accent belongs to the one main action of the dialog.
+.outcomeChosen:global(.ant-btn) {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  color: var(--color-accent);
+}
+
+// The depth and its hint side by side, so the dialog fits a short window.
+.depthRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: flex-end;
+
+  :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+}
+
 .mutedHint {
   color: var(--color-text-muted);
+}
+
+// Two lines, the longest reason Save can be off.
+.saveHint {
+  min-height: 2.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
 }
