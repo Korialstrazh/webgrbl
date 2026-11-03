@@ -1,10 +1,12 @@
 import { Dexie } from 'dexie';
 import { describe, expect, it } from 'vitest';
 import type { StoredProject } from './interfaces/StoredProject';
+import { MATERIAL_REPOSITORY } from '../materials/material.repository';
 import { PROJECT_REPOSITORY } from './project.repository';
 import {
   WEBGRBL_DATABASE_NAME,
   WEBGRBL_DATABASE_SCHEMA_VERSION_1,
+  WEBGRBL_DATABASE_TABLE,
   WEBGRBL_DATABASE_VERSION_1,
 } from './project.database.constants';
 
@@ -23,11 +25,20 @@ describe('webgrbl database upgrade', () => {
       updatedAt: OLD_TIMESTAMP,
       objects: [],
     };
-    await oldDatabase.table('projects').put(oldProject);
+    await oldDatabase.table(WEBGRBL_DATABASE_TABLE.PROJECTS).put(oldProject);
     oldDatabase.close();
 
     const loadedProject = await PROJECT_REPOSITORY.getProject(OLD_PROJECT_ID);
 
     expect(loadedProject?.project.name).toBe(OLD_PROJECT_NAME);
+  });
+
+  it('adds an empty materials table when it upgrades a version 1 database', async () => {
+    const oldDatabase = new Dexie(WEBGRBL_DATABASE_NAME);
+    oldDatabase.version(WEBGRBL_DATABASE_VERSION_1).stores(WEBGRBL_DATABASE_SCHEMA_VERSION_1);
+    await oldDatabase.open();
+    oldDatabase.close();
+
+    expect(await MATERIAL_REPOSITORY.listMaterials()).toEqual([]);
   });
 });

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { WEBGRBL_DATABASE_TABLE } from '../project/project.database.constants';
 import { WEBGRBL_DATABASE } from '../project/webgrbl.database';
 import { MATERIAL_REPOSITORY } from './material.repository';
 import { newMaterial } from './new.material';
@@ -20,7 +21,7 @@ describe('MATERIAL_REPOSITORY', () => {
 
   it('leaves out a malformed row', async () => {
     await MATERIAL_REPOSITORY.putMaterial(newMaterial({ id: FIRST_MATERIAL_ID }));
-    await WEBGRBL_DATABASE.table('materials').put({ id: MALFORMED_MATERIAL_ID, name: 7 });
+    await WEBGRBL_DATABASE.table(WEBGRBL_DATABASE_TABLE.MATERIALS).put({ id: MALFORMED_MATERIAL_ID, name: 7 });
 
     const listedMaterials: Material[] = await MATERIAL_REPOSITORY.listMaterials();
 

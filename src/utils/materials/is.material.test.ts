@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { isMaterial } from './is.material';
 import { newMaterial } from './new.material';
+import { newTestResultFixture } from './new.test.result.fixture';
+
+const UNKNOWN_TEST_OUTCOME = 'maybe';
 
 describe(isMaterial.name, () => {
   it('accepts a new material', () => {
@@ -14,12 +17,7 @@ describe(isMaterial.name, () => {
   it('rejects an unknown test outcome', () => {
     const material: unknown = {
       ...newMaterial(),
-      testResults: [
-        {
-          machineProfileId: 'p', powerPercent: 1, speedMmPerMin: 1, passes: 1, thicknessMm: 1,
-          outcome: 'maybe', depthMm: undefined, testedAtIso: 'x',
-        },
-      ],
+      testResults: [{ ...newTestResultFixture(), outcome: UNKNOWN_TEST_OUTCOME }],
     };
 
     expect(isMaterial(material)).toBe(false);
