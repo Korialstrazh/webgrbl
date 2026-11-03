@@ -45,7 +45,7 @@ import type { Action } from './action';
 import { selectGrblSettings } from './grbl.connection.state';
 import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
 import { selectActiveMachineProfile } from './machine.profile.state';
-import { PROJECT_DOCUMENT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
+import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 import {
   ProjectDocumentLoaded,
   selectEnabledProjectLayers,
@@ -77,7 +77,7 @@ import type { ToolpathStatus } from './toolpath.status.constants';
 // Only the newest progress matters, so older ones the saga has not put yet are dropped.
 const PROGRESS_BUFFER_SIZE = 1;
 const TOOLPATH_INPUT_CHANGE_ACTION_TYPES: string[] = [
-  ...PROJECT_DOCUMENT_CHANGE_ACTION_TYPES,
+  ...PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES,
   ToolpathMachineAreaChanged.type,
 ];
 

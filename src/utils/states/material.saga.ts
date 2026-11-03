@@ -13,6 +13,7 @@
 import { call, delay, put, race, select, takeEvery } from 'redux-saga/effects';
 import { PANEL_SIZES_READ_TIMEOUT_MS } from '../layout.constants';
 import { DEFAULT } from '../localization/default.locales';
+import { getStoredMaterialsWithSavedMaterials } from '../materials/get.stored.materials.with.saved.materials';
 import type { Material } from '../materials/interfaces/Material';
 import { logMaterialStorageError } from '../materials/log.material.storage.error';
 import { MATERIAL_REPOSITORY } from '../materials/material.repository';
@@ -20,23 +21,6 @@ import type { MaterialsReadRace } from './interfaces/MaterialsReadRace';
 import { MaterialSaved, MaterialTestResultSaved, MaterialsLoaded, selectMaterials } from './material.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
-
-/** The stored materials, with the materials saved while they were being read taking the place of their older copies. */
-const getStoredMaterialsWithSavedMaterials = (storedMaterials: Material[], savedMaterials: Material[]): Material[] => {
-  const savedMaterialsById: Map<string, Material> = new Map<string, Material>();
-
-  for (const savedMaterial of savedMaterials) {
-    savedMaterialsById.set(savedMaterial.id, savedMaterial);
-  }
-
-  const storedMaterialIds: Set<string> =
-    new Set<string>(storedMaterials.map((material: Material): string => material.id));
-
-  return [
-    ...storedMaterials.map((material: Material): Material => savedMaterialsById.get(material.id) ?? material),
-    ...savedMaterials.filter((material: Material): boolean => !storedMaterialIds.has(material.id)),
-  ];
-};
 
 function* loadStoredMaterials(): Generator {
   try {

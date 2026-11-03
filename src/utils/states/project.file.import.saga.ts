@@ -11,6 +11,7 @@
  */
 import { call, put, select } from 'redux-saga/effects';
 import { DEFAULT } from '../localization/default.locales';
+import { getStoredMaterialsWithSavedMaterials } from '../materials/get.stored.materials.with.saved.materials';
 import type { Material } from '../materials/interfaces/Material';
 import { MATERIAL_REPOSITORY } from '../materials/material.repository';
 import type { Palette } from '../palette/interfaces/Palette';
@@ -19,7 +20,7 @@ import type { ImportedProjectFile } from '../project/interfaces/ImportedProjectF
 import type { StoredProject } from '../project/interfaces/StoredProject';
 import { MAX_PROJECT_FILE_BYTES } from '../project/project.constants';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
-import { MaterialsLoaded } from './material.state';
+import { MaterialsLoaded, selectMaterials } from './material.state';
 import { selectPalette } from './palette.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import type { ProjectFileImportRequested } from './project.state';
@@ -46,7 +47,11 @@ function* storeImportedMaterial(importedMaterial: Material): Generator {
   const storedMaterials: Material[] =
     (yield call([MATERIAL_REPOSITORY, MATERIAL_REPOSITORY.listMaterials])) as Material[];
 
-  yield put(new MaterialsLoaded({ materials: storedMaterials }));
+  const materialsOnScreen: Material[] = (yield select(selectMaterials)) as Material[];
+
+  yield put(new MaterialsLoaded({
+    materials: getStoredMaterialsWithSavedMaterials(storedMaterials, materialsOnScreen),
+  }));
 }
 
 /** The new project is stored before the open one closes, so no edit waits on storage between the close and the load. */

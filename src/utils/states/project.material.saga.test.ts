@@ -10,9 +10,12 @@ import { newProjectObject } from '../project/new.project.object';
 import { AUTOSAVE_DEBOUNCE_MS, PROJECT_FILE_EXTENSION } from '../project/project.constants';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
 import { useStorageSafeFakeTimers } from '../test.support/use.storage.safe.fake.timers';
+import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
+import { newToolpath } from '../toolpath/test.support/new.toolpath';
+import { newToolpathMove } from '../toolpath/test.support/new.toolpath.move';
 import type { AppToast } from './interfaces/AppToast';
 import { selectActiveMaterial } from './material.selectors';
-import { selectMaterials } from './material.state';
+import { MaterialSaved, selectMaterials } from './material.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
 import {
@@ -32,7 +35,20 @@ import {
   selectProjectId,
   selectProjectSaveStatus,
 } from './project.state';
+import {
+  SimulationPlayToggled,
+  SimulationTimeSet,
+  selectIsSimulationPlaying,
+  selectSimulationTimeS,
+} from './simulation.state';
 import { selectToasts } from './toast.state';
+import {
+  ToolpathReady,
+  ToolpathRequested,
+  selectToolpathDocumentVersion,
+  selectToolpathStatus,
+} from './toolpath.state';
+import { TOOLPATH_STATUS } from './toolpath.status.constants';
 
 vi.mock('../browser/download.text.file', () => ({ downloadTextFile: vi.fn() }));
 
@@ -41,6 +57,7 @@ const LOCAL_NAME = 'My local plywood';
 const FILE_NAME = 'Name in the file';
 const FIRST_MATERIAL_ID = 'material-a';
 const SECOND_MATERIAL_ID = 'material-b';
+const MIDDLE_TIME_S = 0.5;
 
 const newStartedStore = async (): Promise<AppStore> => {
   const store: AppStore = newStore();
@@ -199,5 +216,57 @@ describe('project material', () => {
     const exportedText: string = vi.mocked(downloadTextFile).mock.calls[0]?.[0].text ?? '';
 
     expect(JSON.parse(exportedText).material).toEqual(material);
+  });
+
+  it('keeps a ready toolpath and a playing simulation when a material is selected, and still autosaves', async () => {
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+
+    await vi.waitFor((): void => {
+      expect(selectProjectId(store.getState())).toBeDefined();
+    });
+
+    const openProjectId: string = selectProjectId(store.getState()) ?? '';
+
+    store.dispatch(new ToolpathRequested());
+    store.dispatch(new ToolpathReady({
+      toolpath: newToolpath({ moves: [newToolpathMove()] }),
+      documentVersion: selectToolpathDocumentVersion(store.getState()),
+    }));
+    store.dispatch(new SimulationTimeSet({ timeS: MIDDLE_TIME_S }));
+    store.dispatch(new SimulationPlayToggled());
+
+    const documentVersion: number = selectToolpathDocumentVersion(store.getState());
+
+    store.dispatch(new ProjectMaterialSelected({ materialId: FIRST_MATERIAL_ID }));
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
+
+    expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.READY);
+    expect(selectToolpathDocumentVersion(store.getState())).toBe(documentVersion);
+    expect(selectIsSimulationPlaying(store.getState())).toBe(true);
+    expect(selectSimulationTimeS(store.getState())).toBe(MIDDLE_TIME_S);
+    await vi.waitFor(async (): Promise<void> => {
+      const storedProject: LoadedProject | undefined = await PROJECT_REPOSITORY.getProject(openProjectId);
+
+      expect(storedProject?.document.materialId).toBe(FIRST_MATERIAL_ID);
+    });
+  });
+
+  it('keeps a material whose store failed on screen when an import reloads the materials', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const unsavedMaterial: Material = newMaterial({ id: SECOND_MATERIAL_ID, name: LOCAL_NAME });
+    const fileMaterial: Material = newMaterial({ id: FIRST_MATERIAL_ID, name: FILE_NAME });
+    const store: AppStore = await newStartedStore();
+
+    vi.spyOn(MATERIAL_REPOSITORY, 'putMaterial').mockRejectedValueOnce(new Error('quota exceeded'));
+    store.dispatch(new MaterialSaved({ material: unsavedMaterial }));
+    await vi.waitFor((): void => {
+      expect(selectToasts(store.getState()).map((toast: AppToast): string => toast.messageKey))
+        .toContain(DEFAULT.TOAST_MATERIAL_SAVE_FAILED);
+    });
+
+    await importFileText(store, getMaterialFileText(fileMaterial));
+
+    expect(selectMaterials(store.getState())).toEqual(expect.arrayContaining([unsavedMaterial, fileMaterial]));
+    expect(selectMaterials(store.getState())).toHaveLength(2);
   });
 });
