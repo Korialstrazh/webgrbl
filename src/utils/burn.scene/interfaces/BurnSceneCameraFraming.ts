@@ -11,6 +11,8 @@
 import type { BurnModel } from '../../burn.model/interfaces/BurnModel';
 
 export interface BurnSceneCameraFraming extends Pick<BurnModel, 'sheetBounds' | 'thicknessMm'> {
+  /** The highest a part can stand above its place, in mm. */
+  maxLiftMm: number;
   /** Width of the view divided by its height. */
   aspectRatio: number;
 }

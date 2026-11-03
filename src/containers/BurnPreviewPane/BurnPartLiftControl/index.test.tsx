@@ -102,13 +102,13 @@ describe(BurnPartLiftControl.name, () => {
     expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBe(0);
   });
 
-  it('gives the reason and no slider for a not-through part that rises inside a liftable parent', () => {
+  it('disables the slider and says why for a not-through part that rises inside a liftable parent', () => {
     renderControl(
       newModel([newPart(PART_ID, BURN_PART_STATUS.FREE), newPart(CHILD_ID, BURN_PART_STATUS.NOT_THROUGH, PART_ID)]),
       CHILD_ID,
     );
 
-    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
+    expect(getLiftSlider()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText(RISES_WITH_PARENT_REASON)).toBeInTheDocument();
   });
 

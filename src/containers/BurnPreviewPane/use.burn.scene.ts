@@ -22,6 +22,7 @@ import {
   BurnPartSelected,
   selectBurnPartEffectiveLiftsMm,
   selectCurrentBurnModel,
+  selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { addBurnSceneClickListener } from './add.burn.scene.click.listener';
@@ -36,6 +37,7 @@ export const useBurnScene = (runtimeLoad: BurnSceneRuntimeLoad, hostRef: RefObje
   const dispatch: AppDispatch = useDispatch();
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
   const liftsMm: BurnPartLiftsMm = useSelector(selectBurnPartEffectiveLiftsMm);
+  const selectedPartId: number | undefined = useSelector(selectSelectedBurnPartId);
   const size: ElementSizePx = useElementSizePx(hostRef);
   const [renderer, setRenderer] = useState<BurnSceneRenderer | undefined>(undefined);
   const [isSceneFailed, setIsSceneFailed] = useState<boolean>(false);
@@ -96,6 +98,10 @@ export const useBurnScene = (runtimeLoad: BurnSceneRuntimeLoad, hostRef: RefObje
   useEffect(() => {
     renderer?.applyBurnPartLifts(liftsMm);
   }, [renderer, model, liftsMm]);
+
+  useEffect(() => {
+    renderer?.highlightBurnPart(selectedPartId);
+  }, [renderer, model, selectedPartId]);
 
   return isSceneFailed;
 };

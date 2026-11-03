@@ -169,9 +169,13 @@ export const selectSelectedBurnPartId = (state: RootState): number | undefined =
 export const selectBurnPartLiftMm = (partId: number) => (state: RootState): number =>
   state[BURN_MODEL_STATE_NAME].liftMmByPartId[partId] ?? 0;
 
-const getBurnPartEffectiveLiftMm = (partId: number, parts: BurnPart[], liftsMm: BurnPartLiftsMm): number => {
+const getBurnPartEffectiveLiftMm = (
+  part: BurnPart,
+  partsById: Map<number, BurnPart>,
+  liftsMm: BurnPartLiftsMm,
+): number => {
   const seenPartIds: Set<number> = new Set<number>();
-  let currentPart: BurnPart | undefined = parts.find((part: BurnPart): boolean => part.id === partId);
+  let currentPart: BurnPart | undefined = part;
   let effectiveLiftMm = 0;
 
   while (currentPart && !seenPartIds.has(currentPart.id)) {
@@ -179,28 +183,27 @@ const getBurnPartEffectiveLiftMm = (partId: number, parts: BurnPart[], liftsMm: 
 
     seenPartIds.add(id);
     effectiveLiftMm += liftsMm[id] ?? 0;
-    currentPart = parts.find((part: BurnPart): boolean => part.id === parentId);
+    currentPart = parentId ? partsById.get(parentId) : undefined;
   }
 
   return effectiveLiftMm;
 };
 
-export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootState): number =>
-  getBurnPartEffectiveLiftMm(
-    partId,
-    selectBurnModel(state)?.parts ?? [],
-    state[BURN_MODEL_STATE_NAME].liftMmByPartId,
-  );
-
 export const selectBurnPartEffectiveLiftsMm = createSelector(
   [selectBurnModel, (state: RootState): BurnPartLiftsMm => state[BURN_MODEL_STATE_NAME].liftMmByPartId],
   (model: BurnModel | undefined, liftsMm: BurnPartLiftsMm): BurnPartLiftsMm => {
     const parts: BurnPart[] = model?.parts ?? [];
+    const partsById: Map<number, BurnPart> = new Map<number, BurnPart>(
+      parts.map((part: BurnPart): [number, BurnPart] => [part.id, part]),
+    );
 
-    return Object.fromEntries(parts.map(({ id }: BurnPart): [number, number] => [
-      id,
-      getBurnPartEffectiveLiftMm(id, parts, liftsMm),
+    return Object.fromEntries(parts.map((part: BurnPart): [number, number] => [
+      part.id,
+      getBurnPartEffectiveLiftMm(part, partsById, liftsMm),
     ]));
   },
 );
+
+export const selectBurnPartEffectiveLiftMm = (partId: number) => (state: RootState): number =>
+  selectBurnPartEffectiveLiftsMm(state)[partId] ?? 0;
 // #endregion

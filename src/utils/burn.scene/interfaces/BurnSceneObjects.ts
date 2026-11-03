@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import type { Group, Material } from 'three';
+import type { Group, MeshLambertMaterial } from 'three';
 import type { BurnSceneMesh } from './BurnSceneMesh';
 
 export interface BurnSceneObjects {
@@ -16,6 +16,8 @@ export interface BurnSceneObjects {
   group: Group;
   /** One per region of the model, in the same order. */
   meshes: BurnSceneMesh[];
-  /** The material all meshes share. */
-  material: Material;
+  /** The material of every mesh that is not selected. */
+  material: MeshLambertMaterial;
+  /** The material of the mesh of the selected part. */
+  highlightMaterial: MeshLambertMaterial;
 }

@@ -1,4 +1,4 @@
-import type { BufferAttribute } from 'three';
+import { BufferAttribute } from 'three';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnRegionMesh } from '../burn.model/interfaces/BurnRegionMesh';
 import { BURN_SCENE_ATTRIBUTE } from './burn.scene.constants';
@@ -6,6 +6,16 @@ import type { BurnSceneMesh } from './interfaces/BurnSceneMesh';
 import type { BurnSceneObjects } from './interfaces/BurnSceneObjects';
 import { newBurnSceneObjects } from './new.burn.scene.objects';
 import { newBurnSceneTestModel } from './test.support/new.burn.scene.test.model';
+
+const getFirstMeshAttribute = (meshes: BurnSceneMesh[], attributeName: string): BufferAttribute => {
+  const attribute: unknown = meshes[0]?.mesh.geometry.getAttribute(attributeName);
+
+  if (!(attribute instanceof BufferAttribute)) {
+    throw new Error('expected a buffer attribute');
+  }
+
+  return attribute;
+};
 
 describe(newBurnSceneObjects.name, () => {
   it('builds one mesh per region in the group, and each mesh carries the part id of its region', () => {
@@ -21,8 +31,8 @@ describe(newBurnSceneObjects.name, () => {
   it('keeps bed mm as scene units with the height as Z, and gives every vertex a colour', () => {
     const model: BurnModel = newBurnSceneTestModel();
     const { meshes }: BurnSceneObjects = newBurnSceneObjects(model);
-    const position = meshes[0]?.mesh.geometry.getAttribute(BURN_SCENE_ATTRIBUTE.POSITION) as BufferAttribute;
-    const colour = meshes[0]?.mesh.geometry.getAttribute(BURN_SCENE_ATTRIBUTE.COLOUR) as BufferAttribute;
+    const position: BufferAttribute = getFirstMeshAttribute(meshes, BURN_SCENE_ATTRIBUTE.POSITION);
+    const colour: BufferAttribute = getFirstMeshAttribute(meshes, BURN_SCENE_ATTRIBUTE.COLOUR);
 
     expect(position.array).toEqual(model.meshes[0]?.positions);
     expect(colour.count).toBe(position.count);
@@ -40,7 +50,7 @@ describe(newBurnSceneObjects.name, () => {
       }],
     };
     const { meshes }: BurnSceneObjects = newBurnSceneObjects(model);
-    const colour = meshes[0]?.mesh.geometry.getAttribute(BURN_SCENE_ATTRIBUTE.COLOUR) as BufferAttribute;
+    const colour: BufferAttribute = getFirstMeshAttribute(meshes, BURN_SCENE_ATTRIBUTE.COLOUR);
 
     expect(colour.getX(1)).toBeLessThan(colour.getX(0));
   });

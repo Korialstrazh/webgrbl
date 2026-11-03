@@ -1,5 +1,5 @@
 /**
- * Sizes the view of the orthographic camera so that the sheet and a part at full lift fit, from any side.
+ * Sizes the view of the orthographic camera so that the sheet and the highest lifted part fit, from any side.
  *
  * @author michael.morosov
  *

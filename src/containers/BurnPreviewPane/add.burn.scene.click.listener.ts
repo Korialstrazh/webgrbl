@@ -35,11 +35,14 @@ export const addBurnSceneClickListener = (
   let pressPoint: PointerEvent | undefined;
 
   const handlePointerDown = (pointerEvent: PointerEvent): void => {
-    pressPoint = pointerEvent.button === MAIN_POINTER_BUTTON ? pointerEvent : undefined;
+    // A second finger means a pinch, not a click.
+    const isSecondPointer: boolean = !!pressPoint && pressPoint.pointerId !== pointerEvent.pointerId;
+
+    pressPoint = pointerEvent.button === MAIN_POINTER_BUTTON && !isSecondPointer ? pointerEvent : undefined;
   };
-  const handlePointerMove = ({ clientX, clientY }: PointerEvent): void => {
-    const moveDistancePx: number = pressPoint
-      ? Math.hypot(clientX - pressPoint.clientX, clientY - pressPoint.clientY)
+  const handlePointerMove = ({ clientX, clientY, pointerId }: PointerEvent): void => {
+    const moveDistancePx: number = pressPoint?.pointerId === pointerId
+      ? Math.hypot(clientX - (pressPoint?.clientX ?? clientX), clientY - (pressPoint?.clientY ?? clientY))
       : 0;
 
     if (moveDistancePx > BURN_SCENE_CLICK_MAX_MOVE_PX) {
@@ -49,11 +52,10 @@ export const addBurnSceneClickListener = (
   const handlePointerUp = (pointerEvent: PointerEvent): void => {
     handlePointerMove(pointerEvent);
 
-    if (pressPoint) {
+    if (pressPoint?.pointerId === pointerEvent.pointerId) {
       onSceneClick(getBurnScenePointer(canvas, pointerEvent));
+      pressPoint = undefined;
     }
-
-    pressPoint = undefined;
   };
   const handlePointerCancel = (): void => {
     pressPoint = undefined;

@@ -16,6 +16,8 @@ import {
   BURN_SCENE_BURNT_COLOUR,
   BURN_SCENE_CLEAN_COLOUR,
   BURN_SCENE_COLOUR_VALUES_PER_VERTEX,
+  BURN_SCENE_HIGHLIGHT_COLOUR,
+  BURN_SCENE_HIGHLIGHT_INTENSITY,
   BURN_SCENE_INDEX_VALUES_PER_ITEM,
   BURN_SCENE_POSITION_VALUES_PER_VERTEX,
 } from './burn.scene.constants';
@@ -60,6 +62,11 @@ const newBurnRegionGeometry = ({ positions, shades, indices }: BurnRegionMesh): 
 export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
   const group: Group = new Group();
   const material: MeshLambertMaterial = new MeshLambertMaterial({ vertexColors: true });
+  const highlightMaterial: MeshLambertMaterial = new MeshLambertMaterial({
+    vertexColors: true,
+    emissive: BURN_SCENE_HIGHLIGHT_COLOUR,
+    emissiveIntensity: BURN_SCENE_HIGHLIGHT_INTENSITY,
+  });
   const meshes: BurnSceneMesh[] = model.meshes.map((regionMesh: BurnRegionMesh): BurnSceneMesh => ({
     partId: regionMesh.partId,
     mesh: new Mesh(newBurnRegionGeometry(regionMesh), material),
@@ -69,5 +76,5 @@ export const newBurnSceneObjects = (model: BurnModel): BurnSceneObjects => {
     group.add(mesh);
   }
 
-  return { group, meshes, material };
+  return { group, meshes, material, highlightMaterial };
 };

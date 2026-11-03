@@ -38,6 +38,7 @@ interface PickablePane {
 const newFakeRenderer = (): BurnSceneRenderer => ({
   showBurnModel: vi.fn(),
   applyBurnPartLifts: vi.fn(),
+  highlightBurnPart: vi.fn(),
   resizeBurnScene: vi.fn(),
   getBurnPartIdAtPointer: vi.fn(() => PART_ID),
   dispose: vi.fn(),
@@ -224,6 +225,26 @@ describe(BurnPreviewPane.name, () => {
 
       expect(renderer.getBurnPartIdAtPointer).not.toHaveBeenCalled();
       expect(selectSelectedBurnPartId(store.getState())).toBeUndefined();
+    });
+
+    it('does not select when a second finger touches the scene, as in a pinch', async () => {
+      const { canvas, renderer } = await renderPickablePane();
+
+      fireEvent.pointerDown(canvas, { button: 0, pointerId: 1, clientX: CLICK_X_PX, clientY: CLICK_Y_PX });
+      fireEvent.pointerDown(canvas, { button: 0, pointerId: 2, clientX: CLICK_X_PX, clientY: CLICK_Y_PX });
+      fireEvent.pointerUp(canvas, { button: 0, pointerId: 2, clientX: CLICK_X_PX, clientY: CLICK_Y_PX });
+      fireEvent.pointerUp(canvas, { button: 0, pointerId: 1, clientX: CLICK_X_PX, clientY: CLICK_Y_PX });
+
+      expect(renderer.getBurnPartIdAtPointer).not.toHaveBeenCalled();
+    });
+
+    it('highlights the part a click selects', async () => {
+      const { canvas, renderer } = await renderPickablePane();
+
+      fireEvent.pointerDown(canvas, { button: 0, clientX: CLICK_X_PX, clientY: CLICK_Y_PX });
+      fireEvent.pointerUp(canvas, { button: 0, clientX: CLICK_X_PX, clientY: CLICK_Y_PX });
+
+      expect(renderer.highlightBurnPart).toHaveBeenLastCalledWith(PART_ID);
     });
 
     it('clears the selection on a click that hits no part', async () => {

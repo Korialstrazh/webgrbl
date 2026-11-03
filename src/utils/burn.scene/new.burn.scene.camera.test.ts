@@ -9,7 +9,9 @@ const THICKNESS_MM = 3;
 const SHEET_BOUNDS: ToolpathBounds = { minX: 20, minY: -10, maxX: 220, maxY: 90 };
 const WIDE_ASPECT_RATIO = 2;
 const TALL_ASPECT_RATIO = 0.5;
-const HIGHEST_Z_MM = THICKNESS_MM * (1 + BURN_PART_LIFT_MAX_THICKNESSES);
+// Two nested parts, each at full lift.
+const MAX_LIFT_MM = 2 * THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES;
+const HIGHEST_Z_MM = THICKNESS_MM + MAX_LIFT_MM;
 
 const getLargestSheetCornerNdc = (camera: OrthographicCamera): number => {
   let largestNdc = 0;
@@ -28,12 +30,13 @@ const getLargestSheetCornerNdc = (camera: OrthographicCamera): number => {
 };
 
 describe(newBurnSceneCamera.name, () => {
-  it.each([1, WIDE_ASPECT_RATIO, TALL_ASPECT_RATIO])('frames the whole sheet and a part at full lift at aspect %d', (
+  it.each([1, WIDE_ASPECT_RATIO, TALL_ASPECT_RATIO])('frames the sheet and the deepest lifted chain at aspect %d', (
     aspectRatio: number,
   ) => {
     const camera: OrthographicCamera = newBurnSceneCamera({
       sheetBounds: SHEET_BOUNDS,
       thicknessMm: THICKNESS_MM,
+      maxLiftMm: MAX_LIFT_MM,
       aspectRatio,
     });
 
@@ -41,10 +44,24 @@ describe(newBurnSceneCamera.name, () => {
     expect(getLargestSheetCornerNdc(camera)).toBeGreaterThan(0);
   });
 
+  it('frames the deepest chain on a sheet much smaller than its lift', () => {
+    const smallSheetBounds: ToolpathBounds = { minX: 0, minY: 0, maxX: 5, maxY: 5 };
+    const camera: OrthographicCamera = newBurnSceneCamera({
+      sheetBounds: smallSheetBounds,
+      thicknessMm: THICKNESS_MM,
+      maxLiftMm: MAX_LIFT_MM,
+      aspectRatio: 1,
+    });
+    const topOfLift: Vector3 = new Vector3(0, 0, HIGHEST_Z_MM).project(camera);
+
+    expect(Math.abs(topOfLift.y)).toBeLessThanOrEqual(1);
+  });
+
   it('keeps Z up and sits above the sheet', () => {
     const camera: OrthographicCamera = newBurnSceneCamera({
       sheetBounds: SHEET_BOUNDS,
       thicknessMm: THICKNESS_MM,
+      maxLiftMm: MAX_LIFT_MM,
       aspectRatio: 1,
     });
 
@@ -56,12 +73,14 @@ describe(newBurnSceneCamera.name, () => {
     const camera: OrthographicCamera = newBurnSceneCamera({
       sheetBounds: SHEET_BOUNDS,
       thicknessMm: THICKNESS_MM,
+      maxLiftMm: MAX_LIFT_MM,
       aspectRatio: WIDE_ASPECT_RATIO,
     });
 
     setBurnSceneCameraFrustum(camera, {
       sheetBounds: SHEET_BOUNDS,
       thicknessMm: THICKNESS_MM,
+      maxLiftMm: MAX_LIFT_MM,
       aspectRatio: TALL_ASPECT_RATIO,
     });
 

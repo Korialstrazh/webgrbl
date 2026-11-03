@@ -12,6 +12,7 @@ import { OrthographicCamera, Vector3 } from 'three';
 import {
   BURN_SCENE_CAMERA_DIRECTION,
   BURN_SCENE_CAMERA_DISTANCE_RADIUSES,
+  BURN_SCENE_CAMERA_FAR_DISTANCES,
 } from './burn.scene.constants';
 import { getBurnSceneFrameCentre } from './get.burn.scene.frame.centre';
 import { getBurnSceneFrameRadiusMm } from './get.burn.scene.frame.radius.mm';
@@ -29,7 +30,7 @@ export const newBurnSceneCamera = (framing: BurnSceneCameraFraming): Orthographi
   camera.up.set(0, 0, 1);
   camera.position.copy(centre).add(offset);
   camera.near = 0;
-  camera.far = distanceMm * 2;
+  camera.far = distanceMm * BURN_SCENE_CAMERA_FAR_DISTANCES;
   camera.lookAt(centre);
   camera.updateMatrixWorld();
   setBurnSceneCameraFrustum(camera, framing);

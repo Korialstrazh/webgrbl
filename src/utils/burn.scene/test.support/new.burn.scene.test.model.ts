@@ -18,12 +18,11 @@ import type { ProjectLayer } from '../../layers/interfaces/ProjectLayer';
 import { MATERIAL_TEST_OUTCOME } from '../../materials/material.constants';
 import { newTestResultFixture } from '../../materials/new.test.result.fixture';
 import { getBoxSubpath } from '../../toolpath/test.support/get.box.subpath';
+import { BURN_SCENE_TEST_THICKNESS_MM } from './burn.scene.test.constants';
 
 const LAYER_COLOUR = '#ff0000';
 const FULL_POWER_PERCENT = 100;
 const TEST_SPEED_MM_PER_MIN = 300;
-
-export const BURN_SCENE_TEST_THICKNESS_MM = 3;
 
 export const newBurnSceneTestModel = (): BurnModel => {
   const layers: ProjectLayer[] = [newTestLayer(LAYER_COLOUR, {

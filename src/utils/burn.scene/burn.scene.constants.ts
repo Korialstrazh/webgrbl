@@ -14,6 +14,9 @@ import { WOOD_BED_COLOUR } from '../bed/bed.colour.constants';
 export const BURN_SCENE_CLEAN_COLOUR = WOOD_BED_COLOUR;
 /** The colour of fully burnt material; a vertex shade of 0 to 1 moves from the clean colour to this. */
 export const BURN_SCENE_BURNT_COLOUR = '#17110c';
+/** The glow of the selected part, the accent of the sketch. */
+export const BURN_SCENE_HIGHLIGHT_COLOUR = '#ff8a1f';
+export const BURN_SCENE_HIGHLIGHT_INTENSITY = 0.35;
 export const BURN_SCENE_BACKGROUND_COLOUR = '#1a1d21';
 export const BURN_SCENE_AMBIENT_LIGHT_COLOUR = '#ffffff';
 export const BURN_SCENE_AMBIENT_LIGHT_INTENSITY = 1.6;
@@ -30,6 +33,8 @@ export const BURN_SCENE_CAMERA_DIRECTION: readonly [number, number, number] = [0
 export const BURN_SCENE_FRAME_MARGIN_RATIO = 1.05;
 /** The camera stands this many frame radiuses from the sheet, so nothing crosses the near plane while orbiting. */
 export const BURN_SCENE_CAMERA_DISTANCE_RADIUSES = 4;
+/** The far plane stands this many camera distances away, so the whole frame fits between the planes. */
+export const BURN_SCENE_CAMERA_FAR_DISTANCES = 2;
 /** Stops the orbit at the horizon: the underside of the sheet shows nothing worth seeing. */
 export const BURN_SCENE_MAX_POLAR_ANGLE_RADIANS = Math.PI / 2;
 /** A pointer that moved further than this between press and release dragged the scene instead of clicking. */

@@ -20,6 +20,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPartLiftsMm } from '../burn.model/interfaces/BurnPartLiftsMm';
 import type { ElementSizePx } from '../hooks/interfaces/ElementSizePx';
+import { getBurnPartMaxLiftMm } from '../burn.model/get.burn.part.max.lift.mm';
+import { applyBurnPartHighlight } from './apply.burn.part.highlight';
 import { applyBurnPartLifts } from './apply.burn.part.lifts';
 import {
   BURN_SCENE_AMBIENT_LIGHT_COLOUR,
@@ -35,6 +37,7 @@ import {
 import { getBurnPartAtPointer } from './get.burn.part.at.pointer';
 import { getBurnSceneFrameCentre } from './get.burn.scene.frame.centre';
 import type { BurnSceneCameraFraming } from './interfaces/BurnSceneCameraFraming';
+import type { BurnSceneModelFraming } from './interfaces/BurnSceneModelFraming';
 import type { BurnSceneObjects } from './interfaces/BurnSceneObjects';
 import type { BurnScenePointer } from './interfaces/BurnScenePointer';
 import type { BurnSceneRenderer } from './interfaces/BurnSceneRenderer';
@@ -44,7 +47,12 @@ import { setBurnSceneCameraFrustum } from './set.burn.scene.camera.frustum';
 
 const BURN_SCENE_RENDERER_ERROR_LOG_MESSAGE = 'Starting the 3D renderer failed';
 
-type BurnSceneModelFraming = Omit<BurnSceneCameraFraming, 'aspectRatio'>;
+const isSameBurnSheet = (first: BurnSceneModelFraming, second: BurnSceneModelFraming): boolean =>
+  first.thicknessMm === second.thicknessMm
+  && first.sheetBounds.minX === second.sheetBounds.minX
+  && first.sheetBounds.minY === second.sheetBounds.minY
+  && first.sheetBounds.maxX === second.sheetBounds.maxX
+  && first.sheetBounds.maxY === second.sheetBounds.maxY;
 
 class WebGlBurnSceneRenderer implements BurnSceneRenderer {
   // Draws on the canvas.
@@ -53,14 +61,14 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
   // Holds the lights, and the objects of the model while there is one.
   private readonly scene: Scene = new Scene();
 
-  // The objects of the model on show, the camera framed to it and the orbit controls of that camera.
+  // The objects of the model on show, the camera and the orbit controls of that camera.
   private objects: BurnSceneObjects | undefined;
 
   private camera: OrthographicCamera | undefined;
 
   private controls: OrbitControls | undefined;
 
-  // The sheet and thickness of the model on show, to frame it again when the view changes shape.
+  // What the camera is framed to, kept while the scene is empty so that a rebuild can keep the view.
   private modelFraming: BurnSceneModelFraming | undefined;
 
   // Width of the view divided by its height, known before the first model arrives.
@@ -86,7 +94,7 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     if (model) {
       this.objects = newBurnSceneObjects(model);
       this.scene.add(this.objects.group);
-      this.addCameraAndControls(model);
+      this.updateCameraForBurnModel(model);
     }
 
     this.drawScene();
@@ -95,6 +103,13 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
   public applyBurnPartLifts(liftsMm: BurnPartLiftsMm): void {
     if (this.objects) {
       applyBurnPartLifts(this.objects, liftsMm);
+      this.drawScene();
+    }
+  }
+
+  public highlightBurnPart(partId: number | undefined): void {
+    if (this.objects) {
+      applyBurnPartHighlight(this.objects, partId);
       this.drawScene();
     }
   }
@@ -116,18 +131,36 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
 
   public dispose(): void {
     this.removeModelObjects();
+    this.removeCameraAndControls();
     // dispose() alone leaves the context alive until garbage collection, and browsers cap live WebGL contexts, so
     // switching the 3D view on and off again would soon push out the oldest one.
     this.webGlRenderer.forceContextLoss();
     this.webGlRenderer.dispose();
   }
 
-  private addCameraAndControls({ sheetBounds, thicknessMm }: BurnModel): void {
-    const framing: BurnSceneCameraFraming = { sheetBounds, thicknessMm, aspectRatio: this.aspectRatio };
+  /** A rebuild of the same sheet keeps the orbit, zoom and pan of the user. */
+  private updateCameraForBurnModel({ parts, sheetBounds, thicknessMm }: BurnModel): void {
+    const modelFraming: BurnSceneModelFraming = {
+      sheetBounds,
+      thicknessMm,
+      maxLiftMm: getBurnPartMaxLiftMm(parts, thicknessMm),
+    };
+    const framing: BurnSceneCameraFraming = { ...modelFraming, aspectRatio: this.aspectRatio };
+
+    if (this.camera && this.modelFraming && isSameBurnSheet(this.modelFraming, modelFraming)) {
+      setBurnSceneCameraFrustum(this.camera, framing);
+    } else {
+      this.removeCameraAndControls();
+      this.addCameraAndControls(framing);
+    }
+
+    this.modelFraming = modelFraming;
+  }
+
+  private addCameraAndControls(framing: BurnSceneCameraFraming): void {
     const camera: OrthographicCamera = newBurnSceneCamera(framing);
     const controls: OrbitControls = new OrbitControls(camera, this.webGlRenderer.domElement);
 
-    this.modelFraming = { sheetBounds, thicknessMm };
     this.camera = camera;
     this.controls = controls;
     controls.target.copy(getBurnSceneFrameCentre(framing));
@@ -136,13 +169,19 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     controls.addEventListener(BURN_SCENE_CONTROLS_CHANGE_EVENT, this.drawScene);
   }
 
-  private removeModelObjects(): void {
+  private removeCameraAndControls(): void {
     this.controls?.removeEventListener(BURN_SCENE_CONTROLS_CHANGE_EVENT, this.drawScene);
     this.controls?.dispose();
+    this.camera = undefined;
+    this.controls = undefined;
+    this.modelFraming = undefined;
+  }
 
+  private removeModelObjects(): void {
     if (this.objects) {
       this.scene.remove(this.objects.group);
       this.objects.material.dispose();
+      this.objects.highlightMaterial.dispose();
 
       for (const { mesh } of this.objects.meshes) {
         mesh.geometry.dispose();
@@ -150,14 +189,11 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
     }
 
     this.objects = undefined;
-    this.camera = undefined;
-    this.controls = undefined;
-    this.modelFraming = undefined;
   }
 
   // An arrow function because the controls call it without an object.
   private readonly drawScene = (): void => {
-    if (this.camera) {
+    if (this.objects && this.camera) {
       this.webGlRenderer.render(this.scene, this.camera);
     } else {
       this.webGlRenderer.clear();

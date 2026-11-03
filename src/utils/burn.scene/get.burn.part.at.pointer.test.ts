@@ -8,7 +8,8 @@ import type { BurnSceneObjects } from './interfaces/BurnSceneObjects';
 import type { BurnScenePointer } from './interfaces/BurnScenePointer';
 import { newBurnSceneCamera } from './new.burn.scene.camera';
 import { newBurnSceneObjects } from './new.burn.scene.objects';
-import { BURN_SCENE_TEST_THICKNESS_MM, newBurnSceneTestModel } from './test.support/new.burn.scene.test.model';
+import { BURN_SCENE_TEST_THICKNESS_MM } from './test.support/burn.scene.test.constants';
+import { newBurnSceneTestModel } from './test.support/new.burn.scene.test.model';
 
 const OUTER_PART_ID = 1;
 const INNER_PART_ID = 2;
@@ -29,6 +30,7 @@ const model: BurnModel = newBurnSceneTestModel();
 const newCamera = (): OrthographicCamera => newBurnSceneCamera({
   sheetBounds: model.sheetBounds,
   thicknessMm: model.thicknessMm,
+  maxLiftMm: 0,
   aspectRatio: 1,
 });
 
@@ -72,6 +74,12 @@ describe(getBurnPartAtPointer.name, () => {
   it('finds a lifted part where it now is, and nothing where it used to be', () => {
     const camera: OrthographicCamera = newCamera();
     const objects: BurnSceneObjects = newBurnSceneObjects(model);
+    const oldPlacePointer: BurnScenePointer = getPointerAtPoint(
+      camera,
+      SQUARE_MIDDLE_MM,
+      SQUARE_MIDDLE_MM,
+      SHEET_TOP_MM,
+    );
 
     applyBurnPartLifts(objects, BOTH_PARTS_LIFTED);
 
@@ -80,6 +88,7 @@ describe(getBurnPartAtPointer.name, () => {
       camera,
       getPointerAtPoint(camera, SQUARE_MIDDLE_MM, SQUARE_MIDDLE_MM, SHEET_TOP_MM + LIFT_CLEAR_OF_THE_RAY_MM),
     )).toBe(INNER_PART_ID);
+    expect(getBurnPartAtPointer(objects, camera, oldPlacePointer)).toBeUndefined();
   });
 
   it('returns undefined for an oblique ray that passes under a lifted part and through its hole', () => {

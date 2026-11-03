@@ -70,17 +70,15 @@ export const BurnPartLiftControl = (): ReactNode => {
   return (
     <div className={styles.burnPartLiftControl}>
       <span id={labelId} className={styles.label}>{t(DEFAULT.BURN_PART_LIFT_LABEL)}</span>
-      {!carryingPart && (
-        <Slider
-          min={0}
-          max={model.thicknessMm * BURN_PART_LIFT_MAX_THICKNESSES}
-          step={BURN_PART_LIFT_STEP_MM}
-          value={liftMm}
-          disabled={!isBurnPartLiftable(part)}
-          onChange={(nextLiftMm: number) => dispatch(new BurnPartLifted({ partId: part.id, liftMm: nextLiftMm }))}
-          ariaLabelledByForHandle={labelId}
-        />
-      )}
+      <Slider
+        min={0}
+        max={model.thicknessMm * BURN_PART_LIFT_MAX_THICKNESSES}
+        step={BURN_PART_LIFT_STEP_MM}
+        value={liftMm}
+        disabled={!isBurnPartLiftable(part)}
+        onChange={(nextLiftMm: number) => dispatch(new BurnPartLifted({ partId: part.id, liftMm: nextLiftMm }))}
+        ariaLabelledByForHandle={labelId}
+      />
       {part.status === BURN_PART_STATUS.BORDERLINE && (
         <Tag className={styles.attachedTag} color={ANTD_TAG_COLOR_WARNING}>
           {t(DEFAULT.BURN_PART_LIFT_MAY_STAY_ATTACHED)}

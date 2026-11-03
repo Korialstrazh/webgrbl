@@ -14,10 +14,12 @@ import type { ElementSizePx } from '../../hooks/interfaces/ElementSizePx';
 import type { BurnScenePointer } from './BurnScenePointer';
 
 export interface BurnSceneRenderer {
-  /** Replaces what the scene shows and frames the camera to it; undefined leaves the scene empty. */
+  /** Replaces what the scene shows; undefined leaves it empty. The view only resets when the sheet changes. */
   showBurnModel: (model: BurnModel | undefined) => void;
   /** Moves each part mesh to the height of its lift above its place, in mm. */
   applyBurnPartLifts: (liftsMm: BurnPartLiftsMm) => void;
+  /** Makes the mesh of a part glow, and no other; undefined makes none glow. */
+  highlightBurnPart: (partId: number | undefined) => void;
   /** Sets the drawing size to the size of the view on screen. */
   resizeBurnScene: (size: ElementSizePx) => void;
   /** The part under a place in the view; undefined over the sheet or the background. */

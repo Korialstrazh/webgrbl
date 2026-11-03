@@ -93,6 +93,56 @@ describe('the burn scene renderer', () => {
   });
 });
 
+describe('the burn scene camera across models', () => {
+  const getLastDrawnCamera = (): unknown => fakeWebGlRenderer.render.mock.lastCall?.[1];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('keeps the camera, with the orbit and zoom of the user, through a rebuild of the same sheet', () => {
+    const renderer: BurnSceneRenderer = newRenderer();
+
+    renderer.showBurnModel(newBurnSceneTestModel());
+    const firstCamera: unknown = getLastDrawnCamera();
+
+    renderer.showBurnModel(undefined);
+    renderer.showBurnModel(newBurnSceneTestModel());
+
+    expect(getLastDrawnCamera()).toBe(firstCamera);
+  });
+
+  it('frames again for a sheet of another size or thickness', () => {
+    const renderer: BurnSceneRenderer = newRenderer();
+    const model: BurnModel = newBurnSceneTestModel();
+
+    renderer.showBurnModel(model);
+    const firstCamera: unknown = getLastDrawnCamera();
+
+    renderer.showBurnModel({ ...model, thicknessMm: model.thicknessMm + 1 });
+    const thickerSheetCamera: unknown = getLastDrawnCamera();
+
+    renderer.showBurnModel({
+      ...model,
+      thicknessMm: model.thicknessMm + 1,
+      sheetBounds: { ...model.sheetBounds, maxX: model.sheetBounds.maxX + 1 },
+    });
+
+    expect(thickerSheetCamera).not.toBe(firstCamera);
+    expect(getLastDrawnCamera()).not.toBe(thickerSheetCamera);
+  });
+
+  it('draws again when the highlight changes', () => {
+    const renderer: BurnSceneRenderer = newRenderer();
+
+    renderer.showBurnModel(newBurnSceneTestModel());
+    fakeWebGlRenderer.render.mockClear();
+    renderer.highlightBurnPart(1);
+
+    expect(fakeWebGlRenderer.render).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('the burn scene renderer memory', () => {
   it('frees the geometry of each mesh when the model changes', () => {
     const disposeSpy = vi.spyOn(BufferGeometry.prototype, 'dispose');
