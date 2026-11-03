@@ -1,5 +1,5 @@
 /**
- * The material of the project, in the Design toolbar: a select whose options also show the thickness and the
+ * The material of the project, in the design panel: a select whose options also show the thickness and the
  * test on the active machine, so materials of one name can be told apart, with an entry that adds one.
  *
  * @author michael.morosov

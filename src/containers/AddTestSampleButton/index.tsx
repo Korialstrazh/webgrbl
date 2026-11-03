@@ -1,5 +1,5 @@
 /**
- * Adds the 5 x 5 cm test sample to the project from the Design toolbar. It is off, with the reason, when the sample
+ * Adds the 5 x 5 cm test sample to the project from the Layers panel. It is off, with the reason, when the sample
  * does not fit the machine or the project is full.
  *
  * @author michael.morosov
@@ -39,6 +39,7 @@ export const AddTestSampleButton = (): ReactNode => {
   return (
     <Tooltip title={blockedReason}>
       <Button
+        block
         disabled={!!blockedReason}
         aria-description={blockedReason}
         onClick={() => dispatch(new SampleJobAddRequested())}
