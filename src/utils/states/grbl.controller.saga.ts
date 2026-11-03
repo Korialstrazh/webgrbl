@@ -50,6 +50,7 @@ import { getPreferredPortId } from './grbl.preferred.port.id';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import type { GrblHandshakeRaceResult } from './interfaces/GrblHandshakeRaceResult';
+import { runGrblMachineStop } from './grbl.machine.stop.saga';
 import { runGrblJob } from './job.run.saga';
 import { JobStartRequested } from './job.run.state';
 import {
@@ -156,7 +157,7 @@ function* handleGrblControllerCommands(controller: GrblController): Generator {
   yield all([
     takeEvery(ConsoleCommandSubmitted.type, submitGrblConsoleCommand, controller),
     takeLeading(JobStartRequested.type, runGrblJob, controller),
-    takeEvery(MachineStopRequested.type, runGrblMachineCommand, (): Promise<void> => controller.stopMachine()),
+    takeEvery(MachineStopRequested.type, runGrblMachineStop, controller),
     takeEvery(MachineResetRequested.type, runGrblMachineCommand, (): Promise<void> => controller.resetMachine()),
     takeEvery(MachineUnlockRequested.type, runGrblMachineCommand, (): void => controller.unlockMachine()),
     takeEvery(MachineLineRequested.type, submitGrblMachineLine, controller),

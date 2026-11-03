@@ -115,6 +115,21 @@ describe(runGrblJob.name, () => {
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
   });
 
+  it('keeps the locks on after a stop during finishing until the stop has ended', async () => {
+    const store: AppStore = await prepareConnectedStore();
+
+    store.dispatch(new JobStartRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.FINISHING);
+
+    store.dispatch(new MachineStopRequested());
+    expect(selectIsJobRunActive(store.getState())).toBe(true);
+
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    expect(selectIsJobRunActive(store.getState())).toBe(false);
+  });
+
   it('marks the run interrupted when the connection ends during it', async () => {
     const store: AppStore = await prepareConnectedStore();
 

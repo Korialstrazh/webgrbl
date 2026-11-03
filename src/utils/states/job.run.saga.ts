@@ -16,6 +16,7 @@ import type { GrblProgramResult } from '../grbl/interfaces/GrblProgramResult';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { GCODE_AIR_ASSIST_OFF } from '../toolpath/gcode.constants';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
+import type { Action } from './action';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { JobFinishRaceResult } from './interfaces/JobFinishRaceResult';
 import { JobRunStatusChanged } from './job.run.state';
@@ -28,6 +29,7 @@ import {
   MachineControllerResetDetected,
   MachineResetRequested,
   MachineStatusReceived,
+  MachineStopFinished,
   MachineStopRequested,
 } from './machine.status.state';
 import { getProjectGcodeText } from './project.gcode.text.saga';
@@ -64,8 +66,19 @@ function* waitForMachineAfterProgram(): Generator {
   }
 }
 
+/** A stop counts only once it has finished, so the locks stay on until the machine got its reset. */
 function* waitForJobInterruption(): Generator {
-  return yield take([MachineStopRequested.type, MachineResetRequested.type, MachineControllerResetDetected.type]);
+  const interruption: Action<unknown> = (yield take([
+    MachineStopRequested.type,
+    MachineResetRequested.type,
+    MachineControllerResetDetected.type,
+  ])) as Action<unknown>;
+
+  if (interruption.type === MachineStopRequested.type) {
+    yield take(MachineStopFinished.type);
+  }
+
+  return interruption;
 }
 
 /**

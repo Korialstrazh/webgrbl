@@ -48,6 +48,11 @@ export class MachineStopRequested extends Action {
   public static readonly type: string = actionType('machine stop requested');
 }
 
+/** The stop sequence ended: the machine got its reset, or the stop failed. */
+export class MachineStopFinished extends Action {
+  public static readonly type: string = actionType('machine stop finished');
+}
+
 export class MachineResetRequested extends Action {
   public static readonly type: string = actionType('machine reset requested');
 }
