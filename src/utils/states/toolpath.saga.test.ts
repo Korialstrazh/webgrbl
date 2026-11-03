@@ -42,6 +42,7 @@ import { watchToolpath } from './toolpath.saga';
 import { TOOLPATH_RESTART_DEBOUNCE_MS } from './toolpath.saga.constants';
 import {
   GcodeExportRequested,
+  SampleGcodeExportRequested,
   ToolpathCancelled,
   ToolpathRequested,
   selectIsGcodeExportConfirmationOpen,
@@ -525,5 +526,50 @@ describe(watchToolpath.name, () => {
     store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }));
 
     expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.STALE);
+  });
+});
+
+describe('sample G-code export', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const SAMPLE_JOB_NAME = 'Plywood sample';
+  const SAMPLE_CUT_SETTINGS = { powerPercent: 80, speedMmPerMin: 600, passes: 1 };
+
+  it('downloads <job name>.gcode with M4 S0 and no S above sMax, leaving the project alone', async () => {
+    const downloadSpy = spyOnDownload();
+    const store: AppStore = await newGcodeExportTestStore({
+      activeProfile: newMachineProfile({ sValueMax: PROFILE_S_VALUE_MAX }),
+    });
+    const documentBefore = selectProjectDocument(store.getState());
+    const toolpathStateBefore = selectToolpathStatus(store.getState());
+
+    store.dispatch(new SampleGcodeExportRequested({ cutSettings: SAMPLE_CUT_SETTINGS, jobName: SAMPLE_JOB_NAME }));
+
+    await vi.waitFor((): void => {
+      expect(downloadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    const sValues: number[] = [...getDownloadedText(downloadSpy).matchAll(/S(\d+)/g)].map(
+      (match: RegExpMatchArray): number => Number(match[1]),
+    );
+
+    expect(downloadSpy.mock.calls[0]?.[0]).toMatchObject({ fileName: `${SAMPLE_JOB_NAME}.gcode` });
+    expect(getDownloadedText(downloadSpy)).toContain(GCODE_LASER_MODE_ON);
+    expect(Math.max(...sValues)).toBeLessThanOrEqual(PROFILE_S_VALUE_MAX);
+    expect(selectProjectDocument(store.getState())).toBe(documentBefore);
+    expect(selectToolpathStatus(store.getState())).toBe(toolpathStateBefore);
+    expect(selectToolpath(store.getState())).toBeUndefined();
+  });
+
+  it('downloads nothing with no active machine profile', async () => {
+    const downloadSpy = spyOnDownload();
+    const store: AppStore = await newGcodeExportTestStore({ activeProfile: undefined });
+
+    store.dispatch(new SampleGcodeExportRequested({ cutSettings: SAMPLE_CUT_SETTINGS, jobName: SAMPLE_JOB_NAME }));
+    await flushSagas();
+
+    expect(downloadSpy).not.toHaveBeenCalled();
   });
 });

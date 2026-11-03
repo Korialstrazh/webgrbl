@@ -18,6 +18,7 @@ import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { GcodeExportRequestPayload } from './interfaces/GcodeExportRequestPayload';
+import type { SampleGcodeExportRequestPayload } from './interfaces/SampleGcodeExportRequestPayload';
 import type { ToolpathProgressPayload } from './interfaces/ToolpathProgressPayload';
 import type { ToolpathReadyPayload } from './interfaces/ToolpathReadyPayload';
 import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
@@ -70,6 +71,11 @@ export class ToolpathCancelled extends Action {
 
 export class GcodeExportRequested extends Action<GcodeExportRequestPayload> {
   public static readonly type: string = actionType('gcode export requested');
+}
+
+/** Exports the test sample job of a material; it reads and changes nothing of the open project's toolpath. */
+export class SampleGcodeExportRequested extends Action<SampleGcodeExportRequestPayload> {
+  public static readonly type: string = actionType('sample gcode export requested');
 }
 
 export class GcodeExportConfirmationRequested extends Action {
