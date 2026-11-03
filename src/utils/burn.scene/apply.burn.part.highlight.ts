@@ -1,5 +1,5 @@
 /**
- * Makes the selected part glow in the 3D preview, so the user can see what the lift slider moves.
+ * Makes the selected part glow in the 3D preview, so the user can see what the lift axis moves.
  *
  * @author michael.morosov
  *

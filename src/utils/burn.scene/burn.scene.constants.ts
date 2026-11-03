@@ -40,6 +40,19 @@ export const BURN_SCENE_MAX_POLAR_ANGLE_RADIANS = Math.PI / 2;
 /** A pointer that moved further than this between press and release dragged the scene instead of clicking. */
 export const BURN_SCENE_CLICK_MAX_MOVE_PX = 4;
 
+/** The arrow on the selected part, in pixels on screen. */
+export const BURN_SCENE_LIFT_AXIS_LENGTH_PX = 72;
+export const BURN_SCENE_LIFT_AXIS_SHAFT_RADIUS_PX = 2;
+export const BURN_SCENE_LIFT_AXIS_HEAD_LENGTH_PX = 20;
+export const BURN_SCENE_LIFT_AXIS_HEAD_RADIUS_PX = 9;
+export const BURN_SCENE_LIFT_AXIS_RADIAL_SEGMENTS = 16;
+/** Half of the 44 px touch target. */
+export const BURN_SCENE_LIFT_AXIS_GRAB_RADIUS_PX = 22;
+/** After the model, which the arrow draws over. */
+export const BURN_SCENE_LIFT_AXIS_RENDER_ORDER = 1;
+/** Below this share of its real length on screen, the camera looks too nearly along the axis to follow it. */
+export const BURN_SCENE_LIFT_AXIS_MIN_SCREEN_SHARE = 0.25;
+
 /** The names three.js looks up the mesh data by. */
 export const BURN_SCENE_ATTRIBUTE = {
   POSITION: 'position',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BED_VIEW_MODE } from '../bed/bed.view.constants';
-import { BURN_PART_LIFT_MAX_THICKNESSES, BURN_PART_STATUS } from '../burn.model/burn.model.constants';
+import { BURN_PART_STATUS } from '../burn.model/burn.model.constants';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../burn.model/interfaces/BurnPart';
 import { BedViewModeChanged } from './bed.view.state';
@@ -154,15 +154,15 @@ describe(burnModelReducer.name, () => {
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.READY);
   });
 
-  it('keeps the lift of a part within the lift range', () => {
-    const tooHigh = THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES + 1;
+  it('lets a part lift as high as the user wants, and no lower than its place', () => {
+    const veryHigh = THICKNESS_MM * 1000;
     const root = newRootState(reduceActions([
       ...READY_ACTIONS,
-      new BurnPartLifted({ partId: PARENT_ID, liftMm: tooHigh }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: veryHigh }),
       new BurnPartLifted({ partId: CHILD_ID, liftMm: -1 }),
     ]));
 
-    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES);
+    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(veryHigh);
     expect(selectBurnPartLiftMm(CHILD_ID)(root)).toBe(0);
   });
 

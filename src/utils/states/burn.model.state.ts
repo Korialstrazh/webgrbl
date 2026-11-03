@@ -11,12 +11,10 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { createSelector } from '@reduxjs/toolkit';
-import { BURN_PART_LIFT_MAX_THICKNESSES } from '../burn.model/burn.model.constants';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../burn.model/interfaces/BurnPart';
 import type { BurnPartLiftsMm } from '../burn.model/interfaces/BurnPartLiftsMm';
 import { isBurnPartLiftable } from '../burn.model/is.burn.part.liftable';
-import { getNumberInRange } from '../get.number.in.range';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import { BedViewModeChanged } from './bed.view.state';
@@ -126,7 +124,7 @@ const getStateWithLift = (state: BurnModelState, { partId, liftMm }: BurnPartLif
     ...state,
     liftMmByPartId: {
       ...state.liftMmByPartId,
-      [partId]: getNumberInRange(liftMm, 0, (state.model?.thicknessMm ?? 0) * BURN_PART_LIFT_MAX_THICKNESSES),
+      [partId]: Math.max(liftMm, 0),
     },
   };
 };

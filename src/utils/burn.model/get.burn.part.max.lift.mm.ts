@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BURN_PART_LIFT_MAX_THICKNESSES } from './burn.model.constants';
+import { BURN_PART_FRAMED_LIFT_THICKNESSES } from './burn.model.constants';
 import type { BurnPart } from './interfaces/BurnPart';
 import { isBurnPartLiftable } from './is.burn.part.liftable';
 
@@ -37,5 +37,5 @@ export const getBurnPartMaxLiftMm = (parts: BurnPart[], thicknessMm: number): nu
     deepestChainPartCount = Math.max(deepestChainPartCount, getLiftablePartCountUpTheTree(part, partsById));
   }
 
-  return deepestChainPartCount * thicknessMm * BURN_PART_LIFT_MAX_THICKNESSES;
+  return deepestChainPartCount * thicknessMm * BURN_PART_FRAMED_LIFT_THICKNESSES;
 };

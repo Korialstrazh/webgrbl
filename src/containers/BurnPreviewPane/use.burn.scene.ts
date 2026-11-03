@@ -1,6 +1,7 @@
 /**
  * Runs the 3D scene inside its host element: starts the renderer, keeps it showing the current model, its lifts and
- * the size of the view, and turns clicks into part selection. Tells the pane when WebGL fails.
+ * the size of the view, and turns clicks into part selection and drags of the lift axis into lifts. Tells the pane
+ * when WebGL fails.
  *
  * @author michael.morosov
  *
@@ -11,7 +12,7 @@
  */
 import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPartLiftsMm } from '../../utils/burn.model/interfaces/BurnPartLiftsMm';
 import type { BurnScenePointer } from '../../utils/burn.scene/interfaces/BurnScenePointer';
@@ -19,12 +20,15 @@ import type { BurnSceneRenderer } from '../../utils/burn.scene/interfaces/BurnSc
 import type { ElementSizePx } from '../../utils/hooks/interfaces/ElementSizePx';
 import { useElementSizePx } from '../../utils/hooks/use.element.size.px';
 import {
+  BurnPartLifted,
   BurnPartSelected,
+  selectBurnPartLiftMm,
   selectBurnPartEffectiveLiftsMm,
   selectCurrentBurnModel,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
-import type { AppDispatch } from '../../utils/states/new.store';
+import type { AppDispatch, AppStore } from '../../utils/states/new.store';
+import { addBurnLiftDragListener } from './add.burn.lift.drag.listener';
 import { addBurnSceneClickListener } from './add.burn.scene.click.listener';
 import { BURN_SCENE_RUNTIME_LOAD_STATUS } from './burn.preview.pane.constants';
 import type { BurnSceneRuntimeLoad } from './interfaces/BurnSceneRuntimeLoad';
@@ -35,6 +39,7 @@ const WEBGL_CONTEXT_LOST_EVENT = 'webglcontextlost';
 
 export const useBurnScene = (runtimeLoad: BurnSceneRuntimeLoad, hostRef: RefObject<HTMLDivElement | null>): boolean => {
   const dispatch: AppDispatch = useDispatch();
+  const store: AppStore = useStore() as AppStore;
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
   const liftsMm: BurnPartLiftsMm = useSelector(selectBurnPartEffectiveLiftsMm);
   const selectedPartId: number | undefined = useSelector(selectSelectedBurnPartId);
@@ -72,6 +77,21 @@ export const useBurnScene = (runtimeLoad: BurnSceneRuntimeLoad, hostRef: RefObje
       dispatch(new BurnPartSelected({ partId: newRenderer.getBurnPartIdAtPointer(pointer) }));
     });
 
+    const removeLiftDragListener: () => void = addBurnLiftDragListener(canvas, newRenderer, {
+      getLiftMm: (): number => {
+        const partId: number | undefined = selectSelectedBurnPartId(store.getState());
+
+        return partId ? selectBurnPartLiftMm(partId)(store.getState()) : 0;
+      },
+      setLiftMm: (liftMm: number): void => {
+        const partId: number | undefined = selectSelectedBurnPartId(store.getState());
+
+        if (partId) {
+          dispatch(new BurnPartLifted({ partId, liftMm }));
+        }
+      },
+    });
+
     canvas.addEventListener(WEBGL_CONTEXT_LOST_EVENT, handleContextLost);
     setRenderer(newRenderer);
 
@@ -79,11 +99,12 @@ export const useBurnScene = (runtimeLoad: BurnSceneRuntimeLoad, hostRef: RefObje
       // Off before dispose(), whose own context loss is no failure.
       canvas.removeEventListener(WEBGL_CONTEXT_LOST_EVENT, handleContextLost);
       removeClickListener();
+      removeLiftDragListener();
       newRenderer.dispose();
       canvas.remove();
       setRenderer(undefined);
     };
-  }, [dispatch, hostRef, isSceneFailed, runtimeLoad]);
+  }, [dispatch, hostRef, isSceneFailed, runtimeLoad, store]);
 
   useEffect(() => {
     if (renderer && size.widthPx && size.heightPx) {

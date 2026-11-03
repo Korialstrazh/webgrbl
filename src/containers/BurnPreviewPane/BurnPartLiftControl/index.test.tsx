@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BurnPartLiftControl } from '.';
-import { BURN_PART_LIFT_MAX_THICKNESSES, BURN_PART_STATUS } from '../../../utils/burn.model/burn.model.constants';
+import { BURN_PART_STATUS } from '../../../utils/burn.model/burn.model.constants';
 import { getBurnModel } from '../../../utils/burn.model/get.burn.model';
 import type { BurnModel } from '../../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../../utils/burn.model/interfaces/BurnPart';
@@ -64,16 +64,16 @@ const renderControl = (model: BurnModel, partId: number): AppStore => {
   return store;
 };
 
-const getLiftSlider = (): HTMLElement => screen.getByRole('slider', { name: LIFT_LABEL });
+const getLiftControl = (): HTMLElement => screen.getByRole('spinbutton', { name: LIFT_LABEL });
 
 describe(BurnPartLiftControl.name, () => {
-  it('lifts a free part, over a range of the sheet thickness times the lift limit', () => {
+  it('lifts a free part from the keyboard, with no upper limit', () => {
     const store: AppStore = renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), PART_ID);
 
-    expect(getLiftSlider()).toHaveAttribute('aria-valuemax', String(THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES));
+    expect(getLiftControl()).not.toHaveAttribute('aria-valuemax');
     expect(screen.queryByText(MAY_STAY_ATTACHED_TEXT)).not.toBeInTheDocument();
 
-    fireEvent.keyDown(getLiftSlider(), { key: 'ArrowRight', keyCode: 39, which: 39 });
+    fireEvent.keyDown(getLiftControl(), { key: 'ArrowRight', keyCode: 39, which: 39 });
 
     expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBeCloseTo(STEP_MM);
   });
@@ -83,32 +83,32 @@ describe(BurnPartLiftControl.name, () => {
 
     expect(screen.getByText(MAY_STAY_ATTACHED_TEXT)).toBeInTheDocument();
 
-    fireEvent.keyDown(getLiftSlider(), { key: 'ArrowRight', keyCode: 39, which: 39 });
+    fireEvent.keyDown(getLiftControl(), { key: 'ArrowRight', keyCode: 39, which: 39 });
 
     expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBeCloseTo(STEP_MM);
   });
 
-  it('disables the slider and gives the reason for a part that does not cut through', () => {
+  it('disables lifting and gives the reason for a part that does not cut through', () => {
     const store: AppStore = renderControl(
       newModel([newPart(PART_ID, BURN_PART_STATUS.NOT_THROUGH)]),
       PART_ID,
     );
 
-    expect(getLiftSlider()).toHaveAttribute('aria-disabled', 'true');
+    expect(getLiftControl()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText(NOT_THROUGH_REASON)).toBeInTheDocument();
 
-    fireEvent.keyDown(getLiftSlider(), { key: 'ArrowRight', keyCode: 39, which: 39 });
+    fireEvent.keyDown(getLiftControl(), { key: 'ArrowRight', keyCode: 39, which: 39 });
 
     expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBe(0);
   });
 
-  it('disables the slider and says why for a not-through part that rises inside a liftable parent', () => {
+  it('disables lifting and says why for a not-through part that rises inside a liftable parent', () => {
     renderControl(
       newModel([newPart(PART_ID, BURN_PART_STATUS.FREE), newPart(CHILD_ID, BURN_PART_STATUS.NOT_THROUGH, PART_ID)]),
       CHILD_ID,
     );
 
-    expect(getLiftSlider()).toHaveAttribute('aria-disabled', 'true');
+    expect(getLiftControl()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText(RISES_WITH_PARENT_REASON)).toBeInTheDocument();
   });
 
@@ -127,7 +127,7 @@ describe(BurnPartLiftControl.name, () => {
     renderControl(model, PART_ID);
 
     expect(model.parts.map(({ status }: BurnPart) => status)).toEqual([BURN_PART_STATUS.BORDERLINE]);
-    expect(getLiftSlider()).not.toHaveAttribute('aria-disabled', 'true');
+    expect(getLiftControl()).not.toHaveAttribute('aria-disabled', 'true');
   });
 
   it('shows nothing with no part selected, or for a part the model does not have', () => {
@@ -141,7 +141,7 @@ describe(BurnPartLiftControl.name, () => {
   it('hides once the model is out of date', () => {
     const store: AppStore = renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), PART_ID);
 
-    expect(screen.getByText(LIFT_LABEL)).toBeInTheDocument();
+    expect(getLiftControl()).toBeInTheDocument();
 
     act(() => {
       store.dispatch(new ProjectUndoRequested());

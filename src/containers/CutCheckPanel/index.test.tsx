@@ -134,7 +134,7 @@ describe(CutCheckPanel.name, () => {
     expect(getPartRow(FREE_PART_ID)).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('selects a part with no mesh through its row, and the slider then says why it cannot lift', () => {
+  it('selects a part with no mesh through its row, and the lift control then says why it cannot lift', () => {
     const store: AppStore = newReadyStore();
 
     render(
@@ -146,7 +146,7 @@ describe(CutCheckPanel.name, () => {
     fireEvent.click(getPartRow(ATTACHED_PART_ID));
 
     expect(selectSelectedBurnPartId(store.getState())).toBe(ATTACHED_PART_ID);
-    expect(screen.getByRole('slider')).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('spinbutton')).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText(NOT_THROUGH_HINT)).toBeInTheDocument();
   });
 

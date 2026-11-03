@@ -1,10 +1,10 @@
-import { BURN_PART_LIFT_MAX_THICKNESSES, BURN_PART_STATUS } from './burn.model.constants';
+import { BURN_PART_FRAMED_LIFT_THICKNESSES, BURN_PART_STATUS } from './burn.model.constants';
 import type { BurnPartStatus } from './burn.model.constants';
 import { getBurnPartMaxLiftMm } from './get.burn.part.max.lift.mm';
 import type { BurnPart } from './interfaces/BurnPart';
 
 const THICKNESS_MM = 3;
-const ONE_FULL_LIFT_MM = THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES;
+const ONE_FULL_LIFT_MM = THICKNESS_MM * BURN_PART_FRAMED_LIFT_THICKNESSES;
 
 const newPart = (id: number, parentId?: number, status: BurnPartStatus = BURN_PART_STATUS.FREE): BurnPart => ({
   id,

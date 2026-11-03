@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
 import type { OrthographicCamera } from 'three';
-import { BURN_PART_LIFT_MAX_THICKNESSES } from '../burn.model/burn.model.constants';
+import { BURN_PART_FRAMED_LIFT_THICKNESSES } from '../burn.model/burn.model.constants';
 import type { ToolpathBounds } from '../toolpath/interfaces/ToolpathBounds';
 import { newBurnSceneCamera } from './new.burn.scene.camera';
 import { setBurnSceneCameraFrustum } from './set.burn.scene.camera.frustum';
@@ -10,7 +10,7 @@ const SHEET_BOUNDS: ToolpathBounds = { minX: 20, minY: -10, maxX: 220, maxY: 90 
 const WIDE_ASPECT_RATIO = 2;
 const TALL_ASPECT_RATIO = 0.5;
 // Two nested parts, each at full lift.
-const MAX_LIFT_MM = 2 * THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES;
+const MAX_LIFT_MM = 2 * THICKNESS_MM * BURN_PART_FRAMED_LIFT_THICKNESSES;
 const HIGHEST_Z_MM = THICKNESS_MM + MAX_LIFT_MM;
 
 const getLargestSheetCornerNdc = (camera: OrthographicCamera): number => {

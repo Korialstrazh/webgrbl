@@ -17,6 +17,8 @@ import {
   BurnModelReady,
   BurnModelRequested,
   BurnPartLifted,
+  BurnPartSelected,
+  selectBurnPartLiftMm,
   selectBurnModelStatus,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
@@ -73,6 +75,8 @@ const newFakeRenderer = (): BurnSceneRenderer => ({
   highlightBurnPart: vi.fn(),
   resizeBurnScene: vi.fn(),
   getBurnPartIdAtPointer: vi.fn(() => PART_ID),
+  isBurnLiftAxisAtPoint: vi.fn(() => false),
+  getBurnLiftChangeMm: vi.fn(({ yPx }: { yPx: number }) => -yPx),
   dispose: vi.fn(),
 });
 
@@ -391,6 +395,29 @@ describe(BurnPreviewPane.name, () => {
       fireEvent.pointerUp(canvas, { button: 0, clientX: CLICK_X_PX, clientY: CLICK_Y_PX });
 
       expect(renderer.highlightBurnPart).toHaveBeenLastCalledWith(PART_ID);
+    });
+
+    it('lifts the selected part by dragging its axis, without selecting or reaching the orbit controls', async () => {
+      const { canvas, store, renderer } = await renderPickablePane();
+      const reachedOrbitControls = vi.fn();
+
+      canvas.setPointerCapture = vi.fn();
+      canvas.addEventListener('pointerdown', reachedOrbitControls);
+      store.dispatch(new BurnPartSelected({ partId: PART_ID }));
+      vi.mocked(renderer.isBurnLiftAxisAtPoint).mockReturnValue(true);
+
+      fireEvent.pointerDown(canvas, { button: 0, clientX: CLICK_X_PX, clientY: CLICK_Y_PX });
+      fireEvent.pointerMove(canvas, { clientX: CLICK_X_PX, clientY: CLICK_Y_PX - 500 });
+      expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBe(500);
+
+      fireEvent.pointerMove(canvas, { clientX: CLICK_X_PX, clientY: CLICK_Y_PX + 50 });
+      expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBe(0);
+
+      fireEvent.pointerUp(canvas, { button: 0, clientX: CLICK_X_PX, clientY: CLICK_Y_PX + 50 });
+
+      expect(reachedOrbitControls).not.toHaveBeenCalled();
+      expect(renderer.getBurnPartIdAtPointer).not.toHaveBeenCalled();
+      expect(selectSelectedBurnPartId(store.getState())).toBe(PART_ID);
     });
 
     it('clears the selection on a click that hits no part', async () => {
