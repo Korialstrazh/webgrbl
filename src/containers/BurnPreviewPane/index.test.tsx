@@ -1,17 +1,41 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BurnPreviewPane } from '.';
+import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
 import { BURN_PART_STATUS } from '../../utils/burn.model/burn.model.constants';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import { newBurnSceneRenderer } from '../../utils/burn.scene/burn.scene.runtime';
 import type { BurnSceneRenderer } from '../../utils/burn.scene/interfaces/BurnSceneRenderer';
+import { FakeBurnModelWorkerClient } from '../../utils/burn.model/test.support/fake.burn.model.worker.client';
+import type { Material } from '../../utils/materials/interfaces/Material';
+import { DEFAULT_MATERIAL_THICKNESS_MM } from '../../utils/materials/material.constants';
+import { newMaterial } from '../../utils/materials/new.material';
+import { BedViewModeChanged } from '../../utils/states/bed.view.state';
+import { BURN_MODEL_STATUS } from '../../utils/states/burn.model.status.constants';
 import {
+  BurnModelFailed,
   BurnModelReady,
+  BurnModelRequested,
   BurnPartLifted,
+  selectBurnModelStatus,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
+import { selectActiveMaterial } from '../../utils/states/material.selectors';
+import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
-import { ProjectUndoRequested } from '../../utils/states/project.document.state';
+import type { AppStore } from '../../utils/states/new.store';
+import {
+  LayerToggled,
+  ProjectMaterialSelected,
+  ProjectUndoRequested,
+} from '../../utils/states/project.document.state';
+import { selectProjectId } from '../../utils/states/project.state';
+import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../utils/states/toolpath.state';
+import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
+import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
+import { FakeToolpathWorkerClient } from '../../utils/toolpath/test.support/fake.toolpath.worker.client';
+import { newToolpath } from '../../utils/toolpath/test.support/new.toolpath';
+import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.move';
 
 const NO_WEBGL_TEXT = 'The 3D view could not start in this browser. The Cut check still works.';
 const LOADING_TEXT = 'Loading the 3D view';
@@ -24,6 +48,14 @@ const VIEW_HEIGHT_PX = 100;
 const CLICK_X_PX = 150;
 const CLICK_Y_PX = 25;
 const DRAG_DISTANCE_PX = 40;
+const LAYER_KEY = '#ff0000';
+const OUT_OF_DATE_TEXT = /^Out of date: the design changed/;
+const NO_MATERIAL_TEXT = /^Choose a material or add one/;
+const BUILDING_TEXT = 'Building the 3D view';
+const FAILED_TEXT = /^The 3D view could not be built/;
+const ADD_MATERIAL_LABEL = 'Add material\u2026';
+const SAVE_LABEL = 'Save';
+const TEST_MATERIAL: Material = newMaterial();
 
 vi.mock('../../utils/burn.scene/burn.scene.runtime', () => ({
   newBurnSceneRenderer: vi.fn(),
@@ -173,6 +205,107 @@ describe(BurnPreviewPane.name, () => {
     });
 
     expect(renderer.showBurnModel).toHaveBeenLastCalledWith(undefined);
+  });
+
+  it('explains that a model is out of date after a layer edit, and no longer once it is ready again', async () => {
+    const renderer: BurnSceneRenderer = newFakeRenderer();
+    const store: AppStore = newStore();
+
+    vi.mocked(newBurnSceneRenderer).mockReturnValue(renderer);
+    store.dispatch(new MaterialSaved({ material: TEST_MATERIAL }));
+    store.dispatch(new ProjectMaterialSelected({ materialId: TEST_MATERIAL.id }));
+    store.dispatch(new BurnModelReady({ model: newModel() }));
+    renderPane(store);
+
+    await vi.waitFor(() => {
+      expect(renderer.showBurnModel).toHaveBeenCalledWith(expect.objectContaining({ thicknessMm: 3 }));
+    });
+    expect(screen.queryByText(OUT_OF_DATE_TEXT)).not.toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new LayerToggled({ layerKey: LAYER_KEY, enabled: false }));
+    });
+
+    expect(screen.getByText(OUT_OF_DATE_TEXT)).toBeInTheDocument();
+    expect(renderer.showBurnModel).toHaveBeenLastCalledWith(undefined);
+
+    act(() => {
+      store.dispatch(new BurnModelReady({ model: newModel() }));
+    });
+
+    expect(screen.queryByText(OUT_OF_DATE_TEXT)).not.toBeInTheDocument();
+  });
+
+  it('asks for a material, builds nothing, and adding one selects it and builds', async () => {
+    const burnModelClient: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true), burnModelClient);
+
+    vi.mocked(newBurnSceneRenderer).mockReturnValue(newFakeRenderer());
+    await vi.waitFor((): void => {
+      expect(selectProjectId(store.getState())).toBeDefined();
+    });
+    act(() => {
+      store.dispatch(new ToolpathReady({
+        toolpath: newToolpath({ moves: [newToolpathMove()], bounds: { minX: 0, minY: 0, maxX: 10, maxY: 0 } }),
+        documentVersion: selectToolpathDocumentVersion(store.getState()),
+      }));
+      store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
+    });
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <BedRegionTestHost>
+            <BurnPreviewPane />
+          </BedRegionTestHost>
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    expect(screen.getByText(NO_MATERIAL_TEXT)).toBeInTheDocument();
+    expect(burnModelClient.generationInputs).toEqual([]);
+
+    fireEvent.click(screen.getByRole('button', { name: ADD_MATERIAL_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: SAVE_LABEL }));
+
+    await vi.waitFor((): void => {
+      expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.READY);
+    });
+
+    expect(selectActiveMaterial(store.getState())?.thicknessMm).toBe(DEFAULT_MATERIAL_THICKNESS_MM);
+    expect(burnModelClient.generationInputs).toHaveLength(1);
+    expect(screen.queryByText(NO_MATERIAL_TEXT)).not.toBeInTheDocument();
+  });
+
+  it('explains a running and a failed build', async () => {
+    const store: AppStore = newStore();
+
+    vi.mocked(newBurnSceneRenderer).mockReturnValue(newFakeRenderer());
+    store.dispatch(new MaterialSaved({ material: TEST_MATERIAL }));
+    store.dispatch(new ProjectMaterialSelected({ materialId: TEST_MATERIAL.id }));
+    store.dispatch(new ToolpathRequested());
+    store.dispatch(new ToolpathReady({
+      toolpath: newToolpath(),
+      documentVersion: selectToolpathDocumentVersion(store.getState()),
+    }));
+    store.dispatch(new BurnModelRequested({ materialId: TEST_MATERIAL.id }));
+    renderPane(store);
+
+    expect(screen.getByText(BUILDING_TEXT)).toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new BurnModelFailed());
+    });
+
+    expect(screen.getByText(FAILED_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText(BUILDING_TEXT)).not.toBeInTheDocument();
+  });
+
+  it('still asks for a material when the scene cannot start', async () => {
+    vi.mocked(newBurnSceneRenderer).mockReturnValue(undefined);
+    renderPane();
+
+    expect(await screen.findByText(NO_WEBGL_TEXT)).toBeInTheDocument();
+    expect(screen.getByText(NO_MATERIAL_TEXT)).toBeInTheDocument();
   });
 
   it('tells the renderer the size of the view', async () => {

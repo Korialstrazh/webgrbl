@@ -14,6 +14,7 @@ const DESIGN_PANEL_LABEL = 'Design';
 const MACHINE_PANEL_LABEL = 'Machine';
 const ONLY_STOP_COUNT = 1;
 const THREE_D_VIEW_LABEL = '3D';
+const CUT_CHECK_TITLE = 'Cut check';
 const ROOT_CLASS_NAME = 'appRoute';
 const LAYOUT_CLASS_NAME = 'ant-layout';
 const HEADER_CLASS_NAME = 'ant-layout-header';
@@ -200,6 +201,19 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL })).toBeChecked();
     expect(stopButtons).toHaveLength(ONLY_STOP_COUNT);
     expect(screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL })).toContainElement(stopButton ?? null);
+  });
+
+  it('shows the machine panel and STOP beside the Cut check in the 3D view', async () => {
+    renderAppRoute();
+    await waitForRegions();
+    fireEvent.click(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL }));
+
+    const designPanel: HTMLElement = screen.getByRole('complementary', { name: DESIGN_PANEL_LABEL });
+    const machinePanel: HTMLElement = screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL });
+
+    expect(within(designPanel).getByRole('heading', { name: CUT_CHECK_TITLE })).toBeInTheDocument();
+    expect(within(machinePanel).getByRole('button', { name: STOP_LABEL })).toBeInTheDocument();
+    expect(designPanel).not.toContainElement(machinePanel);
   });
 
   it('narrow layout keeps STOP in the sticky bar in the 3D view', () => {

@@ -1,0 +1,13 @@
+// Both sit on top of the scene, which is positioned absolutely behind them.
+.message {
+  position: relative;
+  max-width: calc(100% - 2 * var(--space-3));
+}
+
+.building {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}

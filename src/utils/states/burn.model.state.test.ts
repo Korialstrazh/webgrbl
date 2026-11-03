@@ -21,8 +21,9 @@ import {
   selectSelectedBurnPartId,
 } from './burn.model.state';
 import type { BurnModelState } from './burn.model.state';
-import { MaterialSaved } from './material.state';
+import { MaterialSaved, MaterialTestResultSaved } from './material.state';
 import { newMaterial } from '../materials/new.material';
+import { newTestResultFixture } from '../materials/new.test.result.fixture';
 import { LayerToggled, ProjectMaterialSelected, ProjectUndoRequested } from './project.document.state';
 import { ToolpathMachineAreaChanged, ToolpathRequested } from './toolpath.state';
 import type { Action } from './action';
@@ -35,7 +36,10 @@ const UNKNOWN_PART_ID = 9;
 const PARENT_LIFT_MM = 2;
 const CHILD_LIFT_MM = 1.5;
 const LAYER_KEY = '#ff0000';
-const MATERIAL_ID = 'material-1';
+const BUILT_MATERIAL_ID = 'material-1';
+const OTHER_MATERIAL_ID = 'material-2';
+
+const newBuildRequest = (): BurnModelRequested => new BurnModelRequested({ materialId: BUILT_MATERIAL_ID });
 
 const newPart = (id: number, parentId: number | undefined): BurnPart => ({
   id,
@@ -61,22 +65,22 @@ const reduceActions = (actions: Action<unknown>[]): BurnModelState => actions.re
 
 const newRootState = (burnModel: BurnModelState): { burnModel: BurnModelState } => ({ burnModel });
 
-const READY_ACTIONS: Action<unknown>[] = [new BurnModelRequested(), new BurnModelReady({ model: newModel() })];
+const READY_ACTIONS: Action<unknown>[] = [newBuildRequest(), new BurnModelReady({ model: newModel() })];
 
 describe(burnModelReducer.name, () => {
   it('goes from idle to building to ready, keeping the model', () => {
     const model: BurnModel = newModel();
-    const root = newRootState(reduceActions([new BurnModelRequested(), new BurnModelReady({ model })]));
+    const root = newRootState(reduceActions([newBuildRequest(), new BurnModelReady({ model })]));
 
     expect(selectBurnModelStatus(newRootState(reduceActions([])))).toBe(BURN_MODEL_STATUS.IDLE);
-    expect(selectBurnModelStatus(newRootState(reduceActions([new BurnModelRequested()]))))
+    expect(selectBurnModelStatus(newRootState(reduceActions([newBuildRequest()]))))
       .toBe(BURN_MODEL_STATUS.BUILDING);
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.READY);
     expect(selectBurnModel(root)).toBe(model);
   });
 
   it('marks a failure', () => {
-    expect(selectBurnModelStatus(newRootState(reduceActions([new BurnModelRequested(), new BurnModelFailed()]))))
+    expect(selectBurnModelStatus(newRootState(reduceActions([newBuildRequest(), new BurnModelFailed()]))))
       .toBe(BURN_MODEL_STATUS.FAILED);
   });
 
@@ -97,13 +101,26 @@ describe(burnModelReducer.name, () => {
     ['a machine area change', new ToolpathMachineAreaChanged()],
     ['a layer change', new LayerToggled({ layerKey: LAYER_KEY, enabled: false })],
     ['an undo', new ProjectUndoRequested()],
-    ['a material selection', new ProjectMaterialSelected({ materialId: MATERIAL_ID })],
-    ['a material edit', new MaterialSaved({ material: newMaterial() })],
+    ['another material being selected', new ProjectMaterialSelected({ materialId: OTHER_MATERIAL_ID })],
+    ['an edit of its material', new MaterialSaved({ material: newMaterial({ id: BUILT_MATERIAL_ID }) })],
   ])('makes a ready model stale on %s', (_title: string, action: Action<unknown>) => {
     const root = newRootState(reduceActions([...READY_ACTIONS, action]));
 
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.STALE);
     expect(selectBurnModel(root)).toBeDefined();
+  });
+
+  it.each([
+    ['the same material being selected', new ProjectMaterialSelected({ materialId: BUILT_MATERIAL_ID })],
+    ['an edit of another material', new MaterialSaved({ material: newMaterial({ id: OTHER_MATERIAL_ID }) })],
+    ['a test of another material', new MaterialTestResultSaved({
+      materialId: OTHER_MATERIAL_ID,
+      testResult: newTestResultFixture(),
+    })],
+  ])('keeps a ready model ready on %s', (_title: string, action: Action<unknown>) => {
+    const root = newRootState(reduceActions([...READY_ACTIONS, action]));
+
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.READY);
   });
 
   it('leaves a failed model failed on a document change', () => {
@@ -113,7 +130,7 @@ describe(burnModelReducer.name, () => {
   });
 
   it('stops building without a model when the input changes, so the saga can cancel', () => {
-    const root = newRootState(reduceActions([new BurnModelRequested(), new ToolpathRequested()]));
+    const root = newRootState(reduceActions([newBuildRequest(), new ToolpathRequested()]));
 
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.IDLE);
   });
@@ -121,7 +138,7 @@ describe(burnModelReducer.name, () => {
   it('stops building when the view leaves 3D and keeps an older model as stale', () => {
     const root = newRootState(reduceActions([
       ...READY_ACTIONS,
-      new BurnModelRequested(),
+      newBuildRequest(),
       new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }),
     ]));
 
@@ -190,7 +207,7 @@ describe(selectCurrentBurnModel.name, () => {
     expect(selectCurrentBurnModel(newRootState(reduceActions(readyActions)))).toBe(model);
     expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, new ProjectUndoRequested()]))))
       .toBeUndefined();
-    expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, new BurnModelRequested()]))))
+    expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, newBuildRequest()]))))
       .toBeUndefined();
     expect(selectCurrentBurnModel(newRootState(reduceActions([...readyActions, new BurnModelFailed()]))))
       .toBeUndefined();

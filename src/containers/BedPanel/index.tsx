@@ -8,8 +8,8 @@
  * - The bed zooms and pans in both views (see BedViewport). Its work surface takes the colour the user chose, and the
  *   marks drawn on it the matching light or dark set.
  * - 3D view: the preview of the finished job in place of the bed, so the bed's zoom and colour controls and the
- *   editing tools leave the header, with the same generation progress or out-of-date banner.
- * - The other tools are not built yet. SVG files dropped on the bed are imported.
+ *   editing tools leave the header for the material toolbar, with the same generation progress or out-of-date banner.
+ * - The other tools are not built yet. SVG files dropped on the bed are imported, but not in 3D, which has no bed.
  *
  * Its element is the host that dialogs and drawers render into.
  *
@@ -39,6 +39,7 @@ import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.
 import { BedObjects } from '../BedObjects';
 import { BedViewport } from '../BedViewport';
 import { BurnPreviewPane } from '../BurnPreviewPane';
+import { BurnPreviewToolbar } from '../BurnPreviewToolbar';
 import { SimulationPlaybackBar } from '../SimulationPlaybackBar';
 import { ToastStack } from '../ToastStack';
 import { ToolpathLayer } from '../ToolpathLayer';
@@ -82,7 +83,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const { viewMode, changeBedViewMode }: BedViewModeControls = useBedViewMode();
   const isToolpathView: boolean = viewMode === BED_VIEW_MODE.TOOLPATH;
   const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
-  const dropArea: SvgFileDropArea = useSvgFileDrop();
+  const dropArea: SvgFileDropArea = useSvgFileDrop(!isThreeDView);
   const toolOptions: BedToolOption[] = BED_TOOL_OPTION_KEYS.map((option: BedToolOptionKey) => ({
     value: option.value,
     label: t(option.labelKey),
@@ -117,6 +118,11 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               value={activeTool}
               onChange={setActiveTool}
             />
+          </div>
+        )}
+        {isThreeDView && (
+          <div className={styles.editingTools}>
+            <BurnPreviewToolbar />
           </div>
         )}
         <div className={styles.viewTools}>

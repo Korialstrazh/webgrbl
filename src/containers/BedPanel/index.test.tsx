@@ -89,6 +89,7 @@ const SOON_TAG_TEXT = 'Soon';
 const REGENERATE_LABEL = 'Regenerate';
 const OUT_OF_DATE_TEXT = 'Out of date';
 const BED_ZOOM_LABEL = 'Bed zoom';
+const MATERIAL_LABEL = 'Material';
 const CANCEL_LABEL = 'Cancel';
 const GENERATING_TEXT = `Generating${HORIZONTAL_ELLIPSIS} 40 %`;
 const GENERATION_PROGRESS = 0.4;
@@ -497,6 +498,37 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('radiogroup', { name: TOOL_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByTestId(BED_OBJECTS_SURFACE_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('shows the material toolbar in the 3D header only', () => {
+    renderPanel(newHeldToolpathStore());
+
+    expect(screen.queryByRole('combobox', { name: MATERIAL_LABEL })).not.toBeInTheDocument();
+
+    openThreeDView();
+
+    expect(screen.getByRole('combobox', { name: MATERIAL_LABEL })).toBeInTheDocument();
+  });
+
+  it('takes no SVG drop in 3D, where there is no bed to drop on, and keeps the browser from opening the file', () => {
+    const store: AppStore = newHeldToolpathStore();
+
+    renderPanel(store);
+    openThreeDView();
+
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+    const dropArea: HTMLElement = screen.getByTestId(BED_DROP_AREA_TEST_ID);
+    const isDragOverNotCancelled: boolean = fireEvent.dragOver(dropArea, FILE_DRAG);
+
+    expect(isDragOverNotCancelled).toBe(false);
+    expect(dropArea).toHaveAttribute(DROP_TARGET_ATTRIBUTE, FALSE_TEXT);
+
+    const isDropNotCancelled: boolean = fireEvent.drop(dropArea, {
+      dataTransfer: { files: [new File([SVG_TEXT], 'logo.svg')] },
+    });
+
+    expect(isDropNotCancelled).toBe(false);
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
   it('shows the job size in the playback bar in Toolpath view', () => {

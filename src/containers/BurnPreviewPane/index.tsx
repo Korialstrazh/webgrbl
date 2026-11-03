@@ -1,6 +1,7 @@
 /**
- * The 3D view of the bed region: the element that hosts the scene, the lift control, the loading state, and a fixed
- * message when the 3D runtime cannot load or the browser cannot run WebGL. The rest of the app does not depend on it.
+ * The 3D view of the bed region: the element that hosts the scene, the lift control, the loading state, why the scene
+ * is empty, and a fixed message when the 3D runtime cannot load or the browser cannot run WebGL. The rest of the app
+ * does not depend on it.
  *
  * @author michael.morosov
  *
@@ -16,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { ANTD_ALERT_TYPE_WARNING } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { BurnPartLiftControl } from './BurnPartLiftControl';
+import { BurnPreviewStateMessage } from './BurnPreviewStateMessage';
 import { BURN_SCENE_RUNTIME_LOAD_STATUS } from './burn.preview.pane.constants';
 import type { BurnSceneRuntimeLoad } from './interfaces/BurnSceneRuntimeLoad';
 import styles from './styles.module.scss';
@@ -43,6 +45,7 @@ export const BurnPreviewPane = (): ReactNode => {
           <span>{t(DEFAULT.BURN_PREVIEW_LOADING)}</span>
         </div>
       )}
+      <BurnPreviewStateMessage />
       {!isSceneUnavailable && <BurnPartLiftControl />}
     </div>
   );

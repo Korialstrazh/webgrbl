@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { DesignPanel } from '.';
+import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
+import { BedViewModeChanged } from '../../utils/states/bed.view.state';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
@@ -10,6 +12,7 @@ import type { AppStore } from '../../utils/states/new.store';
 const DISABLED_REGION_SELECTOR = '[aria-disabled="true"]';
 const PANEL_TITLES: readonly string[] = ['Layers', 'Objects'];
 const PLANNED_PANEL_TITLE = 'Material';
+const CUT_CHECK_TITLE = 'Cut check';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PALETTE_BUTTON_LABEL = 'Palette';
 const PALETTE_LIST_LABEL = 'Palette colours';
@@ -39,6 +42,25 @@ describe(DesignPanel.name, () => {
 
     expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toBeEnabled();
     expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL }).closest(DISABLED_REGION_SELECTOR)).toBeNull();
+  });
+
+  it('leaves the Cut check out of the Design view', () => {
+    renderDesignPanel(newStore());
+
+    expect(screen.queryByRole('heading', { name: CUT_CHECK_TITLE })).not.toBeInTheDocument();
+  });
+
+  it('in 3D shows the Cut check above Layers and hides Objects', () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
+    renderDesignPanel(store);
+
+    const headingNames: (string | null)[] = screen.getAllByRole('heading').map(
+      (heading: HTMLElement) => heading.textContent,
+    );
+
+    expect(headingNames).toEqual([CUT_CHECK_TITLE, PANEL_TITLES[0]]);
   });
 
   it('opens the palette dialog from the Palette button in the Layers header', () => {
