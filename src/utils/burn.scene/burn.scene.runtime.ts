@@ -11,7 +11,6 @@
  */
 import {
   AmbientLight,
-  Box3,
   DirectionalLight,
   Group,
   Mesh,
@@ -53,6 +52,7 @@ import { isBurnLiftAxisAtPoint } from './is.burn.lift.axis.at.point';
 import { newBurnLiftAxis } from './new.burn.lift.axis';
 import { newBurnSceneCamera } from './new.burn.scene.camera';
 import { newBurnSceneObjects } from './new.burn.scene.objects';
+import { placeBurnLiftAxis } from './place.burn.lift.axis';
 import { setBurnSceneCameraFrustum } from './set.burn.scene.camera.frustum';
 
 const BURN_SCENE_RENDERER_ERROR_LOG_MESSAGE = 'Starting the 3D renderer failed';
@@ -218,14 +218,7 @@ class WebGlBurnSceneRenderer implements BurnSceneRenderer {
       ({ partId }: BurnSceneMesh): boolean => !!partId && partId === this.selectedPartId,
     )?.mesh;
 
-    this.liftAxis.visible = !!mesh;
-
-    if (mesh) {
-      const bounds: Box3 = new Box3().setFromObject(mesh);
-
-      bounds.getCenter(this.liftAxis.position);
-      this.liftAxis.position.z = bounds.max.z;
-    }
+    placeBurnLiftAxis(this.liftAxis, mesh);
   }
 
   private disposeLiftAxis(): void {
