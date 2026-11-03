@@ -63,7 +63,7 @@ export class MachineLineRequested extends Action<MachineLineRequestedPayload> {
 
 /** The controller reset itself, without a request from the app. */
 export class MachineControllerResetDetected extends Action {
-  public static readonly type: string = actionType('MachineControllerResetDetected');
+  public static readonly type: string = actionType('machine controller reset detected');
 }
 
 export class MachineUnlockRequested extends Action {

@@ -11,7 +11,6 @@
  */
 import { GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
 import { DEFAULT } from '../localization/default.locales';
-import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import { selectIsConnected } from './grbl.connection.state';
 import { selectIsJobRunActive } from './job.run.state';
 import { selectIsLaserPointerFiring } from './laser.pointer.state';
@@ -21,9 +20,13 @@ import type { AppRootState } from './new.store';
 import { selectToolpath, selectToolpathStatus } from './toolpath.state';
 import { TOOLPATH_STATUS } from './toolpath.status.constants';
 
-export const selectJobStartBlockedReasonKey = (state: AppRootState): string | undefined => {
-  const toolpath: Toolpath | undefined = selectToolpath(state);
+const hasReadyToolpathMoves = (state: AppRootState): boolean =>
+  selectToolpathStatus(state) === TOOLPATH_STATUS.READY && Boolean(selectToolpath(state)?.moves.length);
 
+const isMachineReadyForJob = (state: AppRootState): boolean =>
+  !selectIsLaserPointerFiring(state) && selectMachineStatus(state)?.machineState === GRBL_MACHINE_STATE.IDLE;
+
+export const selectJobStartBlockedReasonKey = (state: AppRootState): string | undefined => {
   if (selectIsJobRunActive(state)) {
     return DEFAULT.JOB_START_BLOCKED_RUNNING;
   }
@@ -36,15 +39,15 @@ export const selectJobStartBlockedReasonKey = (state: AppRootState): string | un
     return DEFAULT.JOB_START_BLOCKED_NO_PROFILE;
   }
 
-  if (selectToolpathStatus(state) !== TOOLPATH_STATUS.READY || !toolpath?.moves.length) {
+  if (!hasReadyToolpathMoves(state)) {
     return DEFAULT.JOB_START_BLOCKED_NO_TOOLPATH;
   }
 
-  if (toolpath.warnings.length) {
+  if (selectToolpath(state)?.warnings.length) {
     return DEFAULT.JOB_START_BLOCKED_WARNINGS;
   }
 
-  if (selectIsLaserPointerFiring(state) || selectMachineStatus(state)?.machineState !== GRBL_MACHINE_STATE.IDLE) {
+  if (!isMachineReadyForJob(state)) {
     return DEFAULT.JOB_START_BLOCKED_NOT_IDLE;
   }
 

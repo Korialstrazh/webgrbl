@@ -17,7 +17,6 @@ import { ConsoleInfoAdded } from './grbl.console.state';
 import type { ConsoleCommandSubmitted } from './grbl.console.state';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import { selectIsJobRunActive } from './job.run.state';
-import type { MachineLineRequested } from './machine.status.state';
 
 const newNonAsciiRejectedConsoleInfo = (): ConsoleInfoAdded => new ConsoleInfoAdded({
   messageKey: DEFAULT.CONSOLE_NON_ASCII_REJECTED,
@@ -40,18 +39,5 @@ export function* submitGrblConsoleCommand(controller: GrblController, action: Co
       error instanceof GrblNonAsciiLineError ? newNonAsciiRejectedConsoleInfo() : newRawErrorConsoleInfo(error);
 
     yield put(consoleInfo);
-  }
-}
-
-/** Lines from the machine controls are dropped during a job, for the same reason as console lines. */
-export function* submitGrblMachineLine(controller: GrblController, action: MachineLineRequested): Generator {
-  if ((yield select(selectIsJobRunActive)) as boolean) {
-    return;
-  }
-
-  try {
-    yield call([controller, controller.sendConsoleCommand], action.payload.line);
-  } catch (error: unknown) {
-    yield put(newRawErrorConsoleInfo(error));
   }
 }

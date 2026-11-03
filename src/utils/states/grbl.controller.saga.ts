@@ -42,9 +42,10 @@ import {
   selectBaudRate,
   selectSelectedPortId,
 } from './grbl.connection.state';
-import { submitGrblConsoleCommand, submitGrblMachineLine } from './grbl.console.command.saga';
+import { submitGrblConsoleCommand } from './grbl.console.command.saga';
 import { ConsoleCommandSubmitted } from './grbl.console.state';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
+import { submitGrblMachineLine } from './grbl.machine.line.saga';
 import { getPreferredPortId } from './grbl.preferred.port.id';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';

@@ -3,17 +3,20 @@ import { GRBL_HOLD_COMPLETE_MAX_WAIT_MS, GRBL_STATUS_POLL_INTERVAL_MS, SIMULATED
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
 import { ANSWER_SETTLE_MS } from '../grbl/test.support/grbl.answer.settle';
 import { DEFAULT } from '../localization/default.locales';
+import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../profiles/new.machine.profile';
+import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
+import type { ObjectWarning } from '../toolpath/interfaces/ObjectWarning';
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../toolpath/test.support/new.toolpath.move';
 import { ConnectRequested, DisconnectRequested, SerialPortSelected } from './grbl.connection.state';
 import { ConsoleCommandSubmitted, selectConsoleEntries } from './grbl.console.state';
 import type { GrblConsoleViewEntry } from './interfaces/GrblConsoleViewEntry';
+import { runGrblJob } from './job.run.saga';
 import { JobStartRequested, selectIsJobRunActive, selectJobRunStatus } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
-import { runGrblJob } from './job.run.saga';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from './machine.profile.state';
 import { MachineStopRequested } from './machine.status.state';
 import { newStore } from './new.store';
@@ -25,6 +28,7 @@ const LONG_MOVE_END_X_MM = 100;
 const SETTLE_MS = GRBL_HOLD_COMPLETE_MAX_WAIT_MS + GRBL_STATUS_POLL_INTERVAL_MS + ANSWER_SETTLE_MS;
 const JOB_END_MS = 10_000;
 const CONSOLE_LINE = 'G0X1';
+const OFF_PAGE_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
 
 const newJobStore = (): AppStore => newStore(
   {
@@ -36,9 +40,9 @@ const newJobStore = (): AppStore => newStore(
   new FakeToolpathWorkerClient(),
 );
 
-const prepareConnectedStore = async (warnings = false): Promise<AppStore> => {
+const prepareConnectedStore = async (warnings: ObjectWarning[] = []): Promise<AppStore> => {
   const store: AppStore = newJobStore();
-  const profile = newMachineProfile();
+  const profile: MachineProfile = newMachineProfile();
 
   store.dispatch(new MachineProfileSaved({ profile }));
   store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
@@ -48,7 +52,7 @@ const prepareConnectedStore = async (warnings = false): Promise<AppStore> => {
   store.dispatch(new ToolpathReady({
     toolpath: newToolpath({
       moves: [newToolpathMove({ to: { x: LONG_MOVE_END_X_MM, y: 0 } })],
-      warnings: warnings ? [{ objectId: 'object', kind: 'outside' }] as never : [],
+      warnings,
     }),
     documentVersion: selectToolpathDocumentVersion(store.getState()),
   }));
@@ -103,7 +107,7 @@ describe(runGrblJob.name, () => {
   });
 
   it('starts nothing while toolpath warnings block the start', async () => {
-    const store: AppStore = await prepareConnectedStore(true);
+    const store: AppStore = await prepareConnectedStore([OFF_PAGE_WARNING]);
 
     expect(selectJobStartBlockedReasonKey(store.getState())).toBe(DEFAULT.JOB_START_BLOCKED_WARNINGS);
     store.dispatch(new JobStartRequested());

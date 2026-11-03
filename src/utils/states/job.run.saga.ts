@@ -71,7 +71,7 @@ function* waitForMachineAfterProgram(): Generator {
  * Idle, so a stop or reset meanwhile must not read as a finished job.
  */
 function* waitForJobFinish(): Generator {
-  const { isMachineDone } = (yield race({
+  const { isMachineDone }: JobFinishRaceResult = (yield race({
     isMachineDone: call(waitForMachineAfterProgram),
     interruption: take([MachineStopRequested.type, MachineResetRequested.type, MachineControllerResetDetected.type]),
   })) as JobFinishRaceResult;
@@ -91,7 +91,7 @@ export function* runGrblJob(controller: GrblController): Generator {
   yield put(newJobRunStatusChanged(JOB_RUN_STATUS.SENDING));
 
   try {
-    const { isCompleted } = (yield call(
+    const { isCompleted }: GrblProgramResult = (yield call(
       [controller, controller.streamProgram],
       programLines,
       { isStopOnErrorEnabled: true },

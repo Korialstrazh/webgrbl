@@ -34,11 +34,11 @@ const actionType: ActionTypeFormatter = actionTypePrefixer(JOB_RUN_STATE_NAME);
 
 // #region Actions
 export class JobStartRequested extends Action {
-  public static readonly type: string = actionType('JobStartRequested');
+  public static readonly type: string = actionType('job start requested');
 }
 
 export class JobRunStatusChanged extends Action<JobRunStatusChangedPayload> {
-  public static readonly type: string = actionType('JobRunStatusChanged');
+  public static readonly type: string = actionType('job run status changed');
 }
 // #endregion
 
@@ -47,14 +47,17 @@ const INITIAL_JOB_RUN_STATE: JobRunState = { status: JOB_RUN_STATUS.IDLE };
 
 const ACTIVE_JOB_RUN_STATUSES: readonly JobRunStatus[] = [JOB_RUN_STATUS.SENDING, JOB_RUN_STATUS.FINISHING];
 
+const isJobRunCutOffByConnection = (state: JobRunState, action: ConnectionStatusChanged): boolean =>
+  ACTIVE_JOB_RUN_STATUSES.includes(state.status)
+  && action.payload.connectionStatus !== GRBL_CONNECTION_STATUS.CONNECTED;
+
 export const jobRunReducer = (state: JobRunState = INITIAL_JOB_RUN_STATE, action: Action<unknown>): JobRunState => {
   switch (action.type) {
   case JobRunStatusChanged.type:
     return { status: (action as JobRunStatusChanged).payload.status };
   case ConnectionStatusChanged.type:
     // The saga of the run is cancelled with the connection, so the end of the run is recorded here.
-    return ACTIVE_JOB_RUN_STATUSES.includes(state.status)
-      && (action as ConnectionStatusChanged).payload.connectionStatus !== GRBL_CONNECTION_STATUS.CONNECTED
+    return isJobRunCutOffByConnection(state, action as ConnectionStatusChanged)
       ? { status: JOB_RUN_STATUS.INTERRUPTED }
       : state;
   default:
