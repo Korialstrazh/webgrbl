@@ -2,6 +2,7 @@ import { newTestResultFixture } from '../materials/new.test.result.fixture';
 import { MATERIAL_TEST_OUTCOME } from '../materials/material.constants';
 import type { LayerSettings } from '../layers/interfaces/LayerSettings';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { LAYER_MODE } from '../palette/palette.constants';
 import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import { getBoxSubpath } from '../toolpath/test.support/get.box.subpath';
@@ -19,6 +20,8 @@ import type { BurnPartSet } from './interfaces/BurnPartSet';
 
 const RED = '#ff0000';
 const BLUE = '#0000ff';
+const GREEN = '#00a000';
+const BORDERLINE_DEPTH_MM = 2.85;
 const THICKNESS_MM = 3;
 const TEST_POWER_PERCENT = 100;
 const TEST_SPEED_MM_PER_MIN = 300;
@@ -284,6 +287,94 @@ describe(getBurnParts.name, () => {
         [1, undefined, BURN_PART_STATUS.FREE, undefined],
         [2, 1, BURN_PART_STATUS.NOT_THROUGH, BLUE],
       ]);
+    });
+
+    it.each([
+      [HALF_POWER_PERCENT, BURN_PART_STATUS.NOT_THROUGH],
+      [BORDERLINE_POWER_PERCENT, BURN_PART_STATUS.BORDERLINE],
+    ])('keeps a through ring free around a large child at %i %% power', (power: number, childStatus: string) => {
+      const largeChild: SvgSubpath = getBoxSubpath({ minX: 11, minY: 11, maxX: 19, maxY: 19 });
+      const { parts }: BurnPartSet = getTwoLayerPartSet(SQUARE, largeChild, power);
+
+      expect(parts.map((part: BurnPart) => [part.id, part.parentId, part.status, part.weakestLayerKey])).toEqual([
+        [1, undefined, BURN_PART_STATUS.FREE, undefined],
+        [2, 1, childStatus, BLUE],
+      ]);
+    });
+
+    it('caps each of three nesting levels only by the wall to its own parent', () => {
+      const midLayer: ProjectLayer = newTestLayer(GREEN, {
+        ...CUTTING_SETTINGS,
+        mode: LAYER_MODE.LINE,
+        maxPowerPercent: BORDERLINE_POWER_PERCENT,
+      });
+      const layers: ProjectLayer[] = [
+        newTestLayer(RED, CUTTING_SETTINGS),
+        midLayer,
+        newTestLayer(BLUE, { ...CUTTING_SETTINGS, maxPowerPercent: HALF_POWER_PERCENT }),
+      ];
+      const toolpath: Toolpath = getTestJobToolpath([
+        newStrokedDrawable([getBoxSubpath({ minX: 5, minY: 5, maxX: 35, maxY: 35 })], RED),
+        newStrokedDrawable([getBoxSubpath({ minX: 10, minY: 10, maxX: 30, maxY: 30 })], GREEN),
+        newStrokedDrawable([getBoxSubpath({ minX: 15, minY: 15, maxX: 25, maxY: 25 })], BLUE),
+      ], layers);
+      const grid: BurnDoseGrid | undefined = getBurnDoseGrid(toolpath, layers);
+
+      if (!grid) {
+        throw new Error('expected a dose grid');
+      }
+
+      const { parts }: BurnPartSet = getBurnParts(grid, { thicknessMm: THICKNESS_MM, basis: CUT_THROUGH_BASIS });
+
+      expect(parts.map((part: BurnPart) => [part.parentId, part.status, part.weakestLayerKey])).toEqual([
+        [undefined, BURN_PART_STATUS.FREE, undefined],
+        [1, BURN_PART_STATUS.BORDERLINE, GREEN],
+        [2, BURN_PART_STATUS.NOT_THROUGH, BLUE],
+      ]);
+      expect(parts[1]?.weakestDepthMm).toBeCloseTo(BORDERLINE_DEPTH_MM, WALL_DEPTH_TOLERANCE_DIGITS);
+      expect(parts[2]?.weakestDepthMm).toBeCloseTo(SHALLOW_DEPTH_MM, WALL_DEPTH_TOLERANCE_DIGITS);
+    });
+
+    it('makes a reached parent name its own wall, not the wall of a shallower child', () => {
+      const layers: ProjectLayer[] = [
+        newTestLayer(RED, { ...CUTTING_SETTINGS, maxPowerPercent: BORDERLINE_POWER_PERCENT }),
+        newTestLayer(BLUE, { ...CUTTING_SETTINGS, maxPowerPercent: HALF_POWER_PERCENT }),
+      ];
+      const toolpath: Toolpath = getTestJobToolpath(
+        [newStrokedDrawable([SQUARE], RED), newStrokedDrawable([INNER_SQUARE], BLUE)],
+        layers,
+      );
+      const grid: BurnDoseGrid | undefined = getBurnDoseGrid(toolpath, layers);
+
+      if (!grid) {
+        throw new Error('expected a dose grid');
+      }
+
+      const { parts }: BurnPartSet = getBurnParts(grid, { thicknessMm: THICKNESS_MM, basis: CUT_THROUGH_BASIS });
+
+      expect(parts[0]?.status).toBe(BURN_PART_STATUS.BORDERLINE);
+      expect(parts[0]?.weakestLayerKey).toBe(RED);
+      expect(parts[0]?.weakestDepthMm).toBeCloseTo(BORDERLINE_DEPTH_MM, WALL_DEPTH_TOLERANCE_DIGITS);
+    });
+
+    it('gives parent chains that always end', () => {
+      const largeChild: SvgSubpath = getBoxSubpath({ minX: 11, minY: 11, maxX: 19, maxY: 19 });
+      const partSets: BurnPartSet[] = [
+        getTwoLayerPartSet(SQUARE, largeChild, HALF_POWER_PERCENT),
+        getTwoLayerPartSet(SQUARE, INNER_SQUARE, HALF_POWER_PERCENT),
+        getTwoLayerPartSet(SQUARE, OVERLAPPING_SQUARE, HALF_POWER_PERCENT),
+      ];
+
+      for (const { parts } of partSets) {
+        for (const part of parts) {
+          const seenIds: Set<number> = new Set<number>();
+
+          for (let id: number | undefined = part.id; id; id = parts[id - 1]?.parentId) {
+            expect(seenIds.has(id)).toBe(false);
+            seenIds.add(id);
+          }
+        }
+      }
     });
 
     it('makes a borderline child of a free parent borderline', () => {
