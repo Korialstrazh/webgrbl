@@ -80,7 +80,8 @@ describe(getSampleJobDocument.name, () => {
     expect(getLeftmostPower(shadingMoves)).toBeGreaterThan(getRightmostPower(shadingMoves));
     expect(lastShadingMove).toBeDefined();
     expect(firstCutMove).toBeDefined();
-    expect(toolpath.moves.indexOf(lastShadingMove ?? NO_MOVE)).toBeLessThan(toolpath.moves.indexOf(firstCutMove ?? NO_MOVE));
+    expect(toolpath.moves.indexOf(lastShadingMove ?? NO_MOVE))
+      .toBeLessThan(toolpath.moves.indexOf(firstCutMove ?? NO_MOVE));
   });
 
   it.each(ORIGIN_CORNERS)('keeps every move in the work area, 5 mm from the %s corner', (originCorner) => {
