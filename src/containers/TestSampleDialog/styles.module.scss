@@ -8,15 +8,15 @@
 .burnSection {
   display: flex;
   gap: 1.25rem;
-  align-items: center;
+  align-items: flex-start;
 }
 
 // A square stand-in for the sample: the cut outline around a gradient.
 .samplePicture {
   flex: 0 0 auto;
   box-sizing: border-box;
-  width: 9rem;
-  height: 9rem;
+  width: 7.5rem;
+  height: 7.5rem;
   padding: 1rem;
   display: flex;
   border: 0.125rem solid var(--color-accent);
@@ -31,15 +31,33 @@
 .burnDetails {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   gap: 0.5rem;
   align-items: flex-start;
+  min-width: 0;
+}
+
+// Three short fields side by side, so the dialog fits a short window without scrolling.
+.settingsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+
+  :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+
+  :global(.ant-input-number) {
+    width: 100%;
+  }
 }
 
 .resultSection {
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
-  margin-top: 1.25rem;
+  margin-top: 1rem;
 }
 
 .outcomeRow {
@@ -47,6 +65,12 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+// Not the filled look: that belongs to the one main action of the dialog.
+.outcomeChosen:global(.ant-btn) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .mutedHint {

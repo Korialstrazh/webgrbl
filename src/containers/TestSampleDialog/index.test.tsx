@@ -179,6 +179,7 @@ describe(TestSampleDialog.name, () => {
     const store: AppStore = newTestStore(profile);
 
     renderDialog(store);
+    clickButton(CUT_THROUGH_LABEL);
     clickButton(SAVE_LABEL);
     await vi.waitFor(async (): Promise<void> => {
       expect((await MATERIAL_REPOSITORY.listMaterials())[0]?.testResults).toHaveLength(1);
@@ -206,6 +207,7 @@ describe(TestSampleDialog.name, () => {
     expect(screen.getByText(SETTINGS_HINT)).toBeInTheDocument();
     clickButton(EXPORT_LABEL);
     enterNumber(POWER_LABEL, 10);
+    clickButton(CUT_THROUGH_LABEL);
     clickButton(SAVE_LABEL);
 
     expect(screen.getByLabelText(POWER_LABEL)).toBeDisabled();
@@ -242,6 +244,32 @@ describe(TestSampleDialog.name, () => {
     enterNumber(PASSES_LABEL, PASSES_MAX);
 
     expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeEnabled();
+  });
+
+  it('has no result chosen at the start and keeps Save off until one is picked, with no export needed', () => {
+    renderDialog(newTestStore());
+
+    expect(screen.getByRole('button', { name: CUT_THROUGH_LABEL })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: NOT_THROUGH_LABEL })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
+
+    clickButton(NOT_THROUGH_LABEL);
+
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeEnabled();
+  });
+
+  it('makes Export the main button until the export, and Save after it', () => {
+    const primaryClassName = 'ant-btn-primary';
+
+    renderDialog(newTestStore());
+
+    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toHaveClass(primaryClassName);
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).not.toHaveClass(primaryClassName);
+
+    clickButton(EXPORT_LABEL);
+
+    expect(screen.getByRole('button', { name: EXPORT_LABEL })).not.toHaveClass(primaryClassName);
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toHaveClass(primaryClassName);
   });
 
   it('saves nothing on Cancel', () => {

@@ -1,7 +1,8 @@
 /**
  * The test sample of a material: step one exports the sample G-code with the entered cut settings, step two records
- * how far the cut went. Save stores the result for the active machine profile after the depth passes its check;
- * Cancel and closing store nothing. Export is off, with the reason, when there is no active profile, the sample does
+ * how far the cut went. No result is chosen at the start, and Save waits for one, so it cannot record a burn nobody
+ * looked at. It does not wait for an export, because the sample may have been burnt on an earlier visit. Save stores
+ * the result for the active machine profile after the depth passes its check; Cancel and closing store nothing. Export is off, with the reason, when there is no active profile, the sample does
  * not fit the work area or the settings are out of range. It starts over on every open.
  *
  * @author michael.morosov
@@ -87,7 +88,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
   );
   // After an export the settings are locked, so the saved ones are the ones burnt.
   const [isExported, setIsExported] = useState<boolean>(false);
-  const [outcome, setOutcome] = useState<MaterialTestOutcome>(MATERIAL_TEST_OUTCOME.CUT_THROUGH);
+  const [outcome, setOutcome] = useState<MaterialTestOutcome | undefined>(undefined);
   // An emptied depth holds undefined; a typed one holds a number, NaN when the input cannot be read.
   const [depthMm, setDepthMm] = useState<number | undefined>(undefined);
   const [depthErrorKey, setDepthErrorKey] = useState<string | undefined>(undefined);
@@ -105,7 +106,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
 
     return hasValidSettings ? undefined : DEFAULT.TEST_SAMPLE_DIALOG_EXPORT_INVALID_SETTINGS;
   })();
-  const canSaveResult: boolean = Boolean(profile) && hasValidSettings;
+  const canSaveResult: boolean = Boolean(profile && outcome) && hasValidSettings;
   const getFieldId = (suffix: string): string => [formId, suffix].join(FIELD_ID_SEPARATOR);
 
   const changeCutSetting = (settingName: keyof SampleCutSettings, value: number | null): void =>
@@ -125,7 +126,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
 
     setDepthErrorKey(nextDepthErrorKey);
 
-    if (nextDepthErrorKey || !profile) {
+    if (nextDepthErrorKey || !profile || !outcome) {
       return;
     }
 
@@ -149,9 +150,13 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
       title={t(DEFAULT.TEST_SAMPLE_DIALOG_TITLE, { name: material.name })}
       okText={t(DEFAULT.TEST_SAMPLE_DIALOG_SAVE)}
       cancelText={t(DEFAULT.TEST_SAMPLE_DIALOG_CANCEL)}
-      okButtonProps={{ disabled: !canSaveResult }}
+      okButtonProps={{
+        disabled: !canSaveResult,
+        type: isExported ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT,
+      }}
       onOk={saveResult}
       onClose={onClose}
+      centered
     >
       <section className={styles.burnSection}>
         <div className={styles.samplePicture} role="img" aria-label={t(DEFAULT.TEST_SAMPLE_DIALOG_PICTURE)}>
@@ -160,35 +165,38 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
         <div className={styles.burnDetails}>
           <strong>{t(DEFAULT.TEST_SAMPLE_DIALOG_BURN_HEADING)}</strong>
           <span>{t(DEFAULT.TEST_SAMPLE_DIALOG_BURN_HINT)}</span>
-          <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
-            <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_POWER)} htmlFor={getFieldId(POWER_FIELD_ID_SUFFIX)}>
-              <InputNumber
-                id={getFieldId(POWER_FIELD_ID_SUFFIX)}
-                disabled={isExported}
-                value={isFiniteNumber(cutSettings.powerPercent) ? cutSettings.powerPercent : null}
-                onChange={(value: number | null) => changeCutSetting('powerPercent', value)}
-              />
-            </Form.Item>
-            <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_SPEED)} htmlFor={getFieldId(SPEED_FIELD_ID_SUFFIX)}>
-              <InputNumber
-                id={getFieldId(SPEED_FIELD_ID_SUFFIX)}
-                disabled={isExported}
-                value={isFiniteNumber(cutSettings.speedMmPerMin) ? cutSettings.speedMmPerMin : null}
-                onChange={(value: number | null) => changeCutSetting('speedMmPerMin', value)}
-              />
-            </Form.Item>
-            <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_PASSES)} htmlFor={getFieldId(PASSES_FIELD_ID_SUFFIX)}>
-              <InputNumber
-                id={getFieldId(PASSES_FIELD_ID_SUFFIX)}
-                disabled={isExported}
-                precision={ANTD_INPUT_NUMBER_PRECISION_INTEGER}
-                value={isFiniteNumber(cutSettings.passes) ? cutSettings.passes : null}
-                onChange={(value: number | null) => changeCutSetting('passes', value)}
-              />
-            </Form.Item>
-          </Form>
+          <div className={styles.settingsRow}>
+            <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
+              <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_POWER)} htmlFor={getFieldId(POWER_FIELD_ID_SUFFIX)}>
+                <InputNumber
+                  id={getFieldId(POWER_FIELD_ID_SUFFIX)}
+                  disabled={isExported}
+                  value={isFiniteNumber(cutSettings.powerPercent) ? cutSettings.powerPercent : null}
+                  onChange={(value: number | null) => changeCutSetting('powerPercent', value)}
+                />
+              </Form.Item>
+              <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_SPEED)} htmlFor={getFieldId(SPEED_FIELD_ID_SUFFIX)}>
+                <InputNumber
+                  id={getFieldId(SPEED_FIELD_ID_SUFFIX)}
+                  disabled={isExported}
+                  value={isFiniteNumber(cutSettings.speedMmPerMin) ? cutSettings.speedMmPerMin : null}
+                  onChange={(value: number | null) => changeCutSetting('speedMmPerMin', value)}
+                />
+              </Form.Item>
+              <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_PASSES)} htmlFor={getFieldId(PASSES_FIELD_ID_SUFFIX)}>
+                <InputNumber
+                  id={getFieldId(PASSES_FIELD_ID_SUFFIX)}
+                  disabled={isExported}
+                  precision={ANTD_INPUT_NUMBER_PRECISION_INTEGER}
+                  value={isFiniteNumber(cutSettings.passes) ? cutSettings.passes : null}
+                  onChange={(value: number | null) => changeCutSetting('passes', value)}
+                />
+              </Form.Item>
+            </Form>
+          </div>
           {!isExported && <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_SETTINGS_HINT)}</span>}
           <Button
+            type={isExported ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
             disabled={!!exportBlockedReasonKey}
             onClick={exportSample}
           >
@@ -201,14 +209,14 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
         <strong>{t(DEFAULT.TEST_SAMPLE_DIALOG_RESULT_HEADING)}</strong>
         <div className={styles.outcomeRow}>
           <Button
-            type={isNotThrough ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
+            className={isCutThrough ? styles.outcomeChosen : undefined}
             aria-pressed={isCutThrough}
             onClick={() => setOutcome(MATERIAL_TEST_OUTCOME.CUT_THROUGH)}
           >
             {t(DEFAULT.TEST_SAMPLE_DIALOG_CUT_THROUGH)}
           </Button>
           <Button
-            type={isNotThrough ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT}
+            className={isNotThrough ? styles.outcomeChosen : undefined}
             aria-pressed={isNotThrough}
             onClick={() => setOutcome(MATERIAL_TEST_OUTCOME.NOT_THROUGH)}
           >
