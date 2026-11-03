@@ -1,3 +1,4 @@
+import { LAYER_MODE } from '../palette/palette.constants';
 import { newTestResultFixture } from '../materials/new.test.result.fixture';
 import { MATERIAL_TEST_OUTCOME } from '../materials/material.constants';
 import type { LayerSettings } from '../layers/interfaces/LayerSettings';
@@ -20,6 +21,7 @@ import type { BurnRegionMesh } from './interfaces/BurnRegionMesh';
 import { getBurnMeshTriangleBoxes } from './test.support/get.burn.mesh.triangle.boxes';
 import type { BurnMeshTriangleBox } from './test.support/interfaces/BurnMeshTriangleBox';
 import { getTestJobToolpath } from './test.support/get.test.job.toolpath';
+import { newFilledDrawable } from './test.support/new.filled.drawable';
 import { newStrokedDrawable } from './test.support/new.stroked.drawable';
 import { newTestLayer } from './test.support/new.test.layer';
 
@@ -212,5 +214,40 @@ describe(`${getBurnParts.name} with cuts that share grid cells`, () => {
 
     expect(parts.map(({ status }) => status)).toEqual([BURN_PART_STATUS.BORDERLINE]);
     expect(warningCount).toBe(1);
+  });
+
+  it('never calls a square free when its two layers draw it with 4 and 8 points', () => {
+    const { points } = OUTER_SQUARE;
+    const eightPointSquare: SvgSubpath = {
+      points: points.flatMap((point, index) => {
+        const next = points[(index + 1) % points.length] ?? point;
+
+        return [point, { x: (point.x + next.x) / 2, y: (point.y + next.y) / 2 }];
+      }),
+      isClosed: true,
+    };
+    const layers: ProjectLayer[] = [newTestLayer(RED, SQUARE_SETTINGS), newTestLayer(BLUE, SQUARE_SETTINGS)];
+    const toolpath: Toolpath = getTestJobToolpath(
+      [newStrokedDrawable([OUTER_SQUARE, getDistantMark(1000)], RED), newStrokedDrawable([eightPointSquare], BLUE)],
+      layers,
+    );
+    const { parts } = getPartSetOfToolpath(toolpath, layers);
+
+    expect(parts.length).toBeGreaterThan(0);
+    expect(parts.filter(({ status }) => status === BURN_PART_STATUS.FREE)).toEqual([]);
+  });
+
+  it('never calls a wall free when a fill and a line only sum past the through dose', () => {
+    const layers: ProjectLayer[] = [
+      newTestLayer(RED, SQUARE_SETTINGS),
+      { ...newTestLayer(BLUE, { ...SQUARE_SETTINGS, mode: LAYER_MODE.FILL }), enabled: true },
+    ];
+    const toolpath: Toolpath = getTestJobToolpath(
+      [newStrokedDrawable([OUTER_SQUARE, getDistantMark(1000)], RED), newFilledDrawable([OUTER_SQUARE], BLUE)],
+      layers,
+    );
+    const { parts } = getPartSetOfToolpath(toolpath, layers);
+
+    expect(parts.filter(({ status }) => status === BURN_PART_STATUS.FREE)).toEqual([]);
   });
 });
