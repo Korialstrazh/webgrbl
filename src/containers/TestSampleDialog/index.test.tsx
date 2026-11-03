@@ -10,6 +10,7 @@ import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProf
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
+import type { Action } from '../../utils/states/action';
 import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import { SampleGcodeExportRequested } from '../../utils/states/toolpath.state';
@@ -37,6 +38,8 @@ const ENTERED_SPEED_MM_PER_MIN = 420;
 const ENTERED_PASSES = 2;
 const ENTERED_DEPTH_MM = 2;
 const SMALL_AREA_MM = 40;
+const OVER_POWER_PERCENT = 500;
+const SETTINGS_HINT = 'These must be the settings the sample was burnt with.';
 
 const newTestStore = (profile: MachineProfile | null = newMachineProfile()): AppStore => {
   const store: AppStore = newStore();
@@ -185,6 +188,37 @@ describe(TestSampleDialog.name, () => {
       expect(selectMaterials(secondStore.getState())[0]?.testResults.map((result) => result.machineProfileId))
         .toEqual([profile.id]);
     });
+  });
+
+  it('locks the settings after the export, so Save stores what was exported', () => {
+    const store: AppStore = newTestStore();
+
+    const dispatchStore = store.dispatch.bind(store);
+
+    vi.spyOn(store, 'dispatch').mockImplementation(
+      (action: Action<unknown>) =>
+        (action instanceof SampleGcodeExportRequested ? action : dispatchStore(action)) as Action<unknown>,
+    );
+    renderDialog(store);
+    enterNumber(POWER_LABEL, ENTERED_POWER_PERCENT);
+    expect(screen.getByText(SETTINGS_HINT)).toBeInTheDocument();
+    clickButton(EXPORT_LABEL);
+    enterNumber(POWER_LABEL, 10);
+    clickButton(SAVE_LABEL);
+
+    expect(screen.getByLabelText(POWER_LABEL)).toBeDisabled();
+    expect(screen.getByLabelText(SPEED_LABEL)).toBeDisabled();
+    expect(screen.getByLabelText(PASSES_LABEL)).toBeDisabled();
+    expect(screen.queryByText(SETTINGS_HINT)).not.toBeInTheDocument();
+    expect(getSavedResults(store)[0]?.powerPercent).toBe(ENTERED_POWER_PERCENT);
+  });
+
+  it('disables Export and Save for a power above the limit', () => {
+    renderDialog(newTestStore());
+    enterNumber(POWER_LABEL, OVER_POWER_PERCENT);
+
+    expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
   });
 
   it('saves nothing on Cancel', () => {

@@ -422,6 +422,7 @@ TEST_SAMPLE_DIALOG_PICTURE;Sample: a 5 by 5 centimetre square with a gradient in
 TEST_SAMPLE_DIALOG_POWER;Power (%)
 TEST_SAMPLE_DIALOG_RESULT_HEADING;2. How far did the cut go?
 TEST_SAMPLE_DIALOG_SAVE;Save for this material
+TEST_SAMPLE_DIALOG_SETTINGS_HINT;These must be the settings the sample was burnt with.
 TEST_SAMPLE_DIALOG_SPEED;Speed (mm/min)
 TEST_SAMPLE_DIALOG_TITLE;Test sample: {{name}}
 TOAST_BURN_MODEL_FAILED;The 3D preview could not be built. Try again, or simplify the design.

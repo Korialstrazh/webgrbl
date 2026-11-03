@@ -59,7 +59,13 @@ const PASSES_FIELD_ID_SUFFIX = 'passes';
 const DEPTH_FIELD_ID_SUFFIX = 'depth';
 
 const hasValidCutSettings = ({ powerPercent, speedMmPerMin, passes }: SampleCutSettings): boolean =>
-  isFiniteNumber(powerPercent) && isFiniteNumber(speedMmPerMin) && isFiniteNumber(passes);
+  isFiniteNumber(powerPercent)
+  && powerPercent >= TEST_SAMPLE_POWER_PERCENT_MIN
+  && powerPercent <= TEST_SAMPLE_POWER_PERCENT_MAX
+  && isFiniteNumber(speedMmPerMin)
+  && speedMmPerMin >= TEST_SAMPLE_SPEED_MM_PER_MIN_MIN
+  && isFiniteNumber(passes)
+  && passes >= TEST_SAMPLE_PASSES_MIN;
 
 const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentProps): ReactNode => {
   const { t } = useTranslation();
@@ -70,6 +76,8 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
   const [cutSettings, setCutSettings] = useState<SampleCutSettings>(
     getSampleCutSettings(useSelector(selectProjectLayers)),
   );
+  // After an export the settings are locked, so the saved ones are the ones burnt.
+  const [isExported, setIsExported] = useState<boolean>(false);
   const [outcome, setOutcome] = useState<MaterialTestOutcome>(MATERIAL_TEST_OUTCOME.CUT_THROUGH);
   // An emptied depth holds undefined; a typed one holds a number, NaN when the input cannot be read.
   const [depthMm, setDepthMm] = useState<number | undefined>(undefined);
@@ -89,6 +97,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
 
   const exportSample = (): void => {
     dispatch(new SampleGcodeExportRequested({ cutSettings, jobName: material.name }));
+    setIsExported(true);
   };
 
   const saveResult = (): void => {
@@ -139,8 +148,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
             <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_POWER)} htmlFor={getFieldId(POWER_FIELD_ID_SUFFIX)}>
               <InputNumber
                 id={getFieldId(POWER_FIELD_ID_SUFFIX)}
-                min={TEST_SAMPLE_POWER_PERCENT_MIN}
-                max={TEST_SAMPLE_POWER_PERCENT_MAX}
+                disabled={isExported}
                 value={isFiniteNumber(cutSettings.powerPercent) ? cutSettings.powerPercent : null}
                 onChange={(value: number | null) => changeCutSetting('powerPercent', value)}
               />
@@ -148,7 +156,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
             <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_SPEED)} htmlFor={getFieldId(SPEED_FIELD_ID_SUFFIX)}>
               <InputNumber
                 id={getFieldId(SPEED_FIELD_ID_SUFFIX)}
-                min={TEST_SAMPLE_SPEED_MM_PER_MIN_MIN}
+                disabled={isExported}
                 value={isFiniteNumber(cutSettings.speedMmPerMin) ? cutSettings.speedMmPerMin : null}
                 onChange={(value: number | null) => changeCutSetting('speedMmPerMin', value)}
               />
@@ -156,13 +164,14 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
             <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_PASSES)} htmlFor={getFieldId(PASSES_FIELD_ID_SUFFIX)}>
               <InputNumber
                 id={getFieldId(PASSES_FIELD_ID_SUFFIX)}
-                min={TEST_SAMPLE_PASSES_MIN}
+                disabled={isExported}
                 precision={ANTD_INPUT_NUMBER_PRECISION_INTEGER}
                 value={isFiniteNumber(cutSettings.passes) ? cutSettings.passes : null}
                 onChange={(value: number | null) => changeCutSetting('passes', value)}
               />
             </Form.Item>
           </Form>
+          {!isExported && <span className={styles.mutedHint}>{t(DEFAULT.TEST_SAMPLE_DIALOG_SETTINGS_HINT)}</span>}
           <Button
             disabled={Boolean(exportBlockedReasonKey) || !hasValidCutSettings(cutSettings)}
             onClick={exportSample}
