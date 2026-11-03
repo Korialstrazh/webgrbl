@@ -11,5 +11,8 @@
 import { GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
 import type { GrblMachineState } from '../grbl/grbl.constants';
 
-export const getCanFireLaserPointer = (isConnected: boolean, machineState: GrblMachineState | undefined): boolean =>
-  isConnected && machineState === GRBL_MACHINE_STATE.IDLE;
+export const getCanFireLaserPointer = (
+  isConnected: boolean,
+  machineState: GrblMachineState | undefined,
+  isJobRunActive: boolean,
+): boolean => isConnected && !isJobRunActive && machineState === GRBL_MACHINE_STATE.IDLE;

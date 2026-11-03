@@ -28,6 +28,7 @@ import { MAX_POINTER_HOLD_MS } from '../machine/machine.command.constants';
 import { MACHINE_COMMAND } from '../machine/machine.commands';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { ConnectionStatusChanged, selectGrblSettings, selectIsConnected } from './grbl.connection.state';
+import { selectIsJobRunActive } from './job.run.state';
 import {
   LaserPointerFireRequested,
   LaserPointerFiringStarted,
@@ -107,7 +108,9 @@ function* fireLaserPointer(): Generator {
   const isConnected: boolean = (yield select(selectIsConnected)) as boolean;
   const status: GrblResolvedStatus | undefined = (yield select(selectMachineStatus)) as GrblResolvedStatus | undefined;
 
-  if (!getCanFireLaserPointer(isConnected, status?.machineState)) {
+  const isJobRunActive: boolean = (yield select(selectIsJobRunActive)) as boolean;
+
+  if (!getCanFireLaserPointer(isConnected, status?.machineState, isJobRunActive)) {
     return;
   }
 

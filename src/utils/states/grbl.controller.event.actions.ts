@@ -17,7 +17,7 @@ import { DEFAULT } from '../localization/default.locales';
 import type { Action } from './action';
 import { ConnectionStatusChanged } from './grbl.connection.state';
 import { ConsoleEntryReceived } from './grbl.console.state';
-import { MachineStatusReceived } from './machine.status.state';
+import { MachineControllerResetDetected, MachineStatusReceived } from './machine.status.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
 
@@ -65,11 +65,14 @@ export const getGrblControllerEventActions = (event: GrblControllerEvent): Actio
       },
     })];
   case GRBL_CONTROLLER_EVENT_KIND.CONTROLLER_RESET:
-    return [new ToastShown({
-      severity: TOAST_SEVERITY.WARNING,
-      messageKey: DEFAULT.TOAST_CONTROLLER_RESET,
-      messageParameters: NO_TOAST_PARAMETERS,
-    })];
+    return [
+      new MachineControllerResetDetected(),
+      new ToastShown({
+        severity: TOAST_SEVERITY.WARNING,
+        messageKey: DEFAULT.TOAST_CONTROLLER_RESET,
+        messageParameters: NO_TOAST_PARAMETERS,
+      }),
+    ];
   default: {
     const unknownEvent: never = event;
     throw new Error(`Unknown GRBL controller event ${JSON.stringify(unknownEvent)}`);

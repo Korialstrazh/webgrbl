@@ -109,13 +109,14 @@ describe(JobCard.name, () => {
     expect(screen.getByText(ONE_LAYER)).toBeInTheDocument();
   });
 
-  it('keeps Start job coming soon: disabled, not the filled main action, with the Soon tag', async () => {
+  it('keeps Start job off with the reason while no laser is connected, and not as the main action', async () => {
     renderJobCard(await newGcodeExportTestStore());
     const startJobButton: HTMLElement = screen.getByRole('button', { name: START_JOB_LABEL });
 
     expect(startJobButton).toBeDisabled();
     expect(startJobButton).not.toHaveClass(PRIMARY_BUTTON_CLASS);
-    expect(startJobButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_LABEL);
+    fireEvent.mouseEnter(startJobButton.parentElement as HTMLElement);
+    expect(await screen.findByText('Connect the laser to start a job.')).toBeInTheDocument();
   });
 
   it('makes Export G-code the filled main action, the one job action that works today', async () => {
