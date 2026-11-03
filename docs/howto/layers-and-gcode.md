@@ -8,7 +8,7 @@ Each colour in your drawing becomes a layer with laser settings. From the layers
 - **Layers.** When you import a drawing, each colour it uses becomes a layer in the Layers section, in burn order. Drag a layer (or use its Move up / Move down buttons) to change the order. The checkbox sends the layer to the laser or leaves it off. The button on a row opens the Layer settings drawer, which slides in from the left right next to the design panel, so the layer list stays visible.
 - **Layer settings.** Send to laser, Mode (Line or Fill), Max power and Min power in percent (with watts when the machine profile has a laser power), Speed in mm/min, Passes, Line interval (Fill only) and Air assist (only when the machine profile has air assist). "Save to palette" stores the settings as the palette entry; "Edit palette..." opens the palette.
 - **Design view by layer.** The Design view draws each object the way its layers burn it: paths on a Line layer as thin outlines in the layer colour with no fill, paths on a fill or shading layer filled as drawn, and paths on a layer that is off dimmed, so the Design view matches what the Toolpath view burns. In code: `getObjectDesignDrawing` (`src/utils/bed/`) reads an artwork once into the same flattened shapes the toolpath uses, in artwork millimetres, grouped in runs of one paint role and layer; `ObjectDesignArtwork` draws each run as one SVG group whose class and stroke attribute come from the layer (`getDesignLayerLooks`), so a layer change restyles groups and a drag only moves the box. An artwork whose paints all sit on enabled fill layers stays the cheaper SVG image (`isDesignDrawnAsAuthored`).
-- **Toolpath view.** Switch the bed from Design to Toolpath to see the real job: burnt and remaining parts, optional travel moves, a head marker and a playback bar. Editing objects is not possible there. The "3D" option is not available yet.
+- **Toolpath view.** Switch the bed from Design to Toolpath to see the real job: burnt and remaining parts, optional travel moves, a head marker and a playback bar. Editing objects is not possible there. The "3D" option shows the burn preview: see [burn-preview](burn-preview.md).
 - **Export G-code.** In the Project menu and on the Job card.
 
 ## The palette
@@ -102,7 +102,7 @@ Shown on the Job card ("Estimate") and in the playback bar clock, next to the jo
 - **A stale toolpath must be regenerated** before it can play or be estimated (export generates it for you).
 - **The Toolpath view hides the live machine head.**
 - A file whose `width` / `height` proportions differ from its `viewBox` is stretched to fit, the same way the bed shows it.
-- Only the Line and Fill modes exist. Raster images, arcs (`G2` / `G3`), a laser without `M4` and the 3D preview come later.
+- Only the Line and Fill modes exist. Raster images, arcs (`G2` / `G3`), and a laser without `M4` come later.
 - No in-app handbook exists yet, so this page and the wiki are the only documentation.
 
 ## Extending it

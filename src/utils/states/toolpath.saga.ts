@@ -27,14 +27,19 @@ import { all, call, debounce, fork, join, put, race, select, take, takeLatest, t
 import { downloadTextFile } from '../browser/download.text.file';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
+import { fitsSampleJob } from '../materials/fits.sample.job';
+import { getSampleJobDocument } from '../materials/get.sample.job.document';
+import type { Palette } from '../palette/interfaces/Palette';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import { EVERY_ACTION_PATTERN } from '../redux.saga.constants';
 import { BedDrawablesCache } from '../toolpath/bed.drawables.cache';
 import { GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
+import { getBedDrawables } from '../toolpath/get.bed.drawables';
 import { getGcodeExportContext } from '../toolpath/get.gcode.export.context';
 import { getGcodeFileName } from '../toolpath/get.gcode.file.name';
 import { getGcodeText } from '../toolpath/get.gcode.text';
+import { getToolpath } from '../toolpath/get.toolpath';
 import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathGeneration } from '../toolpath/interfaces/ToolpathGeneration';
@@ -45,6 +50,7 @@ import type { Action } from './action';
 import { selectGrblSettings } from './grbl.connection.state';
 import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
 import { selectActiveMachineProfile } from './machine.profile.state';
+import { selectPalette } from './palette.state';
 import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 import {
   ProjectDocumentLoaded,
@@ -65,6 +71,7 @@ import {
   ToolpathFailed,
   ToolpathMachineAreaChanged,
   ToolpathProgress,
+  SampleGcodeExportRequested,
   ToolpathReady,
   ToolpathRequested,
   selectToolpath,
@@ -222,16 +229,21 @@ function* waitForReadyToolpath(exportProjectId: string | undefined): Generator {
   }
 }
 
-function* downloadGcode(toolpath: Toolpath, profile: MachineProfile): Generator {
+function* downloadJobGcode(toolpath: Toolpath, profile: MachineProfile, jobName: string): Generator {
   const laserSettings: Record<number, string> = (yield select(selectGrblSettings)) as Record<number, string>;
-  const projectName: string = (yield select(selectProjectName)) as string;
   const createdAtIso: string = new Date().toISOString();
 
   yield call(downloadTextFile, {
-    text: getGcodeText(toolpath, getGcodeExportContext({ profile, laserSettings, projectName, createdAtIso })),
-    fileName: getGcodeFileName(projectName),
+    text: getGcodeText(toolpath, getGcodeExportContext({ profile, laserSettings, projectName: jobName, createdAtIso })),
+    fileName: getGcodeFileName(jobName),
     mimeType: GCODE_MIME_TYPE,
   });
+}
+
+function* downloadGcode(toolpath: Toolpath, profile: MachineProfile): Generator {
+  const projectName: string = (yield select(selectProjectName)) as string;
+
+  yield call(downloadJobGcode, toolpath, profile, projectName);
 }
 
 function* exportGcode(action: GcodeExportRequested): Generator {
@@ -267,6 +279,31 @@ function* exportGcode(action: GcodeExportRequested): Generator {
   yield call(downloadGcode, toolpath, profile);
 }
 
+/** Builds and downloads the test sample on the main thread; the project's document and toolpath are not touched. */
+function* exportSampleGcode(action: SampleGcodeExportRequested): Generator {
+  const profile: MachineProfile | undefined = (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
+
+  const machineArea: ToolpathMachineArea = (yield select(selectToolpathMachineArea)) as ToolpathMachineArea;
+
+  if (!profile || !fitsSampleJob(machineArea)) {
+    return;
+  }
+
+  const palette: Palette = (yield select(selectPalette)) as Palette;
+  const sampleDocument: ProjectDocument = getSampleJobDocument({
+    cutSettings: action.payload.cutSettings,
+    palette,
+    machineArea,
+  });
+  const toolpath: Toolpath = getToolpath({
+    ...getBedDrawables(sampleDocument),
+    layers: sampleDocument.layers,
+    machineArea,
+  });
+
+  yield call(downloadJobGcode, toolpath, profile, action.payload.jobName);
+}
+
 export function* watchToolpath(toolpathWorkerClient: ToolpathWorkerClient): Generator {
   const drawablesCache: BedDrawablesCache = new BedDrawablesCache();
 
@@ -281,6 +318,7 @@ export function* watchToolpath(toolpathWorkerClient: ToolpathWorkerClient): Gene
       debounce(TOOLPATH_RESTART_DEBOUNCE_MS, TOOLPATH_INPUT_CHANGE_ACTION_TYPES, refreshToolpath),
       fork(watchToolpathMachineArea),
       takeLeading(GcodeExportRequested.type, exportGcode),
+      takeLeading(SampleGcodeExportRequested.type, exportSampleGcode),
     ])) as Task[];
 
     // The watchers run as forks, so the saga waits on them here; its finally then runs only when the store stops.

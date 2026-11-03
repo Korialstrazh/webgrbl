@@ -1,6 +1,6 @@
 /**
- * The header of the 3D view: the material of the project, with an entry that adds one, and the test sample, which is
- * not available yet.
+ * The header of the 3D view: the material of the project, with an entry that adds one, and the test sample of the
+ * selected material.
  *
  * @author michael.morosov
  *
@@ -21,6 +21,7 @@ import { selectMaterials } from '../../utils/states/material.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
 import { MaterialDialog } from '../MaterialDialog';
+import { TestSampleDialog } from '../TestSampleDialog';
 import styles from './styles.module.scss';
 
 // Material ids are random UUIDs, so they never match this.
@@ -32,6 +33,7 @@ export const BurnPreviewToolbar = (): ReactNode => {
   const materials: Material[] = useSelector(selectMaterials);
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const [isMaterialDialogOpen, setIsMaterialDialogOpen] = useState<boolean>(false);
+  const [isTestSampleDialogOpen, setIsTestSampleDialogOpen] = useState<boolean>(false);
 
   const changeMaterial = (optionValue: string): void => {
     if (optionValue === ADD_MATERIAL_OPTION_VALUE) {
@@ -54,7 +56,16 @@ export const BurnPreviewToolbar = (): ReactNode => {
         ]}
         onChange={changeMaterial}
       />
-      <Button disabled>{t(DEFAULT.BURN_PREVIEW_BURN_TEST_SAMPLE)}</Button>
+      <Button disabled={!activeMaterial} onClick={() => setIsTestSampleDialogOpen(true)}>
+        {t(DEFAULT.BURN_PREVIEW_BURN_TEST_SAMPLE)}
+      </Button>
+      {activeMaterial && (
+        <TestSampleDialog
+          isOpen={isTestSampleDialogOpen}
+          material={activeMaterial}
+          onClose={() => setIsTestSampleDialogOpen(false)}
+        />
+      )}
       <MaterialDialog isOpen={isMaterialDialogOpen} onClose={() => setIsMaterialDialogOpen(false)} />
     </>
   );

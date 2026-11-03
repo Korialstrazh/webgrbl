@@ -5,7 +5,7 @@ created: 2026-11-03
 
 # Burn preview
 
-The burn preview predicts depth from a test the user made on a real sheet. This article covers its foundation so far: materials, their storage, how a project and a project file refer to a material, and the burn model built from them. See also [[projects-and-svg-import]] and [[layers-and-gcode]].
+The burn preview predicts depth from a test the user made on a real sheet. This article covers materials, their storage, how a project and a project file refer to a material, and the burn model built from them. See also [[projects-and-svg-import]] and [[layers-and-gcode]].
 
 ## Key Takeaways
 
@@ -30,7 +30,9 @@ The burn preview predicts depth from a test the user made on a real sheet. This 
 - **Scene and lazy chunk.** `BurnPreviewPane` loads `burn.scene.runtime` with three.js in a lazy chunk. A failed load or no WebGL shows the fixed `BURN_PREVIEW_NO_WEBGL`, and everything outside the scene keeps working.
 - **Empty state.** `selectBurnPreviewEmptyState` says why there is no current model: `NO_MATERIAL`, `OUT_OF_DATE` (model stale or toolpath not ready), `FAILED` or `BUILDING`; undefined for a ready model. The pane and the Cut check both word it, so neither shows old parts as current. The pane also offers Add material.
 - **Cut check.** `CutCheckPanel` sits above Layers in `DesignPanel` in 3D, where Objects is hidden. It has the counts, one row per part (the only way to select a not-through part, which has no mesh), warnings from `getCutCheckWarningText`, and the estimate or guess note. Warnings never block export.
-- **Toolbar and first material.** `BurnPreviewToolbar` in the 3D header selects the material and opens `MaterialDialog`, which validates with `getMaterialFieldErrors`, then dispatches `MaterialSaved` and `ProjectMaterialSelected`. Burn test sample stays disabled until the sample dialog exists. An existing material cannot be edited yet.
+- **Toolbar and first material.** `BurnPreviewToolbar` in the 3D header selects the material and opens `MaterialDialog`, which validates with `getMaterialFieldErrors`, then dispatches `MaterialSaved` and `ProjectMaterialSelected`. An existing material cannot be edited yet. Burn test sample opens `TestSampleDialog`.
+- **Lifting.** The selected liftable part shows an orange arrow (`BurnPartLiftControl`, `add.burn.lift.drag.listener.ts`) to drag; arrow keys on its status card step `BURN_PART_LIFT_STEP_MM` (0.1). There is no slider and no upper limit; height 0 is absolute (`selectBurnPartEffectiveLiftMm`). Pieces are cel-shaded with an ink outline drawn only where a wall meets the sheet face. The camera is orthographic only.
+- **Test sample.** `getSampleJobDocument` builds a 50 mm Line square plus a black-to-white Fill gradient, 5 mm in from the edge; `SampleGcodeExportRequested` makes `toolpath.saga` write G-code on its own, leaving the project toolpath alone. `TestSampleDialog` locks the settings after Export (saving without exporting is allowed), checks the depth with `getTestDepthErrorKey` and dispatches `MaterialTestResultSaved` for the active profile. Shading comes from the gradient in the design; the app has no shading control.
 - **SVG drop in 3D.** There is no bed, so `useSvgFileDrop(false)` refuses the drag and imports nothing, while still stopping the browser from opening the file.
 
 ## Source
@@ -61,4 +63,5 @@ The burn preview predicts depth from a test the user made on a real sheet. This 
 - `src/containers/BurnPreviewToolbar/`
 - `src/containers/CutCheckPanel/`
 - `src/containers/MaterialDialog/`
+- `src/containers/TestSampleDialog/`
 - `src/containers/BedPanel/use.svg.file.drop.ts`

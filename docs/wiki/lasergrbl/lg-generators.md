@@ -72,7 +72,7 @@ LaserGRBL ships built-in job generators under the **Generate** menu: a Power vs 
   - Labels: `F<speed>` under each column and `<n>pass` beside each row. Caption: `LaserGRBL cutting test [label]` and `S<s>, F<min> - F<max>, <pmin> - F<pmax> pass, <ton>`. Upstream has a typo here: the stray `F` in the pass range.
   - Ends with `M5`. The loaded file is named "Cutting Test".
 - **Upstream source:** [`LaserGRBL/Generator/CuttingTest.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Generator/CuttingTest.cs) (`RestoreDefault`, `ComputeSize`, `Ii_PCurrentValueChanged`). [`LaserGRBL/GrblFile.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblFile.cs) (`GenerateCuttingTest`).
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: in progress. The 3D burn preview ([[burn-preview]]) generates a test sample for a material: one 5 x 5 cm square cut and a black-to-white gradient, with entered power, speed and passes, exported as G-code. It is a single cut and gradient sample, not a speed by passes test grid, and the result is stored as cut through or a depth.
   - Clamp fixed power to `$30` (the upstream bug lets it exceed `$30`).
   - Fix the caption typo.
   - Improvements:
@@ -160,7 +160,7 @@ LaserGRBL ships built-in job generators under the **Generate** menu: a Power vs 
   - Validation errors throw from `OnColumnChanging` with English messages such as "Please enter a valid power level (Min 1%)".
   - Shipped content at the pinned commit: 906 rows and 37 models. Brands: Algo, Atomstack, Comgo, LEON3D, Longer, MECOLOUR, NASUM, Ortur, SculpFun, Two Trees, YoraHome. There are 153 distinct material strings; the most common are Basswood, Acrylic, Leather, Bamboo, Hardwood, Plywood, Kraft paper, Stainless Steel and MDF.
 - **Upstream source:** [`LaserGRBL/PSHelper/MaterialDB.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/PSHelper/MaterialDB.cs) (`Load`, `SaveChanges`, `ImportServer`, `GetNewCount`, `OnColumnChanging`, `OnTableNewRow`). [`LaserGRBL/PSHelper/MaterialDB.xsd`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/PSHelper/MaterialDB.xsd). [`LaserGRBL/StandardMaterials.psh`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/StandardMaterials.psh). [`LaserGRBL/AutoUpdate/GitHub.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/AutoUpdate/GitHub.cs) (`AsyncDownloadDB`).
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: in progress. A minimal material table exists in Dexie (id, name, thickness, one test result per machine profile) with no shipped data, no library UI and no import or export; see [[burn-preview]]. The roadmap item 6 library will grow it.
   - Convert `StandardMaterials.psh` to JSON at build time and precache it. Store user rows in IndexedDB as an overlay, using GUID-keyed edits plus tombstones, so deletions stick (this fixes the upstream re-import).
   - Periodic refresh through `fetch` with ETag when online, in the service worker or on app start. Respect offline mode.
   - Normalise material and model names on import (case and plural duplicates).

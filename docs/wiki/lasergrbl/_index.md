@@ -273,11 +273,11 @@ Some features touch several areas. Their articles cross-link each other, and the
 | ID | Feature | Scope | Status |
 | --- | --- | --- | --- |
 | LG-GEN-01 | [[lg-generators#LG-GEN-01 Power vs Speed test generator\|Power vs Speed test generator]] | core | not started |
-| LG-GEN-02 | [[lg-generators#LG-GEN-02 Cutting test generator\|Cutting test generator]] | core | not started |
+| LG-GEN-02 | [[lg-generators#LG-GEN-02 Cutting test generator\|Cutting test generator]] | core | in progress |
 | LG-GEN-03 | [[lg-generators#LG-GEN-03 Shake test generator\|Shake test generator]] | later | not started |
 | LG-GEN-04 | [[lg-generators#LG-GEN-04 Accuracy test file\|Accuracy test file]] | later | not started |
 | LG-GEN-05 | [[lg-generators#LG-GEN-05 Hershey vector font for generator labels\|Hershey vector font for generator labels]] | core | not started |
-| LG-GEN-06 | [[lg-generators#LG-GEN-06 Material database (data model, storage, updates)\|Material database (data model, storage, updates)]] | core | not started |
+| LG-GEN-06 | [[lg-generators#LG-GEN-06 Material database (data model, storage, updates)\|Material database (data model, storage, updates)]] | core | in progress |
 | LG-GEN-07 | [[lg-generators#LG-GEN-07 Material DB editor\|Material DB editor]] | core | not started |
 | LG-GEN-08 | [[lg-generators#LG-GEN-08 Power/Speed helper (apply preset to import)\|Power/Speed helper (apply preset to import)]] | core | not started |
 

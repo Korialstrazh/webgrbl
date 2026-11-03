@@ -406,6 +406,25 @@ STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
 STATUS_STRIP_TITLE;Status
+TEST_SAMPLE_DIALOG_BURN_HEADING;1. Burn the sample
+TEST_SAMPLE_DIALOG_BURN_HINT;A 5 × 5 cm square is cut out, with a gradient engraved inside.
+TEST_SAMPLE_DIALOG_CANCEL;Cancel
+TEST_SAMPLE_DIALOG_CUT_THROUGH;Cut through
+TEST_SAMPLE_DIALOG_DEPTH;Depth (mm)
+TEST_SAMPLE_DIALOG_DEPTH_HINT;Depth is optional. Without it, the preview says it is less sure.
+TEST_SAMPLE_DIALOG_DEPTH_INVALID;Enter a depth above 0 and at most {{max}} mm.
+TEST_SAMPLE_DIALOG_EXPORT;Export sample G-code
+TEST_SAMPLE_DIALOG_EXPORT_NO_PROFILE;Choose a machine profile to export the sample.
+TEST_SAMPLE_DIALOG_EXPORT_TOO_SMALL;The sample does not fit the work area of this machine.
+TEST_SAMPLE_DIALOG_NOT_THROUGH;Not through
+TEST_SAMPLE_DIALOG_PASSES;Passes
+TEST_SAMPLE_DIALOG_PICTURE;Sample: a 5 by 5 centimetre square with a gradient inside
+TEST_SAMPLE_DIALOG_POWER;Power (%)
+TEST_SAMPLE_DIALOG_RESULT_HEADING;2. How far did the cut go?
+TEST_SAMPLE_DIALOG_SAVE;Save for this material
+TEST_SAMPLE_DIALOG_SETTINGS_HINT;These must be the settings the sample was burnt with.
+TEST_SAMPLE_DIALOG_SPEED;Speed (mm/min)
+TEST_SAMPLE_DIALOG_TITLE;Test sample: {{name}}
 TOAST_BURN_MODEL_FAILED;The 3D preview could not be built. Try again, or simplify the design.
 TOAST_CONNECT_TIMEOUT;No response from the controller - check the baud rate and that the laser is powered.
 TOAST_CONNECTED;Connected to {{firmware}} {{version}}

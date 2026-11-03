@@ -82,9 +82,20 @@ describe(BurnPreviewToolbar.name, () => {
     expect(document.querySelector(`${SELECT_OPTION_SELECTOR}[title="${BIRCH.name}"]`)).toBeInTheDocument();
   });
 
-  it('keeps Burn test sample disabled', () => {
+  it('keeps Burn test sample disabled until a material is selected', () => {
     renderToolbar(newStore());
 
     expect(screen.getByRole('button', { name: TEST_SAMPLE_LABEL })).toBeDisabled();
+  });
+
+  it('opens the test sample dialog for the selected material', () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new MaterialSaved({ material: BIRCH }));
+    renderToolbar(store);
+    pickMaterialOption(BIRCH.name);
+    fireEvent.click(screen.getByRole('button', { name: TEST_SAMPLE_LABEL }));
+
+    expect(screen.getByRole('dialog', { name: `Test sample: ${BIRCH.name}` })).toBeInTheDocument();
   });
 });
