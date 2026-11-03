@@ -163,7 +163,9 @@ const getMeshIndexByPartId = (parts: BurnPart[], partsById: Map<number, BurnPart
   for (const part of parts) {
     const liftingPart: BurnPart | undefined = getLiftingPart(part, partsById);
 
-    meshIndexByPartId.set(part.id, meshIndexOfLiftablePart.get(liftingPart?.id ?? 0) ?? BURN_SHEET_MESH_INDEX);
+    const liftingPartId: number = liftingPart?.id ?? BURN_REGION_LABEL_NONE;
+
+    meshIndexByPartId.set(part.id, meshIndexOfLiftablePart.get(liftingPartId) ?? BURN_SHEET_MESH_INDEX);
   }
 
   return meshIndexByPartId;

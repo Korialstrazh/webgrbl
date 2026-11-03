@@ -16,6 +16,9 @@ import type { BurnMeshQuad } from './interfaces/BurnMeshQuad';
 const FULLY_BURNT_SHADE = 1;
 const CLEAN_SHADE = 0;
 const OUTSIDE_THE_GRID = -1;
+/** Offset from the first cell of a run to the cell on its left, and from the last cell to the cell on its right. */
+const LEFT_COLUMN_OFFSET = -1;
+const RIGHT_COLUMN_OFFSET = 1;
 
 const getCellTopMm = (surface: BurnCellSurface, cell: number): number =>
   surface.thicknessMm - (surface.depthSteps[cell] ?? 0) * BURN_DEPTH_QUANTUM_MM;
@@ -200,8 +203,8 @@ export const visitBurnSurfaceQuads = (surface: BurnCellSurface, visitQuad: (quad
 
       if (hasCellGeometry(surface, row * columnCount + column)) {
         visitRunFlatFaces(surface, [column, endColumn, row], visitQuad);
-        visitRunEndWall(surface, [column, row, -1], visitQuad);
-        visitRunEndWall(surface, [endColumn - 1, row, 1], visitQuad);
+        visitRunEndWall(surface, [column, row, LEFT_COLUMN_OFFSET], visitQuad);
+        visitRunEndWall(surface, [endColumn - 1, row, RIGHT_COLUMN_OFFSET], visitQuad);
         visitRunRowWalls(surface, [column, endColumn, row], -columnCount, visitQuad);
         visitRunRowWalls(surface, [column, endColumn, row], columnCount, visitQuad);
       }

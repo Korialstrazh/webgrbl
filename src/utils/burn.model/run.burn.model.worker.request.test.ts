@@ -3,7 +3,7 @@ import { newToolpath } from '../toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../toolpath/test.support/new.toolpath.move';
 import { BURN_MODEL_WORKER_MESSAGE_KIND } from './burn.model.worker.constants';
 import * as getBurnModelModule from './get.burn.model';
-import type { BurnModelWorkerMessage } from './interfaces/BurnModelWorkerMessage';
+import type { BurnModelWorkerMessagePoster } from './interfaces/BurnModelWorkerMessagePoster';
 import type { BurnModelWorkerRequest } from './interfaces/BurnModelWorkerRequest';
 import type { BurnRegionMesh } from './interfaces/BurnRegionMesh';
 import { runBurnModelWorkerRequest } from './run.burn.model.worker.request';
@@ -29,13 +29,13 @@ describe(runBurnModelWorkerRequest.name, () => {
   });
 
   it('posts the model with the request id and every mesh buffer as transferables', () => {
-    const postMessage = vi.fn();
+    const postMessage = vi.fn<BurnModelWorkerMessagePoster>();
 
     runBurnModelWorkerRequest(REQUEST, postMessage);
 
-    const [message, transferables] = postMessage.mock.calls[0] as [BurnModelWorkerMessage, Transferable[]];
+    const [message, transferables] = postMessage.mock.calls[0] ?? [];
 
-    if (message.kind !== BURN_MODEL_WORKER_MESSAGE_KIND.RESULT) {
+    if (message?.kind !== BURN_MODEL_WORKER_MESSAGE_KIND.RESULT) {
       throw new Error('expected a result message');
     }
 
@@ -55,7 +55,7 @@ describe(runBurnModelWorkerRequest.name, () => {
     vi.spyOn(getBurnModelModule, 'getBurnModel').mockImplementation(() => {
       throw new Error(WORKER_ERROR_TEXT);
     });
-    const postMessage = vi.fn();
+    const postMessage = vi.fn<BurnModelWorkerMessagePoster>();
 
     runBurnModelWorkerRequest(REQUEST, postMessage);
 
@@ -69,7 +69,7 @@ describe(runBurnModelWorkerRequest.name, () => {
     vi.spyOn(getBurnModelModule, 'getBurnModel').mockImplementation(() => {
       throw WORKER_ERROR_TEXT;
     });
-    const postMessage = vi.fn();
+    const postMessage = vi.fn<BurnModelWorkerMessagePoster>();
 
     runBurnModelWorkerRequest(REQUEST, postMessage);
 

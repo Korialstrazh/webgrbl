@@ -193,12 +193,12 @@ describe(getCutCheck.name, () => {
   });
 
   it('names both of two shallow fill layers that reach through together', () => {
-    const [redLayer, blueLayer]: ProjectLayer[] = SHALLOW_LAYERS;
+    const [redLayer = newTestLayer(RED)]: ProjectLayer[] = SHALLOW_LAYERS;
     const check: CutCheck = getTwoFillCheck(SHALLOW_LAYERS, PANEL, PANEL);
 
     expect(check.warnings.map((warning: CutCheckWarning) => warning.layerKey).sort())
       .toEqual(SHALLOW_LAYERS.map(getLayerKey).sort());
-    expect(getCheck([newFilledDrawable([PANEL], RED)], [redLayer ?? blueLayer ?? newTestLayer(RED)]).warnings)
+    expect(getCheck([newFilledDrawable([PANEL], RED)], [redLayer]).warnings)
       .toEqual([]);
   });
 
@@ -213,10 +213,11 @@ describe(getCutCheck.name, () => {
       getFillLayer(RED, FILL_SHALLOW_SPEED_MM_PER_MIN),
       getFillLayer(BLUE, FILL_HIGH_SPEED_MM_PER_MIN),
     ];
+    const [, blueHotLayer = newTestLayer(BLUE)]: ProjectLayer[] = hotLayers;
     const check: CutCheck = getTwoFillCheck(hotLayers, FAR_PANEL, PANEL);
 
     expect(check.warnings.map((warning: CutCheckWarning) => warning.layerKey))
-      .toEqual([getLayerKey(hotLayers[1] ?? newTestLayer(RED))]);
+      .toEqual([getLayerKey(blueHotLayer)]);
     expect(check.warnings[0]?.predictedDepthMm).toBeGreaterThanOrEqual(THICKNESS_MM);
   });
 

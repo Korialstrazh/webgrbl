@@ -9,12 +9,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { BURN_MODEL_WORKER_MESSAGE_KIND } from './burn.model.worker.constants';
 import { getBurnModel } from './get.burn.model';
 import type { BurnModel } from './interfaces/BurnModel';
 import type { BurnModelWorkerMessagePoster } from './interfaces/BurnModelWorkerMessagePoster';
 import type { BurnModelWorkerRequest } from './interfaces/BurnModelWorkerRequest';
 import type { BurnRegionMesh } from './interfaces/BurnRegionMesh';
-import { BURN_MODEL_WORKER_MESSAGE_KIND } from './burn.model.worker.constants';
 
 const getThrownErrorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 

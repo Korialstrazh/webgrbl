@@ -21,6 +21,7 @@ import type { BurnPartSet } from './interfaces/BurnPartSet';
 const RED = '#ff0000';
 const BLUE = '#0000ff';
 const GREEN = '#00a000';
+const MISSING_DOSE_GRID_MESSAGE = 'expected a dose grid';
 const BORDERLINE_DEPTH_MM = 2.85;
 const THICKNESS_MM = 3;
 const TEST_POWER_PERCENT = 100;
@@ -68,7 +69,7 @@ const getPartSet = (
   const grid: BurnDoseGrid | undefined = getBurnDoseGrid(toolpath, [layer]);
 
   if (!grid) {
-    throw new Error('expected a dose grid');
+    throw new Error(MISSING_DOSE_GRID_MESSAGE);
   }
 
   return getBurnParts(grid, { thicknessMm: THICKNESS_MM, basis });
@@ -229,7 +230,7 @@ describe(getBurnParts.name, () => {
     const grid: BurnDoseGrid | undefined = getBurnDoseGrid(toolpath, layers);
 
     if (!grid) {
-      throw new Error('expected a dose grid');
+      throw new Error(MISSING_DOSE_GRID_MESSAGE);
     }
 
     const { parts }: BurnPartSet = getBurnParts(grid, { thicknessMm: THICKNESS_MM, basis: CUT_THROUGH_BASIS });
@@ -253,7 +254,7 @@ describe(getBurnParts.name, () => {
       const grid: BurnDoseGrid | undefined = getBurnDoseGrid(toolpath, layers);
 
       if (!grid) {
-        throw new Error('expected a dose grid');
+        throw new Error(MISSING_DOSE_GRID_MESSAGE);
       }
 
       return getBurnParts(grid, { thicknessMm: THICKNESS_MM, basis: CUT_THROUGH_BASIS });
@@ -321,7 +322,7 @@ describe(getBurnParts.name, () => {
       const grid: BurnDoseGrid | undefined = getBurnDoseGrid(toolpath, layers);
 
       if (!grid) {
-        throw new Error('expected a dose grid');
+        throw new Error(MISSING_DOSE_GRID_MESSAGE);
       }
 
       const { parts }: BurnPartSet = getBurnParts(grid, { thicknessMm: THICKNESS_MM, basis: CUT_THROUGH_BASIS });
@@ -347,7 +348,7 @@ describe(getBurnParts.name, () => {
       const grid: BurnDoseGrid | undefined = getBurnDoseGrid(toolpath, layers);
 
       if (!grid) {
-        throw new Error('expected a dose grid');
+        throw new Error(MISSING_DOSE_GRID_MESSAGE);
       }
 
       const { parts }: BurnPartSet = getBurnParts(grid, { thicknessMm: THICKNESS_MM, basis: CUT_THROUGH_BASIS });

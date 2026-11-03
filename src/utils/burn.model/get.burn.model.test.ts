@@ -310,13 +310,8 @@ describe(getBurnModel.name, () => {
   it('builds a 100,000-move toolpath with cells and triangles under their caps', () => {
     const layers: ProjectLayer[] = [newLayerAtPower(RED, FULL_POWER_PERCENT)];
     const toolpath: Toolpath = newManyMovesToolpath();
-    const startedAtMs: number = performance.now();
     const model: BurnModel = getBurnModel({ toolpath, layers, thicknessMm: THICKNESS_MM, testResult: undefined });
-    const elapsedMs: number = performance.now() - startedAtMs;
     const grid: BurnDoseGrid = getRequiredGrid(toolpath, layers);
-
-    // eslint-disable-next-line no-console -- the task asks for the measured time in the report
-    console.info(`100,000 moves: ${Math.round(elapsedMs)} ms, ${countMeshTriangles(model.meshes)} triangles`);
 
     expect(grid.columnCount * grid.rowCount).toBeLessThanOrEqual(BURN_GRID_MAX_CELLS);
     expect(countMeshTriangles(model.meshes)).toBeGreaterThan(0);
