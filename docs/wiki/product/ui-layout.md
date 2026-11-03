@@ -12,7 +12,7 @@ The approved screen layout of webgrbl and the order in which features get built.
 
 - **Workbench layout.** One screen, with no modes:
   - top bar: project, menus, undo/redo, connection pill, autosave state;
-  - left panel: layers (on/off; off is never sent), objects; the material panel is planned (roadmap item 6);
+  - left panel: layers (on/off; off is never sent), objects; in 3D the Cut check above Layers, Objects hidden; the material is chosen in the 3D toolbar, the material library panel is planned (roadmap item 6);
   - centre: the bed to scale, with a Design / Toolpath / 3D switch and a status strip with a collapsible console;
   - right panel, main task first: machine state (one line while not connected), job (estimate, export, Start), jog, low-power pointer, frame, air assist, and a large STOP that is always visible; the pre-flight check is planned (roadmap item 5);
 - **Running a job** changes the Workbench's state (progress, overrides, jog locked); there is no separate screen.
@@ -31,9 +31,9 @@ The approved screen layout of webgrbl and the order in which features get built.
   1. ~~App shell and design system.~~ Done: see [[app-shell]] and [[ui-components]].
   2. ~~Machine control and machine profiles.~~ Done: see [[machine-control]].
   3. ~~Projects and SVG import (Dexie autosave, undo/redo).~~ Done: see [[projects-and-svg-import]].
-  4. Layers and power mapping, G-code, toolpath preview. 4a done: see [[layers-and-gcode]] (palette, layers from colours, G-code export, Toolpath view with simulation and time estimate); 4b next: 3D burn preview (engraving depth, orthographic and perspective cameras, a material model).
+  4. Layers and power mapping, G-code, toolpath preview. 4a done: see [[layers-and-gcode]] (palette, layers from colours, G-code export, Toolpath view with simulation and time estimate); 4b done: see [[burn-preview]] (3D burn preview with an orthographic camera, materials with a test sample, Cut check, liftable parts). The real burn of the sample awaits the hardware follow-up.
   5. Running jobs (pre-flight, progress, pause, overrides).
   6. Material library (import/export).
-  7. Extras (node editing, 3D preview, more colour ranges).
+  7. Extras (node editing, more colour ranges).
 
 Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference]]. Product goals: [[vision]].
