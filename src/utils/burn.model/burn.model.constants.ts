@@ -22,6 +22,17 @@ export const BURN_SAMPLE_SIZE_MM = 50;
 export const BURN_SAMPLE_ORIGIN_OFFSET_MM = 5;
 export const BURN_SAMPLE_GRADIENT_INSET_MM = 5;
 
+/** Burn depths in a mesh are rounded to this, in mm, so that nearby depths merge into one flat face. */
+export const BURN_DEPTH_QUANTUM_MM = 0.05;
+/** Most triangles of all meshes of a model together; a job with more is drawn with bigger cells. */
+export const BURN_MESH_MAX_TRIANGLES = 2000000;
+/** How much bigger the cells get each time a mesh still has too many triangles. */
+export const BURN_MESH_COARSEN_FACTOR = 2;
+/** Index of the sheet among the meshes of a model. */
+export const BURN_SHEET_MESH_INDEX = 0;
+/** Mesh index of a cell with no material left. */
+export const BURN_CELL_NO_MESH = -1;
+
 /** Burn depth in mm per unit of dose when no test exists: 3 mm at 100 %, 1 run, 300 mm/min. */
 export const GUESS_DEPTH_MM_PER_DOSE = 9;
 

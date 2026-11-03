@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { getBurnGridNeighbourCells } from './get.burn.grid.neighbour.cells';
 import type { BurnGridLayout } from './interfaces/BurnGridLayout';
+import { visitBurnGridNeighbourCells } from './visit.burn.grid.neighbour.cells';
 
 export const visitBurnGridConnectedCells = (
   layout: BurnGridLayout,
@@ -31,6 +31,6 @@ export const visitBurnGridConnectedCells = (
 
   // for-of also walks the cells added while it runs.
   for (const cell of pendingCells) {
-    getBurnGridNeighbourCells(cell, layout).forEach(enterCellWhenOpen);
+    visitBurnGridNeighbourCells(cell, layout, enterCellWhenOpen);
   }
 };

@@ -11,7 +11,6 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import {
-  BURN_DOSE_STORAGE_TOLERANCE_RATIO,
   BURN_PART_STATUS,
   BURN_REGION_LABEL_NONE,
   CUT_DEPTH_LEVEL,
@@ -23,6 +22,7 @@ import { getBurnDepthPrediction } from './get.burn.depth.prediction';
 import { getBurnGridOutsideCells } from './get.burn.grid.outside.cells';
 import { getBurnGridRegions } from './get.burn.grid.regions';
 import { getBurnRegionParents } from './get.burn.region.parents';
+import { getBurnStoredCellDose } from './get.burn.stored.cell.dose';
 import { getBurnWallSides } from './get.burn.wall.sides';
 import type { BurnAttachmentTrees } from './interfaces/BurnAttachmentTrees';
 import type { BurnDepthPrediction } from './interfaces/BurnDepthPrediction';
@@ -40,12 +40,8 @@ import type { ToolpathBounds } from '../toolpath/interfaces/ToolpathBounds';
 /** A region's outermost cells touch its walls, so half a cell past them, on each side, is the middle of the wall. */
 const WALL_MIDDLE_CELL_OFFSET = 0.5;
 
-/** Total dose of a cell, raised by what storing it as a 32-bit float can have rounded away. */
-const getStoredCellDose = (grid: BurnDoseGrid, cell: number): number =>
-  ((grid.lineDose[cell] ?? 0) + (grid.fillDose[cell] ?? 0)) * (1 + BURN_DOSE_STORAGE_TOLERANCE_RATIO);
-
 const getWallCellPrediction = (grid: BurnDoseGrid, cell: number, input: BurnPartsInput): BurnDepthPrediction =>
-  getBurnDepthPrediction(getStoredCellDose(grid, cell), input.thicknessMm, input.basis);
+  getBurnDepthPrediction(getBurnStoredCellDose(grid, cell), input.thicknessMm, input.basis);
 
 const getWallLevelCells = (grid: BurnDoseGrid, input: BurnPartsInput): BurnWallLevelCells => {
   const throughCells: Uint8Array = new Uint8Array(grid.closedCutMask.length);
@@ -74,7 +70,7 @@ const getLowestDoseWall = (
   let lowestDoseWall: BurnWeakestWall | undefined;
 
   for (const cell of wallCells) {
-    const dose: number = getStoredCellDose(grid, cell);
+    const dose: number = getBurnStoredCellDose(grid, cell);
 
     if (isCellCounted(cell) && dose < (lowestDoseWall?.dose ?? Number.POSITIVE_INFINITY)) {
       lowestDoseWall = { cell, dose };

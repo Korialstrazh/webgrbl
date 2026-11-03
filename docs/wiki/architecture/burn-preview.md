@@ -5,7 +5,7 @@ created: 2026-11-03
 
 # Burn preview
 
-The burn preview predicts depth from a test the user made on a real sheet. This article covers its foundation so far: materials, their storage, and how a project and a project file refer to a material. See also [[projects-and-svg-import]] and [[layers-and-gcode]].
+The burn preview predicts depth from a test the user made on a real sheet. This article covers its foundation so far: materials, their storage, how a project and a project file refer to a material, and the burn model built from them. See also [[projects-and-svg-import]] and [[layers-and-gcode]].
 
 ## Key Takeaways
 
@@ -18,6 +18,14 @@ The burn preview predicts depth from a test the user made on a real sheet. This 
 - **Project file version 3.** Adds optional `materialId` and `material` (an embedded copy) after `layers`. Versions 1 and 2 still open, with no material; a stray `material` in them is ignored.
 - **Import.** `isMaterial` checks types only. `getImportedMaterial` then copies known fields, trims and cuts the name, and clamps thickness and test settings, so a speed of 0 cannot make a test dose infinite. An empty id or name rejects the file with `TOAST_PROJECT_FILE_INVALID`. The document points at the embedded material if the two ids differ.
 - **Existing id wins.** `importProjectFile` calls `addMissingMaterial` before storing the project, then reloads with `MaterialsLoaded`, keeping materials on screen whose store failed. A local material with the same id keeps its name and results.
+- **Depth estimate.** `getBurnDepthBasis` turns the test result into a depth per dose (dose = power / feed); `getBurnDepthPrediction` gives depth, level (through, borderline, not through) and sureness. With no test the estimate is `GUESS_DEPTH_MM_PER_DOSE`, and no cell ever counts as through.
+- **Grid.** `getBurnDoseGrid` keeps the dose per cell of the sheet (job bounds + 10 mm, at most 1,000,000 cells, at least 0.1 mm). Floods use `visitBurnGridNeighbourCells`, a callback rather than a list: a list per cell cost 15-20 % of a 100,000-move build.
+- **Parts.** `getBurnParts` finds the regions closed cuts enclose, their status and a parent tree by `parentId`. `FREE` and `BORDERLINE` parts can lift (`isBurnPartLiftable`); a `NOT_THROUGH` part cannot.
+- **Meshes.** `getBurnRegionMeshes` gives the sheet first, then one mesh per liftable part. Height 0 is the sheet bottom and the thickness its untouched top; through cells have no geometry; depths round to `BURN_DEPTH_QUANTUM_MM`; quads merge along rows. A `NOT_THROUGH` part goes to its nearest liftable ancestor, else the sheet. A remaining wall goes to the outermost mesh it touches, so an engraving rises with its part and the wall of a borderline part stays behind. A cell that is not through keeps a floor one step high, however deep its estimate.
+- **Triangle cap.** Over `BURN_MESH_MAX_TRIANGLES` (2,000,000) the surface doubles its cell size until it fits. A block with any through cell is empty, so cuts stay open and only look wider. Quads are counted first, then written to exact-size arrays.
+- **Worker.** `BrowserBurnModelWorkerClient` mirrors the toolpath client: a cancel terminates the worker, a request id guards answers. `runBurnModelWorkerRequest` hands the mesh buffers over as transferables; an error is a fixed-shape message and its text only reaches the log.
+- **Slice `burnModel`.** Status `IDLE`, `BUILDING`, `READY`, `STALE`, `FAILED`. `BurnModelReady` clears selection and lifts. `ToolpathRequested`, `ToolpathMachineAreaChanged`, every document change, and also a material edit, test result or profile selection make a ready model stale, whatever the view. Lifts clamp to 0 to 4 x thickness and change nothing in the project; `selectBurnPartEffectiveLiftMm` adds the lifts of all ancestors. A build stopped by one of those changes or by a view change leaves `BUILDING`.
+- **Saga `watchBurnModel`.** Builds while `selectBedViewMode` is 3D, a material exists and the toolpath is ready. `takeLatest` also hears the toolpath input changes: these build nothing but cancel a running build. A material change is not a toolpath input, so it rebuilds directly. A view change with a ready model builds nothing, which keeps the lifts. A failure logs and shows `TOAST_BURN_MODEL_FAILED`.
 
 ## Source
 
@@ -35,3 +43,9 @@ The burn preview predicts depth from a test the user made on a real sheet. This 
 - `src/utils/project/is.project.file.without.material.ts`
 - `src/utils/get.number.in.range.ts`
 - `src/utils/states/project.document.change.action.types.ts`
+- `src/utils/burn.model/`
+- `src/utils/bed/bed.view.constants.ts`
+- `src/utils/states/bed.view.state.ts`
+- `src/utils/states/burn.model.state.ts`
+- `src/utils/states/burn.model.status.constants.ts`
+- `src/utils/states/burn.model.saga.ts`

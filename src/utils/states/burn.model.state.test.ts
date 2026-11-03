@@ -1,0 +1,205 @@
+import { describe, expect, it } from 'vitest';
+import { BED_VIEW_MODE } from '../bed/bed.view.constants';
+import { BURN_PART_LIFT_MAX_THICKNESSES, BURN_PART_STATUS } from '../burn.model/burn.model.constants';
+import type { BurnModel } from '../burn.model/interfaces/BurnModel';
+import type { BurnPart } from '../burn.model/interfaces/BurnPart';
+import { BedViewModeChanged } from './bed.view.state';
+import { BURN_MODEL_STATUS } from './burn.model.status.constants';
+import {
+  BurnModelFailed,
+  BurnModelReady,
+  BurnModelRequested,
+  BurnPartLifted,
+  BurnPartSelected,
+  burnModelReducer,
+  selectBurnModel,
+  selectBurnModelStatus,
+  selectBurnPartEffectiveLiftMm,
+  selectBurnPartLiftMm,
+  selectSelectedBurnPartId,
+} from './burn.model.state';
+import type { BurnModelState } from './burn.model.state';
+import { MaterialSaved } from './material.state';
+import { newMaterial } from '../materials/new.material';
+import { LayerToggled, ProjectMaterialSelected, ProjectUndoRequested } from './project.document.state';
+import { ToolpathMachineAreaChanged, ToolpathRequested } from './toolpath.state';
+import type { Action } from './action';
+
+const THICKNESS_MM = 3;
+const PARENT_ID = 1;
+const CHILD_ID = 2;
+const GRANDCHILD_ID = 3;
+const UNKNOWN_PART_ID = 9;
+const PARENT_LIFT_MM = 2;
+const CHILD_LIFT_MM = 1.5;
+const LAYER_KEY = '#ff0000';
+const MATERIAL_ID = 'material-1';
+
+const newPart = (id: number, parentId: number | undefined): BurnPart => ({
+  id,
+  parentId,
+  status: BURN_PART_STATUS.FREE,
+  boundsMm: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+  weakestLayerKey: undefined,
+  weakestDepthMm: undefined,
+});
+
+const newModel = (parts: BurnPart[] = [newPart(PARENT_ID, undefined), newPart(CHILD_ID, PARENT_ID)]): BurnModel => ({
+  parts,
+  cutCheck: { freePartCount: 0, borderlinePartCount: 0, attachedPartCount: 0, warnings: [], isGuess: true },
+  meshes: [],
+  sheetBounds: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+  thicknessMm: THICKNESS_MM,
+});
+
+const reduceActions = (actions: Action<unknown>[]): BurnModelState => actions.reduce(
+  (state: BurnModelState, action: Action<unknown>): BurnModelState => burnModelReducer(state, action),
+  burnModelReducer(undefined, new BurnPartSelected({ partId: undefined })),
+);
+
+const newRootState = (burnModel: BurnModelState): { burnModel: BurnModelState } => ({ burnModel });
+
+const READY_ACTIONS: Action<unknown>[] = [new BurnModelRequested(), new BurnModelReady({ model: newModel() })];
+
+describe(burnModelReducer.name, () => {
+  it('goes from idle to building to ready, keeping the model', () => {
+    const model: BurnModel = newModel();
+    const root = newRootState(reduceActions([new BurnModelRequested(), new BurnModelReady({ model })]));
+
+    expect(selectBurnModelStatus(newRootState(reduceActions([])))).toBe(BURN_MODEL_STATUS.IDLE);
+    expect(selectBurnModelStatus(newRootState(reduceActions([new BurnModelRequested()]))))
+      .toBe(BURN_MODEL_STATUS.BUILDING);
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.READY);
+    expect(selectBurnModel(root)).toBe(model);
+  });
+
+  it('marks a failure', () => {
+    expect(selectBurnModelStatus(newRootState(reduceActions([new BurnModelRequested(), new BurnModelFailed()]))))
+      .toBe(BURN_MODEL_STATUS.FAILED);
+  });
+
+  it('clears the selection and the lifts when a model is ready', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartSelected({ partId: PARENT_ID }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+      new BurnModelReady({ model: newModel() }),
+    ]));
+
+    expect(selectSelectedBurnPartId(root)).toBeUndefined();
+    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(0);
+  });
+
+  it.each([
+    ['a toolpath request', new ToolpathRequested()],
+    ['a machine area change', new ToolpathMachineAreaChanged()],
+    ['a layer change', new LayerToggled({ layerKey: LAYER_KEY, enabled: false })],
+    ['an undo', new ProjectUndoRequested()],
+    ['a material selection', new ProjectMaterialSelected({ materialId: MATERIAL_ID })],
+    ['a material edit', new MaterialSaved({ material: newMaterial() })],
+  ])('makes a ready model stale on %s', (_title: string, action: Action<unknown>) => {
+    const root = newRootState(reduceActions([...READY_ACTIONS, action]));
+
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.STALE);
+    expect(selectBurnModel(root)).toBeDefined();
+  });
+
+  it('leaves a failed model failed on a document change', () => {
+    const root = newRootState(reduceActions([new BurnModelFailed(), new ToolpathRequested()]));
+
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.FAILED);
+  });
+
+  it('stops building without a model when the input changes, so the saga can cancel', () => {
+    const root = newRootState(reduceActions([new BurnModelRequested(), new ToolpathRequested()]));
+
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.IDLE);
+  });
+
+  it('stops building when the view leaves 3D and keeps an older model as stale', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnModelRequested(),
+      new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }),
+    ]));
+
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.STALE);
+  });
+
+  it('keeps a ready model ready when the view changes', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }),
+    ]));
+
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.READY);
+  });
+
+  it('keeps the lift of a part within the lift range', () => {
+    const tooHigh = THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES + 1;
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: tooHigh }),
+      new BurnPartLifted({ partId: CHILD_ID, liftMm: -1 }),
+    ]));
+
+    expect(selectBurnPartLiftMm(PARENT_ID)(root)).toBe(THICKNESS_MM * BURN_PART_LIFT_MAX_THICKNESSES);
+    expect(selectBurnPartLiftMm(CHILD_ID)(root)).toBe(0);
+  });
+
+  it('selects and clears the selected part', () => {
+    const selectedRoot = newRootState(reduceActions([...READY_ACTIONS, new BurnPartSelected({ partId: CHILD_ID })]));
+    const clearedRoot = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartSelected({ partId: CHILD_ID }),
+      new BurnPartSelected({ partId: undefined }),
+    ]));
+
+    expect(selectSelectedBurnPartId(selectedRoot)).toBe(CHILD_ID);
+    expect(selectSelectedBurnPartId(clearedRoot)).toBeUndefined();
+  });
+});
+
+describe(selectBurnPartEffectiveLiftMm.name, () => {
+  it('carries the lift of a parent to its child', () => {
+    const root = newRootState(reduceActions([
+      ...READY_ACTIONS,
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftMm(CHILD_ID)(root)).toBe(PARENT_LIFT_MM);
+    expect(selectBurnPartEffectiveLiftMm(PARENT_ID)(root)).toBe(PARENT_LIFT_MM);
+  });
+
+  it('adds the own lift of the child and every ancestor', () => {
+    const parts: BurnPart[] = [
+      newPart(PARENT_ID, undefined),
+      newPart(CHILD_ID, PARENT_ID),
+      newPart(GRANDCHILD_ID, CHILD_ID),
+    ];
+    const root = newRootState(reduceActions([
+      new BurnModelReady({ model: newModel(parts) }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+      new BurnPartLifted({ partId: CHILD_ID, liftMm: CHILD_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftMm(CHILD_ID)(root)).toBe(PARENT_LIFT_MM + CHILD_LIFT_MM);
+    expect(selectBurnPartEffectiveLiftMm(GRANDCHILD_ID)(root)).toBe(PARENT_LIFT_MM + CHILD_LIFT_MM);
+  });
+
+  it('stops at a parent loop instead of walking forever', () => {
+    const parts: BurnPart[] = [newPart(PARENT_ID, CHILD_ID), newPart(CHILD_ID, PARENT_ID)];
+    const root = newRootState(reduceActions([
+      new BurnModelReady({ model: newModel(parts) }),
+      new BurnPartLifted({ partId: PARENT_ID, liftMm: PARENT_LIFT_MM }),
+    ]));
+
+    expect(selectBurnPartEffectiveLiftMm(CHILD_ID)(root)).toBe(PARENT_LIFT_MM);
+  });
+
+  it('gives 0 for a part the model does not have', () => {
+    const root = newRootState(reduceActions(READY_ACTIONS));
+
+    expect(selectBurnPartEffectiveLiftMm(UNKNOWN_PART_ID)(root)).toBe(0);
+  });
+});

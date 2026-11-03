@@ -9,9 +9,11 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { all, fork } from 'redux-saga/effects';
+import type { BurnModelWorkerClient } from '../burn.model/interfaces/BurnModelWorkerClient';
 import type { ToolpathWorkerClient } from '../toolpath/interfaces/ToolpathWorkerClient';
 import { watchBedAppearance } from './bed.appearance.saga';
 import { watchOnlineStatus } from './browser.environment.state';
+import { watchBurnModel } from './burn.model.saga';
 import { watchGrblController } from './grbl.controller.saga';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import { watchLaserPointer } from './laser.pointer.saga';
@@ -27,6 +29,7 @@ import { watchToolpath } from './toolpath.saga';
 export function* rootSaga(
   grblControllerSagaDependencies: GrblControllerSagaDependencies,
   toolpathWorkerClient: ToolpathWorkerClient,
+  burnModelWorkerClient: BurnModelWorkerClient,
 ): Generator {
   yield all([
     fork(watchOnlineStatus),
@@ -40,6 +43,7 @@ export function* rootSaga(
     fork(watchProjects),
     fork(watchGrblController, grblControllerSagaDependencies),
     fork(watchToolpath, toolpathWorkerClient),
+    fork(watchBurnModel, burnModelWorkerClient),
     fork(watchSimulation),
   ]);
 }

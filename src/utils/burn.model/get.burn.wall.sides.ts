@@ -10,21 +10,21 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { BURN_REGION_LABEL_NONE } from './burn.model.constants';
-import { getBurnGridNeighbourCells } from './get.burn.grid.neighbour.cells';
 import type { BurnDoseGrid } from './interfaces/BurnDoseGrid';
 import type { BurnWallSides } from './interfaces/BurnWallSides';
 import { visitBurnGridConnectedCells } from './visit.burn.grid.connected.cells';
+import { visitBurnGridNeighbourCells } from './visit.burn.grid.neighbour.cells';
 
 const MIN_DIRECT_SIDE_COUNT = 2;
 
 const getDirectSides = (grid: BurnDoseGrid, regionNumbers: Int32Array, cell: number): Set<number> => {
   const directSides: Set<number> = new Set<number>();
 
-  for (const neighbourCell of getBurnGridNeighbourCells(cell, grid)) {
+  visitBurnGridNeighbourCells(cell, grid, (neighbourCell: number): void => {
     if (!grid.closedCutMask[neighbourCell]) {
       directSides.add(regionNumbers[neighbourCell] ?? BURN_REGION_LABEL_NONE);
     }
-  }
+  });
 
   return directSides;
 };

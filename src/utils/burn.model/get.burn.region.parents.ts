@@ -11,9 +11,9 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { BURN_REGION_LABEL_NONE } from './burn.model.constants';
-import { getBurnGridNeighbourCells } from './get.burn.grid.neighbour.cells';
 import type { BurnDoseGrid } from './interfaces/BurnDoseGrid';
 import { visitBurnGridConnectedCells } from './visit.burn.grid.connected.cells';
+import { visitBurnGridNeighbourCells } from './visit.burn.grid.neighbour.cells';
 
 /** For each group of connected wall cells, the numbers of the regions along it. */
 const getRegionNumbersAlongWalls = (grid: BurnDoseGrid, regionNumbers: Int32Array): Set<number>[] => {
@@ -29,11 +29,11 @@ const getRegionNumbersAlongWalls = (grid: BurnDoseGrid, regionNumbers: Int32Arra
       visitBurnGridConnectedCells(grid, [firstCell], isWallCellOpen, (cell: number): void => {
         seenWallCells[cell] = 1;
 
-        for (const neighbourCell of getBurnGridNeighbourCells(cell, grid)) {
+        visitBurnGridNeighbourCells(cell, grid, (neighbourCell: number): void => {
           if (!grid.closedCutMask[neighbourCell]) {
             regionNumbersAlongWall.add(regionNumbers[neighbourCell] ?? BURN_REGION_LABEL_NONE);
           }
-        }
+        });
       });
       regionNumbersAlongWalls.push(regionNumbersAlongWall);
     }

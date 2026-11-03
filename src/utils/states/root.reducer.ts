@@ -11,7 +11,9 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import { BED_APPEARANCE_STATE_NAME, bedAppearanceReducer } from './bed.appearance.state';
 import { BED_GESTURE_STATE_NAME, bedGestureReducer } from './bed.gesture.state';
+import { BED_VIEW_STATE_NAME, bedViewReducer } from './bed.view.state';
 import { BROWSER_ENVIRONMENT_STATE_NAME, browserEnvironmentReducer } from './browser.environment.state';
+import { BURN_MODEL_STATE_NAME, burnModelReducer } from './burn.model.state';
 import { GRBL_CONNECTION_STATE_NAME, grblConnectionReducer } from './grbl.connection.state';
 import { GRBL_CONSOLE_STATE_NAME, grblConsoleReducer } from './grbl.console.state';
 import { LASER_POINTER_STATE_NAME, laserPointerReducer } from './laser.pointer.state';
@@ -46,5 +48,7 @@ export const rootReducer = combineReducers({
   [BED_GESTURE_STATE_NAME]: bedGestureReducer,
   [BED_APPEARANCE_STATE_NAME]: bedAppearanceReducer,
   [TOOLPATH_STATE_NAME]: toolpathReducer,
+  [BURN_MODEL_STATE_NAME]: burnModelReducer,
+  [BED_VIEW_STATE_NAME]: bedViewReducer,
   [SIMULATION_STATE_NAME]: simulationReducer,
 });
