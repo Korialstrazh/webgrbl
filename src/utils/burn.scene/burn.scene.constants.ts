@@ -44,8 +44,6 @@ export const BURN_SCENE_CLICK_MAX_MOVE_PX = 4;
 export const BURN_SCENE_TOON_BANDS: readonly number[] = [110, 175, 255];
 /** The ink line around each piece, a burnt brown rather than black so that it reads as part of the wood. */
 export const BURN_SCENE_OUTLINE_COLOUR = '#2a1a0c';
-/** A sharper fold than this can be an outline; the flat quads of a face have none. */
-export const BURN_SCENE_OUTLINE_MIN_ANGLE_DEG = 30;
 export const BURN_SCENE_OUTLINE_SHEET_FACE_TOLERANCE_MM = 0.001;
 
 /** The arrow on the selected part, in pixels on screen. */
