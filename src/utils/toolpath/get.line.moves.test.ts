@@ -25,7 +25,8 @@ const CIRCLE_GRID_ROWS = 40;
 const CIRCLE_SPACING_MM = 5;
 const CIRCLE_RADIUS_MM = 2;
 const CUT_PASSES = 3;
-const LARGE_JOB_TIME_LIMIT_MS = 3000;
+// About 1 s alone, but over 3 s when the full suite loads the machine. The limit only has to catch a much slower order.
+const LARGE_JOB_TIME_LIMIT_MS = 10_000;
 
 /** The Cut layer with one pass, so each test sees one burn of every outline. */
 const getCutLayer = (): ProjectLayer => {
@@ -184,7 +185,7 @@ describe(getLineMoves.name, () => {
     expect(getBurnMoves(moves)[0]?.to).toEqual({ x: 60, y: 50 });
   });
 
-  it('orders 2,000 circles once and burns each exactly once per pass within 3 s', () => {
+  it('orders 2,000 circles once and burns each exactly once per pass within the time limit', () => {
     const circles: SvgSubpath[] = [];
 
     for (let row = 0; row < CIRCLE_GRID_ROWS; row++) {
