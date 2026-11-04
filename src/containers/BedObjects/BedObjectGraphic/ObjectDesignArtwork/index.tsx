@@ -14,7 +14,7 @@
  */
 import { Fragment, memo, useId } from 'react';
 import type { ReactNode } from 'react';
-import { DESIGN_PAINT_ROLE } from '../../../../utils/bed/bed.design.constants';
+import { DESIGN_GRADIENT_ID_PREFIX, DESIGN_PAINT_ROLE } from '../../../../utils/bed/bed.design.constants';
 import type { DesignLayerLook } from '../../../../utils/bed/interfaces/DesignLayerLook';
 import type { ObjectDesignGradient } from '../../../../utils/bed/interfaces/ObjectDesignGradient';
 import type { ObjectDesignPaint } from '../../../../utils/bed/interfaces/ObjectDesignPaint';
@@ -26,6 +26,7 @@ import {
   SVG_GRADIENT_UNITS,
   SVG_PAINT_NONE,
 } from '../../../../utils/svg/geometry/svg.geometry.constants';
+import { SVG_TRANSFORM_FUNCTION } from '../../../../utils/svg/geometry/svg.transform.constants';
 import type { ObjectDesignArtworkProps } from './interfaces/ObjectDesignArtworkProps';
 import styles from './styles.module.scss';
 
@@ -55,7 +56,7 @@ const renderGradientStops = (stops: SvgGradientStop[]): ReactNode =>
 // The artwork matrix already holds the gradient's own units, so the numbers always count as user space here.
 const renderDesignGradient = ({ definition, artworkMatrix }: ObjectDesignGradient, gradientId: string): ReactNode => {
   const { a, b, c, d, e, f } = artworkMatrix;
-  const gradientTransform: string = `matrix(${[a, b, c, d, e, f].join(' ')})`;
+  const gradientTransform: string = `${SVG_TRANSFORM_FUNCTION.MATRIX}(${[a, b, c, d, e, f].join(' ')})`;
 
   return definition.kind === SVG_GRADIENT_KIND.RADIAL
     ? (
@@ -133,7 +134,7 @@ const ObjectDesignArtworkContent = ({ designDrawing, layerLooks }: ObjectDesignA
             stroke={layerLook?.colour}
           >
             {run.paints.map((paint: ObjectDesignPaint, paintIndex: number) =>
-              renderDesignPath(paint, `design-gradient-${artworkId}-${runIndex}-${paintIndex}`))}
+              renderDesignPath(paint, `${DESIGN_GRADIENT_ID_PREFIX}-${artworkId}-${runIndex}-${paintIndex}`))}
           </g>
         );
       })}

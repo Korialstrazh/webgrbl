@@ -1,10 +1,3 @@
-import { SHADING_LAYER_COLOUR } from '../../utils/layers/layer.constants';
-import { getSampleSvgText } from '../../utils/materials/get.sample.svg.text';
-import {
-  SAMPLE_GRADIENT_END_COLOUR,
-  SAMPLE_GRADIENT_START_COLOUR,
-  SAMPLE_SIZE_MM,
-} from '../../utils/materials/sample.job.constants';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BedObjects } from '.';
@@ -12,6 +5,13 @@ import { BED_PLACEHOLDER_KIND } from '../../utils/bed/bed.constants';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { getNewLayer } from '../../utils/layers/get.new.layer';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
+import { SHADING_LAYER_COLOUR } from '../../utils/layers/layer.constants';
+import { getSampleSvgText } from '../../utils/materials/get.sample.svg.text';
+import {
+  SAMPLE_GRADIENT_END_COLOUR,
+  SAMPLE_GRADIENT_START_COLOUR,
+  SAMPLE_SIZE_MM,
+} from '../../utils/materials/sample.job.constants';
 import { DEFAULT_PALETTE, LAYER_MODE } from '../../utils/palette/palette.constants';
 import type { LayerMode } from '../../utils/palette/palette.constants';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
@@ -20,7 +20,15 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
 import { selectSelectedObjectIds } from '../../utils/states/project.selection.state';
-import { SVG_DRAWN_ELEMENT, SVG_PROPERTY } from '../../utils/svg/geometry/svg.geometry.constants';
+import {
+  SVG_DRAWN_ELEMENT,
+  SVG_GRADIENT_TRANSFORM_ATTRIBUTE_NAME,
+  SVG_GRADIENT_UNITS,
+  SVG_GRADIENT_UNITS_ATTRIBUTE_NAME,
+  SVG_LINEAR_GRADIENT_ELEMENT_NAME,
+  SVG_PROPERTY,
+  SVG_STOP_ELEMENT_NAME,
+} from '../../utils/svg/geometry/svg.geometry.constants';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
 import { BED_OBJECT_HIT_AREA_TEST_ID } from './bed.objects.constants';
 
@@ -102,15 +110,15 @@ describe(`${BedObjects.name} layer modes`, () => {
       </Provider>,
     );
 
-    const gradients: Element[] = [...document.querySelectorAll('linearGradient')];
-    const stopColours: (string | null)[] = [...(gradients[0]?.querySelectorAll('stop') ?? [])]
-      .map((stop: Element): string | null => stop.getAttribute('stop-color'));
+    const gradients: Element[] = [...document.querySelectorAll(SVG_LINEAR_GRADIENT_ELEMENT_NAME)];
+    const stopColours: (string | null)[] = [...(gradients[0]?.querySelectorAll(SVG_STOP_ELEMENT_NAME) ?? [])]
+      .map((stop: Element): string | null => stop.getAttribute(SVG_PROPERTY.STOP_COLOR));
 
     expect(gradients).toHaveLength(2);
     expect(new Set(gradients.map((gradient: Element): string => gradient.id)).size).toBe(2);
     expect(stopColours).toEqual([SAMPLE_GRADIENT_START_COLOUR, SAMPLE_GRADIENT_END_COLOUR]);
-    expect(gradients[0]).toHaveAttribute('gradientUnits', 'userSpaceOnUse');
-    expect(gradients[0]).toHaveAttribute('gradientTransform', 'matrix(40 0 0 40 5 5)');
+    expect(gradients[0]).toHaveAttribute(SVG_GRADIENT_UNITS_ATTRIBUTE_NAME, SVG_GRADIENT_UNITS.USER_SPACE_ON_USE);
+    expect(gradients[0]).toHaveAttribute(SVG_GRADIENT_TRANSFORM_ATTRIBUTE_NAME, 'matrix(40 0 0 40 5 5)');
     expect(document.querySelector(`[fill="url(#${gradients[0]?.id ?? ''})"]`)).not.toBeNull();
   });
 

@@ -26,3 +26,6 @@ export const DESIGN_DRAWING_KEY_SEPARATOR = '\u0000';
 
 /** Joins the paint role, the layer key and the index of a run of design paths into its React key. */
 export const DESIGN_RUN_KEY_SEPARATOR = ':';
+
+/** Starts the id of a gradient drawn in the Design view. */
+export const DESIGN_GRADIENT_ID_PREFIX = 'design-gradient';
