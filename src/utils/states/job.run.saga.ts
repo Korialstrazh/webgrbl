@@ -83,8 +83,9 @@ function* waitForJobInterruption(): Generator {
 
 /**
  * The last ok only says GRBL buffered the last line, so the laser may have far to go. A reset also leaves the machine
- * Idle, so a stop or reset meanwhile must not read as a finished job. That includes one from before this wait: the last
- * lines can still be answered while a stop waits for the machine to come to rest.
+ * Idle, so a finished stop or a reset must not read as a finished job. That includes one from before this wait: the
+ * last lines can still be answered while a stop waits for the machine to come to rest. A report during a stop that has
+ * not finished can still win this race; getJobEndStatusAfterStop corrects that.
  */
 function* waitForJobFinish(interruptionTask: Task): Generator {
   const { isMachineDone }: JobFinishRaceResult = (yield race({
@@ -114,6 +115,29 @@ function* followJobProgram(controller: GrblController, programLines: string[], i
   return isFinished ? JOB_RUN_STATUS.COMPLETED : JOB_RUN_STATUS.INTERRUPTED;
 }
 
+function* waitForJobStopRequest(): Generator {
+  yield take(MachineStopRequested.type);
+}
+
+/**
+ * The program can end before a stop has finished: the stop drops the program lines before it writes the reset, and an
+ * Idle or Alarm report can arrive while it waits for the machine to come to rest. Whatever the program ended in, a
+ * requested stop means an interrupted job, and the locks stay on until that stop has finished.
+ */
+function* getJobEndStatusAfterStop(
+  programEndStatus: JobRunStatus,
+  stopRequestTask: Task,
+  interruptionTask: Task,
+): Generator {
+  if (stopRequestTask.isRunning()) {
+    return programEndStatus;
+  }
+
+  yield join(interruptionTask);
+
+  return JOB_RUN_STATUS.INTERRUPTED;
+}
+
 export function* runGrblJob(controller: GrblController): Generator {
   const blockedReasonKey: string | undefined = (yield select(selectJobStartBlockedReasonKey)) as string | undefined;
 
@@ -122,13 +146,16 @@ export function* runGrblJob(controller: GrblController): Generator {
   }
 
   const interruptionTask: Task = (yield fork(waitForJobInterruption)) as Task;
+  const stopRequestTask: Task = (yield fork(waitForJobStopRequest)) as Task;
 
   yield put(new JobRunStarted({ startedAtMs: Date.now() }));
 
   try {
     const programLines: string[] = (yield call(getJobProgramLines)) as string[];
-    const endStatus: JobRunStatus =
+    const programEndStatus: JobRunStatus =
       (yield call(followJobProgram, controller, programLines, interruptionTask)) as JobRunStatus;
+    const endStatus: JobRunStatus =
+      (yield call(getJobEndStatusAfterStop, programEndStatus, stopRequestTask, interruptionTask)) as JobRunStatus;
 
     yield put(newJobRunStatusChanged(endStatus));
 
@@ -139,6 +166,7 @@ export function* runGrblJob(controller: GrblController): Generator {
     yield put(newRawErrorConsoleInfo(error));
     yield put(newJobRunStatusChanged(JOB_RUN_STATUS.INTERRUPTED));
   } finally {
+    yield cancel(stopRequestTask);
     yield cancel(interruptionTask);
   }
 }
