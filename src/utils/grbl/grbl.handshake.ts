@@ -35,8 +35,8 @@ const GRBL_HANDSHAKE_RESTART_QUIET_MS = 1000;
 
 /**
  * Resolves with the first banner. Opening the port often resets the board and the soft reset prints a second banner;
- *
- * one that arrives after $I was sent and is followed by silence makes the queries start again (see getAnswersAcrossRestarts).
+ * one that arrives after $I was sent and is followed by silence makes the queries start again (see
+ * getAnswersAcrossRestarts).
  */
 const waitForFirstGrblBanner = (context: GrblHandshakeContext): Promise<GrblFirmwareIdentity> =>
   new Promise<GrblFirmwareIdentity>((resolveBanner: (identity: GrblFirmwareIdentity) => void): void => {
