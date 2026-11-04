@@ -10,16 +10,20 @@ import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../../utils/layers/layer.constants';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import { DEFAULT_CUT_ENTRY, DEFAULT_FILL_ENTRY, DEFAULT_PALETTE } from '../../utils/palette/palette.constants';
+import { newMaterial } from '../../utils/materials/new.material';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import { MachineProfilesLoaded } from '../../utils/states/machine.profile.state';
+import { selectMaterialPresets } from '../../utils/states/material.preset.state';
+import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import { PaletteEntrySaved, selectPaletteEntries } from '../../utils/states/palette.state';
 import {
   LayerPaletteEntryLinked,
   LayerSettingsChanged,
+  ProjectMaterialSelected,
   ProjectObjectsAdded,
   selectProjectLayers,
 } from '../../utils/states/project.document.state';
@@ -48,7 +52,6 @@ const BAR_LABEL = 'Power from black to white';
 const BLACK_END_TEXT = 'Black: 6.0 W';
 const WHITE_END_TEXT = 'White: 0.0 W';
 const BLACK_END_PERCENT_TEXT = 'Black: 60 %';
-const SOON_TAG_TEXT = 'Soon';
 const DRAWER_ROOT_SELECTOR = '.ant-drawer';
 const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
 const DRAWER_MASK_SELECTOR = '.ant-drawer-mask';
@@ -395,6 +398,27 @@ describe(LayerSettingsDrawer.name, () => {
     const presetButton: HTMLElement = screen.getByRole('button', { name: PRESET_LABEL });
 
     expect(presetButton).toBeDisabled();
-    expect(presetButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_TAG_TEXT);
+    expect(screen.getByRole('note')).toHaveTextContent('Pick the material of the project');
+  });
+
+  it('saves the layer as a preset of the project material and the active machine, in watts', () => {
+    const store: AppStore = newStore();
+    const material = newMaterial();
+
+    loadProfile(store, false);
+    loadColours(store, [CUT_COLOUR]);
+    act(() => {
+      store.dispatch(new MaterialSaved({ material }));
+      store.dispatch(new ProjectMaterialSelected({ materialId: material.id }));
+      store.dispatch(new LayerSettingsChanged({ layerKey: CUT_COLOUR, settings: { maxPowerPercent: SIXTY_PERCENT } }));
+    });
+    renderDrawer(store, CUT_COLOUR);
+
+    fireEvent.click(screen.getByRole('button', { name: PRESET_LABEL }));
+
+    expect(selectMaterialPresets(store.getState())).toEqual([
+      expect.objectContaining({ materialId: material.id, machineProfileId: PROFILE_ID, powerWatts: 6 }),
+    ]);
+    expect(screen.getByRole('status')).toHaveTextContent(material.name);
   });
 });

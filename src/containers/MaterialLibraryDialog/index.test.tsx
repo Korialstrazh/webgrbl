@@ -8,6 +8,10 @@ import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset
 import { newMaterial } from '../../utils/materials/new.material';
 import { newMaterialPreset } from '../../utils/materials/new.material.preset';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
+import { newProjectObject } from '../../utils/project/new.project.object';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { DEFAULT_PALETTE } from '../../utils/palette/palette.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import {
   ActiveMachineProfileSelected,
@@ -18,9 +22,15 @@ import { MaterialPresetSaved, selectMaterialPresets } from '../../utils/states/m
 import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
+import { ProjectObjectsAdded, selectProjectLayers } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 
+const APPLY_LABEL = 'Apply to layer';
+const LAYER_COLOUR = '#ff0000';
+const LAYER_OBJECT: ProjectObject = newProjectObject({
+  svgText: `<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm"><rect fill="${LAYER_COLOUR}" width="5" height="5"/></svg>`,
+});
 const POWER_LABEL = 'Power (W)';
 const SAVE_LABEL = 'Save';
 const ADD_LABEL = 'Add preset';
@@ -169,5 +179,49 @@ describe(MaterialLibraryDialog.name, () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Yes, delete' }));
 
     expect(selectMaterialPresets(store.getState())).toEqual([]);
+  });
+
+  it('offers to apply a stored preset of the active machine only', async () => {
+    renderDialog([newPresetFixture(PLYWOOD, OTHER_PROFILE)]);
+
+    fireEvent.click(await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL }));
+    fireEvent.click(await screen.findByText(PLYWOOD_NAME));
+
+    expect(screen.queryByRole('button', { name: APPLY_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('applies a preset to the layer it was opened from as percent of the laser', async () => {
+    const store: AppStore = newStore();
+    const preset: MaterialPreset = newPresetFixture(PLYWOOD, PROFILE);
+
+    act(() => {
+      store.dispatch(new MachineProfileSaved({ profile: PROFILE }));
+      store.dispatch(new ActiveMachineProfileSelected({ profileId: PROFILE.id }));
+      store.dispatch(new MaterialSaved({ material: PLYWOOD }));
+      store.dispatch(new MaterialPresetSaved({ preset }));
+      store.dispatch(new ProjectObjectsAdded({
+        objects: [LAYER_OBJECT],
+        layers: getObjectsDerivedLayers([LAYER_OBJECT], DEFAULT_PALETTE, []),
+      }));
+    });
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <BedRegionTestHost>
+            <MaterialLibraryDialog isOpen initialLayerKey={LAYER_COLOUR} onClose={() => undefined} />
+          </BedRegionTestHost>
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(await screen.findByText(PLYWOOD_NAME));
+    fireEvent.click(screen.getByRole('button', { name: APPLY_LABEL }));
+
+    expect(selectProjectLayers(store.getState())[0]?.settings).toEqual(expect.objectContaining({
+      maxPowerPercent: 50,
+      speedMmPerMin: preset.speedMmPerMin,
+      passes: preset.passes,
+    }));
+    expect(screen.getByRole('status')).toHaveTextContent('Applied');
   });
 });

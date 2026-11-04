@@ -207,8 +207,10 @@ LAYER_SETTINGS_MIN_POWER;Min power (%)
 LAYER_SETTINGS_MODE;Mode
 LAYER_SETTINGS_OVERLINE;Layer settings
 LAYER_SETTINGS_PASSES;Passes
-LAYER_SETTINGS_PRESET_DESCRIPTION;Save these settings as a material preset to use on other designs.
+LAYER_SETTINGS_PRESET_APPLY;Use a material preset
+LAYER_SETTINGS_PRESET_NEEDS_MATERIAL;Pick the material of the project in the Material panel to save a preset.
 LAYER_SETTINGS_PRESET_SAVE;Save as material preset
+LAYER_SETTINGS_PRESET_SAVED;Saved as a preset for {{name}}.
 LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
 LAYER_SETTINGS_SEND;Send to laser
 LAYER_SETTINGS_SPEED;Speed (mm/min)
@@ -342,6 +344,9 @@ MATERIAL_DIALOG_THICKNESS_INVALID;Enter a thickness from {{min}} to {{max}} mm.
 MATERIAL_DIALOG_TITLE;Add material
 MATERIAL_DIALOG_USE_EXISTING;Use that one
 MATERIAL_LIBRARY_ADD;Add preset
+MATERIAL_LIBRARY_APPLIED;Applied to {{name}}.
+MATERIAL_LIBRARY_APPLY;Apply to layer
+MATERIAL_LIBRARY_APPLY_LAYER;Layer
 MATERIAL_LIBRARY_DELETE;Delete
 MATERIAL_LIBRARY_DELETE_CANCEL;Cancel
 MATERIAL_LIBRARY_DELETE_CONFIRM;Delete this preset?
