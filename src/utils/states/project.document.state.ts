@@ -65,6 +65,11 @@ export class ProjectObjectsAdded extends Action<ProjectObjectsPayload> {
   public static readonly type: string = actionType('project objects added');
 }
 
+/** Unlike ProjectObjectsAdded, its layers replace the document's: the sample may move a layer to burn the cut last. */
+export class SampleJobAdded extends Action<ProjectObjectsPayload> {
+  public static readonly type: string = actionType('sample job added');
+}
+
 export class ProjectObjectsTransformed extends Action<ProjectObjectTransformsPayload> {
   public static readonly type: string = actionType('project objects transformed');
 }
@@ -257,6 +262,11 @@ export const projectDocumentReducer = (
   switch (action.type) {
   case ProjectObjectsAdded.type:
     return getStateWithAddedObjects(state, (action as ProjectObjectsAdded).payload);
+  case SampleJobAdded.type: {
+    const { objects, layers } = (action as SampleJobAdded).payload;
+
+    return getStateWithChange(state, { ...state.document, objects: [...state.document.objects, ...objects], layers });
+  }
   case ProjectObjectsTransformed.type:
     return getStateWithTransforms(state, (action as ProjectObjectsTransformed).payload.transforms);
   case ProjectObjectsDeleted.type:

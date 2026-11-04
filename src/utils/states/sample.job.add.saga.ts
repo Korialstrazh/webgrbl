@@ -11,8 +11,10 @@
  */
 import { put, select } from 'redux-saga/effects';
 import { DEFAULT } from '../localization/default.locales';
+import { getUsedLayerKeys } from '../layers/get.used.layer.keys';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { fitsSampleJob } from '../materials/fits.sample.job';
+import { getLayersWithoutUnusedSampleLayers } from '../materials/get.layers.without.unused.sample.layers';
 import { getSampleJobLayers } from '../materials/get.sample.job.layers';
 import { getSampleJobObject } from '../materials/get.sample.job.object';
 import { getSampleSvgParts } from '../materials/get.sample.svg.parts';
@@ -23,7 +25,7 @@ import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { MAX_PROJECT_OBJECTS } from '../project/project.constants';
 import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachineArea';
 import { selectPalette } from './palette.state';
-import { ProjectObjectsAdded, selectProjectDocument } from './project.document.state';
+import { SampleJobAdded, selectProjectDocument, selectProjectLayers } from './project.document.state';
 import { ProjectSelectionChanged } from './project.selection.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
@@ -40,16 +42,20 @@ export function* addSampleJob(): Generator {
   }
 
   const palette: Palette = (yield select(selectPalette)) as Palette;
-  const svgParts: SampleSvgParts = getSampleSvgParts(projectDocument.layers);
+  const svgParts: SampleSvgParts = getSampleSvgParts((yield select(selectProjectLayers)) as ProjectLayer[]);
   const sampleObject: ProjectObject = getSampleJobObject(machineArea, svgParts);
   const layers: ProjectLayer[] = getSampleJobLayers(
     [...projectDocument.objects, sampleObject],
     palette,
-    projectDocument.layers,
+    getLayersWithoutUnusedSampleLayers(
+      projectDocument.layers,
+      getUsedLayerKeys(projectDocument.objects),
+      svgParts.cutColour,
+    ),
     svgParts.cutColour,
   );
 
-  yield put(new ProjectObjectsAdded({ objects: [sampleObject], layers }));
+  yield put(new SampleJobAdded({ objects: [sampleObject], layers }));
   yield put(new ProjectSelectionChanged({ objectIds: [sampleObject.id] }));
 
   if (!svgParts.hasGradient) {
