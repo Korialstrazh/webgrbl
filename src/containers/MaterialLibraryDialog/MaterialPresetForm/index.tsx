@@ -48,6 +48,8 @@ import type { MaterialPresetFormProps } from '../interfaces/MaterialPresetFormPr
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.dialog.constants';
 import styles from './styles.module.scss';
 
+type MaterialPresetChange = Partial<MaterialPreset>;
+
 const NOTES_ROWS = 3;
 
 const hasPresetFieldError = ({ powerErrorKey, speedErrorKey, passesErrorKey }: MaterialPresetFieldErrors): boolean =>
@@ -66,7 +68,7 @@ export const MaterialPresetForm = ({ preset, maxPowerWatts, onDone }: MaterialPr
   const fieldErrors: MaterialPresetFieldErrors = getMaterialPresetFieldErrors(editedPreset, maxPowerWatts);
   const { powerErrorKey, speedErrorKey, passesErrorKey }: MaterialPresetFieldErrors = fieldErrors;
 
-  const changePreset = (change: Partial<MaterialPreset>): void => {
+  const changePreset = (change: MaterialPresetChange): void => {
     setEditedPreset({ ...editedPreset, ...change });
   };
 
@@ -81,7 +83,7 @@ export const MaterialPresetForm = ({ preset, maxPowerWatts, onDone }: MaterialPr
   };
 
   return (
-    <Form className={styles.presetForm} layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
+    <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
       <Form.Item label={t(DEFAULT.MATERIAL_LIBRARY_MATERIAL)}>
         <Select<string>
           aria-label={t(DEFAULT.MATERIAL_LIBRARY_MATERIAL)}

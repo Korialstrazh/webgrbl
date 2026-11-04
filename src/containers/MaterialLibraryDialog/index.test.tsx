@@ -7,8 +7,8 @@ import type { MaterialPreset } from '../../utils/materials/interfaces/MaterialPr
 import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset.constants';
 import { newMaterial } from '../../utils/materials/new.material';
 import { newMaterialPreset } from '../../utils/materials/new.material.preset';
-import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import {
   ActiveMachineProfileSelected,
   MachineProfileSaved,

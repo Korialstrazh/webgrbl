@@ -12,9 +12,10 @@
 import { Button, Checkbox, Input, Table } from 'antd';
 import type { CheckboxChangeEvent, TableColumnsType } from 'antd';
 import { useState } from 'react';
-import type { ChangeEvent, ReactNode } from 'react';
+import type { ChangeEvent, Key, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { ANTD_TABLE_ROW_SELECTION_TYPE_RADIO, ANTD_TABLE_SIZE_SMALL } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getMaterialPresetRows } from '../../../utils/materials/get.material.preset.rows';
 import type { Material } from '../../../utils/materials/interfaces/Material';
@@ -33,8 +34,6 @@ import { MaterialPresetForm } from '../MaterialPresetForm';
 import styles from './styles.module.scss';
 
 const NEW_PRESET_SPEED_MM_PER_MIN = 1000;
-const ROW_SELECTION_TYPE_RADIO = 'radio' as const;
-const TABLE_SIZE_SMALL = 'small' as const;
 const SEARCH_INPUT_TYPE = 'search';
 const MATERIAL_NAME_FIELD: keyof MaterialPresetRow = 'materialName';
 const COLUMN_KEY = {
@@ -58,7 +57,7 @@ export const MaterialLibraryEditor = (): ReactNode => {
   const [searchText, setSearchText] = useState<string>('');
   const [isOnlyActiveMachine, setIsOnlyActiveMachine] = useState<boolean>(true);
   const [editedPreset, setEditedPreset] = useState<MaterialPreset | undefined>(undefined);
-  const [firstMaterial] = materials;
+  const [firstMaterial]: (Material | undefined)[] = materials;
   const editedProfile: MachineProfile | undefined = profiles.find(
     ({ id }: MachineProfile): boolean => id === editedPreset?.machineProfileId,
   );
@@ -149,16 +148,16 @@ export const MaterialLibraryEditor = (): ReactNode => {
         {!firstMaterial && <p role="note">{t(DEFAULT.MATERIAL_LIBRARY_NO_MATERIALS)}</p>}
         <div className={styles.tableScroller}>
           <Table<MaterialPresetRow>
-            size={TABLE_SIZE_SMALL}
+            size={ANTD_TABLE_SIZE_SMALL}
             pagination={false}
             rowKey={getPresetRowKey}
             columns={columns}
             dataSource={rows}
             locale={{ emptyText: t(DEFAULT.MATERIAL_LIBRARY_EMPTY) }}
             rowSelection={{
-              type: ROW_SELECTION_TYPE_RADIO,
+              type: ANTD_TABLE_ROW_SELECTION_TYPE_RADIO,
               selectedRowKeys: editedPreset ? [editedPreset.id] : [],
-              onChange: (_rowKeys: React.Key[], selectedRows: MaterialPresetRow[]) =>
+              onChange: (_rowKeys: Key[], selectedRows: MaterialPresetRow[]) =>
                 setEditedPreset(selectedRows[0]?.preset),
             }}
             onRow={({ preset }: MaterialPresetRow) => ({ onClick: () => setEditedPreset(preset) })}

@@ -11,10 +11,14 @@ import { newMaterialPreset } from './new.material.preset';
 
 const PROFILE_A = 'profile-a';
 const PROFILE_B = 'profile-b';
-const PLYWOOD: Material = newMaterial({ name: 'Plywood', thicknessMm: 3 });
-const ACRYLIC: Material = newMaterial({ name: 'Acrylic', thicknessMm: 5 });
+const PLYWOOD_NAME = 'Plywood';
+const ACRYLIC_NAME = 'Acrylic';
+const PLYWOOD: Material = newMaterial({ name: PLYWOOD_NAME, thicknessMm: 3 });
+const ACRYLIC: Material = newMaterial({ name: ACRYLIC_NAME, thicknessMm: 5 });
 
-const newPresetFixture = (overrides: Partial<MaterialPreset> = {}): MaterialPreset => ({
+type MaterialPresetOverrides = Partial<MaterialPreset>;
+
+const newPresetFixture = (overrides: MaterialPresetOverrides = {}): MaterialPreset => ({
   ...newMaterialPreset({
     materialId: PLYWOOD.id,
     machineProfileId: PROFILE_A,
@@ -40,7 +44,8 @@ describe(getMaterialPresetRows.name, () => {
   it('sorts by material', () => {
     const presets: MaterialPreset[] = [newPresetFixture(), newPresetFixture({ materialId: ACRYLIC.id })];
 
-    expect(getRowNames(getMaterialPresetRows(presets, [PLYWOOD, ACRYLIC], FILTER))).toEqual(['Acrylic', 'Plywood']);
+    expect(getRowNames(getMaterialPresetRows(presets, [PLYWOOD, ACRYLIC], FILTER)))
+      .toEqual([ACRYLIC_NAME, PLYWOOD_NAME]);
   });
 
   it('keeps to the machine profile when one is given', () => {

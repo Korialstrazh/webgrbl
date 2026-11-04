@@ -14,6 +14,7 @@ import { selectToasts } from './toast.state';
 
 const STORAGE_FAILURE_MESSAGE = 'quota exceeded at /secret/path';
 const CHANGED_POWER_WATTS = 7;
+const DELETED_PROFILE_ID = 'profile-gone';
 
 const newPresetFixture = (overrides: Partial<MaterialPreset> = {}): MaterialPreset => ({
   ...newMaterialPreset({
@@ -106,7 +107,7 @@ describe(watchMaterialPresets.name, () => {
   });
 
   it('removes only the presets of a deleted machine profile', async () => {
-    const deletedProfilePreset: MaterialPreset = newPresetFixture({ machineProfileId: 'profile-gone' });
+    const deletedProfilePreset: MaterialPreset = newPresetFixture({ machineProfileId: DELETED_PROFILE_ID });
     const keptPreset: MaterialPreset = newPresetFixture();
     const store: AppStore = await newLoadedStore();
 
@@ -115,7 +116,7 @@ describe(watchMaterialPresets.name, () => {
     await vi.waitFor(async (): Promise<void> => {
       expect(await MATERIAL_PRESET_REPOSITORY.listMaterialPresets()).toHaveLength(2);
     });
-    store.dispatch(new MachineProfileDeleted({ profileId: 'profile-gone' }));
+    store.dispatch(new MachineProfileDeleted({ profileId: DELETED_PROFILE_ID }));
 
     expect(selectMaterialPresets(store.getState())).toEqual([keptPreset]);
     await waitForStoredPresets([keptPreset]);

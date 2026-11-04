@@ -180,7 +180,7 @@ describe(TopBar.name, () => {
     fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
 
     expect(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: new RegExp(`^${MATERIALS_LABEL}`) })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: new RegExp(`^${MATERIALS_LABEL}`) })).toBeInTheDocument();
   });
 
   it('closes the machine profiles dialog on Escape without stopping the machine', () => {

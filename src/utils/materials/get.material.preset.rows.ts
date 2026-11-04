@@ -19,6 +19,9 @@ const SEARCH_WORD_SEPARATOR = /\s+/;
 const getSearchWords = (searchText: string): string[] =>
   searchText.trim().toLowerCase().split(SEARCH_WORD_SEPARATOR).filter(Boolean);
 
+const isPresetOnListedMachine = ({ machineProfileId }: MaterialPreset, listedProfileId: string | undefined): boolean =>
+  !listedProfileId || machineProfileId === listedProfileId;
+
 const compareMaterialPresetRows = (firstRow: MaterialPresetRow, secondRow: MaterialPresetRow): number =>
   firstRow.materialName.localeCompare(secondRow.materialName) || firstRow.thicknessMm - secondRow.thicknessMm;
 
@@ -32,9 +35,8 @@ export const getMaterialPresetRows = (
 
   for (const preset of presets) {
     const material: Material | undefined = materials.find(({ id }: Material): boolean => id === preset.materialId);
-    const isOnListedMachine: boolean = !machineProfileId || preset.machineProfileId === machineProfileId;
 
-    if (material && isOnListedMachine) {
+    if (material && isPresetOnListedMachine(preset, machineProfileId)) {
       const rowText: string =
         [material.name, material.thicknessMm, getOperationLabel(preset.operation)].join(' ').toLowerCase();
 

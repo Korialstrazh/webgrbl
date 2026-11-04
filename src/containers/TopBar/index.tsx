@@ -1,7 +1,6 @@
 /**
  * The top region: app name, the project name, the Project menu and autosave readout, the machine profiles and material
- * library dialogs,
- * SVG import, undo and redo, the connection pill and update notice.
+ * library dialogs, SVG import, undo and redo, the connection pill and update notice.
  *
  * @author michael.morosov
  *
