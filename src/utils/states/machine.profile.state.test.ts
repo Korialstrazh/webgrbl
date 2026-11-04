@@ -24,8 +24,8 @@ import {
   MachineProfilesLoaded,
   machineProfileReducer,
   selectActiveMachineProfile,
-  selectFrameGridCellMm,
   selectFrameFeedMmPerMin,
+  selectFrameGridCellMm,
   selectFrameMarginMm,
   selectMachineProfiles,
 } from './machine.profile.state';

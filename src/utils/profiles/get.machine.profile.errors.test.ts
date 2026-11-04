@@ -11,6 +11,10 @@ const JOG_FEED_BELOW_RANGE = 99;
 const JOG_FEED_ABOVE_RANGE = 10001;
 const JOG_FEED_RANGE_MIN = 100;
 const JOG_FEED_RANGE_MAX = 10000;
+const FRAME_FEED_BELOW_RANGE = 99;
+const FRAME_FEED_ABOVE_RANGE = 10001;
+const FRAME_FEED_RANGE_MIN = 100;
+const FRAME_FEED_RANGE_MAX = 10000;
 
 const NAME_ERROR: MachineProfileFieldError = { field: 'name', messageKey: MACHINE_PROFILE_ERROR_KEY.NAME_REQUIRED };
 const POWER_ERROR: MachineProfileFieldError = {
@@ -47,7 +51,7 @@ const FRAME_MARGIN_ERROR: MachineProfileFieldError = {
 const FRAME_FEED_ERROR: MachineProfileFieldError = {
   field: 'frameFeedMmPerMin',
   messageKey: MACHINE_PROFILE_ERROR_KEY.FRAME_FEED_RATE_INVALID,
-  messageParameters: { min: 100, max: 10000 },
+  messageParameters: { min: FRAME_FEED_RANGE_MIN, max: FRAME_FEED_RANGE_MAX },
 };
 
 const INVALID_CASES: Array<[string, Partial<MachineProfile>, MachineProfileFieldError]> = [
@@ -71,8 +75,8 @@ const INVALID_CASES: Array<[string, Partial<MachineProfile>, MachineProfileField
   ['a NaN jog feed', { jogFeedRate: NaN }, JOG_FEED_ERROR],
   ['a negative frame margin', { frameMarginMm: -1 }, FRAME_MARGIN_ERROR],
   ['a NaN frame margin', { frameMarginMm: NaN }, FRAME_MARGIN_ERROR],
-  ['a frame speed below the range', { frameFeedMmPerMin: 99 }, FRAME_FEED_ERROR],
-  ['a frame speed above the range', { frameFeedMmPerMin: 10001 }, FRAME_FEED_ERROR],
+  ['a frame speed below the range', { frameFeedMmPerMin: FRAME_FEED_BELOW_RANGE }, FRAME_FEED_ERROR],
+  ['a frame speed above the range', { frameFeedMmPerMin: FRAME_FEED_ABOVE_RANGE }, FRAME_FEED_ERROR],
   ['a NaN frame speed', { frameFeedMmPerMin: NaN }, FRAME_FEED_ERROR],
 ];
 
@@ -107,9 +111,12 @@ describe(getMachineProfileErrors.name, () => {
     expect(getMachineProfileErrors(newMachineProfile({ frameMarginMm }))).toEqual([]);
   });
 
-  it.each([[undefined], [100], [6000], [10000]])('accepts frame speed %s', (frameFeedMmPerMin: number | undefined) => {
-    expect(getMachineProfileErrors(newMachineProfile({ frameFeedMmPerMin }))).toEqual([]);
-  });
+  it.each([[undefined], [FRAME_FEED_RANGE_MIN], [6000], [FRAME_FEED_RANGE_MAX]])(
+    'accepts frame speed %s',
+    (frameFeedMmPerMin: number | undefined) => {
+      expect(getMachineProfileErrors(newMachineProfile({ frameFeedMmPerMin }))).toEqual([]);
+    },
+  );
 
   it('accepts 12 W power', () => {
     expect(getMachineProfileErrors(newMachineProfile({ maxPowerWatts: 12 }))).toEqual([]);
