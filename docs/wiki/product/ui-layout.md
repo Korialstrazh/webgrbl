@@ -32,7 +32,7 @@ The approved screen layout of webgrbl and the order in which features get built.
   2. ~~Machine control and machine profiles.~~ Done: see [[machine-control]].
   3. ~~Projects and SVG import (Dexie autosave, undo/redo).~~ Done: see [[projects-and-svg-import]].
   4. Layers and power mapping, G-code, toolpath preview. 4a done: see [[layers-and-gcode]] (palette, layers from colours, G-code export, Toolpath view with simulation and time estimate); 4b done: see [[burn-preview]] (3D burn preview with an orthographic camera, materials with a test sample, Cut check, liftable parts). The real burn of the sample awaits the hardware follow-up.
-  5. Running jobs (pre-flight, progress, pause, overrides).
+  5. Running jobs (pre-flight, progress, pause, overrides). In progress: see [[running-jobs]]. Start job, progress, Pause and Resume are built, simulator-tested only; Frame job, overrides, pre-flight and long jobs are not.
   6. ~~Material library (import/export).~~ Done: see [[burn-preview]].
   7. Extras (node editing, more colour ranges).
 

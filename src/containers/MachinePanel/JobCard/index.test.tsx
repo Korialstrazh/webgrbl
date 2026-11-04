@@ -1,12 +1,21 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import type { MockInstance } from 'vitest';
 import { JobCard } from '.';
 import * as downloadModule from '../../../utils/browser/download.text.file';
 import { EM_DASH, MIDDLE_DOT } from '../../../utils/characters.constants';
+import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
+import type { GrblMachineState } from '../../../utils/grbl/grbl.constants';
+import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
+import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../../utils/project/new.project.object';
-import type { AppStore } from '../../../utils/states/new.store';
+import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
+import { JobRunStarted, JobStartRequested } from '../../../utils/states/job.run.state';
+import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
+import { MachineStatusReceived } from '../../../utils/states/machine.status.state';
+import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
 import { newStore } from '../../../utils/states/new.store';
 import {
   LayerToggled,
@@ -15,6 +24,7 @@ import {
 } from '../../../utils/states/project.document.state';
 import { selectToolpathMachineArea } from '../../../utils/states/toolpath.machine.area.selector';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../../utils/states/toolpath.state';
+import { selectIsAnyOverlayOpen } from '../../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../../utils/test.support/bed.region.test.host';
 import { newGcodeExportTestStore } from '../../../utils/test.support/new.gcode.export.test.store';
@@ -30,6 +40,7 @@ import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpa
 
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
+const START_CONFIRM_OK_LABEL = 'Start and fire';
 const FRAME_JOB_LABEL = 'Frame job';
 const SOON_LABEL = 'Soon';
 const PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
@@ -47,6 +58,40 @@ const THREE_COLOUR_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="30
   + '<rect fill="none" stroke="#00a000" x="20" width="10" height="10"/></svg>';
 const CREATED_AT_ISO = '2026-11-01T10:00:00.000Z';
 const BURN_LINE_PATTERN = new RegExp(`^${GCODE_BURN_WORD} `, 'm');
+
+const newMachineStatusReceived = (machineState: GrblMachineState): MachineStatusReceived => {
+  const status: GrblResolvedStatus = {
+    machineState,
+    machineSubstate: undefined,
+    machinePosition: { x: 0, y: 0, z: 0 },
+    workPosition: { x: 0, y: 0, z: 0 },
+    workCoordinateOffset: undefined,
+    plannerBlocksAvailable: undefined,
+    rxBytesAvailable: undefined,
+    feedRate: 0,
+    spindleSpeed: 0,
+    overrides: undefined,
+  };
+
+  return new MachineStatusReceived({ status });
+};
+
+const newStartableJobStore = (): AppStore => {
+  const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+  const profile: MachineProfile = newMachineProfile();
+
+  store.dispatch(new MachineProfileSaved({ profile }));
+  store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+  store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
+  store.dispatch(newMachineStatusReceived(GRBL_MACHINE_STATE.IDLE));
+  store.dispatch(new ToolpathRequested());
+  store.dispatch(new ToolpathReady({
+    toolpath: newToolpath({ moves: [newToolpathMove()] }),
+    documentVersion: selectToolpathDocumentVersion(store.getState()),
+  }));
+
+  return store;
+};
 
 const renderJobCard = (store: AppStore): void => {
   render(
@@ -109,13 +154,59 @@ describe(JobCard.name, () => {
     expect(screen.getByText(ONE_LAYER)).toBeInTheDocument();
   });
 
-  it('keeps Start job coming soon: disabled, not the filled main action, with the Soon tag', async () => {
+  it('keeps Start job off with the reason while no laser is connected, and not as the main action', async () => {
     renderJobCard(await newGcodeExportTestStore());
     const startJobButton: HTMLElement = screen.getByRole('button', { name: START_JOB_LABEL });
 
     expect(startJobButton).toBeDisabled();
     expect(startJobButton).not.toHaveClass(PRIMARY_BUTTON_CLASS);
-    expect(startJobButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_LABEL);
+    fireEvent.mouseEnter(startJobButton.parentElement as HTMLElement);
+    expect(await screen.findByText('Connect the laser to start a job.')).toBeInTheDocument();
+  });
+
+  it('starts the job only after the confirmation, which the Escape-to-STOP hotkey treats as an overlay', async () => {
+    const store: AppStore = newStartableJobStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderJobCard(store);
+    fireEvent.click(screen.getByRole('button', { name: START_JOB_LABEL }));
+
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(JobStartRequested));
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
+
+    fireEvent.click(await screen.findByRole('button', { name: START_CONFIRM_OK_LABEL }));
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(JobStartRequested));
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+  });
+
+  it('closes the confirmation when the start gets blocked while it is open', async () => {
+    const store: AppStore = newStartableJobStore();
+
+    renderJobCard(store);
+    fireEvent.click(screen.getByRole('button', { name: START_JOB_LABEL }));
+    await screen.findByRole('button', { name: START_CONFIRM_OK_LABEL });
+
+    act(() => {
+      store.dispatch(newMachineStatusReceived(GRBL_MACHINE_STATE.RUN));
+    });
+
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+  });
+
+  it('shows the run as Paused during a hold, not as Running', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new JobRunStarted({ startedAtMs: 0 }));
+    renderJobCard(store);
+
+    expect(screen.getByRole('status')).toHaveTextContent('Running');
+
+    act(() => {
+      store.dispatch(newMachineStatusReceived(GRBL_MACHINE_STATE.HOLD));
+    });
+
+    expect(screen.getByRole('status')).toHaveTextContent('Paused');
   });
 
   it('makes Export G-code the filled main action, the one job action that works today', async () => {

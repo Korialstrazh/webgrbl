@@ -204,6 +204,11 @@ export const GRBL_HOLD_SUBSTATE = {
   DECELERATING: 1,
 } as const;
 
+/** Substate GRBL prints after Door: 0 once the door is closed again and a resume is accepted. */
+export const GRBL_DOOR_SUBSTATE = {
+  READY_TO_RESUME: 0,
+} as const;
+
 /** Where a sent line came from, which decides whether it counts as job traffic. */
 export const GRBL_LINE_ORIGIN = {
   CONSOLE: 'console',
@@ -271,6 +276,7 @@ export const GRBL_CONTROLLER_EVENT_KIND = {
   NOT_RESPONDING: 'not-responding',
   PROGRAM_STOPPED_ON_ERROR: 'program-stopped-on-error',
   CONTROLLER_RESET: 'controller-reset',
+  PROGRAM_PROGRESS: 'program-progress',
 } as const;
 
 export type GrblControllerEventKind = (typeof GRBL_CONTROLLER_EVENT_KIND)[keyof typeof GRBL_CONTROLLER_EVENT_KIND];

@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { BEFORE_UNLOAD_EVENT_NAME } from '../../utils/browser/browser.events.constants';
+import { selectIsJobRunActive } from '../../utils/states/job.run.state';
 import { selectIsMachineMoving } from '../../utils/states/machine.status.state';
 
 const EMPTY_RETURN_VALUE = '';
@@ -24,16 +25,18 @@ const preventPageUnload = (event: BeforeUnloadEvent): void => {
 
 export const LeavePageGuard = (): ReactNode => {
   const isMachineMoving: boolean = useSelector(selectIsMachineMoving);
+  const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
+  const isLeavingUnsafe: boolean = isMachineMoving || isJobRunActive;
 
   useEffect(() => {
-    if (!isMachineMoving) {
+    if (!isLeavingUnsafe) {
       return undefined;
     }
 
     window.addEventListener(BEFORE_UNLOAD_EVENT_NAME, preventPageUnload);
 
     return () => window.removeEventListener(BEFORE_UNLOAD_EVENT_NAME, preventPageUnload);
-  }, [isMachineMoving]);
+  }, [isLeavingUnsafe]);
 
   return null;
 };

@@ -20,6 +20,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.IDLE,
     hasHomingSwitches: true,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: { canJog: true, canHome: true, canSetZero: true },
   },
   {
@@ -28,6 +29,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.IDLE,
     hasHomingSwitches: false,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: { canJog: true, canHome: false, canSetZero: true },
   },
   {
@@ -36,6 +38,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.JOG,
     hasHomingSwitches: true,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: { canJog: true, canHome: false, canSetZero: false },
   },
   {
@@ -44,6 +47,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.ALARM,
     hasHomingSwitches: true,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: { canJog: false, canHome: true, canSetZero: false },
   },
   {
@@ -52,6 +56,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.ALARM,
     hasHomingSwitches: false,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -60,6 +65,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.RUN,
     hasHomingSwitches: true,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -68,6 +74,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.HOLD,
     hasHomingSwitches: true,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -76,6 +83,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.DOOR,
     hasHomingSwitches: true,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -84,6 +92,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: undefined,
     hasHomingSwitches: true,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -92,6 +101,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.IDLE,
     hasHomingSwitches: true,
     isPointerFiring: false,
+    isJobRunActive: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -100,6 +110,7 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.IDLE,
     hasHomingSwitches: true,
     isPointerFiring: true,
+    isJobRunActive: false,
     expectedAvailability: NOTHING_AVAILABLE,
   },
   {
@@ -108,6 +119,16 @@ const MOVE_AVAILABILITY_CASES: MoveAvailabilityCase[] = [
     machineState: GRBL_MACHINE_STATE.ALARM,
     hasHomingSwitches: true,
     isPointerFiring: true,
+    isJobRunActive: false,
+    expectedAvailability: NOTHING_AVAILABLE,
+  },
+  {
+    caseName: 'locks everything while a job runs',
+    isConnected: true,
+    machineState: GRBL_MACHINE_STATE.IDLE,
+    hasHomingSwitches: true,
+    isPointerFiring: false,
+    isJobRunActive: true,
     expectedAvailability: NOTHING_AVAILABLE,
   },
 ];
