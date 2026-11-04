@@ -22,10 +22,10 @@ import {
 import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
 import {
   FRAME_FEED_MM_PER_MIN,
-  FRAME_GRID_CELL_NONE_MM,
   FRAME_LASER_OFF,
   FRAME_LASER_ON_PREFIX,
 } from './frame.constants';
+import { getFrameGridOffsets } from './get.frame.grid.offsets';
 import type { FrameProgramInput } from './interfaces/FrameProgramInput';
 import type { FrameRectangle } from './interfaces/FrameRectangle';
 
@@ -41,28 +41,13 @@ const getMoveLine = (
     ...extraWords,
   ].join(GCODE_WORD_SEPARATOR);
 
-/** The positions along one axis, from the start side, at every cell size step that is still inside the outline. */
-const getGridOffsets = (sizeMm: number, gridCellMm: number): number[] => {
-  const offsets: number[] = [];
-
-  if (gridCellMm <= FRAME_GRID_CELL_NONE_MM) {
-    return offsets;
-  }
-
-  for (let offsetMm = gridCellMm; offsetMm < sizeMm; offsetMm += gridCellMm) {
-    offsets.push(offsetMm);
-  }
-
-  return offsets;
-};
-
 const getGridLines = (
   rectangle: FrameRectangle,
   gridCellMm: number,
 ): GeometryPoint[][] => {
   const lines: GeometryPoint[][] = [];
 
-  for (const offsetMm of getGridOffsets(
+  for (const offsetMm of getFrameGridOffsets(
     rectangle.maxX - rectangle.minX,
     gridCellMm,
   )) {
@@ -74,7 +59,7 @@ const getGridLines = (
     ]);
   }
 
-  for (const offsetMm of getGridOffsets(
+  for (const offsetMm of getFrameGridOffsets(
     rectangle.maxY - rectangle.minY,
     gridCellMm,
   )) {

@@ -1,7 +1,8 @@
 /**
  * The Job card: the layers that go to the laser, the time estimate and the job actions. Export G-code is the main
  * action, filled and full width, since it is the one that works today; Start job runs it on the connected laser after a
- * confirmation, with the reason shown when it cannot start; Frame job stays coming soon.
+ * confirmation, with the reason shown when it cannot start; Frame job, with its own settings, traces
+ * the outline of the job.
  *
  * @author michael.morosov
  *
@@ -25,8 +26,8 @@ import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { JOB_PAUSED_CONTROLS } from '../../../utils/states/job.pause.control.constants';
 import type { JobPauseControl } from '../../../utils/states/job.pause.control.constants';
 import { selectJobPauseControl } from '../../../utils/states/job.pause.control.selector';
-import { JobStartRequested, selectIsJobRunActive, selectJobRunStatus } from '../../../utils/states/job.run.state';
-import { JOB_RUN_STATUS } from '../../../utils/states/job.run.status.constants';
+import { JobStartRequested, selectIsJobRunActive, selectJobRunKind, selectJobRunStatus } from '../../../utils/states/job.run.state';
+import type { JobRunKind } from '../../../utils/states/job.run.kind.constants';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
 import type { AppDispatch } from '../../../utils/states/new.store';
@@ -34,21 +35,15 @@ import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
 import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.timeline.selectors';
 import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
-import { ComingSoon } from '../../../views/ComingSoon';
 import { Panel } from '../../../views/Panel';
+import { FrameControls } from './FrameControls';
 import { JobPauseButton } from './JobPauseButton';
 import { JobRunProgress } from './JobRunProgress';
+import { getJobRunStatusKey } from './get.job.run.status.key';
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import styles from './styles.module.scss';
 
 const JOB_START_CONFIRM_OVERLAY_ID = 'job-start-confirm';
-
-const JOB_RUN_STATUS_TEXT_KEYS: Partial<Record<JobRunStatus, string>> = {
-  [JOB_RUN_STATUS.SENDING]: DEFAULT.JOB_RUN_STATUS_SENDING,
-  [JOB_RUN_STATUS.FINISHING]: DEFAULT.JOB_RUN_STATUS_FINISHING,
-  [JOB_RUN_STATUS.COMPLETED]: DEFAULT.JOB_RUN_STATUS_COMPLETED,
-  [JOB_RUN_STATUS.INTERRUPTED]: DEFAULT.JOB_RUN_STATUS_INTERRUPTED,
-};
 
 export const JobCard = (): ReactNode => {
   const { t } = useTranslation();
@@ -61,9 +56,12 @@ export const JobCard = (): ReactNode => {
   const jobStartBlockedReasonKey: string | undefined = useSelector(selectJobStartBlockedReasonKey);
   const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
-  const jobRunStatusKey: string | undefined = JOB_PAUSED_CONTROLS.includes(pauseControl)
-    ? DEFAULT.JOB_RUN_STATUS_PAUSED
-    : JOB_RUN_STATUS_TEXT_KEYS[jobRunStatus];
+  const jobRunKind: JobRunKind = useSelector(selectJobRunKind);
+  const jobRunStatusKey: string | undefined = getJobRunStatusKey(
+    jobRunKind,
+    jobRunStatus,
+    JOB_PAUSED_CONTROLS.includes(pauseControl),
+  );
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const [isStartConfirmOpen, setIsStartConfirmOpen] = useState<boolean>(false);
 
@@ -129,9 +127,7 @@ export const JobCard = (): ReactNode => {
             </span>
           </Tooltip>
         </Popconfirm>
-        <ComingSoon description={t(DEFAULT.MACHINE_JOB_FRAME_DESCRIPTION)} isFullWidth>
-          <Button disabled>{t(DEFAULT.MACHINE_JOB_FRAME)}</Button>
-        </ComingSoon>
+        <FrameControls />
       </div>
     </Panel>
   );
