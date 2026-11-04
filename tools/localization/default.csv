@@ -134,6 +134,9 @@ DESIGN_LAYERS_TITLE;Layers
 DESIGN_MATERIAL_TITLE;Material
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Design
+FRAME_START_BLOCKED_BED_OVERRUN;The frame would leave the bed.
+FRAME_START_BLOCKED_LASER_MODE;Laser mode ($32=1) must be confirmed on to frame a job.
+FRAME_START_BLOCKED_NO_BURN_MOVES;The toolpath has no burn moves to frame.
 GCODE_EXPORT_NEEDS_LAYER;Switch on a layer to export G-code.
 GCODE_EXPORT_NEEDS_PROFILE;Add a machine profile to export G-code.
 GCODE_WARNINGS_CANCEL;Cancel

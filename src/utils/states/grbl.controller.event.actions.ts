@@ -18,7 +18,7 @@ import type { Action } from './action';
 import { ConnectionStatusChanged } from './grbl.connection.state';
 import { ConsoleEntryReceived } from './grbl.console.state';
 import { JobRunProgressChanged } from './job.run.state';
-import { MachineControllerResetDetected, MachineStatusReceived } from './machine.status.state';
+import { MachineAlarmReported, MachineControllerResetDetected, MachineStatusReceived } from './machine.status.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
 
@@ -35,11 +35,14 @@ export const getGrblControllerEventActions = (event: GrblControllerEvent): Actio
       messageParameters: { code: event.code, description: getGrblErrorDescriptionKey(event.code) },
     })];
   case GRBL_CONTROLLER_EVENT_KIND.GRBL_ALARM:
-    return [new ToastShown({
-      severity: TOAST_SEVERITY.ERROR,
-      messageKey: DEFAULT.TOAST_GRBL_ALARM,
-      messageParameters: { code: event.code, description: getGrblAlarmDescriptionKey(event.code) },
-    })];
+    return [
+      new MachineAlarmReported(),
+      new ToastShown({
+        severity: TOAST_SEVERITY.ERROR,
+        messageKey: DEFAULT.TOAST_GRBL_ALARM,
+        messageParameters: { code: event.code, description: getGrblAlarmDescriptionKey(event.code) },
+      }),
+    ];
   case GRBL_CONTROLLER_EVENT_KIND.CONNECTION_LOST:
     return [
       new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.LOST }),

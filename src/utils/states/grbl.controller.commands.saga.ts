@@ -10,6 +10,7 @@
  */
 import { all, call, put, takeEvery, takeLeading } from 'redux-saga/effects';
 import type { GrblController } from '../grbl/grbl.controller';
+import { runGrblFrame } from './frame.run.saga';
 import { submitGrblConsoleCommand } from './grbl.console.command.saga';
 import { ConsoleCommandSubmitted } from './grbl.console.state';
 import { runGrblJobPauseCommand } from './grbl.job.pause.saga';
@@ -17,7 +18,7 @@ import { submitGrblMachineLine } from './grbl.machine.line.saga';
 import { runGrblMachineStop } from './grbl.machine.stop.saga';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import { runGrblJob } from './job.run.saga';
-import { JobPauseRequested, JobResumeRequested, JobStartRequested } from './job.run.state';
+import { FrameStartRequested, JobPauseRequested, JobResumeRequested, JobStartRequested } from './job.run.state';
 import {
   MachineLineRequested,
   MachineResetRequested,
@@ -37,6 +38,7 @@ export function* handleGrblControllerCommands(controller: GrblController): Gener
   yield all([
     takeEvery(ConsoleCommandSubmitted.type, submitGrblConsoleCommand, controller),
     takeLeading(JobStartRequested.type, runGrblJob, controller),
+    takeLeading(FrameStartRequested.type, runGrblFrame, controller),
     takeEvery([JobPauseRequested.type, JobResumeRequested.type], runGrblJobPauseCommand, controller),
     takeEvery(MachineStopRequested.type, runGrblMachineStop, controller),
     takeEvery(MachineResetRequested.type, runGrblMachineCommand, (): Promise<void> => controller.resetMachine()),

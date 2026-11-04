@@ -12,6 +12,7 @@ import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineP
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../../utils/project/new.project.object';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
+import { JOB_RUN_KIND } from '../../../utils/states/job.run.kind.constants';
 import { JobRunStarted, JobStartRequested } from '../../../utils/states/job.run.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../../utils/states/machine.status.state';
@@ -197,7 +198,7 @@ describe(JobCard.name, () => {
   it('shows the run as Paused during a hold, not as Running', () => {
     const store: AppStore = newStartableJobStore();
 
-    store.dispatch(new JobRunStarted({ startedAtMs: 0 }));
+    store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.JOB }));
     renderJobCard(store);
 
     expect(screen.getByRole('status')).toHaveTextContent('Running');

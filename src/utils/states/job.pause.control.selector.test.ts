@@ -5,6 +5,7 @@ import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
 import { JOB_PAUSE_CONTROL } from './job.pause.control.constants';
 import type { JobPauseControl } from './job.pause.control.constants';
 import { selectJobPauseControl } from './job.pause.control.selector';
+import { JOB_RUN_KIND } from './job.run.kind.constants';
 import { JobRunStarted } from './job.run.state';
 import { MachineStatusReceived } from './machine.status.state';
 import { newStore } from './new.store';
@@ -30,7 +31,7 @@ const newStatus = (machineState: GrblMachineState, machineSubstate?: number): Gr
 const getControlDuringRun = (status: GrblResolvedStatus): JobPauseControl => {
   const store: AppStore = newStore();
 
-  store.dispatch(new JobRunStarted({ startedAtMs: 0 }));
+  store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.JOB }));
   store.dispatch(new MachineStatusReceived({ status }));
 
   return selectJobPauseControl(store.getState());
