@@ -66,6 +66,11 @@ const REPORTED_DOT_LASER_ON_PATTERN = /M4S10(\r?\n|$)/;
 const LASER_ON_WORD = 'M4S';
 const LASER_OFF_WORD = 'M5S0';
 const AIR_ASSIST_ON_WORD = 'M8';
+const CHOSEN_FEED_MM_PER_MIN = 3000;
+const CHOSEN_FEED_PATTERN = /F3000(\r?\n|$)/;
+const OUT_OF_RANGE_FEED_MM_PER_MIN = 60000;
+const DEFAULT_FEED_PATTERN = /F6000(\r?\n|$)/;
+const OUT_OF_RANGE_FEED_PATTERN = /F60000/;
 
 interface FrameRig {
   store: AppStore;
@@ -233,6 +238,45 @@ describe(runGrblFrame.name, () => {
     await vi.advanceTimersByTimeAsync(FRAME_END_MS);
 
     expect(getWrittenText()).toMatch(REPORTED_DOT_LASER_ON_PATTERN);
+  });
+
+  it('streams the feed chosen in the profile', async () => {
+    const { store, getWrittenText }: FrameRig = await prepareFrameRig(
+      SHORT_MOVE_END_X_MM,
+      false,
+      0,
+      { frameFeedMmPerMin: CHOSEN_FEED_MM_PER_MIN },
+    );
+
+    store.dispatch(new FrameStartRequested());
+    await vi.advanceTimersByTimeAsync(FRAME_END_MS);
+
+    expect(getWrittenText()).toMatch(CHOSEN_FEED_PATTERN);
+    expect(getWrittenText()).not.toMatch(DEFAULT_FEED_PATTERN);
+  });
+
+  it('streams the default feed when the profile sets none', async () => {
+    const { store, getWrittenText }: FrameRig = await prepareFrameRig();
+
+    store.dispatch(new FrameStartRequested());
+    await vi.advanceTimersByTimeAsync(FRAME_END_MS);
+
+    expect(getWrittenText()).toMatch(DEFAULT_FEED_PATTERN);
+  });
+
+  it('streams the default feed when the stored feed is out of range', async () => {
+    const { store, getWrittenText }: FrameRig = await prepareFrameRig(
+      SHORT_MOVE_END_X_MM,
+      false,
+      0,
+      { frameFeedMmPerMin: OUT_OF_RANGE_FEED_MM_PER_MIN },
+    );
+
+    store.dispatch(new FrameStartRequested());
+    await vi.advanceTimersByTimeAsync(FRAME_END_MS);
+
+    expect(getWrittenText()).toMatch(DEFAULT_FEED_PATTERN);
+    expect(getWrittenText()).not.toMatch(OUT_OF_RANGE_FEED_PATTERN);
   });
 
   it('shows the air assist as off after an alarm ended the frame', async () => {

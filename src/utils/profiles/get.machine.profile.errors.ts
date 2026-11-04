@@ -1,6 +1,8 @@
+import { DEFAULT_FRAME_FEED_MM_PER_MIN } from '../frame/frame.constants';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
 import type { MachineProfile } from './interfaces/MachineProfile';
 import type { MachineProfileFieldError } from './interfaces/MachineProfileFieldError';
+import { isFeedRateInRange } from './is.feed.rate.in.range';
 import {
   MACHINE_JOG_FEED_RATE_MAX,
   MACHINE_JOG_FEED_RATE_MIN,
@@ -22,8 +24,7 @@ const isWorkAreaLengthValid = (value: number): boolean => isPositiveNumber(value
 
 const isFrameMarginValid = (value: number = 0): boolean => isFiniteNumber(value) && value >= 0;
 
-const isJogFeedRateValid = (value: number): boolean =>
-  isFiniteNumber(value) && value >= MACHINE_JOG_FEED_RATE_MIN && value <= MACHINE_JOG_FEED_RATE_MAX;
+const isFrameFeedRateValid = (value: number = DEFAULT_FRAME_FEED_MM_PER_MIN): boolean => isFeedRateInRange(value);
 
 /**
  * Lists the problems of a machine profile, one entry per invalid field; an empty list means the profile is valid.
@@ -74,7 +75,7 @@ export const getMachineProfileErrors = (profile: MachineProfile): MachineProfile
     });
   }
 
-  if (!isJogFeedRateValid(profile.jogFeedRate)) {
+  if (!isFeedRateInRange(profile.jogFeedRate)) {
     errors.push({
       field: 'jogFeedRate',
       messageKey: MACHINE_PROFILE_ERROR_KEY.JOG_FEED_RATE_INVALID,
@@ -84,6 +85,14 @@ export const getMachineProfileErrors = (profile: MachineProfile): MachineProfile
 
   if (!isFrameMarginValid(profile.frameMarginMm)) {
     errors.push({ field: 'frameMarginMm', messageKey: MACHINE_PROFILE_ERROR_KEY.FRAME_MARGIN_INVALID });
+  }
+
+  if (!isFrameFeedRateValid(profile.frameFeedMmPerMin)) {
+    errors.push({
+      field: 'frameFeedMmPerMin',
+      messageKey: MACHINE_PROFILE_ERROR_KEY.FRAME_FEED_RATE_INVALID,
+      messageParameters: { min: MACHINE_JOG_FEED_RATE_MIN, max: MACHINE_JOG_FEED_RATE_MAX },
+    });
   }
 
   return errors;

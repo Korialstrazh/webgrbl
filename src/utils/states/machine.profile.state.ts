@@ -9,9 +9,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { FRAME_GRID_CELL_NONE_MM, FRAME_GRID_CELL_OPTIONS_MM } from '../frame/frame.constants';
+import {
+  DEFAULT_FRAME_FEED_MM_PER_MIN,
+  FRAME_GRID_CELL_NONE_MM,
+  FRAME_GRID_CELL_OPTIONS_MM,
+} from '../frame/frame.constants';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { MachineProfilesDocument } from '../profiles/interfaces/MachineProfilesDocument';
+import { isFeedRateInRange } from '../profiles/is.feed.rate.in.range';
 import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../profiles/machine.profile.constants';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
@@ -151,4 +156,11 @@ export const selectFrameGridCellMm = (state: RootState): number => {
 };
 
 export const selectFrameMarginMm = (state: RootState): number => selectActiveMachineProfile(state)?.frameMarginMm ?? 0;
+
+/** A stored speed outside the allowed range (for example from an imported file) never reaches the machine. */
+export const selectFrameFeedMmPerMin = (state: RootState): number => {
+  const feedMmPerMin: number = selectActiveMachineProfile(state)?.frameFeedMmPerMin ?? DEFAULT_FRAME_FEED_MM_PER_MIN;
+
+  return isFeedRateInRange(feedMmPerMin) ? feedMmPerMin : DEFAULT_FRAME_FEED_MM_PER_MIN;
+};
 // #endregion

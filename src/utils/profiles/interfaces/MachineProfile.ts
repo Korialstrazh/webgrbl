@@ -35,4 +35,6 @@ export interface MachineProfile {
   frameGridCellMm?: number;
   /** Distance in mm the frame trace keeps outside the job outline; missing means 0. */
   frameMarginMm?: number;
+  /** Speed in mm/min of the frame trace; missing means the default. */
+  frameFeedMmPerMin?: number;
 }

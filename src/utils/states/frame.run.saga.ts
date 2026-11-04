@@ -28,7 +28,7 @@ import { followJobProgram, waitForJobInterruption } from './job.run.saga';
 import { FrameRunAlarmed, JobRunStarted, JobRunStatusChanged } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
-import { selectActiveMachineProfile, selectFrameGridCellMm } from './machine.profile.state';
+import { selectActiveMachineProfile, selectFrameFeedMmPerMin, selectFrameGridCellMm } from './machine.profile.state';
 import {
   MachineAirAssistChanged,
   MachineAlarmReported,
@@ -61,6 +61,7 @@ const getFrameProgramLinesOfState = (state: AppRootState): string[] | undefined 
   return getFrameProgramLines({
     rectangle,
     gridCellMm: selectFrameGridCellMm(state),
+    feedMmPerMin: selectFrameFeedMmPerMin(state),
     sValue: getFrameSValue(
       profile.maxPowerWatts,
       getValidGcodeSValueMax(getPointerSValueMax(selectGrblSettings(state), profile)),

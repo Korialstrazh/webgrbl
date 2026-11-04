@@ -17,6 +17,8 @@ export interface FrameProgramInput {
   rectangle: FrameRectangle;
   /** Distance between grid lines in mm; 0 traces the outline only. */
   gridCellMm: number;
+  /** Speed of the trace in mm/min. */
+  feedMmPerMin: number;
   /** The S value of the trace. */
   sValue: number;
   /** The machine, for the origin corner and the work area. */

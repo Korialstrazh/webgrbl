@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_FRAME_FEED_MM_PER_MIN } from '../frame/frame.constants';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { MachineProfilesDocument } from '../profiles/interfaces/MachineProfilesDocument';
 import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../profiles/machine.profile.constants';
@@ -24,6 +25,7 @@ import {
   machineProfileReducer,
   selectActiveMachineProfile,
   selectFrameGridCellMm,
+  selectFrameFeedMmPerMin,
   selectFrameMarginMm,
   selectMachineProfiles,
 } from './machine.profile.state';
@@ -173,6 +175,8 @@ describe(selectMachineProfiles.name, () => {
 const UNLISTED_GRID_CELL_MM = 7;
 const LISTED_GRID_CELL_MM = 20;
 const FRAME_MARGIN_MM = 3;
+const FRAME_FEED_MM_PER_MIN = 3000;
+const OUT_OF_RANGE_FEED_MM_PER_MIN = 60000;
 
 const getActiveRootState = (profile: MachineProfile): { [MACHINE_PROFILE_STATE_NAME]: MachineProfileState } =>
   getRootState(getLoadedState(newDocument([profile], profile.id)));
@@ -194,6 +198,26 @@ describe(selectFrameGridCellMm.name, () => {
   it('reads a grid cell size outside the options as 0', () => {
     expect(selectFrameGridCellMm(getActiveRootState(newMachineProfile({ frameGridCellMm: UNLISTED_GRID_CELL_MM }))))
       .toBe(0);
+  });
+});
+
+describe(selectFrameFeedMmPerMin.name, () => {
+  it('returns the default for a profile without the setting', () => {
+    expect(selectFrameFeedMmPerMin(getActiveRootState(newMachineProfile()))).toBe(DEFAULT_FRAME_FEED_MM_PER_MIN);
+  });
+
+  it('returns the default without an active profile', () => {
+    expect(selectFrameFeedMmPerMin(getRootState(getInitialState()))).toBe(DEFAULT_FRAME_FEED_MM_PER_MIN);
+  });
+
+  it('returns the speed of the active profile', () => {
+    expect(selectFrameFeedMmPerMin(getActiveRootState(newMachineProfile({ frameFeedMmPerMin: FRAME_FEED_MM_PER_MIN }))))
+      .toBe(FRAME_FEED_MM_PER_MIN);
+  });
+
+  it.each([[OUT_OF_RANGE_FEED_MM_PER_MIN], [0], [NaN]])('reads the stored speed %s as default', (stored: number) => {
+    expect(selectFrameFeedMmPerMin(getActiveRootState(newMachineProfile({ frameFeedMmPerMin: stored }))))
+      .toBe(DEFAULT_FRAME_FEED_MM_PER_MIN);
   });
 });
 

@@ -9,6 +9,8 @@ const PROFILE = newMachineProfile({
   originCorner: MACHINE_ORIGIN_CORNER.FRONT_LEFT,
 });
 const S_VALUE = 5;
+const FEED_MM_PER_MIN = 1500;
+const OTHER_FEED_MM_PER_MIN = 7200;
 const SYNC_DWELL_LINE = 'G4 P0';
 const START_POINT = { x: 3, y: 4 };
 const SQUARE_100 = { minX: 10, minY: 10, maxX: 110, maxY: 110 };
@@ -19,6 +21,7 @@ describe(getFrameProgramLines.name, () => {
     const lines = getFrameProgramLines({
       rectangle: SQUARE_100,
       gridCellMm: 0,
+      feedMmPerMin: FEED_MM_PER_MIN,
       sValue: S_VALUE,
       profile: PROFILE,
       startPoint: START_POINT,
@@ -38,10 +41,25 @@ describe(getFrameProgramLines.name, () => {
     ]);
   });
 
+  it('writes the feed it is given on the first side only', () => {
+    const lines = getFrameProgramLines({
+      rectangle: SQUARE_100,
+      gridCellMm: 0,
+      feedMmPerMin: OTHER_FEED_MM_PER_MIN,
+      sValue: S_VALUE,
+      profile: PROFILE,
+      startPoint: START_POINT,
+    });
+
+    expect(lines[3]).toBe(`G1 X110 Y10 F${OTHER_FEED_MM_PER_MIN}`);
+    expect(lines.filter((line: string): boolean => line.includes('F')).length).toBe(1);
+  });
+
   it('adds serpentine grid lines after the rectangle, joined by travel moves', () => {
     const lines = getFrameProgramLines({
       rectangle: SQUARE_50,
       gridCellMm: 20,
+      feedMmPerMin: FEED_MM_PER_MIN,
       sValue: S_VALUE,
       profile: PROFILE,
       startPoint: START_POINT,
@@ -63,6 +81,7 @@ describe(getFrameProgramLines.name, () => {
     const withoutGrid = getFrameProgramLines({
       rectangle: SQUARE_50,
       gridCellMm: 0,
+      feedMmPerMin: FEED_MM_PER_MIN,
       sValue: S_VALUE,
       profile: PROFILE,
       startPoint: START_POINT,
@@ -70,6 +89,7 @@ describe(getFrameProgramLines.name, () => {
     const withLargeCell = getFrameProgramLines({
       rectangle: SQUARE_50,
       gridCellMm: 200,
+      feedMmPerMin: FEED_MM_PER_MIN,
       sValue: S_VALUE,
       profile: PROFILE,
       startPoint: START_POINT,
@@ -82,6 +102,7 @@ describe(getFrameProgramLines.name, () => {
     const lines = getFrameProgramLines({
       rectangle: SQUARE_100,
       gridCellMm: 0,
+      feedMmPerMin: FEED_MM_PER_MIN,
       sValue: S_VALUE,
       profile: { ...PROFILE, originCorner: MACHINE_ORIGIN_CORNER.BACK_RIGHT },
       startPoint: START_POINT,
