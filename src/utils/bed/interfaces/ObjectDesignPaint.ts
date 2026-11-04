@@ -11,6 +11,7 @@
  */
 import type { SvgFillRule } from '../../svg/geometry/svg.geometry.constants';
 import type { DesignPaintRole } from '../bed.design.constants';
+import type { ObjectDesignGradient } from './ObjectDesignGradient';
 
 export interface ObjectDesignPaint {
   /** Whether the path stands for the shape's fill or its stroke. */
@@ -21,6 +22,8 @@ export interface ObjectDesignPaint {
   pathData: string;
   /** The paint colour as #rrggbb; for a gradient, the colour of its first stop. */
   colour: string;
+  /** The gradient to draw instead of the colour, when the paint is one that could be placed. */
+  gradient: ObjectDesignGradient | undefined;
   /** The paint opacity from 0 to 1. */
   opacity: number;
   /** For a stroke, its width in artwork millimetres; 0 for a fill. */

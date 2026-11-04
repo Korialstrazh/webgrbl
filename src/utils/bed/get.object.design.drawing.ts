@@ -17,10 +17,12 @@ import { getSvgExpandedDocument } from '../svg/geometry/get.svg.expanded.documen
 import { getSvgMatrixAreaScale } from '../svg/geometry/get.svg.matrix.area.scale';
 import { getSvgMatrixMaxScale } from '../svg/geometry/get.svg.matrix.max.scale';
 import { getSvgMatrixPoint } from '../svg/geometry/get.svg.matrix.point';
+import { getSvgMatrixProduct } from '../svg/geometry/get.svg.matrix.product';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { SvgDrawable } from '../svg/geometry/interfaces/SvgDrawable';
 import type { SvgExpandedDocument } from '../svg/geometry/interfaces/SvgExpandedDocument';
 import type { SvgMatrix } from '../svg/geometry/interfaces/SvgMatrix';
+import type { SvgPaint } from '../svg/geometry/interfaces/SvgPaint';
 import type { SvgSubpath } from '../svg/geometry/interfaces/SvgSubpath';
 import { getSvgViewBox } from '../svg/get.svg.view.box';
 import { getObjectArtworkMatrix } from '../toolpath/get.object.artwork.matrix';
@@ -34,6 +36,7 @@ import { getDesignPaintRuns } from './get.design.paint.runs';
 import { getDesignSubpathsPathData } from './get.design.subpaths.path.data';
 import type { DesignDrawingSource } from './interfaces/DesignDrawingSource';
 import type { ObjectDesignDrawing } from './interfaces/ObjectDesignDrawing';
+import type { ObjectDesignGradient } from './interfaces/ObjectDesignGradient';
 import type { ObjectDesignPaint } from './interfaces/ObjectDesignPaint';
 
 const EMPTY_DESIGN_DRAWING: ObjectDesignDrawing = { runs: [] };
@@ -49,9 +52,18 @@ const getArtworkSubpaths = (subpaths: SvgSubpath[], matrix: SvgMatrix, isClosed:
     isClosed: isClosed || subpath.isClosed,
   }));
 
+const getDesignGradient = (
+  paint: SvgPaint,
+  gradientMatrix: SvgMatrix | undefined,
+  artworkMatrix: SvgMatrix,
+): ObjectDesignGradient | undefined =>
+  paint.gradient && gradientMatrix
+    ? { definition: paint.gradient, artworkMatrix: getSvgMatrixProduct(artworkMatrix, gradientMatrix) }
+    : undefined;
+
 /** The fill path, then the stroke path, the order SVG paints them in; a fill outline is always closed. */
 const getDrawableDesignPaints = (drawable: SvgDrawable, matrix: SvgMatrix): ObjectDesignPaint[] => {
-  const { fill, stroke, strokeWidth, fillRule } = drawable.paint;
+  const { fill, stroke, strokeWidth, fillRule, fillGradientMatrix, strokeGradientMatrix } = drawable.paint;
   const designPaints: ObjectDesignPaint[] = [];
 
   if (fill) {
@@ -60,6 +72,7 @@ const getDrawableDesignPaints = (drawable: SvgDrawable, matrix: SvgMatrix): Obje
       layerKey: getPaintLayerKey(fill),
       pathData: getDesignSubpathsPathData(getArtworkSubpaths(drawable.subpaths, matrix, true)),
       colour: fill.colour,
+      gradient: getDesignGradient(fill, fillGradientMatrix, matrix),
       opacity: fill.opacity,
       strokeWidthMm: 0,
       fillRule,
@@ -72,6 +85,7 @@ const getDrawableDesignPaints = (drawable: SvgDrawable, matrix: SvgMatrix): Obje
       layerKey: getPaintLayerKey(stroke),
       pathData: getDesignSubpathsPathData(getArtworkSubpaths(drawable.subpaths, matrix, false)),
       colour: stroke.colour,
+      gradient: getDesignGradient(stroke, strokeGradientMatrix, matrix),
       opacity: stroke.opacity,
       strokeWidthMm: strokeWidth * getSvgMatrixAreaScale(matrix),
       fillRule,
