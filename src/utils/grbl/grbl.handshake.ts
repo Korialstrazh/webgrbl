@@ -23,12 +23,20 @@ import { isSupportedGrblFirmware } from './grbl.firmware.support';
 import { getParsedGrblResponse } from './grbl.response.parser';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblFirmwareIdentity } from './interfaces/GrblFirmwareIdentity';
+import type { GrblConnectionAnswers } from './interfaces/GrblConnectionAnswers';
+import type { GrblRestartWait } from './interfaces/GrblRestartWait';
 import type { GrblHandshakeContext } from './interfaces/GrblHandshakeContext';
 import type { GrblResponse } from './interfaces/GrblResponse';
 
+/** How often $I and $$ are asked in all before a restarting controller counts as failed. */
+const GRBL_HANDSHAKE_QUERY_ATTEMPTS = 3;
+/** How long a banner may go unanswered before the lines sent earlier count as wiped by a restart. */
+const GRBL_HANDSHAKE_RESTART_QUIET_MS = 1000;
+
 /**
- * Resolves with the first banner. Later banners are ignored: opening the port often resets the board, and the
- * soft reset prints a second banner, so taking only the first keeps $I and $$ from being sent twice.
+ * Resolves with the first banner. Opening the port often resets the board and the soft reset prints a second banner;
+ * one that arrives after $I was sent and is followed by silence makes the queries start again (see
+ * getAnswersAcrossRestarts).
  */
 const waitForFirstGrblBanner = (context: GrblHandshakeContext): Promise<GrblFirmwareIdentity> =>
   new Promise<GrblFirmwareIdentity>((resolveBanner: (identity: GrblFirmwareIdentity) => void): void => {
@@ -77,12 +85,59 @@ const getSupportedGrblIdentity = async (context: GrblHandshakeContext): Promise<
   return identity;
 };
 
+const getGrblConnectionAnswers = async (context: GrblHandshakeContext): Promise<GrblConnectionAnswers> => {
+  const buildInfoLines: string[] = await context.sendPrivateCommand(GRBL_BUILD_INFO_COMMAND);
+  const settingLines: string[] = await context.sendPrivateCommand(GRBL_SETTINGS_COMMAND);
+
+  return { buildInfoLines, settingLines };
+};
+
+/**
+ * Resolves when a banner was followed by a silence with no answer. A banner alone proves nothing: the banner of the
+ * soft reset often arrives after $I was sent, and $I is still answered then.
+ */
+const waitForUnansweredRestart = (context: GrblHandshakeContext): GrblRestartWait => {
+  let quietTimerId: ReturnType<typeof setTimeout> | undefined;
+  const restart: Promise<undefined> = new Promise<undefined>((resolveRestart: (value: undefined) => void): void => {
+    context.setBannerListener((): void => {
+      clearTimeout(quietTimerId);
+      quietTimerId = setTimeout((): void => resolveRestart(undefined), GRBL_HANDSHAKE_RESTART_QUIET_MS);
+    });
+  });
+
+  return { restart, cancelRestartWait: (): void => clearTimeout(quietTimerId) };
+};
+
+/**
+ * A restart wipes $I and $$, so they would never be answered. Some firmwares restart by themselves after an alarm at
+ * start, such as a head resting on a limit switch. So the lines are dropped and asked again, a limited number of
+ * times, under the deadline of the whole handshake.
+ */
+const getAnswersAcrossRestarts = async (context: GrblHandshakeContext): Promise<GrblConnectionAnswers> => {
+  for (let attempt = 0; attempt < GRBL_HANDSHAKE_QUERY_ATTEMPTS; attempt++) {
+    const { restart, cancelRestartWait }: GrblRestartWait = waitForUnansweredRestart(context);
+    const answersWait: Promise<GrblConnectionAnswers> = getGrblConnectionAnswers(context);
+    const answers: GrblConnectionAnswers | undefined = await Promise.race([answersWait, restart]);
+
+    cancelRestartWait();
+
+    if (answers) {
+      return answers;
+    }
+
+    // Dropping the lines rejects this wait, which nobody reads any more.
+    answersWait.catch((): void => undefined);
+    context.dropAllLines();
+  }
+
+  throw new GrblHandshakeError(GRBL_HANDSHAKE_FAILURE_REASON.TIMEOUT);
+};
+
 const runGrblHandshakeSteps = async (context: GrblHandshakeContext): Promise<GrblConnectionInfo> => {
   await context.openTransport();
 
   const identity: GrblFirmwareIdentity = await getSupportedGrblIdentity(context);
-  const buildInfoLines: string[] = await context.sendPrivateCommand(GRBL_BUILD_INFO_COMMAND);
-  const settingLines: string[] = await context.sendPrivateCommand(GRBL_SETTINGS_COMMAND);
+  const { buildInfoLines, settingLines }: GrblConnectionAnswers = await getAnswersAcrossRestarts(context);
 
   return {
     identity,

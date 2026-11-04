@@ -7,11 +7,11 @@ APP_UPDATE_DISMISS;Dismiss
 APP_UPDATE_NEED_REFRESH;A new version of webgrbl is available.
 APP_UPDATE_OFFLINE_READY;webgrbl is ready to work offline.
 APP_UPDATE_RELOAD;Reload
-BED_ARIA_HEAD;Laser head at X {{x}}, Y {{y}} (machine coordinates)
-BED_ARIA_HEAD_OUTSIDE;Laser head at X {{x}}, Y {{y}} (machine coordinates), outside the bed
+BED_ARIA_HEAD;Laser head at X {{x}}, Y {{y}} (work coordinates)
+BED_ARIA_HEAD_OUTSIDE;Laser head at X {{x}}, Y {{y}} (work coordinates), outside the bed
 BED_ARIA_LABEL;Machine bed, {{width}} by {{height}} mm
-BED_ARIA_WORK_ORIGIN;Work zero at X {{x}}, Y {{y}} (machine coordinates)
-BED_ARIA_WORK_ORIGIN_OUTSIDE;Work zero at X {{x}}, Y {{y}} (machine coordinates), outside the bed
+BED_ARIA_WORK_ORIGIN;Work zero at X {{x}}, Y {{y}} (work coordinates)
+BED_ARIA_WORK_ORIGIN_OUTSIDE;Work zero at X {{x}}, Y {{y}} (work coordinates), outside the bed
 BED_COLOUR_DARK_NOTE;A very dark bed hides black artwork.
 BED_COLOUR_LABEL;Bed colour
 BED_COLOUR_PRESET_DARK_GREY;Dark grey
@@ -142,7 +142,7 @@ GCODE_WARNINGS_INTRO;Some content is left out of the job or burns differently th
 GCODE_WARNINGS_ITEM;{{objectName}}: {{warning}}
 GCODE_WARNINGS_LIST_LABEL;Toolpath warnings
 GCODE_WARNINGS_TITLE;Export G-code with warnings?
-GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again.
+GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again. If this appears on connecting, the head may be resting on a limit switch: move it away.
 GRBL_ALARM_10;Emergency stop asserted - clear it and reset.
 GRBL_ALARM_2;Soft limit alarm - the G-code target is beyond the machine travel. The position is kept and it is safe to unlock.
 GRBL_ALARM_3;Reset during a move - the machine position is probably lost so home again.

@@ -27,12 +27,16 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
 import { getBedOverlayTone } from '../../utils/bed/get.bed.overlay.tone';
+import { getBedPointFromWorkPosition } from '../../utils/bed/get.bed.point.from.work.position';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
+import type { GrblAxisPosition } from '../../utils/grbl/interfaces/GrblAxisPosition';
 import type { GrblResolvedStatus } from '../../utils/grbl/interfaces/GrblResolvedStatus';
 import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedColour } from '../../utils/states/bed.appearance.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
+import { selectToolpathMachineArea } from '../../utils/states/toolpath.machine.area.selector';
+import type { ToolpathMachineArea } from '../../utils/toolpath/interfaces/ToolpathMachineArea';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
 import { BedObjects } from '../BedObjects';
@@ -57,6 +61,8 @@ import styles from './styles.module.scss';
 import { useBedViewMode } from './use.bed.view.mode';
 import { useSvgFileDrop } from './use.svg.file.drop';
 
+const WORK_ZERO_POSITION: GrblAxisPosition = { x: 0, y: 0, z: 0 };
+
 export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const { t } = useTranslation();
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
@@ -70,6 +76,11 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const { viewMode, changeBedViewMode }: BedViewModeControls = useBedViewMode();
   const isToolpathView: boolean = viewMode === BED_VIEW_MODE.TOOLPATH;
   const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
+  const machineArea: ToolpathMachineArea = useSelector(selectToolpathMachineArea);
+  const headBedPoint: GrblAxisPosition | undefined =
+    status?.workPosition && getBedPointFromWorkPosition(status.workPosition, machineArea);
+  const workZeroBedPoint: GrblAxisPosition | undefined =
+    status?.workPosition && getBedPointFromWorkPosition(WORK_ZERO_POSITION, machineArea);
   const dropArea: SvgFileDropArea = useSvgFileDrop(!isThreeDView);
 
   return (
@@ -129,8 +140,8 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               controlsHost={viewControlsHost}
               // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
               // add a second crosshair.
-              headPosition={isToolpathView ? undefined : status?.machinePosition}
-              workOriginPosition={isToolpathView ? undefined : status?.workCoordinateOffset}
+              headPosition={isToolpathView ? undefined : headBedPoint}
+              workOriginPosition={isToolpathView ? undefined : workZeroBedPoint}
               placeholderLabel={placeholderKey && t(placeholderKey)}
             >
               {isToolpathView ? (
