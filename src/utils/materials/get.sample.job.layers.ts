@@ -18,7 +18,7 @@ import { getObjectsDerivedLayers } from '../layers/get.objects.derived.layers';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
 import type { Palette } from '../palette/interfaces/Palette';
-import { LAYER_MODE } from '../palette/palette.constants';
+import { CUT_ENTRY_ID, LAYER_MODE } from '../palette/palette.constants';
 import type { LayerMode } from '../palette/palette.constants';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { SAMPLE_CUT_COLOUR } from './sample.job.constants';
@@ -59,6 +59,9 @@ export const getSampleJobLayers = (
     [cutColour]: LAYER_MODE.LINE,
     [SHADING_LAYER_COLOUR]: LAYER_MODE.FILL,
   };
+  // A colour of the sample's own has no palette entry: the link names its layer Cut and lets the next sample find it.
+  const getSampleLayerEntryId = (layer: ProjectLayer): string | undefined =>
+    layer.paletteEntryId ?? (getLayerKey(layer) === cutColour ? CUT_ENTRY_ID : undefined);
   const layers: ProjectLayer[] = getObjectsDerivedLayers(projectObjects, palette, existingLayers).map(
     (layer: ProjectLayer): ProjectLayer => {
       const layerKey: string = getLayerKey(layer);
@@ -66,7 +69,12 @@ export const getSampleJobLayers = (
 
       return existingKeys.has(layerKey) || !sampleMode
         ? layer
-        : { ...layer, enabled: true, settings: { ...layer.settings, mode: sampleMode } };
+        : {
+          ...layer,
+          enabled: true,
+          paletteEntryId: getSampleLayerEntryId(layer),
+          settings: { ...layer.settings, mode: sampleMode },
+        };
     },
   );
 
