@@ -32,9 +32,7 @@ import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import { EVERY_ACTION_PATTERN } from '../redux.saga.constants';
 import { BedDrawablesCache } from '../toolpath/bed.drawables.cache';
 import { GCODE_MIME_TYPE } from '../toolpath/gcode.constants';
-import { getGcodeExportContext } from '../toolpath/get.gcode.export.context';
 import { getGcodeFileName } from '../toolpath/get.gcode.file.name';
-import { getGcodeText } from '../toolpath/get.gcode.text';
 import type { BedDrawableSet } from '../toolpath/interfaces/BedDrawableSet';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathGeneration } from '../toolpath/interfaces/ToolpathGeneration';
@@ -42,7 +40,6 @@ import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachine
 import type { ToolpathWorkerClient } from '../toolpath/interfaces/ToolpathWorkerClient';
 import { logToolpathGenerationError } from '../toolpath/log.toolpath.generation.error';
 import type { Action } from './action';
-import { selectGrblSettings } from './grbl.connection.state';
 import type { ToolpathWaitResult } from './interfaces/ToolpathWaitResult';
 import { selectActiveMachineProfile } from './machine.profile.state';
 import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
@@ -53,6 +50,7 @@ import {
   selectProjectLayers,
 } from './project.document.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
+import { getProjectGcodeText } from './project.gcode.text.saga';
 import { ProjectOpened, selectProjectId, selectProjectName } from './project.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
@@ -224,11 +222,10 @@ function* waitForReadyToolpath(exportProjectId: string | undefined): Generator {
 
 function* downloadGcode(toolpath: Toolpath, profile: MachineProfile): Generator {
   const projectName: string = (yield select(selectProjectName)) as string;
-  const laserSettings: Record<number, string> = (yield select(selectGrblSettings)) as Record<number, string>;
-  const createdAtIso: string = new Date().toISOString();
+  const gcodeText: string = (yield call(getProjectGcodeText, toolpath, profile)) as string;
 
   yield call(downloadTextFile, {
-    text: getGcodeText(toolpath, getGcodeExportContext({ profile, laserSettings, projectName, createdAtIso })),
+    text: gcodeText,
     fileName: getGcodeFileName(projectName),
     mimeType: GCODE_MIME_TYPE,
   });

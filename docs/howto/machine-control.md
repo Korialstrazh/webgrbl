@@ -10,7 +10,7 @@ The Move card, the Laser pointer card and the Machine profiles dialog drive a GR
 
 ## Send a command from a control
 
-Build the line with a pure builder from `src/utils/machine/` and dispatch `MachineLineRequested`. Controls never talk to the controller directly, and the line is dropped while disconnected.
+Build the line with a pure builder from `src/utils/machine/` and dispatch `MachineLineRequested`. Controls never talk to the controller directly, and the line is dropped while disconnected and during a job run.
 
 ```tsx
 const { canJog }: MoveAvailability = getMoveAvailability({
@@ -18,6 +18,7 @@ const { canJog }: MoveAvailability = getMoveAvailability({
   machineState: machineStatus?.machineState,
   hasHomingSwitches,
   isPointerFiring,
+  isJobRunActive,
 });
 
 <Button size={ANTD_BUTTON_SIZE_LARGE} disabled={!canJog} onClick={() => {

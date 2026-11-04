@@ -12,7 +12,7 @@
  */
 import { buffers, eventChannel } from 'redux-saga';
 import type { EventChannel, Task } from 'redux-saga';
-import { all, call, cancel, fork, put, race, select, take, takeEvery } from 'redux-saga/effects';
+import { all, call, cancel, fork, put, race, select, take, takeEvery, takeLeading } from 'redux-saga/effects';
 import {
   GRBL_BAUD_RATES,
   GRBL_CONNECTION_STATUS,
@@ -45,10 +45,14 @@ import {
 import { submitGrblConsoleCommand } from './grbl.console.command.saga';
 import { ConsoleCommandSubmitted } from './grbl.console.state';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
+import { submitGrblMachineLine } from './grbl.machine.line.saga';
 import { getPreferredPortId } from './grbl.preferred.port.id';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import type { GrblHandshakeRaceResult } from './interfaces/GrblHandshakeRaceResult';
+import { runGrblMachineStop } from './grbl.machine.stop.saga';
+import { runGrblJob } from './job.run.saga';
+import { JobStartRequested } from './job.run.state';
 import {
   MachineLineRequested,
   MachineResetRequested,
@@ -149,17 +153,14 @@ function* runGrblMachineCommand(machineCommand: () => Promise<void> | void): Gen
   }
 }
 
-function* runGrblMachineCommandLine(controller: GrblController, action: MachineLineRequested): Generator {
-  yield call(runGrblMachineCommand, (): void => controller.sendConsoleCommand(action.payload.line));
-}
-
 function* handleGrblControllerCommands(controller: GrblController): Generator {
   yield all([
     takeEvery(ConsoleCommandSubmitted.type, submitGrblConsoleCommand, controller),
-    takeEvery(MachineStopRequested.type, runGrblMachineCommand, (): Promise<void> => controller.stopMachine()),
+    takeLeading(JobStartRequested.type, runGrblJob, controller),
+    takeEvery(MachineStopRequested.type, runGrblMachineStop, controller),
     takeEvery(MachineResetRequested.type, runGrblMachineCommand, (): Promise<void> => controller.resetMachine()),
     takeEvery(MachineUnlockRequested.type, runGrblMachineCommand, (): void => controller.unlockMachine()),
-    takeEvery(MachineLineRequested.type, runGrblMachineCommandLine, controller),
+    takeEvery(MachineLineRequested.type, submitGrblMachineLine, controller),
   ]);
 }
 // #endregion

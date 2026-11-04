@@ -7,6 +7,7 @@ import { ConnectionStatusChanged } from './grbl.connection.state';
 import {
   MACHINE_STATUS_STATE_NAME,
   MachineAirAssistChanged,
+  MachineControllerResetDetected,
   MachineResetRequested,
   MachineStatusReceived,
   MachineStopRequested,
@@ -99,6 +100,7 @@ describe('air assist tracking', () => {
   it.each([
     ['Stop', new MachineStopRequested()],
     ['Reset', new MachineResetRequested()],
+    ['a controller reset', new MachineControllerResetDetected()],
     ['a disconnect', new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED })],
     ['a lost connection', new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.LOST })],
   ])('turns off on %s', (_resetName: string, resetAction: Action<unknown>) => {

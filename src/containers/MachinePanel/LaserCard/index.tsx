@@ -26,6 +26,7 @@ import {
 import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
+import { selectIsJobRunActive } from '../../../utils/states/job.run.state';
 import { LaserPointerPowerChanged, selectLaserPointerPowerPercent } from '../../../utils/states/laser.pointer.state';
 import { selectActiveMachineProfile } from '../../../utils/states/machine.profile.state';
 import {
@@ -48,6 +49,7 @@ export const LaserCard = (): ReactNode => {
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const isAirAssistOn: boolean = useSelector(selectIsAirAssistOn);
   const isDisconnected: boolean = !isConnected;
+  const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const [isShownWhileDisconnected, setIsShownWhileDisconnected] = useState<boolean>(false);
   const controlsId: string = useId();
   const isCollapsed: boolean = isDisconnected && !isShownWhileDisconnected;
@@ -98,7 +100,7 @@ export const LaserCard = (): ReactNode => {
           </p>
           {activeProfile?.hasAirAssist && (
             <label className={styles.switchField}>
-              <Switch checked={isAirAssistOn} disabled={isDisconnected} onChange={changeAirAssist} />
+              <Switch checked={isAirAssistOn} disabled={isDisconnected || isJobRunActive} onChange={changeAirAssist} />
               {t(DEFAULT.MACHINE_LASER_AIR_ASSIST)}
             </label>
           )}

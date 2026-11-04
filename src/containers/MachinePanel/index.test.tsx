@@ -198,7 +198,7 @@ describe(MachinePanel.name, () => {
       }
     }
 
-    expect(soonTags.length).toBeGreaterThan(1);
+    expect(soonTags.length).toBeGreaterThan(0);
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 

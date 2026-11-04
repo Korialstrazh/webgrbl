@@ -355,7 +355,7 @@ How the user drives the machine by hand in LaserGRBL: jogging (buttons, keyboard
 | Custom button | per `EnableStyle` (see LG-CTRL-15) |
 
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`Can*` properties, `JogEnabled`), [`LaserGRBL/PreviewForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/PreviewForm.cs) (`TimerUpdate`)
-- **webgrbl notes:** Status: in progress. Partly done ([[machine-control]]): `getMoveAvailability` gates jog (connected, Idle or Jog), Home (homing switches, Idle or Alarm) and Set zero (Idle); `getCanFireLaserPointer` gates the pointer (connected, Idle); Unlock needs Alarm. The remaining gates come with their features. Original advice: Derive these as pure selectors from a single machine-state store, so React re-renders on changes instead of polling a timer. Unit-test the table.
+- **webgrbl notes:** Status: in progress. Partly done ([[machine-control]]): `getMoveAvailability` gates jog (connected, Idle or Jog), Home (homing switches, Idle or Alarm) and Set zero (Idle); `getCanFireLaserPointer` gates the pointer (connected, Idle); both refuse during a job run ([[running-jobs]]); Unlock needs Alarm. The remaining gates come with their features. Original advice: Derive these as pure selectors from a single machine-state store, so React re-renders on changes instead of polling a timer. Unit-test the table.
 
 ## Upstream Source
 

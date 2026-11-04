@@ -19,4 +19,6 @@ export interface MoveAvailabilityConditions {
   hasHomingSwitches: boolean;
   /** True while the laser pointer fires; a move would drag the beam along its path. */
   isPointerFiring: boolean;
+  /** True while a job runs; a move would be mixed into the job. */
+  isJobRunActive: boolean;
 }

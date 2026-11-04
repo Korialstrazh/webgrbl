@@ -25,8 +25,9 @@ export const getMoveAvailability = ({
   machineState,
   hasHomingSwitches,
   isPointerFiring,
+  isJobRunActive,
 }: MoveAvailabilityConditions): MoveAvailability => {
-  const canMoveNow: boolean = isConnected && !isPointerFiring;
+  const canMoveNow: boolean = isConnected && !isPointerFiring && !isJobRunActive;
 
   return {
     canJog: canMoveNow && JOG_MACHINE_STATES.includes(machineState),
