@@ -5,6 +5,7 @@ import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
 import { SAMPLE_CUT_COLOUR, SAMPLE_GRADIENT_ID, SAMPLE_OBJECT_NAME, SAMPLE_SIZE_MM } from '../materials/sample.job.constants';
+import { getSampleSvgText } from '../materials/get.sample.svg.text';
 import { DEFAULT_PALETTE, LAYER_MODE } from '../palette/palette.constants';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
@@ -16,6 +17,7 @@ import {
   ProjectUndoRequested,
   SampleJobAddRequested,
   selectProjectDocument,
+  selectProjectLayers,
   selectProjectObjects,
 } from './project.document.state';
 import { selectSelectedObjectIds } from './project.selection.state';
@@ -23,7 +25,14 @@ import { addSampleJob } from './sample.job.add.saga';
 import { selectToasts } from './toast.state';
 
 const CHANGED_SPEED_MM_PER_MIN = 123;
-const OTHER_OBJECT: ProjectObject = newProjectObject({ name: 'Keep me' });
+const OTHER_OBJECT: ProjectObject = newProjectObject({
+  name: 'Keep me',
+  svgText: getSampleSvgText({ cutColour: SAMPLE_CUT_COLOUR, hasGradient: false }),
+});
+const SHADED_OBJECT: ProjectObject = newProjectObject({
+  name: 'Shaded',
+  svgText: getSampleSvgText({ cutColour: SAMPLE_CUT_COLOUR, hasGradient: true }),
+});
 
 const waitForObjectCount = async (store: AppStore, objectCount: number): Promise<void> => {
   await vi.waitFor((): void => {
@@ -74,11 +83,69 @@ describe(addSampleJob.name, () => {
     expect(selectProjectObjects(store.getState())[1]?.svgText).toContain(`stroke="${sampleLayer?.colour}"`);
   });
 
+  const addSamples = async (store: AppStore, sampleCount: number): Promise<void> => {
+    const startCount: number = selectProjectObjects(store.getState()).length;
+
+    for (let sampleIndex = 1; sampleIndex <= sampleCount; sampleIndex++) {
+      store.dispatch(new SampleJobAddRequested());
+      await waitForObjectCount(store, startCount + sampleIndex);
+    }
+  };
+
+  const getLayerKeysInBurnOrder = (store: AppStore): string[] =>
+    selectProjectLayers(store.getState()).map(getLayerKey);
+
+  it('stays on one red layer over repeated samples in a project that already burns red', async () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new ProjectDocumentLoaded({
+      document: { objects: [OTHER_OBJECT], layers: [getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 0)] },
+    }));
+    await addSamples(store, 3);
+
+    expect(getLayerKeysInBurnOrder(store)).toEqual([SHADING_LAYER_COLOUR, SAMPLE_CUT_COLOUR]);
+  });
+
+  it('takes the Cut layer afresh when the red layer is hidden and in Fill', async () => {
+    const store: AppStore = newStore();
+    const redLayer: ProjectLayer = getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 0);
+
+    store.dispatch(new ProjectDocumentLoaded({
+      document: { objects: [], layers: [{ ...redLayer, settings: { ...redLayer.settings, mode: LAYER_MODE.FILL } }] },
+    }));
+    await addSamples(store, 1);
+
+    expect(getLayerKeysInBurnOrder(store)).toEqual([SHADING_LAYER_COLOUR, SAMPLE_CUT_COLOUR]);
+    expect(getLayerOfKey(store, SAMPLE_CUT_COLOUR)).toMatchObject({
+      paletteEntryId: redLayer.paletteEntryId,
+      settings: { mode: LAYER_MODE.LINE },
+    });
+  });
+
+  it('repairs shading and red left on one order, and joins red again', async () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new ProjectDocumentLoaded({
+      document: {
+        objects: [SHADED_OBJECT],
+        layers: [
+          getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 0),
+          getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0),
+        ],
+      },
+    }));
+    await addSamples(store, 1);
+
+    expect(getLayerKeysInBurnOrder(store)).toEqual([SHADING_LAYER_COLOUR, SAMPLE_CUT_COLOUR]);
+  });
+
   it('leaves the gradient out and says so when the shading layer is off', async () => {
     const store: AppStore = newStore();
     const shadingLayer: ProjectLayer = { ...getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0), enabled: false };
 
-    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [OTHER_OBJECT], layers: [shadingLayer] } }));
+    store.dispatch(new ProjectDocumentLoaded({
+      document: { objects: [SHADED_OBJECT], layers: [shadingLayer, getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 1)] },
+    }));
     store.dispatch(new SampleJobAddRequested());
     await waitForObjectCount(store, 2);
 

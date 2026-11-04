@@ -4,6 +4,7 @@
  * comes last.
  * A project has one shading layer and only that layer burns a gradient, so with that layer off or in Line mode there is
  * no layer to use and the sample leaves the gradient out: the result it records is about the square alone.
+ * Equal orders count as burning after the gradient, because getSampleJobLayers then puts the shading first.
  *
  * @author michael.morosov
  *
@@ -57,7 +58,7 @@ export const getSampleSvgParts = (layers: ProjectLayer[]): SampleSvgParts => {
     return { cutColour: SAMPLE_CUT_COLOUR, hasGradient };
   }
 
-  const burnsAfterGradient: boolean = !hasGradient || !shadingLayer || shadingLayer.order < redLayer.order;
+  const burnsAfterGradient: boolean = !hasGradient || !shadingLayer || shadingLayer.order <= redLayer.order;
   const canJoinRedLayer: boolean = isLayerBurningInMode(redLayer, LAYER_MODE.LINE) && burnsAfterGradient;
 
   return { cutColour: canJoinRedLayer ? SAMPLE_CUT_COLOUR : getFreeSampleCutColour(layers), hasGradient };

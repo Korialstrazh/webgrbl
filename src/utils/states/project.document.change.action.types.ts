@@ -21,10 +21,12 @@ import {
   ProjectObjectsTransformed,
   ProjectRedoRequested,
   ProjectUndoRequested,
+  SampleJobAdded,
 } from './project.document.state';
 
 export const PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES: readonly string[] = [
   ProjectObjectsAdded.type,
+  SampleJobAdded.type,
   ProjectObjectsTransformed.type,
   ProjectObjectsDeleted.type,
   ProjectUndoRequested.type,
