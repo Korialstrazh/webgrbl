@@ -15,6 +15,8 @@ export interface MaterialPresetRowFilter {
   searchText: string;
   /** The only machine profile to list; undefined lists every profile. */
   machineProfileId: string | undefined;
+  /** The material whose rows come first, usually the material of the project; undefined keeps the plain order. */
+  preferredMaterialId?: string;
   /** The word the user sees for an operation, so that a search finds it in the user's language. */
   getOperationLabel: (operation: MaterialPresetOperation) => string;
 }

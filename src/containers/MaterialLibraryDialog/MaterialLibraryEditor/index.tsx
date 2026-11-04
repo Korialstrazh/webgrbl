@@ -1,6 +1,8 @@
 /**
- * The content of the material library: search, the machine filter, the table of presets and the edit panel. A new
- * preset is for the active machine, with no power filled in, so a value nobody chose is never saved.
+ * The content of the material library: search, the machine filter, the table of presets and the edit panel. It owns
+ * the draft the panel edits, so it knows whether there is something to save, keeps the saved preset open, and shows
+ * one confirmation line that stays in view. A new preset is for the project material and the active machine, with no
+ * power filled in, so a value nobody chose is never saved.
  *
  * @author michael.morosov
  *
@@ -9,77 +11,92 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Checkbox, Input, Table } from 'antd';
-import type { CheckboxChangeEvent, TableColumnsType } from 'antd';
+import { CheckCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Input } from 'antd';
+import type { CheckboxChangeEvent } from 'antd';
 import { useState } from 'react';
-import type { ChangeEvent, Key, MouseEvent, ReactNode } from 'react';
+import type { ChangeEvent, Key, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { ANTD_TABLE_SIZE_SMALL } from '../../../utils/antd.constants';
+import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_BUTTON_TYPE_DEFAULT, ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
+import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
+import { getLayerKey } from '../../../utils/layers/get.layer.key';
+import { getLayerPaletteEntry } from '../../../utils/layers/get.layer.palette.entry';
+import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getMaterialPresetRows } from '../../../utils/materials/get.material.preset.rows';
 import type { Material } from '../../../utils/materials/interfaces/Material';
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
 import type { MaterialPresetRow } from '../../../utils/materials/interfaces/MaterialPresetRow';
+import { isSameMaterialPreset } from '../../../utils/materials/is.same.material.preset';
 import { MATERIAL_PRESET_OPERATION } from '../../../utils/materials/material.preset.constants';
 import type { MaterialPresetOperation } from '../../../utils/materials/material.preset.constants';
 import { newMaterialPreset } from '../../../utils/materials/new.material.preset';
 import { PASSES_MIN } from '../../../utils/palette/palette.constants';
+import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntry';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile, selectMachineProfiles } from '../../../utils/states/machine.profile.state';
-import { selectMaterialPresets } from '../../../utils/states/material.preset.state';
+import {
+  MaterialPresetDeleted,
+  MaterialPresetSaved,
+  selectMaterialPresets,
+} from '../../../utils/states/material.preset.state';
+import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import { selectMaterials } from '../../../utils/states/material.state';
+import type { AppDispatch } from '../../../utils/states/new.store';
+import { selectPaletteEntries } from '../../../utils/states/palette.state';
+import { selectProjectLayers } from '../../../utils/states/project.document.state';
+import type { ApplyPresetToLayer } from '../interfaces/ApplyPresetToLayer';
 import type { MaterialLibraryDialogProps } from '../interfaces/MaterialLibraryDialogProps';
+import type { MaterialPresetChange } from '../interfaces/MaterialPresetFormProps';
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.dialog.constants';
+import { MaterialLibraryEmptyState } from '../MaterialLibraryEmptyState';
 import { MaterialPresetForm } from '../MaterialPresetForm';
+import { MaterialPresetTable } from '../MaterialPresetTable';
 import { PresetFileActions } from '../PresetFileActions';
 import { PresetLayerApply } from '../PresetLayerApply';
+import { useApplyPresetToLayer } from '../use.apply.preset.to.layer';
 import styles from './styles.module.scss';
 
-type MaterialLibraryEditorProps = Pick<MaterialLibraryDialogProps, 'initialLayerKey'>;
+type MaterialLibraryEditorProps = Pick<MaterialLibraryDialogProps, 'initialLayerKey' | 'onClose'>;
 
 const NEW_PRESET_SPEED_MM_PER_MIN = 1000;
 const SEARCH_INPUT_TYPE = 'search';
-const MATERIAL_NAME_FIELD: keyof MaterialPresetRow = 'materialName';
 
-// The form beside this panel is keyed by the preset id, and two children of one parent cannot share a key.
-const APPLY_PANEL_KEY_PREFIX = 'apply';
-const APPLY_PANEL_KEY_SEPARATOR = '-';
-
-const COLUMN_KEY = {
-  MATERIAL: 'material',
-  THICKNESS: 'thickness',
-  OPERATION: 'operation',
-  POWER: 'power',
-  SPEED: 'speed',
-  PASSES: 'passes',
-  MACHINE: 'machine',
-} as const;
-
-const getPresetRowKey = ({ preset }: MaterialPresetRow): string => preset.id;
-
-export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditorProps): ReactNode => {
+export const MaterialLibraryEditor = ({ initialLayerKey, onClose }: MaterialLibraryEditorProps): ReactNode => {
   const { t } = useTranslation();
+  const dispatch: AppDispatch = useDispatch();
   const materials: Material[] = useSelector(selectMaterials);
+  const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const presets: MaterialPreset[] = useSelector(selectMaterialPresets);
   const profiles: MachineProfile[] = useSelector(selectMachineProfiles);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const layers: ProjectLayer[] = useSelector(selectProjectLayers);
+  const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
+  const applyPresetToLayer: ApplyPresetToLayer = useApplyPresetToLayer(activeProfile?.maxPowerWatts ?? 0);
   const [pickedLayerKey, setPickedLayerKey] = useState<string | undefined>(initialLayerKey);
   const [searchText, setSearchText] = useState<string>('');
   const [isOnlyActiveMachine, setIsOnlyActiveMachine] = useState<boolean>(true);
-  const [editedPreset, setEditedPreset] = useState<MaterialPreset | undefined>(undefined);
+  const [draftPreset, setDraftPreset] = useState<MaterialPreset | undefined>(undefined);
   const [tickedPresetIds, setTickedPresetIds] = useState<Key[]>([]);
+  const [feedbackText, setFeedbackText] = useState<string | undefined>(undefined);
   const [firstMaterial]: (Material | undefined)[] = materials;
-  const editedProfile: MachineProfile | undefined = profiles.find(
-    ({ id }: MachineProfile): boolean => id === editedPreset?.machineProfileId,
-  );
+  const newPresetMaterial: Material | undefined = activeMaterial ?? firstMaterial;
+  const storedPreset: MaterialPreset | undefined =
+    presets.find(({ id }: MaterialPreset): boolean => id === draftPreset?.id);
+  const isDraftChanged: boolean = Boolean(draftPreset) && !(storedPreset && draftPreset
+    && isSameMaterialPreset(storedPreset, draftPreset));
+  const draftProfile: MachineProfile | undefined =
+    profiles.find(({ id }: MachineProfile): boolean => id === draftPreset?.machineProfileId);
+  const initialLayer: ProjectLayer | undefined =
+    layers.find((layer: ProjectLayer): boolean => getLayerKey(layer) === initialLayerKey);
+  const initialLayerName: string | undefined =
+    initialLayer && getLayerDisplayName(initialLayer, getLayerPaletteEntry(initialLayer, paletteEntries));
 
   // Applying uses the stored values, not unsaved edits. Only presets of the active laser apply: the watts of another
   // laser would give another result on this one.
-  const applicablePreset: MaterialPreset | undefined = presets.find(
-    ({ id, machineProfileId }: MaterialPreset): boolean =>
-      id === editedPreset?.id && machineProfileId === activeProfile?.id,
-  );
+  const applicablePreset: MaterialPreset | undefined =
+    storedPreset?.machineProfileId === activeProfile?.id ? storedPreset : undefined;
 
   // Looked up in the stored list, so that a deleted preset is never exported.
   const tickedPresets: MaterialPreset[] =
@@ -94,6 +111,7 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
   const rows: MaterialPresetRow[] = getMaterialPresetRows(presets, materials, {
     searchText,
     machineProfileId: listedProfileId,
+    preferredMaterialId: activeMaterial?.id,
     getOperationLabel,
   });
 
@@ -101,10 +119,29 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
     profiles.find(({ id }: MachineProfile): boolean => id === profileId)?.name
       ?? t(DEFAULT.MATERIAL_LIBRARY_MACHINE_DELETED);
 
+  /** The heading names the stored preset, so it does not change under the user while the draft is edited. */
+  const getHeadingText = (): string => {
+    const material: Material | undefined =
+      materials.find(({ id }: Material): boolean => id === storedPreset?.materialId);
+
+    return storedPreset && material
+      ? t(DEFAULT.MATERIAL_LIBRARY_PRESET_NAME, {
+        name: material.name,
+        thickness: material.thicknessMm,
+        operation: getOperationLabel(storedPreset.operation),
+      })
+      : t(DEFAULT.MATERIAL_LIBRARY_NEW_PRESET);
+  };
+
+  const openPreset = (preset: MaterialPreset | undefined): void => {
+    setDraftPreset(preset);
+    setFeedbackText(undefined);
+  };
+
   const addPreset = (): void => {
-    if (firstMaterial && activeProfile) {
-      setEditedPreset(newMaterialPreset({
-        materialId: firstMaterial.id,
+    if (newPresetMaterial && activeProfile) {
+      openPreset(newMaterialPreset({
+        materialId: newPresetMaterial.id,
         machineProfileId: activeProfile.id,
         operation: MATERIAL_PRESET_OPERATION.CUT,
         powerWatts: Number.NaN,
@@ -115,41 +152,29 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
     }
   };
 
-  const columns: TableColumnsType<MaterialPresetRow> = [
-    { key: COLUMN_KEY.MATERIAL, title: t(DEFAULT.MATERIAL_LIBRARY_MATERIAL), dataIndex: MATERIAL_NAME_FIELD },
-    {
-      key: COLUMN_KEY.THICKNESS,
-      title: t(DEFAULT.MATERIAL_LIBRARY_THICKNESS),
-      render: ({ thicknessMm }: MaterialPresetRow) =>
-        t(DEFAULT.MATERIAL_LIBRARY_THICKNESS_VALUE, { thickness: thicknessMm }),
-    },
-    {
-      key: COLUMN_KEY.OPERATION,
-      title: t(DEFAULT.MATERIAL_LIBRARY_OPERATION),
-      render: ({ preset }: MaterialPresetRow) => getOperationLabel(preset.operation),
-    },
-    {
-      key: COLUMN_KEY.POWER,
-      title: t(DEFAULT.MATERIAL_LIBRARY_POWER),
-      render: ({ preset }: MaterialPresetRow) => preset.powerWatts,
-    },
-    {
-      key: COLUMN_KEY.SPEED,
-      title: t(DEFAULT.MATERIAL_LIBRARY_SPEED),
-      render: ({ preset }: MaterialPresetRow) => preset.speedMmPerMin,
-    },
-    {
-      key: COLUMN_KEY.PASSES,
-      title: t(DEFAULT.MATERIAL_LIBRARY_PASSES),
-      render: ({ preset }: MaterialPresetRow) => preset.passes,
-    },
-    // With every machine listed, the same material can appear for several lasers.
-    ...(listedProfileId ? [] : [{
-      key: COLUMN_KEY.MACHINE,
-      title: t(DEFAULT.MATERIAL_LIBRARY_MACHINE),
-      render: ({ preset }: MaterialPresetRow) => getProfileName(preset.machineProfileId),
-    }]),
-  ];
+  const saveDraft = (): void => {
+    if (draftPreset) {
+      const savedPreset: MaterialPreset = { ...draftPreset, notes: draftPreset.notes.trim() };
+
+      dispatch(new MaterialPresetSaved({ preset: savedPreset }));
+      setDraftPreset(savedPreset);
+      setFeedbackText(t(DEFAULT.MATERIAL_LIBRARY_SAVED));
+    }
+  };
+
+  const deleteDraft = (): void => {
+    if (draftPreset) {
+      dispatch(new MaterialPresetDeleted({ presetId: draftPreset.id }));
+      setDraftPreset(undefined);
+      setFeedbackText(t(DEFAULT.MATERIAL_LIBRARY_DELETED));
+    }
+  };
+
+  const applyRowPreset = (preset: MaterialPreset): void => {
+    if (initialLayerKey) {
+      setFeedbackText(applyPresetToLayer(preset, initialLayerKey));
+    }
+  };
 
   return (
     <div className={styles.materialLibraryEditor}>
@@ -170,56 +195,81 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
           >
             {t(DEFAULT.MATERIAL_LIBRARY_ONLY_THIS_MACHINE)}
           </Checkbox>
-          <Button disabled={!firstMaterial || !activeProfile} onClick={addPreset}>
+          <Button
+            className={styles.addButton}
+            type={draftPreset ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
+            icon={<PlusOutlined />}
+            // The icon carries a label of its own, so the button names itself to keep its accessible name to its text.
+            aria-label={t(DEFAULT.MATERIAL_LIBRARY_ADD)}
+            disabled={!newPresetMaterial || !activeProfile}
+            onClick={addPreset}
+          >
             {t(DEFAULT.MATERIAL_LIBRARY_ADD)}
           </Button>
         </div>
-        {!firstMaterial && <p role="note">{t(DEFAULT.MATERIAL_LIBRARY_NO_MATERIALS)}</p>}
-        {!activeProfile && <p role="note">{t(DEFAULT.MATERIAL_LIBRARY_NO_ACTIVE_MACHINE)}</p>}
+        {initialLayerName && (
+          <p className={styles.layerNote} role="note">
+            {t(DEFAULT.MATERIAL_LIBRARY_LAYER_NOTE, { layer: initialLayerName })}
+          </p>
+        )}
         <div className={styles.tableScroller}>
-          <Table<MaterialPresetRow>
-            size={ANTD_TABLE_SIZE_SMALL}
-            pagination={false}
-            rowKey={getPresetRowKey}
-            columns={columns}
-            dataSource={rows}
-            locale={{ emptyText: t(DEFAULT.MATERIAL_LIBRARY_EMPTY) }}
-            rowSelection={{
-              // Ticks are for export and stay while search or the machine filter hides their rows.
-              preserveSelectedRowKeys: true,
-              selectedRowKeys: tickedPresetIds,
-              getCheckboxProps: () => ({ 'aria-label': t(DEFAULT.MATERIAL_LIBRARY_TICK_FOR_EXPORT) }),
-              onChange: (rowKeys: Key[]) => setTickedPresetIds(rowKeys),
-              // A tick must not open the row in the edit panel as well.
-              onCell: () => ({
-                onClick: (clickEvent: MouseEvent<HTMLElement>) => clickEvent.stopPropagation(),
-              }),
-            }}
-            rowClassName={({ preset }: MaterialPresetRow): string =>
-              (preset.id === editedPreset?.id ? styles.editedRow ?? '' : '')}
-            onRow={({ preset }: MaterialPresetRow) => ({ onClick: () => setEditedPreset(preset) })}
+          <MaterialPresetTable
+            rows={rows}
+            editedPresetId={draftPreset?.id}
+            tickedPresetIds={tickedPresetIds}
+            isMachineColumnShown={!listedProfileId}
+            rowApply={initialLayerName && activeProfile ? {
+              layerName: initialLayerName,
+              machineProfileId: activeProfile.id,
+              maxPowerWatts: activeProfile.maxPowerWatts,
+              onApply: applyRowPreset,
+            } : undefined}
+            emptyStateComponent={
+              <MaterialLibraryEmptyState
+                hasMaterials={Boolean(firstMaterial)}
+                hasActiveMachine={Boolean(activeProfile)}
+                searchText={searchText}
+                onClearSearch={() => setSearchText('')}
+                onClose={onClose}
+              />
+            }
+            getOperationLabel={getOperationLabel}
+            getProfileName={getProfileName}
+            onTick={setTickedPresetIds}
+            onPick={openPreset}
           />
         </div>
       </div>
       <aside className={styles.editPane}>
-        {editedPreset ? (
+        {draftPreset ? (
           <MaterialPresetForm
-            key={editedPreset.id}
-            preset={editedPreset}
+            key={draftPreset.id}
+            preset={draftPreset}
+            isStored={Boolean(storedPreset)}
+            isChanged={isDraftChanged}
             // A preset whose machine is gone can only be deleted: no power passes the check against 0 W.
-            maxPowerWatts={editedProfile?.maxPowerWatts ?? 0}
-            onDone={() => setEditedPreset(undefined)}
+            maxPowerWatts={draftProfile?.maxPowerWatts ?? 0}
+            headingText={getHeadingText()}
+            onChange={(change: MaterialPresetChange) => setDraftPreset({ ...draftPreset, ...change })}
+            onSave={saveDraft}
+            onCancel={() => openPreset(undefined)}
+            onDelete={deleteDraft}
           />
-        ) : <p>{t(DEFAULT.MATERIAL_LIBRARY_PICK_HINT)}</p>}
+        ) : <p className={styles.pickHint}>{t(DEFAULT.MATERIAL_LIBRARY_PICK_HINT)}</p>}
         {applicablePreset && activeProfile && (
           <PresetLayerApply
-            key={[APPLY_PANEL_KEY_PREFIX, applicablePreset.id].join(APPLY_PANEL_KEY_SEPARATOR)}
             preset={applicablePreset}
             maxPowerWatts={activeProfile.maxPowerWatts}
             pickedLayerKey={pickedLayerKey}
+            isFormChanged={isDraftChanged}
             onPickLayer={setPickedLayerKey}
+            onApplied={setFeedbackText}
           />
         )}
+        <p className={styles.feedback} role="status">
+          {feedbackText && <CheckCircleOutlined className={styles.feedbackIcon} aria-hidden />}
+          {feedbackText}
+        </p>
       </aside>
     </div>
   );

@@ -29,7 +29,7 @@ export const MaterialLibraryDialog = ({ isOpen, onClose, initialLayerKey }: Mate
       destroyOnHidden
       onClose={onClose}
     >
-      <MaterialLibraryEditor initialLayerKey={initialLayerKey} />
+      <MaterialLibraryEditor initialLayerKey={initialLayerKey} onClose={onClose} />
     </AppModal>
   );
 };

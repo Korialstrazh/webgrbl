@@ -1,9 +1,59 @@
+// A column that fills the edit pane: the heading and the actions keep their place, the fields between them scroll.
+.presetForm {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+.heading {
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fields {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  // The form's own gaps are small; antd's bottom margin would stretch the pane past the window.
+  :global(.ant-form-item) {
+    margin-bottom: var(--space-3);
+  }
+
+  :global(.ant-form-item-label) {
+    padding-bottom: var(--space-1);
+  }
+}
+
+// Power, speed and passes side by side, two to a row in the edit pane, so the fields fit the pane without scrolling
+// at the usual window heights; in a narrow window the pane is wider and they take a row of three.
+.numberFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0 var(--space-3);
+}
+
 .numberInput {
   width: 100%;
 }
 
+// Save and Cancel together; Delete stands apart at the far end, so it is never pressed for Save.
 .actions {
   display: flex;
-  justify-content: space-between;
-  gap: var(--space-4);
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.deleteButton {
+  margin-left: auto;
 }

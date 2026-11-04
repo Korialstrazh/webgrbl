@@ -22,6 +22,7 @@ import type {
   SegmentedProps,
   SplitterProps,
   SwitchProps,
+  TableColumnType,
   TableProps,
   TagProps,
   TooltipProps,
@@ -90,7 +91,8 @@ export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
 /** The compact table size, for a table beside an edit panel. */
 export const ANTD_TABLE_SIZE_SMALL: TableProps['size'] = 'small';
 
-/** The `type` of a table row selection that allows one selected row. */
+/** A table column whose header and cells sit at the right edge, for numbers. */
+export const ANTD_TABLE_COLUMN_ALIGN_RIGHT: TableColumnType<unknown>['align'] = 'right';
 
 /** A tag drawn as a soft filled chip without a border. */
 export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';

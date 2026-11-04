@@ -1,5 +1,6 @@
 /**
- * Props of the edit panel of the material library.
+ * Props of the edit panel of the material library. The panel edits a draft its parent owns, so the parent knows
+ * whether there is something to save and keeps the draft after a save.
  *
  * @author michael.morosov
  *
@@ -10,11 +11,21 @@
  */
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
 
+export type MaterialPresetChange = Partial<MaterialPreset>;
+
 export interface MaterialPresetFormProps {
-  /** The preset being edited; a new one is not stored yet and its numbers may not be valid. */
+  /** The draft being edited; a new one is not stored yet and its numbers may not be valid. */
   preset: MaterialPreset;
+  /** Whether a preset with this id is stored, which makes Delete available. */
+  isStored: boolean;
+  /** Whether the draft differs from what is stored, which makes Save the main action. */
+  isChanged: boolean;
   /** Rated power of the laser of the preset, in watts. */
   maxPowerWatts: number;
-  /** Called after a save or a delete. */
-  onDone: () => void;
+  /** The heading above the fields: the name of the preset, or that it is new. */
+  headingText: string;
+  onChange: (change: MaterialPresetChange) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onDelete: () => void;
 }

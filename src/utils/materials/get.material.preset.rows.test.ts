@@ -65,4 +65,17 @@ describe(getMaterialPresetRows.name, () => {
   it('leaves out a preset whose material is not known', () => {
     expect(getMaterialPresetRows([newPresetFixture()], [ACRYLIC], FILTER)).toEqual([]);
   });
+
+  it('lists the preferred material first, then the others by name', () => {
+    const presets: MaterialPreset[] = [
+      newPresetFixture({ materialId: ACRYLIC.id }),
+      newPresetFixture(),
+      newPresetFixture({ materialId: ACRYLIC.id }),
+    ];
+
+    const rows: MaterialPresetRow[] =
+      getMaterialPresetRows(presets, [PLYWOOD, ACRYLIC], { ...FILTER, preferredMaterialId: PLYWOOD.id });
+
+    expect(getRowNames(rows)).toEqual([PLYWOOD_NAME, ACRYLIC_NAME, ACRYLIC_NAME]);
+  });
 });

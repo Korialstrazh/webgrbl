@@ -1,5 +1,5 @@
 /**
- * Props of the part of the material library that applies a preset to a layer.
+ * Props of the part of the material library that applies a preset to a layer the user names.
  *
  * @author michael.morosov
  *
@@ -17,5 +17,9 @@ export interface PresetLayerApplyProps {
   maxPowerWatts: number;
   /** The layer picked to apply to; the library keeps it when the user moves to another preset. */
   pickedLayerKey: string | undefined;
+  /** Whether the form beside holds unsaved edits: then Save is the main action and a note says what Apply uses. */
+  isFormChanged: boolean;
   onPickLayer: (layerKey: string) => void;
+  /** Called with the text that says what was applied, which the library shows where it stays visible. */
+  onApplied: (appliedText: string) => void;
 }

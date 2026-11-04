@@ -14,8 +14,8 @@ import type { MaterialPresetOperation } from '../../utils/materials/material.pre
 
 export const MATERIAL_LIBRARY_DIALOG_OVERLAY_ID = 'material-library-dialog';
 
-/** Room for the table beside the edit panel; a narrower window makes the dialog narrower. */
-export const MATERIAL_LIBRARY_DIALOG_WIDTH = '64rem';
+/** Room for the table with the Machine column beside the edit panel; a narrower window makes the dialog narrower. */
+export const MATERIAL_LIBRARY_DIALOG_WIDTH = '70rem';
 
 export const MATERIAL_PRESET_OPERATION_LABEL_KEY: Record<MaterialPresetOperation, string> = {
   [MATERIAL_PRESET_OPERATION.CUT]: DEFAULT.MATERIAL_LIBRARY_OPERATION_CUT,

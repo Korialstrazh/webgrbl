@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useRef, useState } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
@@ -107,10 +108,21 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
 
   return (
     <div className={styles.presetFileActions}>
-      <Button disabled={!activeProfile} onClick={() => fileInputRef.current?.click()}>
+      {/* The icons carry labels of their own, so each button names itself to keep its name to its text. */}
+      <Button
+        icon={<ImportOutlined />}
+        aria-label={t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
+        disabled={!activeProfile}
+        onClick={() => fileInputRef.current?.click()}
+      >
         {t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
       </Button>
-      <Button disabled={!selectedPresets.length} onClick={exportPresets}>
+      <Button
+        icon={<ExportOutlined />}
+        aria-label={t(DEFAULT.MATERIAL_LIBRARY_EXPORT, { count: selectedPresets.length })}
+        disabled={!selectedPresets.length}
+        onClick={exportPresets}
+      >
         {t(DEFAULT.MATERIAL_LIBRARY_EXPORT, { count: selectedPresets.length })}
       </Button>
       {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
@@ -122,9 +134,11 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
         aria-label={t(DEFAULT.MATERIAL_LIBRARY_IMPORT_FILE)}
         onChange={handleFileInputChange}
       />
-      <p role="status">
-        {Boolean(importedCount) && t(DEFAULT.MATERIAL_LIBRARY_IMPORTED, { count: importedCount })}
-      </p>
+      {Boolean(importedCount) && (
+        <p className={styles.importedText} role="status">
+          {t(DEFAULT.MATERIAL_LIBRARY_IMPORTED, { count: importedCount })}
+        </p>
+      )}
     </div>
   );
 };
