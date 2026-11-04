@@ -2,6 +2,8 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux';
 import { describe, expect, it } from 'vitest';
 import { MaterialLibraryDialog } from '.';
+import { DEFAULT } from '../../utils/localization/default.locales';
+import { getMaterialPresetsFileText } from '../../utils/materials/get.material.presets.file.text';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import type { MaterialPreset } from '../../utils/materials/interfaces/MaterialPreset';
 import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset.constants';
@@ -23,6 +25,8 @@ import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { ProjectObjectsAdded, selectProjectLayers } from '../../utils/states/project.document.state';
+import type { AppToast } from '../../utils/states/interfaces/AppToast';
+import { selectToasts } from '../../utils/states/toast.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 
@@ -31,6 +35,8 @@ const LAYER_COLOUR = '#ff0000';
 const LAYER_OBJECT: ProjectObject = newProjectObject({
   svgText: `<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm"><rect fill="${LAYER_COLOUR}" width="5" height="5"/></svg>`,
 });
+const IMPORT_FILE_NAME = 'presets.json';
+const IMPORT_INPUT_LABEL = 'Open a material presets file';
 const POWER_LABEL = 'Power (W)';
 const SAVE_LABEL = 'Save';
 const ADD_LABEL = 'Add preset';
@@ -44,6 +50,7 @@ const ACRYLIC_NAME = 'Acrylic';
 
 const PROFILE: MachineProfile = newMachineProfile({ maxPowerWatts: MAX_POWER_WATTS });
 const OTHER_PROFILE: MachineProfile = newMachineProfile({ maxPowerWatts: MAX_POWER_WATTS });
+const HALF_POWER_PROFILE: MachineProfile = newMachineProfile({ maxPowerWatts: MAX_POWER_WATTS / 2 });
 const PLYWOOD: Material = newMaterial({ name: PLYWOOD_NAME });
 const ACRYLIC: Material = newMaterial({ name: ACRYLIC_NAME });
 
@@ -222,7 +229,7 @@ describe(MaterialLibraryDialog.name, () => {
       speedMmPerMin: preset.speedMmPerMin,
       passes: preset.passes,
     }));
-    expect(screen.getByRole('status')).toHaveTextContent('Applied');
+    expect(screen.getByText(/^Applied to/)).toBeInTheDocument();
   });
 
   it('does not apply a preset above the power of the laser', async () => {
@@ -233,5 +240,50 @@ describe(MaterialLibraryDialog.name, () => {
 
     expect(screen.getByRole('button', { name: APPLY_LABEL })).toBeDisabled();
     expect(screen.getByText(/more power than this laser/)).toBeInTheDocument();
+  });
+
+  it('imports a file for the active machine and rescales its power', async () => {
+    const store: AppStore = renderDialog();
+    const fileText: string = getMaterialPresetsFileText(
+      [newPresetFixture(PLYWOOD, HALF_POWER_PROFILE)],
+      [PLYWOOD],
+      [HALF_POWER_PROFILE],
+    );
+
+    fireEvent.change(await screen.findByLabelText(IMPORT_INPUT_LABEL), {
+      target: { files: [new File([fileText], IMPORT_FILE_NAME)] },
+    });
+
+    await waitFor(() => {
+      expect(selectMaterialPresets(store.getState())).toEqual([
+        expect.objectContaining({ machineProfileId: PROFILE.id, materialId: PLYWOOD.id, powerWatts: MAX_POWER_WATTS }),
+      ]);
+    });
+  });
+
+  it('changes nothing and shows the fixed toast for a bad file', async () => {
+    const store: AppStore = renderDialog();
+
+    fireEvent.change(await screen.findByLabelText(IMPORT_INPUT_LABEL), {
+      target: { files: [new File(['nonsense'], IMPORT_FILE_NAME)] },
+    });
+
+    await waitFor(() => {
+      expect(selectToasts(store.getState()).map(({ messageKey }: AppToast): string => messageKey))
+        .toContain(DEFAULT.TOAST_MATERIAL_PRESETS_IMPORT_INVALID);
+    });
+    expect(selectMaterialPresets(store.getState())).toEqual([]);
+  });
+
+  it('turns on Export for a ticked row without opening it for editing', async () => {
+    renderDialog([newPresetFixture(PLYWOOD, PROFILE)]);
+
+    await screen.findByText(PLYWOOD_NAME);
+    expect(screen.getByRole('button', { name: 'Export selected (0)' })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select for export' }));
+
+    expect(screen.getByRole('button', { name: 'Export selected (1)' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: SAVE_LABEL })).not.toBeInTheDocument();
   });
 });

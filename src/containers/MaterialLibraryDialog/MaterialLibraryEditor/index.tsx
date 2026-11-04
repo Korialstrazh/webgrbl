@@ -12,10 +12,10 @@
 import { Button, Checkbox, Input, Table } from 'antd';
 import type { CheckboxChangeEvent, TableColumnsType } from 'antd';
 import { useState } from 'react';
-import type { ChangeEvent, Key, ReactNode } from 'react';
+import type { ChangeEvent, Key, MouseEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { ANTD_TABLE_ROW_SELECTION_TYPE_RADIO, ANTD_TABLE_SIZE_SMALL } from '../../../utils/antd.constants';
+import { ANTD_TABLE_SIZE_SMALL } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getMaterialPresetRows } from '../../../utils/materials/get.material.preset.rows';
 import type { Material } from '../../../utils/materials/interfaces/Material';
@@ -32,6 +32,7 @@ import { selectMaterials } from '../../../utils/states/material.state';
 import type { MaterialLibraryDialogProps } from '../interfaces/MaterialLibraryDialogProps';
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.dialog.constants';
 import { MaterialPresetForm } from '../MaterialPresetForm';
+import { PresetFileActions } from '../PresetFileActions';
 import { PresetLayerApply } from '../PresetLayerApply';
 import styles from './styles.module.scss';
 
@@ -67,6 +68,7 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
   const [searchText, setSearchText] = useState<string>('');
   const [isOnlyActiveMachine, setIsOnlyActiveMachine] = useState<boolean>(true);
   const [editedPreset, setEditedPreset] = useState<MaterialPreset | undefined>(undefined);
+  const [tickedPresetIds, setTickedPresetIds] = useState<Key[]>([]);
   const [firstMaterial]: (Material | undefined)[] = materials;
   const editedProfile: MachineProfile | undefined = profiles.find(
     ({ id }: MachineProfile): boolean => id === editedPreset?.machineProfileId,
@@ -78,6 +80,10 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
     ({ id, machineProfileId }: MaterialPreset): boolean =>
       id === editedPreset?.id && machineProfileId === activeProfile?.id,
   );
+
+  // Looked up in the stored list, so that a deleted preset is never exported.
+  const tickedPresets: MaterialPreset[] =
+    presets.filter(({ id }: MaterialPreset): boolean => tickedPresetIds.includes(id));
 
   const getOperationLabel = (operation: MaterialPresetOperation): string =>
     t(MATERIAL_PRESET_OPERATION_LABEL_KEY[operation]);
@@ -148,6 +154,7 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
   return (
     <div className={styles.materialLibraryEditor}>
       <div className={styles.listPane}>
+        <PresetFileActions selectedPresets={tickedPresets} />
         <div className={styles.filters}>
           <Input
             type={SEARCH_INPUT_TYPE}
@@ -178,11 +185,18 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
             dataSource={rows}
             locale={{ emptyText: t(DEFAULT.MATERIAL_LIBRARY_EMPTY) }}
             rowSelection={{
-              type: ANTD_TABLE_ROW_SELECTION_TYPE_RADIO,
-              selectedRowKeys: editedPreset ? [editedPreset.id] : [],
-              onChange: (_rowKeys: Key[], selectedRows: MaterialPresetRow[]) =>
-                setEditedPreset(selectedRows[0]?.preset),
+              // Ticks are for export and stay while search or the machine filter hides their rows.
+              preserveSelectedRowKeys: true,
+              selectedRowKeys: tickedPresetIds,
+              getCheckboxProps: () => ({ 'aria-label': t(DEFAULT.MATERIAL_LIBRARY_TICK_FOR_EXPORT) }),
+              onChange: (rowKeys: Key[]) => setTickedPresetIds(rowKeys),
+              // A tick must not open the row in the edit panel as well.
+              onCell: () => ({
+                onClick: (clickEvent: MouseEvent<HTMLElement>) => clickEvent.stopPropagation(),
+              }),
             }}
+            rowClassName={({ preset }: MaterialPresetRow): string =>
+              (preset.id === editedPreset?.id ? styles.editedRow ?? '' : '')}
             onRow={({ preset }: MaterialPresetRow) => ({ onClick: () => setEditedPreset(preset) })}
           />
         </div>

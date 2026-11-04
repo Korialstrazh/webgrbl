@@ -91,7 +91,6 @@ export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
 export const ANTD_TABLE_SIZE_SMALL: TableProps['size'] = 'small';
 
 /** The `type` of a table row selection that allows one selected row. */
-export const ANTD_TABLE_ROW_SELECTION_TYPE_RADIO = 'radio' as const;
 
 /** A tag drawn as a soft filled chip without a border. */
 export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';

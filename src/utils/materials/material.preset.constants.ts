@@ -17,3 +17,10 @@ export const MATERIAL_PRESET_OPERATION = {
 export type MaterialPresetOperation = (typeof MATERIAL_PRESET_OPERATION)[keyof typeof MATERIAL_PRESET_OPERATION];
 
 export const MATERIAL_PRESET_NOTES_LENGTH_MAX = 500;
+
+export const MATERIAL_PRESETS_FILE_FORMAT = 'webgrbl-material-presets';
+export const MATERIAL_PRESETS_FILE_VERSION = 1;
+export const MATERIAL_PRESETS_FILE_NAME = 'webgrbl-material-presets.json';
+export const MATERIAL_PRESETS_FILE_MIME_TYPE = 'application/json';
+export const MATERIAL_PRESETS_FILE_ACCEPT = '.json,application/json';
+export const MATERIAL_PRESETS_FILE_INDENT = 2;

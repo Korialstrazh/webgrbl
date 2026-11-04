@@ -38,9 +38,9 @@ export const newMaterialPresetFromLayer = (
   materialId,
   machineProfileId,
   operation: getLayerOperation(layer),
-  powerWatts: getRoundedNumber(
-    (maxPowerWatts * layer.settings.maxPowerPercent) / POWER_PERCENT_MAX,
-    PRESET_WATTS_DECIMALS,
+  powerWatts: Math.min(
+    getRoundedNumber((maxPowerWatts * layer.settings.maxPowerPercent) / POWER_PERCENT_MAX, PRESET_WATTS_DECIMALS),
+    maxPowerWatts,
   ),
   speedMmPerMin: layer.settings.speedMmPerMin,
   passes: layer.settings.passes,
