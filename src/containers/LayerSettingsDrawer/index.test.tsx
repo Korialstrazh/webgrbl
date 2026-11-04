@@ -10,6 +10,7 @@ import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../../utils/layers/layer.constants';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import { DEFAULT_CUT_ENTRY, DEFAULT_FILL_ENTRY, DEFAULT_PALETTE } from '../../utils/palette/palette.constants';
+import type { Material } from '../../utils/materials/interfaces/Material';
 import { newMaterial } from '../../utils/materials/new.material';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
@@ -403,7 +404,7 @@ describe(LayerSettingsDrawer.name, () => {
 
   it('saves the layer as a preset of the project material and the active machine, in watts', () => {
     const store: AppStore = newStore();
-    const material = newMaterial();
+    const material: Material = newMaterial();
 
     loadProfile(store, false);
     loadColours(store, [CUT_COLOUR]);

@@ -9,10 +9,10 @@ import { newMaterial } from '../../utils/materials/new.material';
 import { newMaterialPreset } from '../../utils/materials/new.material.preset';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
-import { newProjectObject } from '../../utils/project/new.project.object';
-import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { DEFAULT_PALETTE } from '../../utils/palette/palette.constants';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import {
   ActiveMachineProfileSelected,
   MachineProfileDeleted,

@@ -29,19 +29,21 @@ import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineP
 import { selectActiveMachineProfile, selectMachineProfiles } from '../../../utils/states/machine.profile.state';
 import { selectMaterialPresets } from '../../../utils/states/material.preset.state';
 import { selectMaterials } from '../../../utils/states/material.state';
-import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.dialog.constants';
 import type { MaterialLibraryDialogProps } from '../interfaces/MaterialLibraryDialogProps';
+import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.dialog.constants';
 import { MaterialPresetForm } from '../MaterialPresetForm';
 import { PresetLayerApply } from '../PresetLayerApply';
 import styles from './styles.module.scss';
 
+type MaterialLibraryEditorProps = Pick<MaterialLibraryDialogProps, 'initialLayerKey'>;
+
 const NEW_PRESET_SPEED_MM_PER_MIN = 1000;
 const SEARCH_INPUT_TYPE = 'search';
 const MATERIAL_NAME_FIELD: keyof MaterialPresetRow = 'materialName';
-type MaterialLibraryEditorProps = Pick<MaterialLibraryDialogProps, 'initialLayerKey'>;
 
 // The form beside this panel is keyed by the preset id, and two children of one parent cannot share a key.
 const APPLY_PANEL_KEY_PREFIX = 'apply';
+const APPLY_PANEL_KEY_SEPARATOR = '-';
 
 const COLUMN_KEY = {
   MATERIAL: 'material',
@@ -71,7 +73,7 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
 
   // Applying uses the stored values, not unsaved edits. Only presets of the active laser apply: the watts of another
   // laser would give another result on this one.
-  const appliedPreset: MaterialPreset | undefined = presets.find(
+  const applicablePreset: MaterialPreset | undefined = presets.find(
     ({ id, machineProfileId }: MaterialPreset): boolean =>
       id === editedPreset?.id && machineProfileId === activeProfile?.id,
   );
@@ -194,10 +196,10 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
             onDone={() => setEditedPreset(undefined)}
           />
         ) : <p>{t(DEFAULT.MATERIAL_LIBRARY_PICK_HINT)}</p>}
-        {appliedPreset && activeProfile && (
+        {applicablePreset && activeProfile && (
           <PresetLayerApply
-            key={[APPLY_PANEL_KEY_PREFIX, appliedPreset.id].join('-')}
-            preset={appliedPreset}
+            key={[APPLY_PANEL_KEY_PREFIX, applicablePreset.id].join(APPLY_PANEL_KEY_SEPARATOR)}
+            preset={applicablePreset}
             maxPowerWatts={activeProfile.maxPowerWatts}
             initialLayerKey={initialLayerKey}
           />

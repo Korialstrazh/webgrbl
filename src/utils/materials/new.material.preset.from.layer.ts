@@ -11,11 +11,11 @@
  */
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { LAYER_MODE, POWER_PERCENT_MAX } from '../palette/palette.constants';
+import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { MaterialPreset } from './interfaces/MaterialPreset';
 import { MATERIAL_PRESET_OPERATION } from './material.preset.constants';
 import type { MaterialPresetOperation } from './material.preset.constants';
 import { newMaterialPreset } from './new.material.preset';
-import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 
 type PresetMachineProfile = Pick<MachineProfile, 'id' | 'maxPowerWatts'>;
 

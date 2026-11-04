@@ -30,8 +30,8 @@ import { LAYER_MODE } from '../../../utils/palette/palette.constants';
 import type { LayerMode } from '../../../utils/palette/palette.constants';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from '../../../utils/states/machine.profile.state';
-import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import { MaterialPresetSaved } from '../../../utils/states/material.preset.state';
+import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { PaletteEntrySaved, selectPaletteEntries } from '../../../utils/states/palette.state';
 import {
