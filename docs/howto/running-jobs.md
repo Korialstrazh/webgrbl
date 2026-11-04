@@ -10,6 +10,22 @@ While a job runs, the Job card shows a progress bar, lines answered and elapsed 
 
 While a job runs, the console, jog, home, set zero, pointer and air assist are locked. After a lost connection the laser may still run what it has buffered, and the app cannot stop it, so use the machine's own power switch or emergency stop.
 
-For developers: `runGrblJob` in `src/utils/states/job.run.saga.ts` runs the job, and `selectJobStartBlockedReasonKey` holds the start conditions. Design: [the spec](../superpowers/specs/2026-11-03_(03)_running-jobs.spec.md).
+## Frame job
+
+**Not yet verified on a real laser.** The checks on the ACMER are pending.
+
+Frame job traces the job with a dim dot, so you can see where it lands before you burn. Watch the dot to answer three questions: does the job stay within the limits of the laser, can the head travel the whole path without getting stuck, and is the sheet flat (a wider or blurrier spot shows where it rises or dips).
+
+1. Connect the laser, wait for the toolpath to be ready and set work zero where the job should start.
+2. In the Job card, choose the **Grid** (Rectangle only, 1 cm, 2 cm or 5 cm) and a **Margin** in mm (0 by default), which grows the rectangle on all four sides. Both are saved per machine profile.
+3. Check the dot power shown in the card: it is 0.05 W and assumes the maximum watts of the named machine profile (10 W until you change it), so set the real laser power in the profile first.
+4. Press **Frame job**. There is no confirmation. The head traces the rectangle around the job, then the grid lines, switches the dot off and returns to where it started.
+5. **Pause**, **Resume** and **STOP** work as for a job. The dot is off while paused. While a frame runs, the same locks as for a job apply.
+
+Frame job is off, with the reason in its tooltip, when the job cannot start, when laser mode is not confirmed on (`$32=1`, read at connect), when there is nothing to burn, or when the frame would leave the bed. A message then names the edge and by how many mm the frame goes past it. Work zero counts as the origin of the bed, so this check only tells you the frame fits from where work zero is; it is a first filter. The app does not know how far the head can really travel.
+
+**The machine reports a limit only if it can.** Without soft limits (`$20=1` and a homed machine) or hard limit switches, GRBL reports nothing when the head reaches the end of its travel, and the head can stall against the frame of the machine. The app cannot detect that, so watch the head and press STOP. If the machine does report an alarm, the frame ends and the card says so; clear the alarm before framing again.
+
+For developers: `runGrblFrame` in `src/utils/states/frame.run.saga.ts` runs the frame from the program of `src/utils/frame/`. `runGrblJob` in `src/utils/states/job.run.saga.ts` runs the job, and `selectJobStartBlockedReasonKey` holds the start conditions. Design: [the spec](../superpowers/specs/2026-11-03_(03)_running-jobs.spec.md).
 
 If you send `$32=` or `$RST=` in the console after connecting, Pause stays off until you reconnect, because the app reads settings only when it connects. Other ways of changing the setting, such as the machine's own screen, are not seen.
