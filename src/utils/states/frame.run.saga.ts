@@ -42,7 +42,15 @@ const getFrameProgramLinesOfState = (state: AppRootState): string[] | undefined 
   const profile: MachineProfile | undefined = selectActiveMachineProfile(state);
   const status: GrblResolvedStatus | undefined = selectMachineStatus(state);
 
-  if (!rectangle || !profile || !status?.workPosition) {
+  if (!rectangle) {
+    return undefined;
+  }
+
+  if (!profile) {
+    return undefined;
+  }
+
+  if (!status?.workPosition) {
     return undefined;
   }
 
@@ -112,7 +120,11 @@ export function* runGrblFrame(controller: GrblController): Generator {
   const blockedReasonKey: string | undefined = (yield select(selectFrameStartBlockedReasonKey)) as string | undefined;
   const programLines: string[] | undefined = (yield select(getFrameProgramLinesOfState)) as string[] | undefined;
 
-  if (blockedReasonKey || !programLines) {
+  if (blockedReasonKey) {
+    return;
+  }
+
+  if (!programLines) {
     return;
   }
 
