@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { GRBL_CONTROLLER_EVENT_KIND } from '../grbl/grbl.constants';
 import { DEFAULT } from '../localization/default.locales';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
-import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { MachineControllerResetDetected } from './machine.status.state';
+import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
 
 const STOPPED_LINE_NUMBER = 5;

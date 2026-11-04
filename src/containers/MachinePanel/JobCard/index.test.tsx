@@ -1,12 +1,13 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import type { MockInstance } from 'vitest';
 import { JobCard } from '.';
 import * as downloadModule from '../../../utils/browser/download.text.file';
 import { EM_DASH, MIDDLE_DOT } from '../../../utils/characters.constants';
-import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
 import type { GrblMachineState } from '../../../utils/grbl/grbl.constants';
 import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
+import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../../utils/project/new.project.object';
@@ -14,7 +15,7 @@ import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.s
 import { JobRunStarted, JobStartRequested } from '../../../utils/states/job.run.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../../utils/states/machine.status.state';
-import type { AppStore } from '../../../utils/states/new.store';
+import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
 import { newStore } from '../../../utils/states/new.store';
 import {
   LayerToggled,
@@ -165,7 +166,7 @@ describe(JobCard.name, () => {
 
   it('starts the job only after the confirmation, which the Escape-to-STOP hotkey treats as an overlay', async () => {
     const store: AppStore = newStartableJobStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderJobCard(store);
     fireEvent.click(screen.getByRole('button', { name: START_JOB_LABEL }));

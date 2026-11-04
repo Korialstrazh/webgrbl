@@ -156,10 +156,10 @@ describe(GrblController.name, () => {
 
     const answeredLineCounts: number[] = [];
 
-    for (const event of harness.events) {
-      if (event.kind === GRBL_CONTROLLER_EVENT_KIND.PROGRAM_PROGRESS) {
-        expect(event.totalLineCount).toBe(programLineCount);
-        answeredLineCounts.push(event.answeredLineCount);
+    for (const controllerEvent of harness.events) {
+      if (controllerEvent.kind === GRBL_CONTROLLER_EVENT_KIND.PROGRAM_PROGRESS) {
+        expect(controllerEvent.totalLineCount).toBe(programLineCount);
+        answeredLineCounts.push(controllerEvent.answeredLineCount);
       }
     }
 

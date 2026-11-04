@@ -17,6 +17,9 @@ import { selectIsJobRunActive, selectIsLaserModeUnconfirmed } from './job.run.st
 import { selectIsMachineMoving, selectMachineStatus } from './machine.status.state';
 import type { AppRootState } from './new.store';
 
+const isLaserModeConfirmedOn = (state: AppRootState): boolean =>
+  !selectIsLaserModeUnconfirmed(state) && selectGrblSettings(state)[GRBL_SETTING_LASER_MODE] === GRBL_SETTING_ON_VALUE;
+
 export const selectJobPauseControl = (state: AppRootState): JobPauseControl => {
   if (!selectIsJobRunActive(state)) {
     return JOB_PAUSE_CONTROL.HIDDEN;
@@ -34,8 +37,5 @@ export const selectJobPauseControl = (state: AppRootState): JobPauseControl => {
     return selectIsMachineMoving(state) ? JOB_PAUSE_CONTROL.RESUME_WAITING : JOB_PAUSE_CONTROL.RESUME;
   }
 
-  const isLaserModeConfirmedOn: boolean = !selectIsLaserModeUnconfirmed(state)
-    && selectGrblSettings(state)[GRBL_SETTING_LASER_MODE] === GRBL_SETTING_ON_VALUE;
-
-  return isLaserModeConfirmedOn ? JOB_PAUSE_CONTROL.PAUSE : JOB_PAUSE_CONTROL.PAUSE_BLOCKED;
+  return isLaserModeConfirmedOn(state) ? JOB_PAUSE_CONTROL.PAUSE : JOB_PAUSE_CONTROL.PAUSE_BLOCKED;
 };
