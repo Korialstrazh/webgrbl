@@ -92,7 +92,12 @@ const getGridLines = (
 const getSquaredDistance = (
   first: GeometryPoint,
   second: GeometryPoint,
-): number => (first.x - second.x) ** 2 + (first.y - second.y) ** 2;
+): number => {
+  const deltaX: number = first.x - second.x;
+  const deltaY: number = first.y - second.y;
+
+  return deltaX * deltaX + deltaY * deltaY;
+};
 
 /** Orders every line so that it starts at the end nearest to where the previous line ended. */
 const getSerpentineLines = (
@@ -121,30 +126,36 @@ const getSerpentineLines = (
   return orderedLines;
 };
 
-export const getFrameProgramLines = (input: FrameProgramInput): string[] => {
-  const { rectangle, gridCellMm, sValue, profile, startPoint } = input;
-  const mapPoint = (point: GeometryPoint): GeometryPoint =>
-    getOriginMappedPoint(point, profile.originCorner, profile);
-  const corner: GeometryPoint = { x: rectangle.minX, y: rectangle.minY };
+const getOutlineLines = (
+  rectangle: FrameRectangle,
+  mapPoint: (point: GeometryPoint) => GeometryPoint,
+): string[] => {
   const sides: GeometryPoint[] = [
     { x: rectangle.maxX, y: rectangle.minY },
     { x: rectangle.maxX, y: rectangle.maxY },
     { x: rectangle.minX, y: rectangle.maxY },
-    corner,
+    { x: rectangle.minX, y: rectangle.minY },
   ];
-  const lines: string[] = [
-    GCODE_UNITS_AND_ABSOLUTE,
-    `${FRAME_LASER_ON_PREFIX}${sValue}`,
-    getMoveLine(GCODE_TRAVEL_WORD, mapPoint(corner)),
-  ];
+  const lines: string[] = [];
 
-  sides.forEach((side: GeometryPoint, sideIndex: number) => {
+  for (const [sideIndex, side] of sides.entries()) {
     const feedWords: string[] = sideIndex
       ? []
       : [`${GCODE_F_PREFIX}${FRAME_FEED_MM_PER_MIN}`];
 
     lines.push(getMoveLine(GCODE_BURN_WORD, mapPoint(side), feedWords));
-  });
+  }
+
+  return lines;
+};
+
+const getGridProgramLines = (
+  rectangle: FrameRectangle,
+  gridCellMm: number,
+  mapPoint: (point: GeometryPoint) => GeometryPoint,
+): string[] => {
+  const corner: GeometryPoint = { x: rectangle.minX, y: rectangle.minY };
+  const lines: string[] = [];
 
   for (const [lineStart, lineEnd] of getSerpentineLines(
     getGridLines(rectangle, gridCellMm),
@@ -160,7 +171,24 @@ export const getFrameProgramLines = (input: FrameProgramInput): string[] => {
     );
   }
 
-  lines.push(FRAME_LASER_OFF, getMoveLine(GCODE_TRAVEL_WORD, startPoint));
-
   return lines;
+};
+
+export const getFrameProgramLines = (input: FrameProgramInput): string[] => {
+  const { rectangle, gridCellMm, sValue, profile, startPoint } = input;
+  const mapPoint: (point: GeometryPoint) => GeometryPoint = (
+    point: GeometryPoint,
+  ): GeometryPoint =>
+    getOriginMappedPoint(point, profile.originCorner, profile);
+  const corner: GeometryPoint = { x: rectangle.minX, y: rectangle.minY };
+
+  return [
+    GCODE_UNITS_AND_ABSOLUTE,
+    `${FRAME_LASER_ON_PREFIX}${sValue}`,
+    getMoveLine(GCODE_TRAVEL_WORD, mapPoint(corner)),
+    ...getOutlineLines(rectangle, mapPoint),
+    ...getGridProgramLines(rectangle, gridCellMm, mapPoint),
+    FRAME_LASER_OFF,
+    getMoveLine(GCODE_TRAVEL_WORD, startPoint),
+  ];
 };
