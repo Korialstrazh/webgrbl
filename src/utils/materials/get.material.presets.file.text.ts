@@ -12,7 +12,8 @@
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { Material } from './interfaces/Material';
 import type { MaterialPreset } from './interfaces/MaterialPreset';
-import type { MaterialPresetsFile, MaterialPresetsFilePreset } from './interfaces/MaterialPresetsFile';
+import type { MaterialPresetsFile } from './interfaces/MaterialPresetsFile';
+import type { MaterialPresetsFilePreset } from './interfaces/MaterialPresetsFilePreset';
 import {
   MATERIAL_PRESETS_FILE_FORMAT,
   MATERIAL_PRESETS_FILE_INDENT,

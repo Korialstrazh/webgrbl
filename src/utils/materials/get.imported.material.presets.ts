@@ -27,7 +27,8 @@ import { getMatchingMaterial } from './get.matching.material';
 import type { ImportedMaterialPresets } from './interfaces/ImportedMaterialPresets';
 import type { Material } from './interfaces/Material';
 import type { MaterialPreset } from './interfaces/MaterialPreset';
-import type { MaterialPresetsFilePreset } from './interfaces/MaterialPresetsFile';
+import type { MaterialPresetsFile } from './interfaces/MaterialPresetsFile';
+import type { MaterialPresetsFilePreset } from './interfaces/MaterialPresetsFilePreset';
 import {
   MATERIAL_NAME_LENGTH_MAX,
   MATERIAL_THICKNESS_MM_MAX,
@@ -62,22 +63,19 @@ const isFilePreset = (value: unknown): value is MaterialPresetsFilePreset =>
   isFiniteNumber(value.passes) &&
   isString(value.notes);
 
+const isMaterialPresetsFile = (value: unknown): value is MaterialPresetsFile =>
+  isRecord(value) &&
+  value.format === MATERIAL_PRESETS_FILE_FORMAT &&
+  value.version === MATERIAL_PRESETS_FILE_VERSION &&
+  Array.isArray(value.presets) &&
+  Boolean(value.presets.length) &&
+  value.presets.every(isFilePreset);
+
 const getFilePresets = (fileText: string): MaterialPresetsFilePreset[] | undefined => {
   try {
     const parsedFile: unknown = JSON.parse(fileText);
 
-    if (
-      isRecord(parsedFile) &&
-      parsedFile.format === MATERIAL_PRESETS_FILE_FORMAT &&
-      parsedFile.version === MATERIAL_PRESETS_FILE_VERSION &&
-      Array.isArray(parsedFile.presets) &&
-      parsedFile.presets.length &&
-      parsedFile.presets.every(isFilePreset)
-    ) {
-      return parsedFile.presets;
-    }
-
-    return undefined;
+    return isMaterialPresetsFile(parsedFile) ? parsedFile.presets : undefined;
   } catch {
     return undefined;
   }

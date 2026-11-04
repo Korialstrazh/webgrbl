@@ -6,74 +6,85 @@ import { getMaterialPresetsFileText } from './get.material.presets.file.text';
 import type { ImportedMaterialPresets } from './interfaces/ImportedMaterialPresets';
 import type { Material } from './interfaces/Material';
 import type { MaterialPreset } from './interfaces/MaterialPreset';
+import type { MaterialPresetsFile } from './interfaces/MaterialPresetsFile';
 import { MATERIAL_PRESET_OPERATION } from './material.preset.constants';
 import { newMaterial } from './new.material';
 import { newMaterialPreset } from './new.material.preset';
 
+type MaterialPresetFileChange = Record<string, unknown>;
+
+const PLYWOOD_NAME = 'Plywood';
+const PLYWOOD_THICKNESS_MM = 3;
+const PRESET_SPEED_MM_PER_MIN = 300;
+const PRESET_PASSES = 2;
+const PRESET_NOTES = 'Air assist on';
+
 const SOURCE_PROFILE: MachineProfile = newMachineProfile({ maxPowerWatts: 10 });
 const TARGET_PROFILE: MachineProfile = newMachineProfile({ maxPowerWatts: 40 });
-const PLYWOOD: Material = newMaterial({ name: 'Plywood', thicknessMm: 3 });
+const PLYWOOD: Material = newMaterial({ name: PLYWOOD_NAME, thicknessMm: PLYWOOD_THICKNESS_MM });
 const PRESET: MaterialPreset = newMaterialPreset({
   materialId: PLYWOOD.id,
   machineProfileId: SOURCE_PROFILE.id,
   operation: MATERIAL_PRESET_OPERATION.CUT,
   powerWatts: 5,
-  speedMmPerMin: 300,
-  passes: 2,
-  notes: 'Air assist on',
+  speedMmPerMin: PRESET_SPEED_MM_PER_MIN,
+  passes: PRESET_PASSES,
+  notes: PRESET_NOTES,
 });
 const FILE_TEXT: string = getMaterialPresetsFileText([PRESET], [PLYWOOD], [SOURCE_PROFILE]);
 
-const getFileWithPresetChange = (change: Record<string, unknown>): string => {
-  const parsedFile = JSON.parse(FILE_TEXT);
+const getFileWithPresetChange = (change: MaterialPresetFileChange): string => {
+  const parsedFile: MaterialPresetsFile = JSON.parse(FILE_TEXT) as MaterialPresetsFile;
 
   return JSON.stringify({ ...parsedFile, presets: [{ ...parsedFile.presets[0], ...change }] });
 };
 
 describe(getImportedMaterialPresets.name, () => {
   it('keeps the share of the source laser on the importing machine', () => {
-    const imported: ImportedMaterialPresets | undefined =
+    const importedPresets: ImportedMaterialPresets | undefined =
       getImportedMaterialPresets(FILE_TEXT, [PLYWOOD], TARGET_PROFILE);
 
-    expect(imported?.presets).toEqual([expect.objectContaining({
+    expect(importedPresets?.presets).toEqual([expect.objectContaining({
       machineProfileId: TARGET_PROFILE.id,
       materialId: PLYWOOD.id,
       powerWatts: 20,
-      speedMmPerMin: 300,
-      passes: 2,
-      notes: 'Air assist on',
+      speedMmPerMin: PRESET_SPEED_MM_PER_MIN,
+      passes: PRESET_PASSES,
+      notes: PRESET_NOTES,
     })]);
-    expect(imported?.presets[0]?.id).not.toBe(PRESET.id);
-    expect(imported?.newMaterials).toEqual([]);
+    expect(importedPresets?.presets[0]?.id).not.toBe(PRESET.id);
+    expect(importedPresets?.newMaterials).toEqual([]);
   });
 
   it('adds a missing material once for several presets', () => {
-    const parsedFile = JSON.parse(FILE_TEXT);
+    const parsedFile: MaterialPresetsFile = JSON.parse(FILE_TEXT) as MaterialPresetsFile;
     const twoPresetsText: string =
       JSON.stringify({ ...parsedFile, presets: [parsedFile.presets[0], parsedFile.presets[0]] });
-    const imported: ImportedMaterialPresets | undefined =
+    const importedPresets: ImportedMaterialPresets | undefined =
       getImportedMaterialPresets(twoPresetsText, [], TARGET_PROFILE);
 
-    expect(imported?.newMaterials).toEqual([expect.objectContaining({ name: 'Plywood', thicknessMm: 3 })]);
-    expect(imported?.presets.map(({ materialId }: MaterialPreset): string => materialId))
-      .toEqual([imported?.newMaterials[0]?.id, imported?.newMaterials[0]?.id]);
+    expect(importedPresets?.newMaterials).toEqual([
+      expect.objectContaining({ name: PLYWOOD_NAME, thicknessMm: PLYWOOD_THICKNESS_MM }),
+    ]);
+    expect(importedPresets?.presets.map(({ materialId }: MaterialPreset): string => materialId))
+      .toEqual([importedPresets?.newMaterials[0]?.id, importedPresets?.newMaterials[0]?.id]);
   });
 
   it('never gives more power than the importing laser has', () => {
-    const imported: ImportedMaterialPresets | undefined =
+    const importedPresets: ImportedMaterialPresets | undefined =
       getImportedMaterialPresets(getFileWithPresetChange({ powerWatts: 500 }), [PLYWOOD], TARGET_PROFILE);
 
-    expect(imported?.presets[0]?.powerWatts).toBe(TARGET_PROFILE.maxPowerWatts);
+    expect(importedPresets?.presets[0]?.powerWatts).toBe(TARGET_PROFILE.maxPowerWatts);
   });
 
   it('brings speed and passes into range', () => {
-    const imported: ImportedMaterialPresets | undefined = getImportedMaterialPresets(
+    const importedPresets: ImportedMaterialPresets | undefined = getImportedMaterialPresets(
       getFileWithPresetChange({ speedMmPerMin: 0, passes: 999 }),
       [PLYWOOD],
       TARGET_PROFILE,
     );
 
-    expect(imported?.presets[0]).toEqual(expect.objectContaining({ speedMmPerMin: 1, passes: 50 }));
+    expect(importedPresets?.presets[0]).toEqual(expect.objectContaining({ speedMmPerMin: 1, passes: 50 }));
   });
 
   it.each([

@@ -35,6 +35,7 @@ const LAYER_COLOUR = '#ff0000';
 const LAYER_OBJECT: ProjectObject = newProjectObject({
   svgText: `<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm"><rect fill="${LAYER_COLOUR}" width="5" height="5"/></svg>`,
 });
+const IMPORT_FILE_NAME = 'presets.json';
 const IMPORT_INPUT_LABEL = 'Open a material presets file';
 const POWER_LABEL = 'Power (W)';
 const SAVE_LABEL = 'Save';
@@ -250,7 +251,7 @@ describe(MaterialLibraryDialog.name, () => {
     );
 
     fireEvent.change(await screen.findByLabelText(IMPORT_INPUT_LABEL), {
-      target: { files: [new File([fileText], 'presets.json')] },
+      target: { files: [new File([fileText], IMPORT_FILE_NAME)] },
     });
 
     await waitFor(() => {
@@ -264,7 +265,7 @@ describe(MaterialLibraryDialog.name, () => {
     const store: AppStore = renderDialog();
 
     fireEvent.change(await screen.findByLabelText(IMPORT_INPUT_LABEL), {
-      target: { files: [new File(['nonsense'], 'presets.json')] },
+      target: { files: [new File(['nonsense'], IMPORT_FILE_NAME)] },
     });
 
     await waitFor(() => {

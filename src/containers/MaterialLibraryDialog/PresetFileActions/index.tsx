@@ -62,24 +62,24 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
     try {
       const fileText: string = await pickedFile.text();
       // Read after the file: the materials may have changed while it was being read.
-      const imported: ImportedMaterialPresets | undefined =
+      const importedPresets: ImportedMaterialPresets | undefined =
         getImportedMaterialPresets(fileText, selectMaterials(store.getState()), machineProfile);
 
-      if (!imported) {
+      if (!importedPresets) {
         showImportInvalidToast();
 
         return;
       }
 
-      for (const material of imported.newMaterials) {
+      for (const material of importedPresets.newMaterials) {
         dispatch(new MaterialSaved({ material }));
       }
 
-      for (const preset of imported.presets) {
+      for (const preset of importedPresets.presets) {
         dispatch(new MaterialPresetSaved({ preset }));
       }
 
-      setImportedCount(imported.presets.length);
+      setImportedCount(importedPresets.presets.length);
     } catch {
       showImportInvalidToast();
     }
