@@ -1,7 +1,7 @@
 /**
  * The fields of the layer settings drawer: send to laser, mode, power, speed, passes, air assist and line interval,
- * with the buttons that save the settings to the palette and open the palette. Every change is one change in the
- * project history.
+ * with the buttons that save the settings to the palette and open the palette, and the material preset buttons. Every
+ * change is one change in the project history.
  *
  * @author michael.morosov
  *
@@ -11,7 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button, Segmented, Switch } from 'antd';
-import { useId, useState } from 'react';
+import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,15 +23,11 @@ import { getPowerWattsText } from '../../../utils/layers/get.power.watts.text';
 import type { LayerSettingsChange } from '../../../utils/layers/interfaces/LayerSettingsChange';
 import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
-import type { Material } from '../../../utils/materials/interfaces/Material';
-import { newMaterialPresetFromLayer } from '../../../utils/materials/new.material.preset.from.layer';
 import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntry';
 import { LAYER_MODE } from '../../../utils/palette/palette.constants';
 import type { LayerMode } from '../../../utils/palette/palette.constants';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from '../../../utils/states/machine.profile.state';
-import { MaterialPresetSaved } from '../../../utils/states/material.preset.state';
-import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { PaletteEntrySaved, selectPaletteEntries } from '../../../utils/states/palette.state';
 import {
@@ -39,10 +35,10 @@ import {
   LayerSettingsChanged,
   LayerToggled,
 } from '../../../utils/states/project.document.state';
-import { MaterialLibraryDialog } from '../../MaterialLibraryDialog';
 import type { LayerNumberFieldConfig } from '../interfaces/LayerNumberFieldConfig';
 import type { LayerSettingsFieldsProps } from '../interfaces/LayerSettingsFieldsProps';
 import { LayerNumberField } from '../LayerNumberField';
+import { LayerPresetButtons } from '../LayerPresetButtons';
 import {
   LAYER_FIELD_KEY_SEPARATOR,
   LAYER_LINE_INTERVAL_FIELD,
@@ -63,9 +59,6 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
   const airAssistLabelId: string = useId();
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
   const machineProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
-  const [isLibraryOpen, setIsLibraryOpen] = useState<boolean>(false);
-  const [savedPresetMaterialName, setSavedPresetMaterialName] = useState<string | undefined>(undefined);
   const layerKey: string = getLayerKey(layer);
   const { settings } = layer;
   const maxPowerWatts: number | undefined = machineProfile?.maxPowerWatts;
@@ -83,15 +76,6 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
 
     if (!layerEntry) {
       dispatch(new LayerPaletteEntryLinked({ layerKey, paletteEntryId: savedEntry.id }));
-    }
-  };
-
-  const savePreset = (): void => {
-    if (activeMaterial && machineProfile) {
-      dispatch(new MaterialPresetSaved({
-        preset: newMaterialPresetFromLayer(layer, activeMaterial.id, machineProfile),
-      }));
-      setSavedPresetMaterialName(activeMaterial.name);
     }
   };
 
@@ -160,28 +144,7 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
           {t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
         </Button>
       </div>
-      <div className={styles.actions}>
-        {/* A preset at 0 W could never be saved again in the library, so it is not offered. */}
-        <Button
-          type={ANTD_BUTTON_TYPE_DEFAULT}
-          disabled={!activeMaterial || !machineProfile || !settings.maxPowerPercent}
-          onClick={savePreset}
-        >
-          {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
-        </Button>
-        <Button type={ANTD_BUTTON_TYPE_DEFAULT} onClick={() => setIsLibraryOpen(true)}>
-          {t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
-        </Button>
-      </div>
-      {!activeMaterial && <p role="note">{t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}</p>}
-      <p role="status">
-        {savedPresetMaterialName && t(DEFAULT.LAYER_SETTINGS_PRESET_SAVED, { name: savedPresetMaterialName })}
-      </p>
-      <MaterialLibraryDialog
-        isOpen={isLibraryOpen}
-        initialLayerKey={layerKey}
-        onClose={() => setIsLibraryOpen(false)}
-      />
+      <LayerPresetButtons layer={layer} />
     </div>
   );
 };

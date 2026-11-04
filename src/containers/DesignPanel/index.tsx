@@ -1,7 +1,7 @@
 /**
- * The left region for the design tools: the material of the project, layers and objects. The material and the test
- * sample are chosen and added in the Design view only. In the 3D view it shows the Cut check above the layers, and the
- * objects leave, as they cannot be edited there.
+ * The left region for the design tools: the material of the project with its library, layers and objects. The
+ * material and the test sample are chosen and added in the Design view only. In the 3D view it shows the Cut check
+ * above the layers, and the objects leave, as they cannot be edited there.
  *
  * @author michael.morosov
  *
@@ -26,8 +26,8 @@ import { AddTestSampleButton } from '../AddTestSampleButton';
 import { CutCheckPanel } from '../CutCheckPanel';
 import { LayersSection } from '../LayersSection';
 import { ObjectsSection } from '../ObjectsSection';
+import { MaterialSection } from '../MaterialSection';
 import { PaletteDialog } from '../PaletteDialog';
-import { ProjectMaterialSelect } from '../ProjectMaterialSelect';
 import styles from './styles.module.scss';
 
 export const DesignPanel = (): ReactNode => {
@@ -47,7 +47,7 @@ export const DesignPanel = (): ReactNode => {
       {isThreeDView && <CutCheckPanel />}
       {isDesignView && (
         <Panel title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
-          <ProjectMaterialSelect />
+          <MaterialSection />
         </Panel>
       )}
       <Panel

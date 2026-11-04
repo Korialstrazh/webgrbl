@@ -23,12 +23,16 @@ const ENTERED_NAME = '  Birch 4 mm ';
 const STORED_NAME = 'Birch 4 mm';
 const ENTERED_THICKNESS_MM = 4;
 
-const renderDialog = (store: AppStore, onClose: () => void = vi.fn()): void => {
+const renderDialog = (
+  store: AppStore,
+  onClose: () => void = vi.fn(),
+  onMaterialChosen?: (materialId: string) => void,
+): void => {
   render(
     <Provider store={store}>
       <AntdTestProvider>
         <BedRegionTestHost>
-          <MaterialDialog isOpen onClose={onClose} />
+          <MaterialDialog isOpen onClose={onClose} onMaterialChosen={onMaterialChosen} />
         </BedRegionTestHost>
       </AntdTestProvider>
     </Provider>,
@@ -71,6 +75,21 @@ describe(MaterialDialog.name, () => {
       testResults: [],
     });
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('hands the saved material to onMaterialChosen instead of selecting it for the project', () => {
+    const store: AppStore = newStore();
+    const onMaterialChosen = vi.fn();
+
+    renderDialog(store, vi.fn(), onMaterialChosen);
+    fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: STORED_NAME } });
+    enterThickness(String(ENTERED_THICKNESS_MM));
+    clickSave();
+
+    const [savedMaterial]: Material[] = selectMaterials(store.getState());
+
+    expect(onMaterialChosen).toHaveBeenCalledWith(savedMaterial?.id);
+    expect(selectActiveMaterial(store.getState())).toBeUndefined();
   });
 
   it.each(['0', '', '101'])('blocks Save with a localized error for the thickness "%s"', (thicknessText: string) => {
@@ -120,6 +139,20 @@ describe(MaterialDialog.name, () => {
       expect(selectActiveMaterial(store.getState())?.id).toBe(SAVED.id);
       expect(selectMaterials(store.getState())).toHaveLength(1);
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('hands the saved one to onMaterialChosen without selecting it for the project', () => {
+      const store: AppStore = newStore();
+      const onMaterialChosen = vi.fn();
+
+      store.dispatch(new MaterialSaved({ material: SAVED }));
+      renderDialog(store, vi.fn(), onMaterialChosen);
+      fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: STORED_NAME } });
+      enterThickness(String(ENTERED_THICKNESS_MM));
+      fireEvent.click(screen.getByRole('button', { name: USE_EXISTING_LABEL }));
+
+      expect(onMaterialChosen).toHaveBeenCalledWith(SAVED.id);
+      expect(selectActiveMaterial(store.getState())).toBeUndefined();
     });
 
     it('does not block saving another one', () => {

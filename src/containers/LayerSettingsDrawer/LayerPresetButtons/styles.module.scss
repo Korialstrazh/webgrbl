@@ -1,0 +1,44 @@
+// Relative, as the update question is placed inside it, under the button that asked.
+.actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.updateQuestion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 20rem;
+}
+
+.updateQuestionTitle,
+.updateQuestionText {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.updateQuestionTitle {
+  font-weight: 600;
+}
+
+.updateQuestionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.note,
+.status {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.note {
+  color: var(--color-text-muted);
+}
+
+.status {
+  color: var(--color-success);
+}

@@ -420,6 +420,48 @@ describe(LayerSettingsDrawer.name, () => {
     expect(selectMaterialPresets(store.getState())).toEqual([
       expect.objectContaining({ materialId: material.id, machineProfileId: PROFILE_ID, powerWatts: 6 }),
     ]);
-    expect(screen.getByRole('status')).toHaveTextContent(material.name);
+    expect(screen.getByRole('status')).toHaveTextContent(`Saved ${material.name}, ${material.thicknessMm} mm`);
+    expect(screen.getByRole('status')).toHaveTextContent('Cut');
+  });
+
+  it('asks whether to update the preset of the same material, operation and machine, or save a new one', async () => {
+    const store: AppStore = newStore();
+    const material: Material = newMaterial();
+
+    loadProfile(store, false);
+    loadColours(store, [CUT_COLOUR]);
+    act(() => {
+      store.dispatch(new MaterialSaved({ material }));
+      store.dispatch(new ProjectMaterialSelected({ materialId: material.id }));
+      store.dispatch(new LayerSettingsChanged({ layerKey: CUT_COLOUR, settings: { maxPowerPercent: SIXTY_PERCENT } }));
+    });
+    renderDrawer(store, CUT_COLOUR);
+    fireEvent.click(screen.getByRole('button', { name: PRESET_LABEL }));
+
+    const [storedPreset] = selectMaterialPresets(store.getState());
+
+    act(() => {
+      store.dispatch(new LayerSettingsChanged({ layerKey: CUT_COLOUR, settings: { passes: 3 } }));
+    });
+    fireEvent.click(screen.getByRole('button', { name: PRESET_LABEL }));
+
+    expect(await screen.findByText(/already has a preset for/)).toBeInTheDocument();
+    // The question replaces the stale confirmation of the first save, and Cancel keeps everything as it was.
+    expect(screen.getByRole('status')).toHaveTextContent('');
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(selectMaterialPresets(store.getState())).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole('button', { name: PRESET_LABEL }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Update existing' }));
+
+    expect(selectMaterialPresets(store.getState()))
+      .toEqual([expect.objectContaining({ id: storedPreset?.id, passes: 3 })]);
+    expect(screen.getByRole('status')).toHaveTextContent(/^Updated/);
+
+    fireEvent.click(screen.getByRole('button', { name: PRESET_LABEL }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Save as new' }));
+
+    expect(selectMaterialPresets(store.getState())).toHaveLength(2);
+    expect(screen.getByRole('status')).toHaveTextContent(/^Saved/);
   });
 });

@@ -1,6 +1,6 @@
 /**
- * Gets the rows of the material library table, sorted by material and thickness. A preset whose material is not known
- * has nothing to show and is left out.
+ * Gets the rows of the material library table, sorted by material and thickness, with the rows of a preferred material
+ * (the material of the project) first. A preset whose material is not known has nothing to show and is left out.
  *
  * @author michael.morosov
  *
@@ -22,21 +22,44 @@ const getSearchWords = (searchText: string): string[] =>
 const isPresetOnListedMachine = ({ machineProfileId }: MaterialPreset, listedProfileId: string | undefined): boolean =>
   !listedProfileId || machineProfileId === listedProfileId;
 
+const isPresetOfListedMaterial = ({ materialId }: MaterialPreset, listedMaterialId: string | undefined): boolean =>
+  !listedMaterialId || materialId === listedMaterialId;
+
+const isPresetListed = (preset: MaterialPreset, { machineProfileId, materialId }: MaterialPresetRowFilter): boolean =>
+  isPresetOnListedMachine(preset, machineProfileId) && isPresetOfListedMaterial(preset, materialId);
+
 const compareMaterialPresetRows = (firstRow: MaterialPresetRow, secondRow: MaterialPresetRow): number =>
   firstRow.materialName.localeCompare(secondRow.materialName) || firstRow.thicknessMm - secondRow.thicknessMm;
+
+/** A row of the preferred material sorts before every other row; among themselves the rows keep the usual order. */
+const compareWithPreferredMaterialFirst = (
+  firstRow: MaterialPresetRow,
+  secondRow: MaterialPresetRow,
+  preferredMaterialId: string | undefined,
+): number => {
+  const isFirstPreferred: boolean = firstRow.preset.materialId === preferredMaterialId;
+  const isSecondPreferred: boolean = secondRow.preset.materialId === preferredMaterialId;
+
+  if (isFirstPreferred !== isSecondPreferred) {
+    return isFirstPreferred ? -1 : 1;
+  }
+
+  return compareMaterialPresetRows(firstRow, secondRow);
+};
 
 export const getMaterialPresetRows = (
   presets: MaterialPreset[],
   materials: Material[],
-  { searchText, machineProfileId, getOperationLabel }: MaterialPresetRowFilter,
+  filter: MaterialPresetRowFilter,
 ): MaterialPresetRow[] => {
+  const { searchText, preferredMaterialId, getOperationLabel } = filter;
   const searchWords: string[] = getSearchWords(searchText);
   const rows: MaterialPresetRow[] = [];
 
   for (const preset of presets) {
     const material: Material | undefined = materials.find(({ id }: Material): boolean => id === preset.materialId);
 
-    if (material && isPresetOnListedMachine(preset, machineProfileId)) {
+    if (material && isPresetListed(preset, filter)) {
       const rowText: string =
         [material.name, material.thicknessMm, getOperationLabel(preset.operation)].join(' ').toLowerCase();
 
@@ -46,5 +69,6 @@ export const getMaterialPresetRows = (
     }
   }
 
-  return rows.sort(compareMaterialPresetRows);
+  return rows.sort((firstRow: MaterialPresetRow, secondRow: MaterialPresetRow): number =>
+    compareWithPreferredMaterialFirst(firstRow, secondRow, preferredMaterialId));
 };
