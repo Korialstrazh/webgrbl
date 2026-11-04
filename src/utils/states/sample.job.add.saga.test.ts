@@ -6,7 +6,7 @@ import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
 import { getSampleSvgText } from '../materials/get.sample.svg.text';
 import { SAMPLE_CUT_COLOUR, SAMPLE_GRADIENT_ID, SAMPLE_OBJECT_NAME, SAMPLE_SIZE_MM } from '../materials/sample.job.constants';
-import { DEFAULT_PALETTE, LAYER_MODE } from '../palette/palette.constants';
+import { CUT_ENTRY_ID, DEFAULT_PALETTE, LAYER_MODE } from '../palette/palette.constants';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
 import { newStore } from './new.store';
@@ -25,6 +25,7 @@ import { addSampleJob } from './sample.job.add.saga';
 import { selectToasts } from './toast.state';
 
 const CHANGED_SPEED_MM_PER_MIN = 123;
+const REPEATED_SAMPLE_COUNT = 3;
 const OTHER_OBJECT: ProjectObject = newProjectObject({
   name: 'Keep me',
   svgText: getSampleSvgText({ cutColour: SAMPLE_CUT_COLOUR, hasGradient: false }),
@@ -101,7 +102,7 @@ describe(addSampleJob.name, () => {
     store.dispatch(new ProjectDocumentLoaded({
       document: { objects: [OTHER_OBJECT], layers: [getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 0)] },
     }));
-    await addSamples(store, 3);
+    await addSamples(store, REPEATED_SAMPLE_COUNT);
 
     expect(getLayerKeysInBurnOrder(store)).toEqual([SHADING_LAYER_COLOUR, SAMPLE_CUT_COLOUR]);
   });
@@ -137,6 +138,26 @@ describe(addSampleJob.name, () => {
     await addSamples(store, 1);
 
     expect(getLayerKeysInBurnOrder(store)).toEqual([SHADING_LAYER_COLOUR, SAMPLE_CUT_COLOUR]);
+  });
+
+  it('names its own colour Cut and reuses that one layer while the visible red layer cannot be used', async () => {
+    const store: AppStore = newStore();
+    const redLayer: ProjectLayer = getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 0);
+
+    store.dispatch(new ProjectDocumentLoaded({
+      document: {
+        objects: [OTHER_OBJECT],
+        layers: [{ ...redLayer, settings: { ...redLayer.settings, mode: LAYER_MODE.FILL } }],
+      },
+    }));
+    await addSamples(store, REPEATED_SAMPLE_COUNT);
+
+    const extraLayers: ProjectLayer[] = selectProjectLayers(store.getState()).filter(
+      (layer: ProjectLayer): boolean => !layer.isShading && layer.colour !== SAMPLE_CUT_COLOUR,
+    );
+
+    expect(extraLayers).toHaveLength(1);
+    expect(extraLayers[0]?.paletteEntryId).toBe(CUT_ENTRY_ID);
   });
 
   it('leaves the gradient out and says so when the shading layer is off', async () => {
