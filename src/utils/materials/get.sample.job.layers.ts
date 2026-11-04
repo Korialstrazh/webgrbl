@@ -48,6 +48,10 @@ const isShadingOnCutLayerOrder = (layers: ProjectLayer[], cutColour: string): bo
   return getOrderOfKey(SHADING_LAYER_COLOUR) === getOrderOfKey(cutColour);
 };
 
+/** A colour of the sample's own has no palette entry: linking it to Cut names the layer for the next sample to find. */
+const getSampleLayerEntryId = (layer: ProjectLayer, cutColour: string): string | undefined =>
+  layer.paletteEntryId ?? (getLayerKey(layer) === cutColour ? CUT_ENTRY_ID : undefined);
+
 export const getSampleJobLayers = (
   projectObjects: ProjectObject[],
   palette: Palette,
@@ -59,9 +63,6 @@ export const getSampleJobLayers = (
     [cutColour]: LAYER_MODE.LINE,
     [SHADING_LAYER_COLOUR]: LAYER_MODE.FILL,
   };
-  // A colour of the sample's own has no palette entry: the link names its layer Cut and lets the next sample find it.
-  const getSampleLayerEntryId = (layer: ProjectLayer): string | undefined =>
-    layer.paletteEntryId ?? (getLayerKey(layer) === cutColour ? CUT_ENTRY_ID : undefined);
   const layers: ProjectLayer[] = getObjectsDerivedLayers(projectObjects, palette, existingLayers).map(
     (layer: ProjectLayer): ProjectLayer => {
       const layerKey: string = getLayerKey(layer);
@@ -72,7 +73,7 @@ export const getSampleJobLayers = (
         : {
           ...layer,
           enabled: true,
-          paletteEntryId: getSampleLayerEntryId(layer),
+          paletteEntryId: getSampleLayerEntryId(layer, cutColour),
           settings: { ...layer.settings, mode: sampleMode },
         };
     },

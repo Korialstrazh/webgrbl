@@ -25,6 +25,7 @@ import { addSampleJob } from './sample.job.add.saga';
 import { selectToasts } from './toast.state';
 
 const CHANGED_SPEED_MM_PER_MIN = 123;
+const REPEATED_SAMPLE_COUNT = 3;
 const OTHER_OBJECT: ProjectObject = newProjectObject({
   name: 'Keep me',
   svgText: getSampleSvgText({ cutColour: SAMPLE_CUT_COLOUR, hasGradient: false }),
@@ -101,7 +102,7 @@ describe(addSampleJob.name, () => {
     store.dispatch(new ProjectDocumentLoaded({
       document: { objects: [OTHER_OBJECT], layers: [getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 0)] },
     }));
-    await addSamples(store, 3);
+    await addSamples(store, REPEATED_SAMPLE_COUNT);
 
     expect(getLayerKeysInBurnOrder(store)).toEqual([SHADING_LAYER_COLOUR, SAMPLE_CUT_COLOUR]);
   });
@@ -149,7 +150,7 @@ describe(addSampleJob.name, () => {
         layers: [{ ...redLayer, settings: { ...redLayer.settings, mode: LAYER_MODE.FILL } }],
       },
     }));
-    await addSamples(store, 3);
+    await addSamples(store, REPEATED_SAMPLE_COUNT);
 
     const extraLayers: ProjectLayer[] = selectProjectLayers(store.getState()).filter(
       (layer: ProjectLayer): boolean => !layer.isShading && layer.colour !== SAMPLE_CUT_COLOUR,
