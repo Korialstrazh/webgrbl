@@ -19,7 +19,7 @@ import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { Action } from './action';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { JobFinishRaceResult } from './interfaces/JobFinishRaceResult';
-import { JobRunStatusChanged } from './job.run.state';
+import { JobRunStarted, JobRunStatusChanged } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
@@ -123,7 +123,7 @@ export function* runGrblJob(controller: GrblController): Generator {
 
   const interruptionTask: Task = (yield fork(waitForJobInterruption)) as Task;
 
-  yield put(newJobRunStatusChanged(JOB_RUN_STATUS.SENDING));
+  yield put(new JobRunStarted({ startedAtMs: Date.now() }));
 
   try {
     const programLines: string[] = (yield call(getJobProgramLines)) as string[];

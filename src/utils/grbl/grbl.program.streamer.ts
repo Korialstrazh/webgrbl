@@ -242,6 +242,14 @@ export class GrblProgramStreamer {
   private countAnsweredLine(run: GrblProgramRun): void {
     run.answeredLineCount++;
 
+    if (!run.isCheckRun) {
+      this.host.emitEvent({
+        kind: GRBL_CONTROLLER_EVENT_KIND.PROGRAM_PROGRESS,
+        answeredLineCount: run.answeredLineCount,
+        totalLineCount: run.sentLineCount,
+      });
+    }
+
     if (run.answeredLineCount === run.sentLineCount) {
       this.finishRun(run, true);
     }

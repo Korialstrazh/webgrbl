@@ -22,7 +22,7 @@ import { useOverlayRegistration } from '../../../utils/hooks/use.overlay.registr
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
-import { JobStartRequested, selectJobRunStatus } from '../../../utils/states/job.run.state';
+import { JobStartRequested, selectIsJobRunActive, selectJobRunStatus } from '../../../utils/states/job.run.state';
 import { JOB_RUN_STATUS } from '../../../utils/states/job.run.status.constants';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
@@ -33,6 +33,8 @@ import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.ti
 import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
 import { ComingSoon } from '../../../views/ComingSoon';
 import { Panel } from '../../../views/Panel';
+import { JobPauseButton } from './JobPauseButton';
+import { JobRunProgress } from './JobRunProgress';
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import styles from './styles.module.scss';
 
@@ -55,6 +57,7 @@ export const JobCard = (): ReactNode => {
 
   const jobStartBlockedReasonKey: string | undefined = useSelector(selectJobStartBlockedReasonKey);
   const jobRunStatusKey: string | undefined = JOB_RUN_STATUS_TEXT_KEYS[useSelector(selectJobRunStatus)];
+  const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const [isStartConfirmOpen, setIsStartConfirmOpen] = useState<boolean>(false);
 
   // Escape must only close the confirmation here, not also stop the machine.
@@ -83,6 +86,8 @@ export const JobCard = (): ReactNode => {
             </>
           )}
         </dl>
+        {isJobRunActive && <JobRunProgress />}
+        <JobPauseButton />
         <Tooltip title={gcodeExportBlockedReasonKey && t(gcodeExportBlockedReasonKey)}>
           {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}
           <span className={styles.fullWidthButtonWrapper}>

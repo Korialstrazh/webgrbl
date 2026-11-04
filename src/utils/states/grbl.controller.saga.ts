@@ -12,7 +12,7 @@
  */
 import { buffers, eventChannel } from 'redux-saga';
 import type { EventChannel, Task } from 'redux-saga';
-import { all, call, cancel, fork, put, race, select, take, takeEvery, takeLeading } from 'redux-saga/effects';
+import { all, call, cancel, fork, put, race, select, take, takeEvery } from 'redux-saga/effects';
 import {
   GRBL_BAUD_RATES,
   GRBL_CONNECTION_STATUS,
@@ -42,23 +42,12 @@ import {
   selectBaudRate,
   selectSelectedPortId,
 } from './grbl.connection.state';
-import { submitGrblConsoleCommand } from './grbl.console.command.saga';
-import { ConsoleCommandSubmitted } from './grbl.console.state';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
-import { submitGrblMachineLine } from './grbl.machine.line.saga';
+import { handleGrblControllerCommands } from './grbl.controller.commands.saga';
 import { getPreferredPortId } from './grbl.preferred.port.id';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import type { GrblHandshakeRaceResult } from './interfaces/GrblHandshakeRaceResult';
-import { runGrblMachineStop } from './grbl.machine.stop.saga';
-import { runGrblJob } from './job.run.saga';
-import { JobStartRequested } from './job.run.state';
-import {
-  MachineLineRequested,
-  MachineResetRequested,
-  MachineStopRequested,
-  MachineUnlockRequested,
-} from './machine.status.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
 
@@ -141,27 +130,6 @@ function* pickSerialPort(dependencies: GrblControllerSagaDependencies): Generato
   } catch (error: unknown) {
     yield put(newRawErrorConsoleInfo(error));
   }
-}
-// #endregion
-
-// #region Controller commands
-function* runGrblMachineCommand(machineCommand: () => Promise<void> | void): Generator {
-  try {
-    yield call(machineCommand);
-  } catch (error: unknown) {
-    yield put(newRawErrorConsoleInfo(error));
-  }
-}
-
-function* handleGrblControllerCommands(controller: GrblController): Generator {
-  yield all([
-    takeEvery(ConsoleCommandSubmitted.type, submitGrblConsoleCommand, controller),
-    takeLeading(JobStartRequested.type, runGrblJob, controller),
-    takeEvery(MachineStopRequested.type, runGrblMachineStop, controller),
-    takeEvery(MachineResetRequested.type, runGrblMachineCommand, (): Promise<void> => controller.resetMachine()),
-    takeEvery(MachineUnlockRequested.type, runGrblMachineCommand, (): void => controller.unlockMachine()),
-    takeEvery(MachineLineRequested.type, submitGrblMachineLine, controller),
-  ]);
 }
 // #endregion
 
