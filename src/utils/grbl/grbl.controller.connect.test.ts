@@ -40,6 +40,8 @@ const CONSOLE_COMMAND = 'G1 X10 F600 ; move';
 const PREPARED_CONSOLE_COMMAND = 'G1X10F600';
 const FEEDLESS_MOVE = 'G1X10';
 const UNDEFINED_FEED_ERROR_CODE = 22;
+/** Long enough for the silence after the restart and the second round of queries. */
+const RESTART_RECOVERY_MS = 3_000;
 const OK_TEXT = 'ok';
 const POLL_COUNT = 4;
 const ORIGIN = { x: 0, y: 0, z: 0 };
@@ -139,7 +141,35 @@ describe(GrblController.name, () => {
     await disconnectGrblHarness(harness);
   });
 
-  it('connect ignores a second banner and queries $I and $$ once', async () => {
+  it('asks again when the controller restarts during the handshake, as an alarm at start can make it do', async () => {
+    const harness: GrblControllerHarness = newGrblControllerHarness();
+    const simulator = harness.transport.getSimulator();
+    const forwardWrite = harness.transport.write.bind(harness.transport);
+    let isFirstBuildInfoLost = false;
+
+    vi.spyOn(harness.transport, 'write').mockImplementation(async (bytes: Uint8Array): Promise<void> => {
+      if (!isFirstBuildInfoLost && new TextDecoder().decode(bytes) === BUILD_INFO_LINE) {
+        isFirstBuildInfoLost = true;
+        simulator.injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.SELF_RESET });
+
+        return;
+      }
+
+      await forwardWrite(bytes);
+    });
+
+    const connection: Promise<GrblConnectionInfo> = harness.controller.connect();
+
+    await vi.advanceTimersByTimeAsync(RESTART_RECOVERY_MS);
+
+    const connectionInfo: GrblConnectionInfo = await connection;
+
+    expect(isFirstBuildInfoLost).toBe(true);
+    expect(connectionInfo.settings).toEqual(GRBL_SIMULATOR_DEFAULT_SETTINGS);
+    await disconnectGrblHarness(harness);
+  });
+
+  it('connect queries $I and $$ once when the controller does not restart', async () => {
     const harness: GrblControllerHarness = newGrblControllerHarness();
     const writeSpy = vi.spyOn(harness.transport, 'write');
 

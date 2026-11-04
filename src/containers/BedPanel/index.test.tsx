@@ -54,7 +54,7 @@ const NOT_RESPONDING_TEXT = 'The controller is not responding.';
 const NO_MACHINE_TEXT = 'Connect a machine to see its bed';
 const WORK_POSITION: GrblAxisPosition = { x: 10, y: 20, z: 0 };
 const WORK_COORDINATE_OFFSET: GrblAxisPosition = { x: 100, y: 30, z: 0 };
-const EXPECTED_HEAD_TRANSFORM = 'translate(110 350) scale(1)';
+const EXPECTED_HEAD_TRANSFORM = 'translate(10 380) scale(1)';
 const VIEW_MODE_LABEL = 'Bed view';
 const DESIGN_VIEW_LABEL = 'Design';
 const PROFILE_WIDTH_MM = 300;
@@ -199,6 +199,22 @@ describe(BedPanel.name, () => {
     });
 
     expect(screen.getByTestId(BED_HEAD_TEST_ID)).toHaveAttribute('transform', EXPECTED_HEAD_TRANSFORM);
+  });
+
+  it('moves the head from work zero when the machine was turned on somewhere else on the bed', () => {
+    const store: AppStore = newStore();
+    const offset = { x: -100, y: -80, z: 0 };
+
+    renderPanel(store);
+    act(() => {
+      store.dispatch(new MachineStatusReceived({
+        status: { ...newPositionOnlyReport(), workCoordinateOffset: offset, workPosition: { x: 20, y: 10, z: 0 } },
+      }));
+    });
+
+    const headTransform: string | null = screen.getByTestId(BED_HEAD_TEST_ID).getAttribute('transform');
+
+    expect(headTransform).toContain('translate(20');
   });
 
   it('names the view mode selector and shows Design as selected', () => {
