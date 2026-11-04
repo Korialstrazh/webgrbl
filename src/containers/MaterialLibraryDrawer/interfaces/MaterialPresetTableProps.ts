@@ -21,6 +21,8 @@ export interface MaterialPresetRowApply {
   machineProfileId: string;
   /** Rated power of the active laser, in watts; a preset above it cannot be applied. */
   maxPowerWatts: number;
+  /** The preset applied a moment ago, whose row says so in place of its button. */
+  appliedPresetId: string | undefined;
   onApply: (preset: MaterialPreset) => void;
 }
 

@@ -2,8 +2,8 @@
  * The content of the material library: search, the machine filter, a material filter chip when it was opened for
  * one material, the table of presets and the edit pane. It owns
  * the draft the pane edits, so it knows whether there is something to save, keeps the saved preset open, and shows
- * one confirmation line under the actions. A new preset is for the project material and the active machine, with no
- * power filled in, so a value nobody chose is never saved.
+ * one confirmation line under the actions, which clears itself after a moment. A new preset is for the project
+ * material and the active machine, with no power filled in, so a value nobody chose is never saved.
  *
  * @author michael.morosov
  *
@@ -21,6 +21,9 @@ import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.nam
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../../utils/layers/get.layer.palette.entry';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
+import { INLINE_FEEDBACK_LIFETIME_MS } from '../../../utils/feedback.constants';
+import type { ExpiringValue } from '../../../utils/hooks/interfaces/ExpiringValue';
+import { useExpiringValue } from '../../../utils/hooks/use.expiring.value';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getMaterialPresetRows } from '../../../utils/materials/get.material.preset.rows';
 import type { Material } from '../../../utils/materials/interfaces/Material';
@@ -75,7 +78,10 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
   const [materialFilterId, setMaterialFilterId] = useState<string | undefined>(initialMaterialId);
   const [isOnlyActiveMachine, setIsOnlyActiveMachine] = useState<boolean>(true);
   const [draftPreset, setDraftPreset] = useState<MaterialPreset | undefined>(undefined);
-  const [feedbackText, setFeedbackText] = useState<string | undefined>(undefined);
+  const { value: feedbackText, setValue: setFeedbackText }: ExpiringValue<string> =
+    useExpiringValue<string>(INLINE_FEEDBACK_LIFETIME_MS);
+  const { value: appliedPresetId, setValue: setAppliedPresetId }: ExpiringValue<string> =
+    useExpiringValue<string>(INLINE_FEEDBACK_LIFETIME_MS);
   const [firstMaterial]: (Material | undefined)[] = materials;
   const filteredMaterial: Material | undefined =
     materials.find(({ id }: Material): boolean => id === materialFilterId);
@@ -166,9 +172,10 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
     }
   };
 
+  /** A row confirms its own apply in place, so the confirmation line stays for the edit pane's actions. */
   const applyRowPreset = (preset: MaterialPreset): void => {
-    if (initialLayerKey) {
-      setFeedbackText(applyPresetToLayer(preset, initialLayerKey));
+    if (initialLayerKey && applyPresetToLayer(preset, initialLayerKey)) {
+      setAppliedPresetId(preset.id);
     }
   };
 
@@ -202,6 +209,7 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
               layerName: initialLayerName,
               machineProfileId: activeProfile.id,
               maxPowerWatts: activeProfile.maxPowerWatts,
+              appliedPresetId,
               onApply: applyRowPreset,
             } : undefined}
             emptyStateComponent={
@@ -238,6 +246,10 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
             onDelete={deleteDraft}
           />
         ) : <p className={styles.pickHint}>{t(DEFAULT.MATERIAL_LIBRARY_PICK_HINT)}</p>}
+        <p className={styles.feedback} role="status">
+          {feedbackText && <CheckCircleOutlined className={styles.feedbackIcon} aria-hidden />}
+          {feedbackText}
+        </p>
         {applicablePreset && activeProfile && (
           <PresetLayerApply
             preset={applicablePreset}
@@ -248,10 +260,6 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
             onApplied={setFeedbackText}
           />
         )}
-        <p className={styles.feedback} role="status">
-          {feedbackText && <CheckCircleOutlined className={styles.feedbackIcon} aria-hidden />}
-          {feedbackText}
-        </p>
       </aside>
     </div>
   );

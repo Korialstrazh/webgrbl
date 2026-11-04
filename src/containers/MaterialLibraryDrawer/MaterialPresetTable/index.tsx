@@ -1,7 +1,8 @@
 /**
- * The table of the material library. A click or Enter on a row opens it in the edit panel; a tick selects it for
- * export without opening it. Opened from a layer, each row of the active laser gets a button that applies it to that
- * layer at once.
+ * The table of the material library. A click or Enter on a row opens it in the edit pane; a tick selects it for
+ * export without opening it. Opened from a layer, each row of the active laser gets an Apply button that applies it
+ * to that layer at once, and the row says "Applied" in its place for a moment, so the confirmation is where the click
+ * was.
  *
  * @author michael.morosov
  *
@@ -11,11 +12,16 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { CheckOutlined } from '@ant-design/icons';
-import { Button, Table, Tooltip } from 'antd';
+import { Button, Table, Tag, Tooltip } from 'antd';
 import type { TableColumnsType } from 'antd';
 import type { HTMLAttributes, Key, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ANTD_BUTTON_SIZE_SMALL, ANTD_TABLE_COLUMN_ALIGN_RIGHT, ANTD_TABLE_SIZE_SMALL } from '../../../utils/antd.constants';
+import {
+  ANTD_BUTTON_SIZE_SMALL,
+  ANTD_TABLE_COLUMN_ALIGN_RIGHT,
+  ANTD_TABLE_SIZE_SMALL,
+  ANTD_TAG_COLOR_SUCCESS,
+} from '../../../utils/antd.constants';
 import { ENTER_KEY, SPACE_KEY } from '../../../utils/browser/browser.events.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
@@ -59,28 +65,40 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
       return null;
     }
 
-    const isApplyAllowed: boolean = canApplyRow(preset, rowApply);
-    const buttonLabel: string = isApplyAllowed
-      ? t(DEFAULT.MATERIAL_LIBRARY_APPLY_ROW, { layer: rowApply.layerName })
-      : t(DEFAULT.MATERIAL_LIBRARY_APPLY_TOO_STRONG);
+    if (preset.id === rowApply.appliedPresetId) {
+      return (
+        <Tag className={styles.appliedTag} color={ANTD_TAG_COLOR_SUCCESS} icon={<CheckOutlined aria-hidden />}>
+          {t(DEFAULT.MATERIAL_LIBRARY_APPLIED_ROW)}
+        </Tag>
+      );
+    }
 
+    if (!canApplyRow(preset, rowApply)) {
+      // A disabled button fires no hover events, so the tooltip with the reason listens on a plain wrapper.
+      return (
+        <Tooltip title={t(DEFAULT.MATERIAL_LIBRARY_APPLY_TOO_STRONG)}>
+          <span className={styles.applyButtonWrapper}>
+            <Button size={ANTD_BUTTON_SIZE_SMALL} aria-label={t(DEFAULT.MATERIAL_LIBRARY_APPLY_TOO_STRONG)} disabled>
+              {t(DEFAULT.MATERIAL_LIBRARY_APPLY_ROW_COLUMN)}
+            </Button>
+          </span>
+        </Tooltip>
+      );
+    }
+
+    // No tooltip: the text says what the button does, and a tooltip would take the first Escape meant for the drawer.
     return (
-      <Tooltip title={buttonLabel}>
-        {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}
-        <span className={styles.applyButtonWrapper}>
-          <Button
-            size={ANTD_BUTTON_SIZE_SMALL}
-            icon={<CheckOutlined />}
-            aria-label={buttonLabel}
-            disabled={!isApplyAllowed}
-            onClick={(clickEvent: MouseEvent<HTMLElement>) => {
-              // The button must not open the row in the edit panel as well.
-              clickEvent.stopPropagation();
-              rowApply.onApply(preset);
-            }}
-          />
-        </span>
-      </Tooltip>
+      <Button
+        size={ANTD_BUTTON_SIZE_SMALL}
+        aria-label={t(DEFAULT.MATERIAL_LIBRARY_APPLY_ROW, { layer: rowApply.layerName })}
+        onClick={(clickEvent: MouseEvent<HTMLElement>) => {
+          // The button must not open the row in the edit pane as well.
+          clickEvent.stopPropagation();
+          rowApply.onApply(preset);
+        }}
+      >
+        {t(DEFAULT.MATERIAL_LIBRARY_APPLY_ROW_COLUMN)}
+      </Button>
     );
   };
 

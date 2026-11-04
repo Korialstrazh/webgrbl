@@ -338,15 +338,16 @@ describe(MaterialLibraryDrawer.name, () => {
     const preset: MaterialPreset = newPresetFixture(PLYWOOD, PROFILE);
     const store: AppStore = renderDrawerForLayer([preset]);
 
-    expect(await screen.findByText(/^Opened for the layer Cut/)).toBeInTheDocument();
+    expect(await screen.findByText('Applying to layer: Cut')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText(ROW_APPLY_LABEL));
 
     expect(selectProjectLayers(store.getState())[0]?.settings).toEqual(expect.objectContaining({
       maxPowerPercent: 50,
       speedMmPerMin: preset.speedMmPerMin,
     }));
-    expect(screen.getByRole('status')).toHaveTextContent(/^Applied to Cut/);
-    // The row button applies without opening the row for editing.
+    // The row confirms in place of its button, and applies without opening the row for editing.
+    expect(screen.getByText('Applied')).toBeInTheDocument();
+    expect(screen.queryByLabelText(ROW_APPLY_LABEL)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(SAVE_LABEL)).not.toBeInTheDocument();
   });
 

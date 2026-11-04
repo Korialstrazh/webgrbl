@@ -39,9 +39,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+// Wide enough for the Apply button and the Applied tag alike, so a row does not change width when one takes the
+// other's place.
 .applyCell {
-  width: 3.5rem;
+  width: 6rem;
   text-align: center;
+  white-space: nowrap;
 }
 
 // Takes the hover for the tooltip that says why a disabled button cannot apply.
@@ -49,9 +52,6 @@
   display: inline-flex;
 }
 
-// A 2rem target each, though the tick is small.
-.applyCell > :global(.ant-btn),
-.applyButtonWrapper > :global(.ant-btn) {
-  width: 2rem;
-  height: 2rem;
+.appliedTag {
+  margin: 0;
 }
