@@ -73,14 +73,16 @@ interface FrameRig {
   getWrittenText: () => string;
 }
 
+type FrameProfileOverrides = Partial<MachineProfile>;
+
 const newFrameProfile = (): MachineProfile => newMachineProfile({ hasAirAssist: true });
 
 const prepareFrameRig = async (
   moveEndXMm: number = SHORT_MOVE_END_X_MM,
   isLaserModeOff = false,
   gridCellMm = 0,
-  profileOverrides: Partial<MachineProfile> = {},
-  laserSettingLine = '',
+  profileOverrides: FrameProfileOverrides = {},
+  laserSettingLine: string = '',
 ): Promise<FrameRig> => {
   const simulator: GrblSimulator = new GrblSimulator(() => undefined);
 
