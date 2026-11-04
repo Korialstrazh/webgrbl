@@ -13,6 +13,6 @@ import type { MaterialPreset } from './interfaces/MaterialPreset';
 type MaterialPresetFields = Omit<MaterialPreset, 'id'>;
 
 export const newMaterialPreset = (fields: MaterialPresetFields): MaterialPreset => ({
-  id: crypto.randomUUID(),
   ...fields,
+  id: crypto.randomUUID(),
 });

@@ -19,7 +19,7 @@ const OLD_PROJECT_NAME = 'Made in version 1';
 const OLD_TIMESTAMP = '2026-11-01T10:00:00.000Z';
 
 describe('webgrbl database upgrade', () => {
-  it('opens a version 1 database at version 2 and still reads its project', async () => {
+  it('opens a version 1 database at the current version and still reads its project', async () => {
     const oldDatabase = new Dexie(WEBGRBL_DATABASE_NAME);
     oldDatabase.version(WEBGRBL_DATABASE_VERSION_1).stores(WEBGRBL_DATABASE_SCHEMA_VERSION_1);
     const oldProject: StoredProject = {
