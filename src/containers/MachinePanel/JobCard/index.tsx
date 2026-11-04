@@ -22,6 +22,9 @@ import { useOverlayRegistration } from '../../../utils/hooks/use.overlay.registr
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
+import { JOB_PAUSED_CONTROLS } from '../../../utils/states/job.pause.control.constants';
+import type { JobPauseControl } from '../../../utils/states/job.pause.control.constants';
+import { selectJobPauseControl } from '../../../utils/states/job.pause.control.selector';
 import { JobStartRequested, selectIsJobRunActive, selectJobRunStatus } from '../../../utils/states/job.run.state';
 import { JOB_RUN_STATUS } from '../../../utils/states/job.run.status.constants';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
@@ -56,7 +59,11 @@ export const JobCard = (): ReactNode => {
   const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
 
   const jobStartBlockedReasonKey: string | undefined = useSelector(selectJobStartBlockedReasonKey);
-  const jobRunStatusKey: string | undefined = JOB_RUN_STATUS_TEXT_KEYS[useSelector(selectJobRunStatus)];
+  const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
+  const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
+  const jobRunStatusKey: string | undefined = JOB_PAUSED_CONTROLS.includes(pauseControl)
+    ? DEFAULT.JOB_RUN_STATUS_PAUSED
+    : JOB_RUN_STATUS_TEXT_KEYS[jobRunStatus];
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const [isStartConfirmOpen, setIsStartConfirmOpen] = useState<boolean>(false);
 

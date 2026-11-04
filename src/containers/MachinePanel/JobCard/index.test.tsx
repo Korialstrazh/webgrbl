@@ -11,7 +11,7 @@ import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineP
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../../utils/project/new.project.object';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
-import { JobStartRequested } from '../../../utils/states/job.run.state';
+import { JobRunStarted, JobStartRequested } from '../../../utils/states/job.run.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../../utils/states/machine.status.state';
 import type { AppStore } from '../../../utils/states/new.store';
@@ -191,6 +191,21 @@ describe(JobCard.name, () => {
     });
 
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+  });
+
+  it('shows the run as Paused during a hold, not as Running', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new JobRunStarted({ startedAtMs: 0 }));
+    renderJobCard(store);
+
+    expect(screen.getByRole('status')).toHaveTextContent('Running');
+
+    act(() => {
+      store.dispatch(newMachineStatusReceived(GRBL_MACHINE_STATE.HOLD));
+    });
+
+    expect(screen.getByRole('status')).toHaveTextContent('Paused');
   });
 
   it('makes Export G-code the filled main action, the one job action that works today', async () => {

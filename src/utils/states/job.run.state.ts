@@ -25,7 +25,7 @@ export interface JobRunState {
   status: JobRunStatus;
   /** Program lines of the run the laser has answered. */
   answeredLineCount: number;
-  /** Program lines of the run that are sent in all; 0 before the first answer. */
+  /** Program lines of the run that are sent in all; 0 until the program starts streaming. */
   totalLineCount: number;
   /** When the run started, in milliseconds since the epoch; 0 before the first run. */
   startedAtMs: number;

@@ -221,7 +221,7 @@ export class GrblProgramStreamer {
     }
 
     return new Promise((resolveRun: (result: GrblProgramResult) => void): void => {
-      this.activeRun = {
+      const run: GrblProgramRun = {
         sentLineCount: queuedLines.length,
         answeredLineCount: 0,
         lineErrors: [...nonAsciiLineErrors],
@@ -230,6 +230,9 @@ export class GrblProgramStreamer {
         isStoppingOnError: false,
         resolveRun,
       };
+
+      this.activeRun = run;
+      this.emitProgramProgress(run);
       this.host.commandWriter.enqueueLines(queuedLines);
     });
   }
@@ -241,17 +244,20 @@ export class GrblProgramStreamer {
 
   private countAnsweredLine(run: GrblProgramRun): void {
     run.answeredLineCount++;
+    this.emitProgramProgress(run);
 
+    if (run.answeredLineCount === run.sentLineCount) {
+      this.finishRun(run, true);
+    }
+  }
+
+  private emitProgramProgress(run: GrblProgramRun): void {
     if (!run.isCheckRun) {
       this.host.emitEvent({
         kind: GRBL_CONTROLLER_EVENT_KIND.PROGRAM_PROGRESS,
         answeredLineCount: run.answeredLineCount,
         totalLineCount: run.sentLineCount,
       });
-    }
-
-    if (run.answeredLineCount === run.sentLineCount) {
-      this.finishRun(run, true);
     }
   }
 

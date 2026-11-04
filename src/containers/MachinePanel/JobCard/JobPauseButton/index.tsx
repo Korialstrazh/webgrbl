@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE } from '../../../../utils/antd.constants';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
-import { JOB_PAUSE_CONTROL } from '../../../../utils/states/job.pause.control.constants';
+import { JOB_PAUSED_CONTROLS, JOB_PAUSE_CONTROL } from '../../../../utils/states/job.pause.control.constants';
 import type { JobPauseControl } from '../../../../utils/states/job.pause.control.constants';
 import { selectJobPauseControl } from '../../../../utils/states/job.pause.control.selector';
 import { JobPauseRequested, JobResumeRequested } from '../../../../utils/states/job.run.state';
@@ -26,14 +26,12 @@ const BLOCKED_REASON_KEYS: Partial<Record<JobPauseControl, string>> = {
   [JOB_PAUSE_CONTROL.RESUME_WAITING]: DEFAULT.JOB_RESUME_WAITING,
 };
 
-const RESUME_CONTROLS: readonly JobPauseControl[] = [JOB_PAUSE_CONTROL.RESUME, JOB_PAUSE_CONTROL.RESUME_WAITING];
-
 export const JobPauseButton = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
   const blockedReasonKey: string | undefined = BLOCKED_REASON_KEYS[pauseControl];
-  const isResumeShown: boolean = RESUME_CONTROLS.includes(pauseControl);
+  const isResumeShown: boolean = JOB_PAUSED_CONTROLS.includes(pauseControl);
 
   if (pauseControl === JOB_PAUSE_CONTROL.HIDDEN) {
     return null;

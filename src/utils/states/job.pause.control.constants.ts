@@ -22,3 +22,9 @@ export const JOB_PAUSE_CONTROL = {
 } as const;
 
 export type JobPauseControl = (typeof JOB_PAUSE_CONTROL)[keyof typeof JOB_PAUSE_CONTROL];
+
+/** The controls offered while the machine holds the job. */
+export const JOB_PAUSED_CONTROLS: readonly JobPauseControl[] = [
+  JOB_PAUSE_CONTROL.RESUME,
+  JOB_PAUSE_CONTROL.RESUME_WAITING,
+];

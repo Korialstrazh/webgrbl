@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { ANTD_PROGRESS_STATUS_NORMAL } from '../../../../utils/antd.constants';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { MILLISECONDS_PER_SECOND } from '../../../../utils/machine/machine.command.constants';
 import { PERCENT_DIVISOR } from '../../../../utils/percent.constants';
@@ -42,7 +43,8 @@ export const JobRunProgress = (): ReactNode => {
 
   return (
     <div className={styles.jobRunProgress}>
-      <Progress percent={percent} aria-label={t(DEFAULT.JOB_RUN_PROGRESS_LABEL)} />
+      {/* All lines answered only means buffered, so a full bar shows no success mark while the laser burns. */}
+      <Progress percent={percent} status={ANTD_PROGRESS_STATUS_NORMAL} aria-label={t(DEFAULT.JOB_RUN_PROGRESS_LABEL)} />
       <p className={styles.detail}>
         {t(DEFAULT.JOB_RUN_PROGRESS_DETAIL, {
           answered: answeredLineCount,
