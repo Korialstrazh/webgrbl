@@ -43,17 +43,15 @@ function* storeSavedPreset(action: MaterialPresetSaved): Generator {
   }
 }
 
-function* removeDeletedPreset(deletedPresetIds: Set<string>, action: MaterialPresetDeleted): Generator {
-  deletedPresetIds.add(action.payload.presetId);
-
+function* removeStoredPreset(presetId: string): Generator {
   try {
-    yield call([MATERIAL_PRESET_REPOSITORY, MATERIAL_PRESET_REPOSITORY.deleteMaterialPreset], action.payload.presetId);
+    yield call([MATERIAL_PRESET_REPOSITORY, MATERIAL_PRESET_REPOSITORY.deleteMaterialPreset], presetId);
   } catch (error: unknown) {
     yield call(showPresetStorageError, error);
   }
 }
 
-function* loadStoredPresets(deletedPresetIds: Set<string>): Generator {
+function* loadStoredPresets(deletedPresetIds: ReadonlySet<string>): Generator {
   try {
     const readRace: MaterialPresetsReadRace = (yield race({
       storedPresets: call([MATERIAL_PRESET_REPOSITORY, MATERIAL_PRESET_REPOSITORY.listMaterialPresets]),
@@ -75,8 +73,13 @@ function* loadStoredPresets(deletedPresetIds: Set<string>): Generator {
 export function* watchMaterialPresets(): Generator {
   const deletedPresetIds: Set<string> = new Set<string>();
 
+  function* removeDeletedPreset(action: MaterialPresetDeleted): Generator {
+    deletedPresetIds.add(action.payload.presetId);
+    yield call(removeStoredPreset, action.payload.presetId);
+  }
+
   // Listening starts before the read, so a change made during a slow or hanging read still reaches storage.
   yield takeEvery(MaterialPresetSaved.type, storeSavedPreset);
-  yield takeEvery(MaterialPresetDeleted.type, removeDeletedPreset, deletedPresetIds);
+  yield takeEvery(MaterialPresetDeleted.type, removeDeletedPreset);
   yield call(loadStoredPresets, deletedPresetIds);
 }
