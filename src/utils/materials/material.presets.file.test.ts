@@ -97,6 +97,22 @@ describe(getImportedMaterialPresets.name, () => {
   ])('rejects %s', (_caseName: string, fileText: string) => {
     expect(getImportedMaterialPresets(fileText, [PLYWOOD], TARGET_PROFILE)).toBeUndefined();
   });
+
+  it.each([1.237, 0.005, 0.004])('stays within a laser of %s W and above zero', (maxPowerWatts: number) => {
+    const fullPowerText: string = getFileWithPresetChange({ powerWatts: 10 });
+    const power: number | undefined =
+      getImportedMaterialPresets(fullPowerText, [PLYWOOD], { id: 'small', maxPowerWatts })?.presets[0]?.powerWatts;
+
+    expect(power).toBeLessThanOrEqual(maxPowerWatts);
+    expect(power).toBeGreaterThan(0);
+  });
+
+  it('rejects a file with too many presets', () => {
+    const parsedFile = JSON.parse(FILE_TEXT);
+    const hugeText: string = JSON.stringify({ ...parsedFile, presets: new Array(2001).fill(parsedFile.presets[0]) });
+
+    expect(getImportedMaterialPresets(hugeText, [PLYWOOD], TARGET_PROFILE)).toBeUndefined();
+  });
 });
 
 describe(getMaterialPresetsFileText.name, () => {

@@ -59,6 +59,8 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
   };
 
   const importPresetsFile = async (pickedFile: File, machineProfile: MachineProfile): Promise<void> => {
+    setImportedCount(0);
+
     try {
       const fileText: string = await pickedFile.text();
       // Read after the file: the materials may have changed while it was being read.

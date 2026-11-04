@@ -45,6 +45,8 @@ import { newMaterialPreset } from './new.material.preset';
 
 type ImportingMachineProfile = Pick<MachineProfile, 'id' | 'maxPowerWatts'>;
 
+// Far above any real library; each row is its own store update, so a huge file would freeze the tab.
+const MATERIAL_PRESETS_FILE_COUNT_MAX = 2000;
 const IMPORTED_POWER_WATTS_DECIMALS = 2;
 const IMPORTED_POWER_WATTS_MIN = 0.01;
 const MATERIAL_PRESET_OPERATIONS: readonly unknown[] = Object.values(MATERIAL_PRESET_OPERATION);
@@ -69,6 +71,7 @@ const isMaterialPresetsFile = (value: unknown): value is MaterialPresetsFile =>
   value.version === MATERIAL_PRESETS_FILE_VERSION &&
   Array.isArray(value.presets) &&
   Boolean(value.presets.length) &&
+  value.presets.length <= MATERIAL_PRESETS_FILE_COUNT_MAX &&
   value.presets.every(isFilePreset);
 
 const getFilePresets = (fileText: string): MaterialPresetsFilePreset[] | undefined => {
@@ -84,10 +87,10 @@ const getFilePresets = (fileText: string): MaterialPresetsFilePreset[] | undefin
 const getRescaledPowerWatts = (filePreset: MaterialPresetsFilePreset, maxPowerWatts: number): number => {
   const rescaledWatts: number = (filePreset.powerWatts * maxPowerWatts) / filePreset.sourceMaxPowerWatts;
 
-  return getRoundedNumber(
-    getNumberInRange(rescaledWatts, IMPORTED_POWER_WATTS_MIN, maxPowerWatts),
-    IMPORTED_POWER_WATTS_DECIMALS,
-  );
+  const roundedWatts: number = getRoundedNumber(rescaledWatts, IMPORTED_POWER_WATTS_DECIMALS);
+
+  // The limits come after the rounding, which could otherwise lift the power above the laser or bring it down to 0.
+  return Math.min(Math.max(roundedWatts, IMPORTED_POWER_WATTS_MIN), maxPowerWatts);
 };
 
 export const getImportedMaterialPresets = (
