@@ -1,0 +1,134 @@
+/**
+ * Reads a material presets file for the importing machine, or undefined when any of it is not valid, so that a bad
+ * file changes nothing. Power keeps its share of the source laser: a percentage is what carries over between lasers,
+ * and a file can come from anywhere, so every number is brought into range. Materials are matched by name and
+ * thickness.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-11-04
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+import { getNumberInRange } from '../get.number.in.range';
+import { getRoundedNumber } from '../get.rounded.number';
+import {
+  PASSES_MAX,
+  PASSES_MIN,
+  SPEED_MM_PER_MIN_MAX,
+  SPEED_MM_PER_MIN_MIN,
+} from '../palette/palette.constants';
+import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
+import { isFiniteNumber } from '../type.guards/is.finite.number';
+import { isRecord } from '../type.guards/is.record';
+import { isString } from '../type.guards/is.string';
+import { getMatchingMaterial } from './get.matching.material';
+import type { ImportedMaterialPresets } from './interfaces/ImportedMaterialPresets';
+import type { Material } from './interfaces/Material';
+import type { MaterialPreset } from './interfaces/MaterialPreset';
+import type { MaterialPresetsFile } from './interfaces/MaterialPresetsFile';
+import type { MaterialPresetsFilePreset } from './interfaces/MaterialPresetsFilePreset';
+import {
+  MATERIAL_NAME_LENGTH_MAX,
+  MATERIAL_THICKNESS_MM_MAX,
+  MATERIAL_THICKNESS_MM_MIN,
+} from './material.constants';
+import {
+  MATERIAL_PRESET_NOTES_LENGTH_MAX,
+  MATERIAL_PRESET_OPERATION,
+  MATERIAL_PRESETS_FILE_FORMAT,
+  MATERIAL_PRESETS_FILE_VERSION,
+} from './material.preset.constants';
+import { newMaterial } from './new.material';
+import { newMaterialPreset } from './new.material.preset';
+
+type ImportingMachineProfile = Pick<MachineProfile, 'id' | 'maxPowerWatts'>;
+
+// Far above any real library; each row is its own store update, so a huge file would freeze the tab.
+const MATERIAL_PRESETS_FILE_COUNT_MAX = 2000;
+const IMPORTED_POWER_WATTS_DECIMALS = 2;
+const IMPORTED_POWER_WATTS_MIN = 0.01;
+const MATERIAL_PRESET_OPERATIONS: readonly unknown[] = Object.values(MATERIAL_PRESET_OPERATION);
+
+const isFilePreset = (value: unknown): value is MaterialPresetsFilePreset =>
+  isRecord(value) &&
+  isString(value.materialName) &&
+  Boolean(value.materialName.trim()) &&
+  isFiniteNumber(value.thicknessMm) &&
+  isFiniteNumber(value.sourceMaxPowerWatts) &&
+  value.sourceMaxPowerWatts > 0 &&
+  MATERIAL_PRESET_OPERATIONS.includes(value.operation) &&
+  isFiniteNumber(value.powerWatts) &&
+  value.powerWatts > 0 &&
+  isFiniteNumber(value.speedMmPerMin) &&
+  isFiniteNumber(value.passes) &&
+  isString(value.notes);
+
+const isMaterialPresetsFile = (value: unknown): value is MaterialPresetsFile =>
+  isRecord(value) &&
+  value.format === MATERIAL_PRESETS_FILE_FORMAT &&
+  value.version === MATERIAL_PRESETS_FILE_VERSION &&
+  Array.isArray(value.presets) &&
+  Boolean(value.presets.length) &&
+  value.presets.length <= MATERIAL_PRESETS_FILE_COUNT_MAX &&
+  value.presets.every(isFilePreset);
+
+const getFilePresets = (fileText: string): MaterialPresetsFilePreset[] | undefined => {
+  try {
+    const parsedFile: unknown = JSON.parse(fileText);
+
+    return isMaterialPresetsFile(parsedFile) ? parsedFile.presets : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const getRescaledPowerWatts = (filePreset: MaterialPresetsFilePreset, maxPowerWatts: number): number => {
+  const rescaledWatts: number = (filePreset.powerWatts * maxPowerWatts) / filePreset.sourceMaxPowerWatts;
+
+  const roundedWatts: number = getRoundedNumber(rescaledWatts, IMPORTED_POWER_WATTS_DECIMALS);
+
+  // The limits come after the rounding, which could otherwise lift the power above the laser or bring it down to 0.
+  return Math.min(Math.max(roundedWatts, IMPORTED_POWER_WATTS_MIN), maxPowerWatts);
+};
+
+export const getImportedMaterialPresets = (
+  fileText: string,
+  materials: Material[],
+  { id: machineProfileId, maxPowerWatts }: ImportingMachineProfile,
+): ImportedMaterialPresets | undefined => {
+  const filePresets: MaterialPresetsFilePreset[] | undefined = getFilePresets(fileText);
+
+  if (!filePresets) {
+    return undefined;
+  }
+
+  const newMaterials: Material[] = [];
+  const presets: MaterialPreset[] = [];
+
+  for (const filePreset of filePresets) {
+    const materialFields: Pick<Material, 'name' | 'thicknessMm'> = {
+      name: filePreset.materialName.trim().slice(0, MATERIAL_NAME_LENGTH_MAX),
+      thicknessMm: getNumberInRange(filePreset.thicknessMm, MATERIAL_THICKNESS_MM_MIN, MATERIAL_THICKNESS_MM_MAX),
+    };
+    let material: Material | undefined = getMatchingMaterial([...materials, ...newMaterials], materialFields);
+
+    if (!material) {
+      material = newMaterial(materialFields);
+      newMaterials.push(material);
+    }
+
+    presets.push(newMaterialPreset({
+      materialId: material.id,
+      machineProfileId,
+      operation: filePreset.operation,
+      powerWatts: getRescaledPowerWatts(filePreset, maxPowerWatts),
+      speedMmPerMin: getNumberInRange(filePreset.speedMmPerMin, SPEED_MM_PER_MIN_MIN, SPEED_MM_PER_MIN_MAX),
+      passes: Math.round(getNumberInRange(filePreset.passes, PASSES_MIN, PASSES_MAX)),
+      notes: filePreset.notes.slice(0, MATERIAL_PRESET_NOTES_LENGTH_MAX),
+    }));
+  }
+
+  return { newMaterials, presets };
+};

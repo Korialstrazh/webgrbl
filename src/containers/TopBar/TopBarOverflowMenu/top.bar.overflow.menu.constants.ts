@@ -11,4 +11,5 @@
 
 export const TOP_BAR_OVERFLOW_MENU_KEY = {
   MACHINE_PROFILES: 'machine-profiles',
+  MATERIALS: 'materials',
 } as const;

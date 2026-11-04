@@ -23,6 +23,7 @@ import type {
   SegmentedProps,
   SplitterProps,
   SwitchProps,
+  TableProps,
   TagProps,
   TooltipProps,
 } from 'antd';
@@ -89,6 +90,11 @@ export const ANTD_SPLITTER_ORIENTATION_VERTICAL: SplitterProps['orientation'] = 
 
 /** The compact segmented control size, for secondary choices next to larger controls. */
 export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
+
+/** The compact table size, for a table beside an edit panel. */
+export const ANTD_TABLE_SIZE_SMALL: TableProps['size'] = 'small';
+
+/** The `type` of a table row selection that allows one selected row. */
 
 /** A tag drawn as a soft filled chip without a border. */
 export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';
