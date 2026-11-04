@@ -18,6 +18,7 @@ import { ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../../utils/layers/get.layer.palette.entry';
+import type { LayerSettingsChange } from '../../../utils/layers/interfaces/LayerSettingsChange';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getPresetLayerSettingsChange } from '../../../utils/materials/get.preset.layer.settings.change';
@@ -25,16 +26,21 @@ import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntr
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectPaletteEntries } from '../../../utils/states/palette.state';
 import { LayerSettingsChanged, selectProjectLayers } from '../../../utils/states/project.document.state';
+import { isFiniteNumber } from '../../../utils/type.guards/is.finite.number';
 import type { PresetLayerApplyProps } from '../interfaces/PresetLayerApplyProps';
 import styles from './styles.module.scss';
 
-export const PresetLayerApply = ({ preset, maxPowerWatts, initialLayerKey }: PresetLayerApplyProps): ReactNode => {
+const isMinimumPowerLowered = ({ settings }: ProjectLayer, { maxPowerPercent }: LayerSettingsChange): boolean =>
+  isFiniteNumber(maxPowerPercent) && settings.minPowerPercent > maxPowerPercent;
+
+export const PresetLayerApply = (props: PresetLayerApplyProps): ReactNode => {
+  const { preset, maxPowerWatts, pickedLayerKey, onPickLayer } = props;
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const layers: ProjectLayer[] = useSelector(selectProjectLayers);
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
-  const [pickedLayerKey, setPickedLayerKey] = useState<string | undefined>(initialLayerKey);
-  const [appliedLayerName, setAppliedLayerName] = useState<string | undefined>(undefined);
+  const [appliedText, setAppliedText] = useState<string | undefined>(undefined);
+  const isAboveLaserPower: boolean = preset.powerWatts > maxPowerWatts;
 
   const getLayerName = (layer: ProjectLayer): string =>
     getLayerDisplayName(layer, getLayerPaletteEntry(layer, paletteEntries));
@@ -44,11 +50,15 @@ export const PresetLayerApply = ({ preset, maxPowerWatts, initialLayerKey }: Pre
 
   const applyPreset = (): void => {
     if (pickedLayer) {
-      dispatch(new LayerSettingsChanged({
-        layerKey: getLayerKey(pickedLayer),
-        settings: getPresetLayerSettingsChange(preset, maxPowerWatts),
-      }));
-      setAppliedLayerName(getLayerName(pickedLayer));
+      const settingsChange: LayerSettingsChange = getPresetLayerSettingsChange(preset, maxPowerWatts);
+
+      dispatch(new LayerSettingsChanged({ layerKey: getLayerKey(pickedLayer), settings: settingsChange }));
+      setAppliedText(t(
+        isMinimumPowerLowered(pickedLayer, settingsChange)
+          ? DEFAULT.MATERIAL_LIBRARY_APPLIED_MIN_LOWERED
+          : DEFAULT.MATERIAL_LIBRARY_APPLIED,
+        { name: getLayerName(pickedLayer) },
+      ));
     }
   };
 
@@ -60,14 +70,18 @@ export const PresetLayerApply = ({ preset, maxPowerWatts, initialLayerKey }: Pre
         value={pickedLayer && getLayerKey(pickedLayer)}
         options={layers.map((layer: ProjectLayer) => ({ value: getLayerKey(layer), label: getLayerName(layer) }))}
         onChange={(layerKey: string) => {
-          setPickedLayerKey(layerKey);
-          setAppliedLayerName(undefined);
+          onPickLayer(layerKey);
+          setAppliedText(undefined);
         }}
       />
-      <Button type={ANTD_BUTTON_TYPE_PRIMARY} disabled={!pickedLayer} onClick={applyPreset}>
+      <Button type={ANTD_BUTTON_TYPE_PRIMARY} disabled={!pickedLayer || isAboveLaserPower} onClick={applyPreset}>
         {t(DEFAULT.MATERIAL_LIBRARY_APPLY)}
       </Button>
-      <p role="status">{appliedLayerName && t(DEFAULT.MATERIAL_LIBRARY_APPLIED, { name: appliedLayerName })}</p>
+      {/* The form beside this can hold unsaved edits, which applying does not use. */}
+      <p role="note">
+        {t(isAboveLaserPower ? DEFAULT.MATERIAL_LIBRARY_APPLY_TOO_STRONG : DEFAULT.MATERIAL_LIBRARY_APPLY_SAVED_VALUES)}
+      </p>
+      <p role="status">{appliedText}</p>
     </div>
   );
 };

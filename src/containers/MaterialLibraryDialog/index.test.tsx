@@ -224,4 +224,14 @@ describe(MaterialLibraryDialog.name, () => {
     }));
     expect(screen.getByRole('status')).toHaveTextContent('Applied');
   });
+
+  it('does not apply a preset above the power of the laser', async () => {
+    const tooStrongPreset: MaterialPreset = { ...newPresetFixture(PLYWOOD, PROFILE), powerWatts: TOO_MUCH_POWER_WATTS };
+
+    renderDialog([tooStrongPreset]);
+    fireEvent.click(await screen.findByText(PLYWOOD_NAME));
+
+    expect(screen.getByRole('button', { name: APPLY_LABEL })).toBeDisabled();
+    expect(screen.getByText(/more power than this laser/)).toBeInTheDocument();
+  });
 });

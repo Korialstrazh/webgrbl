@@ -63,6 +63,7 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
   const presets: MaterialPreset[] = useSelector(selectMaterialPresets);
   const profiles: MachineProfile[] = useSelector(selectMachineProfiles);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const [pickedLayerKey, setPickedLayerKey] = useState<string | undefined>(initialLayerKey);
   const [searchText, setSearchText] = useState<string>('');
   const [isOnlyActiveMachine, setIsOnlyActiveMachine] = useState<boolean>(true);
   const [editedPreset, setEditedPreset] = useState<MaterialPreset | undefined>(undefined);
@@ -201,7 +202,8 @@ export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditor
             key={[APPLY_PANEL_KEY_PREFIX, applicablePreset.id].join(APPLY_PANEL_KEY_SEPARATOR)}
             preset={applicablePreset}
             maxPowerWatts={activeProfile.maxPowerWatts}
-            initialLayerKey={initialLayerKey}
+            pickedLayerKey={pickedLayerKey}
+            onPickLayer={setPickedLayerKey}
           />
         )}
       </aside>

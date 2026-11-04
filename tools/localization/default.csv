@@ -345,8 +345,11 @@ MATERIAL_DIALOG_TITLE;Add material
 MATERIAL_DIALOG_USE_EXISTING;Use that one
 MATERIAL_LIBRARY_ADD;Add preset
 MATERIAL_LIBRARY_APPLIED;Applied to {{name}}.
+MATERIAL_LIBRARY_APPLIED_MIN_LOWERED;Applied to {{name}}. Its minimum power was lowered to the new maximum.
 MATERIAL_LIBRARY_APPLY;Apply to layer
 MATERIAL_LIBRARY_APPLY_LAYER;Layer
+MATERIAL_LIBRARY_APPLY_SAVED_VALUES;Applies the saved values. Save your edits first.
+MATERIAL_LIBRARY_APPLY_TOO_STRONG;This preset needs more power than this laser has. Lower its power and save it first.
 MATERIAL_LIBRARY_DELETE;Delete
 MATERIAL_LIBRARY_DELETE_CANCEL;Cancel
 MATERIAL_LIBRARY_DELETE_CONFIRM;Delete this preset?

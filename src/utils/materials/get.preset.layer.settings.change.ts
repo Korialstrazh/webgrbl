@@ -11,10 +11,14 @@
  */
 import type { LayerSettingsChange } from '../layers/interfaces/LayerSettingsChange';
 import { POWER_PERCENT_MAX } from '../palette/palette.constants';
+import { getRoundedNumber } from '../get.rounded.number';
 import type { MaterialPreset } from './interfaces/MaterialPreset';
 
+// As many decimals as the layer drawer shows, so a change the user cannot see adds no undo step.
+const PRESET_PERCENT_DECIMALS = 1;
+
 export const getPresetLayerSettingsChange = (preset: MaterialPreset, maxPowerWatts: number): LayerSettingsChange => ({
-  maxPowerPercent: (preset.powerWatts / maxPowerWatts) * POWER_PERCENT_MAX,
+  maxPowerPercent: getRoundedNumber((preset.powerWatts / maxPowerWatts) * POWER_PERCENT_MAX, PRESET_PERCENT_DECIMALS),
   speedMmPerMin: preset.speedMmPerMin,
   passes: preset.passes,
 });

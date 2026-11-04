@@ -51,4 +51,10 @@ describe(newMaterialPresetFromLayer.name, () => {
     expect(newMaterialPresetFromLayer({ ...FILL_LAYER, isShading: true }, MATERIAL_ID, PROFILE).operation)
       .toBe(MATERIAL_PRESET_OPERATION.SHADE);
   });
+
+  it('rounds the watts', () => {
+    const layer: ProjectLayer = { ...LAYER, settings: { ...LAYER.settings, maxPowerPercent: 33.3 } };
+
+    expect(newMaterialPresetFromLayer(layer, 'material-a', { id: 'profile-b', maxPowerWatts: 3 }).powerWatts).toBe(1);
+  });
 });

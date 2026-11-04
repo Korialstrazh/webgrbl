@@ -15,6 +15,7 @@ export interface PresetLayerApplyProps {
   preset: MaterialPreset;
   /** Rated power of the active laser, in watts. */
   maxPowerWatts: number;
-  /** The layer picked at the start, when the library was opened from one. */
-  initialLayerKey: string | undefined;
+  /** The layer picked to apply to; the library keeps it when the user moves to another preset. */
+  pickedLayerKey: string | undefined;
+  onPickLayer: (layerKey: string) => void;
 }
