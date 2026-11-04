@@ -13,4 +13,9 @@ export interface MaterialDialogProps {
   isOpen: boolean;
   /** Called on Cancel, on closing, and after Save. */
   onClose: () => void;
+  /**
+   * Called with the id of the saved material, or of the matching one the user chose, instead of making it the
+   * material of the project; without it the dialog selects the material for the project.
+   */
+  onMaterialChosen?: (materialId: string) => void;
 }
