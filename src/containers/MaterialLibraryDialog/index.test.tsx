@@ -11,6 +11,7 @@ import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProf
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import {
   ActiveMachineProfileSelected,
+  MachineProfileDeleted,
   MachineProfileSaved,
 } from '../../utils/states/machine.profile.state';
 import { MaterialPresetSaved, selectMaterialPresets } from '../../utils/states/material.preset.state';
@@ -46,13 +47,18 @@ const newPresetFixture = (material: Material, profile: MachineProfile): Material
   notes: '',
 });
 
-const renderDialog = (presets: MaterialPreset[] = []): AppStore => {
+const renderDialog = (presets: MaterialPreset[] = [], hasActiveProfile: boolean = true): AppStore => {
   const store: AppStore = newStore();
 
   act(() => {
     store.dispatch(new MachineProfileSaved({ profile: PROFILE }));
     store.dispatch(new MachineProfileSaved({ profile: OTHER_PROFILE }));
     store.dispatch(new ActiveMachineProfileSelected({ profileId: PROFILE.id }));
+
+    if (!hasActiveProfile) {
+      store.dispatch(new MachineProfileDeleted({ profileId: PROFILE.id }));
+    }
+
     store.dispatch(new MaterialSaved({ material: PLYWOOD }));
     store.dispatch(new MaterialSaved({ material: ACRYLIC }));
     presets.forEach((preset: MaterialPreset) => store.dispatch(new MaterialPresetSaved({ preset })));
@@ -134,6 +140,31 @@ describe(MaterialLibraryDialog.name, () => {
     expect(selectMaterialPresets(store.getState())).toEqual([{ ...preset, powerWatts: NEW_POWER_WATTS }]);
 
     fireEvent.click(await screen.findByText(PLYWOOD_NAME));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Yes, delete' }));
+
+    expect(selectMaterialPresets(store.getState())).toEqual([]);
+  });
+
+  it('shows the machine column and an unchecked filter when no machine is active', async () => {
+    renderDialog([newPresetFixture(PLYWOOD, OTHER_PROFILE)], false);
+
+    expect(await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL })).not.toBeChecked();
+    expect(screen.getByRole('columnheader', { name: 'Machine' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: ADD_LABEL })).toBeDisabled();
+  });
+
+  it('lets a preset of a deleted machine be deleted but not saved', async () => {
+    const orphanPreset: MaterialPreset = newMaterialPreset({
+      ...newPresetFixture(PLYWOOD, PROFILE),
+      machineProfileId: 'machine-gone',
+    });
+    const store: AppStore = renderDialog([orphanPreset]);
+
+    fireEvent.click(await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL }));
+    fireEvent.click(await screen.findByText(PLYWOOD_NAME));
+
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Yes, delete' }));
 

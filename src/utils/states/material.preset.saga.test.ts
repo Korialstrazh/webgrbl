@@ -171,6 +171,23 @@ describe(watchMaterialPresets.name, () => {
     });
   });
 
+  it('does not bring back presets of a machine profile deleted while the load is reading', async () => {
+    const preset: MaterialPreset = newPresetFixture();
+    const finishRead = holdPresetRead();
+
+    vi.spyOn(MATERIAL_PRESET_REPOSITORY, 'deleteMaterialPresetsOfProfile').mockResolvedValue();
+
+    const store: AppStore = newStore();
+
+    store.dispatch(new MachineProfileDeleted({ profileId: preset.machineProfileId }));
+    finishRead([preset]);
+    await new Promise<void>((resolve: () => void) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(selectMaterialPresets(store.getState())).toEqual([]);
+  });
+
   it('logs a failed load and still stores later saves', async () => {
     const logSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const preset: MaterialPreset = newPresetFixture();

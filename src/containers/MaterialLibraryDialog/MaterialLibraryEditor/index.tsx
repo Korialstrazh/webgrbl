@@ -65,14 +65,18 @@ export const MaterialLibraryEditor = (): ReactNode => {
   const getOperationLabel = (operation: MaterialPresetOperation): string =>
     t(MATERIAL_PRESET_OPERATION_LABEL_KEY[operation]);
 
+  // With no active machine there is nothing to keep to, so the list and the checkbox both say every machine.
+  const listedProfileId: string | undefined = isOnlyActiveMachine ? activeProfile?.id : undefined;
+
   const rows: MaterialPresetRow[] = getMaterialPresetRows(presets, materials, {
     searchText,
-    machineProfileId: isOnlyActiveMachine ? activeProfile?.id : undefined,
+    machineProfileId: listedProfileId,
     getOperationLabel,
   });
 
-  const getProfileName = (profileId: string): string | undefined =>
-    profiles.find(({ id }: MachineProfile): boolean => id === profileId)?.name;
+  const getProfileName = (profileId: string): string =>
+    profiles.find(({ id }: MachineProfile): boolean => id === profileId)?.name
+      ?? t(DEFAULT.MATERIAL_LIBRARY_MACHINE_DELETED);
 
   const addPreset = (): void => {
     if (firstMaterial && activeProfile) {
@@ -117,7 +121,7 @@ export const MaterialLibraryEditor = (): ReactNode => {
       render: ({ preset }: MaterialPresetRow) => preset.passes,
     },
     // With every machine listed, the same material can appear for several lasers.
-    ...(isOnlyActiveMachine ? [] : [{
+    ...(listedProfileId ? [] : [{
       key: COLUMN_KEY.MACHINE,
       title: t(DEFAULT.MATERIAL_LIBRARY_MACHINE),
       render: ({ preset }: MaterialPresetRow) => getProfileName(preset.machineProfileId),
@@ -136,7 +140,8 @@ export const MaterialLibraryEditor = (): ReactNode => {
             onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => setSearchText(changeEvent.target.value)}
           />
           <Checkbox
-            checked={isOnlyActiveMachine}
+            checked={Boolean(listedProfileId)}
+            disabled={!activeProfile}
             onChange={(changeEvent: CheckboxChangeEvent) => setIsOnlyActiveMachine(changeEvent.target.checked)}
           >
             {t(DEFAULT.MATERIAL_LIBRARY_ONLY_THIS_MACHINE)}
@@ -146,6 +151,7 @@ export const MaterialLibraryEditor = (): ReactNode => {
           </Button>
         </div>
         {!firstMaterial && <p role="note">{t(DEFAULT.MATERIAL_LIBRARY_NO_MATERIALS)}</p>}
+        {!activeProfile && <p role="note">{t(DEFAULT.MATERIAL_LIBRARY_NO_ACTIVE_MACHINE)}</p>}
         <div className={styles.tableScroller}>
           <Table<MaterialPresetRow>
             size={ANTD_TABLE_SIZE_SMALL}
@@ -165,11 +171,12 @@ export const MaterialLibraryEditor = (): ReactNode => {
         </div>
       </div>
       <aside className={styles.editPane}>
-        {editedPreset && editedProfile ? (
+        {editedPreset ? (
           <MaterialPresetForm
             key={editedPreset.id}
             preset={editedPreset}
-            maxPowerWatts={editedProfile.maxPowerWatts}
+            // A preset whose machine is gone can only be deleted: no power passes the check against 0 W.
+            maxPowerWatts={editedProfile?.maxPowerWatts ?? 0}
             onDone={() => setEditedPreset(undefined)}
           />
         ) : <p>{t(DEFAULT.MATERIAL_LIBRARY_PICK_HINT)}</p>}
