@@ -16,6 +16,6 @@ export interface MaterialLibraryEmptyStateProps {
   /** The search text, which can be the reason no row shows. */
   searchText: string;
   onClearSearch: () => void;
-  /** Closes the dialog, which is in the way of the panel the user has to go to. */
+  /** Closes the library, so the bed is back in view while the user adds what is missing. */
   onClose: () => void;
 }

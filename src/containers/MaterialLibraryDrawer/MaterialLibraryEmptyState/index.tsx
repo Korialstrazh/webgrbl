@@ -1,6 +1,6 @@
 /**
  * What the material library table shows without rows: why there are none, and the one thing to do about it. The
- * dialog covers the Material panel and the top bar, so the way to a missing material or machine is to close it.
+ * drawer leaves the Material panel and the top bar in view, so it points at them and offers to get out of the way.
  *
  * @author michael.morosov
  *

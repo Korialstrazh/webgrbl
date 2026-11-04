@@ -1,0 +1,7 @@
+// The two file actions stand apart, each a button of its own, so the pair never reads as one two-state control.
+.presetFileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}

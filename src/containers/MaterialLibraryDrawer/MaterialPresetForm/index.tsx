@@ -43,7 +43,7 @@ import {
 import { selectMaterials } from '../../../utils/states/material.state';
 import { isFiniteNumber } from '../../../utils/type.guards/is.finite.number';
 import type { MaterialPresetFormProps } from '../interfaces/MaterialPresetFormProps';
-import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.dialog.constants';
+import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.drawer.constants';
 import styles from './styles.module.scss';
 
 type MaterialPresetNumberField = keyof Pick<MaterialPreset, 'powerWatts' | 'speedMmPerMin' | 'passes'>;

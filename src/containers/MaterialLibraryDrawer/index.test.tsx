@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { describe, expect, it, vi } from 'vitest';
-import { MaterialLibraryDialog } from '.';
+import { MaterialLibraryDrawer } from '.';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { getMaterialPresetsFileText } from '../../utils/materials/get.material.presets.file.text';
 import type { Material } from '../../utils/materials/interfaces/Material';
@@ -35,7 +35,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 
 // Buttons in and beside the table are found by their label or text: a role query with a name computes the name of
-// every button in the dialog through jsdom's slow getComputedStyle and takes tens of seconds.
+// every button in the drawer through jsdom's slow getComputedStyle and takes tens of seconds.
 const APPLY_LABEL = 'Apply to layer';
 const LAYER_COLOUR = '#ff0000';
 const LAYER_OBJECT: ProjectObject = newProjectObject({
@@ -77,7 +77,7 @@ const newPresetFixture = (material: Material, profile: MachineProfile): Material
   notes: '',
 });
 
-const renderDialog = (presets: MaterialPreset[] = [], hasActiveProfile: boolean = true): AppStore => {
+const renderDrawer = (presets: MaterialPreset[] = [], hasActiveProfile: boolean = true): AppStore => {
   const store: AppStore = newStore();
 
   act(() => {
@@ -97,7 +97,7 @@ const renderDialog = (presets: MaterialPreset[] = [], hasActiveProfile: boolean 
     <Provider store={store}>
       <AntdTestProvider>
         <BedRegionTestHost>
-          <MaterialLibraryDialog isOpen onClose={() => undefined} />
+          <MaterialLibraryDrawer isOpen onClose={() => undefined} />
         </BedRegionTestHost>
       </AntdTestProvider>
     </Provider>,
@@ -106,7 +106,7 @@ const renderDialog = (presets: MaterialPreset[] = [], hasActiveProfile: boolean 
   return store;
 };
 
-const renderDialogForLayer = (presets: MaterialPreset[]): AppStore => {
+const renderDrawerForLayer = (presets: MaterialPreset[]): AppStore => {
   const store: AppStore = newStore();
 
   act(() => {
@@ -125,7 +125,7 @@ const renderDialogForLayer = (presets: MaterialPreset[]): AppStore => {
     <Provider store={store}>
       <AntdTestProvider>
         <BedRegionTestHost>
-          <MaterialLibraryDialog isOpen initialLayerKey={LAYER_COLOUR} onClose={() => undefined} />
+          <MaterialLibraryDrawer isOpen initialLayerKey={LAYER_COLOUR} onClose={() => undefined} />
         </BedRegionTestHost>
       </AntdTestProvider>
     </Provider>,
@@ -138,9 +138,9 @@ const enterPower = (powerWatts: number): void => {
   fireEvent.change(screen.getByRole('spinbutton', { name: POWER_LABEL }), { target: { value: String(powerWatts) } });
 };
 
-describe(MaterialLibraryDialog.name, () => {
+describe(MaterialLibraryDrawer.name, () => {
   it('saves a new preset for the active machine once a power is entered', async () => {
-    const store: AppStore = renderDialog();
+    const store: AppStore = renderDrawer();
 
     fireEvent.click(await screen.findByRole('button', { name: ADD_LABEL }));
 
@@ -161,7 +161,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('starts a new preset with the project material, and shows no error before a number is touched', async () => {
-    const store: AppStore = renderDialog();
+    const store: AppStore = renderDrawer();
 
     act(() => {
       store.dispatch(new ProjectMaterialSelected({ materialId: ACRYLIC.id }));
@@ -175,7 +175,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('closes the form on Cancel without saving', async () => {
-    const store: AppStore = renderDialog();
+    const store: AppStore = renderDrawer();
 
     fireEvent.click(await screen.findByRole('button', { name: ADD_LABEL }));
     enterPower(NEW_POWER_WATTS);
@@ -186,7 +186,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('keeps Save off for more power than the laser has', async () => {
-    renderDialog();
+    renderDrawer();
 
     fireEvent.click(await screen.findByRole('button', { name: ADD_LABEL }));
     enterPower(TOO_MUCH_POWER_WATTS);
@@ -195,7 +195,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('filters by search text', async () => {
-    renderDialog([newPresetFixture(PLYWOOD, PROFILE), newPresetFixture(ACRYLIC, PROFILE)]);
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE), newPresetFixture(ACRYLIC, PROFILE)]);
 
     expect(await screen.findByText(PLYWOOD_NAME)).toBeInTheDocument();
     fireEvent.change(screen.getByRole('searchbox', { name: SEARCH_LABEL }), { target: { value: 'acry' } });
@@ -207,7 +207,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('lists another machine only when the filter is off', async () => {
-    renderDialog([newPresetFixture(PLYWOOD, OTHER_PROFILE)]);
+    renderDrawer([newPresetFixture(PLYWOOD, OTHER_PROFILE)]);
 
     const onlyMachine: HTMLElement = await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL });
 
@@ -219,7 +219,7 @@ describe(MaterialLibraryDialog.name, () => {
 
   it('edits and deletes a stored preset', async () => {
     const preset: MaterialPreset = newPresetFixture(PLYWOOD, PROFILE);
-    const store: AppStore = renderDialog([preset]);
+    const store: AppStore = renderDrawer([preset]);
 
     fireEvent.click(await screen.findByText(PLYWOOD_NAME));
     enterPower(NEW_POWER_WATTS);
@@ -235,7 +235,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('keeps Save off for a stored preset until a field changes', async () => {
-    renderDialog([newPresetFixture(PLYWOOD, PROFILE)]);
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE)]);
 
     fireEvent.click(await screen.findByText(PLYWOOD_NAME));
 
@@ -245,7 +245,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('opens a row with the keyboard', async () => {
-    renderDialog([newPresetFixture(PLYWOOD, PROFILE)]);
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE)]);
 
     const row: HTMLElement = await screen.findByRole('row', { name: new RegExp(PLYWOOD_NAME) });
 
@@ -256,7 +256,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('shows the machine column and an unchecked filter when no machine is active', async () => {
-    renderDialog([newPresetFixture(PLYWOOD, OTHER_PROFILE)], false);
+    renderDrawer([newPresetFixture(PLYWOOD, OTHER_PROFILE)], false);
 
     expect(await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL })).not.toBeChecked();
     expect(screen.getByRole('columnheader', { name: 'Machine' })).toBeInTheDocument();
@@ -268,7 +268,7 @@ describe(MaterialLibraryDialog.name, () => {
       ...newPresetFixture(PLYWOOD, PROFILE),
       machineProfileId: 'machine-gone',
     });
-    const store: AppStore = renderDialog([orphanPreset]);
+    const store: AppStore = renderDrawer([orphanPreset]);
 
     fireEvent.click(await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL }));
     fireEvent.click(await screen.findByText(PLYWOOD_NAME));
@@ -281,7 +281,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('offers to apply a stored preset of the active machine only', async () => {
-    renderDialog([newPresetFixture(PLYWOOD, OTHER_PROFILE)]);
+    renderDrawer([newPresetFixture(PLYWOOD, OTHER_PROFILE)]);
 
     fireEvent.click(await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL }));
     fireEvent.click(await screen.findByText(PLYWOOD_NAME));
@@ -291,7 +291,7 @@ describe(MaterialLibraryDialog.name, () => {
 
   it('applies a preset to the layer it was opened from as percent of the laser', async () => {
     const preset: MaterialPreset = newPresetFixture(PLYWOOD, PROFILE);
-    const store: AppStore = renderDialogForLayer([preset]);
+    const store: AppStore = renderDrawerForLayer([preset]);
 
     fireEvent.click(await screen.findByText(PLYWOOD_NAME));
     fireEvent.click(screen.getByLabelText(APPLY_LABEL));
@@ -306,7 +306,7 @@ describe(MaterialLibraryDialog.name, () => {
 
   it('names the layer and applies a row to it with one click', async () => {
     const preset: MaterialPreset = newPresetFixture(PLYWOOD, PROFILE);
-    const store: AppStore = renderDialogForLayer([preset]);
+    const store: AppStore = renderDrawerForLayer([preset]);
 
     expect(await screen.findByText(/^Opened for the layer Cut/)).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText(ROW_APPLY_LABEL));
@@ -323,7 +323,7 @@ describe(MaterialLibraryDialog.name, () => {
   it('gives no row button to a preset above the power of the laser or of another machine', async () => {
     const tooStrongPreset: MaterialPreset = { ...newPresetFixture(PLYWOOD, PROFILE), powerWatts: TOO_MUCH_POWER_WATTS };
 
-    renderDialogForLayer([tooStrongPreset, newPresetFixture(ACRYLIC, OTHER_PROFILE)]);
+    renderDrawerForLayer([tooStrongPreset, newPresetFixture(ACRYLIC, OTHER_PROFILE)]);
     await screen.findByText(PLYWOOD_NAME);
     fireEvent.click(screen.getByRole('checkbox', { name: ONLY_MACHINE_LABEL }));
     await screen.findByText(ACRYLIC_NAME);
@@ -333,8 +333,8 @@ describe(MaterialLibraryDialog.name, () => {
     expect(screen.queryByLabelText(ROW_APPLY_LABEL)).not.toBeInTheDocument();
   });
 
-  it('shows a friendly empty state that clears the search or points at closing the dialog', async () => {
-    renderDialog([newPresetFixture(PLYWOOD, PROFILE)]);
+  it('shows a friendly empty state that clears the search', async () => {
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE)]);
 
     await screen.findByText(PLYWOOD_NAME);
     fireEvent.change(screen.getByRole('searchbox', { name: SEARCH_LABEL }), { target: { value: 'zzz' } });
@@ -344,7 +344,7 @@ describe(MaterialLibraryDialog.name, () => {
     expect(await screen.findByText(PLYWOOD_NAME)).toBeInTheDocument();
   });
 
-  it('points at closing the dialog when there is no material', async () => {
+  it('points at the Material panel and offers to close the library when there is no material', async () => {
     const store: AppStore = newStore();
     const onClose = vi.fn();
 
@@ -356,7 +356,7 @@ describe(MaterialLibraryDialog.name, () => {
       <Provider store={store}>
         <AntdTestProvider>
           <BedRegionTestHost>
-            <MaterialLibraryDialog isOpen onClose={onClose} />
+            <MaterialLibraryDrawer isOpen onClose={onClose} />
           </BedRegionTestHost>
         </AntdTestProvider>
       </Provider>,
@@ -370,7 +370,7 @@ describe(MaterialLibraryDialog.name, () => {
   it('does not apply a preset above the power of the laser', async () => {
     const tooStrongPreset: MaterialPreset = { ...newPresetFixture(PLYWOOD, PROFILE), powerWatts: TOO_MUCH_POWER_WATTS };
 
-    renderDialog([tooStrongPreset]);
+    renderDrawer([tooStrongPreset]);
     fireEvent.click(await screen.findByText(PLYWOOD_NAME));
 
     expect(screen.getByRole('button', { name: APPLY_LABEL })).toBeDisabled();
@@ -378,7 +378,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('imports a file for the active machine and rescales its power', async () => {
-    const store: AppStore = renderDialog();
+    const store: AppStore = renderDrawer();
     const fileText: string = getMaterialPresetsFileText(
       [newPresetFixture(PLYWOOD, HALF_POWER_PROFILE)],
       [PLYWOOD],
@@ -397,7 +397,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('changes nothing and shows the fixed toast for a bad file', async () => {
-    const store: AppStore = renderDialog();
+    const store: AppStore = renderDrawer();
 
     fireEvent.change(await screen.findByLabelText(IMPORT_INPUT_LABEL), {
       target: { files: [new File(['nonsense'], IMPORT_FILE_NAME)] },
@@ -411,7 +411,7 @@ describe(MaterialLibraryDialog.name, () => {
   });
 
   it('turns on Export for a ticked row without opening it for editing', async () => {
-    renderDialog([newPresetFixture(PLYWOOD, PROFILE)]);
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE)]);
 
     await screen.findByText(PLYWOOD_NAME);
     expect(screen.getByRole('button', { name: 'Export selected (0)' })).toBeDisabled();

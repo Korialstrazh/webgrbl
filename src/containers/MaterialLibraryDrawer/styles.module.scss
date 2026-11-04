@@ -1,0 +1,9 @@
+// The container the editor sizes its panes by: beside each other while the drawer is wide, stacked when it is not.
+// It fills the drawer body, so the panes can take its height; stacked, the editor grows past it and the body scrolls.
+.libraryBody {
+  container-type: inline-size;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}

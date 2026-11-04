@@ -22,7 +22,7 @@ import type { Material } from '../../utils/materials/interfaces/Material';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectActiveMaterial, selectActiveMaterialPresetCount } from '../../utils/states/material.selectors';
-import { MaterialLibraryDialog } from '../MaterialLibraryDialog';
+import { MaterialLibraryDrawer } from '../MaterialLibraryDrawer';
 import { ProjectMaterialSelect } from '../ProjectMaterialSelect';
 import styles from './styles.module.scss';
 
@@ -68,7 +68,7 @@ export const MaterialSection = (): ReactNode => {
       >
         {getPresetSummaryText()}
       </Button>
-      <MaterialLibraryDialog isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} />
+      <MaterialLibraryDrawer isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} />
     </div>
   );
 };

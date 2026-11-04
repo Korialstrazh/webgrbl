@@ -30,8 +30,8 @@ import { selectActiveMachineProfile } from '../../../utils/states/machine.profil
 import { MaterialPresetSaved, selectMaterialPresets } from '../../../utils/states/material.preset.state';
 import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import type { AppDispatch } from '../../../utils/states/new.store';
-import { MaterialLibraryDialog } from '../../MaterialLibraryDialog';
-import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../../MaterialLibraryDialog/material.library.dialog.constants';
+import { MaterialLibraryDrawer } from '../../MaterialLibraryDrawer';
+import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../../MaterialLibraryDrawer/material.library.drawer.constants';
 import type { LayerPresetButtonsProps } from '../interfaces/LayerPresetButtonsProps';
 import styles from './styles.module.scss';
 
@@ -132,7 +132,7 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
       </div>
       {!activeMaterial && <p className={styles.note} role="note">{t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}</p>}
       <p className={styles.status} role="status">{statusText}</p>
-      <MaterialLibraryDialog
+      <MaterialLibraryDrawer
         isOpen={isLibraryOpen}
         initialLayerKey={layerKey}
         onClose={() => setIsLibraryOpen(false)}

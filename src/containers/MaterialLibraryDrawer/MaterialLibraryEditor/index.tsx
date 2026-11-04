@@ -1,7 +1,7 @@
 /**
- * The content of the material library: search, the machine filter, the table of presets and the edit panel. It owns
- * the draft the panel edits, so it knows whether there is something to save, keeps the saved preset open, and shows
- * one confirmation line that stays in view. A new preset is for the project material and the active machine, with no
+ * The content of the material library: search, the machine filter, the table of presets and the edit pane. It owns
+ * the draft the pane edits, so it knows whether there is something to save, keeps the saved preset open, and shows
+ * one confirmation line under the actions. A new preset is for the project material and the active machine, with no
  * power filled in, so a value nobody chose is never saved.
  *
  * @author michael.morosov
@@ -11,11 +11,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Input } from 'antd';
 import type { CheckboxChangeEvent } from 'antd';
 import { useState } from 'react';
-import type { ChangeEvent, Key, ReactNode } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_TYPE_DEFAULT, ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
@@ -47,23 +47,21 @@ import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectPaletteEntries } from '../../../utils/states/palette.state';
 import { selectProjectLayers } from '../../../utils/states/project.document.state';
 import type { ApplyPresetToLayer } from '../interfaces/ApplyPresetToLayer';
-import type { MaterialLibraryDialogProps } from '../interfaces/MaterialLibraryDialogProps';
+import type { MaterialLibraryEditorProps } from '../interfaces/MaterialLibraryEditorProps';
 import type { MaterialPresetChange } from '../interfaces/MaterialPresetFormProps';
-import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.dialog.constants';
+import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.drawer.constants';
 import { MaterialLibraryEmptyState } from '../MaterialLibraryEmptyState';
 import { MaterialPresetForm } from '../MaterialPresetForm';
 import { MaterialPresetTable } from '../MaterialPresetTable';
-import { PresetFileActions } from '../PresetFileActions';
 import { PresetLayerApply } from '../PresetLayerApply';
 import { useApplyPresetToLayer } from '../use.apply.preset.to.layer';
 import styles from './styles.module.scss';
 
-type MaterialLibraryEditorProps = Pick<MaterialLibraryDialogProps, 'initialLayerKey' | 'onClose'>;
-
 const NEW_PRESET_SPEED_MM_PER_MIN = 1000;
 const SEARCH_INPUT_TYPE = 'search';
 
-export const MaterialLibraryEditor = ({ initialLayerKey, onClose }: MaterialLibraryEditorProps): ReactNode => {
+export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactNode => {
+  const { initialLayerKey, tickedPresetIds, onTick, onClose } = props;
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const materials: Material[] = useSelector(selectMaterials);
@@ -78,7 +76,6 @@ export const MaterialLibraryEditor = ({ initialLayerKey, onClose }: MaterialLibr
   const [searchText, setSearchText] = useState<string>('');
   const [isOnlyActiveMachine, setIsOnlyActiveMachine] = useState<boolean>(true);
   const [draftPreset, setDraftPreset] = useState<MaterialPreset | undefined>(undefined);
-  const [tickedPresetIds, setTickedPresetIds] = useState<Key[]>([]);
   const [feedbackText, setFeedbackText] = useState<string | undefined>(undefined);
   const [firstMaterial]: (Material | undefined)[] = materials;
   const newPresetMaterial: Material | undefined = activeMaterial ?? firstMaterial;
@@ -97,10 +94,6 @@ export const MaterialLibraryEditor = ({ initialLayerKey, onClose }: MaterialLibr
   // laser would give another result on this one.
   const applicablePreset: MaterialPreset | undefined =
     storedPreset?.machineProfileId === activeProfile?.id ? storedPreset : undefined;
-
-  // Looked up in the stored list, so that a deleted preset is never exported.
-  const tickedPresets: MaterialPreset[] =
-    presets.filter(({ id }: MaterialPreset): boolean => tickedPresetIds.includes(id));
 
   const getOperationLabel = (operation: MaterialPresetOperation): string =>
     t(MATERIAL_PRESET_OPERATION_LABEL_KEY[operation]);
@@ -179,10 +172,11 @@ export const MaterialLibraryEditor = ({ initialLayerKey, onClose }: MaterialLibr
   return (
     <div className={styles.materialLibraryEditor}>
       <div className={styles.listPane}>
-        <PresetFileActions selectedPresets={tickedPresets} />
         <div className={styles.filters}>
           <Input
+            className={styles.searchInput}
             type={SEARCH_INPUT_TYPE}
+            prefix={<SearchOutlined aria-hidden />}
             aria-label={t(DEFAULT.MATERIAL_LIBRARY_SEARCH)}
             placeholder={t(DEFAULT.MATERIAL_LIBRARY_SEARCH)}
             value={searchText}
@@ -235,7 +229,7 @@ export const MaterialLibraryEditor = ({ initialLayerKey, onClose }: MaterialLibr
             }
             getOperationLabel={getOperationLabel}
             getProfileName={getProfileName}
-            onTick={setTickedPresetIds}
+            onTick={onTick}
             onPick={openPreset}
           />
         </div>

@@ -1,7 +1,7 @@
 /**
- * Imports a material presets file for the active machine and exports the ticked presets. A file that is not valid
- * changes nothing and shows an error toast. The status asks the user to test first, because rescaled power is only a
- * starting point on another laser.
+ * Imports a material presets file for the active machine and exports the ticked presets, from the header of the
+ * library drawer. A file that is not valid changes nothing and shows an error toast. A successful import shows a toast
+ * that asks the user to test first, because rescaled power is only a starting point on another laser.
  *
  * @author michael.morosov
  *
@@ -12,7 +12,7 @@
  */
 import { ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -49,7 +49,6 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
   const materials: Material[] = useSelector(selectMaterials);
   const profiles: MachineProfile[] = useSelector(selectMachineProfiles);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const [importedCount, setImportedCount] = useState<number>(0);
 
   const showImportInvalidToast = (): void => {
     dispatch(new ToastShown({
@@ -60,8 +59,6 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
   };
 
   const importPresetsFile = async (pickedFile: File, machineProfile: MachineProfile): Promise<void> => {
-    setImportedCount(0);
-
     try {
       const fileText: string = await pickedFile.text();
       // Read after the file: the materials may have changed while it was being read.
@@ -82,7 +79,11 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
         dispatch(new MaterialPresetSaved({ preset }));
       }
 
-      setImportedCount(importedPresets.presets.length);
+      dispatch(new ToastShown({
+        severity: TOAST_SEVERITY.INFO,
+        messageKey: DEFAULT.MATERIAL_LIBRARY_IMPORTED,
+        messageParameters: { count: importedPresets.presets.length },
+      }));
     } catch {
       showImportInvalidToast();
     }
@@ -134,11 +135,6 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
         aria-label={t(DEFAULT.MATERIAL_LIBRARY_IMPORT_FILE)}
         onChange={handleFileInputChange}
       />
-      {Boolean(importedCount) && (
-        <p className={styles.importedText} role="status">
-          {t(DEFAULT.MATERIAL_LIBRARY_IMPORTED, { count: importedCount })}
-        </p>
-      )}
     </div>
   );
 };

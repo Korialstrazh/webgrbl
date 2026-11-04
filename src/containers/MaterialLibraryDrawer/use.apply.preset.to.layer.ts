@@ -1,6 +1,6 @@
 /**
  * Gives the function that applies a preset of the active laser to a layer, as one undo step, and says which layer was
- * changed, because the dialog stays open and hides the layer. Both the edit panel and the row buttons use it.
+ * changed, because the library stays open and can hide the layer. Both the edit pane and the row buttons use it.
  *
  * @author michael.morosov
  *

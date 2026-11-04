@@ -1,5 +1,5 @@
 /**
- * Props of the material library dialog.
+ * Props of the material library drawer.
  *
  * @author michael.morosov
  *
@@ -8,11 +8,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-export interface MaterialLibraryDialogProps {
-  /** Whether the dialog is shown. */
+export interface MaterialLibraryDrawerProps {
+  /** Whether the drawer is shown. */
   isOpen: boolean;
-  /** Called on Escape, the close button and a click on the mask. */
+  /** Called on Escape, the close button and a click on the bed beside the drawer. */
   onClose: () => void;
   /** The layer to apply presets to at the start, when the library is opened from a layer. */
   initialLayerKey?: string;
+  /** The material the list is filtered to at the start, when the library is opened from the preset summary. */
+  initialMaterialId?: string;
 }

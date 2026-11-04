@@ -1,18 +1,11 @@
-// Two panes of one fixed height: the list scrolls on its own and the edit pane keeps its actions in view, so the
-// dialog never changes size when a row is opened or saved. The height leaves room for the dialog header and the
-// gutters of the centred dialog.
+// Two panes beside each other, of the height of the drawer body: the list scrolls on its own and the edit pane keeps
+// its actions in view, so nothing moves when a row is opened or saved.
 .materialLibraryEditor {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 22rem;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr) 20rem;
   gap: var(--space-6);
-  height: min(44rem, calc(100dvh - 11rem));
   min-height: 0;
-
-  // Below this width the panes stack, the edit pane takes the full width and the dialog body scrolls as one.
-  @media (width < 60rem) {
-    grid-template-columns: minmax(0, 1fr);
-    height: auto;
-  }
 }
 
 .listPane {
@@ -30,9 +23,14 @@
   align-items: center;
 }
 
-.filters > input {
+.searchInput {
   flex: 1 1 14rem;
   width: auto;
+
+  // The placeholder is the one hint of what the search matches, so it reads as muted text, not as a faint one.
+  & :global(input)::placeholder {
+    color: var(--color-text-muted);
+  }
 }
 
 .addButton {
@@ -50,11 +48,6 @@
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
-
-  // Stacked, the dialog body is the one scroll container, so the table does not scroll inside it.
-  @media (width < 60rem) {
-    overflow: visible;
-  }
 }
 
 .editPane {
@@ -65,13 +58,6 @@
   min-height: 0;
   padding-left: var(--space-6);
   border-left: 1px solid var(--color-border);
-
-  @media (width < 60rem) {
-    padding-top: var(--space-4);
-    padding-left: 0;
-    border-top: 1px solid var(--color-border);
-    border-left: none;
-  }
 }
 
 .pickHint {
@@ -80,7 +66,7 @@
   color: var(--color-text-muted);
 }
 
-// The confirmation of a save, a delete or an apply: a fixed line at the bottom of the pane, so it is always in view.
+// The confirmation of a save, a delete or an apply, right under the actions that did it.
 .feedback {
   display: flex;
   flex: none;
@@ -95,4 +81,24 @@
 .feedbackIcon {
   flex: none;
   margin-top: 0.125rem;
+}
+
+// In a drawer too narrow for both panes, they stack: the edit pane takes the full width below the table, the editor
+// takes its natural height and the drawer body is the one scroll container.
+@container (width < 60rem) {
+  .materialLibraryEditor {
+    flex: none;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tableScroller {
+    overflow: visible;
+  }
+
+  .editPane {
+    padding-top: var(--space-4);
+    padding-left: 0;
+    border-top: 1px solid var(--color-border);
+    border-left: none;
+  }
 }

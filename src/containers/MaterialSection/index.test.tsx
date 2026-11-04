@@ -20,8 +20,9 @@ import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host
 
 const LIBRARY_BUTTON_LABEL = 'Open the material library';
 const LIBRARY_TITLE = 'Material library';
-// The dialog is found by its title text: a role query over the whole antd dialog is slow in jsdom.
-const DIALOG_SELECTOR = '[role="dialog"]';
+// The drawer is found by its title text: a role query over the whole antd drawer is slow in jsdom.
+const DRAWER_ROOT_SELECTOR = '.ant-drawer';
+const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
 const MACHINE_NAME = 'Test Laser';
 const PROFILE: MachineProfile = newMachineProfile({ name: MACHINE_NAME, maxPowerWatts: 10 });
 const PLYWOOD: Material = newMaterial({ name: 'Plywood' });
@@ -36,8 +37,9 @@ const newPresetFixture = (): MaterialPreset => newMaterialPreset({
   notes: '',
 });
 
-const renderSection = (store: AppStore): void => {
-  render(
+/** Renders the section and returns the bed region element the library drawer renders into. */
+const renderSection = (store: AppStore): HTMLElement => {
+  const { container } = render(
     <Provider store={store}>
       <AntdTestProvider>
         <BedRegionTestHost>
@@ -46,6 +48,13 @@ const renderSection = (store: AppStore): void => {
       </AntdTestProvider>
     </Provider>,
   );
+  const bedRegionHost: Element | null = container.firstElementChild;
+
+  if (!(bedRegionHost instanceof HTMLElement)) {
+    throw new Error('No bed region host');
+  }
+
+  return bedRegionHost;
 };
 
 const newStoreWithMaterial = (presetCount: number): AppStore => {
@@ -91,12 +100,16 @@ describe(MaterialSection.name, () => {
     expect(screen.getByRole('button', { name: 'Choose a material to see its presets' })).toBeInTheDocument();
   });
 
-  it('opens the material library from the book button', async () => {
-    renderSection(newStoreWithMaterial(1));
+  it('opens the material library as a left drawer in the bed region from the book button', async () => {
+    const bedRegionHost: HTMLElement = renderSection(newStoreWithMaterial(1));
 
     fireEvent.click(screen.getByRole('button', { name: LIBRARY_BUTTON_LABEL }));
 
-    expect((await screen.findByText(LIBRARY_TITLE)).closest(DIALOG_SELECTOR)).toBeInTheDocument();
+    const drawerRoot: Element | null = (await screen.findByText(LIBRARY_TITLE)).closest(DRAWER_ROOT_SELECTOR);
+
+    // A left drawer inside the bed region: it sits beside the Material panel and leaves the machine panel in view.
+    expect(drawerRoot).toHaveClass(DRAWER_LEFT_CLASS_NAME);
+    expect(bedRegionHost).toContainElement(drawerRoot instanceof HTMLElement ? drawerRoot : null);
   });
 
   it('opens the material library from the summary line', async () => {
@@ -104,6 +117,6 @@ describe(MaterialSection.name, () => {
 
     fireEvent.click(screen.getByRole('button', { name: `1 preset for ${MACHINE_NAME}` }));
 
-    expect((await screen.findByText(LIBRARY_TITLE)).closest(DIALOG_SELECTOR)).toBeInTheDocument();
+    expect((await screen.findByText(LIBRARY_TITLE)).closest(DRAWER_ROOT_SELECTOR)).toBeInTheDocument();
   });
 });

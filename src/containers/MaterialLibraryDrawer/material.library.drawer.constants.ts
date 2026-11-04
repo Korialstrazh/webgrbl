@@ -1,5 +1,5 @@
 /**
- * Labels of the material preset operations, and the details of the material library dialog.
+ * Labels of the material preset operations, and the details of the material library drawer.
  *
  * @author michael.morosov
  *
@@ -12,10 +12,13 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset.constants';
 import type { MaterialPresetOperation } from '../../utils/materials/material.preset.constants';
 
-export const MATERIAL_LIBRARY_DIALOG_OVERLAY_ID = 'material-library-dialog';
+export const MATERIAL_LIBRARY_DRAWER_OVERLAY_ID = 'material-library-drawer';
 
-/** Room for the table with the Machine column beside the edit panel; a narrower window makes the dialog narrower. */
-export const MATERIAL_LIBRARY_DIALOG_WIDTH = '70rem';
+/**
+ * Room for the table beside the edit pane on a wide screen, and never wider than the bed region, so a narrower window
+ * shows the drawer at the width of the region with the panes stacked.
+ */
+export const MATERIAL_LIBRARY_DRAWER_WIDTH = 'min(68rem, 100%)';
 
 export const MATERIAL_PRESET_OPERATION_LABEL_KEY: Record<MaterialPresetOperation, string> = {
   [MATERIAL_PRESET_OPERATION.CUT]: DEFAULT.MATERIAL_LIBRARY_OPERATION_CUT,
