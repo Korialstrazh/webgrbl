@@ -1,3 +1,10 @@
+import { SHADING_LAYER_COLOUR } from '../../utils/layers/layer.constants';
+import { getSampleSvgText } from '../../utils/materials/get.sample.svg.text';
+import {
+  SAMPLE_GRADIENT_END_COLOUR,
+  SAMPLE_GRADIENT_START_COLOUR,
+  SAMPLE_SIZE_MM,
+} from '../../utils/materials/sample.job.constants';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BedObjects } from '.';
@@ -72,6 +79,41 @@ beforeEach(() => {
 });
 
 describe(`${BedObjects.name} layer modes`, () => {
+  it('keeps a gradient fill as a gradient when the object is drawn per layer', () => {
+    const store: AppStore = newStore();
+    const gradientObject: ProjectObject = newProjectObject({
+      name: OBJECT_NAME,
+      svgText: getSampleSvgText({ cutColour: RED, hasGradient: true }),
+      intrinsicWidthMm: SAMPLE_SIZE_MM,
+      intrinsicHeightMm: SAMPLE_SIZE_MM,
+    });
+
+    store.dispatch(new ProjectDocumentLoaded({
+      document: {
+        objects: [gradientObject, gradientObject],
+        layers: [getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0), getRedLayer(LAYER_MODE.LINE, true)],
+      },
+    }));
+    render(
+      <Provider store={store}>
+        <svg>
+          <BedObjects dimensions={BED} />
+        </svg>
+      </Provider>,
+    );
+
+    const gradients: Element[] = [...document.querySelectorAll('linearGradient')];
+    const stopColours: (string | null)[] = [...(gradients[0]?.querySelectorAll('stop') ?? [])]
+      .map((stop: Element): string | null => stop.getAttribute('stop-color'));
+
+    expect(gradients).toHaveLength(2);
+    expect(new Set(gradients.map((gradient: Element): string => gradient.id)).size).toBe(2);
+    expect(stopColours).toEqual([SAMPLE_GRADIENT_START_COLOUR, SAMPLE_GRADIENT_END_COLOUR]);
+    expect(gradients[0]).toHaveAttribute('gradientUnits', 'userSpaceOnUse');
+    expect(gradients[0]).toHaveAttribute('gradientTransform', 'matrix(40 0 0 40 5 5)');
+    expect(document.querySelector(`[fill="url(#${gradients[0]?.id ?? ''})"]`)).not.toBeNull();
+  });
+
   it('draws an object on a Line layer as outlines in the layer colour instead of the filled image', () => {
     renderWithLayer(getRedLayer(LAYER_MODE.LINE, true));
 

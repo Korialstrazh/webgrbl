@@ -18,6 +18,7 @@ const DRAWING: ObjectDesignDrawing = {
       layerKey: RED,
       pathData: 'M0 0L1 0L1 1Z',
       colour: RED,
+      gradient: undefined,
       opacity: 1,
       strokeWidthMm: 0,
       fillRule: SVG_FILL_RULE.NONZERO,
