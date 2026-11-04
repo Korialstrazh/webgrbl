@@ -16,7 +16,7 @@ import type { MaterialLibraryDialogProps } from './interfaces/MaterialLibraryDia
 import { MATERIAL_LIBRARY_DIALOG_OVERLAY_ID, MATERIAL_LIBRARY_DIALOG_WIDTH } from './material.library.dialog.constants';
 import { MaterialLibraryEditor } from './MaterialLibraryEditor';
 
-export const MaterialLibraryDialog = ({ isOpen, onClose }: MaterialLibraryDialogProps): ReactNode => {
+export const MaterialLibraryDialog = ({ isOpen, onClose, initialLayerKey }: MaterialLibraryDialogProps): ReactNode => {
   const { t } = useTranslation();
 
   return (
@@ -29,7 +29,7 @@ export const MaterialLibraryDialog = ({ isOpen, onClose }: MaterialLibraryDialog
       destroyOnHidden
       onClose={onClose}
     >
-      <MaterialLibraryEditor />
+      <MaterialLibraryEditor initialLayerKey={initialLayerKey} />
     </AppModal>
   );
 };

@@ -13,4 +13,6 @@ export interface MaterialLibraryDialogProps {
   isOpen: boolean;
   /** Called on Escape, the close button and a click on the mask. */
   onClose: () => void;
+  /** The layer to apply presets to at the start, when the library is opened from a layer. */
+  initialLayerKey?: string;
 }

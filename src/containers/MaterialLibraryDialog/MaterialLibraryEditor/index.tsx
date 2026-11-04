@@ -29,13 +29,22 @@ import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineP
 import { selectActiveMachineProfile, selectMachineProfiles } from '../../../utils/states/machine.profile.state';
 import { selectMaterialPresets } from '../../../utils/states/material.preset.state';
 import { selectMaterials } from '../../../utils/states/material.state';
+import type { MaterialLibraryDialogProps } from '../interfaces/MaterialLibraryDialogProps';
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.dialog.constants';
 import { MaterialPresetForm } from '../MaterialPresetForm';
+import { PresetLayerApply } from '../PresetLayerApply';
 import styles from './styles.module.scss';
+
+type MaterialLibraryEditorProps = Pick<MaterialLibraryDialogProps, 'initialLayerKey'>;
 
 const NEW_PRESET_SPEED_MM_PER_MIN = 1000;
 const SEARCH_INPUT_TYPE = 'search';
 const MATERIAL_NAME_FIELD: keyof MaterialPresetRow = 'materialName';
+
+// The form beside this panel is keyed by the preset id, and two children of one parent cannot share a key.
+const APPLY_PANEL_KEY_PREFIX = 'apply';
+const APPLY_PANEL_KEY_SEPARATOR = '-';
+
 const COLUMN_KEY = {
   MATERIAL: 'material',
   THICKNESS: 'thickness',
@@ -48,18 +57,26 @@ const COLUMN_KEY = {
 
 const getPresetRowKey = ({ preset }: MaterialPresetRow): string => preset.id;
 
-export const MaterialLibraryEditor = (): ReactNode => {
+export const MaterialLibraryEditor = ({ initialLayerKey }: MaterialLibraryEditorProps): ReactNode => {
   const { t } = useTranslation();
   const materials: Material[] = useSelector(selectMaterials);
   const presets: MaterialPreset[] = useSelector(selectMaterialPresets);
   const profiles: MachineProfile[] = useSelector(selectMachineProfiles);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const [pickedLayerKey, setPickedLayerKey] = useState<string | undefined>(initialLayerKey);
   const [searchText, setSearchText] = useState<string>('');
   const [isOnlyActiveMachine, setIsOnlyActiveMachine] = useState<boolean>(true);
   const [editedPreset, setEditedPreset] = useState<MaterialPreset | undefined>(undefined);
   const [firstMaterial]: (Material | undefined)[] = materials;
   const editedProfile: MachineProfile | undefined = profiles.find(
     ({ id }: MachineProfile): boolean => id === editedPreset?.machineProfileId,
+  );
+
+  // Applying uses the stored values, not unsaved edits. Only presets of the active laser apply: the watts of another
+  // laser would give another result on this one.
+  const applicablePreset: MaterialPreset | undefined = presets.find(
+    ({ id, machineProfileId }: MaterialPreset): boolean =>
+      id === editedPreset?.id && machineProfileId === activeProfile?.id,
   );
 
   const getOperationLabel = (operation: MaterialPresetOperation): string =>
@@ -180,6 +197,15 @@ export const MaterialLibraryEditor = (): ReactNode => {
             onDone={() => setEditedPreset(undefined)}
           />
         ) : <p>{t(DEFAULT.MATERIAL_LIBRARY_PICK_HINT)}</p>}
+        {applicablePreset && activeProfile && (
+          <PresetLayerApply
+            key={[APPLY_PANEL_KEY_PREFIX, applicablePreset.id].join(APPLY_PANEL_KEY_SEPARATOR)}
+            preset={applicablePreset}
+            maxPowerWatts={activeProfile.maxPowerWatts}
+            pickedLayerKey={pickedLayerKey}
+            onPickLayer={setPickedLayerKey}
+          />
+        )}
       </aside>
     </div>
   );
