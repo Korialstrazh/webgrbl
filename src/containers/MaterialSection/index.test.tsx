@@ -25,7 +25,8 @@ const DRAWER_ROOT_SELECTOR = '.ant-drawer';
 const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
 const MACHINE_NAME = 'Test Laser';
 const PROFILE: MachineProfile = newMachineProfile({ name: MACHINE_NAME, maxPowerWatts: 10 });
-const PLYWOOD: Material = newMaterial({ name: 'Plywood' });
+const PLYWOOD: Material = newMaterial({ name: 'Plywood', thicknessMm: 3 });
+const PLYWOOD_ON_MACHINE = `Plywood, 3 mm on ${MACHINE_NAME}`;
 
 const newPresetFixture = (): MaterialPreset => newMaterialPreset({
   materialId: PLYWOOD.id,
@@ -78,13 +79,13 @@ describe(MaterialSection.name, () => {
   it('counts the presets of the project material on the active machine', () => {
     renderSection(newStoreWithMaterial(2));
 
-    expect(screen.getByRole('button', { name: `2 presets for ${MACHINE_NAME}` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: `2 presets for ${PLYWOOD_ON_MACHINE}` })).toBeInTheDocument();
   });
 
   it('says there are no presets yet', () => {
     renderSection(newStoreWithMaterial(0));
 
-    expect(screen.getByRole('button', { name: `No presets yet for ${MACHINE_NAME}` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: `No presets yet for ${PLYWOOD_ON_MACHINE}` })).toBeInTheDocument();
   });
 
   it('asks for a material when none is chosen, and for a machine when none is active', () => {
@@ -112,11 +113,12 @@ describe(MaterialSection.name, () => {
     expect(bedRegionHost).toContainElement(drawerRoot instanceof HTMLElement ? drawerRoot : null);
   });
 
-  it('opens the material library from the summary line', async () => {
+  it('opens the material library filtered to the project material from the summary link', async () => {
     renderSection(newStoreWithMaterial(1));
 
-    fireEvent.click(screen.getByRole('button', { name: `1 preset for ${MACHINE_NAME}` }));
+    fireEvent.click(screen.getByRole('button', { name: `1 preset for ${PLYWOOD_ON_MACHINE}` }));
 
     expect((await screen.findByText(LIBRARY_TITLE)).closest(DRAWER_ROOT_SELECTOR)).toBeInTheDocument();
+    expect(screen.getByText('Material: Plywood, 3 mm')).toBeInTheDocument();
   });
 });

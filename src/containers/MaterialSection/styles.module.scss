@@ -5,7 +5,7 @@
   min-width: 0;
 }
 
-// The select takes the width; the library button keeps the control height so the two line up.
+// The select takes the width that the Library button leaves; the button keeps the control height so the two line up.
 .selectRow {
   display: flex;
   gap: var(--space-2);
@@ -15,12 +15,12 @@
 
 .libraryButton {
   flex: none;
-  width: var(--control-height);
   height: var(--control-height);
 }
 
-// A quiet one-line summary that reads as text and opens the library on a click; the whole line is the target.
-.presetSummary {
+// The summary reads as a link: muted until hovered, then in the accent and underlined, with a chevron right after
+// the text that says it leads to the presets it counts. The antd class outranks antd's own link colours.
+.presetSummary:global(.ant-btn-link) {
   justify-content: flex-start;
   min-height: 2rem;
   padding-inline: var(--space-1);
@@ -28,4 +28,20 @@
   font-size: 0.75rem;
   text-align: left;
   white-space: normal;
+}
+
+// antd sets the hover colour of a link button with a selector of five classes and states; this one has six.
+.presetSummary:global(.ant-btn):global(.ant-btn-variant-link):not(:disabled):not(:global(.ant-btn-disabled)):hover,
+.presetSummary:global(.ant-btn-link):focus-visible {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.presetSummaryText {
+  white-space: normal;
+}
+
+.presetSummaryChevron {
+  margin-left: var(--space-1);
+  font-size: 0.625rem;
 }

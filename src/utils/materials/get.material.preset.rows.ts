@@ -22,6 +22,12 @@ const getSearchWords = (searchText: string): string[] =>
 const isPresetOnListedMachine = ({ machineProfileId }: MaterialPreset, listedProfileId: string | undefined): boolean =>
   !listedProfileId || machineProfileId === listedProfileId;
 
+const isPresetOfListedMaterial = ({ materialId }: MaterialPreset, listedMaterialId: string | undefined): boolean =>
+  !listedMaterialId || materialId === listedMaterialId;
+
+const isPresetListed = (preset: MaterialPreset, { machineProfileId, materialId }: MaterialPresetRowFilter): boolean =>
+  isPresetOnListedMachine(preset, machineProfileId) && isPresetOfListedMaterial(preset, materialId);
+
 const compareMaterialPresetRows = (firstRow: MaterialPresetRow, secondRow: MaterialPresetRow): number =>
   firstRow.materialName.localeCompare(secondRow.materialName) || firstRow.thicknessMm - secondRow.thicknessMm;
 
@@ -44,15 +50,16 @@ const compareWithPreferredMaterialFirst = (
 export const getMaterialPresetRows = (
   presets: MaterialPreset[],
   materials: Material[],
-  { searchText, machineProfileId, preferredMaterialId, getOperationLabel }: MaterialPresetRowFilter,
+  filter: MaterialPresetRowFilter,
 ): MaterialPresetRow[] => {
+  const { searchText, preferredMaterialId, getOperationLabel } = filter;
   const searchWords: string[] = getSearchWords(searchText);
   const rows: MaterialPresetRow[] = [];
 
   for (const preset of presets) {
     const material: Material | undefined = materials.find(({ id }: Material): boolean => id === preset.materialId);
 
-    if (material && isPresetOnListedMachine(preset, machineProfileId)) {
+    if (material && isPresetListed(preset, filter)) {
       const rowText: string =
         [material.name, material.thicknessMm, getOperationLabel(preset.operation)].join(' ').toLowerCase();
 

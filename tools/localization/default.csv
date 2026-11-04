@@ -368,6 +368,8 @@ MATERIAL_LIBRARY_DELETE_CANCEL;Cancel
 MATERIAL_LIBRARY_DELETE_CONFIRM;Delete this preset?
 MATERIAL_LIBRARY_DELETE_OK;Yes, delete
 MATERIAL_LIBRARY_DELETED;Preset deleted.
+MATERIAL_LIBRARY_EMPTY_MATERIAL_TEXT;Add one here, or save the settings of a layer from its drawer. The filter hides the other materials.
+MATERIAL_LIBRARY_EMPTY_MATERIAL_TITLE;No presets yet for {{name}}, {{thickness}} mm
 MATERIAL_LIBRARY_EMPTY_NO_MACHINE_TITLE;No active machine
 MATERIAL_LIBRARY_EMPTY_NO_MATERIALS_TITLE;No materials yet
 MATERIAL_LIBRARY_EMPTY_SEARCH_TEXT;Try fewer words, or clear the search.
@@ -382,6 +384,8 @@ MATERIAL_LIBRARY_LAYER_NOTE;Opened for the layer {{layer}}: the Apply button of 
 MATERIAL_LIBRARY_MACHINE;Machine
 MATERIAL_LIBRARY_MACHINE_DELETED;Deleted machine
 MATERIAL_LIBRARY_MATERIAL;Material
+MATERIAL_LIBRARY_MATERIAL_FILTER;Material: {{name}}, {{thickness}} mm
+MATERIAL_LIBRARY_MATERIAL_FILTER_CLEAR;Show all materials
 MATERIAL_LIBRARY_MATERIAL_OPTION;{{name}}, {{thickness}} mm
 MATERIAL_LIBRARY_NEW_PRESET;New preset
 MATERIAL_LIBRARY_NO_ACTIVE_MACHINE;Pick an active machine in Machine profiles, in the top bar. Presets belong to one laser.
@@ -408,12 +412,13 @@ MATERIAL_LIBRARY_THICKNESS;Thickness
 MATERIAL_LIBRARY_THICKNESS_VALUE;{{thickness}} mm
 MATERIAL_LIBRARY_TICK_FOR_EXPORT;Select for export
 MATERIAL_LIBRARY_TITLE;Material library
+MATERIAL_SECTION_LIBRARY;Library
 MATERIAL_SECTION_OPEN_LIBRARY;Open the material library
 MATERIAL_SECTION_PRESETS_NO_MACHINE;Pick an active machine to use presets
 MATERIAL_SECTION_PRESETS_NO_MATERIAL;Choose a material to see its presets
-MATERIAL_SECTION_PRESETS_NONE;No presets yet for {{machine}}
-MATERIAL_SECTION_PRESETS_one;{{count}} preset for {{machine}}
-MATERIAL_SECTION_PRESETS_other;{{count}} presets for {{machine}}
+MATERIAL_SECTION_PRESETS_NONE;No presets yet for {{name}}, {{thickness}} mm on {{machine}}
+MATERIAL_SECTION_PRESETS_one;{{count}} preset for {{name}}, {{thickness}} mm on {{machine}}
+MATERIAL_SECTION_PRESETS_other;{{count}} presets for {{name}}, {{thickness}} mm on {{machine}}
 OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visible part.
 OBJECT_WARNING_IMAGE;Images are not engraved yet.
 OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.

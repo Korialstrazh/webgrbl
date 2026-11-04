@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BookOutlined, SearchOutlined } from '@ant-design/icons';
+import { BookOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../../utils/localization/default.locales';
@@ -17,7 +17,9 @@ import { EmptyState } from '../../../views/EmptyState';
 import type { MaterialLibraryEmptyStateProps } from '../interfaces/MaterialLibraryEmptyStateProps';
 
 export const MaterialLibraryEmptyState = (props: MaterialLibraryEmptyStateProps): ReactNode => {
-  const { hasMaterials, hasActiveMachine, searchText, onClearSearch, onClose } = props;
+  const {
+    hasMaterials, hasActiveMachine, searchText, filteredMaterial, onClearSearch, onClearMaterialFilter, onClose,
+  } = props;
   const { t } = useTranslation();
 
   if (!hasMaterials) {
@@ -52,6 +54,21 @@ export const MaterialLibraryEmptyState = (props: MaterialLibraryEmptyStateProps)
         bodyText={t(DEFAULT.MATERIAL_LIBRARY_EMPTY_SEARCH_TEXT)}
         actionLabel={t(DEFAULT.MATERIAL_LIBRARY_CLEAR_SEARCH)}
         onAction={onClearSearch}
+      />
+    );
+  }
+
+  if (filteredMaterial) {
+    return (
+      <EmptyState
+        iconComponent={<FilterOutlined />}
+        titleText={t(DEFAULT.MATERIAL_LIBRARY_EMPTY_MATERIAL_TITLE, {
+          name: filteredMaterial.name,
+          thickness: filteredMaterial.thicknessMm,
+        })}
+        bodyText={t(DEFAULT.MATERIAL_LIBRARY_EMPTY_MATERIAL_TEXT)}
+        actionLabel={t(DEFAULT.MATERIAL_LIBRARY_MATERIAL_FILTER_CLEAR)}
+        onAction={onClearMaterialFilter}
       />
     );
   }

@@ -55,6 +55,13 @@ describe(getMaterialPresetRows.name, () => {
     expect(getMaterialPresetRows(presets, [PLYWOOD], { ...FILTER, machineProfileId: PROFILE_B })).toHaveLength(1);
   });
 
+  it('keeps to the material when one is given', () => {
+    const presets: MaterialPreset[] = [newPresetFixture(), newPresetFixture({ materialId: ACRYLIC.id })];
+
+    expect(getRowNames(getMaterialPresetRows(presets, [PLYWOOD, ACRYLIC], { ...FILTER, materialId: ACRYLIC.id })))
+      .toEqual([ACRYLIC_NAME]);
+  });
+
   it('needs every search word, in any field and any case', () => {
     const presets: MaterialPreset[] = [newPresetFixture()];
 

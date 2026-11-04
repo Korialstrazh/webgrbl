@@ -43,6 +43,9 @@ export const ANTD_BUTTON_TYPE_TEXT: ButtonProps['type'] = 'text';
 /** A filled button in the accent colour, for the main action. */
 export const ANTD_BUTTON_TYPE_PRIMARY: ButtonProps['type'] = 'primary';
 
+/** A button drawn as a link, for a line of text that leads somewhere. */
+export const ANTD_BUTTON_TYPE_LINK: ButtonProps['type'] = 'link';
+
 /** The popover opens and closes when its anchor is clicked, and closes on a click outside. */
 export const ANTD_POPOVER_TRIGGER_CLICK: PopoverProps['trigger'] = 'click';
 

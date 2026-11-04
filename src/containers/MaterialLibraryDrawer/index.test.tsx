@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { MaterialLibraryDrawer } from '.';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { getMaterialPresetsFileText } from '../../utils/materials/get.material.presets.file.text';
+import { MATERIAL_PRESET_REPOSITORY } from '../../utils/materials/material.preset.repository';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import type { MaterialPreset } from '../../utils/materials/interfaces/MaterialPreset';
 import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset.constants';
@@ -77,7 +78,13 @@ const newPresetFixture = (material: Material, profile: MachineProfile): Material
   notes: '',
 });
 
-const renderDrawer = (presets: MaterialPreset[] = [], hasActiveProfile: boolean = true): AppStore => {
+interface RenderDrawerOptions {
+  hasActiveProfile?: boolean;
+  initialMaterialId?: string;
+}
+
+const renderDrawer = (presets: MaterialPreset[] = [], options: RenderDrawerOptions = {}): AppStore => {
+  const { hasActiveProfile = true, initialMaterialId } = options;
   const store: AppStore = newStore();
 
   act(() => {
@@ -97,7 +104,7 @@ const renderDrawer = (presets: MaterialPreset[] = [], hasActiveProfile: boolean 
     <Provider store={store}>
       <AntdTestProvider>
         <BedRegionTestHost>
-          <MaterialLibraryDrawer isOpen onClose={() => undefined} />
+          <MaterialLibraryDrawer isOpen initialMaterialId={initialMaterialId} onClose={() => undefined} />
         </BedRegionTestHost>
       </AntdTestProvider>
     </Provider>,
@@ -206,6 +213,29 @@ describe(MaterialLibraryDrawer.name, () => {
     expect(screen.getByText(ACRYLIC_NAME)).toBeInTheDocument();
   });
 
+  it('keeps to the material it was opened for until the filter chip is removed', async () => {
+    renderDrawer(
+      [newPresetFixture(PLYWOOD, PROFILE), newPresetFixture(ACRYLIC, PROFILE)],
+      { initialMaterialId: ACRYLIC.id },
+    );
+
+    expect(await screen.findByText(ACRYLIC_NAME)).toBeInTheDocument();
+    expect(screen.queryByText(PLYWOOD_NAME)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Show all materials'));
+
+    expect(await screen.findByText(PLYWOOD_NAME)).toBeInTheDocument();
+    expect(screen.queryByText(/^Material: /)).not.toBeInTheDocument();
+  });
+
+  it('says the filtered material has no presets yet and starts a new preset with it', async () => {
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE)], { initialMaterialId: ACRYLIC.id });
+
+    expect(await screen.findByText(`No presets yet for ${ACRYLIC_NAME}, 3 mm`)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: ADD_LABEL }));
+
+    expect(screen.getByText(new RegExp(`^${ACRYLIC_NAME}, `))).toBeInTheDocument();
+  });
+
   it('lists another machine only when the filter is off', async () => {
     renderDrawer([newPresetFixture(PLYWOOD, OTHER_PROFILE)]);
 
@@ -256,7 +286,7 @@ describe(MaterialLibraryDrawer.name, () => {
   });
 
   it('shows the machine column and an unchecked filter when no machine is active', async () => {
-    renderDrawer([newPresetFixture(PLYWOOD, OTHER_PROFILE)], false);
+    renderDrawer([newPresetFixture(PLYWOOD, OTHER_PROFILE)], { hasActiveProfile: false });
 
     expect(await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL })).not.toBeChecked();
     expect(screen.getByRole('columnheader', { name: 'Machine' })).toBeInTheDocument();
@@ -393,6 +423,11 @@ describe(MaterialLibraryDrawer.name, () => {
       expect(selectMaterialPresets(store.getState())).toEqual([
         expect.objectContaining({ machineProfileId: PROFILE.id, materialId: PLYWOOD.id, powerWatts: MAX_POWER_WATTS }),
       ]);
+    });
+    // The saga writes the preset after the state has it; a write still in flight when the test ends would reopen the
+    // database after its cleanup and leak the preset into the next test.
+    await waitFor(async () => {
+      expect(await MATERIAL_PRESET_REPOSITORY.listMaterialPresets()).toHaveLength(1);
     });
   });
 

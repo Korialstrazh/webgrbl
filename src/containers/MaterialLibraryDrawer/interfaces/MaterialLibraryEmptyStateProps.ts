@@ -8,6 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { Material } from '../../../utils/materials/interfaces/Material';
+
 export interface MaterialLibraryEmptyStateProps {
   /** Whether any material exists; without one no preset can be added. */
   hasMaterials: boolean;
@@ -15,7 +17,10 @@ export interface MaterialLibraryEmptyStateProps {
   hasActiveMachine: boolean;
   /** The search text, which can be the reason no row shows. */
   searchText: string;
+  /** The material the list is filtered to, which can be the reason no row shows; undefined without a filter. */
+  filteredMaterial: Material | undefined;
   onClearSearch: () => void;
+  onClearMaterialFilter: () => void;
   /** Closes the library, so the bed is back in view while the user adds what is missing. */
   onClose: () => void;
 }

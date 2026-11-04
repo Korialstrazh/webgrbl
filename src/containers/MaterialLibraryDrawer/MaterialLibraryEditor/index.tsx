@@ -1,5 +1,6 @@
 /**
- * The content of the material library: search, the machine filter, the table of presets and the edit pane. It owns
+ * The content of the material library: search, the machine filter, a material filter chip when it was opened for
+ * one material, the table of presets and the edit pane. It owns
  * the draft the pane edits, so it knows whether there is something to save, keeps the saved preset open, and shows
  * one confirmation line under the actions. A new preset is for the project material and the active machine, with no
  * power filled in, so a value nobody chose is never saved.
@@ -11,14 +12,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckCircleOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Input } from 'antd';
-import type { CheckboxChangeEvent } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import type { ChangeEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_DEFAULT, ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../../utils/layers/get.layer.palette.entry';
@@ -51,6 +49,7 @@ import type { MaterialLibraryEditorProps } from '../interfaces/MaterialLibraryEd
 import type { MaterialPresetChange } from '../interfaces/MaterialPresetFormProps';
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.drawer.constants';
 import { MaterialLibraryEmptyState } from '../MaterialLibraryEmptyState';
+import { MaterialLibraryFilters } from '../MaterialLibraryFilters';
 import { MaterialPresetForm } from '../MaterialPresetForm';
 import { MaterialPresetTable } from '../MaterialPresetTable';
 import { PresetLayerApply } from '../PresetLayerApply';
@@ -58,10 +57,9 @@ import { useApplyPresetToLayer } from '../use.apply.preset.to.layer';
 import styles from './styles.module.scss';
 
 const NEW_PRESET_SPEED_MM_PER_MIN = 1000;
-const SEARCH_INPUT_TYPE = 'search';
 
 export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactNode => {
-  const { initialLayerKey, tickedPresetIds, onTick, onClose } = props;
+  const { initialLayerKey, initialMaterialId, tickedPresetIds, onTick, onClose } = props;
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const materials: Material[] = useSelector(selectMaterials);
@@ -74,11 +72,15 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
   const applyPresetToLayer: ApplyPresetToLayer = useApplyPresetToLayer(activeProfile?.maxPowerWatts ?? 0);
   const [pickedLayerKey, setPickedLayerKey] = useState<string | undefined>(initialLayerKey);
   const [searchText, setSearchText] = useState<string>('');
+  const [materialFilterId, setMaterialFilterId] = useState<string | undefined>(initialMaterialId);
   const [isOnlyActiveMachine, setIsOnlyActiveMachine] = useState<boolean>(true);
   const [draftPreset, setDraftPreset] = useState<MaterialPreset | undefined>(undefined);
   const [feedbackText, setFeedbackText] = useState<string | undefined>(undefined);
   const [firstMaterial]: (Material | undefined)[] = materials;
-  const newPresetMaterial: Material | undefined = activeMaterial ?? firstMaterial;
+  const filteredMaterial: Material | undefined =
+    materials.find(({ id }: Material): boolean => id === materialFilterId);
+  // A new preset is for the material the list is filtered to, as that is the material the user came for.
+  const newPresetMaterial: Material | undefined = filteredMaterial ?? activeMaterial ?? firstMaterial;
   const storedPreset: MaterialPreset | undefined =
     presets.find(({ id }: MaterialPreset): boolean => id === draftPreset?.id);
   const isDraftChanged: boolean = Boolean(draftPreset) && !(storedPreset && draftPreset
@@ -104,6 +106,7 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
   const rows: MaterialPresetRow[] = getMaterialPresetRows(presets, materials, {
     searchText,
     machineProfileId: listedProfileId,
+    materialId: filteredMaterial?.id,
     preferredMaterialId: activeMaterial?.id,
     getOperationLabel,
   });
@@ -172,35 +175,18 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
   return (
     <div className={styles.materialLibraryEditor}>
       <div className={styles.listPane}>
-        <div className={styles.filters}>
-          <Input
-            className={styles.searchInput}
-            type={SEARCH_INPUT_TYPE}
-            prefix={<SearchOutlined aria-hidden />}
-            aria-label={t(DEFAULT.MATERIAL_LIBRARY_SEARCH)}
-            placeholder={t(DEFAULT.MATERIAL_LIBRARY_SEARCH)}
-            value={searchText}
-            onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => setSearchText(changeEvent.target.value)}
-          />
-          <Checkbox
-            checked={Boolean(listedProfileId)}
-            disabled={!activeProfile}
-            onChange={(changeEvent: CheckboxChangeEvent) => setIsOnlyActiveMachine(changeEvent.target.checked)}
-          >
-            {t(DEFAULT.MATERIAL_LIBRARY_ONLY_THIS_MACHINE)}
-          </Checkbox>
-          <Button
-            className={styles.addButton}
-            type={draftPreset ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
-            icon={<PlusOutlined />}
-            // The icon carries a label of its own, so the button names itself to keep its accessible name to its text.
-            aria-label={t(DEFAULT.MATERIAL_LIBRARY_ADD)}
-            disabled={!newPresetMaterial || !activeProfile}
-            onClick={addPreset}
-          >
-            {t(DEFAULT.MATERIAL_LIBRARY_ADD)}
-          </Button>
-        </div>
+        <MaterialLibraryFilters
+          searchText={searchText}
+          isOnlyActiveMachine={Boolean(listedProfileId)}
+          hasActiveMachine={Boolean(activeProfile)}
+          filteredMaterial={filteredMaterial}
+          isAddAllowed={Boolean(newPresetMaterial && activeProfile)}
+          isAddMainAction={!draftPreset}
+          onSearch={setSearchText}
+          onOnlyActiveMachineChange={setIsOnlyActiveMachine}
+          onClearMaterialFilter={() => setMaterialFilterId(undefined)}
+          onAdd={addPreset}
+        />
         {initialLayerName && (
           <p className={styles.layerNote} role="note">
             {t(DEFAULT.MATERIAL_LIBRARY_LAYER_NOTE, { layer: initialLayerName })}
@@ -223,7 +209,9 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
                 hasMaterials={Boolean(firstMaterial)}
                 hasActiveMachine={Boolean(activeProfile)}
                 searchText={searchText}
+                filteredMaterial={filteredMaterial}
                 onClearSearch={() => setSearchText('')}
+                onClearMaterialFilter={() => setMaterialFilterId(undefined)}
                 onClose={onClose}
               />
             }
