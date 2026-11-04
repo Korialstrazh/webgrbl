@@ -72,7 +72,7 @@ The large drawing area in LaserGRBL's main window. It renders the loaded program
 - **Options & defaults:** Colour `PreviewJobRange`. OpenGL: 1 px line, stipple factor 10, pattern `0xAAAA`. GDI: dash pattern 1/zoom, 2/zoom, with labels on the axes.
 - **Behaviour & gotchas:** The lines are full-width guides, not a rectangle. Width × height is not printed as a number anywhere; the user reads the edge labels. DrawingRange slightly underestimates (see [[lg-gcode-files]] LG-GCODE-07).
 - **Upstream source:** [`LaserGRBL/Obj3D/Objects3D.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Obj3D/Objects3D.cs) (`Grbl3D.Draw` bounding display list, `Invalidate`), [`LaserGRBL/GrblFile.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/GrblFile.cs) (`DrawJobRange`)
-- **webgrbl notes:** Status: not started. Show an explicit rectangle plus a "W × H mm, origin X,Y" readout. Add a "frame/outline" action that traces the box with the laser off or at low power ([[lg-machine-control]]). Warn if the box falls outside the work area.
+- **webgrbl notes:** Status: not started. Show an explicit rectangle plus a "W × H mm, origin X,Y" readout. The outline action exists as Frame job, a low-power trace ([[running-jobs]]); a laser-off variant is not built. Warn if the box falls outside the work area.
 
 ### LG-PREV-05 Zoom, pan and auto-size
 

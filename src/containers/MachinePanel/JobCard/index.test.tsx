@@ -12,6 +12,7 @@ import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineP
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../../utils/project/new.project.object';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
+import { JOB_RUN_KIND } from '../../../utils/states/job.run.kind.constants';
 import { JobRunStarted, JobStartRequested } from '../../../utils/states/job.run.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../../utils/states/machine.status.state';
@@ -41,9 +42,9 @@ import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpa
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
 const START_CONFIRM_OK_LABEL = 'Start and fire';
-const FRAME_JOB_LABEL = 'Frame job';
 const SOON_LABEL = 'Soon';
 const PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
+const ESTIMATE_LABEL = 'Estimate';
 const ESTIMATE_PLACEHOLDER = EM_DASH;
 const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
@@ -132,7 +133,7 @@ describe(JobCard.name, () => {
     });
 
     expect(screen.getByText(TWO_LAYERS_ONE_OFF)).toBeInTheDocument();
-    expect(screen.getByText(ESTIMATE_PLACEHOLDER)).toBeInTheDocument();
+    expect(screen.getByText(ESTIMATE_LABEL).nextElementSibling).toHaveTextContent(ESTIMATE_PLACEHOLDER);
   });
 
   it('shows the estimate of a ready toolpath', () => {
@@ -197,7 +198,7 @@ describe(JobCard.name, () => {
   it('shows the run as Paused during a hold, not as Running', () => {
     const store: AppStore = newStartableJobStore();
 
-    store.dispatch(new JobRunStarted({ startedAtMs: 0 }));
+    store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.JOB }));
     renderJobCard(store);
 
     expect(screen.getByRole('status')).toHaveTextContent('Running');
@@ -209,24 +210,31 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('status')).toHaveTextContent('Paused');
   });
 
+  it('reads Framing during a frame, and Running during a job', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.FRAME }));
+    renderJobCard(store);
+
+    expect(screen.getByRole('status')).toHaveTextContent('Framing');
+
+    act(() => {
+      store.dispatch(newMachineStatusReceived(GRBL_MACHINE_STATE.HOLD));
+    });
+
+    expect(screen.getByRole('status')).toHaveTextContent('Framing: paused');
+  });
+
   it('makes Export G-code the filled main action, the one job action that works today', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
     expect(getExportButton()).toHaveClass(PRIMARY_BUTTON_CLASS);
   });
 
-  it('offers Frame job as a disabled Soon action that dispatches nothing', async () => {
-    const store: AppStore = await newGcodeExportTestStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
+  it('has no Soon tag any more, since Frame job works', async () => {
+    renderJobCard(await newGcodeExportTestStore());
 
-    renderJobCard(store);
-    const frameJobButton: HTMLElement = screen.getByRole('button', { name: FRAME_JOB_LABEL });
-
-    fireEvent.click(frameJobButton);
-
-    expect(frameJobButton).toBeDisabled();
-    expect(frameJobButton.parentElement?.nextElementSibling).toHaveTextContent(SOON_LABEL);
-    expect(dispatchSpy).not.toHaveBeenCalled();
+    expect(screen.queryByText(SOON_LABEL)).not.toBeInTheDocument();
   });
 
   it('downloads the G-code from Export G-code', async () => {

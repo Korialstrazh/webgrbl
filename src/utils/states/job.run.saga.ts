@@ -19,6 +19,7 @@ import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { Action } from './action';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { JobFinishRaceResult } from './interfaces/JobFinishRaceResult';
+import { JOB_RUN_KIND } from './job.run.kind.constants';
 import { JobRunStarted, JobRunStatusChanged } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
@@ -70,7 +71,7 @@ function* waitForMachineAfterProgram(): Generator {
  * A stop counts only once it has finished, so the locks stay on until the machine got its reset. The reset byte is
  * awaited without a time limit, so a stalled port would otherwise keep the locks on until the connection ends.
  */
-function* waitForJobInterruption(): Generator {
+export function* waitForJobInterruption(): Generator {
   const interruption: Action<unknown> = (yield take([
     MachineStopRequested.type,
     MachineResetRequested.type,
@@ -103,7 +104,11 @@ function* waitForJobFinish(interruptionTask: Task): Generator {
 }
 
 /** Sends the program and follows it; resolves with the status the job ended in. */
-function* followJobProgram(controller: GrblController, programLines: string[], interruptionTask: Task): Generator {
+export function* followJobProgram(
+  controller: GrblController,
+  programLines: string[],
+  interruptionTask: Task,
+): Generator {
   const { isCompleted }: GrblProgramResult = (yield call(
     [controller, controller.streamProgram],
     programLines,
@@ -154,7 +159,7 @@ export function* runGrblJob(controller: GrblController): Generator {
   const interruptionTask: Task = (yield fork(waitForJobInterruption)) as Task;
   const stopRequestTask: Task = (yield fork(waitForJobStopRequest)) as Task;
 
-  yield put(new JobRunStarted({ startedAtMs: Date.now() }));
+  yield put(new JobRunStarted({ startedAtMs: Date.now(), kind: JOB_RUN_KIND.JOB }));
 
   try {
     const programLines: string[] = (yield call(getJobProgramLines)) as string[];

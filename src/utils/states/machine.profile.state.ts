@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { FRAME_GRID_CELL_NONE_MM, FRAME_GRID_CELL_OPTIONS_MM } from '../frame/frame.constants';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { MachineProfilesDocument } from '../profiles/interfaces/MachineProfilesDocument';
 import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../profiles/machine.profile.constants';
@@ -142,4 +143,12 @@ export const selectActiveMachineProfile = (state: RootState): MachineProfile | u
 
   return activeProfileId ? selectMachineProfile(activeProfileId)(state) : undefined;
 };
+
+export const selectFrameGridCellMm = (state: RootState): number => {
+  const gridCellMm: number = selectActiveMachineProfile(state)?.frameGridCellMm ?? FRAME_GRID_CELL_NONE_MM;
+
+  return FRAME_GRID_CELL_OPTIONS_MM.includes(gridCellMm) ? gridCellMm : FRAME_GRID_CELL_NONE_MM;
+};
+
+export const selectFrameMarginMm = (state: RootState): number => selectActiveMachineProfile(state)?.frameMarginMm ?? 0;
 // #endregion

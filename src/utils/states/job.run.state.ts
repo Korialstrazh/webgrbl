@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { GRBL_CONNECTION_STATUS } from '../grbl/grbl.constants';
+import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import { ConnectionEstablished, ConnectionStatusChanged } from './grbl.connection.state';
@@ -17,8 +17,11 @@ import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { JobRunProgressChangedPayload } from './interfaces/JobRunProgressChangedPayload';
 import type { JobRunStartedPayload } from './interfaces/JobRunStartedPayload';
 import type { JobRunStatusChangedPayload } from './interfaces/JobRunStatusChangedPayload';
+import { JOB_RUN_KIND } from './job.run.kind.constants';
+import type { JobRunKind } from './job.run.kind.constants';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
+import { MachineStatusReceived } from './machine.status.state';
 
 // #region State
 export interface JobRunState {
@@ -32,6 +35,10 @@ export interface JobRunState {
   startedAtMs: number;
   /** True once a console line may have changed $32, so the setting read at connect no longer counts. */
   isLaserModeUnconfirmed: boolean;
+  /** Whether the latest run is a job or a frame. */
+  kind: JobRunKind;
+  /** True when the latest run was a frame that an Alarm report ended. */
+  isFrameAlarmed: boolean;
 }
 // #endregion
 
@@ -44,6 +51,15 @@ const actionType: ActionTypeFormatter = actionTypePrefixer(JOB_RUN_STATE_NAME);
 // #endregion
 
 // #region Actions
+export class FrameStartRequested extends Action {
+  public static readonly type: string = actionType('frame start requested');
+}
+
+/** An alarm ended the frame run, not a stop or reset of the user. */
+export class FrameRunAlarmed extends Action {
+  public static readonly type: string = actionType('frame run alarmed');
+}
+
 export class JobStartRequested extends Action {
   public static readonly type: string = actionType('job start requested');
 }
@@ -76,6 +92,8 @@ const INITIAL_JOB_RUN_STATE: JobRunState = {
   totalLineCount: 0,
   startedAtMs: 0,
   isLaserModeUnconfirmed: false,
+  kind: JOB_RUN_KIND.JOB,
+  isFrameAlarmed: false,
 };
 
 // Settings are read only at connect: a write to $32 or a settings reset leaves them out of date.
@@ -91,6 +109,9 @@ const isJobRunCutOffByConnection = (state: JobRunState, action: ConnectionStatus
   ACTIVE_JOB_RUN_STATUSES.includes(state.status)
   && action.payload.connectionStatus !== GRBL_CONNECTION_STATUS.CONNECTED;
 
+const isStatusReportInAlarm = (action: MachineStatusReceived): boolean =>
+  action.payload.status.machineState === GRBL_MACHINE_STATE.ALARM;
+
 export const jobRunReducer = (state: JobRunState = INITIAL_JOB_RUN_STATE, action: Action<unknown>): JobRunState => {
   switch (action.type) {
   case JobRunStatusChanged.type:
@@ -102,7 +123,15 @@ export const jobRunReducer = (state: JobRunState = INITIAL_JOB_RUN_STATE, action
       answeredLineCount: 0,
       totalLineCount: 0,
       startedAtMs: (action as JobRunStarted).payload.startedAtMs,
+      kind: (action as JobRunStarted).payload.kind,
+      isFrameAlarmed: false,
     };
+  case FrameRunAlarmed.type:
+    return { ...state, isFrameAlarmed: true };
+  case MachineStatusReceived.type:
+    return state.isFrameAlarmed && !isStatusReportInAlarm(action as MachineStatusReceived)
+      ? { ...state, isFrameAlarmed: false }
+      : state;
   case ConsoleCommandSubmitted.type:
     return isLaserModeChangingLine((action as ConsoleCommandSubmitted).payload.commandText)
       ? { ...state, isLaserModeUnconfirmed: true }
@@ -135,6 +164,10 @@ export const selectIsLaserModeUnconfirmed = (state: RootState): boolean =>
   state[JOB_RUN_STATE_NAME].isLaserModeUnconfirmed;
 
 export const selectJobRunStartedAtMs = (state: RootState): number => state[JOB_RUN_STATE_NAME].startedAtMs;
+
+export const selectJobRunKind = (state: RootState): JobRunKind => state[JOB_RUN_STATE_NAME].kind;
+
+export const selectIsFrameAlarmed = (state: RootState): boolean => state[JOB_RUN_STATE_NAME].isFrameAlarmed;
 
 /** True while program lines are sent or the laser still works through them. */
 export const selectIsJobRunActive = (state: RootState): boolean =>

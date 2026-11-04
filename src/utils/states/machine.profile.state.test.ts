@@ -23,6 +23,8 @@ import {
   MachineProfilesLoaded,
   machineProfileReducer,
   selectActiveMachineProfile,
+  selectFrameGridCellMm,
+  selectFrameMarginMm,
   selectMachineProfiles,
 } from './machine.profile.state';
 import type { MachineProfileState } from './machine.profile.state';
@@ -165,5 +167,43 @@ describe(selectMachineProfiles.name, () => {
     const second: MachineProfile = newMachineProfile();
 
     expect(selectMachineProfiles(getRootState(getLoadedState(newDocument([first, second]))))).toEqual([first, second]);
+  });
+});
+
+const UNLISTED_GRID_CELL_MM = 7;
+const LISTED_GRID_CELL_MM = 20;
+const FRAME_MARGIN_MM = 3;
+
+const getActiveRootState = (profile: MachineProfile): { [MACHINE_PROFILE_STATE_NAME]: MachineProfileState } =>
+  getRootState(getLoadedState(newDocument([profile], profile.id)));
+
+describe(selectFrameGridCellMm.name, () => {
+  it('returns 0 for a profile without the setting', () => {
+    expect(selectFrameGridCellMm(getActiveRootState(newMachineProfile()))).toBe(0);
+  });
+
+  it('returns 0 without an active profile', () => {
+    expect(selectFrameGridCellMm(getRootState(getInitialState()))).toBe(0);
+  });
+
+  it('returns a listed grid cell size', () => {
+    expect(selectFrameGridCellMm(getActiveRootState(newMachineProfile({ frameGridCellMm: LISTED_GRID_CELL_MM }))))
+      .toBe(LISTED_GRID_CELL_MM);
+  });
+
+  it('reads a grid cell size outside the options as 0', () => {
+    expect(selectFrameGridCellMm(getActiveRootState(newMachineProfile({ frameGridCellMm: UNLISTED_GRID_CELL_MM }))))
+      .toBe(0);
+  });
+});
+
+describe(selectFrameMarginMm.name, () => {
+  it('returns 0 for a profile without the setting', () => {
+    expect(selectFrameMarginMm(getActiveRootState(newMachineProfile()))).toBe(0);
+  });
+
+  it('returns the margin of the active profile', () => {
+    expect(selectFrameMarginMm(getActiveRootState(newMachineProfile({ frameMarginMm: FRAME_MARGIN_MM }))))
+      .toBe(FRAME_MARGIN_MM);
   });
 });

@@ -31,4 +31,8 @@ export interface MachineProfile {
   hasHomingSwitches: boolean;
   /** Feed rate used for jogging, in mm/min. */
   jogFeedRate: number;
+  /** Cell size in mm of the grid the frame trace draws inside the job outline; missing or 0 means no grid. */
+  frameGridCellMm?: number;
+  /** Distance in mm the frame trace keeps outside the job outline; missing means 0. */
+  frameMarginMm?: number;
 }
