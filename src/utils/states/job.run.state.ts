@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { GRBL_CONNECTION_STATUS } from '../grbl/grbl.constants';
+import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import { ConnectionEstablished, ConnectionStatusChanged } from './grbl.connection.state';
@@ -21,6 +21,7 @@ import { JOB_RUN_KIND } from './job.run.kind.constants';
 import type { JobRunKind } from './job.run.kind.constants';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
+import { MachineStatusReceived } from './machine.status.state';
 
 // #region State
 export interface JobRunState {
@@ -108,6 +109,9 @@ const isJobRunCutOffByConnection = (state: JobRunState, action: ConnectionStatus
   ACTIVE_JOB_RUN_STATUSES.includes(state.status)
   && action.payload.connectionStatus !== GRBL_CONNECTION_STATUS.CONNECTED;
 
+const isStatusReportInAlarm = (action: MachineStatusReceived): boolean =>
+  action.payload.status.machineState === GRBL_MACHINE_STATE.ALARM;
+
 export const jobRunReducer = (state: JobRunState = INITIAL_JOB_RUN_STATE, action: Action<unknown>): JobRunState => {
   switch (action.type) {
   case JobRunStatusChanged.type:
@@ -124,6 +128,10 @@ export const jobRunReducer = (state: JobRunState = INITIAL_JOB_RUN_STATE, action
     };
   case FrameRunAlarmed.type:
     return { ...state, isFrameAlarmed: true };
+  case MachineStatusReceived.type:
+    return state.isFrameAlarmed && !isStatusReportInAlarm(action as MachineStatusReceived)
+      ? { ...state, isFrameAlarmed: false }
+      : state;
   case ConsoleCommandSubmitted.type:
     return isLaserModeChangingLine((action as ConsoleCommandSubmitted).payload.commandText)
       ? { ...state, isLaserModeUnconfirmed: true }

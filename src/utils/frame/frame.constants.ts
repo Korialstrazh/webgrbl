@@ -21,8 +21,9 @@ export const FRAME_GRID_CELL_OPTIONS_MM: readonly number[] = [
   20,
   50,
 ];
-export const FRAME_LASER_ON_PREFIX = 'M3 S';
-export const FRAME_LASER_OFF = 'M5';
+export const FRAME_LASER_ON_PREFIX = 'M4 S';
+/** A dwell of no time: it waits for the planner to empty, which the plain G0 of the return move does not. */
+export const FRAME_SYNC_DWELL = 'G4 P0';
 
 export const FRAME_EDGE = {
   LEFT: 'left',

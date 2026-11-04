@@ -9,6 +9,7 @@ const PROFILE = newMachineProfile({
   originCorner: MACHINE_ORIGIN_CORNER.FRONT_LEFT,
 });
 const S_VALUE = 5;
+const SYNC_DWELL_LINE = 'G4 P0';
 const START_POINT = { x: 3, y: 4 };
 const SQUARE_100 = { minX: 10, minY: 10, maxX: 110, maxY: 110 };
 const SQUARE_50 = { minX: 0, minY: 0, maxX: 50, maxY: 50 };
@@ -25,14 +26,15 @@ describe(getFrameProgramLines.name, () => {
 
     expect(lines).toEqual([
       'G21 G90',
-      'M3 S5',
+      'M4 S5',
       'G0 X10 Y10',
       'G1 X110 Y10 F1500',
       'G1 X110 Y110',
       'G1 X10 Y110',
       'G1 X10 Y10',
-      'M5',
+      'M5 S0',
       'G0 X3 Y4',
+      SYNC_DWELL_LINE,
     ]);
   });
 
@@ -45,7 +47,7 @@ describe(getFrameProgramLines.name, () => {
       startPoint: START_POINT,
     });
 
-    expect(lines.slice(7, -2)).toEqual([
+    expect(lines.slice(7, -3)).toEqual([
       'G0 X20 Y0',
       'G1 X20 Y50',
       'G0 X40 Y50',
@@ -87,6 +89,7 @@ describe(getFrameProgramLines.name, () => {
 
     expect(lines[2]).toBe('G0 X390 Y290');
     expect(lines[3]).toBe('G1 X290 Y290 F1500');
-    expect(lines.at(-1)).toBe('G0 X3 Y4');
+    expect(lines.at(-2)).toBe('G0 X3 Y4');
+    expect(lines.at(-1)).toBe(SYNC_DWELL_LINE);
   });
 });

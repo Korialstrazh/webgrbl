@@ -13,6 +13,7 @@ import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import {
   GCODE_BURN_WORD,
   GCODE_F_PREFIX,
+  GCODE_LASER_OFF_END,
   GCODE_TRAVEL_WORD,
   GCODE_UNITS_AND_ABSOLUTE,
   GCODE_WORD_SEPARATOR,
@@ -22,8 +23,8 @@ import {
 import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
 import {
   FRAME_FEED_MM_PER_MIN,
-  FRAME_LASER_OFF,
   FRAME_LASER_ON_PREFIX,
+  FRAME_SYNC_DWELL,
 } from './frame.constants';
 import { getFrameGridOffsets } from './get.frame.grid.offsets';
 import type { FrameProgramInput } from './interfaces/FrameProgramInput';
@@ -173,7 +174,8 @@ export const getFrameProgramLines = (input: FrameProgramInput): string[] => {
     getMoveLine(GCODE_TRAVEL_WORD, mapPoint(corner)),
     ...getOutlineLines(rectangle, mapPoint),
     ...getGridProgramLines(rectangle, gridCellMm, mapPoint),
-    FRAME_LASER_OFF,
+    GCODE_LASER_OFF_END,
     getMoveLine(GCODE_TRAVEL_WORD, startPoint),
+    FRAME_SYNC_DWELL,
   ];
 };

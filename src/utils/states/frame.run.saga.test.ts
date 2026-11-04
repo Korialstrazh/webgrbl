@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { GRBL_HOLD_COMPLETE_MAX_WAIT_MS, GRBL_STATUS_POLL_INTERVAL_MS, SIMULATED_LASER_PORT_ID } from '../grbl/grbl.constants';
+import {
+  GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
+  GRBL_MACHINE_STATE,
+  GRBL_STATUS_POLL_INTERVAL_MS,
+  SIMULATED_LASER_PORT_ID,
+} from '../grbl/grbl.constants';
 import { GrblController } from '../grbl/grbl.controller';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
 import { GrblSimulator } from '../grbl/simulator/grbl.simulator';
@@ -27,7 +32,14 @@ import {
 } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from './machine.profile.state';
-import { MachineLineRequested, MachineStopRequested, selectMachineStatus } from './machine.status.state';
+import {
+  MachineAirAssistChanged,
+  MachineLineRequested,
+  MachineStopRequested,
+  MachineUnlockRequested,
+  selectIsAirAssistOn,
+  selectMachineStatus,
+} from './machine.status.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
 import { ToolpathReady, selectToolpathDocumentVersion } from './toolpath.state';
@@ -45,8 +57,13 @@ const INTO_RETURN_MOVE_MS = 5000;
 const LIMIT_ALARM_CODE = 1;
 const CYCLE_ABORT_ALARM_CODE = 3;
 const LASER_MODE_OFF_LINE = '$32=0\n';
-const LASER_ON_WORD = 'M3S';
-const LASER_OFF_WORD = 'M5';
+const REPORTED_S_VALUE_MAX_LINE = '$30=100\n';
+const PROFILE_S_VALUE_MAX = 1000;
+/** 0.05 W of 0.5 W is 10 percent: S10 at the reported 100, S100 at the profile's 1000. */
+const HALF_WATT = 0.5;
+const REPORTED_DOT_LASER_ON_PATTERN = /M4S10(\r?\n|$)/;
+const LASER_ON_WORD = 'M4S';
+const LASER_OFF_WORD = 'M5S0';
 const AIR_ASSIST_ON_WORD = 'M8';
 
 interface FrameRig {
@@ -56,14 +73,24 @@ interface FrameRig {
   getWrittenText: () => string;
 }
 
+type FrameProfileOverrides = Partial<MachineProfile>;
+
 const newFrameProfile = (): MachineProfile => newMachineProfile({ hasAirAssist: true });
 
 const prepareFrameRig = async (
   moveEndXMm: number = SHORT_MOVE_END_X_MM,
   isLaserModeOff = false,
   gridCellMm = 0,
+  profileOverrides: FrameProfileOverrides = {},
+  laserSettingLine: string = '',
 ): Promise<FrameRig> => {
   const simulator: GrblSimulator = new GrblSimulator(() => undefined);
+
+  if (laserSettingLine) {
+    simulator.powerOn();
+    simulator.receiveBytes(new TextEncoder().encode(laserSettingLine));
+    simulator.powerOff();
+  }
 
   if (isLaserModeOff) {
     simulator.powerOn();
@@ -80,7 +107,7 @@ const prepareFrameRig = async (
     },
     new FakeToolpathWorkerClient(),
   );
-  const profile: MachineProfile = { ...newFrameProfile(), frameGridCellMm: gridCellMm };
+  const profile: MachineProfile = { ...newFrameProfile(), frameGridCellMm: gridCellMm, ...profileOverrides };
 
   store.dispatch(new MachineProfileSaved({ profile }));
   store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
@@ -190,6 +217,50 @@ describe(runGrblFrame.name, () => {
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
     expect(selectIsFrameAlarmed(store.getState())).toBe(true);
     expect(selectIsJobRunActive(store.getState())).toBe(false);
+  });
+
+  it('scales the dot power by the S max the laser reports, not the profile S max', async () => {
+    const { store, getWrittenText }: FrameRig = await prepareFrameRig(
+      SHORT_MOVE_END_X_MM,
+      false,
+      0,
+      { maxPowerWatts: HALF_WATT, sValueMax: PROFILE_S_VALUE_MAX },
+      REPORTED_S_VALUE_MAX_LINE,
+    );
+
+    store.dispatch(new FrameStartRequested());
+    await vi.advanceTimersByTimeAsync(FRAME_END_MS);
+
+    expect(getWrittenText()).toMatch(REPORTED_DOT_LASER_ON_PATTERN);
+  });
+
+  it('shows the air assist as off after an alarm ended the frame', async () => {
+    const { store, simulator }: FrameRig = await prepareFrameRig();
+
+    store.dispatch(new MachineAirAssistChanged({ isAirAssistOn: true }));
+    store.dispatch(new FrameStartRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    simulator.injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.ALARM, alarmCode: LIMIT_ALARM_CODE });
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    expect(selectIsAirAssistOn(store.getState())).toBe(false);
+  });
+
+  it('forgets the frame alarm once a status report shows the machine out of Alarm', async () => {
+    const { store, simulator }: FrameRig = await prepareFrameRig();
+
+    store.dispatch(new FrameStartRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    simulator.injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.ALARM, alarmCode: LIMIT_ALARM_CODE });
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+    expect(selectIsFrameAlarmed(store.getState())).toBe(true);
+
+    store.dispatch(new MachineUnlockRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    expect(selectMachineStatus(store.getState())?.machineState).not.toBe(GRBL_MACHINE_STATE.ALARM);
+    expect(selectIsFrameAlarmed(store.getState())).toBe(false);
   });
 
   it('counts an alarm that cuts the stream off, when the run ends before any status report shows it', async () => {

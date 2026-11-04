@@ -12,7 +12,7 @@ While a job runs, the console, jog, home, set zero, pointer and air assist are l
 
 ## Frame job
 
-**Not yet verified on a real laser.** The checks on the ACMER are pending.
+**Not yet verified on a real laser.** The checks on the ACMER are pending: the dot visible at about 0.05 W including at corners, dark while paused, and dark when the head stops. The dot uses `M4`, so it goes dark when the head stands still and dims at corners.
 
 Frame job traces the job with a dim dot, so you can see where it lands before you burn. Watch the dot to answer three questions: does the job stay within the limits of the laser, can the head travel the whole path without getting stuck, and is the sheet flat (a wider or blurrier spot shows where it rises or dips).
 
