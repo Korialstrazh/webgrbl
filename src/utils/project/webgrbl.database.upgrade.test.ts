@@ -1,13 +1,17 @@
 import { Dexie } from 'dexie';
 import { describe, expect, it } from 'vitest';
 import type { StoredProject } from './interfaces/StoredProject';
+import { MATERIAL_PRESET_REPOSITORY } from '../materials/material.preset.repository';
 import { MATERIAL_REPOSITORY } from '../materials/material.repository';
+import { newMaterial } from '../materials/new.material';
 import { PROJECT_REPOSITORY } from './project.repository';
 import {
   WEBGRBL_DATABASE_NAME,
   WEBGRBL_DATABASE_SCHEMA_VERSION_1,
+  WEBGRBL_DATABASE_SCHEMA_VERSION_2,
   WEBGRBL_DATABASE_TABLE,
   WEBGRBL_DATABASE_VERSION_1,
+  WEBGRBL_DATABASE_VERSION_2,
 } from './project.database.constants';
 
 const OLD_PROJECT_ID = 'old-project';
@@ -40,5 +44,16 @@ describe('webgrbl database upgrade', () => {
     oldDatabase.close();
 
     expect(await MATERIAL_REPOSITORY.listMaterials()).toEqual([]);
+  });
+
+  it('keeps the materials and adds an empty presets table when it upgrades a version 2 database', async () => {
+    const material = newMaterial();
+    const oldDatabase = new Dexie(WEBGRBL_DATABASE_NAME);
+    oldDatabase.version(WEBGRBL_DATABASE_VERSION_2).stores(WEBGRBL_DATABASE_SCHEMA_VERSION_2);
+    await oldDatabase.table(WEBGRBL_DATABASE_TABLE.MATERIALS).put(material);
+    oldDatabase.close();
+
+    expect(await MATERIAL_REPOSITORY.listMaterials()).toEqual([material]);
+    expect(await MATERIAL_PRESET_REPOSITORY.listMaterialPresets()).toEqual([]);
   });
 });

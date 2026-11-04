@@ -12,14 +12,16 @@ import type { StoredProject } from './interfaces/StoredProject';
 import type { StoredSvgAsset } from './interfaces/StoredSvgAsset';
 
 export const WEBGRBL_DATABASE_NAME = 'webgrbl';
-export const WEBGRBL_DATABASE_VERSION = 2;
+export const WEBGRBL_DATABASE_VERSION = 3;
 export const WEBGRBL_DATABASE_VERSION_1 = 1;
+export const WEBGRBL_DATABASE_VERSION_2 = 2;
 
 export const WEBGRBL_DATABASE_TABLE = {
   PROJECTS: 'projects',
   SVG_ASSETS: 'svgAssets',
   APP_STATE: 'appState',
   MATERIALS: 'materials',
+  MATERIAL_PRESETS: 'materialPresets',
 } as const;
 
 export const PROJECT_UPDATED_AT_INDEX: keyof StoredProject = 'updatedAt';
@@ -35,10 +37,16 @@ export const WEBGRBL_DATABASE_SCHEMA_VERSION_1: Record<string, string> = {
   [WEBGRBL_DATABASE_TABLE.APP_STATE]: 'key',
 };
 
-/** Dexie schema of the current version: version 1 plus the materials table. */
-export const WEBGRBL_DATABASE_SCHEMA: Record<string, string> = {
+/** Dexie schema of version 2: version 1 plus the materials table. */
+export const WEBGRBL_DATABASE_SCHEMA_VERSION_2: Record<string, string> = {
   ...WEBGRBL_DATABASE_SCHEMA_VERSION_1,
   [WEBGRBL_DATABASE_TABLE.MATERIALS]: 'id',
+};
+
+/** Dexie schema of the current version: version 2 plus the material presets table. */
+export const WEBGRBL_DATABASE_SCHEMA: Record<string, string> = {
+  ...WEBGRBL_DATABASE_SCHEMA_VERSION_2,
+  [WEBGRBL_DATABASE_TABLE.MATERIAL_PRESETS]: 'id',
 };
 
 export const APP_STATE_KEY = {
