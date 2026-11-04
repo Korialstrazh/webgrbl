@@ -298,7 +298,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
     - Everything else is enqueued, case preserved.
     - Custom buttons are in [[lg-machine-control]].
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`RunProgram`, `RunProgramFromStart`, `OnJobBegin`, `ExecuteCustomCode`, `EvaluateExpression`, `EvaluateCB`, `IsImmediate`, `GCODE_STD_*`), [`LaserGRBL/ConnectLogForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ConnectLogForm.cs) (`BtnRunProgramClick`), [`LaserGRBL/SettingsForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/SettingsForm.cs)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done, simulator-tested only — see [[running-jobs]].
   - Stream from a pre-serialized array in a worker. For huge raster files (millions of lines), avoid cloning per line and keep the log virtualized ([[#LG-STRM-21 Command log / console|LG-STRM-21]]).
   - Keep header/footer/passes with the same expression variables, and fix the `WPos` bug.
   - Add a pre-flight check before start: bounds vs `$130/$131`, laser mode `$32`, homing state.
@@ -361,7 +361,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
     6. Marlin only: force `Idle`.
   - Note "complete" means all lines acked, not that motion stopped. Grbl may still be executing the planner buffer.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`ManageCommandResponse`, `OnProgramEnd`, `OnJobEnd`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done, simulator-tested only: a job ends at the next Idle report after the last `ok` — see [[running-jobs]].
   - Mark the job finished only when all lines are acked and the state returns to Idle, which is more accurate.
   - Use the Notifications API (and optionally the Badging API) for "job done" when the tab is in the background.
   - Keep a persistent job history (IndexedDB) with duration, errors and file name.
@@ -380,7 +380,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
   - Pending lines are not cleared. No feed hold or reset is sent, so the controller finishes its RX buffer (up to ~127–1024 bytes) and planner (~15 blocks) before the `M5` executes.
   - The next Send offers Resume with "Start again from beginning" preselected.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`AbortProgram`, `CanAbortProgram`), [`LaserGRBL/ConnectLogForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ConnectLogForm.cs) (`BtnAbortProgram_Click`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: done, simulator-tested only: Stop marks the run as interrupted — see [[running-jobs]].
   - Offer two clear actions:
     - "Stop after buffer" (LaserGRBL behaviour).
     - "Stop now": `!`, wait for Hold:0, `0x18`, which keeps position, then optional `$X`.
@@ -404,7 +404,7 @@ This article covers how LaserGRBL feeds G-code to the controller over an open co
   - Projected total = real job time (minus pauses) × estimated total / estimated time of the last executed line, plus pauses.
   - Resume uses `JobContinue` with a correction, so counters reflect file line numbers.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`TimeProjection`: `JobStart`, `JobContinue`, `JobSent`, `JobExecuted`, `JobPause`, `JobResume`, `JobEnd`, `ProjectedTarget`), [`LaserGRBL/ConnectLogForm.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/ConnectLogForm.cs) (`TimerUpdate`)
-- **webgrbl notes:** Status: not started.
+- **webgrbl notes:** Status: in progress, simulator-tested only: lines done and elapsed time are built, time projection is not — see [[running-jobs]].
   - Show remaining time and ETA clock time, a percentage, and current line / total.
   - Use `performance.now()` (monotonic).
   - Treat "sent − executed" as the buffered lookahead, and render it in the preview.

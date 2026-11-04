@@ -132,7 +132,7 @@ How the user drives the machine by hand in LaserGRBL: jogging (buttons, keyboard
 - **Options & defaults:** Hold is enabled in `Run`. Resume is enabled in `Door`, `Hold`, `Cooling` or `AutoHold`.
 - **Behaviour & gotchas:** Hold sends `!` (`0x21`) and remembers that the user requested it. Resume sends `~` (`0x7E`). A GRBL `Hold` status not requested by the user is shown as the synthetic status **AutoHold**. A hold requested by auto-cooling is shown as **Cooling**. `SafetyDoor()` (`@`, `0x40`) exists but is unused.
 - **Upstream source:** [`LaserGRBL/Core/GrblCore.cs`](https://github.com/arkypita/LaserGRBL/blob/1f9337b3af27133f8b1696e41cc110f2af74d04f/LaserGRBL/Core/GrblCore.cs) (`FeedHold`, `CycleStartResume`, `SafetyDoor`, `ParseMachineStatus`)
-- **webgrbl notes:** Status: not started. Realtime bytes must not wait behind a full line buffer. Write them immediately on the port writer, outside the character-counting accounting.
+- **webgrbl notes:** Status: in progress, simulator-tested only: Pause and Resume exist for a running job in the Job card, not as general control strip buttons — see [[running-jobs]]. Realtime bytes must not wait behind a full line buffer. Write them immediately on the port writer, outside the character-counting accounting.
 
 ### LG-CTRL-11 Set work zero
 

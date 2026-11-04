@@ -5,7 +5,7 @@ created: 2026-11-03
 
 # Running jobs
 
-Roadmap item 5, slice 1. Simulator-tested only. User steps: `docs/howto/running-jobs.md`. Later slices: `docs/superpowers/specs/2026-11-03_(03)_running-jobs.spec.md`.
+Roadmap item 5, slices 1 (Start job) and 2 (progress, Pause and Resume). Simulator-tested only: not production-ready until the laser checks are done. Not built yet: slices 3 to 6 (Frame job, overrides, pre-flight, long jobs). User steps: `docs/howto/running-jobs.md`. Slices: `docs/superpowers/specs/2026-11-03_(03)_running-jobs.spec.md`.
 
 ## Key Takeaways
 
@@ -25,4 +25,4 @@ Roadmap item 5, slice 1. Simulator-tested only. User steps: `docs/howto/running-
 
 - `src/utils/states/job.run.state.ts`, `job.run.saga.ts`, `job.run.status.constants.ts`, `job.start.blocked.reason.selector.ts`, `job.pause.control.constants.ts`, `job.pause.control.selector.ts`, `grbl.job.pause.saga.ts`, `project.gcode.text.saga.ts`, `grbl.console.command.saga.ts`, `grbl.machine.line.saga.ts`
 - `src/utils/grbl/grbl.program.streamer.ts`, `interfaces/GrblProgramProgressEvent.ts`
-- `src/containers/MachinePanel/JobCard/`
+- `src/containers/MachinePanel/JobCard/` (with `JobPauseButton/` and `JobRunProgress/`), `src/containers/LeavePageGuard/`
