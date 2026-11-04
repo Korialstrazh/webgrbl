@@ -1,6 +1,7 @@
 /**
- * The material of the project, in the design panel: a select whose options also show the thickness and the
- * test on the active machine, so materials of one name can be told apart, with an entry that adds one.
+ * The material of the project, in the design panel: a select that names each material with its thickness, so materials
+ * of one name can be told apart, whose options also show the test on the active machine, with an entry that adds one.
+ * Picking the add entry changes nothing in the select: the dialog it opens selects the new material on save.
  *
  * @author michael.morosov
  *
@@ -38,17 +39,16 @@ export const ProjectMaterialSelect = (): ReactNode => {
   const activeProfileId: string | undefined = useSelector(selectActiveMachineProfile)?.id;
   const [isMaterialDialogOpen, setIsMaterialDialogOpen] = useState<boolean>(false);
 
-  const getMaterialDetailText = ({ thicknessMm, testResults }: Material): string => {
+  const getMaterialDetailText = ({ testResults }: Material): string => {
     const testResult: MaterialTestResult | undefined = testResults.find(
       ({ machineProfileId }: MaterialTestResult): boolean => machineProfileId === activeProfileId,
     );
 
     return testResult
       ? t(DEFAULT.BURN_PREVIEW_MATERIAL_DETAIL_TESTED, {
-        thickness: thicknessMm,
         date: getMaterialTestDateText(testResult.testedAtIso, i18n.language),
       })
-      : t(DEFAULT.BURN_PREVIEW_MATERIAL_DETAIL_UNTESTED, { thickness: thicknessMm });
+      : t(DEFAULT.BURN_PREVIEW_MATERIAL_DETAIL_UNTESTED);
   };
 
   const changeMaterial = (optionValue: string): void => {
@@ -65,11 +65,12 @@ export const ProjectMaterialSelect = (): ReactNode => {
         className={styles.materialSelect}
         aria-label={t(DEFAULT.BURN_PREVIEW_MATERIAL_LABEL)}
         placeholder={t(DEFAULT.BURN_PREVIEW_MATERIAL_PLACEHOLDER)}
-        value={activeMaterial?.id}
+        // null, not undefined: with undefined antd lets the select keep the add entry it was clicked on.
+        value={activeMaterial?.id ?? null}
         options={[
           ...materials.map((material: Material) => ({
             value: material.id,
-            label: material.name,
+            label: t(DEFAULT.BURN_PREVIEW_MATERIAL_OPTION, { name: material.name, thickness: material.thicknessMm }),
             detail: getMaterialDetailText(material),
           })),
           { value: ADD_MATERIAL_OPTION_VALUE, label: t(DEFAULT.BURN_PREVIEW_ADD_MATERIAL) },

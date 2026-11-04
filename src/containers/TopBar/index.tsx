@@ -1,6 +1,6 @@
 /**
- * The top region: app name, the project name, the Project menu and autosave readout, the machine profiles and material
- * library dialogs, SVG import, undo and redo, the connection pill and update notice.
+ * The top region: app name, the project name, the Project menu and autosave readout, the machine profiles dialog, SVG
+ * import, undo and redo, the connection pill and update notice. The material library opens from the Material panel.
  *
  * @author michael.morosov
  *
@@ -22,7 +22,6 @@ import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUnd
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
 import { MachineProfilesDialog } from '../MachineProfilesDialog';
-import { MaterialLibraryDialog } from '../MaterialLibraryDialog';
 import { SvgImportButton } from '../SvgImportButton';
 import { AutosaveReadout } from './AutosaveReadout';
 import { ProjectMenu } from './ProjectMenu';
@@ -36,7 +35,6 @@ export const TopBar = (): ReactNode => {
   const canUndo: boolean = useSelector(selectCanUndo);
   const canRedo: boolean = useSelector(selectCanRedo);
   const [isProfilesDialogOpen, setIsProfilesDialogOpen] = useState<boolean>(false);
-  const [isMaterialLibraryOpen, setIsMaterialLibraryOpen] = useState<boolean>(false);
 
   return (
     <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
@@ -54,13 +52,6 @@ export const TopBar = (): ReactNode => {
           onClick={() => setIsProfilesDialogOpen(true)}
         >
           {t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
-        </Button>
-        <Button
-          className={styles.secondaryItem}
-          type={ANTD_BUTTON_TYPE_TEXT}
-          onClick={() => setIsMaterialLibraryOpen(true)}
-        >
-          {t(DEFAULT.TOP_BAR_MENU_MATERIALS)}
         </Button>
         <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.compactHiddenLabel} />
       </div>
@@ -81,17 +72,13 @@ export const TopBar = (): ReactNode => {
           disabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
-        <TopBarOverflowMenu
-          onOpenMachineProfiles={() => setIsProfilesDialogOpen(true)}
-          onOpenMaterials={() => setIsMaterialLibraryOpen(true)}
-        />
+        <TopBarOverflowMenu onOpenMachineProfiles={() => setIsProfilesDialogOpen(true)} />
       </div>
       <div className={styles.trailing}>
         <AppUpdatePrompt />
         <ConnectionPill />
       </div>
       <MachineProfilesDialog isOpen={isProfilesDialogOpen} onClose={() => setIsProfilesDialogOpen(false)} />
-      <MaterialLibraryDialog isOpen={isMaterialLibraryOpen} onClose={() => setIsMaterialLibraryOpen(false)} />
     </Layout.Header>
   );
 };

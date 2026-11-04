@@ -20,7 +20,8 @@ const ADD_MATERIAL_LABEL = 'Add material\u2026';
 const SAVE_LABEL = 'Save';
 const DIALOG_TITLE = 'Add material';
 const SELECT_OPTION_SELECTOR = '.ant-select-item-option';
-const BIRCH: Material = newMaterial({ name: 'Birch 4 mm', thicknessMm: 4 });
+const BIRCH: Material = newMaterial({ name: 'Birch', thicknessMm: 4 });
+const BIRCH_OPTION_LABEL = 'Birch, 4 mm';
 
 const renderToolbar = (store: AppStore): void => {
   render(
@@ -52,7 +53,7 @@ describe(ProjectMaterialSelect.name, () => {
 
     store.dispatch(new MaterialSaved({ material: BIRCH }));
     renderToolbar(store);
-    pickMaterialOption(BIRCH.name);
+    pickMaterialOption(BIRCH_OPTION_LABEL);
 
     expect(selectActiveMaterial(store.getState())).toEqual(BIRCH);
   });
@@ -75,7 +76,7 @@ describe(ProjectMaterialSelect.name, () => {
     expect(selectActiveMaterial(store.getState())).toBeDefined();
   });
 
-  it('shows thickness and test date for a material tested on the active machine', () => {
+  it('names each material with its thickness, and shows the test date of one tested on the active machine', () => {
     const store: AppStore = newStore();
     const profile: MachineProfile = newMachineProfile();
 
@@ -87,7 +88,8 @@ describe(ProjectMaterialSelect.name, () => {
     renderToolbar(store);
     fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
 
-    expect(screen.getByText(/^4 mm, tested /)).toBeInTheDocument();
+    expect(screen.getByText(BIRCH_OPTION_LABEL)).toBeInTheDocument();
+    expect(screen.getByText(/^Tested /)).toBeInTheDocument();
   });
 
   it('tells a material not tested on the active machine, and marks the current one', () => {
@@ -98,7 +100,7 @@ describe(ProjectMaterialSelect.name, () => {
     renderToolbar(store);
     fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
 
-    expect(screen.getByText('4 mm, not tested')).toBeInTheDocument();
+    expect(screen.getByText('Not tested on this machine')).toBeInTheDocument();
     expect(document.querySelector(`${SELECT_OPTION_SELECTOR} .anticon-check`)).toBeInTheDocument();
   });
 
@@ -111,6 +113,6 @@ describe(ProjectMaterialSelect.name, () => {
     });
     fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
 
-    expect(document.querySelector(`${SELECT_OPTION_SELECTOR}[title="${BIRCH.name}"]`)).toBeInTheDocument();
+    expect(document.querySelector(`${SELECT_OPTION_SELECTOR}[title="${BIRCH_OPTION_LABEL}"]`)).toBeInTheDocument();
   });
 });

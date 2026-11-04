@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import type { Material } from '../materials/interfaces/Material';
+import type { MaterialPreset } from '../materials/interfaces/MaterialPreset';
 import type { MaterialTestResult } from '../materials/interfaces/MaterialTestResult';
 import { MATERIAL_TEST_OUTCOME } from '../materials/material.constants';
+import { MATERIAL_PRESET_OPERATION } from '../materials/material.preset.constants';
 import { newMaterial } from '../materials/new.material';
+import { newMaterialPreset } from '../materials/new.material.preset';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../profiles/new.machine.profile';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from './machine.profile.state';
-import { selectActiveMaterial, selectActiveMaterialTestResult } from './material.selectors';
+import { selectActiveMaterial, selectActiveMaterialPresetCount, selectActiveMaterialTestResult } from './material.selectors';
+import { MaterialPresetSaved } from './material.preset.state';
 import { MaterialSaved, MaterialsLoaded } from './material.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
@@ -81,5 +85,37 @@ describe(selectActiveMaterialTestResult.name, () => {
 
   it('gives undefined with no active material', () => {
     expect(selectActiveMaterialTestResult(newStore().getState())).toBeUndefined();
+  });
+});
+
+describe(selectActiveMaterialPresetCount.name, () => {
+  const newPresetFixture = (materialId: string, machineProfileId: string): MaterialPreset => newMaterialPreset({
+    materialId,
+    machineProfileId,
+    operation: MATERIAL_PRESET_OPERATION.CUT,
+    powerWatts: 5,
+    speedMmPerMin: 300,
+    passes: 1,
+    notes: '',
+  });
+
+  it('counts the presets of the project material on the active machine only', () => {
+    const store: AppStore = newStore();
+    const material: Material = newMaterial();
+    const otherMaterial: Material = newMaterial();
+    const profile: MachineProfile = newMachineProfile();
+    const otherProfile: MachineProfile = newMachineProfile();
+
+    store.dispatch(new MaterialsLoaded({ materials: [material, otherMaterial] }));
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new MachineProfileSaved({ profile: otherProfile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    store.dispatch(new MaterialPresetSaved({ preset: newPresetFixture(material.id, profile.id) }));
+    store.dispatch(new MaterialPresetSaved({ preset: newPresetFixture(otherMaterial.id, profile.id) }));
+    store.dispatch(new MaterialPresetSaved({ preset: newPresetFixture(material.id, otherProfile.id) }));
+
+    expect(selectActiveMaterialPresetCount(store.getState())).toBe(0);
+    store.dispatch(new ProjectMaterialSelected({ materialId: material.id }));
+    expect(selectActiveMaterialPresetCount(store.getState())).toBe(1);
   });
 });

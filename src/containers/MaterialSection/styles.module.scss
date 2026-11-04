@@ -1,0 +1,31 @@
+.materialSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+// The select takes the width; the library button keeps the control height so the two line up.
+.selectRow {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+}
+
+.libraryButton {
+  flex: none;
+  width: var(--control-height);
+  height: var(--control-height);
+}
+
+// A quiet one-line summary that reads as text and opens the library on a click; the whole line is the target.
+.presetSummary {
+  justify-content: flex-start;
+  min-height: 2rem;
+  padding-inline: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-align: left;
+  white-space: normal;
+}
