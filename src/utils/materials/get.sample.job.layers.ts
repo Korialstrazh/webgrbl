@@ -41,7 +41,7 @@ const getLayersWithShadingBeforeCut = (layers: ProjectLayer[], cutColour: string
   return getLayersInOrder(layers, otherKeys);
 };
 
-const hasSameLayerOrder = (layers: ProjectLayer[], cutColour: string): boolean => {
+const isShadingOnCutLayerOrder = (layers: ProjectLayer[], cutColour: string): boolean => {
   const getOrderOfKey = (layerKey: string): number | undefined =>
     layers.find((layer: ProjectLayer): boolean => getLayerKey(layer) === layerKey)?.order;
 
@@ -72,7 +72,8 @@ export const getSampleJobLayers = (
 
   // An existing shading layer stays where the user put it: getSampleSvgParts already placed the square after it. Only
   // a tie moves it, as older samples could leave shading and cut on one order, which says nothing about the burn.
-  const hasPlacedShading: boolean = existingKeys.has(SHADING_LAYER_COLOUR) && !hasSameLayerOrder(layers, cutColour);
+  const hasPlacedShading: boolean =
+    existingKeys.has(SHADING_LAYER_COLOUR) && !isShadingOnCutLayerOrder(layers, cutColour);
 
   return hasPlacedShading ? layers : getLayersWithShadingBeforeCut(layers, cutColour);
 };

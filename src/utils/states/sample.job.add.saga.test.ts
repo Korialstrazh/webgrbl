@@ -4,8 +4,8 @@ import { getLayerKey } from '../layers/get.layer.key';
 import { getNewLayer } from '../layers/get.new.layer';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { SHADING_LAYER_COLOUR } from '../layers/layer.constants';
-import { SAMPLE_CUT_COLOUR, SAMPLE_GRADIENT_ID, SAMPLE_OBJECT_NAME, SAMPLE_SIZE_MM } from '../materials/sample.job.constants';
 import { getSampleSvgText } from '../materials/get.sample.svg.text';
+import { SAMPLE_CUT_COLOUR, SAMPLE_GRADIENT_ID, SAMPLE_OBJECT_NAME, SAMPLE_SIZE_MM } from '../materials/sample.job.constants';
 import { DEFAULT_PALETTE, LAYER_MODE } from '../palette/palette.constants';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
@@ -144,7 +144,10 @@ describe(addSampleJob.name, () => {
     const shadingLayer: ProjectLayer = { ...getNewLayer(SHADING_LAYER_COLOUR, DEFAULT_PALETTE, 0), enabled: false };
 
     store.dispatch(new ProjectDocumentLoaded({
-      document: { objects: [SHADED_OBJECT], layers: [shadingLayer, getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 1)] },
+      document: {
+        objects: [SHADED_OBJECT],
+        layers: [shadingLayer, getNewLayer(SAMPLE_CUT_COLOUR, DEFAULT_PALETTE, 1)],
+      },
     }));
     store.dispatch(new SampleJobAddRequested());
     await waitForObjectCount(store, 2);
