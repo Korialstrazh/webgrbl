@@ -12,6 +12,10 @@ import type { Key, ReactNode } from 'react';
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
 import type { MaterialPresetRow } from '../../../utils/materials/interfaces/MaterialPresetRow';
 import type { MaterialPresetOperation } from '../../../utils/materials/material.preset.constants';
+import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
+
+/** The active laser: its presets also show their power as percent of it, the unit the layers use. */
+export type MaterialPresetPowerReference = Pick<MachineProfile, 'id' | 'maxPowerWatts'>;
 
 /** The row buttons that apply a preset to the layer the library was opened from. */
 export interface MaterialPresetRowApply {
@@ -34,6 +38,8 @@ export interface MaterialPresetTableProps {
   tickedPresetIds: Key[];
   /** Whether the Machine column shows, which it does when the rows can belong to several lasers. */
   isMachineColumnShown: boolean;
+  /** The active laser; undefined without one, and then no row shows a percent. */
+  activeProfile: MaterialPresetPowerReference | undefined;
   /** The row buttons when the library was opened from a layer; none otherwise. */
   rowApply?: MaterialPresetRowApply;
   /** What the table shows without rows. */

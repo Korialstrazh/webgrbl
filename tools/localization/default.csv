@@ -211,6 +211,7 @@ LAYER_SETTINGS_MODE;Mode
 LAYER_SETTINGS_OVERLINE;Layer settings
 LAYER_SETTINGS_PASSES;Passes
 LAYER_SETTINGS_PRESET_APPLY;Use a material preset
+LAYER_SETTINGS_PRESET_CANCEL;Cancel
 LAYER_SETTINGS_PRESET_EXISTS;{{name}}, {{thickness}} mm · {{operation}} already has a preset for {{machine}}.
 LAYER_SETTINGS_PRESET_EXISTS_QUESTION;Update it with these settings, or save a new one?
 LAYER_SETTINGS_PRESET_NEEDS_MATERIAL;Pick the material of the project in the Material panel to save a preset.
@@ -378,6 +379,7 @@ MATERIAL_LIBRARY_EMPTY_SEARCH_TITLE;Nothing matches "{{search}}"
 MATERIAL_LIBRARY_EMPTY_TEXT;Add a preset here, or save the settings of a layer from its drawer.
 MATERIAL_LIBRARY_EMPTY_TITLE;No presets yet
 MATERIAL_LIBRARY_EXPORT;Export selected ({{count}})
+MATERIAL_LIBRARY_EXPORT_HINT;Tick presets to export
 MATERIAL_LIBRARY_IMPORT;Import
 MATERIAL_LIBRARY_IMPORT_FILE;Open a material presets file
 MATERIAL_LIBRARY_IMPORTED;Imported {{count}} for this machine. Power was rescaled from the source laser, so test before a real job.
@@ -402,7 +404,11 @@ MATERIAL_LIBRARY_PASSES_INVALID;Enter a whole number from {{min}} to {{max}}.
 MATERIAL_LIBRARY_PASSES_VALUE;{{passes}}×
 MATERIAL_LIBRARY_PICK_HINT;Pick a preset to edit it, or add a new one.
 MATERIAL_LIBRARY_POWER;Power (W)
+MATERIAL_LIBRARY_POWER_COLUMN;Power
 MATERIAL_LIBRARY_POWER_INVALID;Enter a power above 0, up to {{max}} W.
+MATERIAL_LIBRARY_POWER_PERCENT;{{percent}} %
+MATERIAL_LIBRARY_POWER_VALUE;{{watts}} W
+MATERIAL_LIBRARY_POWER_WITH_PERCENT;Power (W, {{percent}} %)
 MATERIAL_LIBRARY_PRESET_NAME;{{name}}, {{thickness}} mm · {{operation}}
 MATERIAL_LIBRARY_SAVE;Save
 MATERIAL_LIBRARY_SAVED;Preset saved.

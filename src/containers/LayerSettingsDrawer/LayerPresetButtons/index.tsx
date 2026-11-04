@@ -1,8 +1,9 @@
 /**
  * The preset buttons of the layer settings drawer: Save as material preset stores the layer for the project material
  * and the active machine, and Use a material preset opens the library for this layer. When a preset for the same
- * material, operation and machine exists, saving asks whether to update it or add a new one, so a second click never
- * leaves two rows that look the same.
+ * material, operation and machine exists, saving asks in a popover under the button whether to update it, add a new
+ * one or do nothing, so a second click never leaves two rows that look the same. The confirmation line under the
+ * buttons clears itself after a moment, and at once when the question opens.
  *
  * @author michael.morosov
  *
@@ -12,12 +13,21 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { BookOutlined, SaveOutlined } from '@ant-design/icons';
-import { Button, Popconfirm } from 'antd';
-import { useState } from 'react';
-import type { ReactNode } from 'react';
+import { Button, Popover } from 'antd';
+import { useRef, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_DEFAULT } from '../../../utils/antd.constants';
+import {
+  ANTD_BUTTON_SIZE_SMALL,
+  ANTD_BUTTON_TYPE_DEFAULT,
+  ANTD_BUTTON_TYPE_PRIMARY,
+  ANTD_BUTTON_TYPE_TEXT,
+  ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT,
+} from '../../../utils/antd.constants';
+import { INLINE_FEEDBACK_LIFETIME_MS } from '../../../utils/feedback.constants';
+import type { ExpiringValue } from '../../../utils/hooks/interfaces/ExpiringValue';
+import { useExpiringValue } from '../../../utils/hooks/use.expiring.value';
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getLayerPresetOperation } from '../../../utils/materials/get.layer.preset.operation';
@@ -46,7 +56,10 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
   const presets: MaterialPreset[] = useSelector(selectMaterialPresets);
   const [isLibraryOpen, setIsLibraryOpen] = useState<boolean>(false);
   const [isUpdateAsked, setIsUpdateAsked] = useState<boolean>(false);
-  const [statusText, setStatusText] = useState<string | undefined>(undefined);
+  const { value: statusText, setValue: setStatusText }: ExpiringValue<string> =
+    useExpiringValue<string>(INLINE_FEEDBACK_LIFETIME_MS);
+  // The question renders into the button row, so it stays inside the drawer instead of floating over the layer list.
+  const actionsRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const layerKey: string = getLayerKey(layer);
   // A preset at 0 W could never be saved again in the library, so it is not offered.
   const isSaveAllowed: boolean = Boolean(activeMaterial && machineProfile && layer.settings.maxPowerPercent);
@@ -85,24 +98,46 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
 
   const handleSaveClick = (): void => {
     if (matchingPreset) {
+      // A stale confirmation under an open question would read as its answer.
+      setStatusText(undefined);
       setIsUpdateAsked(true);
     } else {
       savePreset(undefined);
     }
   };
 
+  const updateQuestionComponent: ReactNode = activeMaterial && machineProfile && (
+    <div className={styles.updateQuestion}>
+      <p className={styles.updateQuestionTitle}>
+        {t(DEFAULT.LAYER_SETTINGS_PRESET_EXISTS, getPresetNameParameters(activeMaterial, machineProfile))}
+      </p>
+      <p className={styles.updateQuestionText}>{t(DEFAULT.LAYER_SETTINGS_PRESET_EXISTS_QUESTION)}</p>
+      <div className={styles.updateQuestionActions}>
+        <Button
+          type={ANTD_BUTTON_TYPE_PRIMARY}
+          size={ANTD_BUTTON_SIZE_SMALL}
+          onClick={() => savePreset(matchingPreset)}
+        >
+          {t(DEFAULT.LAYER_SETTINGS_PRESET_UPDATE)}
+        </Button>
+        <Button size={ANTD_BUTTON_SIZE_SMALL} onClick={() => savePreset(undefined)}>
+          {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE_NEW)}
+        </Button>
+        <Button type={ANTD_BUTTON_TYPE_TEXT} size={ANTD_BUTTON_SIZE_SMALL} onClick={() => setIsUpdateAsked(false)}>
+          {t(DEFAULT.LAYER_SETTINGS_PRESET_CANCEL)}
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <div className={styles.actions}>
-        <Popconfirm
+      <div ref={actionsRef} className={styles.actions}>
+        <Popover
           open={isUpdateAsked}
-          title={activeMaterial && machineProfile
-            && t(DEFAULT.LAYER_SETTINGS_PRESET_EXISTS, getPresetNameParameters(activeMaterial, machineProfile))}
-          description={t(DEFAULT.LAYER_SETTINGS_PRESET_EXISTS_QUESTION)}
-          okText={t(DEFAULT.LAYER_SETTINGS_PRESET_UPDATE)}
-          cancelText={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE_NEW)}
-          onConfirm={() => savePreset(matchingPreset)}
-          onCancel={() => savePreset(undefined)}
+          content={updateQuestionComponent}
+          placement={ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT}
+          getPopupContainer={(triggerNode: HTMLElement): HTMLElement => actionsRef.current ?? triggerNode}
           // The button opens the question itself, after its check; a click outside or Escape only closes it.
           onOpenChange={(isOpen: boolean) => {
             if (!isOpen) {
@@ -120,7 +155,7 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
           >
             {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
           </Button>
-        </Popconfirm>
+        </Popover>
         <Button
           type={ANTD_BUTTON_TYPE_DEFAULT}
           icon={<BookOutlined />}

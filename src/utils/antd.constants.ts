@@ -52,6 +52,9 @@ export const ANTD_POPOVER_TRIGGER_CLICK: PopoverProps['trigger'] = 'click';
 /** The popover opens below its anchor, aligned to the anchor's right edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT: PopoverProps['placement'] = 'bottomRight';
 
+/** The popover opens below its anchor, aligned to the anchor's left edge. */
+export const ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT: PopoverProps['placement'] = 'bottomLeft';
+
 /** Form labels sit above their fields. */
 export const ANTD_FORM_LAYOUT_VERTICAL: FormProps['layout'] = 'vertical';
 

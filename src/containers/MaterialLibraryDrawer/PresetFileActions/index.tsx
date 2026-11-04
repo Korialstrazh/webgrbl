@@ -11,7 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { ExportOutlined, ImportOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -118,14 +118,19 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
       >
         {t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
       </Button>
-      <Button
-        icon={<ExportOutlined />}
-        aria-label={t(DEFAULT.MATERIAL_LIBRARY_EXPORT, { count: selectedPresets.length })}
-        disabled={!selectedPresets.length}
-        onClick={exportPresets}
-      >
-        {t(DEFAULT.MATERIAL_LIBRARY_EXPORT, { count: selectedPresets.length })}
-      </Button>
+      {/* Export waits for ticks, and says so: a disabled button fires no hover events, so a plain wrapper does. */}
+      <Tooltip title={selectedPresets.length ? undefined : t(DEFAULT.MATERIAL_LIBRARY_EXPORT_HINT)}>
+        <span className={styles.exportButtonWrapper}>
+          <Button
+            icon={<ExportOutlined />}
+            aria-label={t(DEFAULT.MATERIAL_LIBRARY_EXPORT, { count: selectedPresets.length })}
+            disabled={!selectedPresets.length}
+            onClick={exportPresets}
+          >
+            {t(DEFAULT.MATERIAL_LIBRARY_EXPORT, { count: selectedPresets.length })}
+          </Button>
+        </span>
+      </Tooltip>
       {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
       <input
         ref={fileInputRef}

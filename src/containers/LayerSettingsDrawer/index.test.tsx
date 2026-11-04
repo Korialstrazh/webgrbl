@@ -446,7 +446,13 @@ describe(LayerSettingsDrawer.name, () => {
     fireEvent.click(screen.getByRole('button', { name: PRESET_LABEL }));
 
     expect(await screen.findByText(/already has a preset for/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Update existing' }));
+    // The question replaces the stale confirmation of the first save, and Cancel keeps everything as it was.
+    expect(screen.getByRole('status')).toHaveTextContent('');
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(selectMaterialPresets(store.getState())).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole('button', { name: PRESET_LABEL }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Update existing' }));
 
     expect(selectMaterialPresets(store.getState()))
       .toEqual([expect.objectContaining({ id: storedPreset?.id, passes: 3 })]);

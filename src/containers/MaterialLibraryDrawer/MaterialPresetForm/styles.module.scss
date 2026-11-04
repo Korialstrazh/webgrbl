@@ -45,6 +45,15 @@
   width: 100%;
 }
 
+// Room for two lines of error text, filled or not, so a wrong number moves nothing below it.
+.numberError {
+  min-height: 2.25rem;
+  margin: 0 0 var(--space-2);
+  color: var(--color-danger-text);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
 // Save and Cancel together; Delete stands apart at the far end, so it is never pressed for Save.
 .actions {
   display: flex;

@@ -205,6 +205,7 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
             editedPresetId={draftPreset?.id}
             tickedPresetIds={tickedPresetIds}
             isMachineColumnShown={!listedProfileId}
+            activeProfile={activeProfile}
             rowApply={initialLayerName && activeProfile ? {
               layerName: initialLayerName,
               machineProfileId: activeProfile.id,

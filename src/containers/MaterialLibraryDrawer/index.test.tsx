@@ -60,6 +60,7 @@ const NEW_POWER_WATTS = 4;
 const TOO_MUCH_POWER_WATTS = 11;
 const MAX_POWER_WATTS = 10;
 const PLYWOOD_NAME = 'Plywood';
+const HALF_POWER_PERCENT_TEXT = '50 %';
 const ACRYLIC_NAME = 'Acrylic';
 
 const PROFILE: MachineProfile = newMachineProfile({ maxPowerWatts: MAX_POWER_WATTS });
@@ -155,6 +156,8 @@ describe(MaterialLibraryDrawer.name, () => {
 
     expect(saveButton).toBeDisabled();
     expect(screen.getByRole('heading', { name: NEW_PRESET_HEADING })).toBeInTheDocument();
+    // The power is what the user came to type, so it has the focus.
+    expect(screen.getByRole('spinbutton', { name: POWER_LABEL })).toHaveFocus();
     enterPower(NEW_POWER_WATTS);
     fireEvent.click(saveButton);
 
@@ -236,7 +239,7 @@ describe(MaterialLibraryDrawer.name, () => {
     expect(screen.getByText(new RegExp(`^${ACRYLIC_NAME}, `))).toBeInTheDocument();
   });
 
-  it('lists another machine only when the filter is off', async () => {
+  it('lists another machine only when the filter is off, without a percent of the active laser', async () => {
     renderDrawer([newPresetFixture(PLYWOOD, OTHER_PROFILE)]);
 
     const onlyMachine: HTMLElement = await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL });
@@ -245,6 +248,17 @@ describe(MaterialLibraryDrawer.name, () => {
     fireEvent.click(onlyMachine);
 
     expect(await screen.findByText(PLYWOOD_NAME)).toBeInTheDocument();
+    expect(screen.getByText('5 W')).toBeInTheDocument();
+    expect(screen.queryByText(HALF_POWER_PERCENT_TEXT)).not.toBeInTheDocument();
+  });
+
+  it('shows the power of a preset of the active laser as percent beside the watts', async () => {
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE)]);
+
+    expect(await screen.findByText(HALF_POWER_PERCENT_TEXT)).toBeInTheDocument();
+    fireEvent.click(screen.getByText(PLYWOOD_NAME));
+
+    expect(screen.getByText('Power (W, 50 %)')).toBeInTheDocument();
   });
 
   it('edits and deletes a stored preset', async () => {

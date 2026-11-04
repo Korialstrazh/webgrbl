@@ -25,6 +25,7 @@ import {
 import { ENTER_KEY, SPACE_KEY } from '../../../utils/browser/browser.events.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
+import { getPresetPowerPercent } from '../../../utils/materials/get.preset.power.percent';
 import type { MaterialPresetRow } from '../../../utils/materials/interfaces/MaterialPresetRow';
 import type { MaterialPresetRowApply, MaterialPresetTableProps } from '../interfaces/MaterialPresetTableProps';
 import styles from './styles.module.scss';
@@ -55,10 +56,24 @@ const canApplyRow = ({ machineProfileId, powerWatts }: MaterialPreset, rowApply:
 
 export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode => {
   const {
-    rows, editedPresetId, tickedPresetIds, isMachineColumnShown, rowApply, emptyStateComponent,
+    rows, editedPresetId, tickedPresetIds, isMachineColumnShown, activeProfile, rowApply, emptyStateComponent,
     getOperationLabel, getProfileName, onTick, onPick,
   } = props;
   const { t } = useTranslation();
+
+  /** The watts, and for a preset of the active laser the percent beside them, as the layers show power in percent. */
+  const renderPower = ({ preset }: MaterialPresetRow): ReactNode => (
+    <>
+      {t(DEFAULT.MATERIAL_LIBRARY_POWER_VALUE, { watts: preset.powerWatts })}
+      {activeProfile && preset.machineProfileId === activeProfile.id && (
+        <span className={styles.powerPercent}>
+          {t(DEFAULT.MATERIAL_LIBRARY_POWER_PERCENT, {
+            percent: getPresetPowerPercent(preset, activeProfile.maxPowerWatts),
+          })}
+        </span>
+      )}
+    </>
+  );
 
   const renderApplyButton = ({ preset }: MaterialPresetRow): ReactNode => {
     if (!rowApply || preset.machineProfileId !== rowApply.machineProfileId) {
@@ -119,10 +134,10 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
     },
     {
       key: COLUMN_KEY.POWER,
-      title: t(DEFAULT.MATERIAL_LIBRARY_POWER),
+      title: t(DEFAULT.MATERIAL_LIBRARY_POWER_COLUMN),
       align: ANTD_TABLE_COLUMN_ALIGN_RIGHT,
       onCell: getNumberCellProps,
-      render: ({ preset }: MaterialPresetRow) => preset.powerWatts,
+      render: renderPower,
     },
     {
       key: COLUMN_KEY.SPEED,
@@ -165,6 +180,12 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
         // Ticks are for export and stay while search or the machine filter hides their rows.
         preserveSelectedRowKeys: true,
         selectedRowKeys: tickedPresetIds,
+        // The header tick says what the ticks are for, as nothing else in the table does.
+        columnTitle: (selectAllComponent: ReactNode) => (
+          <Tooltip title={t(DEFAULT.MATERIAL_LIBRARY_TICK_FOR_EXPORT)}>
+            <span className={styles.selectAllWrapper}>{selectAllComponent}</span>
+          </Tooltip>
+        ),
         getCheckboxProps: () => ({ 'aria-label': t(DEFAULT.MATERIAL_LIBRARY_TICK_FOR_EXPORT) }),
         onChange: (rowKeys: Key[]) => onTick(rowKeys),
         // A tick must not open the row in the edit panel as well.

@@ -1,7 +1,8 @@
 /**
- * The edit panel of the material library: a heading, then which material and operation, power, speed, passes and
+ * The edit pane of the material library: a heading, then which material and operation, power, speed, passes and
  * notes, and the actions in a footer that stays in view while the fields scroll. A number is only marked wrong once
- * the user has touched it; Save waits for every number to pass. A stored preset can be deleted.
+ * the user has touched it, in one line of reserved height under the numbers, so an error moves nothing; Save waits
+ * for every number to pass. A new preset starts in its Power field. A stored preset can be deleted.
  *
  * @author michael.morosov
  *
@@ -26,6 +27,7 @@ import {
 } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getMaterialPresetFieldErrors } from '../../../utils/materials/get.material.preset.field.errors';
+import { getPresetPowerPercent } from '../../../utils/materials/get.preset.power.percent';
 import type { Material } from '../../../utils/materials/interfaces/Material';
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
 import type { MaterialPresetFieldErrors } from '../../../utils/materials/interfaces/MaterialPresetFieldErrors';
@@ -84,6 +86,21 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
   const powerErrorKey: string | undefined = getShownErrorKey(POWER_FIELD, fieldErrors.powerErrorKey);
   const speedErrorKey: string | undefined = getShownErrorKey(SPEED_FIELD, fieldErrors.speedErrorKey);
   const passesErrorKey: string | undefined = getShownErrorKey(PASSES_FIELD, fieldErrors.passesErrorKey);
+  // The percent of the laser beside the watts, the unit the layers show, while the power is a number within range.
+  const isPowerPercentShown: boolean = Boolean(maxPowerWatts) && !fieldErrors.powerErrorKey;
+
+  /** One line for the first wrong number, so the fields keep their place. */
+  const getNumberErrorText = (): string | undefined => {
+    if (powerErrorKey) {
+      return t(powerErrorKey, { max: maxPowerWatts });
+    }
+
+    if (speedErrorKey) {
+      return t(speedErrorKey, { min: SPEED_MM_PER_MIN_MIN, max: SPEED_MM_PER_MIN_MAX });
+    }
+
+    return passesErrorKey && t(passesErrorKey, { min: PASSES_MIN, max: PASSES_MAX });
+  };
 
   return (
     <div className={styles.presetForm}>
@@ -114,13 +131,18 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
           </Form.Item>
           <div className={styles.numberFields}>
             <Form.Item
-              label={t(DEFAULT.MATERIAL_LIBRARY_POWER)}
+              label={isPowerPercentShown
+                ? t(DEFAULT.MATERIAL_LIBRARY_POWER_WITH_PERCENT, {
+                  percent: getPresetPowerPercent(preset, maxPowerWatts),
+                })
+                : t(DEFAULT.MATERIAL_LIBRARY_POWER)}
               validateStatus={powerErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
-              help={powerErrorKey && t(powerErrorKey, { max: maxPowerWatts })}
             >
               <InputNumber
                 className={styles.numberInput}
                 aria-label={t(DEFAULT.MATERIAL_LIBRARY_POWER)}
+                // A new preset has no power yet, and that is what the user came to type.
+                autoFocus={!isStored}
                 value={getNumberInputValue(preset.powerWatts)}
                 onBlur={() => touchField(POWER_FIELD)}
                 onChange={(value: number | null) => changeNumber(POWER_FIELD, value)}
@@ -129,7 +151,6 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
             <Form.Item
               label={t(DEFAULT.MATERIAL_LIBRARY_SPEED)}
               validateStatus={speedErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
-              help={speedErrorKey && t(speedErrorKey, { min: SPEED_MM_PER_MIN_MIN, max: SPEED_MM_PER_MIN_MAX })}
             >
               <InputNumber
                 className={styles.numberInput}
@@ -142,7 +163,6 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
             <Form.Item
               label={t(DEFAULT.MATERIAL_LIBRARY_PASSES)}
               validateStatus={passesErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
-              help={passesErrorKey && t(passesErrorKey, { min: PASSES_MIN, max: PASSES_MAX })}
             >
               <InputNumber
                 className={styles.numberInput}
@@ -154,6 +174,7 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
               />
             </Form.Item>
           </div>
+          <p className={styles.numberError} aria-live="polite">{getNumberErrorText()}</p>
           <Form.Item label={t(DEFAULT.MATERIAL_LIBRARY_NOTES)}>
             <Input.TextArea
               aria-label={t(DEFAULT.MATERIAL_LIBRARY_NOTES)}
