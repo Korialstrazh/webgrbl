@@ -141,7 +141,7 @@ GCODE_WARNINGS_INTRO;Some content is left out of the job or burns differently th
 GCODE_WARNINGS_ITEM;{{objectName}}: {{warning}}
 GCODE_WARNINGS_LIST_LABEL;Toolpath warnings
 GCODE_WARNINGS_TITLE;Export G-code with warnings?
-GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again.
+GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again. If this appears on connecting, the head may be resting on a limit switch: move it away.
 GRBL_ALARM_10;Emergency stop asserted - clear it and reset.
 GRBL_ALARM_2;Soft limit alarm - the G-code target is beyond the machine travel. The position is kept and it is safe to unlock.
 GRBL_ALARM_3;Reset during a move - the machine position is probably lost so home again.

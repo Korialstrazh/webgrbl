@@ -681,7 +681,7 @@ registerLocales({
       [DEFAULT.GCODE_WARNINGS_ITEM]: "{{objectName}}: {{warning}}",
       [DEFAULT.GCODE_WARNINGS_LIST_LABEL]: "Toolpath warnings",
       [DEFAULT.GCODE_WARNINGS_TITLE]: "Export G-code with warnings?",
-      [DEFAULT.GRBL_ALARM_1]: "Hard limit triggered - the machine position is probably lost so home again.",
+      [DEFAULT.GRBL_ALARM_1]: "Hard limit triggered - the machine position is probably lost so home again. If this appears on connecting, the head may be resting on a limit switch: move it away.",
       [DEFAULT.GRBL_ALARM_10]: "Emergency stop asserted - clear it and reset.",
       [DEFAULT.GRBL_ALARM_2]: "Soft limit alarm - the G-code target is beyond the machine travel. The position is kept and it is safe to unlock.",
       [DEFAULT.GRBL_ALARM_3]: "Reset during a move - the machine position is probably lost so home again.",
