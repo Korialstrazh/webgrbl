@@ -19,6 +19,7 @@ import type {
   InputNumberProps,
   MenuProps,
   PopoverProps,
+  ProgressProps,
   SegmentedProps,
   SplitterProps,
   SwitchProps,
@@ -54,6 +55,9 @@ export const ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT: PopoverProps['placement'] = 'b
 
 /** The popover opens below its anchor, aligned to the anchor's left edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT: PopoverProps['placement'] = 'bottomLeft';
+
+/** A progress bar that stays neutral at 100%, for work that is not done when the bar is full. */
+export const ANTD_PROGRESS_STATUS_NORMAL: ProgressProps['status'] = 'normal';
 
 /** Form labels sit above their fields. */
 export const ANTD_FORM_LAYOUT_VERTICAL: FormProps['layout'] = 'vertical';

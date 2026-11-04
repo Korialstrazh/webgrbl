@@ -20,6 +20,7 @@ import type { GrblResolvedStatus } from '../../../../utils/grbl/interfaces/GrblR
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { getCanFireLaserPointer } from '../../../../utils/machine/get.can.fire.laser.pointer';
 import { selectIsConnected } from '../../../../utils/states/grbl.connection.state';
+import { selectIsJobRunActive } from '../../../../utils/states/job.run.state';
 import {
   LaserPointerFireRequested,
   LaserPointerReleaseRequested,
@@ -37,7 +38,8 @@ export const PointerFireButton = (): ReactNode => {
   const isConnected: boolean = useSelector(selectIsConnected);
   const machineStatus: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
   const isFiring: boolean = useSelector(selectIsLaserPointerFiring);
-  const canFire: boolean = getCanFireLaserPointer(isConnected, machineStatus?.machineState);
+  const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
+  const canFire: boolean = getCanFireLaserPointer(isConnected, machineStatus?.machineState, isJobRunActive);
   // A disabled button may never get the pointer up or leave, so a held pointer keeps the button usable to let go.
   const isButtonUsable: boolean = canFire || isFiring;
 

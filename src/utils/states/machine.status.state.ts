@@ -48,6 +48,11 @@ export class MachineStopRequested extends Action {
   public static readonly type: string = actionType('machine stop requested');
 }
 
+/** The stop sequence ended: the machine got its reset, or the stop failed. */
+export class MachineStopFinished extends Action {
+  public static readonly type: string = actionType('machine stop finished');
+}
+
 export class MachineResetRequested extends Action {
   public static readonly type: string = actionType('machine reset requested');
 }
@@ -59,6 +64,11 @@ interface MachineLineRequestedPayload {
 
 export class MachineLineRequested extends Action<MachineLineRequestedPayload> {
   public static readonly type: string = actionType('machine line requested');
+}
+
+/** The controller reset itself, without a request from the app. */
+export class MachineControllerResetDetected extends Action {
+  public static readonly type: string = actionType('machine controller reset detected');
 }
 
 export class MachineUnlockRequested extends Action {
@@ -100,9 +110,10 @@ export const machineStatusReducer = (
     return { ...state, status: (action as MachineStatusReceived).payload.status };
   case MachineAirAssistChanged.type:
     return { ...state, isAirAssistOn: (action as MachineAirAssistChanged).payload.isAirAssistOn };
-  // Stop and Reset end in a soft reset, which switches the coolant outputs off.
+  // Stop and Reset end in a soft reset, which switches the coolant outputs off, and so does a reset of its own.
   case MachineStopRequested.type:
   case MachineResetRequested.type:
+  case MachineControllerResetDetected.type:
     return { ...state, isAirAssistOn: false };
   case ConnectionStatusChanged.type:
     // Without a connection the laser's own air assist state is unknown, so the switch starts over as off.

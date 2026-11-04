@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { GRBL_CONTROLLER_EVENT_KIND } from '../grbl/grbl.constants';
 import { DEFAULT } from '../localization/default.locales';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
+import { MachineControllerResetDetected } from './machine.status.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
 
@@ -29,6 +30,7 @@ describe(getGrblControllerEventActions.name, () => {
 
   it('a controller reset shows the controller-reset warning toast', () => {
     expect(getGrblControllerEventActions({ kind: GRBL_CONTROLLER_EVENT_KIND.CONTROLLER_RESET })).toEqual([
+      new MachineControllerResetDetected(),
       new ToastShown({
         severity: TOAST_SEVERITY.WARNING,
         messageKey: DEFAULT.TOAST_CONTROLLER_RESET,

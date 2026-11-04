@@ -42,19 +42,12 @@ import {
   selectBaudRate,
   selectSelectedPortId,
 } from './grbl.connection.state';
-import { submitGrblConsoleCommand } from './grbl.console.command.saga';
-import { ConsoleCommandSubmitted } from './grbl.console.state';
+import { handleGrblControllerCommands } from './grbl.controller.commands.saga';
 import { getGrblControllerEventActions } from './grbl.controller.event.actions';
 import { getPreferredPortId } from './grbl.preferred.port.id';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
 import type { GrblHandshakeRaceResult } from './interfaces/GrblHandshakeRaceResult';
-import {
-  MachineLineRequested,
-  MachineResetRequested,
-  MachineStopRequested,
-  MachineUnlockRequested,
-} from './machine.status.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
 
@@ -137,30 +130,6 @@ function* pickSerialPort(dependencies: GrblControllerSagaDependencies): Generato
   } catch (error: unknown) {
     yield put(newRawErrorConsoleInfo(error));
   }
-}
-// #endregion
-
-// #region Controller commands
-function* runGrblMachineCommand(machineCommand: () => Promise<void> | void): Generator {
-  try {
-    yield call(machineCommand);
-  } catch (error: unknown) {
-    yield put(newRawErrorConsoleInfo(error));
-  }
-}
-
-function* runGrblMachineCommandLine(controller: GrblController, action: MachineLineRequested): Generator {
-  yield call(runGrblMachineCommand, (): void => controller.sendConsoleCommand(action.payload.line));
-}
-
-function* handleGrblControllerCommands(controller: GrblController): Generator {
-  yield all([
-    takeEvery(ConsoleCommandSubmitted.type, submitGrblConsoleCommand, controller),
-    takeEvery(MachineStopRequested.type, runGrblMachineCommand, (): Promise<void> => controller.stopMachine()),
-    takeEvery(MachineResetRequested.type, runGrblMachineCommand, (): Promise<void> => controller.resetMachine()),
-    takeEvery(MachineUnlockRequested.type, runGrblMachineCommand, (): void => controller.unlockMachine()),
-    takeEvery(MachineLineRequested.type, runGrblMachineCommandLine, controller),
-  ]);
 }
 // #endregion
 
