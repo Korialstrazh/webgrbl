@@ -51,6 +51,7 @@ const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const MACHINE_PROFILES_LABEL = 'Machine profiles';
 const MORE_LABEL = 'More';
 const MATERIALS_LABEL = 'Materials';
+const MATERIAL_LIBRARY_TITLE = 'Material library';
 const SOON_LABEL = 'Soon';
 const PROJECT_MENU_LABEL = 'Project';
 const PROJECT_ID = 'project-1';
@@ -125,8 +126,23 @@ describe(TopBar.name, () => {
       </Provider>,
     );
 
-    expect(screen.queryByRole('button', { name: MATERIALS_LABEL, hidden: true })).not.toBeInTheDocument();
     expect(screen.queryByText(SOON_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('opens the material library', async () => {
+    render(
+      <Provider store={newStore()}>
+        <AntdTestProvider>
+          <BedRegionTestHost>
+            <TopBar />
+          </BedRegionTestHost>
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: MATERIALS_LABEL }));
+
+    expect(await screen.findByRole('dialog', { name: MATERIAL_LIBRARY_TITLE })).toBeInTheDocument();
   });
 
   it('keeps a fixed height on one row', () => {
@@ -158,13 +174,13 @@ describe(TopBar.name, () => {
     expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
   });
 
-  it('lists no planned Materials entry in the overflow menu', async () => {
+  it('lists Materials in the overflow menu', async () => {
     renderWorkbenchTopBar(newStore());
 
     fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
 
     expect(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: new RegExp(`^${MATERIALS_LABEL}`) })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: new RegExp(`^${MATERIALS_LABEL}`) })).toBeInTheDocument();
   });
 
   it('closes the machine profiles dialog on Escape without stopping the machine', () => {

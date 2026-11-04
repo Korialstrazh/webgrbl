@@ -17,6 +17,7 @@ import type { MaterialPreset } from '../materials/interfaces/MaterialPreset';
 import { logMaterialStorageError } from '../materials/log.material.storage.error';
 import { MATERIAL_PRESET_REPOSITORY } from '../materials/material.preset.repository';
 import type { MaterialPresetsReadRace } from './interfaces/MaterialPresetsReadRace';
+import { MachineProfileDeleted } from './machine.profile.state';
 import {
   MaterialPresetDeleted,
   MaterialPresetSaved,
@@ -51,6 +52,17 @@ function* removeStoredPreset(presetId: string): Generator {
   }
 }
 
+function* removePresetsOfDeletedProfile(action: MachineProfileDeleted): Generator {
+  try {
+    yield call(
+      [MATERIAL_PRESET_REPOSITORY, MATERIAL_PRESET_REPOSITORY.deleteMaterialPresetsOfProfile],
+      action.payload.profileId,
+    );
+  } catch (error: unknown) {
+    yield call(showPresetStorageError, error);
+  }
+}
+
 function* loadStoredPresets(deletedPresetIds: ReadonlySet<string>): Generator {
   try {
     const readRace: MaterialPresetsReadRace = (yield race({
@@ -80,6 +92,7 @@ export function* watchMaterialPresets(): Generator {
 
   // Listening starts before the read, so a change made during a slow or hanging read still reaches storage.
   yield takeEvery(MaterialPresetSaved.type, storeSavedPreset);
+  yield takeEvery(MachineProfileDeleted.type, removePresetsOfDeletedProfile);
   yield takeEvery(MaterialPresetDeleted.type, removeDeletedPreset);
   yield call(loadStoredPresets, deletedPresetIds);
 }

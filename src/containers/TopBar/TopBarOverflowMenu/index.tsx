@@ -22,15 +22,20 @@ import type { TopBarOverflowMenuProps } from '../interfaces/TopBarOverflowMenuPr
 import styles from './styles.module.scss';
 import { TOP_BAR_OVERFLOW_MENU_KEY } from './top.bar.overflow.menu.constants';
 
-export const TopBarOverflowMenu = ({ onOpenMachineProfiles }: TopBarOverflowMenuProps): ReactNode => {
+export const TopBarOverflowMenu = ({ onOpenMachineProfiles, onOpenMaterials }: TopBarOverflowMenuProps): ReactNode => {
   const { t } = useTranslation();
   const menuItems: ProjectMenuItems = [
     { key: TOP_BAR_OVERFLOW_MENU_KEY.MACHINE_PROFILES, label: t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES) },
+    { key: TOP_BAR_OVERFLOW_MENU_KEY.MATERIALS, label: t(DEFAULT.TOP_BAR_MENU_MATERIALS) },
   ];
 
   const handleMenuClick = ({ key }: ProjectMenuClickInfo): void => {
     if (key === TOP_BAR_OVERFLOW_MENU_KEY.MACHINE_PROFILES) {
       onOpenMachineProfiles();
+    }
+
+    if (key === TOP_BAR_OVERFLOW_MENU_KEY.MATERIALS) {
+      onOpenMaterials();
     }
   };
 

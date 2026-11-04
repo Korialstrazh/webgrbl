@@ -5,6 +5,7 @@ import { MATERIAL_PRESET_OPERATION } from '../materials/material.preset.constant
 import { MATERIAL_PRESET_REPOSITORY } from '../materials/material.preset.repository';
 import { newMaterialPreset } from '../materials/new.material.preset';
 import type { AppToast } from './interfaces/AppToast';
+import { MachineProfileDeleted } from './machine.profile.state';
 import { watchMaterialPresets } from './material.preset.saga';
 import { MaterialPresetDeleted, MaterialPresetSaved, selectMaterialPresets } from './material.preset.state';
 import { newStore } from './new.store';
@@ -102,6 +103,22 @@ describe(watchMaterialPresets.name, () => {
 
     expect(selectMaterialPresets(store.getState())).toEqual([]);
     await waitForStoredPresets([]);
+  });
+
+  it('removes only the presets of a deleted machine profile', async () => {
+    const deletedProfilePreset: MaterialPreset = newPresetFixture({ machineProfileId: 'profile-gone' });
+    const keptPreset: MaterialPreset = newPresetFixture();
+    const store: AppStore = await newLoadedStore();
+
+    store.dispatch(new MaterialPresetSaved({ preset: deletedProfilePreset }));
+    store.dispatch(new MaterialPresetSaved({ preset: keptPreset }));
+    await vi.waitFor(async (): Promise<void> => {
+      expect(await MATERIAL_PRESET_REPOSITORY.listMaterialPresets()).toHaveLength(2);
+    });
+    store.dispatch(new MachineProfileDeleted({ profileId: 'profile-gone' }));
+
+    expect(selectMaterialPresets(store.getState())).toEqual([keptPreset]);
+    await waitForStoredPresets([keptPreset]);
   });
 
   it('shows the fixed toast and not the error text when a store fails', async () => {
