@@ -756,7 +756,7 @@ registerLocales({
       [DEFAULT.GRBL_ERROR_NON_ASCII_LINE]: "The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.",
       [DEFAULT.GRBL_ERROR_UNKNOWN]: "Unknown error.",
       [DEFAULT.JOB_PAUSE]: "Pause",
-      [DEFAULT.JOB_PAUSE_BLOCKED_LASER_MODE]: "Pause is off because laser mode is off ($32=0): the beam could stay on while the head stands still. Use STOP.",
+      [DEFAULT.JOB_PAUSE_BLOCKED_LASER_MODE]: "Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.",
       [DEFAULT.JOB_RESUME]: "Resume",
       [DEFAULT.JOB_RESUME_WAITING]: "Wait until the machine has stopped and any door is closed.",
       [DEFAULT.JOB_RUN_PROGRESS_DETAIL]: "{{answered}} of {{total}} lines answered, {{elapsed}} elapsed",

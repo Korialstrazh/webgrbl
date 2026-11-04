@@ -45,6 +45,7 @@ const LONG_MOVE_END_X_MM = 100;
 const SETTLE_MS = GRBL_HOLD_COMPLETE_MAX_WAIT_MS + GRBL_STATUS_POLL_INTERVAL_MS + ANSWER_SETTLE_MS;
 const JOB_END_MS = 10_000;
 const LASER_MODE_OFF_LINE = '$32=0\n';
+const LASER_MODE_CHANGING_LINES: string[] = ['$32=0', '$32 = 1', '$rst=*'];
 const CONSOLE_LINE = 'G0X1';
 const MACHINE_LINE = 'G0X2';
 const OFF_PAGE_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
@@ -186,6 +187,20 @@ describe(runGrblJob.name, () => {
     await vi.advanceTimersByTimeAsync(JOB_END_MS);
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
   });
+
+  it.each(LASER_MODE_CHANGING_LINES)(
+    'refuses to pause after the console sent %s, until a reconnect',
+    async (line: string) => {
+      const store: AppStore = await prepareConnectedStore();
+
+      store.dispatch(new ConsoleCommandSubmitted({ commandText: line }));
+      await vi.advanceTimersByTimeAsync(SETTLE_MS);
+      store.dispatch(new JobStartRequested());
+      await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+      expect(selectJobPauseControl(store.getState())).toBe(JOB_PAUSE_CONTROL.PAUSE_BLOCKED);
+    },
+  );
 
   it('marks the run interrupted when the connection ends during it', async () => {
     const store: AppStore = await prepareConnectedStore();

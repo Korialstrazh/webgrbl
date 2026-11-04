@@ -11,7 +11,8 @@
 import { GRBL_CONNECTION_STATUS } from '../grbl/grbl.constants';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
-import { ConnectionStatusChanged } from './grbl.connection.state';
+import { ConnectionEstablished, ConnectionStatusChanged } from './grbl.connection.state';
+import { ConsoleCommandSubmitted } from './grbl.console.state';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { JobRunProgressChangedPayload } from './interfaces/JobRunProgressChangedPayload';
 import type { JobRunStartedPayload } from './interfaces/JobRunStartedPayload';
@@ -29,6 +30,8 @@ export interface JobRunState {
   totalLineCount: number;
   /** When the run started, in milliseconds since the epoch; 0 before the first run. */
   startedAtMs: number;
+  /** True once a console line may have changed $32, so the setting read at connect no longer counts. */
+  isLaserModeUnconfirmed: boolean;
 }
 // #endregion
 
@@ -72,7 +75,15 @@ const INITIAL_JOB_RUN_STATE: JobRunState = {
   answeredLineCount: 0,
   totalLineCount: 0,
   startedAtMs: 0,
+  isLaserModeUnconfirmed: false,
 };
+
+// Settings are read only at connect: a write to $32 or a settings reset leaves them out of date.
+const LASER_MODE_CHANGING_LINE_PATTERN = /^\$(32=|RST=)/i;
+const LINE_WHITESPACE_PATTERN = /\s/g;
+
+const isLaserModeChangingLine = (commandText: string): boolean =>
+  LASER_MODE_CHANGING_LINE_PATTERN.test(commandText.replace(LINE_WHITESPACE_PATTERN, ''));
 
 const ACTIVE_JOB_RUN_STATUSES: readonly JobRunStatus[] = [JOB_RUN_STATUS.SENDING, JOB_RUN_STATUS.FINISHING];
 
@@ -86,11 +97,18 @@ export const jobRunReducer = (state: JobRunState = INITIAL_JOB_RUN_STATE, action
     return { ...state, status: (action as JobRunStatusChanged).payload.status };
   case JobRunStarted.type:
     return {
+      ...state,
       status: JOB_RUN_STATUS.SENDING,
       answeredLineCount: 0,
       totalLineCount: 0,
       startedAtMs: (action as JobRunStarted).payload.startedAtMs,
     };
+  case ConsoleCommandSubmitted.type:
+    return isLaserModeChangingLine((action as ConsoleCommandSubmitted).payload.commandText)
+      ? { ...state, isLaserModeUnconfirmed: true }
+      : state;
+  case ConnectionEstablished.type:
+    return { ...state, isLaserModeUnconfirmed: false };
   case JobRunProgressChanged.type:
     return { ...state, ...(action as JobRunProgressChanged).payload };
   case ConnectionStatusChanged.type:
@@ -112,6 +130,9 @@ export const selectJobRunStatus = (state: RootState): JobRunStatus => state[JOB_
 export const selectJobRunAnsweredLineCount = (state: RootState): number => state[JOB_RUN_STATE_NAME].answeredLineCount;
 
 export const selectJobRunTotalLineCount = (state: RootState): number => state[JOB_RUN_STATE_NAME].totalLineCount;
+
+export const selectIsLaserModeUnconfirmed = (state: RootState): boolean =>
+  state[JOB_RUN_STATE_NAME].isLaserModeUnconfirmed;
 
 export const selectJobRunStartedAtMs = (state: RootState): number => state[JOB_RUN_STATE_NAME].startedAtMs;
 

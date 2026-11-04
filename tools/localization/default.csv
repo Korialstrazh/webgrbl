@@ -194,7 +194,7 @@ GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
 JOB_PAUSE;Pause
-JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is off ($32=0): the beam could stay on while the head stands still. Use STOP.
+JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.
 JOB_RESUME;Resume
 JOB_RESUME_WAITING;Wait until the machine has stopped and any door is closed.
 JOB_RUN_PROGRESS_DETAIL;{{answered}} of {{total}} lines answered, {{elapsed}} elapsed

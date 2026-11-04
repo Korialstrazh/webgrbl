@@ -11,3 +11,5 @@ While a job runs, the Job card shows a progress bar, lines answered and elapsed 
 While a job runs, the console, jog, home, set zero, pointer and air assist are locked. After a lost connection the laser may still run what it has buffered, and the app cannot stop it, so use the machine's own power switch or emergency stop.
 
 For developers: `runGrblJob` in `src/utils/states/job.run.saga.ts` runs the job, and `selectJobStartBlockedReasonKey` holds the start conditions. Design: [the spec](../superpowers/specs/2026-11-03_(03)_running-jobs.spec.md).
+
+If you send `$32=` or `$RST=` in the console after connecting, Pause stays off until you reconnect, because the app reads settings only when it connects. Other ways of changing the setting, such as the machine's own screen, are not seen.
