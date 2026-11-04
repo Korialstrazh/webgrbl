@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ExportOutlined, ImportOutlined } from '@ant-design/icons';
+import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
@@ -99,6 +99,11 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
     }
   };
 
+  // The count only once there is one: a zero in the label would read as a fault, not as a hint.
+  const exportLabel: string = selectedPresets.length
+    ? t(DEFAULT.MATERIAL_LIBRARY_EXPORT_COUNT, { count: selectedPresets.length })
+    : t(DEFAULT.MATERIAL_LIBRARY_EXPORT);
+
   const exportPresets = (): void => {
     downloadTextFile({
       text: getMaterialPresetsFileText(selectedPresets, materials, profiles),
@@ -109,9 +114,10 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
 
   return (
     <div className={styles.presetFileActions}>
-      {/* The icons carry labels of their own, so each button names itself to keep its name to its text. */}
+      {/* Import takes a file in and Export gives one out, so the icons are the file upload and download arrows. The
+          icons carry labels of their own, so each button names itself to keep its name to its text. */}
       <Button
-        icon={<ImportOutlined />}
+        icon={<UploadOutlined />}
         aria-label={t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
         disabled={!activeProfile}
         onClick={() => fileInputRef.current?.click()}
@@ -122,12 +128,12 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
       <Tooltip title={selectedPresets.length ? undefined : t(DEFAULT.MATERIAL_LIBRARY_EXPORT_HINT)}>
         <span className={styles.exportButtonWrapper}>
           <Button
-            icon={<ExportOutlined />}
-            aria-label={t(DEFAULT.MATERIAL_LIBRARY_EXPORT, { count: selectedPresets.length })}
+            icon={<DownloadOutlined />}
+            aria-label={exportLabel}
             disabled={!selectedPresets.length}
             onClick={exportPresets}
           >
-            {t(DEFAULT.MATERIAL_LIBRARY_EXPORT, { count: selectedPresets.length })}
+            {exportLabel}
           </Button>
         </span>
       </Tooltip>

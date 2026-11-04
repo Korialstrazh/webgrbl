@@ -1,8 +1,9 @@
 /**
- * The edit pane of the material library: a heading, then which material and operation, power, speed, passes and
- * notes, and the actions in a footer that stays in view while the fields scroll. A number is only marked wrong once
- * the user has touched it, in one line of reserved height under the numbers, so an error moves nothing; Save waits
- * for every number to pass. A new preset starts in its Power field. A stored preset can be deleted.
+ * The edit view of the material library: a Back button to the list and a heading, then which material and operation,
+ * power, speed, passes and notes, and the actions in a footer that stays in view while the fields scroll. The
+ * material select ends in an entry that adds a material. One line under the numbers says the power as percent of
+ * the laser, or names the first wrong number once the user has touched it, so an error moves nothing; Save waits for
+ * every number to pass. A new preset starts in its Power field. A stored preset can be deleted.
  *
  * @author michael.morosov
  *
@@ -11,14 +12,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CloseOutlined, DeleteOutlined, SaveOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, DeleteOutlined, SaveOutlined } from '@ant-design/icons';
 import { Button, Form, Input, InputNumber, Popconfirm, Select } from 'antd';
 import { useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import {
-  ANTD_BUTTON_TYPE_DEFAULT,
   ANTD_BUTTON_TYPE_PRIMARY,
   ANTD_BUTTON_TYPE_TEXT,
   ANTD_FORM_ITEM_STATUS_ERROR,
@@ -54,6 +54,8 @@ const NOTES_ROWS = 2;
 const POWER_FIELD: MaterialPresetNumberField = 'powerWatts';
 const SPEED_FIELD: MaterialPresetNumberField = 'speedMmPerMin';
 const PASSES_FIELD: MaterialPresetNumberField = 'passes';
+// Material ids are random UUIDs, so they never match this.
+const NEW_MATERIAL_OPTION_VALUE = 'new-material';
 
 const hasPresetFieldError = ({ powerErrorKey, speedErrorKey, passesErrorKey }: MaterialPresetFieldErrors): boolean =>
   Boolean(powerErrorKey || speedErrorKey || passesErrorKey);
@@ -62,7 +64,9 @@ const hasPresetFieldError = ({ powerErrorKey, speedErrorKey, passesErrorKey }: M
 const getNumberInputValue = (value: number): number | null => (isFiniteNumber(value) ? value : null);
 
 export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode => {
-  const { preset, isStored, isChanged, maxPowerWatts, headingText, onChange, onSave, onCancel, onDelete } = props;
+  const {
+    preset, isStored, isChanged, maxPowerWatts, headingText, onChange, onSave, onBack, onDelete, onNewMaterial,
+  } = props;
   const { t } = useTranslation();
   const materials: Material[] = useSelector(selectMaterials);
   const [touchedFields, setTouchedFields] = useState<MaterialPresetNumberField[]>([]);
@@ -83,13 +87,19 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
     onChange({ [field]: value ?? Number.NaN });
   };
 
+  const changeMaterial = (materialId: string): void => {
+    if (materialId === NEW_MATERIAL_OPTION_VALUE) {
+      onNewMaterial();
+    } else {
+      onChange({ materialId });
+    }
+  };
+
   const powerErrorKey: string | undefined = getShownErrorKey(POWER_FIELD, fieldErrors.powerErrorKey);
   const speedErrorKey: string | undefined = getShownErrorKey(SPEED_FIELD, fieldErrors.speedErrorKey);
   const passesErrorKey: string | undefined = getShownErrorKey(PASSES_FIELD, fieldErrors.passesErrorKey);
-  // The percent of the laser beside the watts, the unit the layers show, while the power is a number within range.
-  const isPowerPercentShown: boolean = Boolean(maxPowerWatts) && !fieldErrors.powerErrorKey;
 
-  /** One line for the first wrong number, so the fields keep their place. */
+  /** The first wrong number, so the fields keep their place. */
   const getNumberErrorText = (): string | undefined => {
     if (powerErrorKey) {
       return t(powerErrorKey, { max: maxPowerWatts });
@@ -102,20 +112,43 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
     return passesErrorKey && t(passesErrorKey, { min: PASSES_MIN, max: PASSES_MAX });
   };
 
+  /** The percent of the laser, the unit the layers show, while the power is a number within range. */
+  const getPowerPercentHint = (): string | undefined => (maxPowerWatts && !fieldErrors.powerErrorKey
+    ? t(DEFAULT.MATERIAL_LIBRARY_POWER_PERCENT_HINT, {
+      percent: getPresetPowerPercent(preset, maxPowerWatts),
+      max: maxPowerWatts,
+    })
+    : undefined);
+
+  const numberErrorText: string | undefined = getNumberErrorText();
+
   return (
     <div className={styles.presetForm}>
-      <h3 className={styles.heading}>{headingText}</h3>
+      <div className={styles.header}>
+        <Button
+          type={ANTD_BUTTON_TYPE_TEXT}
+          icon={<ArrowLeftOutlined />}
+          aria-label={t(DEFAULT.MATERIAL_LIBRARY_BACK)}
+          onClick={onBack}
+        >
+          {t(DEFAULT.MATERIAL_LIBRARY_BACK)}
+        </Button>
+        <h3 className={styles.heading}>{headingText}</h3>
+      </div>
       <div className={styles.fields}>
         <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
           <Form.Item label={t(DEFAULT.MATERIAL_LIBRARY_MATERIAL)}>
             <Select<string>
               aria-label={t(DEFAULT.MATERIAL_LIBRARY_MATERIAL)}
               value={preset.materialId}
-              options={materials.map(({ id, name, thicknessMm }: Material) => ({
-                value: id,
-                label: t(DEFAULT.MATERIAL_LIBRARY_MATERIAL_OPTION, { name, thickness: thicknessMm }),
-              }))}
-              onChange={(materialId: string) => onChange({ materialId })}
+              options={[
+                ...materials.map(({ id, name, thicknessMm }: Material) => ({
+                  value: id,
+                  label: t(DEFAULT.MATERIAL_LIBRARY_MATERIAL_OPTION, { name, thickness: thicknessMm }),
+                })),
+                { value: NEW_MATERIAL_OPTION_VALUE, label: t(DEFAULT.MATERIAL_LIBRARY_NEW_MATERIAL_OPTION) },
+              ]}
+              onChange={changeMaterial}
             />
           </Form.Item>
           <Form.Item label={t(DEFAULT.MATERIAL_LIBRARY_OPERATION)}>
@@ -131,11 +164,7 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
           </Form.Item>
           <div className={styles.numberFields}>
             <Form.Item
-              label={isPowerPercentShown
-                ? t(DEFAULT.MATERIAL_LIBRARY_POWER_WITH_PERCENT, {
-                  percent: getPresetPowerPercent(preset, maxPowerWatts),
-                })
-                : t(DEFAULT.MATERIAL_LIBRARY_POWER)}
+              label={t(DEFAULT.MATERIAL_LIBRARY_POWER)}
               validateStatus={powerErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
             >
               <InputNumber
@@ -174,7 +203,12 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
               />
             </Form.Item>
           </div>
-          <p className={styles.numberError} aria-live="polite">{getNumberErrorText()}</p>
+          <p
+            className={numberErrorText ? [styles.numberNote, styles.numberError].join(' ') : styles.numberNote}
+            aria-live="polite"
+          >
+            {numberErrorText ?? getPowerPercentHint()}
+          </p>
           <Form.Item label={t(DEFAULT.MATERIAL_LIBRARY_NOTES)}>
             <Input.TextArea
               aria-label={t(DEFAULT.MATERIAL_LIBRARY_NOTES)}
@@ -190,21 +224,13 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
       <div className={styles.actions}>
         {/* The icons carry labels of their own, so each button names itself to keep its name to its text. */}
         <Button
-          type={isChanged ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT}
+          type={ANTD_BUTTON_TYPE_PRIMARY}
           icon={<SaveOutlined />}
           aria-label={t(DEFAULT.MATERIAL_LIBRARY_SAVE)}
           disabled={!isSaveAllowed}
           onClick={onSave}
         >
           {t(DEFAULT.MATERIAL_LIBRARY_SAVE)}
-        </Button>
-        <Button
-          type={ANTD_BUTTON_TYPE_TEXT}
-          icon={<CloseOutlined />}
-          aria-label={t(DEFAULT.MATERIAL_LIBRARY_CANCEL)}
-          onClick={onCancel}
-        >
-          {t(DEFAULT.MATERIAL_LIBRARY_CANCEL)}
         </Button>
         {isStored && (
           <Popconfirm

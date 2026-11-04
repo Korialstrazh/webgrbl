@@ -21,6 +21,8 @@ export interface MaterialLibraryEmptyStateProps {
   filteredMaterial: Material | undefined;
   onClearSearch: () => void;
   onClearMaterialFilter: () => void;
-  /** Closes the library, so the bed is back in view while the user adds what is missing. */
+  /** Opens the dialog that adds a material, the one thing to do while there is none. */
+  onNewMaterial: () => void;
+  /** Closes the library, so the top bar is free while the user picks a machine. */
   onClose: () => void;
 }

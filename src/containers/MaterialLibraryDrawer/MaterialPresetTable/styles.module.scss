@@ -1,6 +1,9 @@
-// The table keeps the headers on one line and lets the list area, not the table, scroll.
+// The list scrolls inside its own container, so the header stays in view while the rows move under it.
 .presetTable {
   :global(.ant-table-thead) > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     white-space: nowrap;
   }
 }
@@ -14,39 +17,48 @@
   }
 }
 
-// The row open in the edit pane: the accent tint of the approved selection, with an accent edge on its left, whether
-// it is ticked or hovered or not. A tick for export is the secondary action, so a ticked row keeps the plain
-// background and the plain hover. antd paints a ticked row and its hover with five classes; these carry six.
-.presetTable :global(.ant-table-tbody) > tr:global(.ant-table-row).editedRow > td:global(.ant-table-cell),
-.presetTable :global(.ant-table-tbody) > tr:global(.ant-table-row).editedRow > td:global(.ant-table-cell-row-hover) {
-  background: color-mix(in oklab, var(--color-accent) 14%, var(--color-surface-2));
-}
-
-.presetTable :global(.ant-table-tbody) > tr.editedRow > td:first-child {
-  box-shadow: inset 0.1875rem 0 0 var(--color-accent);
-}
-
-.presetTable :global(.ant-table-tbody)
-  > tr:global(.ant-table-row):global(.ant-table-row-selected):not(.editedRow)
-  > td:global(.ant-table-cell) {
+// A tick for export is the secondary action, so a ticked row keeps the plain background and the plain hover. antd
+// paints a ticked row and its hover with five classes; these carry six.
+.presetTable :global(.ant-table-tbody) > tr:global(.ant-table-row):global(.ant-table-row-selected) > td:global(.ant-table-cell) {
   background: transparent;
 }
 
-.presetTable :global(.ant-table-tbody)
-  > tr:global(.ant-table-row):global(.ant-table-row-selected):not(.editedRow)
-  > td:global(.ant-table-cell-row-hover) {
+.presetTable :global(.ant-table-tbody) > tr:global(.ant-table-row):global(.ant-table-row-selected) > td:global(.ant-table-cell-row-hover) {
   background: var(--color-surface-hover);
 }
 
-.numberCell {
+// Two lines: the name of the preset, then its numbers in the mono font the layer summaries use.
+.presetCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.presetName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presetDetail {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.numbers {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
-// The percent of the active laser after the watts, quieter, as it is the same value in the layer's unit.
+// The percent of the active laser after the watts, quieter still, as it is the same value in the layer's unit.
 .powerPercent {
   margin-left: var(--space-1);
-  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+.machineName {
+  font-family: var(--font-ui);
 }
 
 // Takes the hover for the tooltip that says what the ticks are for.
@@ -57,7 +69,7 @@
 // Wide enough for the Apply button and the Applied tag alike, so a row does not change width when one takes the
 // other's place.
 .applyCell {
-  width: 6rem;
+  width: 5.5rem;
   text-align: center;
   white-space: nowrap;
 }

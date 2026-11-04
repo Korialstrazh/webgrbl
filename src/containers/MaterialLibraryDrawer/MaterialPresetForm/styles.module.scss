@@ -1,13 +1,27 @@
-// A column that fills the edit pane: the heading and the actions keep their place, the fields between them scroll.
+// A column of its natural height, so the actions follow the fields; in a short window it shrinks, the header and the
+// actions keep their place and the fields between them scroll.
 .presetForm {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-direction: column;
   gap: var(--space-3);
   min-height: 0;
 }
 
+// The way back to the list before the name of the preset, on one line, so the view says where it is and how to
+// leave it without taking a line from the fields.
+.header {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+  // The Back button sits flush with the fields, so its icon starts where the labels start.
+  margin-left: calc(-1 * var(--space-2));
+}
+
 .heading {
+  min-width: 0;
   margin: 0;
   overflow: hidden;
   color: var(--color-text);
@@ -18,12 +32,12 @@
 }
 
 .fields {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 
-  // The form's own gaps are small; antd's bottom margin would stretch the pane past the window.
+  // The form's own gaps are small; antd's bottom margin would stretch the view past the window.
   :global(.ant-form-item) {
     margin-bottom: var(--space-3);
   }
@@ -33,28 +47,37 @@
   }
 }
 
-// Power, speed and passes side by side, two to a row in the edit pane, so the fields fit the pane without scrolling
-// at the usual window heights; in a narrow window the pane is wider and they take a row of three.
+// Power, speed and passes on one row of three in the narrow drawer, each as wide as its label needs, so the labels
+// keep one line and the inputs line up.
 .numberFields {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 0.8fr);
   gap: 0 var(--space-3);
+
+  :global(.ant-form-item-label) > label {
+    white-space: nowrap;
+  }
 }
 
 .numberInput {
   width: 100%;
 }
 
-// Room for two lines of error text, filled or not, so a wrong number moves nothing below it.
-.numberError {
-  min-height: 2.25rem;
+// One line under the numbers: the percent of the laser, or the first wrong number in its place. Its height is
+// reserved, so a wrong number moves nothing below it.
+.numberNote {
+  min-height: 1.25rem;
   margin: 0 0 var(--space-2);
-  color: var(--color-danger-text);
+  color: var(--color-text-muted);
   font-size: 0.75rem;
   line-height: 1.5;
 }
 
-// Save and Cancel together; Delete stands apart at the far end, so it is never pressed for Save.
+.numberError {
+  color: var(--color-danger-text);
+}
+
+// Save at the start; Delete stands apart at the far end, so it is never pressed for Save.
 .actions {
   display: flex;
   flex: none;

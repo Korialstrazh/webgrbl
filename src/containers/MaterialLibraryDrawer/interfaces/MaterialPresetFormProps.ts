@@ -1,5 +1,5 @@
 /**
- * Props of the edit panel of the material library. The panel edits a draft its parent owns, so the parent knows
+ * Props of the edit view of the material library. The view edits a draft its parent owns, so the parent knows
  * whether there is something to save and keeps the draft after a save.
  *
  * @author michael.morosov
@@ -26,6 +26,9 @@ export interface MaterialPresetFormProps {
   headingText: string;
   onChange: (change: MaterialPresetChange) => void;
   onSave: () => void;
-  onCancel: () => void;
+  /** Goes back to the list; unsaved edits are dropped. */
+  onBack: () => void;
   onDelete: () => void;
+  /** Opens the dialog that adds a material, which becomes the material of the draft. */
+  onNewMaterial: () => void;
 }

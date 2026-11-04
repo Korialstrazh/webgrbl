@@ -1,6 +1,7 @@
 /**
- * What the material library table shows without rows: why there are none, and the one thing to do about it. The
- * drawer leaves the Material panel and the top bar in view, so it points at them and offers to get out of the way.
+ * What the material library list shows without rows: why there are none, and the one thing to do about it. With no
+ * material there is a New material button right here, as a preset needs one; without an active machine it points
+ * at Machine profiles in the top bar and offers to get out of the way.
  *
  * @author michael.morosov
  *
@@ -18,7 +19,8 @@ import type { MaterialLibraryEmptyStateProps } from '../interfaces/MaterialLibra
 
 export const MaterialLibraryEmptyState = (props: MaterialLibraryEmptyStateProps): ReactNode => {
   const {
-    hasMaterials, hasActiveMachine, searchText, filteredMaterial, onClearSearch, onClearMaterialFilter, onClose,
+    hasMaterials, hasActiveMachine, searchText, filteredMaterial, onClearSearch, onClearMaterialFilter,
+    onNewMaterial, onClose,
   } = props;
   const { t } = useTranslation();
 
@@ -28,8 +30,8 @@ export const MaterialLibraryEmptyState = (props: MaterialLibraryEmptyStateProps)
         iconComponent={<BookOutlined />}
         titleText={t(DEFAULT.MATERIAL_LIBRARY_EMPTY_NO_MATERIALS_TITLE)}
         bodyText={t(DEFAULT.MATERIAL_LIBRARY_NO_MATERIALS)}
-        actionLabel={t(DEFAULT.MATERIAL_LIBRARY_CLOSE)}
-        onAction={onClose}
+        actionLabel={t(DEFAULT.MATERIAL_LIBRARY_NEW_MATERIAL)}
+        onAction={onNewMaterial}
       />
     );
   }

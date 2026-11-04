@@ -1,5 +1,5 @@
 /**
- * Props of the table of the material library.
+ * Props of the list of the material library: one compact row per preset.
  *
  * @author michael.morosov
  *
@@ -32,12 +32,10 @@ export interface MaterialPresetRowApply {
 
 export interface MaterialPresetTableProps {
   rows: MaterialPresetRow[];
-  /** The preset open in the edit panel, whose row is highlighted. */
-  editedPresetId: string | undefined;
   /** The presets ticked for export. */
   tickedPresetIds: Key[];
-  /** Whether the Machine column shows, which it does when the rows can belong to several lasers. */
-  isMachineColumnShown: boolean;
+  /** Whether each row names its machine, which it does when the rows can belong to several lasers. */
+  isMachineNamed: boolean;
   /** The active laser; undefined without one, and then no row shows a percent. */
   activeProfile: MaterialPresetPowerReference | undefined;
   /** The row buttons when the library was opened from a layer; none otherwise. */

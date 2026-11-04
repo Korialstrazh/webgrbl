@@ -1,6 +1,6 @@
 /**
- * Props of the toolbar above the material library table: the search, the machine filter, the material filter chip
- * and the Add preset button.
+ * Props of the toolbar above the material library list: the search, the machine filter, the chips that name the
+ * material the list is kept to and the layer it applies to, and the Add preset and New material buttons.
  *
  * @author michael.morosov
  *
@@ -19,12 +19,13 @@ export interface MaterialLibraryFiltersProps {
   hasActiveMachine: boolean;
   /** The material the list is filtered to; undefined lists every material. */
   filteredMaterial: Material | undefined;
+  /** The name of the layer the rows apply to, when the library was opened from a layer. */
+  targetLayerName: string | undefined;
   /** Whether a preset can be added: there is a material to add it for and a machine to add it on. */
   isAddAllowed: boolean;
-  /** Whether Add preset is the main action, which it is while no preset is open in the edit pane. */
-  isAddMainAction: boolean;
   onSearch: (searchText: string) => void;
   onOnlyActiveMachineChange: (isOnlyActiveMachine: boolean) => void;
   onClearMaterialFilter: () => void;
   onAdd: () => void;
+  onNewMaterial: () => void;
 }

@@ -15,10 +15,10 @@ import type { MaterialPresetOperation } from '../../utils/materials/material.pre
 export const MATERIAL_LIBRARY_DRAWER_OVERLAY_ID = 'material-library-drawer';
 
 /**
- * Room for the table beside the edit pane on a wide screen, and never wider than the bed region, so a narrower window
- * shows the drawer at the width of the region with the panes stacked.
+ * One column: room for the compact list and the edit view, narrow enough to leave most of the bed in view beside
+ * the Material panel, and never wider than the bed region, so a narrow window shows it at the width of the region.
  */
-export const MATERIAL_LIBRARY_DRAWER_WIDTH = 'min(68rem, 100%)';
+export const MATERIAL_LIBRARY_DRAWER_WIDTH = 'min(27rem, 100%)';
 
 export const MATERIAL_PRESET_OPERATION_LABEL_KEY: Record<MaterialPresetOperation, string> = {
   [MATERIAL_PRESET_OPERATION.CUT]: DEFAULT.MATERIAL_LIBRARY_OPERATION_CUT,

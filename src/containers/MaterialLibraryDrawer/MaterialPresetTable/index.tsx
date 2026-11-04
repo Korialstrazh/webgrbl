@@ -1,8 +1,9 @@
 /**
- * The table of the material library. A click or Enter on a row opens it in the edit pane; a tick selects it for
- * export without opening it. Opened from a layer, each row of the active laser gets an Apply button that applies it
- * to that layer at once, and the row says "Applied" in its place for a moment, so the confirmation is where the click
- * was.
+ * The list of the material library, compact enough for the narrow drawer: each row names the material, thickness and
+ * operation on one line and the power, speed and passes on a second, with the machine after them when the rows can
+ * belong to several lasers. A click or Enter on a row opens it in the edit view; a tick selects it for export
+ * without opening it. Opened from a layer, each row of the active laser gets an Apply button that applies it to that
+ * layer at once, and the row says "Applied" in its place for a moment, so the confirmation is where the click was.
  *
  * @author michael.morosov
  *
@@ -14,15 +15,11 @@
 import { CheckOutlined } from '@ant-design/icons';
 import { Button, Table, Tag, Tooltip } from 'antd';
 import type { TableColumnsType } from 'antd';
-import type { HTMLAttributes, Key, KeyboardEvent, MouseEvent, ReactNode } from 'react';
+import type { Key, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ANTD_BUTTON_SIZE_SMALL,
-  ANTD_TABLE_COLUMN_ALIGN_RIGHT,
-  ANTD_TABLE_SIZE_SMALL,
-  ANTD_TAG_COLOR_SUCCESS,
-} from '../../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_TABLE_SIZE_SMALL, ANTD_TAG_COLOR_SUCCESS } from '../../../utils/antd.constants';
 import { ENTER_KEY, SPACE_KEY } from '../../../utils/browser/browser.events.constants';
+import { MIDDLE_DOT } from '../../../utils/characters.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
 import { getPresetPowerPercent } from '../../../utils/materials/get.preset.power.percent';
@@ -31,23 +28,14 @@ import type { MaterialPresetRowApply, MaterialPresetTableProps } from '../interf
 import styles from './styles.module.scss';
 
 const ROW_TAB_INDEX = 0;
-const MATERIAL_NAME_FIELD: keyof MaterialPresetRow = 'materialName';
+const DETAIL_SEPARATOR = ` ${MIDDLE_DOT} `;
 
 const COLUMN_KEY = {
-  MATERIAL: 'material',
-  THICKNESS: 'thickness',
-  OPERATION: 'operation',
-  POWER: 'power',
-  SPEED: 'speed',
-  PASSES: 'passes',
-  MACHINE: 'machine',
+  PRESET: 'preset',
   APPLY: 'apply',
 } as const;
 
 const getPresetRowKey = ({ preset }: MaterialPresetRow): string => preset.id;
-
-/** The number cells, not their headers, use the mono font, as the layer summaries do. */
-const getNumberCellProps = (): HTMLAttributes<HTMLElement> => ({ className: styles.numberCell });
 
 const isRowOpenKey = ({ key }: KeyboardEvent<HTMLElement>): boolean => key === ENTER_KEY || key === SPACE_KEY;
 
@@ -56,14 +44,14 @@ const canApplyRow = ({ machineProfileId, powerWatts }: MaterialPreset, rowApply:
 
 export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode => {
   const {
-    rows, editedPresetId, tickedPresetIds, isMachineColumnShown, activeProfile, rowApply, emptyStateComponent,
+    rows, tickedPresetIds, isMachineNamed, activeProfile, rowApply, emptyStateComponent,
     getOperationLabel, getProfileName, onTick, onPick,
   } = props;
   const { t } = useTranslation();
 
   /** The watts, and for a preset of the active laser the percent beside them, as the layers show power in percent. */
-  const renderPower = ({ preset }: MaterialPresetRow): ReactNode => (
-    <>
+  const renderPower = (preset: MaterialPreset): ReactNode => (
+    <span>
       {t(DEFAULT.MATERIAL_LIBRARY_POWER_VALUE, { watts: preset.powerWatts })}
       {activeProfile && preset.machineProfileId === activeProfile.id && (
         <span className={styles.powerPercent}>
@@ -72,7 +60,34 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
           })}
         </span>
       )}
-    </>
+    </span>
+  );
+
+  const renderPreset = ({ preset, materialName, thicknessMm }: MaterialPresetRow): ReactNode => (
+    <span className={styles.presetCell}>
+      <span className={styles.presetName}>
+        {t(DEFAULT.MATERIAL_LIBRARY_PRESET_NAME, {
+          name: materialName,
+          thickness: thicknessMm,
+          operation: getOperationLabel(preset.operation),
+        })}
+      </span>
+      <span className={styles.presetDetail}>
+        <span className={styles.numbers}>
+          {renderPower(preset)}
+          {DETAIL_SEPARATOR}
+          <span>{t(DEFAULT.MATERIAL_LIBRARY_SPEED_VALUE, { speed: preset.speedMmPerMin })}</span>
+          {DETAIL_SEPARATOR}
+          <span>{t(DEFAULT.MATERIAL_LIBRARY_PASSES_VALUE, { passes: preset.passes })}</span>
+        </span>
+        {isMachineNamed && (
+          <span className={styles.machineName}>
+            {DETAIL_SEPARATOR}
+            {getProfileName(preset.machineProfileId)}
+          </span>
+        )}
+      </span>
+    </span>
   );
 
   const renderApplyButton = ({ preset }: MaterialPresetRow): ReactNode => {
@@ -107,7 +122,7 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
         size={ANTD_BUTTON_SIZE_SMALL}
         aria-label={t(DEFAULT.MATERIAL_LIBRARY_APPLY_ROW, { layer: rowApply.layerName })}
         onClick={(clickEvent: MouseEvent<HTMLElement>) => {
-          // The button must not open the row in the edit pane as well.
+          // The button must not open the row in the edit view as well.
           clickEvent.stopPropagation();
           rowApply.onApply(preset);
         }}
@@ -118,47 +133,7 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
   };
 
   const columns: TableColumnsType<MaterialPresetRow> = [
-    { key: COLUMN_KEY.MATERIAL, title: t(DEFAULT.MATERIAL_LIBRARY_MATERIAL), dataIndex: MATERIAL_NAME_FIELD },
-    {
-      key: COLUMN_KEY.THICKNESS,
-      title: t(DEFAULT.MATERIAL_LIBRARY_THICKNESS),
-      align: ANTD_TABLE_COLUMN_ALIGN_RIGHT,
-      onCell: getNumberCellProps,
-      render: ({ thicknessMm }: MaterialPresetRow) =>
-        t(DEFAULT.MATERIAL_LIBRARY_THICKNESS_VALUE, { thickness: thicknessMm }),
-    },
-    {
-      key: COLUMN_KEY.OPERATION,
-      title: t(DEFAULT.MATERIAL_LIBRARY_OPERATION),
-      render: ({ preset }: MaterialPresetRow) => getOperationLabel(preset.operation),
-    },
-    {
-      key: COLUMN_KEY.POWER,
-      title: t(DEFAULT.MATERIAL_LIBRARY_POWER_COLUMN),
-      align: ANTD_TABLE_COLUMN_ALIGN_RIGHT,
-      onCell: getNumberCellProps,
-      render: renderPower,
-    },
-    {
-      key: COLUMN_KEY.SPEED,
-      title: t(DEFAULT.MATERIAL_LIBRARY_SPEED),
-      align: ANTD_TABLE_COLUMN_ALIGN_RIGHT,
-      onCell: getNumberCellProps,
-      render: ({ preset }: MaterialPresetRow) => preset.speedMmPerMin,
-    },
-    {
-      key: COLUMN_KEY.PASSES,
-      title: t(DEFAULT.MATERIAL_LIBRARY_PASSES),
-      align: ANTD_TABLE_COLUMN_ALIGN_RIGHT,
-      onCell: getNumberCellProps,
-      render: ({ preset }: MaterialPresetRow) => t(DEFAULT.MATERIAL_LIBRARY_PASSES_VALUE, { passes: preset.passes }),
-    },
-    // With every machine listed, the same material can appear for several lasers.
-    ...(isMachineColumnShown ? [{
-      key: COLUMN_KEY.MACHINE,
-      title: t(DEFAULT.MATERIAL_LIBRARY_MACHINE),
-      render: ({ preset }: MaterialPresetRow) => getProfileName(preset.machineProfileId),
-    }] : []),
+    { key: COLUMN_KEY.PRESET, title: t(DEFAULT.MATERIAL_LIBRARY_PRESET_COLUMN), render: renderPreset },
     ...(rowApply ? [{
       key: COLUMN_KEY.APPLY,
       title: t(DEFAULT.MATERIAL_LIBRARY_APPLY_ROW_COLUMN),
@@ -180,7 +155,7 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
         // Ticks are for export and stay while search or the machine filter hides their rows.
         preserveSelectedRowKeys: true,
         selectedRowKeys: tickedPresetIds,
-        // The header tick says what the ticks are for, as nothing else in the table does.
+        // The header tick says what the ticks are for, as nothing else in the list does.
         columnTitle: (selectAllComponent: ReactNode) => (
           <Tooltip title={t(DEFAULT.MATERIAL_LIBRARY_TICK_FOR_EXPORT)}>
             <span className={styles.selectAllWrapper}>{selectAllComponent}</span>
@@ -188,13 +163,12 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
         ),
         getCheckboxProps: () => ({ 'aria-label': t(DEFAULT.MATERIAL_LIBRARY_TICK_FOR_EXPORT) }),
         onChange: (rowKeys: Key[]) => onTick(rowKeys),
-        // A tick must not open the row in the edit panel as well.
+        // A tick must not open the row in the edit view as well.
         onCell: () => ({
           onClick: (clickEvent: MouseEvent<HTMLElement>) => clickEvent.stopPropagation(),
         }),
       }}
-      rowClassName={({ preset }: MaterialPresetRow): string =>
-        (preset.id === editedPresetId ? [styles.presetRow, styles.editedRow].join(' ') : styles.presetRow ?? '')}
+      rowClassName={() => styles.presetRow ?? ''}
       onRow={({ preset }: MaterialPresetRow) => ({
         tabIndex: ROW_TAB_INDEX,
         onClick: () => onPick(preset),

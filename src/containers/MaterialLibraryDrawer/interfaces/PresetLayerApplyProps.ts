@@ -1,5 +1,6 @@
 /**
- * Props of the part of the material library that applies a preset to a layer the user names.
+ * Props of the part of the edit view that applies the open preset to a layer the user names. It is always there,
+ * so the user sees where applying happens; while nothing can be applied, its note says why.
  *
  * @author michael.morosov
  *
@@ -11,14 +12,17 @@
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
 
 export interface PresetLayerApplyProps {
-  /** The stored preset to apply. */
-  preset: MaterialPreset;
+  /**
+   * The stored preset of the active laser to apply; undefined while the open preset is not stored or is another
+   * laser's.
+   */
+  preset: MaterialPreset | undefined;
+  /** Whether the open preset is stored: without a preset to apply, this tells a new one from one of another laser. */
+  isPresetStored: boolean;
   /** Rated power of the active laser, in watts. */
   maxPowerWatts: number;
   /** The layer picked to apply to; the library keeps it when the user moves to another preset. */
   pickedLayerKey: string | undefined;
-  /** Whether the form beside holds unsaved edits: then Save is the main action and a note says what Apply uses. */
-  isFormChanged: boolean;
   onPickLayer: (layerKey: string) => void;
   /** Called with the text that says what was applied, which the library shows where it stays visible. */
   onApplied: (appliedText: string) => void;
