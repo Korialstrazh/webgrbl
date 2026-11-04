@@ -14,6 +14,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
+import { MILLISECONDS_PER_SECOND } from '../../../../utils/machine/machine.command.constants';
+import { PERCENT_DIVISOR } from '../../../../utils/percent.constants';
 import {
   selectJobRunAnsweredLineCount,
   selectJobRunStartedAtMs,
@@ -23,8 +25,6 @@ import { getJobEstimateText } from '../../../../utils/toolpath/get.job.estimate.
 import styles from './styles.module.scss';
 
 const ELAPSED_REFRESH_MS = 1000;
-const MILLISECONDS_PER_SECOND = 1000;
-const FULL_PERCENT = 100;
 
 export const JobRunProgress = (): ReactNode => {
   const { t } = useTranslation();
@@ -32,7 +32,7 @@ export const JobRunProgress = (): ReactNode => {
   const totalLineCount: number = useSelector(selectJobRunTotalLineCount);
   const startedAtMs: number = useSelector(selectJobRunStartedAtMs);
   const [nowMs, setNowMs] = useState<number>(Date.now());
-  const percent: number = totalLineCount ? Math.floor((answeredLineCount / totalLineCount) * FULL_PERCENT) : 0;
+  const percent: number = totalLineCount ? Math.floor((answeredLineCount / totalLineCount) * PERCENT_DIVISOR) : 0;
 
   useEffect(() => {
     const timerId: ReturnType<typeof setInterval> = setInterval(() => setNowMs(Date.now()), ELAPSED_REFRESH_MS);

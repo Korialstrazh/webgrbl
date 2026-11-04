@@ -10,14 +10,17 @@
  */
 import { call, put, select } from 'redux-saga/effects';
 import type { GrblController } from '../grbl/grbl.controller';
-import type { Action } from './action';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import { JOB_PAUSE_CONTROL } from './job.pause.control.constants';
 import type { JobPauseControl } from './job.pause.control.constants';
 import { selectJobPauseControl } from './job.pause.control.selector';
 import { JobPauseRequested } from './job.run.state';
+import type { JobResumeRequested } from './job.run.state';
 
-export function* runGrblJobPauseCommand(controller: GrblController, action: Action<unknown>): Generator {
+export function* runGrblJobPauseCommand(
+  controller: GrblController,
+  action: JobPauseRequested | JobResumeRequested,
+): Generator {
   const pauseControl: JobPauseControl = (yield select(selectJobPauseControl)) as JobPauseControl;
   const isPauseRequest: boolean = action.type === JobPauseRequested.type;
   const allowedControl: JobPauseControl = isPauseRequest ? JOB_PAUSE_CONTROL.PAUSE : JOB_PAUSE_CONTROL.RESUME;

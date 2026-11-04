@@ -15,9 +15,9 @@ import { newToolpathMove } from '../toolpath/test.support/new.toolpath.move';
 import { ConnectRequested, DisconnectRequested, SerialPortSelected } from './grbl.connection.state';
 import { ConsoleCommandSubmitted, selectConsoleEntries } from './grbl.console.state';
 import type { GrblConsoleViewEntry } from './interfaces/GrblConsoleViewEntry';
-import { runGrblJob } from './job.run.saga';
 import { JOB_PAUSE_CONTROL } from './job.pause.control.constants';
 import { selectJobPauseControl } from './job.pause.control.selector';
+import { runGrblJob } from './job.run.saga';
 import {
   JobPauseRequested,
   JobResumeRequested,

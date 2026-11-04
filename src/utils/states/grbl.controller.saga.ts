@@ -42,8 +42,8 @@ import {
   selectBaudRate,
   selectSelectedPortId,
 } from './grbl.connection.state';
-import { getGrblControllerEventActions } from './grbl.controller.event.actions';
 import { handleGrblControllerCommands } from './grbl.controller.commands.saga';
+import { getGrblControllerEventActions } from './grbl.controller.event.actions';
 import { getPreferredPortId } from './grbl.preferred.port.id';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
