@@ -16,9 +16,12 @@ import type { FrameRectangle } from '../frame/interfaces/FrameRectangle';
 import { GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
 import type { GrblController } from '../grbl/grbl.controller';
 import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
+import { getPointerSValueMax } from '../machine/get.pointer.s.value.max';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
+import { getValidGcodeSValueMax } from '../toolpath/get.valid.gcode.s.value.max';
 import type { Action } from './action';
 import { selectFrameRectangle, selectFrameStartBlockedReasonKey } from './frame.start.blocked.reason.selector';
+import { selectGrblSettings } from './grbl.connection.state';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import { JOB_RUN_KIND } from './job.run.kind.constants';
 import { followJobProgram, waitForJobInterruption } from './job.run.saga';
@@ -27,6 +30,7 @@ import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
 import { selectActiveMachineProfile, selectFrameGridCellMm } from './machine.profile.state';
 import {
+  MachineAirAssistChanged,
   MachineAlarmReported,
   MachineControllerResetDetected,
   MachineResetRequested,
@@ -57,7 +61,10 @@ const getFrameProgramLinesOfState = (state: AppRootState): string[] | undefined 
   return getFrameProgramLines({
     rectangle,
     gridCellMm: selectFrameGridCellMm(state),
-    sValue: getFrameSValue(profile.maxPowerWatts, profile.sValueMax),
+    sValue: getFrameSValue(
+      profile.maxPowerWatts,
+      getValidGcodeSValueMax(getPointerSValueMax(selectGrblSettings(state), profile)),
+    ),
     profile,
     startPoint: status.workPosition,
   });
@@ -138,6 +145,10 @@ export function* runGrblFrame(controller: GrblController): Generator {
       (yield call(followFrameProgram, controller, programLines, endCauseTask, interruptionTask)) as JobRunStatus;
 
     yield put(new JobRunStatusChanged({ status: endStatus }));
+
+    if (endStatus === JOB_RUN_STATUS.INTERRUPTED) {
+      yield put(new MachineAirAssistChanged({ isAirAssistOn: false }));
+    }
   } catch (error: unknown) {
     yield put(newRawErrorConsoleInfo(error));
     yield put(new JobRunStatusChanged({ status: JOB_RUN_STATUS.INTERRUPTED }));

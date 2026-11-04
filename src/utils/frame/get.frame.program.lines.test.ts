@@ -25,14 +25,15 @@ describe(getFrameProgramLines.name, () => {
 
     expect(lines).toEqual([
       'G21 G90',
-      'M3 S5',
+      'M4 S5',
       'G0 X10 Y10',
       'G1 X110 Y10 F1500',
       'G1 X110 Y110',
       'G1 X10 Y110',
       'G1 X10 Y10',
-      'M5',
+      'M5 S0',
       'G0 X3 Y4',
+      'G4 P0',
     ]);
   });
 
@@ -45,7 +46,7 @@ describe(getFrameProgramLines.name, () => {
       startPoint: START_POINT,
     });
 
-    expect(lines.slice(7, -2)).toEqual([
+    expect(lines.slice(7, -3)).toEqual([
       'G0 X20 Y0',
       'G1 X20 Y50',
       'G0 X40 Y50',
@@ -87,6 +88,7 @@ describe(getFrameProgramLines.name, () => {
 
     expect(lines[2]).toBe('G0 X390 Y290');
     expect(lines[3]).toBe('G1 X290 Y290 F1500');
-    expect(lines.at(-1)).toBe('G0 X3 Y4');
+    expect(lines.at(-2)).toBe('G0 X3 Y4');
+    expect(lines.at(-1)).toBe('G4 P0');
   });
 });

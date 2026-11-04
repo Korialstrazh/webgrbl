@@ -55,7 +55,7 @@ dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
 
 `npm run dev`, then connect the simulated laser in the connection popover: jog and Set zero move the head and the zero marker on the bed. To see a pointer cut-off, hold the fire button and switch tab: the button releases.
 
-Hardware check: a known follow-up, deferred on 2026-10-31 because the ACMER laser was not available. Still to verify in Chrome: jog in every direction at 1 and 10 mm, go to zero, Set zero then Stop keeps the zero marker, Home and air assist if fitted, the pointer at 1 % shows a dot and switches off on release, Alt-Tab and after 10 s, and whether a stationary pointer lights at all on this firmware. Stock GRBL with laser mode on (`$32=1`) keeps a stationary pointer dark; the card's note says so in plain words.
+Hardware check: a known follow-up, deferred on 2026-10-31 because the ACMER laser was not available. Still to verify in Chrome: jog in every direction at 1 and 10 mm, go to zero, Set zero then Stop keeps the zero marker, Home and air assist if fitted, the pointer at 1 % shows a dot and switches off on release, Alt-Tab and after 10 s, and whether a stationary pointer lights at all on this firmware. The pointer sends `M3` and a feed-only `G1 F100`; stock GRBL keeps `M3` lit without motion, so it should light there, but that is not verified on hardware, and the card's firmware note still says some firmwares keep the laser off while the head stands still.
 
 ## Tests
 
