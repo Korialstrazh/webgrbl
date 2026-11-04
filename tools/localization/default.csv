@@ -207,8 +207,10 @@ LAYER_SETTINGS_MIN_POWER;Min power (%)
 LAYER_SETTINGS_MODE;Mode
 LAYER_SETTINGS_OVERLINE;Layer settings
 LAYER_SETTINGS_PASSES;Passes
-LAYER_SETTINGS_PRESET_DESCRIPTION;Save these settings as a material preset to use on other designs.
+LAYER_SETTINGS_PRESET_APPLY;Use a material preset
+LAYER_SETTINGS_PRESET_NEEDS_MATERIAL;Pick the material of the project in the Material panel to save a preset.
 LAYER_SETTINGS_PRESET_SAVE;Save as material preset
+LAYER_SETTINGS_PRESET_SAVED;Saved as a preset for {{name}}.
 LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
 LAYER_SETTINGS_SEND;Send to laser
 LAYER_SETTINGS_SPEED;Speed (mm/min)
@@ -278,7 +280,7 @@ MACHINE_PROFILE_ERROR_WORK_AREA_Y_INVALID;Work area height must be greater than 
 MACHINE_PROFILES_ACTIVE;Active
 MACHINE_PROFILES_DELETE;Delete
 MACHINE_PROFILES_DELETE_CANCEL;Cancel
-MACHINE_PROFILES_DELETE_CONFIRM;Delete the profile {{name}}?
+MACHINE_PROFILES_DELETE_CONFIRM;Delete the profile {{name}} and its material presets?
 MACHINE_PROFILES_DELETE_LAST_HINT;Keep at least one machine profile. Add another before deleting this one.
 MACHINE_PROFILES_DELETE_OK;Yes, delete
 MACHINE_PROFILES_EXPORT;Export
@@ -341,6 +343,47 @@ MATERIAL_DIALOG_THICKNESS;Thickness (mm)
 MATERIAL_DIALOG_THICKNESS_INVALID;Enter a thickness from {{min}} to {{max}} mm.
 MATERIAL_DIALOG_TITLE;Add material
 MATERIAL_DIALOG_USE_EXISTING;Use that one
+MATERIAL_LIBRARY_ADD;Add preset
+MATERIAL_LIBRARY_APPLIED;Applied to {{name}}.
+MATERIAL_LIBRARY_APPLIED_MIN_LOWERED;Applied to {{name}}. Its minimum power was lowered to the new maximum.
+MATERIAL_LIBRARY_APPLY;Apply to layer
+MATERIAL_LIBRARY_APPLY_LAYER;Layer
+MATERIAL_LIBRARY_APPLY_SAVED_VALUES;Applies the saved values. Save your edits first.
+MATERIAL_LIBRARY_APPLY_TOO_STRONG;This preset needs more power than this laser has. Lower its power and save it first.
+MATERIAL_LIBRARY_DELETE;Delete
+MATERIAL_LIBRARY_DELETE_CANCEL;Cancel
+MATERIAL_LIBRARY_DELETE_CONFIRM;Delete this preset?
+MATERIAL_LIBRARY_DELETE_OK;Yes, delete
+MATERIAL_LIBRARY_EMPTY;No presets to show.
+MATERIAL_LIBRARY_EXPORT;Export selected ({{count}})
+MATERIAL_LIBRARY_IMPORT;Import
+MATERIAL_LIBRARY_IMPORT_FILE;Open a material presets file
+MATERIAL_LIBRARY_IMPORTED;Imported {{count}} for this machine. Power was rescaled from the source laser, so test before a real job.
+MATERIAL_LIBRARY_MACHINE;Machine
+MATERIAL_LIBRARY_MACHINE_DELETED;Deleted machine
+MATERIAL_LIBRARY_MATERIAL;Material
+MATERIAL_LIBRARY_MATERIAL_OPTION;{{name}}, {{thickness}} mm
+MATERIAL_LIBRARY_NO_ACTIVE_MACHINE;Pick an active machine in Machine profiles to add presets.
+MATERIAL_LIBRARY_NO_MATERIALS;Add a material in the Material panel first.
+MATERIAL_LIBRARY_NOTES;Notes
+MATERIAL_LIBRARY_ONLY_THIS_MACHINE;Only for this machine
+MATERIAL_LIBRARY_OPERATION;Operation
+MATERIAL_LIBRARY_OPERATION_CUT;Cut
+MATERIAL_LIBRARY_OPERATION_ENGRAVE;Engrave
+MATERIAL_LIBRARY_OPERATION_SHADE;Shade
+MATERIAL_LIBRARY_PASSES;Passes
+MATERIAL_LIBRARY_PASSES_INVALID;Enter a whole number from {{min}} to {{max}}.
+MATERIAL_LIBRARY_PICK_HINT;Pick a preset to edit it, or add a new one.
+MATERIAL_LIBRARY_POWER;Power (W)
+MATERIAL_LIBRARY_POWER_INVALID;Enter a power above 0, up to {{max}} W.
+MATERIAL_LIBRARY_SAVE;Save
+MATERIAL_LIBRARY_SEARCH;Search material, thickness, operation
+MATERIAL_LIBRARY_SPEED;Speed (mm/min)
+MATERIAL_LIBRARY_SPEED_INVALID;Enter a speed from {{min}} to {{max}} mm/min.
+MATERIAL_LIBRARY_THICKNESS;Thickness
+MATERIAL_LIBRARY_THICKNESS_VALUE;{{thickness}} mm
+MATERIAL_LIBRARY_TICK_FOR_EXPORT;Select for export
+MATERIAL_LIBRARY_TITLE;Material library
 OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visible part.
 OBJECT_WARNING_IMAGE;Images are not engraved yet.
 OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.
@@ -457,6 +500,8 @@ TOAST_GCODE_EXPORT_DROPPED;The G-code export was stopped because another project
 TOAST_GRBL_ALARM;Alarm {{code}}: {{description}} - unlock or home the machine.
 TOAST_GRBL_ERROR;Error {{code}}: {{description}}
 TOAST_LASER_MODE_OFF;Laser mode is off ($32=0): the laser may burn spots where it slows down. Send $32=1 in the console to turn it on.
+TOAST_MATERIAL_PRESET_SAVE_FAILED;The material preset change could not be saved - the browser storage may be full. Your changes stay on screen until you reload the page.
+TOAST_MATERIAL_PRESETS_IMPORT_INVALID;That file is not a valid material presets file. Nothing was imported.
 TOAST_MATERIAL_SAVE_FAILED;The material could not be saved - the browser storage may be full. Your changes stay on screen until you reload the page.
 TOAST_NOT_RESPONDING;The controller is not responding.
 TOAST_PORT_ACCESS_DENIED_OR_BUSY;Could not open the port. On Linux, add your user to the dialout group. On any system, close other apps or tabs using the port.
@@ -505,6 +550,7 @@ TOP_BAR_AUTOSAVE_SAVING;Saving…
 TOP_BAR_AUTOSAVE_UNSAVED;Not saved
 TOP_BAR_MENU_IMPORT_SVG;Import SVG
 TOP_BAR_MENU_MACHINE_PROFILES;Machine profiles
+TOP_BAR_MENU_MATERIALS;Materials
 TOP_BAR_MENU_PROJECT;Project
 TOP_BAR_MORE;More
 TOP_BAR_PROJECT_MENU_EXPORT_GCODE;Export G-code

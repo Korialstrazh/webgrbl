@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_DRAWER_PLACEMENT_LEFT } from '../../utils/antd.constants';
 import { getLayerDisplayName } from '../../utils/layers/get.layer.display.name';
+import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../utils/layers/get.layer.palette.entry';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
@@ -55,7 +56,7 @@ export const LayerSettingsDrawer = (props: LayerSettingsDrawerProps): ReactNode 
       focusable={LAYER_SETTINGS_DRAWER_FOCUS}
       onClose={onClose}
     >
-      {layer && <LayerSettingsFields layer={layer} onEditPalette={onEditPalette} />}
+      {layer && <LayerSettingsFields key={getLayerKey(layer)} layer={layer} onEditPalette={onEditPalette} />}
     </BedRegionDrawer>
   );
 };
