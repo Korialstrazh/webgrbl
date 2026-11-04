@@ -4,6 +4,7 @@ import {
   GRBL_MACHINE_STATE,
   GRBL_STATUS_POLL_INTERVAL_MS,
   SIMULATED_LASER_PORT_ID,
+  GRBL_STOP_FINISH_MAX_WAIT_MS,
 } from '../grbl/grbl.constants';
 import { GrblController } from '../grbl/grbl.controller';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
@@ -335,12 +336,26 @@ describe(runGrblFrame.name, () => {
     store.dispatch(new FrameStartRequested());
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     store.dispatch(new MachineStopRequested());
-    await vi.advanceTimersByTimeAsync(FRAME_END_MS);
+    await vi.advanceTimersByTimeAsync(GRBL_STOP_FINISH_MAX_WAIT_MS - 1);
 
     expect(selectIsJobRunActive(store.getState())).toBe(true);
 
     finishStop();
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+  });
+
+  it('ends the run at the time limit when a stop never finishes', async () => {
+    const { store }: FrameRig = await prepareFrameRig();
+
+    vi.spyOn(GrblController.prototype, 'stopMachine').mockImplementation(
+      (): Promise<void> => new Promise((): void => undefined),
+    );
+    store.dispatch(new FrameStartRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new MachineStopRequested());
+    await vi.advanceTimersByTimeAsync(GRBL_STOP_FINISH_MAX_WAIT_MS);
 
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
   });
