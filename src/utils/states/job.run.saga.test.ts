@@ -3,8 +3,8 @@ import {
   GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
   GRBL_MACHINE_STATE,
   GRBL_SOFT_RESET_BYTE,
-  GRBL_STOP_FINISH_MAX_WAIT_MS,
   GRBL_STATUS_POLL_INTERVAL_MS,
+  GRBL_STOP_FINISH_MAX_WAIT_MS,
   SIMULATED_LASER_PORT_ID,
 } from '../grbl/grbl.constants';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
@@ -167,6 +167,9 @@ const expectLocksOnWhileResetIsHeld = async (store: AppStore, transport: Control
   expect(selectIsJobRunActive(store.getState())).toBe(false);
 };
 
+const isIdleReportWhileJobFinishing = (store: AppStore, receivedText: string): boolean =>
+  receivedText.includes(IDLE_REPORT_START) && selectJobRunStatus(store.getState()) === JOB_RUN_STATUS.FINISHING;
+
 describe(runGrblJob.name, () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -262,7 +265,7 @@ describe(runGrblJob.name, () => {
     const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
 
     transport.receivedTextObserver = (text: string): void => {
-      if (text.includes(IDLE_REPORT_START) && selectJobRunStatus(store.getState()) === JOB_RUN_STATUS.FINISHING) {
+      if (isIdleReportWhileJobFinishing(store, text)) {
         transport.receivedTextObserver = undefined;
         store.dispatch(new MachineStopRequested());
       }
