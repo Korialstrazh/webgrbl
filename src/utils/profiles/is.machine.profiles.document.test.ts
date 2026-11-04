@@ -22,13 +22,14 @@ const INVALID_VALUES: unknown[] = [
   { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), jogFeedRate: '1500' }] },
   { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), frameGridCellMm: '10' }] },
   { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), frameMarginMm: NaN }] },
+  { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), frameFeedMmPerMin: '6000' }] },
 ];
 
 describe(isMachineProfilesDocument.name, () => {
   it('accepts a profile with frame settings', () => {
     const document: MachineProfilesDocument = {
       ...VALID_DOCUMENT,
-      profiles: [newMachineProfile({ frameGridCellMm: 10, frameMarginMm: 2 })],
+      profiles: [newMachineProfile({ frameGridCellMm: 10, frameMarginMm: 2, frameFeedMmPerMin: 3000 })],
     };
 
     expect(isMachineProfilesDocument(document)).toBe(true);

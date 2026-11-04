@@ -1,6 +1,6 @@
 /**
- * Frame job: the grid and margin of the trace, how long it takes and at what power, and the button that starts it. A
- * frame that would leave the bed is off with the edge and distance, and an alarm during a frame is told here.
+ * Frame job: the grid, margin and speed of the trace, how long it takes and at what power, and the button that starts
+ * it. A frame that would leave the bed is off with the edge and distance, and an alarm during a frame is told here.
  *
  * @author michael.morosov
  *
@@ -44,14 +44,20 @@ import {
 import {
   MachineProfileSaved,
   selectActiveMachineProfile,
+  selectFrameFeedMmPerMin,
   selectFrameGridCellMm,
+  selectFrameMarginMm,
 } from '../../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../../utils/states/new.store';
 import { getJobEstimateText } from '../../../../utils/toolpath/get.job.estimate.text';
-import { FrameMarginInput } from './FrameMarginInput';
+import { FrameNumberInput } from './FrameNumberInput';
 import styles from './styles.module.scss';
 
 const FRAME_GRID_SELECT_ID = 'frame-grid-select';
+const FRAME_MARGIN_FIELD = 'frameMarginMm';
+const FRAME_MARGIN_INPUT_ID = 'frame-margin-input';
+const FRAME_SPEED_FIELD = 'frameFeedMmPerMin';
+const FRAME_SPEED_INPUT_ID = 'frame-speed-input';
 
 const FRAME_EDGE_TEXT_KEYS: Record<FrameEdge, string> = {
   [FRAME_EDGE.LEFT]: DEFAULT.FRAME_EDGE_LEFT,
@@ -65,6 +71,8 @@ export const FrameControls = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const gridCellMm: number = useSelector(selectFrameGridCellMm);
+  const marginMm: number = useSelector(selectFrameMarginMm);
+  const feedMmPerMin: number = useSelector(selectFrameFeedMmPerMin);
   const rectangle: FrameRectangle | undefined = useSelector(selectFrameRectangle);
   const bedOverrun: FrameBedOverrun | undefined = useSelector(selectFrameBedOverrun);
   const blockedReasonKey: string | undefined = useSelector(selectFrameStartBlockedReasonKey);
@@ -95,11 +103,28 @@ export const FrameControls = (): ReactNode => {
           }}
         />
       </div>
-      <FrameMarginInput key={activeProfile?.id} isDisabled={isJobRunActive} />
+      <FrameNumberInput
+        key={`${FRAME_MARGIN_FIELD}-${activeProfile?.id}`}
+        field={FRAME_MARGIN_FIELD}
+        inputId={FRAME_MARGIN_INPUT_ID}
+        labelKey={DEFAULT.FRAME_MARGIN_LABEL}
+        savedValue={marginMm}
+        isDisabled={isJobRunActive}
+      />
+      <FrameNumberInput
+        key={`${FRAME_SPEED_FIELD}-${activeProfile?.id}`}
+        field={FRAME_SPEED_FIELD}
+        inputId={FRAME_SPEED_INPUT_ID}
+        labelKey={DEFAULT.FRAME_SPEED_LABEL}
+        savedValue={feedMmPerMin}
+        isDisabled={isJobRunActive}
+      />
       <dl className={styles.facts}>
         <dt>{t(DEFAULT.FRAME_TIME_LABEL)}</dt>
         <dd>
-          {rectangle ? getJobEstimateText(t, getFrameDurationSeconds(rectangle, gridCellMm)) : MISSING_VALUE_TEXT}
+          {rectangle
+            ? getJobEstimateText(t, getFrameDurationSeconds(rectangle, gridCellMm, feedMmPerMin))
+            : MISSING_VALUE_TEXT}
         </dd>
         <dt>{t(DEFAULT.FRAME_POWER_LABEL)}</dt>
         <dd>

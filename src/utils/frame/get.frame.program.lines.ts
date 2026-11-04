@@ -21,11 +21,7 @@ import {
   GCODE_Y_PREFIX,
 } from '../toolpath/gcode.constants';
 import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
-import {
-  FRAME_FEED_MM_PER_MIN,
-  FRAME_LASER_ON_PREFIX,
-  FRAME_SYNC_DWELL,
-} from './frame.constants';
+import { FRAME_LASER_ON_PREFIX, FRAME_SYNC_DWELL } from './frame.constants';
 import { getFrameGridOffsets } from './get.frame.grid.offsets';
 import type { FrameProgramInput } from './interfaces/FrameProgramInput';
 import type { FrameRectangle } from './interfaces/FrameRectangle';
@@ -115,6 +111,7 @@ const getSerpentineLines = (
 const getOutlineLines = (
   rectangle: FrameRectangle,
   mapPoint: (point: GeometryPoint) => GeometryPoint,
+  feedMmPerMin: number,
 ): string[] => {
   const sides: GeometryPoint[] = [
     { x: rectangle.maxX, y: rectangle.minY },
@@ -127,7 +124,7 @@ const getOutlineLines = (
   for (const [sideIndex, side] of sides.entries()) {
     const feedWords: string[] = sideIndex
       ? []
-      : [`${GCODE_F_PREFIX}${FRAME_FEED_MM_PER_MIN}`];
+      : [`${GCODE_F_PREFIX}${feedMmPerMin}`];
 
     lines.push(getMoveLine(GCODE_BURN_WORD, mapPoint(side), feedWords));
   }
@@ -161,7 +158,7 @@ const getGridProgramLines = (
 };
 
 export const getFrameProgramLines = (input: FrameProgramInput): string[] => {
-  const { rectangle, gridCellMm, sValue, profile, startPoint } = input;
+  const { rectangle, gridCellMm, feedMmPerMin, sValue, profile, startPoint } = input;
   const mapPoint: (point: GeometryPoint) => GeometryPoint = (
     point: GeometryPoint,
   ): GeometryPoint =>
@@ -172,7 +169,7 @@ export const getFrameProgramLines = (input: FrameProgramInput): string[] => {
     GCODE_UNITS_AND_ABSOLUTE,
     `${FRAME_LASER_ON_PREFIX}${sValue}`,
     getMoveLine(GCODE_TRAVEL_WORD, mapPoint(corner)),
-    ...getOutlineLines(rectangle, mapPoint),
+    ...getOutlineLines(rectangle, mapPoint, feedMmPerMin),
     ...getGridProgramLines(rectangle, gridCellMm, mapPoint),
     GCODE_LASER_OFF_END,
     getMoveLine(GCODE_TRAVEL_WORD, startPoint),

@@ -31,4 +31,5 @@ export const isMachineProfile = (value: unknown): value is MachineProfile =>
   isBoolean(value.hasHomingSwitches) &&
   isFiniteNumber(value.jogFeedRate) &&
   isOptionalFiniteNumber(value.frameGridCellMm) &&
-  isOptionalFiniteNumber(value.frameMarginMm);
+  isOptionalFiniteNumber(value.frameMarginMm) &&
+  isOptionalFiniteNumber(value.frameFeedMmPerMin);
