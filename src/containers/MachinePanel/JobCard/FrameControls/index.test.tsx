@@ -27,11 +27,12 @@ const FRAME_JOB_LABEL = 'Frame job';
 const GRID_LABEL = 'Frame grid';
 const MARGIN_LABEL = 'Frame margin (mm)';
 const PROFILE_NAME = 'Test laser';
+const OTHER_PROFILE_NAME = 'Other laser';
 const OVERRUN_MM = 12;
 const SAVED_MARGIN_MM = 5;
 const SAVED_GRID_CELL_MM = 20;
 const INVALID_MARGIN_MM = -3;
-const GRID_20_LABEL = '20 mm';
+const GRID_20_LABEL = '2 cm';
 const SELECT_OPTION_SELECTOR = '.ant-select-item-option';
 // The 100 mm by 50 mm outline has a 300 mm perimeter, 12 s at 1500 mm/min.
 const FRAME_TIME_TEXT = '0 min 12 s';
@@ -155,6 +156,27 @@ describe(FrameControls.name, () => {
 
     expect(screen.getByRole('alert')).toHaveTextContent(MARGIN_ERROR_TEXT);
     expect(getActiveProfile(store).frameMarginMm).toBeUndefined();
+  });
+
+  it('drops an unsaved margin and its error when another profile becomes active', () => {
+    const store: AppStore = newFrameStore(100);
+    const otherProfile: MachineProfile = newMachineProfile({
+      name: OTHER_PROFILE_NAME,
+      frameMarginMm: SAVED_MARGIN_MM,
+    });
+
+    renderFrameControls(store);
+    fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: String(INVALID_MARGIN_MM) } });
+    fireEvent.blur(screen.getByLabelText(MARGIN_LABEL));
+    expect(screen.getByRole('alert')).toHaveTextContent(MARGIN_ERROR_TEXT);
+
+    act(() => {
+      store.dispatch(new MachineProfileSaved({ profile: otherProfile }));
+      store.dispatch(new ActiveMachineProfileSelected({ profileId: otherProfile.id }));
+    });
+
+    expect(screen.queryByText(MARGIN_ERROR_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(MARGIN_LABEL)).toHaveValue(String(SAVED_MARGIN_MM));
   });
 
   it('turns the button off and names the edge and distance when the frame leaves the bed', () => {

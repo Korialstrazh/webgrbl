@@ -13,6 +13,7 @@
 export const FRAME_DOT_WATTS = 0.05;
 export const FRAME_FEED_MM_PER_MIN = 1500;
 export const FRAME_GRID_CELL_NONE_MM = 0;
+export const FRAME_MM_PER_CM = 10;
 /** Grid cell sizes in mm the user can pick; none means the rectangle only. */
 export const FRAME_GRID_CELL_OPTIONS_MM: readonly number[] = [
   FRAME_GRID_CELL_NONE_MM,

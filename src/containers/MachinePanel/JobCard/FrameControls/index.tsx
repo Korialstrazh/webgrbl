@@ -19,6 +19,7 @@ import {
   FRAME_EDGE,
   FRAME_GRID_CELL_NONE_MM,
   FRAME_GRID_CELL_OPTIONS_MM,
+  FRAME_MM_PER_CM,
 } from '../../../../utils/frame/frame.constants';
 import type { FrameEdge } from '../../../../utils/frame/frame.constants';
 import { getFrameDurationSeconds } from '../../../../utils/frame/get.frame.duration.seconds';
@@ -85,7 +86,7 @@ export const FrameControls = (): ReactNode => {
             value: cellMm,
             label: cellMm === FRAME_GRID_CELL_NONE_MM
               ? t(DEFAULT.FRAME_GRID_NONE)
-              : t(DEFAULT.FRAME_GRID_CELL, { cellMm }),
+              : t(DEFAULT.FRAME_GRID_CELL, { cellCm: cellMm / FRAME_MM_PER_CM }),
           }))}
           onChange={(frameGridCellMm: number): void => {
             if (activeProfile) {
@@ -94,7 +95,7 @@ export const FrameControls = (): ReactNode => {
           }}
         />
       </div>
-      <FrameMarginInput isDisabled={isJobRunActive} />
+      <FrameMarginInput key={activeProfile?.id} isDisabled={isJobRunActive} />
       <dl className={styles.facts}>
         <dt>{t(DEFAULT.FRAME_TIME_LABEL)}</dt>
         <dd>

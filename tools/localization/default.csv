@@ -140,7 +140,7 @@ FRAME_EDGE_BACK;back
 FRAME_EDGE_FRONT;front
 FRAME_EDGE_LEFT;left
 FRAME_EDGE_RIGHT;right
-FRAME_GRID_CELL;{{cellMm}} mm
+FRAME_GRID_CELL;{{cellCm}} cm
 FRAME_GRID_LABEL;Frame grid
 FRAME_GRID_NONE;Rectangle only
 FRAME_MARGIN_LABEL;Frame margin (mm)

@@ -770,7 +770,7 @@ registerLocales({
       [DEFAULT.FRAME_EDGE_FRONT]: "front",
       [DEFAULT.FRAME_EDGE_LEFT]: "left",
       [DEFAULT.FRAME_EDGE_RIGHT]: "right",
-      [DEFAULT.FRAME_GRID_CELL]: "{{cellMm}} mm",
+      [DEFAULT.FRAME_GRID_CELL]: "{{cellCm}} cm",
       [DEFAULT.FRAME_GRID_LABEL]: "Frame grid",
       [DEFAULT.FRAME_GRID_NONE]: "Rectangle only",
       [DEFAULT.FRAME_MARGIN_LABEL]: "Frame margin (mm)",

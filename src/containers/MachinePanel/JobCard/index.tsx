@@ -26,8 +26,13 @@ import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { JOB_PAUSED_CONTROLS } from '../../../utils/states/job.pause.control.constants';
 import type { JobPauseControl } from '../../../utils/states/job.pause.control.constants';
 import { selectJobPauseControl } from '../../../utils/states/job.pause.control.selector';
-import { JobStartRequested, selectIsJobRunActive, selectJobRunKind, selectJobRunStatus } from '../../../utils/states/job.run.state';
 import type { JobRunKind } from '../../../utils/states/job.run.kind.constants';
+import {
+  JobStartRequested,
+  selectIsJobRunActive,
+  selectJobRunKind,
+  selectJobRunStatus,
+} from '../../../utils/states/job.run.state';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
 import type { AppDispatch } from '../../../utils/states/new.store';
@@ -39,8 +44,8 @@ import { Panel } from '../../../views/Panel';
 import { FrameControls } from './FrameControls';
 import { JobPauseButton } from './JobPauseButton';
 import { JobRunProgress } from './JobRunProgress';
-import { getJobRunStatusKey } from './get.job.run.status.key';
 import { getJobLayerCountText } from './get.job.layer.count.text';
+import { getJobRunStatusKey } from './get.job.run.status.key';
 import styles from './styles.module.scss';
 
 const JOB_START_CONFIRM_OVERLAY_ID = 'job-start-confirm';
