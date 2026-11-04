@@ -27,4 +27,10 @@ export const MATERIAL_PRESET_REPOSITORY = {
   async deleteMaterialPreset(presetId: string): Promise<void> {
     await WEBGRBL_DATABASE.materialPresets.delete(presetId);
   },
+
+  async deleteMaterialPresetsOfProfile(machineProfileId: string): Promise<void> {
+    await WEBGRBL_DATABASE.materialPresets
+      .filter((preset: MaterialPreset): boolean => preset.machineProfileId === machineProfileId)
+      .delete();
+  },
 };

@@ -12,7 +12,7 @@ The approved screen layout of webgrbl and the order in which features get built.
 
 - **Workbench layout.** One screen, with no modes:
   - top bar: project, menus, undo/redo, connection pill, autosave state;
-  - left panel: material select (Design view), layers (on/off; off is never sent) with Add test sample below the list (Design view), objects; in 3D the Cut check above Layers, Objects hidden; the material library is planned (roadmap item 6);
+  - left panel: material select (Design view), layers (on/off; off is never sent) with Add test sample below the list (Design view), objects; in 3D the Cut check above Layers, Objects hidden; the material library opens from the top bar (roadmap item 6, in progress);
   - centre: the bed to scale, with a Design / Toolpath / 3D switch and a status strip with a collapsible console;
   - right panel, main task first: machine state (one line while not connected), job (estimate, export, Start), jog, low-power pointer, frame, air assist, and a large STOP that is always visible; the pre-flight check is planned (roadmap item 5);
 - **Running a job** changes the Workbench's state (progress, overrides, jog locked); there is no separate screen.

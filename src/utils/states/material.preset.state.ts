@@ -15,6 +15,7 @@ import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { MaterialPresetDeletedPayload } from './interfaces/MaterialPresetDeletedPayload';
 import type { MaterialPresetPayload } from './interfaces/MaterialPresetPayload';
 import type { MaterialPresetsPayload } from './interfaces/MaterialPresetsPayload';
+import { MachineProfileDeleted } from './machine.profile.state';
 
 // #region State
 export interface MaterialPresetState {
@@ -72,6 +73,14 @@ export const materialPresetReducer = (
       ...state,
       presets: state.presets.filter(
         ({ id }: MaterialPreset): boolean => id !== (action as MaterialPresetDeleted).payload.presetId,
+      ),
+    };
+  case MachineProfileDeleted.type:
+    return {
+      ...state,
+      presets: state.presets.filter(
+        ({ machineProfileId }: MaterialPreset): boolean =>
+          machineProfileId !== (action as MachineProfileDeleted).payload.profileId,
       ),
     };
   default:

@@ -5,6 +5,7 @@ import { MATERIAL_PRESET_OPERATION } from '../materials/material.preset.constant
 import { MATERIAL_PRESET_REPOSITORY } from '../materials/material.preset.repository';
 import { newMaterialPreset } from '../materials/new.material.preset';
 import type { AppToast } from './interfaces/AppToast';
+import { MachineProfileDeleted } from './machine.profile.state';
 import { watchMaterialPresets } from './material.preset.saga';
 import { MaterialPresetDeleted, MaterialPresetSaved, selectMaterialPresets } from './material.preset.state';
 import { newStore } from './new.store';
@@ -13,6 +14,7 @@ import { selectToasts } from './toast.state';
 
 const STORAGE_FAILURE_MESSAGE = 'quota exceeded at /secret/path';
 const CHANGED_POWER_WATTS = 7;
+const DELETED_PROFILE_ID = 'profile-gone';
 
 const newPresetFixture = (overrides: Partial<MaterialPreset> = {}): MaterialPreset => ({
   ...newMaterialPreset({
@@ -104,6 +106,22 @@ describe(watchMaterialPresets.name, () => {
     await waitForStoredPresets([]);
   });
 
+  it('removes only the presets of a deleted machine profile', async () => {
+    const deletedProfilePreset: MaterialPreset = newPresetFixture({ machineProfileId: DELETED_PROFILE_ID });
+    const keptPreset: MaterialPreset = newPresetFixture();
+    const store: AppStore = await newLoadedStore();
+
+    store.dispatch(new MaterialPresetSaved({ preset: deletedProfilePreset }));
+    store.dispatch(new MaterialPresetSaved({ preset: keptPreset }));
+    await vi.waitFor(async (): Promise<void> => {
+      expect(await MATERIAL_PRESET_REPOSITORY.listMaterialPresets()).toHaveLength(2);
+    });
+    store.dispatch(new MachineProfileDeleted({ profileId: DELETED_PROFILE_ID }));
+
+    expect(selectMaterialPresets(store.getState())).toEqual([keptPreset]);
+    await waitForStoredPresets([keptPreset]);
+  });
+
   it('shows the fixed toast and not the error text when a store fails', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const store: AppStore = await newLoadedStore();
@@ -151,6 +169,23 @@ describe(watchMaterialPresets.name, () => {
     await vi.waitFor((): void => {
       expect(selectMaterialPresets(store.getState())).toEqual([untouchedPreset, changedPreset]);
     });
+  });
+
+  it('does not bring back presets of a machine profile deleted while the load is reading', async () => {
+    const preset: MaterialPreset = newPresetFixture();
+    const finishRead = holdPresetRead();
+
+    vi.spyOn(MATERIAL_PRESET_REPOSITORY, 'deleteMaterialPresetsOfProfile').mockResolvedValue();
+
+    const store: AppStore = newStore();
+
+    store.dispatch(new MachineProfileDeleted({ profileId: preset.machineProfileId }));
+    finishRead([preset]);
+    await new Promise<void>((resolve: () => void) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(selectMaterialPresets(store.getState())).toEqual([]);
   });
 
   it('logs a failed load and still stores later saves', async () => {
