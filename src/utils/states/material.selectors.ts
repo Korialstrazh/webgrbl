@@ -10,8 +10,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getMaterialPresetCount } from '../materials/get.material.preset.count';
 import type { Material } from '../materials/interfaces/Material';
-import type { MaterialPreset } from '../materials/interfaces/MaterialPreset';
 import type { MaterialTestResult } from '../materials/interfaces/MaterialTestResult';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from './machine.profile.state';
@@ -48,8 +48,8 @@ export const selectActiveMaterialPresetCount = (state: RootState): number => {
     return 0;
   }
 
-  return selectMaterialPresets(state).filter(
-    ({ materialId, machineProfileId }: MaterialPreset): boolean =>
-      materialId === activeMaterialId && machineProfileId === activeProfileId,
-  ).length;
+  return getMaterialPresetCount(selectMaterialPresets(state), {
+    materialId: activeMaterialId,
+    machineProfileId: activeProfileId,
+  });
 };

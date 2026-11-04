@@ -58,8 +58,10 @@ BURN_PREVIEW_ENTER_TEST_RESULT;Enter test result
 BURN_PREVIEW_FAILED;The 3D view could not be built. Switch to another view and back to try again.
 BURN_PREVIEW_LOADING;Loading the 3D view
 BURN_PREVIEW_MATERIAL_CURRENT;Material: {{name}}
-BURN_PREVIEW_MATERIAL_DETAIL_TESTED;Tested {{date}}
-BURN_PREVIEW_MATERIAL_DETAIL_UNTESTED;Not tested on this machine
+BURN_PREVIEW_MATERIAL_DETAIL_PRESETS_one;{{count}} preset
+BURN_PREVIEW_MATERIAL_DETAIL_PRESETS_other;{{count}} presets
+BURN_PREVIEW_MATERIAL_DETAIL_TESTED;Burn test {{date}}
+BURN_PREVIEW_MATERIAL_DETAIL_UNTESTED;No burn test on this machine
 BURN_PREVIEW_MATERIAL_LABEL;Material
 BURN_PREVIEW_MATERIAL_NONE;Material: none
 BURN_PREVIEW_MATERIAL_OPTION;{{name}}, {{thickness}} mm

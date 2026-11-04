@@ -2,12 +2,16 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ProjectMaterialSelect } from '.';
 import type { Material } from '../../utils/materials/interfaces/Material';
+import type { MaterialPreset } from '../../utils/materials/interfaces/MaterialPreset';
+import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset.constants';
 import { newMaterial } from '../../utils/materials/new.material';
+import { newMaterialPreset } from '../../utils/materials/new.material.preset';
 import { newTestResultFixture } from '../../utils/materials/new.test.result.fixture';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
+import { MaterialPresetSaved } from '../../utils/states/material.preset.state';
 import { selectActiveMaterial } from '../../utils/states/material.selectors';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
@@ -22,6 +26,17 @@ const DIALOG_TITLE = 'Add material';
 const SELECT_OPTION_SELECTOR = '.ant-select-item-option';
 const BIRCH: Material = newMaterial({ name: 'Birch', thicknessMm: 4 });
 const BIRCH_OPTION_LABEL = 'Birch, 4 mm';
+const UNTESTED_TEXT = 'No burn test on this machine';
+
+const newPresetFixture = (materialId: string, machineProfileId: string): MaterialPreset => newMaterialPreset({
+  materialId,
+  machineProfileId,
+  operation: MATERIAL_PRESET_OPERATION.CUT,
+  powerWatts: 5,
+  speedMmPerMin: 300,
+  passes: 1,
+  notes: '',
+});
 
 const renderToolbar = (store: AppStore): void => {
   render(
@@ -89,10 +104,10 @@ describe(ProjectMaterialSelect.name, () => {
     fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
 
     expect(screen.getByText(BIRCH_OPTION_LABEL)).toBeInTheDocument();
-    expect(screen.getByText(/^Tested /)).toBeInTheDocument();
+    expect(screen.getByText(/^Burn test /)).toBeInTheDocument();
   });
 
-  it('tells a material not tested on the active machine, and marks the current one', () => {
+  it('tells a material has no burn test on the active machine, and marks the current one', () => {
     const store: AppStore = newStore();
 
     store.dispatch(new MaterialSaved({ material: BIRCH }));
@@ -100,8 +115,26 @@ describe(ProjectMaterialSelect.name, () => {
     renderToolbar(store);
     fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
 
-    expect(screen.getByText('Not tested on this machine')).toBeInTheDocument();
+    expect(screen.getByText(UNTESTED_TEXT)).toBeInTheDocument();
     expect(document.querySelector(`${SELECT_OPTION_SELECTOR} .anticon-check`)).toBeInTheDocument();
+  });
+
+  it('counts the presets of the material on the active machine beside the burn test', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile();
+    const otherProfile: MachineProfile = newMachineProfile();
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new MachineProfileSaved({ profile: otherProfile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    store.dispatch(new MaterialSaved({ material: BIRCH }));
+    store.dispatch(new MaterialPresetSaved({ preset: newPresetFixture(BIRCH.id, profile.id) }));
+    store.dispatch(new MaterialPresetSaved({ preset: newPresetFixture(BIRCH.id, profile.id) }));
+    store.dispatch(new MaterialPresetSaved({ preset: newPresetFixture(BIRCH.id, otherProfile.id) }));
+    renderToolbar(store);
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: MATERIAL_LABEL }));
+
+    expect(screen.getByText(`2 presets \u00B7 ${UNTESTED_TEXT}`)).toBeInTheDocument();
   });
 
   it('shows a material added later in the list', () => {
