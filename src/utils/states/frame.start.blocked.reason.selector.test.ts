@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { GRBL_MACHINE_STATE, GRBL_SETTING_LASER_MODE, GRBL_SETTING_ON_VALUE, GRBL_CONNECTION_STATUS } from '../grbl/grbl.constants';
 import { FRAME_EDGE } from '../frame/frame.constants';
-import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
 import type { GrblFirmwareIdentity } from '../grbl/interfaces/GrblFirmwareIdentity';
+import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';

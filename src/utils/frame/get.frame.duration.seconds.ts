@@ -13,10 +13,13 @@ import { FRAME_FEED_MM_PER_MIN } from './frame.constants';
 import { getFrameGridOffsets } from './get.frame.grid.offsets';
 import type { FrameRectangle } from './interfaces/FrameRectangle';
 
+// A rectangle has two sides along each axis, so its outline is twice the width plus the height.
+const RECTANGLE_SIDES_PER_AXIS = 2;
+
 export const getFrameDurationSeconds = (rectangle: FrameRectangle, gridCellMm: number): number => {
   const widthMm: number = rectangle.maxX - rectangle.minX;
   const heightMm: number = rectangle.maxY - rectangle.minY;
-  const outlineLengthMm: number = 2 * (widthMm + heightMm);
+  const outlineLengthMm: number = RECTANGLE_SIDES_PER_AXIS * (widthMm + heightMm);
   const gridLengthMm: number =
     getFrameGridOffsets(widthMm, gridCellMm).length * heightMm
     + getFrameGridOffsets(heightMm, gridCellMm).length * widthMm;

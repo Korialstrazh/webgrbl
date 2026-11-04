@@ -28,6 +28,8 @@ const GRID_LABEL = 'Frame grid';
 const MARGIN_LABEL = 'Frame margin (mm)';
 const PROFILE_NAME = 'Test laser';
 const OTHER_PROFILE_NAME = 'Other laser';
+// The 100 mm wide outline of the stored toolpath.
+const OUTLINE_END_X_MM = 100;
 const OVERRUN_MM = 12;
 const SAVED_MARGIN_MM = 5;
 const SAVED_GRID_CELL_MM = 20;
@@ -107,14 +109,14 @@ const getActiveProfile = (store: AppStore): MachineProfile => {
 
 describe(FrameControls.name, () => {
   it('shows the frame time, the dot power and the profile the power is worked out for', () => {
-    renderFrameControls(newFrameStore(100));
+    renderFrameControls(newFrameStore(OUTLINE_END_X_MM));
 
     expect(screen.getByText(FRAME_TIME_TEXT)).toBeInTheDocument();
     expect(screen.getByText(`about 0.05 W (${PROFILE_NAME}, assumed 10 W laser)`)).toBeInTheDocument();
   });
 
   it('starts the frame at once, with no confirmation', () => {
-    const store: AppStore = newFrameStore(100);
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderFrameControls(store);
@@ -124,7 +126,7 @@ describe(FrameControls.name, () => {
   });
 
   it('saves the grid the user picks to the active profile', () => {
-    const store: AppStore = newFrameStore(100);
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
 
     renderFrameControls(store);
     fireEvent.mouseDown(screen.getByRole('combobox', { name: GRID_LABEL }));
@@ -138,7 +140,7 @@ describe(FrameControls.name, () => {
   });
 
   it('saves a valid margin to the active profile', () => {
-    const store: AppStore = newFrameStore(100);
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
 
     renderFrameControls(store);
     fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: String(SAVED_MARGIN_MM) } });
@@ -148,7 +150,7 @@ describe(FrameControls.name, () => {
   });
 
   it('shows the profile error of an invalid margin and does not save it', () => {
-    const store: AppStore = newFrameStore(100);
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
 
     renderFrameControls(store);
     fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: String(INVALID_MARGIN_MM) } });
@@ -159,7 +161,7 @@ describe(FrameControls.name, () => {
   });
 
   it('drops an unsaved margin and its error when another profile becomes active', () => {
-    const store: AppStore = newFrameStore(100);
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
     const otherProfile: MachineProfile = newMachineProfile({
       name: OTHER_PROFILE_NAME,
       frameMarginMm: SAVED_MARGIN_MM,
@@ -191,7 +193,7 @@ describe(FrameControls.name, () => {
   });
 
   it('turns the button off while no work position is known, with the reason on hover', async () => {
-    const store: AppStore = newFrameStore(100);
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
 
     store.dispatch(newIdleStatusReceived(false));
     renderFrameControls(store);
@@ -202,7 +204,7 @@ describe(FrameControls.name, () => {
   });
 
   it('turns the controls off while a frame runs', () => {
-    const store: AppStore = newFrameStore(100);
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
 
     store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.FRAME }));
     renderFrameControls(store);
@@ -213,7 +215,7 @@ describe(FrameControls.name, () => {
   });
 
   it('says the machine reported an alarm after a frame ended by one, and not flatly that a limit was hit', () => {
-    const store: AppStore = newFrameStore(100);
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
 
     renderFrameControls(store);
     expect(screen.queryByText(ALARM_TEXT_PATTERN)).not.toBeInTheDocument();
