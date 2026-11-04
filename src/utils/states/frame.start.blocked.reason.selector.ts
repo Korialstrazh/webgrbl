@@ -20,6 +20,7 @@ import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachine
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
 import { selectIsLaserModeConfirmedOn } from './laser.mode.selector';
 import { selectFrameMarginMm } from './machine.profile.state';
+import { selectMachineStatus } from './machine.status.state';
 import type { AppRootState } from './new.store';
 import { selectToolpathMachineArea } from './toolpath.machine.area.selector';
 import { selectToolpath } from './toolpath.state';
@@ -51,5 +52,10 @@ export const selectFrameStartBlockedReasonKey = (state: AppRootState): string | 
     return DEFAULT.FRAME_START_BLOCKED_NO_BURN_MOVES;
   }
 
-  return selectFrameBedOverrun(state) ? DEFAULT.FRAME_START_BLOCKED_BED_OVERRUN : undefined;
+  if (selectFrameBedOverrun(state)) {
+    return DEFAULT.FRAME_START_BLOCKED_BED_OVERRUN;
+  }
+
+  // The frame returns the head to where it started, so without a work position the run would send nothing.
+  return selectMachineStatus(state)?.workPosition ? undefined : DEFAULT.FRAME_START_BLOCKED_NO_WORK_POSITION;
 };

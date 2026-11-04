@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { GRBL_MACHINE_STATE, GRBL_SETTING_LASER_MODE, GRBL_SETTING_ON_VALUE, GRBL_CONNECTION_STATUS } from '../grbl/grbl.constants';
 import { FRAME_EDGE } from '../frame/frame.constants';
 import type { GrblFirmwareIdentity } from '../grbl/interfaces/GrblFirmwareIdentity';
+import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
 import { SimulatedLaserTransport } from '../grbl/simulated.laser.transport';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
@@ -71,6 +72,19 @@ const newReadyStore = (moves: ToolpathMove[], profileOverrides: Partial<MachineP
   return store;
 };
 
+const NO_POSITION_STATUS: GrblResolvedStatus = {
+  machineState: GRBL_MACHINE_STATE.IDLE,
+  machineSubstate: undefined,
+  machinePosition: undefined,
+  workPosition: undefined,
+  workCoordinateOffset: undefined,
+  plannerBlocksAvailable: undefined,
+  rxBytesAvailable: undefined,
+  feedRate: undefined,
+  spindleSpeed: undefined,
+  overrides: undefined,
+};
+
 const newInsideMove = (): ToolpathMove => newToolpathMove({ to: { x: INSIDE_END_MM, y: 0 } });
 
 describe(selectFrameStartBlockedReasonKey.name, () => {
@@ -105,6 +119,16 @@ describe(selectFrameStartBlockedReasonKey.name, () => {
 
     expect(selectFrameBedOverrun(store.getState())).toEqual({ edge: FRAME_EDGE.LEFT, distanceMm: MARGIN_MM });
     expect(selectFrameStartBlockedReasonKey(store.getState())).toBe(DEFAULT.FRAME_START_BLOCKED_BED_OVERRUN);
+  });
+
+  it('blocks while the machine has reported no work position, since the run would send nothing', () => {
+    const store: AppStore = newReadyStore([newInsideMove()]);
+
+    store.dispatch(new MachineStatusReceived({
+      status: NO_POSITION_STATUS,
+    }));
+
+    expect(selectFrameStartBlockedReasonKey(store.getState())).toBe(DEFAULT.FRAME_START_BLOCKED_NO_WORK_POSITION);
   });
 
   it('memoises the overrun', () => {

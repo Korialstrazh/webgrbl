@@ -110,3 +110,6 @@ export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['h
 
 export const ANTD_TOOLTIP_PLACEMENT_BOTTOM: TooltipProps['placement'] = 'bottom';
 export const ANTD_TOOLTIP_PLACEMENT_LEFT: TooltipProps['placement'] = 'left';
+
+/** An input number outlined as having an invalid value. */
+export const ANTD_INPUT_NUMBER_STATUS_ERROR: InputNumberProps['status'] = 'error';

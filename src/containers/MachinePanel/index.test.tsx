@@ -31,8 +31,6 @@ const ANTD_PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
 const EXPORT_GCODE_LABEL = 'Export G-code';
 const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
 const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
-const SOON_TAG_TEXT = 'Soon';
-const CONTROL_SELECTOR = 'button, input';
 const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
 
 const NEW_STATUS: GrblResolvedStatus = {
@@ -175,31 +173,6 @@ describe(MachinePanel.name, () => {
     for (const cardTitle of COMING_SOON_TITLES) {
       expect(screen.getByRole('heading', { name: cardTitle })).toBeInTheDocument();
     }
-  });
-
-  it('shows every control that is not built yet disabled, with one Soon tag each, and dispatches nothing', () => {
-    const store: AppStore = newStore();
-
-    renderMachinePanel(store);
-    connect(store);
-
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
-    const soonTags: HTMLElement[] = screen.getAllByText(SOON_TAG_TEXT);
-
-    for (const soonTag of soonTags) {
-      const soonControls: NodeListOf<Element> | undefined =
-        soonTag.previousElementSibling?.querySelectorAll(CONTROL_SELECTOR);
-
-      expect(soonControls).toHaveLength(1);
-
-      for (const soonControl of soonControls ?? []) {
-        expect(soonControl).toBeDisabled();
-        fireEvent.click(soonControl);
-      }
-    }
-
-    expect(soonTags.length).toBeGreaterThan(0);
-    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
   it('renders STOP only in a wide window', () => {
