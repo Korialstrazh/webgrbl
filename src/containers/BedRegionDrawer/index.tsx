@@ -35,6 +35,9 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
     <Drawer
       {...drawerProps}
       open={isShown}
+      // A drawer opened from inside another one must not push that one aside: it would leave the region, over the
+      // design panel, and come back when the inner drawer closes.
+      push={false}
       getContainer={bedRegionHost}
       rootClassName={styles.bedRegionDrawer}
       classNames={{ mask: styles.transparentMask, section: styles.drawerSection }}

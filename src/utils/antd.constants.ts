@@ -23,6 +23,7 @@ import type {
   SegmentedProps,
   SplitterProps,
   SwitchProps,
+  TableColumnType,
   TableProps,
   TagProps,
   TooltipProps,
@@ -43,11 +44,17 @@ export const ANTD_BUTTON_TYPE_TEXT: ButtonProps['type'] = 'text';
 /** A filled button in the accent colour, for the main action. */
 export const ANTD_BUTTON_TYPE_PRIMARY: ButtonProps['type'] = 'primary';
 
+/** A button drawn as a link, for a line of text that leads somewhere. */
+export const ANTD_BUTTON_TYPE_LINK: ButtonProps['type'] = 'link';
+
 /** The popover opens and closes when its anchor is clicked, and closes on a click outside. */
 export const ANTD_POPOVER_TRIGGER_CLICK: PopoverProps['trigger'] = 'click';
 
 /** The popover opens below its anchor, aligned to the anchor's right edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT: PopoverProps['placement'] = 'bottomRight';
+
+/** The popover opens below its anchor, aligned to the anchor's left edge. */
+export const ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT: PopoverProps['placement'] = 'bottomLeft';
 
 /** A progress bar that stays neutral at 100%, for work that is not done when the bar is full. */
 export const ANTD_PROGRESS_STATUS_NORMAL: ProgressProps['status'] = 'normal';
@@ -94,7 +101,8 @@ export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
 /** The compact table size, for a table beside an edit panel. */
 export const ANTD_TABLE_SIZE_SMALL: TableProps['size'] = 'small';
 
-/** The `type` of a table row selection that allows one selected row. */
+/** A table column whose header and cells sit at the right edge, for numbers. */
+export const ANTD_TABLE_COLUMN_ALIGN_RIGHT: TableColumnType<unknown>['align'] = 'right';
 
 /** A tag drawn as a soft filled chip without a border. */
 export const ANTD_TAG_VARIANT_FILLED: TagProps['variant'] = 'filled';

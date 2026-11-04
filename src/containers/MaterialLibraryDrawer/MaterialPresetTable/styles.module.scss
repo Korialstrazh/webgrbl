@@ -1,0 +1,84 @@
+// The list scrolls inside its own container, so the header stays in view while the rows move under it.
+.presetTable {
+  :global(.ant-table-thead) > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    white-space: nowrap;
+  }
+}
+
+// A row opens on a click, so it shows a pointer, and it is in the tab order, so it shows the focus ring.
+.presetRow {
+  cursor: pointer;
+
+  &:focus-visible {
+    outline-offset: calc(-1 * var(--focus-outline-width));
+  }
+}
+
+// A tick for export is the secondary action, so a ticked row keeps the plain background and the plain hover. antd
+// paints a ticked row and its hover with five classes; these carry six.
+.presetTable :global(.ant-table-tbody) > tr:global(.ant-table-row):global(.ant-table-row-selected) > td:global(.ant-table-cell) {
+  background: transparent;
+}
+
+.presetTable :global(.ant-table-tbody) > tr:global(.ant-table-row):global(.ant-table-row-selected) > td:global(.ant-table-cell-row-hover) {
+  background: var(--color-surface-hover);
+}
+
+// Two lines: the name of the preset, then its numbers in the mono font the layer summaries use.
+.presetCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.presetName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presetDetail {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.numbers {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+// The percent of the active laser after the watts, quieter still, as it is the same value in the layer's unit.
+.powerPercent {
+  margin-left: var(--space-1);
+  opacity: 0.8;
+}
+
+.machineName {
+  font-family: var(--font-ui);
+}
+
+// Takes the hover for the tooltip that says what the ticks are for.
+.selectAllWrapper {
+  display: inline-flex;
+}
+
+// Wide enough for the Apply button and the Applied tag alike, so a row does not change width when one takes the
+// other's place.
+.applyCell {
+  width: 5.5rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+// Takes the hover for the tooltip that says why a disabled button cannot apply.
+.applyButtonWrapper {
+  display: inline-flex;
+}
+
+.appliedTag {
+  margin: 0;
+}

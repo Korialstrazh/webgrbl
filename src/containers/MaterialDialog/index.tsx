@@ -1,8 +1,9 @@
 /**
  * Adds a material: the name starts empty with the focus on it, and the thickness at the default. Save waits for both
- * to pass their checks, stores the material and makes it the material of the project; a field the user has changed
- * shows its failed check below it. A name and thickness that match a saved material are allowed, with an offer to use
- * that one. It starts over on every open.
+ * to pass their checks, stores the material and makes it the material of the project, or hands it to the caller that
+ * asked for it instead, such as the material library; a field the user has changed shows its failed check below it.
+ * A name and thickness that match a saved material are allowed, with an offer to use that one. It starts over on
+ * every open.
  *
  * @author michael.morosov
  *
@@ -44,7 +45,7 @@ import type { MaterialDialogProps } from './interfaces/MaterialDialogProps';
 import { MATERIAL_DIALOG_OVERLAY_ID } from './material.dialog.constants';
 import styles from './styles.module.scss';
 
-type MaterialDialogContentProps = Pick<MaterialDialogProps, 'onClose'>;
+type MaterialDialogContentProps = Pick<MaterialDialogProps, 'onClose' | 'onMaterialChosen'>;
 
 const FIELD_ID_SEPARATOR = '-';
 const NAME_FIELD_ID_SUFFIX = 'name';
@@ -53,7 +54,7 @@ const THICKNESS_FIELD_ID_SUFFIX = 'thickness';
 const hasMaterialFieldError = ({ nameErrorKey, thicknessErrorKey }: MaterialFieldErrors): boolean =>
   Boolean(nameErrorKey || thicknessErrorKey);
 
-const MaterialDialogContent = ({ onClose }: MaterialDialogContentProps): ReactNode => {
+const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogContentProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const formId: string = useId();
@@ -71,17 +72,21 @@ const MaterialDialogContent = ({ onClose }: MaterialDialogContentProps): ReactNo
   const nameFieldId: string = [formId, NAME_FIELD_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
   const thicknessFieldId: string = [formId, THICKNESS_FIELD_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
 
+  const chooseMaterial = (materialId: string): void => {
+    if (onMaterialChosen) {
+      onMaterialChosen(materialId);
+    } else {
+      dispatch(new ProjectMaterialSelected({ materialId }));
+    }
+
+    onClose();
+  };
+
   const saveMaterial = (): void => {
     const material: Material = newMaterial({ name: materialName.trim(), thicknessMm });
 
     dispatch(new MaterialSaved({ material }));
-    dispatch(new ProjectMaterialSelected({ materialId: material.id }));
-    onClose();
-  };
-
-  const selectMatchingMaterial = (materialId: string): void => {
-    dispatch(new ProjectMaterialSelected({ materialId }));
-    onClose();
+    chooseMaterial(material.id);
   };
 
   return (
@@ -145,7 +150,7 @@ const MaterialDialogContent = ({ onClose }: MaterialDialogContentProps): ReactNo
       {matchingMaterial && (
         <div className={styles.duplicateNote} role="note">
           <span>{t(DEFAULT.MATERIAL_DIALOG_DUPLICATE_NOTE, { name: matchingMaterial.name })}</span>
-          <Button size={ANTD_BUTTON_SIZE_SMALL} onClick={() => selectMatchingMaterial(matchingMaterial.id)}>
+          <Button size={ANTD_BUTTON_SIZE_SMALL} onClick={() => chooseMaterial(matchingMaterial.id)}>
             {t(DEFAULT.MATERIAL_DIALOG_USE_EXISTING)}
           </Button>
         </div>
@@ -154,5 +159,5 @@ const MaterialDialogContent = ({ onClose }: MaterialDialogContentProps): ReactNo
   );
 };
 
-export const MaterialDialog = ({ isOpen, onClose }: MaterialDialogProps): ReactNode =>
-  (isOpen ? <MaterialDialogContent onClose={onClose} /> : null);
+export const MaterialDialog = ({ isOpen, onClose, onMaterialChosen }: MaterialDialogProps): ReactNode =>
+  (isOpen ? <MaterialDialogContent onClose={onClose} onMaterialChosen={onMaterialChosen} /> : null);

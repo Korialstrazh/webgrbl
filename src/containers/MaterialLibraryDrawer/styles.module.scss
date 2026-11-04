@@ -1,0 +1,8 @@
+// The container the editor fills: the full height of the drawer body, so the view inside keeps its actions in view
+// and scrolls its list or its fields on its own.
+.libraryBody {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}

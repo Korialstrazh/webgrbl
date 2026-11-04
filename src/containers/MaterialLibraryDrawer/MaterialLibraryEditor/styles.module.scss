@@ -1,0 +1,35 @@
+// Each view is a column of the height of the drawer body: the filters and the actions keep their place, and the
+// list or the fields between them are the one part that scrolls, so nothing moves when a row is opened or saved.
+.listView,
+.editView {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 0;
+}
+
+.listScroller {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+// The confirmation of a save, a delete or an apply, right under the actions that did it.
+.feedback {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+  align-items: flex-start;
+  min-height: 1.25rem;
+  margin: 0;
+  color: var(--color-success);
+  font-size: 0.875rem;
+}
+
+.feedbackIcon {
+  flex: none;
+  margin-top: 0.125rem;
+}

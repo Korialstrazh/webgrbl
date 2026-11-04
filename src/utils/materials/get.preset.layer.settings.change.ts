@@ -10,15 +10,12 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { LayerSettingsChange } from '../layers/interfaces/LayerSettingsChange';
-import { POWER_PERCENT_MAX } from '../palette/palette.constants';
-import { getRoundedNumber } from '../get.rounded.number';
+import { getPresetPowerPercent } from './get.preset.power.percent';
 import type { MaterialPreset } from './interfaces/MaterialPreset';
 
-// As many decimals as the layer drawer shows, so a change the user cannot see adds no undo step.
-const PRESET_PERCENT_DECIMALS = 1;
-
 export const getPresetLayerSettingsChange = (preset: MaterialPreset, maxPowerWatts: number): LayerSettingsChange => ({
-  maxPowerPercent: getRoundedNumber((preset.powerWatts / maxPowerWatts) * POWER_PERCENT_MAX, PRESET_PERCENT_DECIMALS),
+  // Rounded to what the layer drawer shows, so a change the user cannot see adds no undo step.
+  maxPowerPercent: getPresetPowerPercent(preset, maxPowerWatts),
   speedMmPerMin: preset.speedMmPerMin,
   passes: preset.passes,
 });

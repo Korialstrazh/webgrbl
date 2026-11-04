@@ -12,6 +12,4 @@
 export interface TopBarOverflowMenuProps {
   /** Opens the machine profiles dialog, which the top bar owns. */
   onOpenMachineProfiles: () => void;
-  /** Opens the material library dialog, which the top bar owns. */
-  onOpenMaterials: () => void;
 }

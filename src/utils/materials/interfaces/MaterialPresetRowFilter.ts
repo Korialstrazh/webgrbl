@@ -1,5 +1,5 @@
 /**
- * What the material library table lists: the search text and the machine profile to keep to.
+ * What the material library table lists: the search text, the machine profile and the material to keep to.
  *
  * @author michael.morosov
  *
@@ -15,6 +15,10 @@ export interface MaterialPresetRowFilter {
   searchText: string;
   /** The only machine profile to list; undefined lists every profile. */
   machineProfileId: string | undefined;
+  /** The only material to list, when the library was opened for one; undefined lists every material. */
+  materialId?: string;
+  /** The material whose rows come first, usually the material of the project; undefined keeps the plain order. */
+  preferredMaterialId?: string;
   /** The word the user sees for an operation, so that a search finds it in the user's language. */
   getOperationLabel: (operation: MaterialPresetOperation) => string;
 }

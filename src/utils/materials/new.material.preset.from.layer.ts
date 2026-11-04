@@ -11,24 +11,15 @@
  */
 import { getRoundedNumber } from '../get.rounded.number';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { LAYER_MODE, POWER_PERCENT_MAX } from '../palette/palette.constants';
+import { POWER_PERCENT_MAX } from '../palette/palette.constants';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
+import { getLayerPresetOperation } from './get.layer.preset.operation';
 import type { MaterialPreset } from './interfaces/MaterialPreset';
-import { MATERIAL_PRESET_OPERATION } from './material.preset.constants';
-import type { MaterialPresetOperation } from './material.preset.constants';
 import { newMaterialPreset } from './new.material.preset';
 
 const PRESET_WATTS_DECIMALS = 2;
 
 type PresetMachineProfile = Pick<MachineProfile, 'id' | 'maxPowerWatts'>;
-
-const getLayerOperation = ({ isShading, settings }: ProjectLayer): MaterialPresetOperation => {
-  if (isShading) {
-    return MATERIAL_PRESET_OPERATION.SHADE;
-  }
-
-  return settings.mode === LAYER_MODE.FILL ? MATERIAL_PRESET_OPERATION.ENGRAVE : MATERIAL_PRESET_OPERATION.CUT;
-};
 
 export const newMaterialPresetFromLayer = (
   layer: ProjectLayer,
@@ -37,7 +28,7 @@ export const newMaterialPresetFromLayer = (
 ): MaterialPreset => newMaterialPreset({
   materialId,
   machineProfileId,
-  operation: getLayerOperation(layer),
+  operation: getLayerPresetOperation(layer),
   powerWatts: Math.min(
     getRoundedNumber((maxPowerWatts * layer.settings.maxPowerPercent) / POWER_PERCENT_MAX, PRESET_WATTS_DECIMALS),
     maxPowerWatts,

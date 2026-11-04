@@ -55,6 +55,13 @@ describe(getMaterialPresetRows.name, () => {
     expect(getMaterialPresetRows(presets, [PLYWOOD], { ...FILTER, machineProfileId: PROFILE_B })).toHaveLength(1);
   });
 
+  it('keeps to the material when one is given', () => {
+    const presets: MaterialPreset[] = [newPresetFixture(), newPresetFixture({ materialId: ACRYLIC.id })];
+
+    expect(getRowNames(getMaterialPresetRows(presets, [PLYWOOD, ACRYLIC], { ...FILTER, materialId: ACRYLIC.id })))
+      .toEqual([ACRYLIC_NAME]);
+  });
+
   it('needs every search word, in any field and any case', () => {
     const presets: MaterialPreset[] = [newPresetFixture()];
 
@@ -64,5 +71,18 @@ describe(getMaterialPresetRows.name, () => {
 
   it('leaves out a preset whose material is not known', () => {
     expect(getMaterialPresetRows([newPresetFixture()], [ACRYLIC], FILTER)).toEqual([]);
+  });
+
+  it('lists the preferred material first, then the others by name', () => {
+    const presets: MaterialPreset[] = [
+      newPresetFixture({ materialId: ACRYLIC.id }),
+      newPresetFixture(),
+      newPresetFixture({ materialId: ACRYLIC.id }),
+    ];
+
+    const rows: MaterialPresetRow[] =
+      getMaterialPresetRows(presets, [PLYWOOD, ACRYLIC], { ...FILTER, preferredMaterialId: PLYWOOD.id });
+
+    expect(getRowNames(rows)).toEqual([PLYWOOD_NAME, ACRYLIC_NAME, ACRYLIC_NAME]);
   });
 });
