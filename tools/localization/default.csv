@@ -294,6 +294,7 @@ MACHINE_MOVE_STEP_LABEL;Step size
 MACHINE_MOVE_STEP_OPTION;{{distance}} mm
 MACHINE_MOVE_TITLE;Move
 MACHINE_PANEL_TITLE;Machine
+MACHINE_PROFILE_ERROR_FRAME_MARGIN_INVALID;Frame margin must not be negative
 MACHINE_PROFILE_ERROR_JOG_FEED_RATE_INVALID;Jog feed must be between {{min}} and {{max}} mm/min
 MACHINE_PROFILE_ERROR_MAX_POWER_INVALID;Laser power must be greater than 0 W and at most {{max}} W
 MACHINE_PROFILE_ERROR_NAME_REQUIRED;Enter a name for the machine

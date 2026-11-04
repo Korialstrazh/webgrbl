@@ -20,9 +20,20 @@ const INVALID_VALUES: unknown[] = [
   { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), originCorner: 'middle' }] },
   { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), id: '' }] },
   { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), jogFeedRate: '1500' }] },
+  { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), frameGridCellMm: '10' }] },
+  { ...VALID_DOCUMENT, profiles: [{ ...newMachineProfile(), frameMarginMm: NaN }] },
 ];
 
 describe(isMachineProfilesDocument.name, () => {
+  it('accepts a profile with frame settings', () => {
+    const document: MachineProfilesDocument = {
+      ...VALID_DOCUMENT,
+      profiles: [newMachineProfile({ frameGridCellMm: 10, frameMarginMm: 2 })],
+    };
+
+    expect(isMachineProfilesDocument(document)).toBe(true);
+  });
+
   it('accepts a valid document', () => {
     expect(isMachineProfilesDocument(VALID_DOCUMENT)).toBe(true);
     expect(isMachineProfilesDocument({ ...VALID_DOCUMENT, activeProfileId: VALID_PROFILE.id })).toBe(true);
