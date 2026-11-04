@@ -21,6 +21,7 @@ export const newGrblHandshakeContext = (parts: GrblHandshakeContextParts): GrblH
     writeRealtimeCommand: (command: GrblRealtimeCommand): void => void commandWriter.writeRealtimeCommand(command),
     setBannerListener,
     setHandshakeCanceller,
+    dropAllLines: (): void => commandWriter.dropAllLines(),
     sendPrivateCommand: (commandText: string): Promise<string[]> => commandWriter.sendPrivateCommand(commandText),
   };
 };

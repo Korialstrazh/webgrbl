@@ -22,6 +22,8 @@ export interface GrblHandshakeContext {
   setBannerListener(listener: ((identity: GrblFirmwareIdentity) => void) | undefined): void;
   /** Sets the callback that cancels the running handshake with the given error, or removes it with undefined. */
   setHandshakeCanceller(canceller: ((error: Error) => void) | undefined): void;
+  /** Forgets all queued and in-flight lines after the controller restarted; their waits reject. */
+  dropAllLines(): void;
   /** Sends a private line through the send queue; resolves with its answer lines once it is acknowledged. */
   sendPrivateCommand(commandText: string): Promise<string[]>;
 }
