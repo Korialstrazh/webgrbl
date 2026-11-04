@@ -17,6 +17,7 @@ import { DEFAULT } from '../localization/default.locales';
 import type { Action } from './action';
 import { ConnectionStatusChanged } from './grbl.connection.state';
 import { ConsoleEntryReceived } from './grbl.console.state';
+import { JobRunProgressChanged } from './job.run.state';
 import { MachineControllerResetDetected, MachineStatusReceived } from './machine.status.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from './toast.constants';
 import { ToastShown } from './toast.state';
@@ -73,6 +74,11 @@ export const getGrblControllerEventActions = (event: GrblControllerEvent): Actio
         messageParameters: NO_TOAST_PARAMETERS,
       }),
     ];
+  case GRBL_CONTROLLER_EVENT_KIND.PROGRAM_PROGRESS:
+    return [new JobRunProgressChanged({
+      answeredLineCount: event.answeredLineCount,
+      totalLineCount: event.totalLineCount,
+    })];
   default: {
     const unknownEvent: never = event;
     throw new Error(`Unknown GRBL controller event ${JSON.stringify(unknownEvent)}`);

@@ -145,6 +145,41 @@ describe(GrblController.name, () => {
     vi.useRealTimers();
   });
 
+  it('reports the progress of a program from its start to its last answered line', async () => {
+    const harness: GrblControllerHarness = await newConnectedHarness();
+    const programLineCount = 3;
+    const program: Promise<GrblProgramResult> =
+      harness.controller.streamProgram(newModalProgram(programLineCount), { isStopOnErrorEnabled: true });
+
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    await program;
+
+    const answeredLineCounts: number[] = [];
+
+    for (const event of harness.events) {
+      if (event.kind === GRBL_CONTROLLER_EVENT_KIND.PROGRAM_PROGRESS) {
+        expect(event.totalLineCount).toBe(programLineCount);
+        answeredLineCounts.push(event.answeredLineCount);
+      }
+    }
+
+    expect(answeredLineCounts).toEqual([0, 1, 2, 3]);
+
+    await disconnectGrblHarness(harness);
+  });
+
+  it('reports no program progress for a check', async () => {
+    const harness: GrblControllerHarness = await newConnectedHarness();
+    const check: Promise<GrblProgramLineError[]> = harness.controller.checkProgram(newModalProgram(2));
+
+    await vi.advanceTimersByTimeAsync(PROGRAM_SETTLE_MS);
+    await check;
+
+    expect(getEventsOfKind(harness.events, GRBL_CONTROLLER_EVENT_KIND.PROGRAM_PROGRESS)).toEqual([]);
+
+    await disconnectGrblHarness(harness);
+  });
+
   it('streams a 200-line program to completion without overflowing the simulator buffer', async () => {
     const harness: GrblControllerHarness = await newConnectedHarness();
 

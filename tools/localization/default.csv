@@ -193,10 +193,17 @@ GRBL_ERROR_8;This $ command only works while the machine is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
+JOB_PAUSE;Pause
+JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.
+JOB_RESUME;Resume
+JOB_RESUME_WAITING;Wait until the machine has stopped and any door is closed.
+JOB_RUN_PROGRESS_DETAIL;{{answered}} of {{total}} lines answered, {{elapsed}} elapsed
+JOB_RUN_PROGRESS_LABEL;Job progress
 JOB_RUN_STATUS_COMPLETED;Finished
 JOB_RUN_STATUS_FINISHING;Finishing
 JOB_RUN_STATUS_INTERRUPTED;Stopped before the end
 JOB_RUN_STATUS_LABEL;Status
+JOB_RUN_STATUS_PAUSED;Paused
 JOB_RUN_STATUS_SENDING;Running
 JOB_START_BLOCKED_NO_PROFILE;Add a machine profile to start a job.
 JOB_START_BLOCKED_NO_TOOLPATH;Wait for an up-to-date toolpath with something to burn.
