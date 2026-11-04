@@ -16,6 +16,8 @@ export const GRBL_HANDSHAKE_TIMEOUT_MS = 10_000;
 export const GRBL_STATUS_POLL_INTERVAL_MS = 250;
 /** Longest wait for the machine to finish a feed hold before a soft reset is sent. */
 export const GRBL_HOLD_COMPLETE_MAX_WAIT_MS = 2_000;
+/** How long a job keeps its locks after a stop request; above the hold wait, so only a stalled write reaches it. */
+export const GRBL_STOP_FINISH_MAX_WAIT_MS = 5_000;
 /** Time between two status queries while a stop waits for the hold to complete. */
 export const GRBL_STOP_STATUS_POLL_INTERVAL_MS = 50;
 /** Longest wait for the banner after a soft reset before the held queue sends again and not-responding is reported. */

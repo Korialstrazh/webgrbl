@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   GRBL_HOLD_COMPLETE_MAX_WAIT_MS,
+  GRBL_MACHINE_STATE,
   GRBL_SOFT_RESET_BYTE,
+  GRBL_STOP_FINISH_MAX_WAIT_MS,
   GRBL_STATUS_POLL_INTERVAL_MS,
   SIMULATED_LASER_PORT_ID,
 } from '../grbl/grbl.constants';
@@ -34,6 +36,7 @@ import {
   selectJobRunTotalLineCount,
 } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
+import type { JobRunStatus } from './job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from './machine.profile.state';
 import {
@@ -42,6 +45,7 @@ import {
   MachineResetRequested,
   MachineStopRequested,
   selectIsAirAssistOn,
+  selectMachineStatus,
 } from './machine.status.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
@@ -141,12 +145,12 @@ const prepareConnectedStore = async (
   return store;
 };
 
-/** Far more lines than GRBL can buffer, so the program is still being sent when a stop comes. */
-const replaceToolpathWithManyMoves = (store: AppStore): void => {
+/** With MANY_MOVES_COUNT, far more lines than GRBL can buffer, so the program is still being sent when a stop comes. */
+const replaceToolpathWithMoves = (store: AppStore, moveCount: number): void => {
   store.dispatch(new ToolpathReady({
     toolpath: newToolpath({
-      moves: Array.from({ length: MANY_MOVES_COUNT }, (_: unknown, moveIndex: number): ToolpathMove =>
-        newToolpathMove({ to: { x: moveIndex + 1, y: 0 } })),
+      moves: Array.from({ length: moveCount }, (_: unknown, moveIndex: number): ToolpathMove =>
+        newToolpathMove({ to: { x: LONG_MOVE_END_X_MM * (moveIndex + 1), y: 0 } })),
       warnings: [],
     }),
     documentVersion: selectToolpathDocumentVersion(store.getState()),
@@ -227,7 +231,7 @@ describe(runGrblJob.name, () => {
     const transport: ControlledLaserTransport = new ControlledLaserTransport();
     const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
 
-    replaceToolpathWithManyMoves(store);
+    replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
     transport.holdResetWrite();
     store.dispatch(new JobStartRequested());
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -269,11 +273,53 @@ describe(runGrblJob.name, () => {
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
   });
 
+  it.each([
+    [JOB_RUN_STATUS.SENDING, MANY_MOVES_COUNT],
+    [JOB_RUN_STATUS.FINISHING, 1],
+  ])('ends the run at the time limit when the reset byte of a stop stalls while %s', async (
+    statusAtStop: JobRunStatus,
+    moveCount: number,
+  ) => {
+    const transport: ControlledLaserTransport = new ControlledLaserTransport();
+    const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
+
+    replaceToolpathWithMoves(store, moveCount);
+    transport.holdResetWrite();
+    store.dispatch(new JobStartRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    expect(selectJobRunStatus(store.getState())).toBe(statusAtStop);
+
+    store.dispatch(new MachineStopRequested());
+    await vi.advanceTimersByTimeAsync(GRBL_STOP_FINISH_MAX_WAIT_MS - 1);
+    expect(selectIsJobRunActive(store.getState())).toBe(true);
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    expect(selectIsJobRunActive(store.getState())).toBe(false);
+    transport.releaseResetWrite();
+  });
+
+  it('reports interrupted when the machine goes Idle after a reset during finishing', async () => {
+    const store: AppStore = await prepareConnectedStore();
+
+    store.dispatch(new JobStartRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new JobPauseRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.FINISHING);
+
+    store.dispatch(new MachineResetRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    expect(selectMachineStatus(store.getState())?.machineState).toBe(GRBL_MACHINE_STATE.IDLE);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+  });
+
   it('ends the run at a reset without waiting for its byte to be written', async () => {
     const transport: ControlledLaserTransport = new ControlledLaserTransport();
     const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
 
-    replaceToolpathWithManyMoves(store);
+    replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
     transport.holdResetWrite();
     store.dispatch(new JobStartRequested());
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -289,7 +335,7 @@ describe(runGrblJob.name, () => {
     const transport: ControlledLaserTransport = new ControlledLaserTransport();
     const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
 
-    replaceToolpathWithManyMoves(store);
+    replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
     store.dispatch(new JobStartRequested());
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     transport.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.SELF_RESET });

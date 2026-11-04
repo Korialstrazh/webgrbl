@@ -9,8 +9,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { Task } from 'redux-saga';
-import { call, cancel, fork, join, put, race, select, take } from 'redux-saga/effects';
-import { GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
+import { call, cancel, delay, fork, join, put, race, select, take } from 'redux-saga/effects';
+import { GRBL_MACHINE_STATE, GRBL_STOP_FINISH_MAX_WAIT_MS } from '../grbl/grbl.constants';
 import type { GrblController } from '../grbl/grbl.controller';
 import type { GrblProgramResult } from '../grbl/interfaces/GrblProgramResult';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
@@ -66,7 +66,10 @@ function* waitForMachineAfterProgram(): Generator {
   }
 }
 
-/** A stop counts only once it has finished, so the locks stay on until the machine got its reset. */
+/**
+ * A stop counts only once it has finished, so the locks stay on until the machine got its reset. The reset byte is
+ * awaited without a time limit, so a stalled port would otherwise keep the locks on until the connection ends.
+ */
 function* waitForJobInterruption(): Generator {
   const interruption: Action<unknown> = (yield take([
     MachineStopRequested.type,
@@ -75,7 +78,10 @@ function* waitForJobInterruption(): Generator {
   ])) as Action<unknown>;
 
   if (interruption.type === MachineStopRequested.type) {
-    yield take(MachineStopFinished.type);
+    yield race({
+      stopFinished: take(MachineStopFinished.type),
+      waitExpired: delay(GRBL_STOP_FINISH_MAX_WAIT_MS),
+    });
   }
 
   return interruption;
