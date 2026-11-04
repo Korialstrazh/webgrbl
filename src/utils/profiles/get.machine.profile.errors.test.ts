@@ -39,6 +39,11 @@ const JOG_FEED_ERROR: MachineProfileFieldError = {
   messageParameters: { min: 100, max: 10000 },
 };
 
+const FRAME_MARGIN_ERROR: MachineProfileFieldError = {
+  field: 'frameMarginMm',
+  messageKey: MACHINE_PROFILE_ERROR_KEY.FRAME_MARGIN_INVALID,
+};
+
 const INVALID_CASES: Array<[string, Partial<MachineProfile>, MachineProfileFieldError]> = [
   ['an empty name', { name: '' }, NAME_ERROR],
   ['a blank name', { name: '   ' }, NAME_ERROR],
@@ -58,6 +63,8 @@ const INVALID_CASES: Array<[string, Partial<MachineProfile>, MachineProfileField
   ['a jog feed below the range', { jogFeedRate: JOG_FEED_BELOW_RANGE }, JOG_FEED_ERROR],
   ['a jog feed above the range', { jogFeedRate: JOG_FEED_ABOVE_RANGE }, JOG_FEED_ERROR],
   ['a NaN jog feed', { jogFeedRate: NaN }, JOG_FEED_ERROR],
+  ['a negative frame margin', { frameMarginMm: -1 }, FRAME_MARGIN_ERROR],
+  ['a NaN frame margin', { frameMarginMm: NaN }, FRAME_MARGIN_ERROR],
 ];
 
 describe(getMachineProfileErrors.name, () => {
@@ -85,6 +92,10 @@ describe(getMachineProfileErrors.name, () => {
 
   it.each([[255], [1000], [10000]])('accepts S value %d', (sValueMax: number) => {
     expect(getMachineProfileErrors(newMachineProfile({ sValueMax }))).toEqual([]);
+  });
+
+  it.each([[undefined], [0], [5]])('accepts frame margin %s', (frameMarginMm: number | undefined) => {
+    expect(getMachineProfileErrors(newMachineProfile({ frameMarginMm }))).toEqual([]);
   });
 
   it('accepts 12 W power', () => {

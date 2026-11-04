@@ -11,6 +11,7 @@
  */
 import { isBoolean } from '../type.guards/is.boolean';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
+import { isOptionalFiniteNumber } from '../type.guards/is.optional.finite.number';
 import { isRecord } from '../type.guards/is.record';
 import { isString } from '../type.guards/is.string';
 import type { MachineProfile } from './interfaces/MachineProfile';
@@ -28,4 +29,6 @@ export const isMachineProfile = (value: unknown): value is MachineProfile =>
   isMachineOriginCorner(value.originCorner) &&
   isBoolean(value.hasAirAssist) &&
   isBoolean(value.hasHomingSwitches) &&
-  isFiniteNumber(value.jogFeedRate);
+  isFiniteNumber(value.jogFeedRate) &&
+  isOptionalFiniteNumber(value.frameGridCellMm) &&
+  isOptionalFiniteNumber(value.frameMarginMm);

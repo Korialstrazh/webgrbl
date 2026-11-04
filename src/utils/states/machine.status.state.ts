@@ -44,6 +44,11 @@ export class MachineStatusReceived extends Action<MachineStatusReceivedPayload> 
   public static readonly type: string = actionType('machine status received');
 }
 
+/** GRBL printed an ALARM line; its status reports show the Alarm state only from the next poll on. */
+export class MachineAlarmReported extends Action {
+  public static readonly type: string = actionType('machine alarm reported');
+}
+
 export class MachineStopRequested extends Action {
   public static readonly type: string = actionType('machine stop requested');
 }

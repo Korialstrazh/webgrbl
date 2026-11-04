@@ -20,6 +20,8 @@ const isSValueMaxValid = (value: number): boolean =>
 
 const isWorkAreaLengthValid = (value: number): boolean => isPositiveNumber(value) && value <= MACHINE_WORK_AREA_MAX_MM;
 
+const isFrameMarginValid = (value: number = 0): boolean => isFiniteNumber(value) && value >= 0;
+
 const isJogFeedRateValid = (value: number): boolean =>
   isFiniteNumber(value) && value >= MACHINE_JOG_FEED_RATE_MIN && value <= MACHINE_JOG_FEED_RATE_MAX;
 
@@ -78,6 +80,10 @@ export const getMachineProfileErrors = (profile: MachineProfile): MachineProfile
       messageKey: MACHINE_PROFILE_ERROR_KEY.JOG_FEED_RATE_INVALID,
       messageParameters: { min: MACHINE_JOG_FEED_RATE_MIN, max: MACHINE_JOG_FEED_RATE_MAX },
     });
+  }
+
+  if (!isFrameMarginValid(profile.frameMarginMm)) {
+    errors.push({ field: 'frameMarginMm', messageKey: MACHINE_PROFILE_ERROR_KEY.FRAME_MARGIN_INVALID });
   }
 
   return errors;

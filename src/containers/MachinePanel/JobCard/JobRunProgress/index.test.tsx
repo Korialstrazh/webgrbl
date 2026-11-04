@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { JobRunProgress } from '.';
+import { JOB_RUN_KIND } from '../../../../utils/states/job.run.kind.constants';
 import { JobRunProgressChanged, JobRunStarted } from '../../../../utils/states/job.run.state';
 import { newStore } from '../../../../utils/states/new.store';
 import type { AppStore } from '../../../../utils/states/new.store';
@@ -11,7 +12,7 @@ const SUCCESS_STATUS_SELECTOR = '.ant-progress-status-success';
 const renderProgress = (answeredLineCount: number): HTMLElement => {
   const store: AppStore = newStore();
 
-  store.dispatch(new JobRunStarted({ startedAtMs: Date.now() }));
+  store.dispatch(new JobRunStarted({ startedAtMs: Date.now(), kind: JOB_RUN_KIND.JOB }));
   store.dispatch(new JobRunProgressChanged({ answeredLineCount, totalLineCount: TOTAL_LINE_COUNT }));
 
   return render(
