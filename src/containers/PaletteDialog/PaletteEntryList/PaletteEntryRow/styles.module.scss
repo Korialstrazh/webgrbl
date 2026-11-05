@@ -1,4 +1,5 @@
 .row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -22,7 +23,7 @@
 .selectButton {
   display: grid;
   flex: 1;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0 var(--space-2);
   align-items: center;
   height: auto;
@@ -60,30 +61,53 @@
 .summary {
   grid-column: 1 / -1;
   min-width: 0;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  font-size: 0.75rem;
   color: var(--color-text-muted);
 }
 
-// The move and delete buttons are a 2rem target each, though their icons are small.
-.row > :global(.ant-btn.ant-btn-icon-only) {
-  flex: none;
-  width: 2rem;
-  height: 2rem;
+// Out of sight until the row is hovered or holds the focus, and then only over the name line, so they never cover a
+// value. They stay in the tab order, and delete asks before it deletes.
+.rowActions {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: flex;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+
+  > :global(.ant-btn) {
+    width: 1.75rem;
+    height: 1.5rem;
+  }
 }
 
-// Delete is quiet until the row is hovered, focused or edited, so a row does not show a red cross all the time. It
-// stays in the tab order: focusing it shows it, and it asks before it deletes.
+.row:hover .rowActions,
+.row:focus-within .rowActions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// A touch screen has no hover, so the buttons stay in view on a line of their own above the row content.
+@media (hover: none) {
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .rowActions {
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.modeIcon {
+  color: var(--color-text-muted);
+}
+
 .deleteButton:global(.ant-btn) {
   color: var(--color-text-muted);
-  opacity: 0;
-}
-
-.row:hover .deleteButton:global(.ant-btn),
-.row:focus-within .deleteButton:global(.ant-btn),
-.editedRow .deleteButton:global(.ant-btn) {
-  opacity: 1;
 }
 
 .deleteButton:global(.ant-btn):hover {

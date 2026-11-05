@@ -1,0 +1,25 @@
+@use '../../styles/accessibility' as accessibility;
+
+// Wrapping, never clipping: in the narrowest panel a cell moves to a second line and every value stays in view.
+.cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+
+  :global(.anticon) {
+    opacity: 0.8;
+  }
+}
+
+.summaryText {
+  @include accessibility.visually-hidden;
+}

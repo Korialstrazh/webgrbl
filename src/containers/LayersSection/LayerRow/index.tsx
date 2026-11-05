@@ -13,10 +13,7 @@
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
-  DashboardOutlined,
   HolderOutlined,
-  SyncOutlined,
-  ThunderboltOutlined,
 } from '@ant-design/icons';
 import { Button, Checkbox, Tooltip } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
@@ -24,11 +21,10 @@ import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
-import { getLayerSummaryParts } from '../../../utils/layers/get.layer.summary.parts';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
-import { LayerSummaryText } from '../../../views/LayerSummaryText';
 import { LayerSwatch } from '../../../views/LayerSwatch';
+import { LayerValueCells } from '../../../views/LayerValueCells';
 import type { LayerRowProps } from '../interfaces/LayerRowProps';
 import styles from './styles.module.scss';
 
@@ -84,16 +80,8 @@ export const LayerRow = ({
           <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
         </span>
         <span className={styles.name} title={layerName}>{layerName}</span>
-        <LayerSummaryText
-          className={styles.summary}
-          parts={getLayerSummaryParts(t, settings)}
-          iconComponents={[
-            <LayerModeIcon key={settings.mode} mode={settings.mode} />,
-            <ThunderboltOutlined key={DEFAULT.LAYERS_SUMMARY_POWER} />,
-            <DashboardOutlined key={DEFAULT.LAYERS_SUMMARY_SPEED} />,
-            <SyncOutlined key={DEFAULT.LAYERS_SUMMARY_PASSES} />,
-          ]}
-        />
+        <span className={styles.modeIcon} aria-hidden><LayerModeIcon mode={settings.mode} /></span>
+        <LayerValueCells className={styles.summary} settings={settings} />
         {hasNoPaletteEntry && <span className={styles.note}>{t(DEFAULT.LAYERS_NOT_IN_PALETTE)}</span>}
       </Button>
       <div className={styles.moveButtons}>
