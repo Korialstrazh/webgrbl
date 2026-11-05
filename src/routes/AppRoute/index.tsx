@@ -8,7 +8,7 @@
  * In a wide window the three panels sit in a splitter the user can resize, and the console, while open, sits below the
  * bed in a second, vertical splitter. The splitters wait until the stored panel sizes are read, a quick IndexedDB read
  * with a timeout, so the workbench opens with them instead of jumping from the defaults. In a narrow window the open
- * console stacks below the bed in the same region.
+ * console is a bottom sheet over the region on screen.
  *
  * @author michael.morosov
  *
@@ -78,7 +78,6 @@ export const AppRoute = (): ReactNode => {
           <div ref={setBedRegionHost} className={styles.narrowRegions}>
             <div className={getNarrowRegionClassName(narrowRegion, WORKBENCH_REGION.BED)}>
               {bedPanelComponent}
-              {isConsoleOpen && <ConsoleDock />}
             </div>
             <div className={getNarrowRegionClassName(narrowRegion, WORKBENCH_REGION.DESIGN)}>
               {designPanelComponent}
@@ -86,6 +85,8 @@ export const AppRoute = (): ReactNode => {
             <div className={getNarrowRegionClassName(narrowRegion, WORKBENCH_REGION.JOB)}>
               {machinePanelComponent}
             </div>
+            {/* A sheet over whichever region shows; it stays inside this box, so STOP below it stays free. */}
+            {isConsoleOpen && <ConsoleDock />}
           </div>
         )}
         <StatusStrip />

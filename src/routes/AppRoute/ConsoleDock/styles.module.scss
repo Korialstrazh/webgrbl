@@ -1,4 +1,4 @@
-// Fills the splitter panel in a wide window; stacked in a narrow window it gets a height of its own.
+// Fills the splitter panel in a wide window; in a narrow window it is a bottom sheet over the region on screen.
 .consoleDock {
   display: flex;
   flex: 1;
@@ -12,6 +12,11 @@
 // 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
 @media (width < 80rem) {
   .consoleDock {
-    height: 16rem;
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 10;
+    height: min(16rem, 60%);
+    box-shadow: 0 -0.25rem 1rem rgb(0 0 0 / 40%);
   }
 }

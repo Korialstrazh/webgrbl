@@ -58,7 +58,7 @@ const getBedColumnPanels = (): HTMLElement[] =>
   Array.from(document.querySelectorAll<HTMLElement>(`${VERTICAL_SPLITTER_SELECTOR} > ${SPLITTER_PANEL_SELECTOR}`));
 
 const toggleConsole = (): void => {
-  fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+  fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('button', { name: CONSOLE_TOGGLE_LABEL }));
 };
 
 const getSplitterPanelFlexBases = (): string[] =>
@@ -145,7 +145,7 @@ describe(AppRoute.name, () => {
     expect(getBedColumnPanels()[1]?.style.flexBasis).toBe('30%');
   });
 
-  it('stacks the open console below the bed in a narrow window', () => {
+  it('opens the console as a sheet inside the regions box in a narrow window, outside any region', () => {
     setMatchMediaMatches(false);
     renderAppRoute();
 
@@ -156,6 +156,8 @@ describe(AppRoute.name, () => {
     expect(document.querySelector(SPLITTER_SELECTOR)).not.toBeInTheDocument();
     expect(screen.getByRole('main').compareDocumentPosition(consoleHeading))
       .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    // Not inside the Bed region, so it shows over whichever region is on screen.
+    expect(screen.getByRole('main').parentElement?.contains(consoleHeading)).toBe(false);
   });
 
   it('puts the bed first in a narrow window, so the first screen shows the work', () => {
