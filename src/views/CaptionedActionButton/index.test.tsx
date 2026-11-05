@@ -24,14 +24,21 @@ describe(CaptionedActionButton.name, () => {
 
   it('shows a lock on an action that is turned off', () => {
     render(
-      <CaptionedActionButton labelText={LABEL_TEXT} captionText={CAPTION_TEXT} iconComponent={<PlayCircleFilled />} isDisabled />,
+      <CaptionedActionButton
+        labelText={LABEL_TEXT}
+        captionText={CAPTION_TEXT}
+        iconComponent={<PlayCircleFilled />}
+        isDisabled
+      />,
     );
 
     expect(screen.getByTestId(CAPTIONED_ACTION_LOCK_TEST_ID)).toBeInTheDocument();
   });
 
   it('shows no lock on an action that can be used', () => {
-    render(<CaptionedActionButton labelText={LABEL_TEXT} captionText={CAPTION_TEXT} iconComponent={<PlayCircleFilled />} />);
+    render(
+      <CaptionedActionButton labelText={LABEL_TEXT} captionText={CAPTION_TEXT} iconComponent={<PlayCircleFilled />} />,
+    );
 
     expect(screen.getByRole('button', { name: LABEL_TEXT })).toBeEnabled();
     expect(screen.queryByTestId(CAPTIONED_ACTION_LOCK_TEST_ID)).not.toBeInTheDocument();

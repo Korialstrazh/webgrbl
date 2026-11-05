@@ -114,7 +114,7 @@ export const ProfileFileActions = (): ReactNode => {
         aria-label={t(DEFAULT.MACHINE_PROFILES_IMPORT_FILE)}
         onChange={handleFileInputChange}
       />
-      {/* Not built yet: a muted note in a Coming soon list, never a button, so it is not in the tab order as an action. */}
+      {/* Not built yet: a muted note in a Coming soon list, never a button, so it is not tabbed to as an action. */}
       <section className={styles.comingSoonList} aria-label={t(DEFAULT.COMING_SOON_LIST)}>
         <h3 className={styles.comingSoonHeading}>
           <ClockCircleOutlined aria-hidden />
