@@ -73,8 +73,23 @@
   }
 }
 
-// Narrow, Import SVG keeps only its icon, so the app title and the project name keep room beside the laser chip.
+.profileName {
+  display: inline-block;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+// The profile button gives up its name first; Import SVG, the core action, keeps its label down to 37.5rem.
 @media (width < 62.5rem) {
+  .profileName {
+    @include accessibility.visually-hidden;
+  }
+}
+
+@media (width < 37.5rem) {
   .compactHiddenLabel {
     @include accessibility.visually-hidden;
   }
@@ -85,16 +100,23 @@
   font-size: 1.25rem;
 }
 
-// At phone width the menus scroll sideways behind the pill, which never gives up space.
+// At phone width the title, the name and the save word go, and the buttons close up, so everything fits with no scroll.
 @media (width < 30rem) {
   .heading {
     display: none;
   }
 
+  .topBar {
+    gap: var(--space-1);
+    padding: 0 var(--space-2);
+  }
+
   .activeMenus {
-    flex-shrink: 1;
-    min-width: 2.5rem;
-    overflow-x: auto;
-    scrollbar-width: none;
+    gap: 0;
+  }
+
+  .activeMenus :global(.ant-btn) {
+    min-width: 2.125rem;
+    padding-inline: var(--space-1);
   }
 }

@@ -8,6 +8,9 @@ import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import { PROJECT_FILE_MIME_TYPE } from '../../utils/project/project.constants';
 import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
+import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { MachineStopRequested } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
@@ -49,6 +52,7 @@ const AUTOSAVE_TEXT = 'Saved';
 const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const MACHINE_PROFILES_LABEL = 'Laser profiles';
+const ACTIVE_PROFILE_NAME = 'Garage laser';
 const MATERIALS_LABEL = 'Materials';
 const SOON_LABEL = 'Soon';
 const PROJECT_MENU_LABEL = 'Project';
@@ -103,6 +107,17 @@ const renderWorkbenchTopBar = (store: AppStore): void => {
 describe(TopBar.name, () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('names the active profile on the profile button', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile({ name: ACTIVE_PROFILE_NAME });
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    renderWorkbenchTopBar(store);
+
+    expect(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL })).toHaveTextContent(ACTIVE_PROFILE_NAME);
   });
 
   it('shows the app name, the autosave readout and the connection pill', () => {

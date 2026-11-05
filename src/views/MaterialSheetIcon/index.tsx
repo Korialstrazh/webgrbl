@@ -23,9 +23,10 @@ const MaterialSheetIconDrawing = (): ReactNode => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M3.5 4.5h11l-2 6.5h-11Z" />
-    <path d="M1.5 11v1.5h11l2-6.5V4.5 M12.5 11v1.5" />
-    <path d="M4.5 7c2-.8 3.5.8 6 0" stroke="var(--color-accent)" />
+    <rect x="1.5" y="3.5" width="13" height="9" rx="1" />
+    <path d="M1.5 6.5c2.5-1 4 .8 6.5 0s3.5-.8 6.5 0" />
+    <path d="M1.5 10c2.5.7 3.5-.6 6-.3" />
+    <ellipse cx="10.5" cy="9.8" rx="1.7" ry="0.9" />
   </svg>
 );
 

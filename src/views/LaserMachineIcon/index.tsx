@@ -24,9 +24,10 @@ const LaserMachineIconDrawing = (): ReactNode => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M2 2.5h12 M2 2.5v11 M14 2.5v11 M1 13.5h14" />
-    <path d="M6 2.5h4v3.5l-2 1.5-2-1.5Z" />
-    <path d="M8 8v3.5" stroke="var(--color-accent)" strokeWidth="1.6" />
+    <path d="M5 1.5h6v4.5l-1.5 2h-3L5 6Z" />
+    <path d="M8 8v4.5" strokeWidth="1.6" />
+    <path d="M2 14.5h12" />
+    <path d="M4.5 10.5l1.2 1.2 M11.5 10.5l-1.2 1.2" />
   </svg>
 );
 
