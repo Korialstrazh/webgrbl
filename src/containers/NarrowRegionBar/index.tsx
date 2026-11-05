@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { DashboardOutlined, EditOutlined, ProfileOutlined } from '@ant-design/icons';
+import { BlockOutlined, DashboardOutlined, ProfileOutlined } from '@ant-design/icons';
 import { Segmented } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -37,7 +37,7 @@ export const NarrowRegionBar = (): ReactNode => {
         options={[
           {
             value: WORKBENCH_REGION.DESIGN,
-            icon: <EditOutlined aria-hidden />,
+            icon: <BlockOutlined aria-hidden />,
             label: t(DEFAULT.NARROW_REGION_DESIGN),
           },
           { value: WORKBENCH_REGION.BED, icon: <DashboardOutlined aria-hidden />, label: t(DEFAULT.NARROW_REGION_BED) },

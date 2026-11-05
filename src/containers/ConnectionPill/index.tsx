@@ -20,6 +20,7 @@ import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
+import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectIsWebSerialSupported } from '../../utils/states/browser.environment.state';
@@ -33,6 +34,9 @@ import {
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ConnectionPopoverOpenChanged, selectIsConnectionPopoverOpen } from '../../utils/states/ui.overlay.state';
+import { selectNarrowRegion } from '../../utils/states/ui.workbench.state';
+import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants';
+import type { WorkbenchRegion } from '../../utils/states/workbench.region.constants';
 import { ConnectionPopover } from '../ConnectionPopover';
 import { CONNECTION_PILL_STATUS_LABEL_KEY } from './connection.pill.constants';
 import { getSelectedPortLabel } from './get.selected.port.label';
@@ -57,6 +61,10 @@ export const ConnectionPill = (): ReactNode => {
   const selectedPortId: string = useSelector(selectSelectedPortId);
   const firmwareIdentity: GrblFirmwareIdentity | undefined = useSelector(selectFirmwareIdentity);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const isWide: boolean = useIsWideLayout();
+  const narrowRegion: WorkbenchRegion = useSelector(selectNarrowRegion);
+  // The Job card, with its readiness step and next-step button, already offers Connect wherever it is on screen.
+  const isJobCardShown: boolean = isWide || narrowRegion === WORKBENCH_REGION.JOB;
   const statusText: string = t(CONNECTION_PILL_STATUS_LABEL_KEY[connectionStatus]);
   const firmwareText: string | undefined = isConnected && firmwareIdentity
     ? t(DEFAULT.CONNECTION_PILL_FIRMWARE, {
@@ -93,7 +101,7 @@ export const ConnectionPill = (): ReactNode => {
         {!isWebSerialSupported && (
           <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
         )}
-        {isConnectOffered(connectionStatus) && (
+        {isConnectOffered(connectionStatus) && !isJobCardShown && (
           <span className={styles.connectVerb}>
             <ApiOutlined aria-hidden="true" />
             {` ${t(DEFAULT.CONNECTION_CONNECT_MENU)}`}
