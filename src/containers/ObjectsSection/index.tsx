@@ -1,6 +1,6 @@
 /**
  * The Objects section of the design panel: the list of project objects, and for a single selected object its
- * placement fields. With no objects it shows a hint and an Import SVG button.
+ * placement fields. With no objects it shows a short hint; the card on the bed offers the import.
  *
  * @author michael.morosov
  *
@@ -24,7 +24,6 @@ import {
   selectSelectedObjectIds,
   selectSelectedObjects,
 } from '../../utils/states/project.selection.state';
-import { SvgImportButton } from '../SvgImportButton';
 import { ObjectRow } from './ObjectRow';
 import { ObjectTransformFields } from './ObjectTransformFields';
 import styles from './styles.module.scss';
@@ -42,7 +41,6 @@ export const ObjectsSection = (): ReactNode => {
     return (
       <div className={styles.empty}>
         <p className={styles.hint}>{t(DEFAULT.OBJECTS_EMPTY_HINT)}</p>
-        <SvgImportButton />
       </div>
     );
   }

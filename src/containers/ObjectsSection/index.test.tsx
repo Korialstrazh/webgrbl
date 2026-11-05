@@ -43,7 +43,7 @@ const SECOND_SIZE_TEXT = `Frame 20.0 ${MULTIPLICATION_SIGN} 20.0 mm`;
 const SECOND_SIZE_MM = 20;
 const OBJECTS_LIST_NAME = 'Project objects';
 const IMPORT_LABEL = 'Import SVG';
-const EMPTY_HINT_PATTERN = /No objects yet/;
+const EMPTY_HINT_PATTERN = /Nothing on the bed yet/;
 const SECOND_ROW_NAME_PATTERN = /^Moon/;
 const PRESSED_ATTRIBUTE = 'aria-pressed';
 const TRUE_TEXT = 'true';
@@ -126,11 +126,11 @@ const getObjectById = (store: AppStore, objectId: string): ProjectObject | undef
   );
 
 describe(ObjectsSection.name, () => {
-  it('shows a hint and an import button when there are no objects', () => {
+  it('shows a hint and no import button when there are no objects', () => {
     renderSection(newStore());
 
     expect(screen.getByText(EMPTY_HINT_PATTERN)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: IMPORT_LABEL })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: IMPORT_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
 
