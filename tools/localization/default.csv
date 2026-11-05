@@ -72,6 +72,7 @@ BURN_SCENE_VIEW_FIT_HINT;Fit: back to the first view of the whole sheet
 BURN_SCENE_VIEW_LABEL;3D view
 BURN_SCENE_VIEW_TOP_HINT;Top: look straight down at the sheet
 COMING_SOON;Soon
+COMING_SOON_LIST;Coming soon
 CONNECTION_CONNECT_MENU;Connect
 CONNECTION_NO_PORT_CHOSEN;No port chosen
 CONNECTION_PILL_CONNECTED;Connected

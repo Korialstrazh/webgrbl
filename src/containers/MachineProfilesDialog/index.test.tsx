@@ -90,6 +90,9 @@ const SETTINGS_WITHOUT_X_TRAVEL_AND_LASER_MODE: Record<number, string> = { 131: 
 const SETTINGS_WITHOUT_PROFILE_VALUES: Record<number, string> = { 0: '10' };
 const RX_BUFFER_SIZE = 127;
 
+const COMING_SOON_LIST_NAME = 'Coming soon';
+const GRBL_SETTINGS_TEXT = 'GRBL settings ($$)';
+
 const renderDialog = (store: AppStore, onClose: () => void = vi.fn()): void => {
   render(
     <Provider store={store}>
@@ -138,6 +141,15 @@ const newDocumentText = (profiles: MachineProfile[]): string => JSON.stringify({
 } satisfies MachineProfilesDocument);
 
 describe(MachineProfilesDialog.name, () => {
+  it('lists the GRBL settings editor as a coming-soon note, not as a button', () => {
+    renderDialog(newStore());
+
+    const comingSoonList: HTMLElement = screen.getByRole('region', { name: COMING_SOON_LIST_NAME });
+
+    expect(within(comingSoonList).getByText(GRBL_SETTINGS_TEXT)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: GRBL_SETTINGS_TEXT })).not.toBeInTheDocument();
+  });
+
   it('keeps the GRBL field under a collapsed Advanced panel and opens it when that field fails a check', () => {
     renderDialog(newStore());
 
