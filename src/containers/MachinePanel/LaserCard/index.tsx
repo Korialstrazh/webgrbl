@@ -1,6 +1,6 @@
 /**
  * The laser pointer card: pointer power, hold to fire and air assist. While no laser is connected none of them can
- * act, so the card is one line, "Connect to use", with a Show button that opens the controls anyway, disabled.
+ * act, so the card is one line, "Connect to use", with a chevron that opens the controls anyway, disabled.
  *
  * @author michael.morosov
  *
@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { AimOutlined } from '@ant-design/icons';
 import { Slider, Switch } from 'antd';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -61,7 +62,6 @@ export const LaserCard = (): ReactNode => {
       isCollapsed={isCollapsed}
       hintText={t(DEFAULT.MACHINE_LASER_COLLAPSED_HINT)}
       controlsId={controlsId}
-      toggleText={t(isCollapsed ? DEFAULT.MACHINE_CARD_SHOW : DEFAULT.MACHINE_CARD_HIDE)}
       toggleLabel={t(toggleLabelKey)}
       onToggle={() => setIsShownWhileDisconnected(isCollapsed)}
     />
@@ -73,7 +73,11 @@ export const LaserCard = (): ReactNode => {
   };
 
   return (
-    <Panel title={t(DEFAULT.MACHINE_LASER_TITLE)} headerActionComponent={collapseToggleComponent}>
+    <Panel
+      iconComponent={<AimOutlined />}
+      title={t(DEFAULT.MACHINE_LASER_TITLE)}
+      headerActionComponent={collapseToggleComponent}
+    >
       {isCollapsed ? undefined : (
         <div id={controlsId} className={styles.laserCard}>
           <div className={styles.powerField}>

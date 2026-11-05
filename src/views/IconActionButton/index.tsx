@@ -1,0 +1,40 @@
+/**
+ * An icon-only action: the button names itself with its label for assistive technology, and a tooltip shows the
+ * label, or why the action is off. The tooltip goes away on a click, so it never covers what the click opened.
+ *
+ * @author michael.morosov
+ *
+ * @since 2026-11-05
+ *
+ * @copyright michael.morosov - All rights reserved.
+ * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ */
+import { Button } from 'antd';
+import type { ButtonProps } from 'antd';
+import type { ReactNode } from 'react';
+import { DismissibleTooltip } from '../DismissibleTooltip';
+
+interface IconActionButtonProps extends Omit<ButtonProps, 'icon' | 'children' | 'aria-label' | 'disabled'> {
+  /** What the action does: the tooltip and the accessible name. */
+  labelText: string;
+  iconComponent: ReactNode;
+  /** Why the action is off; it replaces the label in the tooltip and turns the button off. */
+  blockedReasonText?: string;
+  isDisabled?: boolean;
+}
+
+export const IconActionButton = (props: IconActionButtonProps): ReactNode => {
+  const { labelText, iconComponent, blockedReasonText, isDisabled = false, ...buttonProps } = props;
+
+  return (
+    <DismissibleTooltip title={blockedReasonText ?? labelText}>
+      <Button
+        {...buttonProps}
+        icon={iconComponent}
+        aria-label={labelText}
+        aria-description={blockedReasonText}
+        disabled={isDisabled || Boolean(blockedReasonText)}
+      />
+    </DismissibleTooltip>
+  );
+};

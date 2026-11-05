@@ -59,7 +59,7 @@
     padding: 0 var(--space-3);
   }
 
-  .secondaryItem:global(.ant-btn) {
+  .secondaryItem {
     display: none;
   }
 
@@ -78,9 +78,8 @@
   }
 }
 
-// At the narrowest widths (the 684 px window included) Import SVG keeps only its icon, so the app title and the
-// project name keep room to show. 46rem must match the AutosaveReadout styles.
-@media (width < 46rem) {
+// Narrow, Import SVG keeps only its icon, so the app title and the project name keep room beside the laser chip.
+@media (width < 62.5rem) {
   .compactHiddenLabel {
     @include accessibility.visually-hidden;
   }

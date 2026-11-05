@@ -41,11 +41,10 @@ describe(DesignPanel.name, () => {
     expect(document.querySelectorAll(DISABLED_REGION_SELECTOR)).toHaveLength(0);
   });
 
-  it('shows the objects section with an import button as an active control', () => {
+  it('leaves the SVG import to the top bar and the card on the bed', () => {
     renderDesignPanel(newStore());
 
-    expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toBeEnabled();
-    expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL }).closest(DISABLED_REGION_SELECTOR)).toBeNull();
+    expect(screen.queryByRole('button', { name: IMPORT_SVG_LABEL })).not.toBeInTheDocument();
   });
 
   it('leaves the Cut check out of the Design view', () => {

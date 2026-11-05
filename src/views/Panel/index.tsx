@@ -15,18 +15,23 @@ import styles from './styles.module.scss';
 
 interface PanelProps {
   title: string;
+  /** The icon before the title. */
+  iconComponent?: ReactNode;
   /** The content below the heading; none leaves the section at its heading line. */
   children?: ReactNode;
   headerActionComponent?: ReactNode;
 }
 
-export const Panel = ({ title, children, headerActionComponent }: PanelProps): ReactNode => {
+export const Panel = ({ title, iconComponent, children, headerActionComponent }: PanelProps): ReactNode => {
   const headingId: string = useId();
 
   return (
     <section className={styles.panel} aria-labelledby={headingId}>
       <header className={children ? [styles.header, styles.headerAboveBody].join(' ') : styles.header}>
-        <h2 id={headingId} className={styles.title}>{title}</h2>
+        <h2 id={headingId} className={styles.title}>
+          {iconComponent && <span className={styles.icon} aria-hidden>{iconComponent}</span>}
+          {title}
+        </h2>
         {headerActionComponent}
       </header>
       {children && <div className={styles.body}>{children}</div>}

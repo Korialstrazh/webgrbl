@@ -12,7 +12,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { BookOutlined, RightOutlined } from '@ant-design/icons';
-import { Button, Tooltip } from 'antd';
+import { Button } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,7 @@ import type { Material } from '../../utils/materials/interfaces/Material';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectActiveMaterial, selectActiveMaterialPresetCount } from '../../utils/states/material.selectors';
+import { IconActionButton } from '../../views/IconActionButton';
 import { MaterialLibraryDrawer } from '../MaterialLibraryDrawer';
 import { ProjectMaterialSelect } from '../ProjectMaterialSelect';
 import styles from './styles.module.scss';
@@ -65,16 +66,12 @@ export const MaterialSection = (): ReactNode => {
     <div className={styles.materialSection}>
       <div className={styles.selectRow}>
         <ProjectMaterialSelect />
-        <Tooltip title={t(DEFAULT.MATERIAL_SECTION_OPEN_LIBRARY)}>
-          <Button
-            className={styles.libraryButton}
-            icon={<BookOutlined />}
-            aria-label={t(DEFAULT.MATERIAL_SECTION_OPEN_LIBRARY)}
-            onClick={() => openLibrary(undefined)}
-          >
-            {t(DEFAULT.MATERIAL_SECTION_LIBRARY)}
-          </Button>
-        </Tooltip>
+        {/* Its tooltip goes on the click: left open it would cover the drawer and take the drawer's Escape. */}
+        <IconActionButton
+          labelText={t(DEFAULT.MATERIAL_SECTION_OPEN_LIBRARY)}
+          iconComponent={<BookOutlined />}
+          onClick={() => openLibrary(undefined)}
+        />
       </div>
       <Button
         className={styles.presetSummary}

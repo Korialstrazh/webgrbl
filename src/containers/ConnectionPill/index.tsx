@@ -11,7 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { DownOutlined } from '@ant-design/icons';
+import { ApiOutlined, DownOutlined } from '@ant-design/icons';
 import { useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -93,7 +93,10 @@ export const ConnectionPill = (): ReactNode => {
           <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
         )}
         {isConnectOffered(connectionStatus) && (
-          <span className={styles.connectVerb}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
+          <span className={styles.connectVerb}>
+            <ApiOutlined aria-hidden="true" />
+            {` ${t(DEFAULT.CONNECTION_CONNECT_MENU)}`}
+          </span>
         )}
         <DownOutlined className={styles.caret} aria-hidden="true" />
       </button>

@@ -10,7 +10,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Layout } from 'antd';
+import { AppstoreOutlined, BgColorsOutlined, BlockOutlined, GroupOutlined } from '@ant-design/icons';
+import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,7 @@ import type { BedViewMode } from '../../utils/bed/bed.view.constants';
 import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedViewMode } from '../../utils/states/bed.view.state';
+import { IconActionButton } from '../../views/IconActionButton';
 import { Panel } from '../../views/Panel';
 import { AddTestSampleButton } from '../AddTestSampleButton';
 import { CutCheckPanel } from '../CutCheckPanel';
@@ -46,25 +48,29 @@ export const DesignPanel = (): ReactNode => {
     >
       {isThreeDView && <CutCheckPanel />}
       {isDesignView && (
-        <Panel title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
+        <Panel iconComponent={<AppstoreOutlined />} title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
           <MaterialSection />
         </Panel>
       )}
       <Panel
+        iconComponent={<BlockOutlined />}
         title={t(DEFAULT.DESIGN_LAYERS_TITLE)}
         headerActionComponent={
-          <Button size={ANTD_BUTTON_SIZE_SMALL} onClick={() => setIsPaletteDialogOpen(true)}>
-            {t(DEFAULT.LAYERS_OPEN_PALETTE)}
-          </Button>
+          <span className={styles.layersActions}>
+            {isDesignView && <AddTestSampleButton isIconOnly />}
+            <IconActionButton
+              size={ANTD_BUTTON_SIZE_SMALL}
+              labelText={t(DEFAULT.LAYERS_OPEN_PALETTE)}
+              iconComponent={<BgColorsOutlined />}
+              onClick={() => setIsPaletteDialogOpen(true)}
+            />
+          </span>
         }
       >
-        <div className={styles.layersContent}>
-          <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
-          {isDesignView && <AddTestSampleButton />}
-        </div>
+        <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
       </Panel>
       {!isThreeDView && (
-        <Panel title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>
+        <Panel iconComponent={<GroupOutlined />} title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>
           <ObjectsSection />
         </Panel>
       )}

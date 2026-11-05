@@ -12,15 +12,17 @@ BED_ARIA_HEAD_OUTSIDE;Laser head at X {{x}}, Y {{y}} (work coordinates), outside
 BED_ARIA_LABEL;Machine bed, {{width}} by {{height}} mm
 BED_ARIA_WORK_ORIGIN;Work zero at X {{x}}, Y {{y}} (work coordinates)
 BED_ARIA_WORK_ORIGIN_OUTSIDE;Work zero at X {{x}}, Y {{y}} (work coordinates), outside the bed
-BED_COLOUR_DARK_NOTE;A very dark bed hides black artwork.
+BED_COLOUR_DARK_NOTE;On a dark bed, artwork gets a thin light rim so black stays visible.
 BED_COLOUR_LABEL;Bed colour
+BED_COLOUR_PRESET_CHARCOAL;Charcoal (default)
 BED_COLOUR_PRESET_DARK_GREY;Dark grey
-BED_COLOUR_PRESET_GREY;Grey (default)
+BED_COLOUR_PRESET_GREY;Grey
 BED_COLOUR_PRESET_LIGHT_GREY;Light grey
 BED_COLOUR_PRESET_PLYWOOD;Plywood
 BED_COLOUR_PRESET_WHITE;White
 BED_COLOUR_PRESETS;Presets
 BED_COLOUR_RESET;Reset to default
+BED_EMPTY_DROP_HINT;Drop an SVG here
 BED_MORE_TOOLS_LABEL;More bed tools, coming in a later release
 BED_NO_MACHINE;Connect a machine to see its bed
 BED_OBJECTS_LABEL;Design objects: arrow keys move the selection, Delete removes it
@@ -154,6 +156,8 @@ FRAME_RUN_STATUS_FINISHING;Framing
 FRAME_RUN_STATUS_INTERRUPTED;Frame stopped before the end
 FRAME_RUN_STATUS_PAUSED;Framing: paused
 FRAME_RUN_STATUS_SENDING;Framing
+FRAME_SETTINGS_HIDE;Hide frame settings
+FRAME_SETTINGS_SHOW;Show frame settings
 FRAME_SPEED_LABEL;Frame speed (mm/min)
 FRAME_START_BLOCKED_BED_OVERRUN;The frame would leave the bed.
 FRAME_START_BLOCKED_LASER_MODE;Laser mode ($32=1) must be confirmed on to frame a job.
@@ -241,6 +245,18 @@ JOB_START_CONFIRM_CANCEL;Cancel
 JOB_START_CONFIRM_DESCRIPTION;Check the material, focus and work zero. Keep protective glasses on and stay with the machine.
 JOB_START_CONFIRM_OK;Start and fire
 JOB_START_CONFIRM_TITLE;Start the job? The laser will fire.
+LASER_STATE_FIRING;Power on
+LASER_STATE_FIRING_HINT;The laser reports power above zero. It may be firing.
+LASER_STATE_JOB_RUNNING;Job running
+LASER_STATE_JOB_RUNNING_HINT;A job is running. The laser can fire at any moment.
+LASER_STATE_NOT_CONNECTED;No link
+LASER_STATE_NOT_CONNECTED_HINT;No laser is connected, so its state is unknown.
+LASER_STATE_POINTER_ON;Pointer on
+LASER_STATE_POINTER_ON_HINT;The laser pointer is firing at low power.
+LASER_STATE_POWER_UNKNOWN;Power unknown
+LASER_STATE_POWER_UNKNOWN_HINT;The laser has not reported its power.
+LASER_STATE_ZERO_POWER;0 power
+LASER_STATE_ZERO_POWER_HINT;The last report from the laser shows zero power.
 LAYER_MODE_FILL;Fill
 LAYER_MODE_LINE;Line
 LAYER_POWER_PERCENT;{{percent}} %
@@ -250,6 +266,8 @@ LAYER_SETTINGS_BAR_BLACK;Black: {{power}}
 LAYER_SETTINGS_BAR_LABEL;Power from black to white
 LAYER_SETTINGS_BAR_WHITE;White: {{power}}
 LAYER_SETTINGS_EDIT_PALETTE;Edit palette…
+LAYER_SETTINGS_HELP;Line follows the shapes, Fill scans across them. More power, less speed or more passes burn deeper.
+LAYER_SETTINGS_HELP_LABEL;About these settings
 LAYER_SETTINGS_LINE_INTERVAL;Line interval (mm)
 LAYER_SETTINGS_MAX_POWER;Max power (%)
 LAYER_SETTINGS_MIN_POWER;Min power (%)
@@ -334,7 +352,7 @@ MACHINE_PROFILE_ERROR_S_VALUE_MAX_INVALID;Maximum S value must be a whole number
 MACHINE_PROFILE_ERROR_WORK_AREA_X_INVALID;Work area width must be greater than 0 and at most {{max}} mm
 MACHINE_PROFILE_ERROR_WORK_AREA_Y_INVALID;Work area height must be greater than 0 and at most {{max}} mm
 MACHINE_PROFILES_ACTIVE;Active
-MACHINE_PROFILES_DELETE;Delete
+MACHINE_PROFILES_DELETE;Delete {{name}}
 MACHINE_PROFILES_DELETE_CANCEL;Cancel
 MACHINE_PROFILES_DELETE_CONFIRM;Delete the profile {{name}} and its material presets?
 MACHINE_PROFILES_DELETE_LAST_HINT;Keep at least one machine profile. Add another before deleting this one.
@@ -356,7 +374,7 @@ MACHINE_PROFILES_IMPORT;Import...
 MACHINE_PROFILES_IMPORT_FILE;Import profiles file
 MACHINE_PROFILES_LASER_MODE_OFF;This laser reports laser mode off ($32=0), so it may burn spots where it slows down. Send $32=1 in the console to turn it on.
 MACHINE_PROFILES_LIST;Profiles
-MACHINE_PROFILES_NEW;+ New profile
+MACHINE_PROFILES_NEW;New profile
 MACHINE_PROFILES_ORIGIN_BACK_LEFT;Back left
 MACHINE_PROFILES_ORIGIN_BACK_RIGHT;Back right
 MACHINE_PROFILES_ORIGIN_FRONT_LEFT;Front left
@@ -369,7 +387,7 @@ MACHINE_PROFILES_READ_SUMMARY;Read from the laser. Press Save to keep these valu
 MACHINE_PROFILES_READ_VALUE;{{label}}: {{value}}
 MACHINE_PROFILES_READ_YES;yes
 MACHINE_PROFILES_SAVE;Save
-MACHINE_PROFILES_SET_ACTIVE;Set active
+MACHINE_PROFILES_SET_ACTIVE;Make {{name}} active
 MACHINE_PROFILES_TITLE;Machine profiles
 MACHINE_START_JOB;Start job
 MACHINE_START_JOB_TITLE;Job
@@ -482,7 +500,7 @@ OBJECT_WARNING_TEXT;Text is not converted to paths. In Inkscape use Path > Objec
 OBJECT_WARNING_UNREADABLE;The drawing could not be read, so nothing of it burns. Import the SVG again.
 OBJECT_WARNING_USE_LIMIT;The design repeats too many elements, so some repeated parts are left out.
 OBJECTS_DELETE;Delete {{name}}
-OBJECTS_EMPTY_HINT;No objects yet. Import an SVG or drop one on the bed.
+OBJECTS_EMPTY_HINT;Nothing on the bed yet.
 OBJECTS_FIELD_HEIGHT;Height
 OBJECTS_FIELD_ROTATION;Rotation
 OBJECTS_FIELD_WIDTH;Width
@@ -523,13 +541,14 @@ PALETTE_ERROR_SPEED_INVALID;Speed must be from {{min}} to {{max}} mm/min
 PALETTE_EXPORT;Export for Inkscape
 PALETTE_FIELD_COLOUR;Colour
 PALETTE_FIELD_NAME;Name
+PALETTE_INKSCAPE_HELP;Using the file in Inkscape
 PALETTE_INKSCAPE_HINT;To use the exported file in Inkscape, put it in its palettes folder:
 PALETTE_INKSCAPE_PATH_LINUX;Linux: ~/.config/inkscape/palettes/
 PALETTE_INKSCAPE_PATH_WINDOWS;Windows: %APPDATA%\inkscape\palettes\
 PALETTE_LIST;Palette colours
 PALETTE_MOVE_DOWN;Move {{name}} down
 PALETTE_MOVE_UP;Move {{name}} up
-PALETTE_NEW;+ New colour
+PALETTE_NEW;New colour
 PALETTE_RESET;Reset to defaults
 PALETTE_RESET_CANCEL;Cancel
 PALETTE_RESET_CONFIRM;Replace the whole palette with the default colours? Your changes to the palette are lost.
@@ -605,6 +624,7 @@ TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}
 TOAST_PROJECT_FILE_INVALID;The file is not a webgrbl project file. Nothing was opened.
 TOAST_PROJECT_SAVE_FAILED;The project could not be saved - the browser storage may be full. Your changes stay on screen, and the next change tries to save again.
 TOAST_PROJECT_STORAGE_FAILED;The saved projects could not be read or changed. Try again, or reload the page.
+TOAST_SAMPLE_ADDED;Test sample added
 TOAST_SAMPLE_WITHOUT_GRADIENT;The shading layer is off or not in Fill mode, so the test sample has its cut square only. Set that layer to Fill and on, then add the sample again for the gradient.
 TOAST_SVG_CONTENT_REMOVED;Parts of {{fileName}} were left out: embedded web content, linked images or external styles.
 TOAST_SVG_IMPORT_FAILED_NO_SIZE;{{fileName}} was skipped: it has no size (width and height or a viewBox).

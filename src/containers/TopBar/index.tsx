@@ -9,8 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ImportOutlined, RedoOutlined, UndoOutlined } from '@ant-design/icons';
-import { Button, Layout } from 'antd';
+import { ImportOutlined, RedoOutlined, ToolOutlined, UndoOutlined } from '@ant-design/icons';
+import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,8 +19,10 @@ import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
+import { IconActionButton } from '../../views/IconActionButton';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
+import { LaserStateChip } from '../LaserStateChip';
 import { MachineProfilesDialog } from '../MachineProfilesDialog';
 import { SvgImportButton } from '../SvgImportButton';
 import { AutosaveReadout } from './AutosaveReadout';
@@ -46,36 +48,39 @@ export const TopBar = (): ReactNode => {
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <ProjectMenu />
         <AutosaveReadout />
-        <Button
-          className={styles.secondaryItem}
-          type={ANTD_BUTTON_TYPE_TEXT}
-          onClick={() => setIsProfilesDialogOpen(true)}
-        >
-          {t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
-        </Button>
+        <span className={styles.secondaryItem}>
+          <IconActionButton
+            type={ANTD_BUTTON_TYPE_TEXT}
+            size={ANTD_BUTTON_SIZE_LARGE}
+            labelText={t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
+            iconComponent={<ToolOutlined />}
+            onClick={() => setIsProfilesDialogOpen(true)}
+          />
+        </span>
         <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.compactHiddenLabel} />
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_LARGE}
-          icon={<UndoOutlined />}
-          aria-label={t(DEFAULT.TOP_BAR_UNDO)}
-          disabled={!canUndo}
+          iconComponent={<UndoOutlined />}
+          labelText={t(DEFAULT.TOP_BAR_UNDO)}
+          isDisabled={!canUndo}
           onClick={() => dispatch(new ProjectUndoRequested())}
         />
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_LARGE}
-          icon={<RedoOutlined />}
-          aria-label={t(DEFAULT.TOP_BAR_REDO)}
-          disabled={!canRedo}
+          iconComponent={<RedoOutlined />}
+          labelText={t(DEFAULT.TOP_BAR_REDO)}
+          isDisabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
         <TopBarOverflowMenu onOpenMachineProfiles={() => setIsProfilesDialogOpen(true)} />
       </div>
       <div className={styles.trailing}>
         <AppUpdatePrompt />
+        <LaserStateChip />
         <ConnectionPill />
       </div>
       <MachineProfilesDialog isOpen={isProfilesDialogOpen} onClose={() => setIsProfilesDialogOpen(false)} />
