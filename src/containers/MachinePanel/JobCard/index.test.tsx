@@ -121,6 +121,8 @@ const getFirstLayerKey = (store: AppStore): string => {
 const START_JOB_NAME = 'Start job';
 const NOT_CONNECTED_REASON = 'Connect the laser to start a job.';
 const CONNECT_STEP_OPEN_LABEL = 'Connect: to do';
+const ACTIONS_NOT_CONNECTED_REASON = 'Connect the laser to start or frame.';
+const QUIET_BUTTON_CLASS = 'quiet';
 
 describe(JobCard.name, () => {
   afterEach(() => {
@@ -236,11 +238,24 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
   });
 
-  it('leaves a reason the readiness row shows to that row', async () => {
+  it('writes one shared line under Start and Frame while both wait for a connection', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
+    expect(screen.getByText(ACTIONS_NOT_CONNECTED_REASON)).toBeVisible();
     expect(screen.queryByText(NOT_CONNECTED_REASON)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: CONNECT_STEP_OPEN_LABEL })).toBeInTheDocument();
+  });
+
+  it('writes no reason line once Start and Frame can run', () => {
+    renderJobCard(newStartableJobStore());
+
+    expect(screen.queryByText(ACTIONS_NOT_CONNECTED_REASON)).not.toBeInTheDocument();
+  });
+
+  it('shows Export G-code as the quiet secondary action', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    expect(getExportButton().className).toContain(QUIET_BUTTON_CLASS);
   });
 
   it('has no Soon tag any more, since Frame job works', async () => {

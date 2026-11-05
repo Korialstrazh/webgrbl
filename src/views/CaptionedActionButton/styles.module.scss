@@ -15,6 +15,12 @@
   background-color: var(--color-surface-3);
 }
 
+// A secondary action keeps the plain border and no fill, so the filled main action stays the one that stands out.
+.captionedActionButton.quiet:global(.ant-btn-variant-outlined):not(:disabled) {
+  border-color: var(--color-border);
+  background-color: transparent;
+}
+
 .captionedActionButton:global(.ant-btn):disabled {
   border-style: dashed;
 }

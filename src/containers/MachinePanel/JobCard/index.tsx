@@ -1,9 +1,9 @@
 /**
  * The Job card: the layers that go to the laser, the time estimate and the job actions. Start job is the main
  * action, filled in the accent colour once it can run, and runs the job on the connected laser after a confirmation.
- * A readiness row says what is still open; other reasons Start job is off are written below it, and Export G-code gives
- * its reason in a tooltip. Frame job, with its settings behind a gear, traces
- * the outline of the job.
+ * A readiness row says what is still open, and why Start job and Frame job are off is written under the buttons;
+ * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
+ * gear, traces the outline of the job.
  *
  * @author michael.morosov
  *
@@ -37,6 +37,7 @@ import {
   selectJobRunStatus,
 } from '../../../utils/states/job.run.state';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
+import { selectFrameStartBlockedReasonKey } from '../../../utils/states/frame.start.blocked.reason.selector';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/states/project.document.state';
@@ -50,15 +51,10 @@ import { FrameControls } from './FrameControls';
 import { JobPauseButton } from './JobPauseButton';
 import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
+import { getJobActionBlockedReasonKeys } from './get.job.action.blocked.reason.keys';
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobRunStatusKey } from './get.job.run.status.key';
 import styles from './styles.module.scss';
-
-/** These reasons are what the readiness row already shows, so a sentence would only repeat it. */
-const READINESS_ROW_REASON_KEYS: readonly string[] = [
-  DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED,
-  DEFAULT.JOB_START_BLOCKED_NO_PROFILE,
-];
 
 interface JobCardProps {
   /** False where Start job is pinned elsewhere, as in the narrow layout. */
@@ -74,6 +70,11 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
 
   const jobStartBlockedReasonKey: string | undefined = useSelector(selectJobStartBlockedReasonKey);
+  const frameStartBlockedReasonKey: string | undefined = useSelector(selectFrameStartBlockedReasonKey);
+  const actionBlockedReasonKeys: string[] = getJobActionBlockedReasonKeys(
+    jobStartBlockedReasonKey,
+    frameStartBlockedReasonKey,
+  );
   const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
   const jobRunKind: JobRunKind = useSelector(selectJobRunKind);
@@ -113,12 +114,6 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
         {!isJobRunActive && <JobReadinessRow />}
         {isJobRunActive && <JobRunProgress />}
         <JobPauseButton />
-        {jobStartBlockedReasonKey && !READINESS_ROW_REASON_KEYS.includes(jobStartBlockedReasonKey) && (
-          <p className={styles.blockedReason}>
-            <InfoCircleOutlined aria-hidden />
-            {t(jobStartBlockedReasonKey)}
-          </p>
-        )}
         <FrameControls
           startActionComponent={isStartShown ? <JobStartButton /> : undefined}
           exportActionComponent={(
@@ -127,11 +122,19 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
               captionText={t(DEFAULT.MACHINE_JOB_EXPORT_CAPTION)}
               iconComponent={<DownloadOutlined />}
               blockedReasonText={gcodeExportBlockedReasonKey && t(gcodeExportBlockedReasonKey)}
+              isQuiet
               isDisabled={!isGcodeExportEnabled}
               onClick={() => dispatch(new GcodeExportRequested({ isWarningConfirmed: false }))}
             />
           )}
         />
+        {/* Disabled buttons take no focus, so their reasons are written out where keyboard and eye both reach. */}
+        {actionBlockedReasonKeys.map((reasonKey: string) => (
+          <p key={reasonKey} className={styles.blockedReason}>
+            <InfoCircleOutlined aria-hidden />
+            {t(reasonKey)}
+          </p>
+        ))}
       </div>
     </Panel>
   );

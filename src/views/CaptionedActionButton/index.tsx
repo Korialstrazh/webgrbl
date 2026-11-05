@@ -26,6 +26,8 @@ interface CaptionedActionButtonProps extends Omit<ButtonProps, 'icon' | 'childre
   isDisabled?: boolean;
   /** False on a main action: a name in a tooltip would cover what is around it. A blocked reason still shows. */
   isLabelTooltipShown?: boolean;
+  /** True on a secondary action beside a main one: a faint border, so it never draws the eye first. */
+  isQuiet?: boolean;
 }
 
 export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactNode => {
@@ -36,6 +38,7 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
     blockedReasonText,
     isDisabled = false,
     isLabelTooltipShown = true,
+    isQuiet = false,
     className,
     ...buttonProps
   } = props;
@@ -45,7 +48,7 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
     <DismissibleTooltip title={tooltipText} placement={ANTD_TOOLTIP_PLACEMENT_BOTTOM}>
       <Button
         {...buttonProps}
-        className={[styles.captionedActionButton, className].join(' ')}
+        className={[styles.captionedActionButton, isQuiet ? styles.quiet : undefined, className].join(' ')}
         aria-label={labelText}
         aria-description={blockedReasonText}
         disabled={isDisabled || Boolean(blockedReasonText)}
