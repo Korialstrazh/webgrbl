@@ -1,12 +1,24 @@
-// Holds the switch, and takes a click on it to close the name.
-.switchSlot {
-  display: inline-flex;
+// Each view is an icon over one word, so the switch explains itself without a hover.
+.viewSwitch :global(.ant-segmented-item-label) {
+  min-width: 3.25rem;
+  min-height: 2.75rem;
+  padding-inline: var(--space-1);
+  line-height: 1;
+  text-align: center;
 }
 
-// Each view is an icon alone, so it holds the full touch target itself.
-.viewSwitch :global(.ant-segmented-item-label) {
-  min-width: 2.75rem;
-  text-align: center;
+.viewOption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  align-items: center;
+  justify-content: center;
+  height: 2.75rem;
+  font-size: 1rem;
+}
+
+.caption {
+  font-size: 0.6875rem;
 }
 
 // The current view stands out from a hovered one by the accent, as the speed chips of the Toolpath view do.

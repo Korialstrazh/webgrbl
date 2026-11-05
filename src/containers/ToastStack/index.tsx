@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckCircleFilled, CloseCircleFilled, CloseOutlined, UndoOutlined, WarningFilled } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, CloseOutlined, WarningFilled } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { TFunction } from 'i18next';
 import type { ReactNode } from 'react';
@@ -26,6 +26,7 @@ import { TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import type { ToastSeverity } from '../../utils/states/toast.constants';
 import { ToastDismissed, selectToasts } from '../../utils/states/toast.state';
 import type { ToastStackProps } from './interfaces/ToastStackProps';
+import { UndoArrowIcon } from '../../views/UndoArrowIcon';
 import styles from './styles.module.scss';
 import { TOAST_STACK_TEST_ID } from './toast.stack.constants';
 
@@ -77,7 +78,7 @@ export const ToastStack = ({ isWide }: ToastStackProps): ReactNode => {
           {toast.isUndoOffered && (
             <Button
               size={ANTD_BUTTON_SIZE_SMALL}
-              icon={<UndoOutlined aria-hidden />}
+              icon={<UndoArrowIcon aria-hidden />}
               onClick={() => {
                 dispatch(new ProjectUndoRequested());
                 dispatch(new ToastDismissed({ toastId: toast.toastId }));

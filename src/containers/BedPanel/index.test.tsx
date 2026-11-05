@@ -274,7 +274,7 @@ describe(BedPanel.name, () => {
     expect(regionElement).not.toContainElement(screen.getByRole('radiogroup', { name: 'Bed view' }));
   });
 
-  it('shows the views and Fit as icons with accessible names and tooltips, not text', async () => {
+  it('shows the views as an icon over one word, and Fit as an icon with an accessible name', () => {
     renderPanel(newStore());
 
     for (const label of [DESIGN_VIEW_LABEL, TOOLPATH_VIEW_LABEL, '3D']) {
@@ -282,17 +282,13 @@ describe(BedPanel.name, () => {
       const option: HTMLElement | null = radio.closest('label');
 
       expect(option?.querySelector('.anticon')).not.toBeNull();
-      expect(option).not.toHaveTextContent(label);
+      expect(option).toHaveTextContent(label);
     }
 
     const fitButton: HTMLElement = screen.getByRole('button', { name: /^Fit the bed/ });
 
     expect(fitButton.querySelector('.anticon')).not.toBeNull();
     expect(fitButton).not.toHaveTextContent('Fit');
-
-    fireEvent.mouseEnter(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL }).closest('label') as HTMLElement);
-
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(DESIGN_VIEW_LABEL);
   });
 
   it('keeps the view switch in one fixed slot at the end of the header in all three views', () => {

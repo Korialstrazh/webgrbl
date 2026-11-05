@@ -11,6 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { FormatPainterOutlined } from '@ant-design/icons';
 import { Button, ColorPicker, Tooltip } from 'antd';
 import type { ColorPickerProps } from 'antd';
 import type { Color } from 'antd/es/color-picker';
@@ -88,6 +89,7 @@ export const BedColourPicker = (): ReactNode => {
     >
       <Tooltip title={labelText}>
         <Button className={styles.bedColourButton} aria-label={labelText}>
+          <FormatPainterOutlined aria-hidden />
           {/* A plain swatch of the current colour; only its fill changes at run time. */}
           <span
             className={styles.swatch}

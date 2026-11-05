@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ApiOutlined, BlockOutlined, CheckCircleFilled, ImportOutlined, ToolOutlined } from '@ant-design/icons';
+import { ApiOutlined, AppstoreOutlined, CheckCircleFilled, ImportOutlined, ToolOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -55,7 +55,7 @@ const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
   },
   {
     step: JOB_READINESS_STEP.MATERIAL,
-    iconComponent: <BlockOutlined aria-hidden />,
+    iconComponent: <AppstoreOutlined aria-hidden />,
     captionKey: DEFAULT.JOB_READINESS_MATERIAL,
     hintKey: DEFAULT.JOB_READINESS_MATERIAL_HINT,
   },
@@ -79,7 +79,7 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
   const captionText: string = t(captionKey);
 
   return (
-    <DismissibleTooltip title={t(hintKey)}>
+    <DismissibleTooltip title={isNextStep ? undefined : t(hintKey)}>
       <Button
         className={styles.step}
         type={isNextStep ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_TEXT}

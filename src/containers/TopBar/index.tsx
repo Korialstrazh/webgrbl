@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ImportOutlined, RedoOutlined, ToolOutlined, UndoOutlined } from '@ant-design/icons';
+import { ImportOutlined, ToolOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,8 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
 import { MachineProfilesDialogOpenChanged, selectIsMachineProfilesDialogOpen } from '../../utils/states/ui.workbench.state';
 import { IconActionButton } from '../../views/IconActionButton';
+import { RedoArrowIcon } from '../../views/RedoArrowIcon';
+import { UndoArrowIcon } from '../../views/UndoArrowIcon';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
 import { LaserStateChip } from '../LaserStateChip';
@@ -67,7 +69,7 @@ export const TopBar = (): ReactNode => {
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_LARGE}
-          iconComponent={<UndoOutlined />}
+          iconComponent={<UndoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_UNDO)}
           isDisabled={!canUndo}
           onClick={() => dispatch(new ProjectUndoRequested())}
@@ -75,7 +77,7 @@ export const TopBar = (): ReactNode => {
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_LARGE}
-          iconComponent={<RedoOutlined />}
+          iconComponent={<RedoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_REDO)}
           isDisabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}

@@ -17,18 +17,13 @@ import {
   ClockCircleOutlined,
   DownloadOutlined,
   InfoCircleOutlined,
-  PlayCircleFilled,
   ProfileOutlined,
 } from '@ant-design/icons';
-import { Button, Popconfirm } from 'antd';
-import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_DEFAULT, ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
-import { useOverlayRegistration } from '../../../utils/hooks/use.overlay.registration';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
@@ -37,21 +32,20 @@ import type { JobPauseControl } from '../../../utils/states/job.pause.control.co
 import { selectJobPauseControl } from '../../../utils/states/job.pause.control.selector';
 import type { JobRunKind } from '../../../utils/states/job.run.kind.constants';
 import {
-  JobStartRequested,
   selectIsJobRunActive,
   selectJobRunKind,
   selectJobRunStatus,
 } from '../../../utils/states/job.run.state';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
-import { selectFirstUnmetJobReadinessStep } from '../../../utils/states/job.readiness.selector';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/states/project.document.state';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
 import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.timeline.selectors';
 import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
-import { IconActionButton } from '../../../views/IconActionButton';
+import { CaptionedActionButton } from '../../../views/CaptionedActionButton';
 import { Panel } from '../../../views/Panel';
+import { JobStartButton } from '../../JobStartButton';
 import { FrameControls } from './FrameControls';
 import { JobPauseButton } from './JobPauseButton';
 import { JobReadinessRow } from './JobReadinessRow';
@@ -60,14 +54,18 @@ import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobRunStatusKey } from './get.job.run.status.key';
 import styles from './styles.module.scss';
 
-const JOB_START_CONFIRM_OVERLAY_ID = 'job-start-confirm';
 /** These reasons are what the readiness row already shows, so a sentence would only repeat it. */
 const READINESS_ROW_REASON_KEYS: readonly string[] = [
   DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED,
   DEFAULT.JOB_START_BLOCKED_NO_PROFILE,
 ];
 
-export const JobCard = (): ReactNode => {
+interface JobCardProps {
+  /** False where Start job is pinned elsewhere, as in the narrow layout. */
+  isStartShown?: boolean;
+}
+
+export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const layers: ProjectLayer[] = useSelector(selectProjectLayers);
@@ -85,19 +83,6 @@ export const JobCard = (): ReactNode => {
     JOB_PAUSED_CONTROLS.includes(pauseControl),
   );
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
-  const isReadinessComplete: boolean = !useSelector(selectFirstUnmetJobReadinessStep);
-  const isStartTheNextAction: boolean = isReadinessComplete && !jobStartBlockedReasonKey;
-  const [isStartConfirmOpen, setIsStartConfirmOpen] = useState<boolean>(false);
-
-  // Escape must only close the confirmation here, not also stop the machine.
-  useOverlayRegistration(JOB_START_CONFIRM_OVERLAY_ID, isStartConfirmOpen);
-
-  // A confirmation left open after the start got blocked would offer a button that does nothing.
-  useEffect(() => {
-    if (jobStartBlockedReasonKey) {
-      setIsStartConfirmOpen(false);
-    }
-  }, [jobStartBlockedReasonKey]);
 
   return (
     <Panel iconComponent={<ProfileOutlined />} title={t(DEFAULT.MACHINE_START_JOB_TITLE)}>
@@ -128,28 +113,6 @@ export const JobCard = (): ReactNode => {
         {!isJobRunActive && <JobReadinessRow />}
         {isJobRunActive && <JobRunProgress />}
         <JobPauseButton />
-        <Popconfirm
-          title={t(DEFAULT.JOB_START_CONFIRM_TITLE)}
-          description={t(DEFAULT.JOB_START_CONFIRM_DESCRIPTION)}
-          okText={t(DEFAULT.JOB_START_CONFIRM_OK)}
-          cancelText={t(DEFAULT.JOB_START_CONFIRM_CANCEL)}
-          okButtonProps={{ danger: true }}
-          disabled={!!jobStartBlockedReasonKey}
-          open={isStartConfirmOpen}
-          onOpenChange={setIsStartConfirmOpen}
-          onConfirm={() => dispatch(new JobStartRequested())}
-        >
-          <Button
-            block
-            type={isStartTheNextAction ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT}
-            size={ANTD_BUTTON_SIZE_LARGE}
-            icon={<PlayCircleFilled aria-hidden />}
-            disabled={!!jobStartBlockedReasonKey}
-            aria-description={jobStartBlockedReasonKey && t(jobStartBlockedReasonKey)}
-          >
-            {t(DEFAULT.MACHINE_START_JOB)}
-          </Button>
-        </Popconfirm>
         {jobStartBlockedReasonKey && !READINESS_ROW_REASON_KEYS.includes(jobStartBlockedReasonKey) && (
           <p className={styles.blockedReason}>
             <InfoCircleOutlined aria-hidden />
@@ -157,10 +120,11 @@ export const JobCard = (): ReactNode => {
           </p>
         )}
         <FrameControls
-          leadingActionComponent={(
-            <IconActionButton
-              size={ANTD_BUTTON_SIZE_LARGE}
+          startActionComponent={isStartShown ? <JobStartButton /> : undefined}
+          exportActionComponent={(
+            <CaptionedActionButton
               labelText={t(DEFAULT.MACHINE_JOB_EXPORT_GCODE)}
+              captionText={t(DEFAULT.MACHINE_JOB_EXPORT_CAPTION)}
               iconComponent={<DownloadOutlined />}
               blockedReasonText={gcodeExportBlockedReasonKey && t(gcodeExportBlockedReasonKey)}
               isDisabled={!isGcodeExportEnabled}

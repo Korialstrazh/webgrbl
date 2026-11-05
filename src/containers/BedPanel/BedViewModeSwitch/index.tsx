@@ -10,10 +10,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Segmented } from 'antd';
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ANTD_TOOLTIP_PLACEMENT_BOTTOM } from '../../../utils/antd.constants';
 import type { BedViewMode } from '../../../utils/bed/bed.view.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { BED_VIEW_MODE_OPTION_KEYS, BED_VIEW_MODE_SWITCH_NAME } from '../bed.toolbar.constants';
@@ -23,27 +21,23 @@ import styles from './styles.module.scss';
 
 export const BedViewModeSwitch = ({ viewMode, changeBedViewMode }: BedViewModeControls): ReactNode => {
   const { t } = useTranslation();
-  const [tooltipViewMode, setTooltipViewMode] = useState<BedViewMode | undefined>(undefined);
 
   return (
-    <div className={styles.switchSlot} onClickCapture={() => setTooltipViewMode(undefined)}>
-      <Segmented<BedViewMode>
-        className={styles.viewSwitch}
-        name={BED_VIEW_MODE_SWITCH_NAME}
-        aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
-        options={BED_VIEW_MODE_OPTION_KEYS.map(({ value, labelKey, IconComponent }: BedViewModeOptionKey) => ({
-          value,
-          label: <IconComponent aria-label={t(labelKey)} />,
-          tooltip: {
-            title: t(labelKey),
-            placement: ANTD_TOOLTIP_PLACEMENT_BOTTOM,
-            open: tooltipViewMode === value,
-            onOpenChange: (isOpen: boolean) => setTooltipViewMode(isOpen ? value : undefined),
-          },
-        }))}
-        value={viewMode}
-        onChange={changeBedViewMode}
-      />
-    </div>
+    <Segmented<BedViewMode>
+      className={styles.viewSwitch}
+      name={BED_VIEW_MODE_SWITCH_NAME}
+      aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}
+      options={BED_VIEW_MODE_OPTION_KEYS.map(({ value, labelKey, IconComponent }: BedViewModeOptionKey) => ({
+        value,
+        label: (
+          <span className={styles.viewOption}>
+            <IconComponent aria-hidden />
+            <span className={styles.caption}>{t(labelKey)}</span>
+          </span>
+        ),
+      }))}
+      value={viewMode}
+      onChange={changeBedViewMode}
+    />
   );
 };

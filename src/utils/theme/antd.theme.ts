@@ -70,6 +70,8 @@ export const ANTD_THEME: ThemeConfig = {
     colorBgBase: COLOR_BG,
     colorBgContainer: COLOR_SURFACE_1,
     colorBgElevated: COLOR_SURFACE_2,
+    // Tooltips share the dark surface of the popovers instead of antd's slate.
+    colorBgSpotlight: COLOR_SURFACE_3,
     colorBorder: COLOR_BORDER,
     colorText: COLOR_TEXT,
     colorTextSecondary: COLOR_TEXT_MUTED,

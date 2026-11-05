@@ -4,19 +4,62 @@
   gap: var(--space-3);
 }
 
-// Three equal icon buttons in one row.
+// The job actions in one row: Start takes most room, then Frame with its gear, then Export.
 .actions {
   display: flex;
   gap: var(--space-2);
 
-  > span {
-    display: block;
-    flex: 1;
-  }
-
   :global(.ant-btn) {
     width: 100%;
   }
+
+  span {
+    display: block;
+  }
+
+  :global(.ant-btn) span {
+    display: inline;
+  }
+}
+
+.startAction {
+  flex: 1.5 1 0;
+  min-width: 0;
+}
+
+.exportAction {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+// Frame and its gear read as one split button.
+.frameSplit {
+  display: flex;
+  flex: 1.4 1 0;
+  min-width: 0;
+
+  > span:first-child {
+    flex: 1 1 0;
+    min-width: 0;
+
+    :global(.ant-btn) {
+      border-start-end-radius: 0;
+      border-end-end-radius: 0;
+    }
+  }
+
+  > span:last-child {
+    flex: none;
+    margin-inline-start: -1px;
+  }
+}
+
+.frameGear:global(.ant-btn) {
+  width: 1.75rem;
+  height: 3.25rem;
+  padding: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
 }
 
 .settings {

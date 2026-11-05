@@ -10,13 +10,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ExpandOutlined, SettingOutlined } from '@ant-design/icons';
+import { SettingOutlined } from '@ant-design/icons';
 import { Alert, Select } from 'antd';
-import { useId, useState } from 'react';
+import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_ALERT_TYPE_WARNING, ANTD_BUTTON_SIZE_LARGE } from '../../../../utils/antd.constants';
+import { ANTD_ALERT_TYPE_WARNING } from '../../../../utils/antd.constants';
 import {
   FRAME_DOT_WATTS,
   FRAME_EDGE,
@@ -52,7 +52,10 @@ import {
   selectFrameMarginMm,
 } from '../../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../../utils/states/new.store';
+import { FrameSettingsOpenChanged, selectIsFrameSettingsOpen } from '../../../../utils/states/ui.workbench.state';
 import { getJobEstimateText } from '../../../../utils/toolpath/get.job.estimate.text';
+import { CaptionedActionButton } from '../../../../views/CaptionedActionButton';
+import { FrameTraceIcon } from '../../../../views/FrameTraceIcon';
 import { IconActionButton } from '../../../../views/IconActionButton';
 import { FrameNumberInput } from './FrameNumberInput';
 import styles from './styles.module.scss';
@@ -71,11 +74,13 @@ const FRAME_EDGE_TEXT_KEYS: Record<FrameEdge, string> = {
 };
 
 interface FrameControlsProps {
-  /** Another job action that shares the row of the frame buttons. */
-  leadingActionComponent?: ReactNode;
+  /** Start job, first in the row of job actions; absent where it is pinned elsewhere. */
+  startActionComponent?: ReactNode;
+  /** Export G-code, last in the row of job actions. */
+  exportActionComponent?: ReactNode;
 }
 
-export const FrameControls = ({ leadingActionComponent }: FrameControlsProps): ReactNode => {
+export const FrameControls = ({ startActionComponent, exportActionComponent }: FrameControlsProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
@@ -88,29 +93,33 @@ export const FrameControls = ({ leadingActionComponent }: FrameControlsProps): R
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const latestRunKind: JobRunKind = useSelector(selectJobRunKind);
   const isFrameAlarmed: boolean = useSelector(selectIsFrameAlarmed);
-  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const isSettingsOpen: boolean = useSelector(selectIsFrameSettingsOpen);
   const settingsId: string = useId();
   const isAlarmShown: boolean = isFrameAlarmed && latestRunKind === JOB_RUN_KIND.FRAME && !isJobRunActive;
 
   return (
     <div className={styles.frameControls}>
       <div className={styles.actions}>
-        {leadingActionComponent}
-        <IconActionButton
-          size={ANTD_BUTTON_SIZE_LARGE}
-          labelText={t(DEFAULT.MACHINE_JOB_FRAME)}
-          iconComponent={<ExpandOutlined />}
-          blockedReasonText={blockedReasonKey && t(blockedReasonKey)}
-          onClick={() => dispatch(new FrameStartRequested())}
-        />
-        <IconActionButton
-          size={ANTD_BUTTON_SIZE_LARGE}
-          labelText={t(isSettingsOpen ? DEFAULT.FRAME_SETTINGS_HIDE : DEFAULT.FRAME_SETTINGS_SHOW)}
-          iconComponent={<SettingOutlined />}
-          aria-expanded={isSettingsOpen}
-          aria-controls={settingsId}
-          onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-        />
+        {startActionComponent && <div className={styles.startAction}>{startActionComponent}</div>}
+        {/* The gear is joined to Frame: it holds the settings of the frame, not of the job. */}
+        <div className={styles.frameSplit}>
+          <CaptionedActionButton
+            labelText={t(DEFAULT.MACHINE_JOB_FRAME)}
+            captionText={t(DEFAULT.MACHINE_JOB_FRAME_CAPTION)}
+            iconComponent={<FrameTraceIcon />}
+            blockedReasonText={blockedReasonKey && t(blockedReasonKey)}
+            onClick={() => dispatch(new FrameStartRequested())}
+          />
+          <IconActionButton
+            className={styles.frameGear}
+            labelText={t(isSettingsOpen ? DEFAULT.FRAME_SETTINGS_HIDE : DEFAULT.FRAME_SETTINGS_SHOW)}
+            iconComponent={<SettingOutlined />}
+            aria-expanded={isSettingsOpen}
+            aria-controls={settingsId}
+            onClick={() => dispatch(new FrameSettingsOpenChanged({ isFrameSettingsOpen: !isSettingsOpen }))}
+          />
+        </div>
+        <div className={styles.exportAction}>{exportActionComponent}</div>
       </div>
       {isSettingsOpen && (
         <div id={settingsId} className={styles.settings}>
