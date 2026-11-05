@@ -1,6 +1,6 @@
 /**
  * The form of one machine profile. It edits a draft and stores it only on Save, after the profile checks pass; a
- * failed check shows its message under the field. "Read from connected laser" fills the draft with the values the
+ * failed check shows its message under the field. "Read from laser" fills the draft with the values the
  * laser reports validly and shows what was read, with a warning when the laser reports laser mode off.
  *
  * @author michael.morosov
