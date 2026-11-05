@@ -1,8 +1,8 @@
 /**
- * The Cut check of the 3D view: the part counts with a small Estimate or Guess badge whose tooltip explains it, one
- * compact icon row per group of warnings with a button to that layer's settings, and a list with one row per part that
- * selects it, cut down to the selected row when it is long so Layers stays near. Without a current model it is the
- * heading only, as the 3D view says why, and it shows no old parts. Warnings never block export.
+ * The Cut check of the 3D view: the part counts as status icons with a count, a small Estimate or Guess badge whose
+ * tooltip explains it, one compact icon row per group of warnings with a button to that layer's settings, and a list
+ * with one row per part that selects it and carries one status icon, cut down to the selected row when it is long so
+ * Layers stays near. Without a current model it is the heading only, as the 3D view says why, and it shows no old parts. Warnings never block export.
  *
  * @author michael.morosov
  *
@@ -17,11 +17,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  ANTD_BUTTON_TYPE_TEXT,
-  ANTD_TAG_COLOR_SUCCESS,
-  ANTD_TAG_COLOR_WARNING,
-} from '../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { BURN_PART_STATUS } from '../../utils/burn.model/burn.model.constants';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../utils/burn.model/interfaces/BurnPart';
@@ -42,8 +38,11 @@ import { selectProjectLayers } from '../../utils/states/project.document.state';
 import { Panel } from '../../views/Panel';
 import { BurnPartRowLift } from './BurnPartRowLift';
 import { CutCheckWarningRow } from './CutCheckWarningRow';
+import { PartStatusMark } from './PartStatusMark';
+import { getCutCheckSummaryCounts } from './get.cut.check.summary.counts';
 import { getCutCheckListScrollTopPx } from './get.cut.check.list.scroll.top.px';
 import { getCutCheckWarningGroups } from './get.cut.check.warning.groups';
+import type { CutCheckSummaryCount } from './interfaces/CutCheckSummaryCount';
 import type { CutCheckWarningGroup } from './interfaces/CutCheckWarningGroup';
 import styles from './styles.module.scss';
 
@@ -68,7 +67,6 @@ const getScrollingAncestor = (element: HTMLElement): HTMLElement | undefined => 
   return undefined;
 };
 
-const getSummaryCountClassName = (count: number): string | undefined => (count ? undefined : styles.emptyCount);
 
 export const CutCheckPanel = (): ReactNode => {
   const { t } = useTranslation();
@@ -95,7 +93,8 @@ export const CutCheckPanel = (): ReactNode => {
     return null;
   }
 
-  const { freePartCount, borderlinePartCount, attachedPartCount, warnings, isGuess } = model.cutCheck;
+  const { warnings, isGuess } = model.cutCheck;
+  const summaryCounts: CutCheckSummaryCount[] = getCutCheckSummaryCounts(model.cutCheck);
   const warningGroups: CutCheckWarningGroup[] = getCutCheckWarningGroups(warnings);
   const getLayerName = (layerKey: string): string => getLayerNameByKey(layerKey, projectLayers, paletteEntries);
   const isPartListLong: boolean = model.parts.length > PART_LIST_FULL_ROW_LIMIT;
@@ -111,24 +110,16 @@ export const CutCheckPanel = (): ReactNode => {
       <div className={styles.cutCheckPanel}>
         <div className={styles.summary}>
           <strong>{t(DEFAULT.CUT_CHECK_PART_COUNT, { count: model.parts.length })}</strong>
-          <Tag
-            className={getSummaryCountClassName(freePartCount)}
-            color={freePartCount ? ANTD_TAG_COLOR_SUCCESS : undefined}
-          >
-            {t(DEFAULT.CUT_CHECK_SUMMARY_FREE, { count: freePartCount })}
-          </Tag>
-          <Tag
-            className={getSummaryCountClassName(borderlinePartCount)}
-            color={borderlinePartCount ? ANTD_TAG_COLOR_WARNING : undefined}
-          >
-            {t(DEFAULT.CUT_CHECK_SUMMARY_MAY_STAY_ATTACHED, { count: borderlinePartCount })}
-          </Tag>
-          <Tag
-            className={getSummaryCountClassName(attachedPartCount)}
-            color={attachedPartCount ? ANTD_TAG_COLOR_WARNING : undefined}
-          >
-            {t(DEFAULT.CUT_CHECK_SUMMARY_ATTACHED, { count: attachedPartCount })}
-          </Tag>
+          {summaryCounts.map(({ status, count, textKey }: CutCheckSummaryCount) => (
+            <Tag key={status} className={styles.countTag}>
+              <PartStatusMark
+                status={status}
+                count={count}
+                labelText={t(textKey, { count })}
+                isMuted={!count}
+              />
+            </Tag>
+          ))}
           <Tooltip title={accuracyNoteText}>
             <Tag
               className={styles.accuracyTag}
@@ -165,9 +156,7 @@ export const CutCheckPanel = (): ReactNode => {
               >
                 <span>{t(DEFAULT.CUT_CHECK_PART_ROW, { part: id })}</span>
                 <BurnPartRowLift partId={id} />
-                <Tag color={status === BURN_PART_STATUS.FREE ? undefined : ANTD_TAG_COLOR_WARNING}>
-                  {t(PART_STATUS_TEXT_KEYS[status])}
-                </Tag>
+                <PartStatusMark status={status} labelText={t(PART_STATUS_TEXT_KEYS[status])} />
               </Button>
             </li>
           ))}

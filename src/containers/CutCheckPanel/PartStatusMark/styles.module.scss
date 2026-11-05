@@ -1,0 +1,30 @@
+@use '../../../styles/accessibility' as accessibility;
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.icon {
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.free .icon {
+  color: var(--color-success);
+}
+
+.borderline .icon,
+.notThrough .icon {
+  color: var(--color-warning);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.label {
+  @include accessibility.visually-hidden;
+}

@@ -1,6 +1,6 @@
 /**
- * Gets the three short cells of a layer row: power, speed and passes. The units stay in the row's tooltip, so the three
- * values always fit.
+ * Gets the three short cells of a layer row: power, speed and passes as bare numbers. The units stay in the tooltips and
+ * the spoken summary, so the row reads as icons and values.
  *
  * @author michael.morosov
  *
@@ -16,5 +16,5 @@ import type { LayerSummarySettings } from './interfaces/LayerSummarySettings';
 export const getLayerValueCells = (t: TFunction, settings: LayerSummarySettings): string[] => [
   t(DEFAULT.LAYERS_CELL_POWER, { power: settings.maxPowerPercent }),
   t(DEFAULT.LAYERS_CELL_SPEED, { speed: settings.speedMmPerMin }),
-  t(DEFAULT.LAYERS_SUMMARY_PASSES, { passes: settings.passes }),
+  t(DEFAULT.LAYERS_CELL_PASSES, { passes: settings.passes }),
 ];

@@ -130,6 +130,8 @@ describe(CutCheckPanel.name, () => {
     expect(getPartRow(FREE_PART_ID)).toHaveTextContent('Free');
     expect(getPartRow(BORDERLINE_PART_ID)).toHaveTextContent('May stay attached');
     expect(getPartRow(ATTACHED_PART_ID)).toHaveTextContent('Attached');
+    // One icon per row stands for the status; no row repeats a visible badge.
+    expect(getPartRow(BORDERLINE_PART_ID).querySelector('.ant-tag')).toBeNull();
 
     fireEvent.click(getPartRow(BORDERLINE_PART_ID));
 

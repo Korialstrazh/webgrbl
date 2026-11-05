@@ -11,13 +11,23 @@ describe(LayerValueCells.name, () => {
       <LayerValueCells settings={{ mode: LAYER_MODE.LINE, maxPowerPercent: 100, speedMmPerMin: 300, passes: 3 }} />,
     );
 
-    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByText('100')).toBeInTheDocument();
     expect(screen.getByText('300')).toBeInTheDocument();
-    expect(screen.getByText(`3${MULTIPLICATION_SIGN}`)).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText(SUMMARY_TEXT)).toBeInTheDocument();
 
     fireEvent.mouseEnter(screen.getByText('300'));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Speed (mm/min)');
+  });
+
+  it('names the power unit in its tooltip, since the cell shows the bare number', async () => {
+    render(
+      <LayerValueCells settings={{ mode: LAYER_MODE.LINE, maxPowerPercent: 100, speedMmPerMin: 300, passes: 3 }} />,
+    );
+
+    fireEvent.mouseEnter(screen.getByText('100'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Power (%)');
   });
 });
