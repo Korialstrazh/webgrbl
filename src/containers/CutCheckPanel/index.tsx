@@ -2,7 +2,8 @@
  * The Cut check of the 3D view: the part counts as status icons with a count, a small Estimate or Guess badge whose
  * tooltip explains it, one compact icon row per group of warnings with a button to that layer's settings, and a list
  * with one row per part that selects it and carries one status icon, cut down to the selected row when it is long so
- * Layers stays near. Without a current model it is the heading only, as the 3D view says why, and it shows no old parts. Warnings never block export.
+ * Layers stays near. Without a current model it is the heading only, as the 3D view says why, and it shows no old
+ * parts. Warnings never block export.
  *
  * @author michael.morosov
  *
@@ -66,7 +67,6 @@ const getScrollingAncestor = (element: HTMLElement): HTMLElement | undefined => 
 
   return undefined;
 };
-
 
 export const CutCheckPanel = (): ReactNode => {
   const { t } = useTranslation();

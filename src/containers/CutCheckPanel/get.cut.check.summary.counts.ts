@@ -22,5 +22,9 @@ export const getCutCheckSummaryCounts = (cutCheck: CutCheckPartCounts): CutCheck
     count: cutCheck.borderlinePartCount,
     textKey: DEFAULT.CUT_CHECK_SUMMARY_MAY_STAY_ATTACHED,
   },
-  { status: BURN_PART_STATUS.NOT_THROUGH, count: cutCheck.attachedPartCount, textKey: DEFAULT.CUT_CHECK_SUMMARY_ATTACHED },
+  {
+    status: BURN_PART_STATUS.NOT_THROUGH,
+    count: cutCheck.attachedPartCount,
+    textKey: DEFAULT.CUT_CHECK_SUMMARY_ATTACHED,
+  },
 ];

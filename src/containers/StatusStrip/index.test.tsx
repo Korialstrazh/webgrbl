@@ -78,7 +78,7 @@ describe(StatusStrip.name, () => {
     expect(screen.queryByText(SOON_LABEL)).not.toBeInTheDocument();
   });
 
-  it('shows the bed point under the pointer once the next frame comes, and hides it while the pointer is off the bed', () => {
+  it('shows the bed point under the pointer once the next frame comes, hiding it off the bed', () => {
     const animationFrames: AnimationFrameStub = new AnimationFrameStub();
 
     animationFrames.install();
