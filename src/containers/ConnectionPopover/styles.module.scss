@@ -1,26 +1,29 @@
 .connectionPopover {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  min-width: 17rem;
+  gap: var(--space-2);
+  min-width: 20rem;
 }
 
 .field {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  align-items: center;
+  gap: var(--space-2);
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }
 
 .fieldLabel {
   display: inline-flex;
+  flex: 0 0 5rem;
   align-items: center;
   gap: var(--space-1);
 }
 
 .portRow {
   display: flex;
+  flex: 1;
+  min-width: 0;
   gap: var(--space-1);
 }
 
