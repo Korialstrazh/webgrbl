@@ -15,6 +15,8 @@ export interface ProfileListProps {
   profilesDocument: MachineProfilesDocument;
   /** Id of the profile in the form; it may be a new profile that is not stored yet. */
   editedProfileId: string;
+  /** The name of the new profile in the form while it is not stored yet; it gets a row of its own. */
+  unsavedProfileName?: string;
   /** Called with the id of the profile the user picks for editing. */
   onSelect: (profileId: string) => void;
   /** Called when the user starts a new profile. */

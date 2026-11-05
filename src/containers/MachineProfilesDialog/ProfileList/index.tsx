@@ -23,11 +23,12 @@ import type { ProfileListProps } from './interfaces/ProfileListProps';
 import styles from './styles.module.scss';
 
 export const ProfileList = (props: ProfileListProps): ReactNode => {
-  const { profilesDocument, editedProfileId, onSelect, onCreate, onDelete, onSetActive } = props;
+  const { profilesDocument, editedProfileId, unsavedProfileName, onSelect, onCreate, onDelete, onSetActive } = props;
   const { t } = useTranslation();
   const { activeProfileId, profiles }: MachineProfilesDocument = profilesDocument;
   // The last profile stays: without one the bed size and the G-code export have nothing to work from.
   const isOnlyProfile: boolean = profiles.length <= 1;
+  const isEditedProfileUnsaved: boolean = !profiles.some(({ id }: MachineProfile): boolean => id === editedProfileId);
 
   return (
     <div className={styles.profileList}>
@@ -79,6 +80,14 @@ export const ProfileList = (props: ProfileListProps): ReactNode => {
             </li>
           );
         })}
+        {isEditedProfileUnsaved && (
+          <li className={[styles.card, styles.editedCard].join(' ')}>
+            <Button className={styles.selectButton} type={ANTD_BUTTON_TYPE_TEXT} aria-current>
+              <span className={styles.profileName}>{unsavedProfileName}</span>
+              <span className={styles.unsavedLabel}>{t(DEFAULT.MACHINE_PROFILES_UNSAVED)}</span>
+            </Button>
+          </li>
+        )}
       </ul>
       <Button block icon={<PlusOutlined aria-hidden />} onClick={onCreate}>{t(DEFAULT.MACHINE_PROFILES_NEW)}</Button>
     </div>

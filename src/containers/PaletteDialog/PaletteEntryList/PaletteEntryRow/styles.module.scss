@@ -49,21 +49,19 @@
   height: 1.5rem;
 }
 
-// At most two lines each; only longer text is cut short, and its title shows it in full.
-.name,
-.summary {
-  display: -webkit-box;
+// One line each, like a layer row; longer text is cut short, and its title shows it in full.
+.name {
   min-width: 0;
   overflow: hidden;
-  overflow-wrap: anywhere;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .summary {
   grid-column: 1 / -1;
-  font-family: var(--font-mono);
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }

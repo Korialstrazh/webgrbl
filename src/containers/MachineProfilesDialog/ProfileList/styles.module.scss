@@ -48,3 +48,9 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.unsavedLabel {
+  flex: none;
+  color: var(--color-warning);
+  font-size: 0.75rem;
+}

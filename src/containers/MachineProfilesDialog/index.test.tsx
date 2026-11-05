@@ -59,7 +59,7 @@ const EDITED_WORK_AREA_X_MM = 300;
 const EDITED_MAX_POWER_WATTS = 20;
 const TOO_WIDE_WORK_AREA_MM = 6000;
 const WORK_AREA_X_ERROR_TEXT = 'Work area width must be greater than 0 and at most 5000 mm';
-const NAME_ERROR_TEXT = 'Enter a name for the machine';
+const NAME_ERROR_TEXT = 'Enter a name for the laser';
 const STORED_WORK_AREA_X_MM = 600;
 const STORED_WORK_AREA_Y_MM = 500;
 const STORED_S_VALUE_MAX = 255;
@@ -173,6 +173,12 @@ describe(MachineProfilesDialog.name, () => {
     expect(selectMachineProfiles(store.getState())).toEqual([
       { ...workshopProfile, maxPowerWatts: EDITED_MAX_POWER_WATTS },
     ]);
+  });
+
+  it('marks a profile that is not stored yet as new and not saved in the list', () => {
+    renderDialog(newStore());
+
+    expect(screen.getByText('New, not saved')).toBeInTheDocument();
   });
 
   it('keeps a new profile out of the store until it is saved', () => {

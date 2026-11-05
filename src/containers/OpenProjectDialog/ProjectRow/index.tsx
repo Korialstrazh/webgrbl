@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { DeleteOutlined, EditOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import { Button, Popconfirm, Tag } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -25,6 +26,8 @@ import {
 } from '../../../utils/states/project.state';
 import { ProjectRenameInput } from '../../ProjectRenameInput';
 import type { ProjectRowProps } from './interfaces/ProjectRowProps';
+import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
+import { IconActionButton } from '../../../views/IconActionButton';
 import styles from './styles.module.scss';
 
 export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps): ReactNode => {
@@ -68,22 +71,37 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
       </div>
       <div className={styles.actions}>
         {!isOpenProject && (
-          <Button size={ANTD_BUTTON_SIZE_SMALL} onClick={openProject}>{t(DEFAULT.OPEN_PROJECT_OPEN)}</Button>
+          <IconActionButton
+            size={ANTD_BUTTON_SIZE_SMALL}
+            labelText={t(DEFAULT.OPEN_PROJECT_OPEN)}
+            iconComponent={<FolderOpenOutlined />}
+            onClick={openProject}
+          />
         )}
-        <Button size={ANTD_BUTTON_SIZE_SMALL} type={ANTD_BUTTON_TYPE_TEXT} onClick={() => setIsRenaming(true)}>
-          {t(DEFAULT.OPEN_PROJECT_RENAME)}
-        </Button>
-        <Popconfirm
-          title={t(DEFAULT.OPEN_PROJECT_DELETE_CONFIRM, { name: projectName })}
-          okText={t(DEFAULT.OPEN_PROJECT_DELETE_OK)}
-          cancelText={t(DEFAULT.OPEN_PROJECT_DELETE_CANCEL)}
-          okButtonProps={{ danger: true }}
-          onConfirm={() => dispatch(new ProjectDeleteRequested({ projectId }))}
-        >
-          <Button size={ANTD_BUTTON_SIZE_SMALL} type={ANTD_BUTTON_TYPE_TEXT} danger>
-            {t(DEFAULT.OPEN_PROJECT_DELETE)}
-          </Button>
-        </Popconfirm>
+        <IconActionButton
+          size={ANTD_BUTTON_SIZE_SMALL}
+          type={ANTD_BUTTON_TYPE_TEXT}
+          labelText={t(DEFAULT.OPEN_PROJECT_RENAME)}
+          iconComponent={<EditOutlined />}
+          onClick={() => setIsRenaming(true)}
+        />
+        <DismissibleTooltip title={t(DEFAULT.OPEN_PROJECT_DELETE)}>
+          <Popconfirm
+            title={t(DEFAULT.OPEN_PROJECT_DELETE_CONFIRM, { name: projectName })}
+            okText={t(DEFAULT.OPEN_PROJECT_DELETE_OK)}
+            cancelText={t(DEFAULT.OPEN_PROJECT_DELETE_CANCEL)}
+            okButtonProps={{ danger: true }}
+            onConfirm={() => dispatch(new ProjectDeleteRequested({ projectId }))}
+          >
+            <Button
+              size={ANTD_BUTTON_SIZE_SMALL}
+              type={ANTD_BUTTON_TYPE_TEXT}
+              danger
+              icon={<DeleteOutlined />}
+              aria-label={t(DEFAULT.OPEN_PROJECT_DELETE)}
+            />
+          </Popconfirm>
+        </DismissibleTooltip>
       </div>
     </li>
   );

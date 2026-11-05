@@ -32,7 +32,6 @@ import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../../utils/states/toast
 import { ToastShown } from '../../../utils/states/toast.state';
 import { useAppStore } from '../../../utils/states/use.app.store';
 import { ComingSoon } from '../../../views/ComingSoon';
-import { IconActionButton } from '../../../views/IconActionButton';
 import {
   MACHINE_PROFILES_EXPORT_FILE_NAME,
   MACHINE_PROFILES_FILE_ACCEPT,
@@ -99,17 +98,13 @@ export const ProfileFileActions = (): ReactNode => {
   return (
     <div className={styles.profileFileActions}>
       <div className={styles.transferButtons}>
-        <IconActionButton
-          labelText={t(DEFAULT.MACHINE_PROFILES_IMPORT)}
-          iconComponent={<UploadOutlined />}
-          onClick={() => fileInputRef.current?.click()}
-        />
-        <IconActionButton
-          labelText={t(DEFAULT.MACHINE_PROFILES_EXPORT)}
-          iconComponent={<DownloadOutlined />}
-          isDisabled={!profiles.length}
-          onClick={exportProfiles}
-        />
+        {/* Icon and word, as in the material library. */}
+        <Button icon={<UploadOutlined aria-hidden />} onClick={() => fileInputRef.current?.click()}>
+          {t(DEFAULT.MACHINE_PROFILES_IMPORT)}
+        </Button>
+        <Button icon={<DownloadOutlined aria-hidden />} disabled={!profiles.length} onClick={exportProfiles}>
+          {t(DEFAULT.MACHINE_PROFILES_EXPORT)}
+        </Button>
       </div>
       {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
       <input

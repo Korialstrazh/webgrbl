@@ -10,6 +10,8 @@
  */
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
 
+import type { ReactNode } from 'react';
+
 export interface ProfileNumberFieldDefinition {
   /** Profile field the input edits. */
   field: keyof Pick<MachineProfile, 'maxPowerWatts' | 'workAreaXMm' | 'workAreaYMm' | 'sValueMax' | 'jogFeedRate'>;
@@ -17,4 +19,6 @@ export interface ProfileNumberFieldDefinition {
   labelKey: string;
   /** Localization key of a short explanation of a GRBL term in the label, shown from an info icon. */
   hintKey?: string;
+  /** The icon before the label. */
+  iconComponent: ReactNode;
 }

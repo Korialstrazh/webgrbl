@@ -10,6 +10,8 @@
  */
 import type { PaletteEntry } from '../../../../utils/palette/interfaces/PaletteEntry';
 
+import type { ReactNode } from 'react';
+
 export interface PaletteNumberFieldDefinition {
   /** Entry field the input edits. */
   field: keyof Pick<
@@ -18,6 +20,8 @@ export interface PaletteNumberFieldDefinition {
   >;
   /** Localization key of the field label. */
   labelKey: string;
+  /** The icon before the label. */
+  iconComponent: ReactNode;
   /** Whether the field applies to fill entries only. */
   isFillOnly: boolean;
 }

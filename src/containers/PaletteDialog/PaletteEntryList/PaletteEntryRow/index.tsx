@@ -9,7 +9,15 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ArrowDownOutlined, ArrowUpOutlined, CloseOutlined, HolderOutlined } from '@ant-design/icons';
+import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  CloseOutlined,
+  DashboardOutlined,
+  HolderOutlined,
+  SyncOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
 import { Button, Popconfirm } from 'antd';
 import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +28,7 @@ import { SHADING_ENTRY_ID } from '../../../../utils/palette/palette.constants';
 import { LayerSummaryText } from '../../../../views/LayerSummaryText';
 import { LayerSwatch } from '../../../../views/LayerSwatch';
 import type { PaletteEntryRowProps } from '../interfaces/PaletteEntryRowProps';
+import { LayerModeIcon } from '../../../../views/LayerModeIcon';
 import styles from './styles.module.scss';
 
 const allowDropOnRow = (dragEvent: DragEvent<HTMLLIElement>): void => {
@@ -63,7 +72,16 @@ export const PaletteEntryRow = ({
           <LayerSwatch colour={entry.colour} isShading={isShading} />
         </span>
         <span className={styles.name} title={entryName}>{entryName}</span>
-        <LayerSummaryText className={styles.summary} parts={getLayerSummaryParts(t, entry)} />
+        <LayerSummaryText
+          className={styles.summary}
+          parts={getLayerSummaryParts(t, entry)}
+          iconComponents={[
+            <LayerModeIcon key={entry.mode} mode={entry.mode} />,
+            <ThunderboltOutlined key={DEFAULT.LAYERS_SUMMARY_POWER} />,
+            <DashboardOutlined key={DEFAULT.LAYERS_SUMMARY_SPEED} />,
+            <SyncOutlined key={DEFAULT.LAYERS_SUMMARY_PASSES} />,
+          ]}
+        />
       </Button>
       <Button
         type={ANTD_BUTTON_TYPE_TEXT}
