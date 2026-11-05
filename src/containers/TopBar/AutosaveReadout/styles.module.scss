@@ -29,9 +29,9 @@
   background-color: var(--color-danger);
 }
 
-// At the narrowest widths only the coloured dot stays on screen; the label is still read out. 46rem must match the
-// TopBar styles.
-@media (width < 46rem) {
+// Below 62.5rem only the coloured dot stays on screen, so Import SVG and the connection pill keep their room; the label
+// is still read out. 62.5rem must match the TopBar styles.
+@media (width < 62.5rem) {
   .autosave {
     margin-right: 0;
   }
