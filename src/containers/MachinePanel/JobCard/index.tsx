@@ -1,7 +1,8 @@
 /**
  * The Job card: the layers that go to the laser, the time estimate and the job actions. Start job is the main
  * action, filled in the accent colour once it can run, and runs the job on the connected laser after a confirmation.
- * A readiness row says what is still open, and why Start job and Frame job are off is written under the buttons;
+ * A readiness row says what is still open, and why Start job and Frame job are off sits behind a warning icon in the
+ * heading;
  * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
  * gear, traces the outline of the job.
  *
@@ -16,7 +17,6 @@ import {
   BlockOutlined,
   ClockCircleOutlined,
   DownloadOutlined,
-  InfoCircleOutlined,
   ProfileOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
@@ -46,6 +46,7 @@ import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.ti
 import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
 import { CaptionedActionButton } from '../../../views/CaptionedActionButton';
 import { Panel } from '../../../views/Panel';
+import { TooltipNoteIcon } from '../../../views/TooltipNoteIcon';
 import { JobStartButton } from '../../JobStartButton';
 import { FrameControls } from './FrameControls';
 import { JobPauseButton } from './JobPauseButton';
@@ -55,6 +56,8 @@ import { getJobActionBlockedReasonKeys } from './get.job.action.blocked.reason.k
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobRunStatusKey } from './get.job.run.status.key';
 import styles from './styles.module.scss';
+
+const REASON_SEPARATOR = ' ';
 
 interface JobCardProps {
   /** False where Start job is pinned elsewhere, as in the narrow layout. */
@@ -75,6 +78,9 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
     jobStartBlockedReasonKey,
     frameStartBlockedReasonKey,
   );
+  const actionBlockedReasonText: string = actionBlockedReasonKeys
+    .map((reasonKey: string): string => t(reasonKey))
+    .join(REASON_SEPARATOR);
   const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
   const jobRunKind: JobRunKind = useSelector(selectJobRunKind);
@@ -86,7 +92,15 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
 
   return (
-    <Panel iconComponent={<ProfileOutlined />} title={t(DEFAULT.MACHINE_START_JOB_TITLE)}>
+    <Panel
+      iconComponent={<ProfileOutlined />}
+      title={t(DEFAULT.MACHINE_START_JOB_TITLE)}
+      headerActionComponent={actionBlockedReasonText && (
+        // Disabled buttons take no focus, so their reasons sit behind one icon that keyboard, pointer and screen
+        // reader all reach, instead of a standing sentence.
+        <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning />
+      )}
+    >
       <div className={styles.jobCard}>
         <dl className={styles.facts}>
           <div className={styles.fact}>
@@ -128,13 +142,6 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
             />
           )}
         />
-        {/* Disabled buttons take no focus, so their reasons are written out where keyboard and eye both reach. */}
-        {actionBlockedReasonKeys.map((reasonKey: string) => (
-          <p key={reasonKey} className={styles.blockedReason}>
-            <InfoCircleOutlined aria-hidden />
-            {t(reasonKey)}
-          </p>
-        ))}
       </div>
     </Panel>
   );

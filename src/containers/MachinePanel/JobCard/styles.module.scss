@@ -34,18 +34,3 @@
 .factLabel {
   @include accessibility.visually-hidden;
 }
-
-.blockedReason {
-  display: flex;
-  gap: var(--space-2);
-  margin: 0;
-  color: var(--color-text-muted);
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
-
-  :global(.anticon) {
-    flex: none;
-    margin-top: 0.1875rem;
-    color: var(--color-warning);
-  }
-}

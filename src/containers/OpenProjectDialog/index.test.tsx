@@ -87,7 +87,7 @@ describe(OpenProjectDialog.name, () => {
     expect(screen.getByRole('dialog', { name: DIALOG_LABEL })).toBeInTheDocument();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
     expect(getDispatchedActionCalls(dispatchSpy, ProjectSummariesRequested)).toHaveLength(1);
-    expect(screen.getByText(FOOTER_PATTERN)).toBeInTheDocument();
+    expect(screen.getByRole('note', { name: FOOTER_PATTERN })).toBeInTheDocument();
     expect(await screen.findByText(NEWEST_NAME)).toBeInTheDocument();
   });
 

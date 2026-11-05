@@ -238,18 +238,19 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
   });
 
-  it('writes one shared line under Start and Frame while both wait for a connection', async () => {
+  it('gives one shared reason behind a focusable icon while Start and Frame wait for a connection', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
-    expect(screen.getByText(ACTIONS_NOT_CONNECTED_REASON)).toBeVisible();
+    expect(screen.getByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).toHaveAttribute('tabindex', '0');
+    expect(screen.queryByText(ACTIONS_NOT_CONNECTED_REASON)).not.toBeInTheDocument();
     expect(screen.queryByText(NOT_CONNECTED_REASON)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: CONNECT_STEP_OPEN_LABEL })).toBeInTheDocument();
   });
 
-  it('writes no reason line once Start and Frame can run', () => {
+  it('shows no reason icon once Start and Frame can run', () => {
     renderJobCard(newStartableJobStore());
 
-    expect(screen.queryByText(ACTIONS_NOT_CONNECTED_REASON)).not.toBeInTheDocument();
+    expect(screen.queryByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).not.toBeInTheDocument();
   });
 
   it('shows Export G-code as the quiet secondary action', async () => {

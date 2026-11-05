@@ -1,6 +1,5 @@
+// The storage note sits at the start of the footer, where the text used to be.
 .footerNote {
-  margin: 0;
-  font-size: 0.8125rem;
-  text-align: start;
-  color: var(--color-text-muted);
+  display: flex;
+  justify-content: flex-start;
 }
