@@ -71,7 +71,7 @@ BURN_SCENE_VIEW_FIT_HINT;Fit: back to the first view of the whole sheet
 BURN_SCENE_VIEW_LABEL;3D view
 BURN_SCENE_VIEW_TOP_HINT;Top: look straight down at the sheet
 COMING_SOON;Soon
-CONNECTION_CONNECT_MENU;Connect...
+CONNECTION_CONNECT_MENU;Connect
 CONNECTION_NO_PORT_CHOSEN;No port chosen
 CONNECTION_PILL_CONNECTED;Connected
 CONNECTION_PILL_CONNECTING;Connecting
@@ -81,7 +81,7 @@ CONNECTION_PILL_LABEL;Connection: {{details}}. Open the connection menu.
 CONNECTION_PILL_LOST;Connection lost
 CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED;No Web Serial
 CONNECTION_POPOVER_BAUD;Baud rate
-CONNECTION_POPOVER_CHOOSE_PORT;Choose port...
+CONNECTION_POPOVER_CHOOSE_PORT;Choose port
 CONNECTION_POPOVER_CONNECT;Connect
 CONNECTION_POPOVER_CONNECTING;Connecting...
 CONNECTION_POPOVER_DISCONNECT;Disconnect
@@ -134,6 +134,13 @@ DESIGN_LAYERS_TITLE;Layers
 DESIGN_MATERIAL_TITLE;Material
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Design
+FIELD_CAPTION_MAX;max
+FIELD_CAPTION_MIN;min
+FIELD_UNIT_MM;mm
+FIELD_UNIT_MM_PER_MIN;mm/min
+FIELD_UNIT_PERCENT;%
+FIELD_UNIT_TIMES;×
+FIELD_UNIT_WATTS;W
 FRAME_ALARMED;The laser reported an alarm, possibly a limit. Check the laser and clear the alarm before framing again.
 FRAME_BED_OVERRUN;The frame goes {{distanceMm}} mm past the {{edge}} edge of the bed. Move the job before framing.
 FRAME_EDGE_BACK;back
@@ -152,7 +159,10 @@ FRAME_RUN_STATUS_INTERRUPTED;Frame stopped before the end
 FRAME_RUN_STATUS_PAUSED;Framing: paused
 FRAME_RUN_STATUS_SENDING;Framing
 FRAME_SETTINGS_HIDE;Hide frame settings
+FRAME_SETTINGS_NEEDS_PROFILE;Choose a laser profile: it holds these settings.
+FRAME_SETTINGS_RUN_LOCKED;Fixed while a job runs.
 FRAME_SETTINGS_SHOW;Show frame settings
+FRAME_SETTINGS_TITLE;Frame settings
 FRAME_SPEED_LABEL;Frame speed (mm/min)
 FRAME_START_BLOCKED_BED_OVERRUN;The frame would leave the bed.
 FRAME_START_BLOCKED_LASER_MODE;Laser mode ($32=1) must be confirmed on to frame a job.
@@ -293,6 +303,8 @@ LAYER_SETTINGS_PRESET_UPDATED;Updated the {{name}}, {{thickness}} mm · {{operat
 LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
 LAYER_SETTINGS_SEND;Send to laser
 LAYER_SETTINGS_SPEED;Speed (mm/min)
+LAYERS_CELL_POWER;{{power}}%
+LAYERS_CELL_SPEED;{{speed}}
 LAYERS_EMPTY_HINT;No layers yet. Layers appear when the design has colours.
 LAYERS_LIST_LABEL;Project layers
 LAYERS_MOVE_DOWN;Move {{name}} down
@@ -373,12 +385,17 @@ MACHINE_PROFILES_FIELD_MAX_POWER;Laser power (W)
 MACHINE_PROFILES_FIELD_NAME;Name
 MACHINE_PROFILES_FIELD_ORIGIN_CORNER;Origin corner
 MACHINE_PROFILES_FIELD_S_VALUE_MAX;Maximum S value ($30)
+MACHINE_PROFILES_FIELD_S_VALUE_MAX_CAPTION;S max
 MACHINE_PROFILES_FIELD_S_VALUE_MAX_HINT;The S value GRBL treats as full laser power, its setting $30. Usually 1000.
 MACHINE_PROFILES_FIELD_WORK_AREA_X;Work area width (mm)
 MACHINE_PROFILES_FIELD_WORK_AREA_Y;Work area height (mm)
-MACHINE_PROFILES_GRBL_SETTINGS;GRBL settings ($$)...
+MACHINE_PROFILES_GRBL_SETTINGS;GRBL settings ($$)
 MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION;View and change the settings stored in the laser.
-MACHINE_PROFILES_IMPORT;Import...
+MACHINE_PROFILES_GROUP_ADVANCED;Advanced
+MACHINE_PROFILES_GROUP_BED;Bed
+MACHINE_PROFILES_GROUP_MACHINE;Machine
+MACHINE_PROFILES_GROUP_OPTIONS;Options
+MACHINE_PROFILES_IMPORT;Import
 MACHINE_PROFILES_IMPORT_FILE;Import profiles file
 MACHINE_PROFILES_LASER_MODE_OFF;This laser reports laser mode off ($32=0), so it may burn spots where it slows down. Send $32=1 in the console to turn it on.
 MACHINE_PROFILES_LIST;Profiles
@@ -497,7 +514,7 @@ MATERIAL_LIBRARY_TICK_FOR_EXPORT;Select for export
 MATERIAL_LIBRARY_TITLE;Material library
 MATERIAL_SECTION_LIBRARY;Library
 MATERIAL_SECTION_OPEN_LIBRARY;Open the material library
-MATERIAL_SECTION_PRESETS_NO_MACHINE;Choose a laser profile to use presets
+MATERIAL_SECTION_PRESETS_NO_MACHINE;Laser profile
 MATERIAL_SECTION_PRESETS_NO_MATERIAL;Choose a material to see its presets
 MATERIAL_SECTION_PRESETS_NONE;No presets yet for {{name}}, {{thickness}} mm on {{machine}}
 MATERIAL_SECTION_PRESETS_one;{{count}} preset for {{name}}, {{thickness}} mm on {{machine}}

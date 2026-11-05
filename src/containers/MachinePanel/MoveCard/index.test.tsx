@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import type { MockInstance } from 'vitest';
 import { MoveCard } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
 import type { GrblMachineState } from '../../../utils/grbl/grbl.constants';
@@ -7,12 +8,14 @@ import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblReso
 import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
-import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
+import { ConnectRequested, ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
 import { LaserPointerFiringStarted, LaserPointerFiringStopped } from '../../../utils/states/laser.pointer.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
 import { MachineLineRequested, MachineStatusReceived } from '../../../utils/states/machine.status.state';
 import { newStore } from '../../../utils/states/new.store';
-import type { AppStore } from '../../../utils/states/new.store';
+import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
+import { selectIsConnectionPopoverOpen } from '../../../utils/states/ui.overlay.state';
+import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 
 const JOG_NORTH_EAST_LABEL = 'Jog up and right';
 const JOG_ORIGIN_LABEL = 'Origin';
@@ -93,10 +96,21 @@ const getRequestedLines = (dispatchSpy: ReturnType<typeof vi.spyOn>): string[] =
 };
 
 describe(MoveCard.name, () => {
+  it('opens the connection popover from the plug and asks for no connection', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    render(<Provider store={store}><AntdTestProvider><MoveCard /></AntdTestProvider></Provider>);
+    fireEvent.click(screen.getByRole('button', { name: COLLAPSED_HINT_TEXT }));
+
+    expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(ConnectRequested));
+  });
+
   it('collapses to one line with a plug badge while disconnected, without any move control', () => {
     renderMoveCard(newStore());
 
-    expect(screen.getByRole('img', { name: COLLAPSED_HINT_TEXT })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: COLLAPSED_HINT_TEXT })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: SHOW_CONTROLS_LABEL })).toHaveAttribute(ARIA_EXPANDED_ATTRIBUTE, 'false');
     expect(screen.queryByRole('button', { name: JOG_NORTH_EAST_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('spinbutton', { name: JOG_SPEED_LABEL })).not.toBeInTheDocument();
@@ -114,7 +128,7 @@ describe(MoveCard.name, () => {
       screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL }),
     );
     expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeDisabled();
-    expect(screen.getByRole('img', { name: COLLAPSED_HINT_TEXT })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: COLLAPSED_HINT_TEXT })).toBeInTheDocument();
 
     fireEvent.click(hideButton);
 
@@ -129,7 +143,7 @@ describe(MoveCard.name, () => {
 
     expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: SHOW_CONTROLS_LABEL })).not.toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: COLLAPSED_HINT_TEXT })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: COLLAPSED_HINT_TEXT })).not.toBeInTheDocument();
   });
 
   it('jogs north-east at step 1 with the default feed rate', () => {

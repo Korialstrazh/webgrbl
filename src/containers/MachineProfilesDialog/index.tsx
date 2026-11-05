@@ -13,6 +13,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { LaserMachineIcon } from '../../views/LaserMachineIcon';
 import { AppModal } from '../AppModal';
 import type { MachineProfilesDialogProps } from './interfaces/MachineProfilesDialogProps';
 import { MACHINE_PROFILES_DIALOG_OVERLAY_ID, MACHINE_PROFILES_DIALOG_WIDTH } from './machine.profiles.dialog.constants';
@@ -25,7 +26,7 @@ export const MachineProfilesDialog = ({ isOpen, onClose }: MachineProfilesDialog
     <AppModal
       isOpen={isOpen}
       overlayIdPrefix={MACHINE_PROFILES_DIALOG_OVERLAY_ID}
-      title={t(DEFAULT.MACHINE_PROFILES_TITLE)}
+      title={<><LaserMachineIcon aria-hidden /> {t(DEFAULT.MACHINE_PROFILES_TITLE)}</>}
       footer={null}
       maxWidth={MACHINE_PROFILES_DIALOG_WIDTH}
       destroyOnHidden

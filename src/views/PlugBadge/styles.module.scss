@@ -15,3 +15,16 @@
     color: var(--color-text);
   }
 }
+
+// The clickable plug: a round target, and the accent on hover says it leads to Connect.
+.plugButton:global(.ant-btn) {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+  color: var(--color-text-muted);
+
+  &:hover {
+    color: var(--color-accent);
+  }
+}

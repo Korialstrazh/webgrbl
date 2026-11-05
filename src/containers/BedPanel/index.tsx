@@ -39,6 +39,7 @@ import { selectProjectObjects } from '../../utils/states/project.document.state'
 import { selectToolpathMachineArea } from '../../utils/states/toolpath.machine.area.selector';
 import type { ToolpathMachineArea } from '../../utils/toolpath/interfaces/ToolpathMachineArea';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
+import { LaserMachineIcon } from '../../views/LaserMachineIcon';
 import { PlugBadge } from '../../views/PlugBadge';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
 import { BedEmptyCard } from '../BedEmptyCard';
@@ -157,7 +158,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           )}
           {!isThreeDView && hasNoObjects && placeholderKey && (
             <span className={styles.placeholderChip}>
-              <PlugBadge reasonText={t(placeholderKey)} />
+              <PlugBadge reasonText={t(placeholderKey)} iconComponent={<LaserMachineIcon />} />
             </span>
           )}
           {viewMode === BED_VIEW_MODE.DESIGN && hasNoObjects && <BedEmptyCard />}

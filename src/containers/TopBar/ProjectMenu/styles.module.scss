@@ -13,7 +13,7 @@
 }
 
 // The same small chevron as the connection pill's.
-.caret {
+:global(.ant-btn) .caret.caret:global(.anticon) {
   margin-left: var(--space-1);
   color: var(--color-text-muted);
   font-size: 0.75rem;

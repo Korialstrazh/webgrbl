@@ -18,4 +18,6 @@ export interface CollapsedCardToggleProps {
   toggleLabel: string;
   /** Called when the toggle is pressed. */
   onToggle: () => void;
+  /** Called when the plug is pressed, to open the connection popover; it must not connect. */
+  onPlugClick?: () => void;
 }

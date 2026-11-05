@@ -15,15 +15,18 @@ import { DragOutlined } from '@ant-design/icons';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
+import type { AppDispatch } from '../../../utils/states/new.store';
+import { ConnectionPopoverOpenChanged } from '../../../utils/states/ui.overlay.state';
 import { CollapsedCardToggle } from '../../../views/CollapsedCardToggle';
 import { Panel } from '../../../views/Panel';
 import { MoveControls } from './MoveControls';
 
 export const MoveCard = (): ReactNode => {
   const { t } = useTranslation();
+  const dispatch: AppDispatch = useDispatch();
   const isConnected: boolean = useSelector(selectIsConnected);
   const [isShownWhileDisconnected, setIsShownWhileDisconnected] = useState<boolean>(false);
   const controlsId: string = useId();
@@ -38,6 +41,7 @@ export const MoveCard = (): ReactNode => {
       controlsId={controlsId}
       toggleLabel={t(toggleLabelKey)}
       onToggle={() => setIsShownWhileDisconnected(isCollapsed)}
+      onPlugClick={() => dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }))}
     />
   );
 

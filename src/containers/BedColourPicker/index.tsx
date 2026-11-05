@@ -11,7 +11,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { FormatPainterOutlined } from '@ant-design/icons';
 import { Button, ColorPicker, Tooltip } from 'antd';
 import type { ColorPickerProps } from 'antd';
 import type { Color } from 'antd/es/color-picker';
@@ -25,6 +24,7 @@ import type { BedColourPreset } from '../../utils/bed/interfaces/BedColourPreset
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { BedColourChanged, selectBedColour } from '../../utils/states/bed.appearance.state';
 import type { AppDispatch } from '../../utils/states/new.store';
+import { BedColourIcon } from '../../views/BedColourIcon';
 import styles from './styles.module.scss';
 
 type BedColourPickerPanelRender = NonNullable<ColorPickerProps['panelRender']>;
@@ -89,7 +89,7 @@ export const BedColourPicker = (): ReactNode => {
     >
       <Tooltip title={labelText}>
         <Button className={styles.bedColourButton} aria-label={labelText}>
-          <FormatPainterOutlined aria-hidden />
+          <BedColourIcon aria-hidden />
           {/* A plain swatch of the current colour; only its fill changes at run time. */}
           <span
             className={styles.swatch}

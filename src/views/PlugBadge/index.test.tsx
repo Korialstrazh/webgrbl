@@ -19,4 +19,13 @@ describe(PlugBadge.name, () => {
       expect(screen.getByRole('tooltip')).toHaveTextContent(REASON_TEXT);
     });
   });
+
+  it('is a named button that calls its handler when it has one', () => {
+    const onClick = vi.fn();
+
+    render(<AntdTestProvider><PlugBadge reasonText={REASON_TEXT} onClick={onClick} /></AntdTestProvider>);
+    fireEvent.click(screen.getByRole('button', { name: REASON_TEXT }));
+
+    expect(onClick).toHaveBeenCalledOnce();
+  });
 });

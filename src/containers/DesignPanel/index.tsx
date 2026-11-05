@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { AppstoreOutlined, BgColorsOutlined, BlockOutlined, GroupOutlined } from '@ant-design/icons';
+import { BlockOutlined, GroupOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -23,6 +23,8 @@ import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedViewMode } from '../../utils/states/bed.view.state';
 import { IconActionButton } from '../../views/IconActionButton';
+import { MaterialSheetIcon } from '../../views/MaterialSheetIcon';
+import { PaletteIcon } from '../../views/PaletteIcon';
 import { Panel } from '../../views/Panel';
 import { AddTestSampleButton } from '../AddTestSampleButton';
 import { CutCheckPanel } from '../CutCheckPanel';
@@ -48,7 +50,7 @@ export const DesignPanel = (): ReactNode => {
     >
       {isThreeDView && <CutCheckPanel />}
       {isDesignView && (
-        <Panel iconComponent={<AppstoreOutlined />} title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
+        <Panel iconComponent={<MaterialSheetIcon />} title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
           <MaterialSection />
         </Panel>
       )}
@@ -61,7 +63,7 @@ export const DesignPanel = (): ReactNode => {
             <IconActionButton
               size={ANTD_BUTTON_SIZE_SMALL}
               labelText={t(DEFAULT.LAYERS_OPEN_PALETTE)}
-              iconComponent={<BgColorsOutlined />}
+              iconComponent={<PaletteIcon />}
               onClick={() => setIsPaletteDialogOpen(true)}
             />
           </span>

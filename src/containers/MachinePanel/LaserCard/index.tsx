@@ -37,6 +37,7 @@ import {
   selectIsAirAssistOn,
 } from '../../../utils/states/machine.status.state';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { ConnectionPopoverOpenChanged } from '../../../utils/states/ui.overlay.state';
 import { CollapsedCardToggle } from '../../../views/CollapsedCardToggle';
 import { Panel } from '../../../views/Panel';
 import { PointerFireButton } from './PointerFireButton';
@@ -65,6 +66,7 @@ export const LaserCard = (): ReactNode => {
       controlsId={controlsId}
       toggleLabel={t(toggleLabelKey)}
       onToggle={() => setIsShownWhileDisconnected(isCollapsed)}
+      onPlugClick={() => dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }))}
     />
   );
 

@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ImportOutlined, ToolOutlined } from '@ant-design/icons';
+import { ImportOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
 import { MachineProfilesDialogOpenChanged, selectIsMachineProfilesDialogOpen } from '../../utils/states/ui.workbench.state';
 import { IconActionButton } from '../../views/IconActionButton';
+import { LaserMachineIcon } from '../../views/LaserMachineIcon';
 import { RedoArrowIcon } from '../../views/RedoArrowIcon';
 import { UndoArrowIcon } from '../../views/UndoArrowIcon';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
@@ -58,7 +59,7 @@ export const TopBar = (): ReactNode => {
             type={ANTD_BUTTON_TYPE_TEXT}
             size={ANTD_BUTTON_SIZE_LARGE}
             labelText={t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
-            iconComponent={<ToolOutlined />}
+            iconComponent={<LaserMachineIcon />}
             onClick={() => changeProfilesDialogOpen(true)}
           />
         </span>

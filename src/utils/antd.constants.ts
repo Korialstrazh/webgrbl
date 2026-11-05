@@ -78,6 +78,8 @@ export const ANTD_MENU_MODE_INLINE: MenuProps['mode'] = 'inline';
 export const ANTD_INPUT_NUMBER_PRECISION_INTEGER: InputNumberProps['precision'] = 0;
 
 /** The compact switch size, for a switch next to small text. */
+export const ANTD_COLLAPSE_SIZE_SMALL = 'small';
+
 export const ANTD_SWITCH_SIZE_SMALL: SwitchProps['size'] = 'small';
 
 /** The dropdown opens and closes when its anchor is clicked. */

@@ -10,11 +10,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BookOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
+import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { EmptyState } from '../../../views/EmptyState';
+import { MaterialSheetIcon } from '../../../views/MaterialSheetIcon';
 import type { MaterialLibraryEmptyStateProps } from '../interfaces/MaterialLibraryEmptyStateProps';
 
 export const MaterialLibraryEmptyState = (props: MaterialLibraryEmptyStateProps): ReactNode => {
@@ -27,7 +28,7 @@ export const MaterialLibraryEmptyState = (props: MaterialLibraryEmptyStateProps)
   if (!hasMaterials) {
     return (
       <EmptyState
-        iconComponent={<BookOutlined />}
+        iconComponent={<MaterialSheetIcon />}
         titleText={t(DEFAULT.MATERIAL_LIBRARY_EMPTY_NO_MATERIALS_TITLE)}
         bodyText={t(DEFAULT.MATERIAL_LIBRARY_NO_MATERIALS)}
         actionLabel={t(DEFAULT.MATERIAL_LIBRARY_NEW_MATERIAL)}
@@ -39,7 +40,7 @@ export const MaterialLibraryEmptyState = (props: MaterialLibraryEmptyStateProps)
   if (!hasActiveMachine) {
     return (
       <EmptyState
-        iconComponent={<BookOutlined />}
+        iconComponent={<MaterialSheetIcon />}
         titleText={t(DEFAULT.MATERIAL_LIBRARY_EMPTY_NO_MACHINE_TITLE)}
         bodyText={t(DEFAULT.MATERIAL_LIBRARY_NO_ACTIVE_MACHINE)}
         actionLabel={t(DEFAULT.MATERIAL_LIBRARY_CLOSE)}
@@ -77,7 +78,7 @@ export const MaterialLibraryEmptyState = (props: MaterialLibraryEmptyStateProps)
 
   return (
     <EmptyState
-      iconComponent={<BookOutlined />}
+      iconComponent={<MaterialSheetIcon />}
       titleText={t(DEFAULT.MATERIAL_LIBRARY_EMPTY_TITLE)}
       bodyText={t(DEFAULT.MATERIAL_LIBRARY_EMPTY_TEXT)}
     />

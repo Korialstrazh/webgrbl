@@ -362,7 +362,7 @@ describe(LaserCard.name, () => {
   it('collapses to one line with a Show button while disconnected and opens on Show', () => {
     renderLaserCard(newStore());
 
-    expect(screen.getByRole('img', { name: COLLAPSED_HINT })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: COLLAPSED_HINT })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: FIRE_LABEL })).not.toBeInTheDocument();
 
     showLaserControls();

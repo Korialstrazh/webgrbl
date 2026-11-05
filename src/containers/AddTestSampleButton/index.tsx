@@ -9,7 +9,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ExperimentOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +21,7 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { SampleJobAddRequested, selectProjectObjects } from '../../utils/states/project.document.state';
 import { selectToolpathMachineArea } from '../../utils/states/toolpath.machine.area.selector';
 import { IconActionButton } from '../../views/IconActionButton';
+import { TestSampleIcon } from '../../views/TestSampleIcon';
 
 interface AddTestSampleButtonProps {
   isIconOnly?: boolean;
@@ -51,7 +51,7 @@ export const AddTestSampleButton = ({ isIconOnly = false }: AddTestSampleButtonP
       <IconActionButton
         size={ANTD_BUTTON_SIZE_SMALL}
         labelText={t(DEFAULT.ADD_TEST_SAMPLE)}
-        iconComponent={<ExperimentOutlined />}
+        iconComponent={<TestSampleIcon />}
         blockedReasonText={blockedReason}
         onClick={addSample}
       />
@@ -61,7 +61,7 @@ export const AddTestSampleButton = ({ isIconOnly = false }: AddTestSampleButtonP
   return (
     <Tooltip title={blockedReason}>
       <Button
-        icon={<ExperimentOutlined aria-hidden />}
+        icon={<TestSampleIcon aria-hidden />}
         disabled={!!blockedReason}
         aria-description={blockedReason}
         onClick={addSample}

@@ -19,12 +19,12 @@ import type { CollapsedCardToggleProps } from './interfaces/CollapsedCardToggleP
 import styles from './styles.module.scss';
 
 export const CollapsedCardToggle = (props: CollapsedCardToggleProps): ReactNode => {
-  const { isCollapsed, hintText, controlsId, toggleLabel, onToggle } = props;
+  const { isCollapsed, hintText, controlsId, toggleLabel, onToggle, onPlugClick } = props;
 
   return (
     <span className={styles.collapsedSummary}>
       {/* Kept while the card is open, so the disabled controls below it still say why they are disabled. */}
-      <PlugBadge reasonText={hintText} />
+      <PlugBadge reasonText={hintText} onClick={onPlugClick} />
       <IconActionButton
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
