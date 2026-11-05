@@ -347,7 +347,7 @@ describe(MaterialLibraryDrawer.name, () => {
 
     expect(await screen.findByRole('checkbox', { name: ONLY_MACHINE_LABEL })).not.toBeChecked();
     expect(screen.getByText(new RegExp(OTHER_MACHINE_NAME))).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: ADD_LABEL })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: ADD_LABEL })).not.toBeInTheDocument();
   });
 
   it('lets a preset of a deleted machine be deleted but not saved', async () => {
