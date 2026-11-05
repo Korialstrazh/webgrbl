@@ -11,6 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { BgColorsOutlined } from '@ant-design/icons';
 import { Button, ColorPicker, Tooltip } from 'antd';
 import type { ColorPickerProps } from 'antd';
 import type { Color } from 'antd/es/color-picker';
@@ -88,13 +89,15 @@ export const BedColourPicker = (): ReactNode => {
     >
       <Tooltip title={labelText}>
         <Button className={styles.bedColourButton} aria-label={labelText}>
-          {/* One swatch of the current colour reads as the bed itself; only its fill changes at run time. */}
-          <span
-            className={[styles.swatch, styles.currentSwatch].join(' ')}
-            aria-hidden="true"
-            // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
-            style={{ backgroundColor: bedColour }}
-          />
+          {/* A paint bucket beside a swatch of the current colour: the control paints the bed. */}
+          <span className={styles.glyphs} aria-hidden="true">
+            <BgColorsOutlined className={styles.bucket} />
+            <span
+              className={[styles.swatch, styles.currentSwatch].join(' ')}
+              // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
+              style={{ backgroundColor: bedColour }}
+            />
+          </span>
           {/* A caption under the glyphs, like the view switch beside it, so the swatch says what it colours. */}
           <span className={styles.caption} aria-hidden="true">{t(DEFAULT.BED_COLOUR_CAPTION)}</span>
         </Button>

@@ -4,12 +4,23 @@
   height: 2.5rem;
   flex-direction: column;
   padding-inline: var(--space-2);
-  gap: 0;
+  gap: 0.125rem;
 }
 
 .caption {
-  font-size: 0.75rem;
+  color: var(--color-text);
+  font-size: 0.875rem;
   line-height: 1;
+}
+
+.glyphs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.bucket {
+  font-size: 0.875rem;
 }
 
 .swatch {

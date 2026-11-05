@@ -11,13 +11,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { RightOutlined } from '@ant-design/icons';
+import { PlusOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_LINK } from '../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_SMALL } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
@@ -62,6 +62,18 @@ export const MaterialSection = (): ReactNode => {
     );
   };
 
+  const getPresetSummaryIconComponent = (): ReactNode => {
+    if (!activeProfile) {
+      return <LaserMachineIcon />;
+    }
+
+    if (!activeMaterial) {
+      return <MaterialSheetIcon />;
+    }
+
+    return activePresetCount ? <UnorderedListOutlined /> : <PlusOutlined />;
+  };
+
   const openLibrary = (materialId: string | undefined): void => {
     setLibraryMaterialId(materialId);
     setIsLibraryOpen(true);
@@ -82,18 +94,14 @@ export const MaterialSection = (): ReactNode => {
           onClick={() => openLibrary(undefined)}
         />
       </div>
+      {/* A small icon button with its label, like the other controls of the panel. */}
       <Button
         className={styles.presetSummary}
-        type={ANTD_BUTTON_TYPE_LINK}
         size={ANTD_BUTTON_SIZE_SMALL}
+        icon={<span className={styles.presetSummaryIcon} aria-hidden>{getPresetSummaryIconComponent()}</span>}
         onClick={activeProfile ? () => openLibrary(activeMaterial?.id) : openProfilesDialog}
       >
-        {/* One span, so the chevron follows the last word even when the text wraps, instead of the end of the line. */}
-        <span className={styles.presetSummaryText}>
-          {!activeProfile && <LaserMachineIcon className={styles.presetSummaryIcon} aria-hidden />}
-          {getPresetSummaryText()}
-          <RightOutlined className={styles.presetSummaryChevron} aria-hidden />
-        </span>
+        <span className={styles.presetSummaryText}>{getPresetSummaryText()}</span>
       </Button>
       <MaterialLibraryDrawer
         isOpen={isLibraryOpen}

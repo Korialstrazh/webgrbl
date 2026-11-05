@@ -17,8 +17,13 @@
   font-size: 1rem;
 }
 
+// Body-size captions in the full text colour (13:1 on the toolbar), so a view that is not current still reads clearly.
+.viewSwitch :global(.ant-segmented-item) {
+  color: var(--color-text);
+}
+
 .caption {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 }
 
 // The current view stands out from a hovered one by the accent, as the speed chips of the Toolpath view do.

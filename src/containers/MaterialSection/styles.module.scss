@@ -18,39 +18,26 @@
   height: var(--control-height);
 }
 
-// The summary reads as a link at rest: in the accent colour with a chevron right after the text, which says it leads
-// on; hovered, it also takes an underline. The antd class outranks antd's
-// own link colours.
-.presetSummary:global(.ant-btn-link) {
-  justify-content: flex-start;
-  min-height: 2rem;
-  padding-inline: var(--space-1);
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
+// The presets entry is a small outlined button with an icon and its label, so it reads as a control, not as a note.
+.presetSummary:global(.ant-btn) {
+  align-self: flex-start;
+  max-width: 100%;
+  height: auto;
+  min-height: 1.75rem;
+  color: var(--color-text);
+  font-size: 0.8125rem;
   text-align: left;
   white-space: normal;
-}
-
-// antd sets the hover colour of a link button with a selector of five classes and states; this one has six.
-.presetSummary:global(.ant-btn):global(.ant-btn-variant-link):not(:disabled):not(:global(.ant-btn-disabled)):hover,
-.presetSummary:global(.ant-btn-link):focus-visible {
-  color: var(--color-text);
-  text-decoration: underline;
 }
 
 .presetSummaryText {
   white-space: normal;
 }
 
-.presetSummaryChevron {
-  margin-left: var(--space-1);
-  font-size: 0.625rem;
-}
-
 .presetSummaryIcon {
-  margin-right: var(--space-1);
-  font-size: 1rem;
-  vertical-align: text-bottom;
+  display: inline-flex;
+  color: var(--color-accent);
+  font-size: 0.875rem;
 }
 
 .selectRow :global(.ant-btn .anticon) {

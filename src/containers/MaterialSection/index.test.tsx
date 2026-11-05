@@ -2,7 +2,6 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { describe, expect, it } from 'vitest';
 import { MaterialSection } from '.';
-import { MIDDLE_DOT } from '../../utils/characters.constants';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import type { MaterialPreset } from '../../utils/materials/interfaces/MaterialPreset';
 import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset.constants';
@@ -86,7 +85,7 @@ describe(MaterialSection.name, () => {
   it('says there are no presets yet', () => {
     renderSection(newStoreWithMaterial(0));
 
-    expect(screen.getByRole('button', { name: `No presets ${MIDDLE_DOT} Add` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add preset' })).toBeInTheDocument();
   });
 
   it('asks for a material when none is chosen, and for a machine when none is active', () => {
