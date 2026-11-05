@@ -165,9 +165,25 @@ describe(JobCard.name, () => {
     renderJobCard(await newGcodeExportTestStore());
     const startJobButton: HTMLElement = screen.getByRole('button', { name: START_JOB_LABEL });
 
-    expect(startJobButton).toBeDisabled();
+    expect(startJobButton).toHaveAttribute('aria-disabled', 'true');
     expect(startJobButton).not.toHaveClass(PRIMARY_BUTTON_CLASS);
     expect(startJobButton).toHaveAccessibleDescription(NOT_CONNECTED_REASON);
+  });
+
+  it('opens no start confirmation from a blocked Start job, which stays focusable', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderJobCard(store);
+    const startJobButton: HTMLElement = screen.getByRole('button', { name: START_JOB_LABEL });
+
+    startJobButton.focus();
+    fireEvent.click(startJobButton);
+
+    expect(startJobButton).toHaveFocus();
+    expect(screen.queryByRole('button', { name: START_CONFIRM_OK_LABEL })).not.toBeInTheDocument();
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(JobStartRequested));
   });
 
   it('starts the job only after the confirmation, which the Escape-to-STOP hotkey treats as an overlay', async () => {
@@ -234,7 +250,7 @@ describe(JobCard.name, () => {
     renderJobCard(await newGcodeExportTestStore());
 
     expect(getExportButton()).not.toHaveClass(PRIMARY_BUTTON_CLASS);
-    expect(screen.getByRole('button', { name: START_JOB_NAME })).toBeDisabled();
+    expect(screen.getByRole('button', { name: START_JOB_NAME })).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
   });
 
@@ -279,7 +295,7 @@ describe(JobCard.name, () => {
   it('disables export without an active machine profile and says a profile is needed', async () => {
     renderJobCard(await newGcodeExportTestStore({ activeProfile: undefined }));
 
-    expect(getExportButton()).toBeDisabled();
+    expect(getExportButton()).toHaveAttribute('aria-disabled', 'true');
 
     fireEvent.mouseEnter(getExportButton().parentElement ?? getExportButton());
 
@@ -306,7 +322,7 @@ describe(JobCard.name, () => {
 
     renderJobCard(store);
 
-    expect(getExportButton()).toBeDisabled();
+    expect(getExportButton()).toHaveAttribute('aria-disabled', 'true');
     fireEvent.mouseEnter(getExportButton().parentElement ?? getExportButton());
     expect(await screen.findByText(NEEDS_LAYER_TOOLTIP)).toBeInTheDocument();
     expect(drawableSet.drawables.length).toBeGreaterThan(0);

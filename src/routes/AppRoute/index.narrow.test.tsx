@@ -22,7 +22,7 @@ describe('AppRoute in a narrow window', () => {
     await renderWorkbench(newStore());
 
     expect(screen.getAllByRole('button', { name: START_LABEL })).toHaveLength(1);
-    expect(screen.getByRole('button', { name: START_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: START_LABEL })).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('button', { name: START_LABEL }).closest('[class*="stickyStopBar"]')).not.toBeNull();
   });
 

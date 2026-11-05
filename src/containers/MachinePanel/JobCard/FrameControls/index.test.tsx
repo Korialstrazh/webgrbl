@@ -301,7 +301,7 @@ describe(FrameControls.name, () => {
 
     renderFrameControls(store);
 
-    expect(getFrameJobButton()).toBeDisabled();
+    expect(getFrameJobButton()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText(
       `The frame goes ${OVERRUN_MM} mm past the right edge of the bed. Move the job before framing.`,
     )).toBeInTheDocument();
@@ -314,8 +314,20 @@ describe(FrameControls.name, () => {
     renderFrameControls(store);
     fireEvent.mouseEnter(getFrameJobButton().parentElement as HTMLElement);
 
-    expect(getFrameJobButton()).toBeDisabled();
+    expect(getFrameJobButton()).toHaveAttribute('aria-disabled', 'true');
     expect(await screen.findByText('The laser has not reported its position yet.')).toBeInTheDocument();
+  });
+
+  it('keeps a blocked Frame focusable and starts no frame on a click', () => {
+    const store: AppStore = newFrameStore(getActiveProfile(newFrameStore(0)).workAreaXMm + OVERRUN_MM);
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderFrameControls(store);
+    getFrameJobButton().focus();
+    fireEvent.click(getFrameJobButton());
+
+    expect(getFrameJobButton()).toHaveFocus();
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(FrameStartRequested));
   });
 
   it('turns the controls off while a frame runs', () => {
@@ -324,7 +336,7 @@ describe(FrameControls.name, () => {
     store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.FRAME }));
     renderFrameControls(store);
 
-    expect(getFrameJobButton()).toBeDisabled();
+    expect(getFrameJobButton()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('combobox', { name: GRID_LABEL })).toBeDisabled();
     expect(screen.getByLabelText(MARGIN_LABEL)).toBeDisabled();
     expect(screen.getByLabelText(SPEED_LABEL)).toBeDisabled();

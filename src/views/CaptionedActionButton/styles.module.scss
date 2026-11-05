@@ -10,14 +10,14 @@
 }
 
 // Enabled reads by its fill and border, not by a brighter word; primary and danger keep their own look.
-.captionedActionButton:global(.ant-btn-variant-outlined):not(:disabled) {
+.captionedActionButton:global(.ant-btn-variant-outlined):not(:disabled, [aria-disabled='true']) {
   border-color: var(--color-text-muted);
   background-color: var(--color-surface-3);
 }
 
 // A secondary action has no fill but a solid, clearly visible outline and bright text, so it still reads as ready
 // beside an off action, while the filled main action stays the one that stands out.
-.captionedActionButton.quiet:global(.ant-btn-variant-outlined):not(:disabled) {
+.captionedActionButton.quiet:global(.ant-btn-variant-outlined):not(:disabled, [aria-disabled='true']) {
   border-color: var(--color-text-muted);
   background-color: transparent;
   color: var(--color-text);
@@ -25,12 +25,15 @@
 
 // Off: no fill, a dashed outline (at least 3:1) and a dimmed icon with a lock, so it can never be taken for a ready action. The
 // caption keeps the readable disabled grey.
-.captionedActionButton:global(.ant-btn):disabled {
+.captionedActionButton:global(.ant-btn):disabled,
+.captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'],
+.captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true']:is(:hover, :active) {
   border-style: dashed;
   border-color: var(--color-disabled-border-dashed);
   background-color: transparent;
   // The caption keeps the readable disabled grey (at least 4.5:1 on every surface), never antd's dimmer default.
   color: var(--color-disabled-text);
+  cursor: not-allowed;
 
   .icon > :global(.anticon):first-child {
     opacity: 0.75;

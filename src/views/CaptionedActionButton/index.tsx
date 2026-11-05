@@ -1,7 +1,8 @@
 /**
  * An action as an icon over one word, so it explains itself without a hover. The longer name stays the accessible name
  * and, with the reason it is off, the tooltip, which opens below the row and away from the actions above it. An off
- * action has no fill, a dashed outline and a small lock on its icon, so it never looks like one that can be used.
+ * action has no fill, a dashed outline and a small lock on its icon, so it never looks like one that can be used; when
+ * it is blocked for a reason it stays focusable (aria-disabled) and ignores activation.
  *
  * @author michael.morosov
  *
@@ -13,7 +14,7 @@
 import { LockFilled } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ButtonProps } from 'antd';
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import { ANTD_TOOLTIP_PLACEMENT_BOTTOM } from '../../utils/antd.constants';
 import { DismissibleTooltip } from '../DismissibleTooltip';
 import { CAPTIONED_ACTION_LOCK_TEST_ID } from './captioned.action.constants';
@@ -43,10 +44,25 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
     isLabelTooltipShown = true,
     isQuiet = false,
     className,
+    onClick,
     ...buttonProps
   } = props;
   const tooltipText: string | undefined = blockedReasonText ?? (isLabelTooltipShown ? labelText : undefined);
-  const isButtonDisabled: boolean = isDisabled || Boolean(blockedReasonText);
+  const isBlocked: boolean = Boolean(blockedReasonText);
+  const isButtonDisabled: boolean = isDisabled || isBlocked;
+
+  // A blocked action stays in the tab order, so keyboard and screen reader users reach its reason; a click, Enter or
+  // Space on it does nothing and never reaches a wrapper such as a confirmation.
+  const handleClick = (clickEvent: MouseEvent<HTMLElement>): void => {
+    if (isBlocked) {
+      clickEvent.preventDefault();
+      clickEvent.stopPropagation();
+
+      return;
+    }
+
+    onClick?.(clickEvent);
+  };
 
   return (
     <DismissibleTooltip title={tooltipText} placement={ANTD_TOOLTIP_PLACEMENT_BOTTOM}>
@@ -55,7 +71,9 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
         className={[styles.captionedActionButton, isQuiet ? styles.quiet : undefined, className].join(' ')}
         aria-label={labelText}
         aria-description={blockedReasonText}
-        disabled={isButtonDisabled}
+        aria-disabled={isBlocked || undefined}
+        disabled={isDisabled && !isBlocked}
+        onClick={handleClick}
       >
         <span className={styles.icon} aria-hidden>
           {iconComponent}
