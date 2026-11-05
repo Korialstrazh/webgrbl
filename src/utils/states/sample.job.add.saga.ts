@@ -43,7 +43,7 @@ export function* addSampleJob(): Generator {
 
   const palette: Palette = (yield select(selectPalette)) as Palette;
   const svgParts: SampleSvgParts = getSampleSvgParts((yield select(selectProjectLayers)) as ProjectLayer[]);
-  const sampleObject: ProjectObject = getSampleJobObject(machineArea, svgParts);
+  const sampleObject: ProjectObject = getSampleJobObject(machineArea, svgParts, projectDocument.objects);
   const layers: ProjectLayer[] = getSampleJobLayers(
     [...projectDocument.objects, sampleObject],
     palette,
@@ -57,6 +57,13 @@ export function* addSampleJob(): Generator {
 
   yield put(new SampleJobAdded({ objects: [sampleObject], layers }));
   yield put(new ProjectSelectionChanged({ objectIds: [sampleObject.id] }));
+
+  yield put(new ToastShown({
+    severity: TOAST_SEVERITY.INFO,
+    messageKey: DEFAULT.TOAST_SAMPLE_ADDED,
+    messageParameters: NO_TOAST_PARAMETERS,
+    isUndoOffered: true,
+  }));
 
   if (!svgParts.hasGradient) {
     yield put(new ToastShown({

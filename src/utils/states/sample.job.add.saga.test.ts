@@ -47,6 +47,22 @@ const getLayerOfKey = (store: AppStore, layerKey: string): ProjectLayer | undefi
   );
 
 describe(addSampleJob.name, () => {
+  it('reports the sample in a toast that offers Undo, and offsets a repeated sample', async () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new SampleJobAddRequested());
+    await waitForObjectCount(store, 1);
+    store.dispatch(new SampleJobAddRequested());
+    await waitForObjectCount(store, 2);
+
+    const [first, second] = selectProjectObjects(store.getState());
+
+    expect(selectToasts(store.getState())).toEqual(expect.arrayContaining([
+      expect.objectContaining({ messageKey: DEFAULT.TOAST_SAMPLE_ADDED, isUndoOffered: true }),
+    ]));
+    expect([second?.xMm, second?.yMm]).not.toEqual([first?.xMm, first?.yMm]);
+  });
+
   it('adds a selected 50 mm object, with a new Line layer for the square and Fill for the gradient', async () => {
     const store: AppStore = newStore();
 

@@ -251,3 +251,46 @@ describe(fitsSampleJob.name, () => {
     expect(fitsSampleJob(newToolpathMachineArea())).toBe(true);
   });
 });
+
+describe('getSampleJobObject placement of repeats', () => {
+  const WORK_AREA_MM = 100;
+  const area: ToolpathMachineArea = newToolpathMachineArea({ workAreaXMm: WORK_AREA_MM, workAreaYMm: WORK_AREA_MM });
+
+  const addSamples = (machineArea: ToolpathMachineArea, count: number): ProjectObject[] => {
+    const objects: ProjectObject[] = [];
+
+    for (let sampleIndex = 0; sampleIndex < count; ++sampleIndex) {
+      objects.push(getSampleJobObject(machineArea, undefined, objects));
+    }
+
+    return objects;
+  };
+
+  it('offsets a repeat so it does not sit on the first sample', () => {
+    const [first, second] = addSamples(area, 2);
+
+    expect([second?.xMm, second?.yMm]).not.toEqual([first?.xMm, first?.yMm]);
+  });
+
+  it('keeps every repeat on the bed, on separate spots, from any origin corner', () => {
+    Object.values(MACHINE_ORIGIN_CORNER).forEach((originCorner: MachineOriginCorner): void => {
+      const objects: ProjectObject[] = addSamples({ ...area, originCorner }, 12);
+      const spots: Set<string> = new Set(objects.map(({ xMm, yMm }: ProjectObject): string => `${xMm}/${yMm}`));
+
+      expect(spots.size).toBe(objects.length);
+      objects.forEach(({ xMm, yMm, widthMm, heightMm }: ProjectObject): void => {
+        expect(xMm).toBeGreaterThanOrEqual(0);
+        expect(yMm).toBeGreaterThanOrEqual(0);
+        expect(xMm + widthMm).toBeLessThanOrEqual(WORK_AREA_MM);
+        expect(yMm + heightMm).toBeLessThanOrEqual(WORK_AREA_MM);
+      });
+    });
+  });
+
+  it('falls back to the first spot when no other spot is free on a bed just big enough', () => {
+    const tightArea: ToolpathMachineArea = newToolpathMachineArea({ workAreaXMm: 55, workAreaYMm: 55 });
+    const [first, second] = addSamples(tightArea, 2);
+
+    expect([second?.xMm, second?.yMm]).toEqual([first?.xMm, first?.yMm]);
+  });
+});

@@ -17,4 +17,6 @@ export interface ToastShownPayload {
   messageKey: string;
   /** Values for the placeholders of the message. */
   messageParameters: Record<string, string | number>;
+  /** Whether the toast offers to undo the change it reports. */
+  isUndoOffered?: boolean;
 }

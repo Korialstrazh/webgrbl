@@ -1,10 +1,11 @@
 @use '../../styles/layout' as layout;
 
-// Anchored to the top right of the bed area, above the console overlay (z-index 30).
+// Anchored to the bottom of the bed area, clear of the bed toolbar and the playback bar, above the console overlay
+// (z-index 30).
 .toastStack {
   position: absolute;
-  top: var(--space-4);
   right: var(--space-4);
+  bottom: 5rem;
   z-index: 40;
   display: flex;
   flex-direction: column;
@@ -18,6 +19,7 @@
 // over it, so STOP stays clickable); toasts beyond the cap scroll inside the stack.
 .pinnedToWindow {
   position: fixed;
+  bottom: auto;
   top: calc(#{layout.$top-bar-height} + var(--space-4));
   max-width: calc(100vw - 2 * var(--space-4));
   max-height: calc(100dvh - #{layout.$top-bar-height} - #{layout.$sticky-stop-bar-height} - 2 * var(--space-4));
@@ -37,6 +39,22 @@
   font-family: var(--font-ui);
   font-size: 0.875rem;
   pointer-events: auto;
+}
+
+.icon {
+  flex: none;
+}
+
+.info .icon {
+  color: var(--color-info);
+}
+
+.warning .icon {
+  color: var(--color-warning);
+}
+
+.error .icon {
+  color: var(--color-danger-text);
 }
 
 .info {
