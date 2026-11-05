@@ -49,6 +49,16 @@ describe(BurnPreviewToolbar.name, () => {
     expect(screen.getByRole('dialog', { name: `Test result: ${BIRCH.name}` })).toBeInTheDocument();
   });
 
+  it('asks to choose a material when materials exist but none is chosen', () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new MaterialSaved({ material: BIRCH }));
+    renderToolbar(store);
+
+    expect(screen.getByText('Choose a material')).toBeInTheDocument();
+    expect(screen.queryByText('Material: none')).not.toBeInTheDocument();
+  });
+
   it('says none is chosen and keeps the test result off without a material', () => {
     renderToolbar(newStore());
 

@@ -11,7 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { AppstoreAddOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { AppstoreAddOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Input, Tag } from 'antd';
 import type { CheckboxChangeEvent } from 'antd';
 import type { ChangeEvent, ReactNode } from 'react';
@@ -55,7 +55,8 @@ export const MaterialLibraryFilters = (props: MaterialLibraryFiltersProps): Reac
         <div className={styles.filterChips}>
           {filteredMaterial && (
             <Tag
-              className={styles.filterChip}
+              className={[styles.filterChip, styles.materialFilterChip].join(' ')}
+              icon={<FilterOutlined aria-hidden />}
               closable={{ 'aria-label': t(DEFAULT.MATERIAL_LIBRARY_MATERIAL_FILTER_CLEAR) }}
               onClose={onClearMaterialFilter}
             >

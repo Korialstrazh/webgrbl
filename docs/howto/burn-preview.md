@@ -4,7 +4,7 @@ The 3D view shows how a job will turn out before material is spent: the engraved
 
 ## Open it
 
-1. In **Design**, pick a material in the Material panel on the left (the user moved it to Design from 3D; 3D shows it as read-only text and, with none chosen, tells you to pick one in Design), or choose **Add material...** and enter a name and a thickness (0.1 to 100 mm). Save waits for both to be valid. A name and thickness you already have bring a note and **Use that one**; saving a copy stays allowed. Each option shows the thickness and, for the active machine, the test date or **not tested**; the current material has a check mark. The material belongs to the project; the project file carries a copy, so it opens elsewhere.
+1. In **Design**, pick a material in the Material panel on the left (the user moved it to Design from 3D; 3D shows it as read-only text and, with none chosen, shows a centred card: a material select when materials exist, or **Add material...** when none do), or choose **Add material...** and enter a name and a thickness (0.1 to 100 mm). Save waits for both to be valid. A name and thickness you already have bring a note and **Use that one**; saving a copy stays allowed. Each option shows the thickness and, for the active machine, the test date or **not tested**; the current material has a check mark. The material belongs to the project; the project file carries a copy, so it opens elsewhere.
 2. Switch the bed to **3D** (the cube icon of the view switch). It needs a material and a ready toolpath; the toolpath is requested for you.
 3. Orbit, zoom and pan the sheet. The camera is orthographic only.
 

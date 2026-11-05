@@ -270,7 +270,7 @@ describe(MaterialLibraryDrawer.name, () => {
     fireEvent.click(screen.getByLabelText('Show all materials'));
 
     expect(await screen.findByText(getRowNamePattern(PLYWOOD_NAME))).toBeInTheDocument();
-    expect(screen.queryByText(/^Material: /)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Filter: /)).not.toBeInTheDocument();
   });
 
   it('says the filtered material has no presets yet and starts a new preset with it', async () => {
@@ -466,13 +466,13 @@ describe(MaterialLibraryDrawer.name, () => {
     addMaterialInDialog();
 
     expect(selectMaterials(store.getState())).toHaveLength(1);
-    expect(await screen.findByText(`Material: ${BIRCH_NAME}, ${BIRCH_THICKNESS_MM} mm`)).toBeInTheDocument();
+    expect(await screen.findByText(`Filter: ${BIRCH_NAME}, ${BIRCH_THICKNESS_MM} mm`)).toBeInTheDocument();
     expect(screen.getByText(`No presets yet for ${BIRCH_NAME}, ${BIRCH_THICKNESS_MM} mm`)).toBeInTheDocument();
-    // The library adds materials without touching the project.
-    expect(selectActiveMaterial(store.getState())).toBeUndefined();
+    // With none chosen yet, the first material the project gets is this one.
+    expect(selectActiveMaterial(store.getState())?.name).toBe(BIRCH_NAME);
   });
 
-  it('adds a material from the edit view, which becomes the material of the draft only', async () => {
+  it('adds a material from the edit view, which becomes the material of the draft, and of a project that has none', async () => {
     const store: AppStore = renderDrawer();
 
     fireEvent.click(await screen.findByRole('button', { name: ADD_LABEL }));
@@ -485,7 +485,7 @@ describe(MaterialLibraryDrawer.name, () => {
     const [birch]: Material[] = selectMaterials(store.getState()).filter(({ name }: Material) => name === BIRCH_NAME);
 
     expect(selectMaterialPresets(store.getState())).toEqual([expect.objectContaining({ materialId: birch?.id })]);
-    expect(selectActiveMaterial(store.getState())).toBeUndefined();
+    expect(selectActiveMaterial(store.getState())?.id).toBe(birch?.id);
     await waitForStoredPresetCount(1);
   });
 

@@ -121,6 +121,6 @@ describe(MaterialSection.name, () => {
     fireEvent.click(screen.getByRole('button', { name: `1 preset for ${PLYWOOD_ON_MACHINE}` }));
 
     expect((await screen.findByText(LIBRARY_TITLE)).closest(DRAWER_ROOT_SELECTOR)).toBeInTheDocument();
-    expect(screen.getByText('Material: Plywood, 3 mm')).toBeInTheDocument();
+    expect(screen.getByText('Filter: Plywood, 3 mm')).toBeInTheDocument();
   });
 });

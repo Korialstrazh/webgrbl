@@ -11,3 +11,17 @@
   align-items: center;
   gap: var(--space-2);
 }
+
+// The same card the empty bed shows, so the 3D view without a material reads as a next step, not as a blank view.
+.materialCard {
+  position: relative;
+  width: 22rem;
+  max-width: calc(100% - 2 * var(--space-3));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-2);
+}
+
+.materialSelect {
+  width: 100%;
+}

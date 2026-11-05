@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MaterialDialog } from '.';
+import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import { DEFAULT_MATERIAL_THICKNESS_MM } from '../../utils/materials/material.constants';
 import { newMaterial } from '../../utils/materials/new.material';
@@ -8,6 +9,7 @@ import { selectActiveMaterial } from '../../utils/states/material.selectors';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
+import { ProjectMaterialSelected, selectProjectLayers } from '../../utils/states/project.document.state';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
@@ -48,6 +50,42 @@ const clickSave = (): void => {
 };
 
 describe(MaterialDialog.name, () => {
+  describe('with a caller that takes the chosen material', () => {
+    const saveNewMaterial = (store: AppStore): void => {
+      renderDialog(store, vi.fn(), vi.fn());
+      fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: ENTERED_NAME } });
+      clickSave();
+    };
+
+    it('makes the new material the project material when none is chosen', () => {
+      const store: AppStore = newStore();
+
+      saveNewMaterial(store);
+
+      expect(selectActiveMaterial(store.getState())?.name).toBe(STORED_NAME);
+    });
+
+    it('keeps the project material when one is already chosen', () => {
+      const store: AppStore = newStore();
+      const chosenMaterial: Material = newMaterial({ name: 'Oak', thicknessMm: ENTERED_THICKNESS_MM });
+
+      store.dispatch(new MaterialSaved({ material: chosenMaterial }));
+      store.dispatch(new ProjectMaterialSelected({ materialId: chosenMaterial.id }));
+      saveNewMaterial(store);
+
+      expect(selectActiveMaterial(store.getState())?.id).toBe(chosenMaterial.id);
+    });
+
+    it('leaves the layers exactly as they were when it selects the new material', () => {
+      const store: AppStore = newStore();
+      const layersBefore: ProjectLayer[] = selectProjectLayers(store.getState());
+
+      saveNewMaterial(store);
+
+      expect(selectProjectLayers(store.getState())).toBe(layersBefore);
+    });
+  });
+
   it('registers an overlay, starts with an empty name in focus and keeps Save off', () => {
     const store: AppStore = newStore();
 
@@ -77,7 +115,7 @@ describe(MaterialDialog.name, () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('hands the saved material to onMaterialChosen instead of selecting it for the project', () => {
+  it('hands the saved material to onMaterialChosen, and also selects it while the project has none', () => {
     const store: AppStore = newStore();
     const onMaterialChosen = vi.fn();
 
@@ -89,7 +127,7 @@ describe(MaterialDialog.name, () => {
     const [savedMaterial]: Material[] = selectMaterials(store.getState());
 
     expect(onMaterialChosen).toHaveBeenCalledWith(savedMaterial?.id);
-    expect(selectActiveMaterial(store.getState())).toBeUndefined();
+    expect(selectActiveMaterial(store.getState())?.id).toBe(savedMaterial?.id);
   });
 
   it.each(['0', '', '101'])('blocks Save with a localized error for the thickness "%s"', (thicknessText: string) => {

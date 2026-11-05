@@ -36,6 +36,7 @@ import {
   MATERIAL_THICKNESS_MM_MIN,
 } from '../../utils/materials/material.constants';
 import { newMaterial } from '../../utils/materials/new.material';
+import { selectActiveMaterial } from '../../utils/states/material.selectors';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
@@ -62,6 +63,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
   const [isNameChanged, setIsNameChanged] = useState<boolean>(false);
   const [thicknessMm, setThicknessMm] = useState<number>(DEFAULT_MATERIAL_THICKNESS_MM);
   const materials: Material[] = useSelector(selectMaterials);
+  const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const nameInputRef: RefObject<InputRef | null> = useRef<InputRef>(null);
   const fieldErrors: MaterialFieldErrors = getMaterialFieldErrors(materialName, thicknessMm);
   const isSaveAllowed: boolean = !hasMaterialFieldError(fieldErrors);
@@ -86,6 +88,12 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
     const material: Material = newMaterial({ name: materialName.trim(), thicknessMm });
 
     dispatch(new MaterialSaved({ material }));
+
+    // Choosing a material changes no layer value, so the first one a project gets can safely become its material.
+    if (!activeMaterial) {
+      dispatch(new ProjectMaterialSelected({ materialId: material.id }));
+    }
+
     chooseMaterial(material.id);
   };
 
