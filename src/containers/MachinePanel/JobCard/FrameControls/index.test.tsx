@@ -93,6 +93,8 @@ const newFrameStore = (endX: number): AppStore => {
   return store;
 };
 
+const SHOW_SETTINGS_LABEL = 'Show frame settings';
+
 const renderFrameControls = (store: AppStore): void => {
   render(
     <Provider store={store}>
@@ -101,6 +103,7 @@ const renderFrameControls = (store: AppStore): void => {
       </AntdTestProvider>
     </Provider>,
   );
+  fireEvent.click(screen.getByRole('button', { name: SHOW_SETTINGS_LABEL }));
 };
 
 const getFrameJobButton = (): HTMLElement => screen.getByRole('button', { name: FRAME_JOB_LABEL });
@@ -116,6 +119,23 @@ const getActiveProfile = (store: AppStore): MachineProfile => {
 };
 
 describe(FrameControls.name, () => {
+  it('keeps the frame settings closed until the gear is pressed', () => {
+    render(
+      <Provider store={newFrameStore(OUTLINE_END_X_MM)}>
+        <AntdTestProvider>
+          <FrameControls />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    expect(screen.queryByLabelText('Frame margin (mm)')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: SHOW_SETTINGS_LABEL })).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByRole('button', { name: SHOW_SETTINGS_LABEL }));
+
+    expect(screen.getByLabelText('Frame margin (mm)')).toBeInTheDocument();
+  });
+
   it('shows the frame time, the dot power and the profile the power is worked out for', () => {
     renderFrameControls(newFrameStore(OUTLINE_END_X_MM));
 

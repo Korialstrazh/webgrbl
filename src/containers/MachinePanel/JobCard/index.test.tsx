@@ -118,6 +118,9 @@ const getFirstLayerKey = (store: AppStore): string => {
   return getLayerKey(firstLayer);
 };
 
+const START_JOB_NAME = 'Start job';
+const NOT_CONNECTED_REASON = 'Connect the laser to start a job.';
+
 describe(JobCard.name, () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -133,7 +136,7 @@ describe(JobCard.name, () => {
     });
 
     expect(screen.getByText(TWO_LAYERS_ONE_OFF)).toBeInTheDocument();
-    expect(screen.getByText(ESTIMATE_LABEL).nextElementSibling).toHaveTextContent(ESTIMATE_PLACEHOLDER);
+    expect(screen.getByText(ESTIMATE_LABEL).closest('div')).toHaveTextContent(ESTIMATE_PLACEHOLDER);
   });
 
   it('shows the estimate of a ready toolpath', () => {
@@ -225,10 +228,18 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('status')).toHaveTextContent('Framing: paused');
   });
 
-  it('makes Export G-code the filled main action, the one job action that works today', async () => {
+  it('never fills Export G-code, and fills Start job only when it can run', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
-    expect(getExportButton()).toHaveClass(PRIMARY_BUTTON_CLASS);
+    expect(getExportButton()).not.toHaveClass(PRIMARY_BUTTON_CLASS);
+    expect(screen.getByRole('button', { name: START_JOB_NAME })).toBeDisabled();
+    expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
+  });
+
+  it('writes why Start job is off beside it', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    expect(screen.getByText(NOT_CONNECTED_REASON)).toBeInTheDocument();
   });
 
   it('has no Soon tag any more, since Frame job works', async () => {
