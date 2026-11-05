@@ -166,8 +166,9 @@ describe(MachineProfilesDialog.name, () => {
   it('keeps the active profile when another profile is saved', () => {
     const store: AppStore = newStore();
 
-    saveProfile(store, { name: WORKSHOP_NAME });
-    store.dispatch(new ActiveMachineProfileSelected({ profileId: selectMachineProfiles(store.getState())[0]?.id ?? '' }));
+    const workshopProfile: MachineProfile = saveProfile(store, { name: WORKSHOP_NAME });
+
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: workshopProfile.id }));
     renderDialog(store);
     clickButton(NEW_PROFILE_LABEL);
     changeField(NAME_LABEL, SECOND_PROFILE_NAME);

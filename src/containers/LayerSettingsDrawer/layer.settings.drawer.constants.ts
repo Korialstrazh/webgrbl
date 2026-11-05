@@ -28,25 +28,32 @@ export const LAYER_LINE_INTERVAL_DECIMALS = 2;
 export const LAYER_MAX_POWER_FIELD: LayerNumberFieldConfig = {
   field: 'maxPowerPercent',
   labelKey: DEFAULT.LAYER_SETTINGS_MAX_POWER,
+  captionKey: DEFAULT.FIELD_CAPTION_MAX,
+  unitKey: DEFAULT.FIELD_UNIT_PERCENT,
   decimals: LAYER_POWER_DECIMALS,
 };
 export const LAYER_MIN_POWER_FIELD: LayerNumberFieldConfig = {
   field: 'minPowerPercent',
   labelKey: DEFAULT.LAYER_SETTINGS_MIN_POWER,
+  captionKey: DEFAULT.FIELD_CAPTION_MIN,
+  unitKey: DEFAULT.FIELD_UNIT_PERCENT,
   decimals: LAYER_POWER_DECIMALS,
 };
 export const LAYER_SPEED_FIELD: LayerNumberFieldConfig = {
   field: 'speedMmPerMin',
   labelKey: DEFAULT.LAYER_SETTINGS_SPEED,
+  unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
   decimals: LAYER_SPEED_DECIMALS,
 };
 export const LAYER_PASSES_FIELD: LayerNumberFieldConfig = {
   field: 'passes',
   labelKey: DEFAULT.LAYER_SETTINGS_PASSES,
+  unitKey: DEFAULT.FIELD_UNIT_TIMES,
   decimals: LAYER_PASSES_DECIMALS,
 };
 export const LAYER_LINE_INTERVAL_FIELD: LayerNumberFieldConfig = {
   field: 'lineIntervalMm',
   labelKey: DEFAULT.LAYER_SETTINGS_LINE_INTERVAL,
+  unitKey: DEFAULT.FIELD_UNIT_MM,
   decimals: LAYER_LINE_INTERVAL_DECIMALS,
 };

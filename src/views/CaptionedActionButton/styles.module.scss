@@ -9,12 +9,22 @@
   padding: var(--space-1) var(--space-2);
 }
 
+// Enabled reads by its fill and border, not by a brighter word; primary and danger keep their own look.
+.captionedActionButton:global(.ant-btn-variant-outlined):not(:disabled) {
+  border-color: var(--color-text-muted);
+  background-color: var(--color-surface-3);
+}
+
+.captionedActionButton:global(.ant-btn):disabled {
+  border-style: dashed;
+}
+
 .icon {
   font-size: 1.125rem;
   line-height: 1;
 }
 
 .caption {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   line-height: 1.2;
 }

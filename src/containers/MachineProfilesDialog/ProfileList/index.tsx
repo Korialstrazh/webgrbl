@@ -56,7 +56,11 @@ export const ProfileList = (props: ProfileListProps): ReactNode => {
               </Button>
               {!isActive && (
                 <DismissibleTooltip title={setActiveLabel}>
-                  <Button size={ANTD_BUTTON_SIZE_SMALL} aria-label={setActiveLabel} onClick={() => onSetActive(profile.id)}>
+                  <Button
+                    size={ANTD_BUTTON_SIZE_SMALL}
+                    aria-label={setActiveLabel}
+                    onClick={() => onSetActive(profile.id)}
+                  >
                     {t(DEFAULT.MACHINE_PROFILES_USE)}
                   </Button>
                 </DismissibleTooltip>

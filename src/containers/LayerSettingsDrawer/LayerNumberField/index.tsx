@@ -9,19 +9,19 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { InputNumber } from 'antd';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { isFiniteNumber } from '../../../utils/type.guards/is.finite.number';
 import type { LayerFieldDraft } from '../interfaces/LayerFieldDraft';
 import type { LayerNumberFieldProps } from '../interfaces/LayerNumberFieldProps';
+import { IconNumberField } from '../../../views/IconNumberField';
 import styles from './styles.module.scss';
 
 const isDraftValueChanged = (draftValue: number | null | undefined, storedValue: number): draftValue is number =>
   isFiniteNumber(draftValue) && draftValue !== storedValue;
 
 export const LayerNumberField = (props: LayerNumberFieldProps): ReactNode => {
-  const { label, iconComponent, value, decimals, hintText, onCommit } = props;
+  const { label, iconComponent, captionText, unitText, value, decimals, hintText, onCommit } = props;
   const inputId: string = useId();
   // No draft means the user is not editing, so the stored value is shown. A cleared field is a draft with no value.
   const [draft, setDraft] = useState<LayerFieldDraft | undefined>(undefined);
@@ -39,16 +39,14 @@ export const LayerNumberField = (props: LayerNumberFieldProps): ReactNode => {
 
   return (
     <div className={styles.field}>
-      <label className={styles.label} htmlFor={inputId}>
-        {iconComponent && <span className={styles.labelIcon} aria-hidden>{iconComponent}</span>}
-        {label}
-      </label>
-      <InputNumber
-        id={inputId}
-        className={styles.input}
+      <IconNumberField
+        inputId={inputId}
+        labelText={label}
+        iconComponent={iconComponent}
+        captionText={captionText}
+        unitText={unitText}
         value={draft ? draft.fieldValue : value}
         precision={decimals}
-        controls={false}
         changeOnBlur={false}
         onChange={(fieldValue: number | null) => setDraft({ fieldValue })}
         onBlur={commitDraft}

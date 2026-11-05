@@ -25,7 +25,7 @@ import { newToolpath } from '../../../../utils/toolpath/test.support/new.toolpat
 import { newToolpathMove } from '../../../../utils/toolpath/test.support/new.toolpath.move';
 
 const FRAME_JOB_LABEL = 'Frame job';
-const NEEDS_PROFILE_TEXT = 'Choose a laser profile: it holds these settings.';
+const NEEDS_PROFILE_TEXT = 'Set up a laser profile first.';
 const GRID_LABEL = 'Frame grid';
 const MARGIN_LABEL = 'Frame margin (mm)';
 const SPEED_LABEL = 'Frame speed (mm/min)';
@@ -152,7 +152,7 @@ describe(FrameControls.name, () => {
     renderFrameControls(store);
 
     expect(screen.getByText(NEEDS_PROFILE_TEXT)).toBeInTheDocument();
-    expect(screen.getByLabelText(MARGIN_LABEL)).toBeDisabled();
+    expect(screen.queryByLabelText(MARGIN_LABEL)).not.toBeInTheDocument();
   });
 
   it('keeps the settings editable while disconnected, as they only change the stored profile', () => {

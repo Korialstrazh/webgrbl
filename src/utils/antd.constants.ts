@@ -123,3 +123,7 @@ export const ANTD_TOOLTIP_PLACEMENT_LEFT: TooltipProps['placement'] = 'left';
 
 /** An input number outlined as having an invalid value. */
 export const ANTD_INPUT_NUMBER_STATUS_ERROR: InputNumberProps['status'] = 'error';
+
+/** Antd's class names for a modal's content box and title, for moving the focus into a dialog that opened. */
+export const ANTD_MODAL_CONTENT_SELECTOR = '.ant-modal-content';
+export const ANTD_MODAL_TITLE_SELECTOR = '.ant-modal-title';

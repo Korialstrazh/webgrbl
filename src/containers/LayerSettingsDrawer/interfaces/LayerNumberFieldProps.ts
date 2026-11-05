@@ -12,8 +12,10 @@ import type { ReactNode } from 'react';
 
 export interface LayerNumberFieldProps {
   label: string;
-  /** The icon before the label. */
-  iconComponent?: ReactNode;
+  /** The icon at the start of the field. */
+  iconComponent: ReactNode;
+  captionText?: string;
+  unitText?: string;
   /** The value stored in the project. */
   value: number;
   decimals: number;

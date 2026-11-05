@@ -11,6 +11,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import {
+  ApiOutlined,
   BorderOuterOutlined,
   CloudOutlined,
   ColumnHeightOutlined,
@@ -279,7 +280,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
           <Tooltip title={isConnected ? undefined : t(DEFAULT.MACHINE_PROFILES_READ_NEEDS_CONNECTION)}>
             {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}
             <span className={styles.readButtonWrapper}>
-              <Button disabled={!isConnected} onClick={readDraftFromLaser}>
+              <Button disabled={!isConnected} icon={<ApiOutlined aria-hidden />} onClick={readDraftFromLaser}>
                 {t(DEFAULT.MACHINE_PROFILES_READ_FROM_LASER)}
               </Button>
             </span>

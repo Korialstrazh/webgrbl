@@ -31,20 +31,6 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
   return (
     <div className={styles.paletteFileActions}>
       <div className={styles.actions}>
-        <DismissibleTooltip title={t(DEFAULT.PALETTE_RESET)}>
-          <Popconfirm
-            title={t(DEFAULT.PALETTE_RESET_CONFIRM)}
-            okText={t(DEFAULT.PALETTE_RESET_OK)}
-            cancelText={t(DEFAULT.PALETTE_RESET_CANCEL)}
-            okButtonProps={{ danger: true }}
-            onConfirm={() => {
-              dispatch(new PaletteResetRequested());
-              onReset();
-            }}
-          >
-            <Button icon={<ReloadOutlined />} aria-label={t(DEFAULT.PALETTE_RESET)} />
-          </Popconfirm>
-        </DismissibleTooltip>
         <IconActionButton
           labelText={t(DEFAULT.PALETTE_EXPORT)}
           iconComponent={<DownloadOutlined />}
@@ -66,6 +52,22 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
             <Button icon={<QuestionCircleOutlined />} aria-label={t(DEFAULT.PALETTE_INKSCAPE_HELP)} />
           </Popover>
         </DismissibleTooltip>
+        <span className={styles.resetAction}>
+          <DismissibleTooltip title={t(DEFAULT.PALETTE_RESET)}>
+            <Popconfirm
+              title={t(DEFAULT.PALETTE_RESET_CONFIRM)}
+              okText={t(DEFAULT.PALETTE_RESET_OK)}
+              cancelText={t(DEFAULT.PALETTE_RESET_CANCEL)}
+              okButtonProps={{ danger: true }}
+              onConfirm={() => {
+                dispatch(new PaletteResetRequested());
+                onReset();
+              }}
+            >
+              <Button danger icon={<ReloadOutlined />} aria-label={t(DEFAULT.PALETTE_RESET)} />
+            </Popconfirm>
+          </DismissibleTooltip>
+        </span>
       </div>
     </div>
   );

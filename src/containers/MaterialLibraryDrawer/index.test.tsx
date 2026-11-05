@@ -472,7 +472,7 @@ describe(MaterialLibraryDrawer.name, () => {
     expect(selectActiveMaterial(store.getState())?.name).toBe(BIRCH_NAME);
   });
 
-  it('adds a material from the edit view, which becomes the material of the draft, and of a project that has none', async () => {
+  it('adds a material from the edit view, which goes to the draft and to a project with none', async () => {
     const store: AppStore = renderDrawer();
 
     fireEvent.click(await screen.findByRole('button', { name: ADD_LABEL }));

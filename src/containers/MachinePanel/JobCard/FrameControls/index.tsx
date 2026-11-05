@@ -137,68 +137,72 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
           {t(settingsOffReasonKey)}
         </p>
       )}
-      <div className={styles.field}>
-        <label className={styles.hiddenLabel} htmlFor={FRAME_GRID_SELECT_ID}>{t(DEFAULT.FRAME_GRID_LABEL)}</label>
-        <Tooltip title={t(DEFAULT.FRAME_GRID_LABEL)}>
-          <Select<number>
-            id={FRAME_GRID_SELECT_ID}
-            prefix={<BorderlessTableOutlined aria-hidden />}
-            disabled={!activeProfile || isJobRunActive}
-            value={gridCellMm}
-            options={FRAME_GRID_CELL_OPTIONS_MM.map((cellMm: number) => ({
-              value: cellMm,
-              label: cellMm === FRAME_GRID_CELL_NONE_MM
-                ? t(DEFAULT.FRAME_GRID_NONE)
-                : t(DEFAULT.FRAME_GRID_CELL, { cellCm: cellMm / FRAME_MM_PER_CM }),
-            }))}
-            // Above the popover, which the default container would draw it under when both are in the body.
-            getPopupContainer={(triggerNode: HTMLElement): HTMLElement => triggerNode.parentElement ?? triggerNode}
-            onChange={(frameGridCellMm: number): void => {
-              if (activeProfile) {
-                dispatch(new MachineProfileSaved({ profile: { ...activeProfile, frameGridCellMm } }));
-              }
-            }}
+      {activeProfile && (
+        <>
+          <div className={styles.field}>
+            <label className={styles.hiddenLabel} htmlFor={FRAME_GRID_SELECT_ID}>{t(DEFAULT.FRAME_GRID_LABEL)}</label>
+            <Tooltip title={t(DEFAULT.FRAME_GRID_LABEL)}>
+              <Select<number>
+                id={FRAME_GRID_SELECT_ID}
+                prefix={<BorderlessTableOutlined aria-hidden />}
+                disabled={!activeProfile || isJobRunActive}
+                value={gridCellMm}
+                options={FRAME_GRID_CELL_OPTIONS_MM.map((cellMm: number) => ({
+                  value: cellMm,
+                  label: cellMm === FRAME_GRID_CELL_NONE_MM
+                    ? t(DEFAULT.FRAME_GRID_NONE)
+                    : t(DEFAULT.FRAME_GRID_CELL, { cellCm: cellMm / FRAME_MM_PER_CM }),
+                }))}
+                // Above the popover, which the default container would draw it under when both are in the body.
+                getPopupContainer={(triggerNode: HTMLElement): HTMLElement => triggerNode.parentElement ?? triggerNode}
+                onChange={(frameGridCellMm: number): void => {
+                  if (activeProfile) {
+                    dispatch(new MachineProfileSaved({ profile: { ...activeProfile, frameGridCellMm } }));
+                  }
+                }}
+              />
+            </Tooltip>
+          </div>
+          <FrameNumberInput
+            key={`${FRAME_MARGIN_FIELD}-${activeProfile?.id}`}
+            field={FRAME_MARGIN_FIELD}
+            inputId={FRAME_MARGIN_INPUT_ID}
+            labelKey={DEFAULT.FRAME_MARGIN_LABEL}
+            iconComponent={<RadiusSettingOutlined />}
+            unitKey={DEFAULT.FIELD_UNIT_MM}
+            savedValue={marginMm}
+            isDisabled={isJobRunActive}
           />
-        </Tooltip>
-      </div>
-      <FrameNumberInput
-        key={`${FRAME_MARGIN_FIELD}-${activeProfile?.id}`}
-        field={FRAME_MARGIN_FIELD}
-        inputId={FRAME_MARGIN_INPUT_ID}
-        labelKey={DEFAULT.FRAME_MARGIN_LABEL}
-        iconComponent={<RadiusSettingOutlined />}
-        unitKey={DEFAULT.FIELD_UNIT_MM}
-        savedValue={marginMm}
-        isDisabled={isJobRunActive}
-      />
-      <FrameNumberInput
-        key={`${FRAME_SPEED_FIELD}-${activeProfile?.id}`}
-        field={FRAME_SPEED_FIELD}
-        inputId={FRAME_SPEED_INPUT_ID}
-        labelKey={DEFAULT.FRAME_SPEED_LABEL}
-        iconComponent={<DashboardOutlined />}
-        unitKey={DEFAULT.FIELD_UNIT_MM_PER_MIN}
-        savedValue={feedMmPerMin}
-        isDisabled={isJobRunActive}
-      />
-      <dl className={styles.facts}>
-        <dt><ClockCircleOutlined aria-hidden /> {t(DEFAULT.FRAME_TIME_LABEL)}</dt>
-        <dd>
-          {rectangle
-            ? getJobEstimateText(t, getFrameDurationSeconds(rectangle, gridCellMm, feedMmPerMin))
-            : MISSING_VALUE_TEXT}
-        </dd>
-        <dt><ThunderboltOutlined aria-hidden /> {t(DEFAULT.FRAME_POWER_LABEL)}</dt>
-        <dd>
-          {activeProfile
-            ? t(DEFAULT.FRAME_POWER_VALUE, {
-              watts: FRAME_DOT_WATTS,
-              profileName: activeProfile.name,
-              maxPowerWatts: activeProfile.maxPowerWatts,
-            })
-            : MISSING_VALUE_TEXT}
-        </dd>
-      </dl>
+          <FrameNumberInput
+            key={`${FRAME_SPEED_FIELD}-${activeProfile?.id}`}
+            field={FRAME_SPEED_FIELD}
+            inputId={FRAME_SPEED_INPUT_ID}
+            labelKey={DEFAULT.FRAME_SPEED_LABEL}
+            iconComponent={<DashboardOutlined />}
+            unitKey={DEFAULT.FIELD_UNIT_MM_PER_MIN}
+            savedValue={feedMmPerMin}
+            isDisabled={isJobRunActive}
+          />
+          <dl className={styles.facts}>
+            <dt><ClockCircleOutlined aria-hidden /> {t(DEFAULT.FRAME_TIME_LABEL)}</dt>
+            <dd>
+              {rectangle
+                ? getJobEstimateText(t, getFrameDurationSeconds(rectangle, gridCellMm, feedMmPerMin))
+                : MISSING_VALUE_TEXT}
+            </dd>
+            <dt><ThunderboltOutlined aria-hidden /> {t(DEFAULT.FRAME_POWER_LABEL)}</dt>
+            <dd>
+              {activeProfile
+                ? t(DEFAULT.FRAME_POWER_VALUE, {
+                  watts: FRAME_DOT_WATTS,
+                  profileName: activeProfile.name,
+                  maxPowerWatts: activeProfile.maxPowerWatts,
+                })
+                : MISSING_VALUE_TEXT}
+            </dd>
+          </dl>
+        </>
+      )}
     </div>
   );
 
@@ -212,7 +216,11 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
             labelText={t(DEFAULT.MACHINE_JOB_FRAME)}
             captionText={t(DEFAULT.MACHINE_JOB_FRAME_CAPTION)}
             iconComponent={<FrameTraceIcon />}
-            blockedReasonText={blockedReasonKey && t(blockedReasonKey)}
+            blockedReasonText={blockedReasonKey && t(
+              blockedReasonKey === DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED
+                ? DEFAULT.FRAME_START_BLOCKED_NOT_CONNECTED
+                : blockedReasonKey,
+            )}
             onClick={() => dispatch(new FrameStartRequested())}
           />
           <Popover

@@ -13,17 +13,16 @@
 import {
   ColumnHeightOutlined,
   DashboardOutlined,
-  QuestionCircleOutlined,
   SaveOutlined,
   SyncOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { Button, Popover, Segmented, Switch } from 'antd';
+import { Segmented, Switch } from 'antd';
 import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_POPOVER_TRIGGER_CLICK, ANTD_SWITCH_SIZE_SMALL } from '../../../utils/antd.constants';
+import { ANTD_SWITCH_SIZE_SMALL } from '../../../utils/antd.constants';
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../../utils/layers/get.layer.palette.entry';
 import { getPaletteEntryFromLayer } from '../../../utils/layers/get.palette.entry.from.layer';
@@ -43,7 +42,6 @@ import {
   LayerSettingsChanged,
   LayerToggled,
 } from '../../../utils/states/project.document.state';
-import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { PaletteIcon } from '../../../views/PaletteIcon';
@@ -103,6 +101,8 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
       key={[layerKey, config.field].join(LAYER_FIELD_KEY_SEPARATOR)}
       label={t(config.labelKey)}
       iconComponent={iconComponent}
+      captionText={config.captionKey && t(config.captionKey)}
+      unitText={config.unitKey && t(config.unitKey)}
       value={settings[config.field]}
       decimals={config.decimals}
       hintText={hintText}
@@ -158,25 +158,19 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         </div>
       )}
       <div className={styles.actions}>
-        <IconActionButton
-          labelText={t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE)}
-          iconComponent={<SaveOutlined />}
-          onClick={savePaletteEntry}
-        />
-        <IconActionButton
-          labelText={t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
-          iconComponent={<PaletteIcon />}
-          onClick={onEditPalette}
-        />
-        <DismissibleTooltip title={t(DEFAULT.LAYER_SETTINGS_HELP_LABEL)}>
-          <Popover
-            trigger={ANTD_POPOVER_TRIGGER_CLICK}
-            content={<p className={styles.help}>{t(DEFAULT.LAYER_SETTINGS_HELP)}</p>}
-          >
-            <Button icon={<QuestionCircleOutlined />} aria-label={t(DEFAULT.LAYER_SETTINGS_HELP_LABEL)} />
-          </Popover>
-        </DismissibleTooltip>
         <LayerPresetButtons layer={layer} />
+        <div className={styles.paletteActions}>
+          <IconActionButton
+            labelText={t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE)}
+            iconComponent={<SaveOutlined />}
+            onClick={savePaletteEntry}
+          />
+          <IconActionButton
+            labelText={t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
+            iconComponent={<PaletteIcon />}
+            onClick={onEditPalette}
+          />
+        </div>
       </div>
     </div>
   );
