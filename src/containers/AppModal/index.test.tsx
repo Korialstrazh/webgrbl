@@ -59,7 +59,14 @@ describe('AppModal focus', () => {
     render(
       <Provider store={newStore()}>
         <AntdTestProvider>
-          <AppModal isOpen overlayIdPrefix={MODAL_OVERLAY_ID} title={MODAL_TITLE} footer={null} onClose={vi.fn()}>
+          <AppModal
+            isOpen
+            overlayIdPrefix={MODAL_OVERLAY_ID}
+            maxWidth={MODAL_MAX_WIDTH}
+            title={MODAL_TITLE}
+            footer={null}
+            onClose={vi.fn()}
+          >
             <input aria-label={FIRST_FIELD_LABEL} />
           </AppModal>
         </AntdTestProvider>

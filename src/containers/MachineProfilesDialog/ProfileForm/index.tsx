@@ -14,14 +14,9 @@ import {
   ApiOutlined,
   BorderOuterOutlined,
   CloudOutlined,
-  ColumnHeightOutlined,
-  ColumnWidthOutlined,
-  ControlOutlined,
-  DragOutlined,
   HomeOutlined,
   SettingOutlined,
   TagOutlined,
-  ThunderboltOutlined,
 } from '@ant-design/icons';
 import { Button, Collapse, Form, Input, Select, Switch, Tooltip } from 'antd';
 import { useId, useState } from 'react';
@@ -57,51 +52,12 @@ import type { ProfileFieldStatus } from './interfaces/ProfileFieldStatus';
 import type { ProfileFormProps } from './interfaces/ProfileFormProps';
 import type { ProfileNumberFieldDefinition } from './interfaces/ProfileNumberFieldDefinition';
 import { LaserReadingAlerts } from './LaserReadingAlerts';
+import { ADVANCED_NUMBER_FIELDS, BED_NUMBER_FIELDS, MACHINE_NUMBER_FIELDS } from './profile.form.fields';
 import { IconNumberField } from '../../../views/IconNumberField';
 import { LaserMachineIcon } from '../../../views/LaserMachineIcon';
 import styles from './styles.module.scss';
 
 const FIELD_ID_SEPARATOR = '-';
-
-const MACHINE_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
-  {
-    field: 'maxPowerWatts',
-    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_MAX_POWER,
-    iconComponent: <ThunderboltOutlined />,
-    unitKey: DEFAULT.FIELD_UNIT_WATTS,
-  },
-  {
-    field: 'jogFeedRate',
-    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_JOG_FEED_RATE,
-    iconComponent: <DragOutlined />,
-    unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
-  },
-];
-
-const BED_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
-  {
-    field: 'workAreaXMm',
-    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_X,
-    iconComponent: <ColumnWidthOutlined />,
-    unitKey: DEFAULT.FIELD_UNIT_MM,
-  },
-  {
-    field: 'workAreaYMm',
-    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_Y,
-    iconComponent: <ColumnHeightOutlined />,
-    unitKey: DEFAULT.FIELD_UNIT_MM,
-  },
-];
-
-const ADVANCED_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
-  {
-    field: 'sValueMax',
-    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX,
-    hintKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX_HINT,
-    iconComponent: <ControlOutlined />,
-    captionKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX_CAPTION,
-  },
-];
 
 const ADVANCED_PANEL_KEY = 'advanced';
 
