@@ -65,6 +65,8 @@ const OPEN_LABEL = 'Open from this browser\u2026';
 const SAVE_SHORTCUT_PATTERN = /Ctrl\+S/;
 const SAVE_AS_FILE_LABEL = 'Save as file';
 const OPEN_FILE_LABEL = 'Open project file\u2026';
+const ICON_SELECTOR = '[role="img"]';
+const FOLDER_OPEN_ICON_NAME = 'folder-open';
 const EXPORT_GCODE_PATTERN = /Export G-code/;
 const OPEN_PROJECT_DIALOG_LABEL = 'Open project';
 const PROJECT_FILE_INPUT_LABEL = 'Open a project file';
@@ -271,6 +273,21 @@ describe(TopBar.name, () => {
       fireEvent.click(screen.getByRole('menuitem', { name: SAVE_SHORTCUT_PATTERN }));
 
       expect(getDispatchedActionCalls(dispatchSpy, ProjectSaveRequested)).toHaveLength(1);
+    });
+
+    it('gives each project menu entry its own icon, so Save as file and Open project file never look alike', () => {
+      renderWorkbenchTopBar(newStore());
+      openProjectMenu();
+
+      const iconNames: (string | null)[] = screen.getAllByRole('menuitem').map(
+        (menuItem: HTMLElement): string | null =>
+          menuItem.querySelector(ICON_SELECTOR)?.getAttribute('aria-label') ?? null,
+      );
+
+      expect(iconNames).not.toContain(null);
+      expect(new Set(iconNames).size).toBe(iconNames.length);
+      expect(screen.getByRole('menuitem', { name: OPEN_FILE_LABEL }).querySelector(ICON_SELECTOR))
+        .toHaveAttribute('aria-label', FOLDER_OPEN_ICON_NAME);
     });
 
     it('requests a file export from Save as file', () => {

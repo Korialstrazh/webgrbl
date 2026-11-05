@@ -14,8 +14,8 @@ import {
   DownloadOutlined,
   FileAddOutlined,
   FolderOpenOutlined,
+  HistoryOutlined,
   SaveOutlined,
-  UploadOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
@@ -28,7 +28,7 @@ import styles from './styles.module.scss';
 
 export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvailability): ProjectMenuItems => [
   { key: PROJECT_MENU_KEY.NEW, icon: <FileAddOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_NEW) },
-  { key: PROJECT_MENU_KEY.OPEN, icon: <FolderOpenOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN) },
+  { key: PROJECT_MENU_KEY.OPEN, icon: <HistoryOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN) },
   {
     key: PROJECT_MENU_KEY.SAVE,
     icon: <SaveOutlined aria-hidden />,
@@ -47,7 +47,7 @@ export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvaila
   },
   {
     key: PROJECT_MENU_KEY.OPEN_FILE,
-    icon: <UploadOutlined aria-hidden />,
+    icon: <FolderOpenOutlined aria-hidden />,
     label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN_FILE),
   },
   { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
