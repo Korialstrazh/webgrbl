@@ -59,6 +59,8 @@
   --color-disabled-bg: #1a1d21;
   --color-disabled-text: #9aa0a6;
   --color-disabled-border: #23272c;
+  // The dashed outline of an off action button with no fill: visible on every surface, fainter than an enabled one.
+  --color-disabled-border-dashed: #4a5058;
   // STOP while it cannot act: the disabled look with a dark red outline, so it still reads as the emergency control.
   --color-danger-disabled-border: #5a2a2c;
 

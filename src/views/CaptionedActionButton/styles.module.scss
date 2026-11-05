@@ -15,18 +15,42 @@
   background-color: var(--color-surface-3);
 }
 
-// A secondary action keeps the plain border and no fill, so the filled main action stays the one that stands out.
+// A secondary action has no fill but a solid, clearly visible outline and bright text, so it still reads as ready
+// beside an off action, while the filled main action stays the one that stands out.
 .captionedActionButton.quiet:global(.ant-btn-variant-outlined):not(:disabled) {
-  border-color: var(--color-border);
+  border-color: var(--color-text-muted);
   background-color: transparent;
+  color: var(--color-text);
 }
 
+// Off: no fill, a faint dashed outline and a dimmed icon with a lock, so it can never be taken for a ready action. The
+// caption keeps the readable disabled grey.
 .captionedActionButton:global(.ant-btn):disabled {
   border-style: dashed;
+  border-color: var(--color-disabled-border-dashed);
+  background-color: transparent;
+
+  .icon > :global(.anticon):first-child {
+    opacity: 0.55;
+  }
 }
 
 .icon {
+  position: relative;
   font-size: 1.125rem;
+  line-height: 1;
+}
+
+// Doubled class: a caller that sizes every icon in its button must not enlarge the badge.
+.icon .lockBadge.lockBadge:global(.anticon) {
+  position: absolute;
+  inset-block-end: -0.25rem;
+  inset-inline-end: -0.5rem;
+  padding: 0.0625rem;
+  border-radius: 50%;
+  background-color: var(--color-surface-1);
+  color: var(--color-warning);
+  font-size: 0.6875rem;
   line-height: 1;
 }
 
