@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { CutCheckPanel } from '.';
 import { BURN_PART_STATUS, CUT_CHECK_WARNING_KIND } from '../../utils/burn.model/burn.model.constants';
@@ -27,6 +27,7 @@ import type { AppStore } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { LayerToggled, ProjectMaterialSelected, selectProjectLayers } from '../../utils/states/project.document.state';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../utils/states/toolpath.state';
+import { selectOpenLayerSettingsKey } from '../../utils/states/ui.workbench.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 import { newGcodeExportTestStore } from '../../utils/test.support/new.gcode.export.test.store';
@@ -103,17 +104,15 @@ describe(CutCheckPanel.name, () => {
       expect(screen.getByText(summaryText)).toBeInTheDocument();
     }
 
-    expect(screen.getByText(ESTIMATE_NOTE)).toBeInTheDocument();
-    expect(screen.queryByText(GUESS_NOTE)).not.toBeInTheDocument();
-    expect(screen.queryByText(TEST_SAMPLE_POINTER)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(ESTIMATE_NOTE)).toHaveTextContent('Estimate');
+    expect(screen.queryByText('Guess')).not.toBeInTheDocument();
   });
 
   it('shows the guess note and points to the test sample when there is no test', () => {
     renderPanel(newReadyStore(newModel(newCutCheck({ isGuess: true }))));
 
-    expect(screen.getByText(GUESS_NOTE)).toBeInTheDocument();
-    expect(screen.getByText(TEST_SAMPLE_POINTER)).toBeInTheDocument();
-    expect(screen.queryByText(ESTIMATE_NOTE)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(`${GUESS_NOTE} ${TEST_SAMPLE_POINTER}`)).toHaveTextContent('Guess');
+    expect(screen.queryByText('Estimate')).not.toBeInTheDocument();
   });
 
   it('writes one part in the singular', () => {
@@ -187,8 +186,12 @@ describe(CutCheckPanel.name, () => {
     });
     renderPanel(store);
 
-    expect(screen.getByText(new RegExp(`^Layer ${layerName}: Part 3 stays attached`))).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(`^Layer ${UNKNOWN_LAYER_KEY}: Part 3 stays attached`))).toBeInTheDocument();
+    expect(screen.getByLabelText(new RegExp(`^Layer ${layerName}: Part 3 stays attached`))).toBeInTheDocument();
+    expect(screen.getByLabelText(new RegExp(`^Layer ${UNKNOWN_LAYER_KEY}: Part 3 stays attached`))).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: `Fix in ${layerName} settings` }));
+
+    expect(selectOpenLayerSettingsKey(store.getState())).toBe(getLayerKey(layer));
   });
 
   describe('warnings of many parts', () => {
@@ -213,12 +216,12 @@ describe(CutCheckPanel.name, () => {
     it('says one thing once with the count, layer, depths and suggestion, and keeps each kind in view', () => {
       renderPanel(newReadyStore(groupedModel));
 
-      expect(screen.getAllByRole('alert')).toHaveLength(3);
-      expect(screen.getByText(new RegExp(
+      expect(within(screen.getByRole('list', { name: 'Cut check warnings' })).getAllByRole('listitem')).toHaveLength(3);
+      expect(screen.getByLabelText(new RegExp(
         `^Layer ${UNKNOWN_LAYER_KEY}: 2 parts may stay attached \\(predicted 0\\.2 mm, needed 3\\.0 mm\\)\\.`,
       ))).toBeInTheDocument();
-      expect(screen.getByText(/Part 3 stays attached/)).toBeInTheDocument();
-      expect(screen.getByText(/the fill cuts through/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Part 3 stays attached/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/the fill cuts through/)).toBeInTheDocument();
     });
 
     it('keeps the numbers and the suggestion in the callout, never in a selected row', () => {
@@ -226,7 +229,7 @@ describe(CutCheckPanel.name, () => {
       fireEvent.click(getPartRow(BORDERLINE_PART_ID));
 
       expect(screen.queryByText(/Part 2 may stay attached/)).not.toBeInTheDocument();
-      expect(screen.getAllByText(/predicted 0\.2 mm/)).toHaveLength(3);
+      expect(screen.getAllByLabelText(/predicted 0\.2 mm/)).toHaveLength(3);
     });
   });
 
@@ -314,7 +317,7 @@ describe(CutCheckPanel.name, () => {
       </Provider>,
     );
 
-    expect(screen.getByText(/lower the power or raise the speed/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/lower the power or raise the speed/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeEnabled();
   });
 
@@ -336,7 +339,7 @@ describe(CutCheckPanel.name, () => {
 
     expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
-    expect(screen.queryByText(ESTIMATE_NOTE)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(ESTIMATE_NOTE)).not.toBeInTheDocument();
   });
 
   it.each([

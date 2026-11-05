@@ -1,0 +1,28 @@
+.warningRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2rem;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+}
+
+.warningIcon {
+  flex: none;
+  color: var(--color-warning);
+}
+
+.layerName {
+  overflow: hidden;
+  flex: 1;
+  min-width: 2.5rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.depth {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}

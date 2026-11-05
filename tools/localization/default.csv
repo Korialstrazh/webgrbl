@@ -106,8 +106,13 @@ CONSOLE_REALTIME_STATUS_QUERY;Status query
 CONSOLE_SHOW_STATUS_REPORTS;Show status reports
 CONSOLE_TITLE;Console
 CONSOLE_TOGGLE;Console
+CUT_CHECK_BADGE_ESTIMATE;Estimate
+CUT_CHECK_BADGE_GUESS;Guess
+CUT_CHECK_DEPTH_COMPARISON;{{predicted}} / {{needed}} mm
+CUT_CHECK_FIX;Fix
 CUT_CHECK_NOTE_ESTIMATE;Estimate from your test.
 CUT_CHECK_NOTE_GUESS;This is a guess: no test has been made with this material on this laser.
+CUT_CHECK_OPEN_LAYER_SETTINGS;Fix in {{layer}} settings
 CUT_CHECK_PART_COUNT_one;{{count}} part
 CUT_CHECK_PART_COUNT_other;{{count}} parts
 CUT_CHECK_PART_LIFTED;{{height}} mm
@@ -130,6 +135,7 @@ CUT_CHECK_WARNING_PART_ATTACHED;Layer {{layer}}: Part {{part}} stays attached (p
 CUT_CHECK_WARNING_PART_MAY_STAY_ATTACHED;Layer {{layer}}: Part {{part}} may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
 CUT_CHECK_WARNING_PARTS_ATTACHED;Layer {{layer}}: {{count}} parts stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
 CUT_CHECK_WARNING_PARTS_MAY_STAY_ATTACHED;Layer {{layer}}: {{count}} parts may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
+CUT_CHECK_WARNINGS_LABEL;Cut check warnings
 DESIGN_LAYERS_TITLE;Layers
 DESIGN_MATERIAL_TITLE;Material
 DESIGN_OBJECTS_TITLE;Objects

@@ -1,8 +1,8 @@
 /**
- * The Cut check of the 3D view: the part counts, the warnings put together by what they say, a list with one row per
- * part that selects it, cut down to the selected row when it is long so Layers stays near, and whether this is an
- * estimate from a test or a guess. Without a current model it is the heading only, as the 3D view says why, and it
- * shows no old parts. Warnings never block export.
+ * The Cut check of the 3D view: the part counts with a small Estimate or Guess badge whose tooltip explains it, one
+ * compact icon row per group of warnings with a button to that layer's settings, and a list with one row per part that
+ * selects it, cut down to the selected row when it is long so Layers stays near. Without a current model it is the
+ * heading only, as the 3D view says why, and it shows no old parts. Warnings never block export.
  *
  * @author michael.morosov
  *
@@ -11,14 +11,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckSquareOutlined } from '@ant-design/icons';
-import { Alert, Button, Tag } from 'antd';
+import { CheckSquareOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Button, Tag, Tooltip } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  ANTD_ALERT_TYPE_WARNING,
   ANTD_BUTTON_TYPE_TEXT,
   ANTD_TAG_COLOR_SUCCESS,
   ANTD_TAG_COLOR_WARNING,
@@ -42,9 +41,9 @@ import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { selectProjectLayers } from '../../utils/states/project.document.state';
 import { Panel } from '../../views/Panel';
 import { BurnPartRowLift } from './BurnPartRowLift';
+import { CutCheckWarningRow } from './CutCheckWarningRow';
 import { getCutCheckListScrollTopPx } from './get.cut.check.list.scroll.top.px';
 import { getCutCheckWarningGroups } from './get.cut.check.warning.groups';
-import { getCutCheckWarningText } from './get.cut.check.warning.text';
 import type { CutCheckWarningGroup } from './interfaces/CutCheckWarningGroup';
 import styles from './styles.module.scss';
 
@@ -56,6 +55,7 @@ const PART_STATUS_TEXT_KEYS: Record<BurnPart['status'], string> = {
 
 /** More rows than this start cut down to the selected row: the counts above already sum them up. */
 const PART_LIST_FULL_ROW_LIMIT = 4;
+const NOTE_SENTENCE_SEPARATOR = ' ';
 const SCROLLING_OVERFLOW_VALUES: readonly string[] = ['auto', 'scroll'];
 
 const getScrollingAncestor = (element: HTMLElement): HTMLElement | undefined => {
@@ -99,6 +99,9 @@ export const CutCheckPanel = (): ReactNode => {
   const warningGroups: CutCheckWarningGroup[] = getCutCheckWarningGroups(warnings);
   const getLayerName = (layerKey: string): string => getLayerNameByKey(layerKey, projectLayers, paletteEntries);
   const isPartListLong: boolean = model.parts.length > PART_LIST_FULL_ROW_LIMIT;
+  const guessNoteText: string = [t(DEFAULT.CUT_CHECK_NOTE_GUESS), t(DEFAULT.CUT_CHECK_TEST_SAMPLE_POINTER)]
+    .join(NOTE_SENTENCE_SEPARATOR);
+  const accuracyNoteText: string = isGuess ? guessNoteText : t(DEFAULT.CUT_CHECK_NOTE_ESTIMATE);
   const shownParts: BurnPart[] = isPartListLong && !isPartListExpanded
     ? model.parts.filter(({ id }: BurnPart): boolean => id === selectedPartId)
     : model.parts;
@@ -126,21 +129,29 @@ export const CutCheckPanel = (): ReactNode => {
           >
             {t(DEFAULT.CUT_CHECK_SUMMARY_ATTACHED, { count: attachedPartCount })}
           </Tag>
+          <Tooltip title={accuracyNoteText}>
+            <Tag
+              className={styles.accuracyTag}
+              icon={<QuestionCircleOutlined aria-hidden />}
+              tabIndex={0}
+              aria-label={accuracyNoteText}
+            >
+              {t(isGuess ? DEFAULT.CUT_CHECK_BADGE_GUESS : DEFAULT.CUT_CHECK_BADGE_ESTIMATE)}
+            </Tag>
+          </Tooltip>
         </div>
-        <p className={styles.note}>{t(isGuess ? DEFAULT.CUT_CHECK_NOTE_GUESS : DEFAULT.CUT_CHECK_NOTE_ESTIMATE)}</p>
-        {isGuess && <p className={styles.note}>{t(DEFAULT.CUT_CHECK_TEST_SAMPLE_POINTER)}</p>}
-        {warningGroups.map(({ groupKey, warnings: groupWarnings }: CutCheckWarningGroup) => (
-          <Alert
-            key={groupKey}
-            type={ANTD_ALERT_TYPE_WARNING}
-            title={getCutCheckWarningText(
-              t,
-              groupWarnings[0],
-              getLayerName(groupWarnings[0].layerKey),
-              groupWarnings.length,
-            )}
-          />
-        ))}
+        {warningGroups.length > 0 && (
+          <ul className={styles.warningList} aria-label={t(DEFAULT.CUT_CHECK_WARNINGS_LABEL)}>
+            {warningGroups.map(({ groupKey, warnings: groupWarnings }: CutCheckWarningGroup) => (
+              <CutCheckWarningRow
+                key={groupKey}
+                warning={groupWarnings[0]}
+                layerName={getLayerName(groupWarnings[0].layerKey)}
+                partCount={groupWarnings.length}
+              />
+            ))}
+          </ul>
+        )}
         <ul className={styles.list}>
           {shownParts.map(({ id, status }: BurnPart) => (
             <li key={id} ref={id === selectedPartId ? selectedRowRef : undefined}>

@@ -8,7 +8,7 @@ The 3D view shows how a job will turn out before material is spent: the engraved
 2. Switch the bed to **3D** (the cube icon of the view switch). It needs a material and a ready toolpath; the toolpath is requested for you.
 3. Orbit, zoom and pan the sheet. The camera is orthographic only.
 
-In 3D the left panel shows the **Cut check** above Layers; Objects is hidden. STOP stays visible. Dropping an SVG onto the bed does nothing in 3D.
+In 3D the left panel shows the **Cut check** above Layers; Objects is hidden. Each warning is one short row (warning icon, layer, predicted / needed depth); hover it for the full sentence and press **Fix** to open that layer's settings. The **Estimate** or **Guess** tag explains in its tooltip how sure the check is. STOP stays visible. Dropping an SVG onto the bed does nothing in 3D.
 
 ## Test sample
 

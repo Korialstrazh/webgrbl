@@ -23,6 +23,8 @@ export interface UiWorkbenchState {
   isFrameSettingsOpen: boolean;
   /** Whether the laser profiles dialog is open; the top bar and the Job card both open it. */
   isMachineProfilesDialogOpen: boolean;
+  /** The key of the layer whose settings drawer is open; the layer row and the 3D Cut check both open it. */
+  openLayerSettingsKey?: string;
 }
 // #endregion
 
@@ -46,6 +48,9 @@ export class FrameSettingsOpenChanged extends Action<Pick<UiWorkbenchState, 'isF
 export class MachineProfilesDialogOpenChanged extends Action<Pick<UiWorkbenchState, 'isMachineProfilesDialogOpen'>> {
   public static readonly type: string = actionType('machine profiles dialog open changed');
 }
+export class LayerSettingsOpenChanged extends Action<Pick<UiWorkbenchState, 'openLayerSettingsKey'>> {
+  public static readonly type: string = actionType('layer settings open changed');
+}
 // #endregion
 
 // #region Initial state
@@ -65,6 +70,7 @@ export const uiWorkbenchReducer = (
   case NarrowRegionChanged.type:
   case FrameSettingsOpenChanged.type:
   case MachineProfilesDialogOpenChanged.type:
+  case LayerSettingsOpenChanged.type:
     return { ...state, ...(action as Action<Partial<UiWorkbenchState>>).payload };
   default:
     return state;
@@ -82,4 +88,6 @@ export const selectIsFrameSettingsOpen = (state: RootState): boolean =>
 
 export const selectIsMachineProfilesDialogOpen = (state: RootState): boolean =>
   state[UI_WORKBENCH_STATE_NAME].isMachineProfilesDialogOpen;
+export const selectOpenLayerSettingsKey = (state: RootState): string | undefined =>
+  state[UI_WORKBENCH_STATE_NAME].openLayerSettingsKey;
 // #endregion

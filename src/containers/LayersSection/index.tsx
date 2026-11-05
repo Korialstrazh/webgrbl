@@ -23,6 +23,7 @@ import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { LayerToggled, LayersReordered, selectProjectLayers } from '../../utils/states/project.document.state';
+import { LayerSettingsOpenChanged, selectOpenLayerSettingsKey } from '../../utils/states/ui.workbench.state';
 import { LayerSettingsDrawer } from '../LayerSettingsDrawer';
 import type { LayersSectionProps } from './interfaces/LayersSectionProps';
 import { LayerRow } from './LayerRow';
@@ -34,7 +35,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
   const dispatch: AppDispatch = useDispatch();
   const layers: ProjectLayer[] = useSelector(selectProjectLayers);
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
-  const [openLayerKey, setOpenLayerKey] = useState<string | undefined>(undefined);
+  const openLayerKey: string | undefined = useSelector(selectOpenLayerSettingsKey);
   const [draggedLayerKey, setDraggedLayerKey] = useState<string | undefined>(undefined);
   const openButtonsRef = useRef<Map<string, HTMLButtonElement>>(new Map<string, HTMLButtonElement>());
   const closedLayerKeyRef = useRef<string | undefined>(undefined);
@@ -71,6 +72,10 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
     }
 
     setDraggedLayerKey(undefined);
+  };
+
+  const setOpenLayerKey = (layerKey: string | undefined): void => {
+    dispatch(new LayerSettingsOpenChanged({ openLayerSettingsKey: layerKey }));
   };
 
   const closeLayerSettings = (): void => {
