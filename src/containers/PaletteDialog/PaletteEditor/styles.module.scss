@@ -1,6 +1,7 @@
 .paletteEditor {
   display: grid;
-  grid-template-columns: 16rem minmax(0, 1fr);
+  // Wide enough for a row's swatch, name, values and buttons on one line each.
+  grid-template-columns: 19rem minmax(0, 1fr);
   gap: var(--space-6);
 
   // Below this width the list and the form stack.

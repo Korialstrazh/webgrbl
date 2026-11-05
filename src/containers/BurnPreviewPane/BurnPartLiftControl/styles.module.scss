@@ -29,6 +29,16 @@
   }
 }
 
+// Before a part is picked the bar holds one captioned icon, so it stays one slim line and leaves the height to the scene.
+.status.idleStatus {
+  min-height: 0;
+}
+
+.idleCaption {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
 .height {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;

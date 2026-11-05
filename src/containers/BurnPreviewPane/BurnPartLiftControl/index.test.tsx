@@ -171,6 +171,7 @@ describe(BurnPartLiftControl.name, () => {
     const store: AppStore = renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), undefined);
 
     expect(screen.getByRole('note', { name: CLICK_HINT })).toBeInTheDocument();
+    expect(screen.getByText('Lift a part')).toBeInTheDocument();
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
 
     act(() => {

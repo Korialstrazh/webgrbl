@@ -66,7 +66,7 @@ export const StatusStrip = (): ReactNode => {
               </dd>
             </Tooltip>
           </div>
-          <div className={[styles.readout, styles.estimateReadout].join(' ')}>
+          <div className={styles.readout}>
             <dt>
               <FieldTimeOutlined aria-hidden />
               <span className={styles.termLabel}>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</span>

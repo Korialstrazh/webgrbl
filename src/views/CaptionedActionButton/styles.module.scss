@@ -23,7 +23,7 @@
   color: var(--color-text);
 }
 
-// Off: no fill, a faint dashed outline and a dimmed icon with a lock, so it can never be taken for a ready action. The
+// Off: no fill, a dashed outline (at least 3:1) and a dimmed icon with a lock, so it can never be taken for a ready action. The
 // caption keeps the readable disabled grey.
 .captionedActionButton:global(.ant-btn):disabled {
   border-style: dashed;
@@ -33,7 +33,7 @@
   color: var(--color-disabled-text);
 
   .icon > :global(.anticon):first-child {
-    opacity: 0.55;
+    opacity: 0.75;
   }
 }
 

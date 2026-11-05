@@ -14,6 +14,7 @@ import {
   ArrowUpOutlined,
   CloseOutlined,
   HolderOutlined,
+  LockOutlined,
 } from '@ant-design/icons';
 import { Button, Popconfirm } from 'antd';
 import type { DragEvent, ReactNode } from 'react';
@@ -25,6 +26,7 @@ import { LayerSwatch } from '../../../../views/LayerSwatch';
 import { LayerValueCells } from '../../../../views/LayerValueCells';
 import type { PaletteEntryRowProps } from '../interfaces/PaletteEntryRowProps';
 import { LayerModeIcon } from '../../../../views/LayerModeIcon';
+import { TooltipNoteIcon } from '../../../../views/TooltipNoteIcon';
 import styles from './styles.module.scss';
 
 const allowDropOnRow = (dragEvent: DragEvent<HTMLLIElement>): void => {
@@ -88,6 +90,11 @@ export const PaletteEntryRow = ({
           aria-label={t(DEFAULT.PALETTE_MOVE_DOWN, { name: entryName })}
           onClick={onMoveDown}
         />
+        {isShading && (
+          <span className={styles.lockNote}>
+            <TooltipNoteIcon noteText={t(DEFAULT.PALETTE_SHADING_LOCKED)} iconComponent={<LockOutlined />} />
+          </span>
+        )}
         {!isShading && (
           <Popconfirm
             title={t(DEFAULT.PALETTE_DELETE_CONFIRM, { name: entryName })}

@@ -53,6 +53,7 @@ const COLOUR_PICKER_DISABLED_SELECTOR = '.ant-color-picker-trigger-disabled';
 const COLOUR_PICKER_SELECTOR = '.ant-color-picker-trigger';
 const CUT_NAME_PATTERN = /^Cut/;
 const SHADING_NAME_PATTERN = /^Shading/;
+const SHADING_LOCKED_TEXT = 'Shading is built in and cannot be deleted.';
 const SCORE_NAME_PATTERN = /^Score/;
 const NEW_ENTRY_COLOUR = '#12ab34';
 const FIRST_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[0] ?? '';
@@ -266,7 +267,9 @@ describe(PaletteDialog.name, () => {
 
     expect(within(getRow(SHADING_NAME_PATTERN)).queryByRole('button', { name: DELETE_NAME_PATTERN }))
       .not.toBeInTheDocument();
+    expect(within(getRow(SHADING_NAME_PATTERN)).getByRole('note', { name: SHADING_LOCKED_TEXT })).toBeInTheDocument();
     expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
+    expect(within(getRow(CUT_NAME_PATTERN)).queryByRole('note')).not.toBeInTheDocument();
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: SHADING_NAME_PATTERN }));

@@ -34,9 +34,6 @@ import {
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ConnectionPopoverOpenChanged, selectIsConnectionPopoverOpen } from '../../utils/states/ui.overlay.state';
-import { selectNarrowRegion } from '../../utils/states/ui.workbench.state';
-import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants';
-import type { WorkbenchRegion } from '../../utils/states/workbench.region.constants';
 import { ConnectionPopover } from '../ConnectionPopover';
 import { CONNECTION_PILL_STATUS_LABEL_KEY } from './connection.pill.constants';
 import { getSelectedPortLabel } from './get.selected.port.label';
@@ -62,9 +59,9 @@ export const ConnectionPill = (): ReactNode => {
   const firmwareIdentity: GrblFirmwareIdentity | undefined = useSelector(selectFirmwareIdentity);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const isWide: boolean = useIsWideLayout();
-  const narrowRegion: WorkbenchRegion = useSelector(selectNarrowRegion);
-  // The Job card, with its readiness step and next-step button, already offers Connect wherever it is on screen.
-  const isJobCardShown: boolean = isWide || narrowRegion === WORKBENCH_REGION.JOB;
+  // Side by side the Job card always offers Connect beside the pill. In the narrow layout the pill keeps the Connect
+  // verb on every tab, so its content never changes from one tab to the next.
+  const isJobCardShown: boolean = isWide;
   const statusText: string = t(CONNECTION_PILL_STATUS_LABEL_KEY[connectionStatus]);
   const firmwareText: string | undefined = isConnected && firmwareIdentity
     ? t(DEFAULT.CONNECTION_PILL_FIRMWARE, {

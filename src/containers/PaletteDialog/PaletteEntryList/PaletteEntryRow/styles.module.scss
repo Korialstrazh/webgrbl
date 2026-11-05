@@ -18,8 +18,7 @@
 }
 
 // The button takes the row width the handle and the icon buttons leave: the swatch beside the name, the summary below
-// it across the button. The name and the summary each wrap to a second line instead of being cut short, and the button
-// grows with them, so they never run under the icon buttons.
+// it across the button, each on one line, so the row never breaks a value away from its icon.
 .selectButton {
   display: grid;
   flex: 1;
@@ -62,6 +61,7 @@
   grid-column: 1 / -1;
   min-width: 0;
   color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 // Out of sight until the row is hovered or holds the focus, and then only over the name line, so they never cover a
@@ -104,6 +104,13 @@
 
 .modeIcon {
   color: var(--color-text-muted);
+}
+
+// Shading cannot be deleted: a lock stands where the delete button would be, and a tap says why.
+.lockNote {
+  width: 1.75rem;
+  min-height: 1.5rem;
+  font-size: 0.875rem;
 }
 
 .deleteButton:global(.ant-btn) {

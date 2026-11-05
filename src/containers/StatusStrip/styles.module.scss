@@ -79,11 +79,3 @@
 .termLabel {
   @include accessibility.visually-hidden;
 }
-
-// Side by side the Job card shows the estimate already; stacked, that card is far away, so the strip keeps it.
-// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
-@media (width >= 80rem) {
-  .estimateReadout {
-    display: none;
-  }
-}

@@ -16,6 +16,9 @@ import {
   selectIsAnyOverlayOpen,
   selectIsConnectionPopoverOpen,
 } from '../../utils/states/ui.overlay.state';
+import { NarrowRegionChanged } from '../../utils/states/ui.workbench.state';
+import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants';
+import type { WorkbenchRegion } from '../../utils/states/workbench.region.constants';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const ONLINE_OR_OFFLINE_PATTERN = /Online|Offline/;
@@ -72,6 +75,17 @@ describe(ConnectionPill.name, () => {
     fireEvent.click(pillButton);
 
     expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toBeInTheDocument();
+  });
+
+  it.each(Object.values(WORKBENCH_REGION))('keeps the Connect verb on the narrow %s tab', (region: WorkbenchRegion) => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new NarrowRegionChanged({ narrowRegion: region }));
+    });
+
+    expect(within(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).getByText(CONNECT_VERB_TEXT))
+      .toBeInTheDocument();
   });
 
   it.each(Object.values(GRBL_CONNECTION_STATUS))('shows the label of the %s state', (status: GrblConnectionStatus) => {

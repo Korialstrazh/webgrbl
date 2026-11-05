@@ -24,7 +24,7 @@ The splitter sizes are controlled percentages, so the bars also work from the ke
 | Left | `DesignPanel` | Material (the select, Design view only), Layers (with Add test sample below the list, Design view only), Objects |
 | Centre | `BedPanel` | header on one row at 1368 px in Design view (`ToolpathToolbar` in Toolpath view, the zoom cluster, `BedMoreToolsMenu` and last the view switch in a fixed grid slot, so it never moves between views; the tools take a row of their own below the switch when the bed is under 62 rem; `BedMoreToolsMenu` is a More button that lists the unbuilt Edit nodes, Align and 3D as disabled entries with a Soon tag and a one-line description), `BedViewport` (the zoomable `BedView` with `BedRulers` and `BedZoomControls`), `SimulationPlaybackBar` with the job size, `ToastStack`; host element for bed-region dialogs and drawers. The console panel sits below it |
 | Right | `MachinePanel` | main task first: Status (its heading line only, with "Not connected" and a secondary (outlined) Connect button, while disconnected; the top-bar pill is the main way to connect; in a narrow panel the header group drops under the title instead of being cut, else readout plus Reset/Unlock), Job (a readiness row, then one filled action per state: the next step, or Start job once it can run; Frame job with its settings gear and a quiet, faintly outlined Export G-code below it; a line under the actions says why Start and Frame are off), Move and Laser pointer (each one line, "Connect to move" or "Connect to use" with a Show button, while disconnected, through `CollapsedCardToggle`; the hint stays beside Hide when the card is open, so the disabled controls still say why), so the disconnected panel fits a 703 px window without scrolling, in a scrolling area that fades out at the bottom when cut off, and STOP in a footer below it when wide |
-| Bottom | `StatusStrip` | job size (a short "Open the Toolpath view" hint until the toolpath is ready) and estimate of the ready toolpath, the live bed cursor in mm (hidden, keeping its room, until the pointer is over the bed), an Offline note while the browser has no network, Console toggle |
+| Bottom | `StatusStrip` | job size (a short "Open the Toolpath view" hint until the toolpath is ready) and estimate of the ready toolpath at every width, the live bed cursor in mm (hidden, keeping its room, until the pointer is over the bed), an Offline note while the browser has no network, Console toggle |
 
 Empty readouts show one mark everywhere, the em dash (`MISSING_VALUE_TEXT`).
 
@@ -111,3 +111,7 @@ The user picks the bed colour from the swatch button at the start of the zoom cl
 - Each value must be a finite number above 0 and at most 5000 mm; otherwise a 400 mm square is drawn.
 - Disconnected: the 400 mm square with the "no machine" placeholder. Connected without usable `$130`/`$131`: the square with the "size unknown" placeholder.
 - `BedView` draws the head crosshair at the machine position and the work zero marker from the work coordinate offset. A head outside the bed is clamped to the nearest edge and the aria label says it is outside the bed.
+
+## Icon notes
+
+A short note shown as an info (or other) icon in a tinted circle (`TooltipNoteIcon`) opens its text in a popover on hover, on a tap or click, and on Enter or Space, so no note depends on hover alone.

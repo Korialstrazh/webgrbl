@@ -34,6 +34,13 @@ body {
   outline-offset: var(--focus-outline-offset);
 }
 
+// On a filled orange button the orange ring would vanish into the fill, so it gets a two-tone ring instead: a dark gap
+// in the background colour, then a light ring in the text colour, clear against both the fill and the surface.
+.ant-btn.ant-btn-variant-solid.ant-btn-color-primary:focus-visible {
+  outline-color: var(--color-text);
+  box-shadow: 0 0 0 var(--focus-outline-offset) var(--color-bg);
+}
+
 // The splitter bars change colour smoothly between rest, hover and drag; the colours come from the antd theme.
 .ant-splitter-bar-dragger::before {
   transition: background-color 0.12s;

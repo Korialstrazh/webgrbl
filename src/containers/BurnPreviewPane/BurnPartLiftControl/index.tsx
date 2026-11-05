@@ -81,9 +81,10 @@ export const BurnPartLiftControl = (): ReactNode => {
   if (!part) {
     return (
       <div className={styles.burnPartLiftControl}>
-        <span className={styles.status}>
-          {/* An icon instead of a standing sentence; the tooltip, focus and screen reader still give the prompt. */}
+        <span className={[styles.status, styles.idleStatus].join(' ')}>
+          {/* An icon with a short caption instead of a standing sentence; a tap or the focus opens the full prompt. */}
           <TooltipNoteIcon noteText={t(DEFAULT.BURN_PART_LIFT_CLICK_HINT)} iconComponent={<SelectOutlined />} />
+          <span className={styles.idleCaption} aria-hidden>{t(DEFAULT.BURN_PART_LIFT_IDLE_CAPTION)}</span>
         </span>
         {putAllBackComponent}
       </div>
