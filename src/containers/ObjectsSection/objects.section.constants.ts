@@ -28,3 +28,9 @@ export const OBJECT_TRANSFORM_FIELDS: readonly ObjectTransformFieldConfig[] = [
   { field: 'heightMm', labelKey: DEFAULT.OBJECTS_FIELD_HEIGHT, decimals: OBJECT_MILLIMETRE_DECIMALS },
   { field: 'rotationDeg', labelKey: DEFAULT.OBJECTS_FIELD_ROTATION, decimals: OBJECT_ROTATION_DECIMALS },
 ];
+
+/** The kind of a row in the object list, shown as its icon and kept on the row for tests. */
+export const OBJECT_KIND = {
+  SVG: 'svg',
+  SAMPLE: 'sample',
+} as const;
