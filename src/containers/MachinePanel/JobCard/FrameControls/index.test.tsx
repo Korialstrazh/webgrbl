@@ -17,6 +17,7 @@ import {
 import { MachineStatusReceived } from '../../../../utils/states/machine.status.state';
 import type { AppDispatch, AppStore } from '../../../../utils/states/new.store';
 import { newStore } from '../../../../utils/states/new.store';
+import { selectIsAnyOverlayOpen } from '../../../../utils/states/ui.overlay.state';
 import { ToolpathReady, selectToolpathDocumentVersion } from '../../../../utils/states/toolpath.state';
 import { AntdTestProvider } from '../../../../utils/test.support/antd.test.provider';
 import { FakeToolpathWorkerClient } from '../../../../utils/toolpath/test.support/fake.toolpath.worker.client';
@@ -24,6 +25,7 @@ import { newToolpath } from '../../../../utils/toolpath/test.support/new.toolpat
 import { newToolpathMove } from '../../../../utils/toolpath/test.support/new.toolpath.move';
 
 const FRAME_JOB_LABEL = 'Frame job';
+const NEEDS_PROFILE_TEXT = 'Choose a laser profile: it holds these settings.';
 const GRID_LABEL = 'Frame grid';
 const MARGIN_LABEL = 'Frame margin (mm)';
 const SPEED_LABEL = 'Frame speed (mm/min)';
@@ -134,6 +136,34 @@ describe(FrameControls.name, () => {
     fireEvent.click(screen.getByRole('button', { name: SHOW_SETTINGS_LABEL }));
 
     expect(screen.getByLabelText('Frame margin (mm)')).toBeInTheDocument();
+  });
+
+  it('registers the open settings as an overlay, so Escape only closes them', () => {
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
+
+    renderFrameControls(store);
+
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
+  });
+
+  it('says why the settings are off while no profile is active', () => {
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+
+    renderFrameControls(store);
+
+    expect(screen.getByText(NEEDS_PROFILE_TEXT)).toBeInTheDocument();
+    expect(screen.getByLabelText(MARGIN_LABEL)).toBeDisabled();
+  });
+
+  it('keeps the settings editable while disconnected, as they only change the stored profile', () => {
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
+
+    store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }));
+    renderFrameControls(store);
+    fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: String(SAVED_MARGIN_MM) } });
+    fireEvent.blur(screen.getByLabelText(MARGIN_LABEL));
+
+    expect(getActiveProfile(store).frameMarginMm).toBe(SAVED_MARGIN_MM);
   });
 
   it('shows the frame time, the dot power and the profile the power is worked out for', () => {
