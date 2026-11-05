@@ -1,5 +1,5 @@
 /**
- * A row of the layer list: a drag handle, an on/off checkbox and a button that opens the layer settings, showing the
+ * A row of the layer list: a drag handle, an on/off checkbox drawn as an eye (the row dims while off) and a button that opens the layer settings, showing the
  * swatch, the name, a summary and a note when the colour is not in the palette. Move buttons reorder it
  * without a pointer.
  *
@@ -13,9 +13,9 @@
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
   HolderOutlined,
-  SendOutlined,
-  StopOutlined,
 } from '@ant-design/icons';
 import { Button, Checkbox, Tooltip } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
@@ -69,7 +69,7 @@ export const LayerRow = ({
         <HolderOutlined className={styles.handle} aria-hidden="true" />
       </Tooltip>
       <Tooltip title={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}>
-        {/* Still a real checkbox for the keyboard and for screen readers; only its look is a send toggle. */}
+        {/* Still a real checkbox for the keyboard and for screen readers; only its look is an eye that is open while the layer is sent. */}
         <Checkbox
           className={styles.sendToggle}
           checked={layer.enabled}
@@ -77,7 +77,7 @@ export const LayerRow = ({
           onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
         >
           <span className={styles.sendToggleFace} aria-hidden>
-            {layer.enabled ? <SendOutlined /> : <StopOutlined />}
+            {layer.enabled ? <EyeOutlined /> : <EyeInvisibleOutlined />}
           </span>
         </Checkbox>
       </Tooltip>
