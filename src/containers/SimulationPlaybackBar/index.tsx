@@ -27,7 +27,7 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_SEGMENTED_SIZE_SMALL } from '../../utils/antd.constants';
+import { ANTD_SEGMENTED_SIZE_SMALL } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
 import { SIMULATION_SPEEDS } from '../../utils/states/simulation.speed.constants';
@@ -120,7 +120,6 @@ export const SimulationPlaybackBar = (): ReactNode => {
           onClick={transport.goToSimulationStart}
         />
         <Button
-          type={ANTD_BUTTON_TYPE_PRIMARY}
           icon={getPlayIconComponent(isPlaying, isAtEnd)}
           aria-label={playLabel}
           title={playLabel}

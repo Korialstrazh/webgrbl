@@ -14,7 +14,7 @@ import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
 import { BED_VIEW_MODE } from '../../../../utils/bed/bed.view.constants';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
@@ -42,6 +42,10 @@ interface JobReadinessLook {
   iconComponent: ReactNode;
   captionKey: string;
   hintKey: string;
+  /** The tooltip once the step is done, where the hint would ask for what has been done already. */
+  metHintKey?: string;
+  /** The label of the one action button while this is the current step. */
+  actionKey: string;
 }
 
 const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
@@ -50,24 +54,29 @@ const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
     iconComponent: <LaserMachineIcon aria-hidden />,
     captionKey: DEFAULT.JOB_READINESS_PROFILE,
     hintKey: DEFAULT.JOB_READINESS_PROFILE_HINT,
+    actionKey: DEFAULT.JOB_READINESS_PROFILE_ACTION,
   },
   {
     step: JOB_READINESS_STEP.DESIGN,
     iconComponent: <ImportOutlined aria-hidden />,
     captionKey: DEFAULT.JOB_READINESS_DESIGN,
     hintKey: DEFAULT.JOB_READINESS_DESIGN_HINT,
+    metHintKey: DEFAULT.JOB_READINESS_DESIGN_MET_HINT,
+    actionKey: DEFAULT.JOB_READINESS_DESIGN_ACTION,
   },
   {
     step: JOB_READINESS_STEP.MATERIAL,
     iconComponent: <MaterialSheetIcon aria-hidden />,
     captionKey: DEFAULT.JOB_READINESS_MATERIAL,
     hintKey: DEFAULT.JOB_READINESS_MATERIAL_HINT,
+    actionKey: DEFAULT.JOB_READINESS_MATERIAL_ACTION,
   },
   {
     step: JOB_READINESS_STEP.CONNECT,
     iconComponent: <ApiOutlined aria-hidden />,
     captionKey: DEFAULT.JOB_READINESS_CONNECT,
     hintKey: DEFAULT.JOB_READINESS_CONNECT_HINT,
+    actionKey: DEFAULT.JOB_READINESS_CONNECT_ACTION,
   },
 ];
 
@@ -76,7 +85,7 @@ interface JobReadinessButtonProps extends JobReadinessLook {
 }
 
 const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
-  const { step, iconComponent, captionKey, hintKey, onGoToStep } = props;
+  const { step, iconComponent, captionKey, hintKey, metHintKey, onGoToStep } = props;
   const { t } = useTranslation();
   const isMet: boolean = useSelector(selectIsJobReadinessStepMet(step));
   const isNextStep: boolean = useSelector(selectFirstUnmetJobReadinessStep) === step;
@@ -90,7 +99,7 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
 
   return (
     <li className={cellClassName}>
-      <DismissibleTooltip title={isNextStep ? undefined : t(hintKey)}>
+      <DismissibleTooltip title={isNextStep ? undefined : t(isMet && metHintKey ? metHintKey : hintKey)}>
         <Button
           className={styles.step}
           type={ANTD_BUTTON_TYPE_TEXT}
@@ -113,6 +122,9 @@ export const JobReadinessRow = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
+  const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
+  const nextLook: JobReadinessLook | undefined =
+    JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
 
   const goToMaterialSelect = (): void => {
     dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }));
@@ -146,6 +158,16 @@ export const JobReadinessRow = (): ReactNode => {
           <JobReadinessButton key={look.step} {...look} onGoToStep={goToStep} />
         ))}
       </ol>
+      {nextLook && (
+        <Button
+          type={ANTD_BUTTON_TYPE_PRIMARY}
+          block
+          icon={nextLook.iconComponent}
+          onClick={() => goToStep(nextLook.step)}
+        >
+          {t(nextLook.actionKey)}
+        </Button>
+      )}
       {fileInputComponent}
     </>
   );

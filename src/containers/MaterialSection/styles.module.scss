@@ -25,7 +25,7 @@
   justify-content: flex-start;
   min-height: 2rem;
   padding-inline: var(--space-1);
-  color: var(--color-accent);
+  color: var(--color-text-muted);
   font-size: 0.75rem;
   text-align: left;
   white-space: normal;
@@ -34,7 +34,7 @@
 // antd sets the hover colour of a link button with a selector of five classes and states; this one has six.
 .presetSummary:global(.ant-btn):global(.ant-btn-variant-link):not(:disabled):not(:global(.ant-btn-disabled)):hover,
 .presetSummary:global(.ant-btn-link):focus-visible {
-  color: var(--color-accent);
+  color: var(--color-text);
   text-decoration: underline;
 }
 

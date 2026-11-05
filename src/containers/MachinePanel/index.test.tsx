@@ -83,11 +83,12 @@ describe(MachinePanel.name, () => {
     expect(screen.queryByRole('button', { name: STATUS_CONNECT_LABEL })).not.toBeInTheDocument();
   });
 
-  it('has no filled call to action while the job cannot start: the stepper marks the next step instead', () => {
+  it('has one filled call to action while the job cannot start: the action of the next step', () => {
     renderMachinePanel();
 
     // STOP is a danger button of its own, not a next step, so it is not counted.
-    expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(0);
+    expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'Set up laser' })).toHaveClass('ant-btn-primary');
     expect(screen.getByRole('button', { name: PROFILE_STEP_LABEL })).toHaveAttribute('aria-current', 'step');
   });
 

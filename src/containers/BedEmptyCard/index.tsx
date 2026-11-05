@@ -11,10 +11,8 @@
 import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_DEFAULT, ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_DEFAULT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { JOB_READINESS_STEP, selectFirstUnmetJobReadinessStep } from '../../utils/states/job.readiness.selector';
 import { AddTestSampleButton } from '../AddTestSampleButton';
 import { SvgImportButton } from '../SvgImportButton';
 import styles from './styles.module.scss';
@@ -22,7 +20,6 @@ import styles from './styles.module.scss';
 export const BedEmptyCard = (): ReactNode => {
   const { t } = useTranslation();
   // One accent action at a time: the Job card's readiness row leads until the design is the next step.
-  const isDesignNextStep: boolean = useSelector(selectFirstUnmetJobReadinessStep) === JOB_READINESS_STEP.DESIGN;
 
   return (
     <div className={styles.bedEmptyCard}>
@@ -31,7 +28,7 @@ export const BedEmptyCard = (): ReactNode => {
         <p className={styles.hint}>{t(DEFAULT.BED_EMPTY_DROP_HINT)}</p>
         <div className={styles.actions}>
           <SvgImportButton
-            buttonType={isDesignNextStep ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT}
+            buttonType={ANTD_BUTTON_TYPE_DEFAULT}
             iconComponent={<ImportOutlined aria-hidden />}
           />
           <AddTestSampleButton />

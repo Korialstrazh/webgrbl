@@ -14,7 +14,7 @@ import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_PRIMARY, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import styles from './styles.module.scss';
 
@@ -45,7 +45,7 @@ export const AppUpdatePrompt = (): ReactNode => {
     <div className={styles.appUpdatePrompt} role="alert" title={messageText}>
       <span className={styles.message}>{messageText}</span>
       {isRefreshNeeded && (
-        <Button size={ANTD_BUTTON_SIZE_SMALL} type={ANTD_BUTTON_TYPE_PRIMARY} onClick={reloadWithNewVersion}>
+        <Button size={ANTD_BUTTON_SIZE_SMALL} onClick={reloadWithNewVersion}>
           {t(DEFAULT.APP_UPDATE_RELOAD)}
         </Button>
       )}

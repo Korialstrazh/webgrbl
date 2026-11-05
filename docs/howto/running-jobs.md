@@ -10,6 +10,8 @@ While a job runs, the Job card shows a progress bar, lines answered and elapsed 
 
 While a job runs, the console, jog, home, set zero, pointer and air assist are locked. After a lost connection the laser may still run what it has buffered, and the app cannot stop it, so use the machine's own power switch or emergency stop.
 
+The Job card shows a stepper (Profile, Design, Material, Connect) and, under it, one filled button for the current step: **Set up laser**, **Import SVG**, **Choose material** or **Connect laser**. It opens what the step opens and starts nothing: **Connect laser** only opens the connection popover. Filled orange is kept for this button and for Start.
+
 ## Frame job
 
 **Not yet verified on a real laser.** The checks on the ACMER are pending: the dot visible at about 0.05 W including at corners, dark while paused, and dark when the head stops. The dot uses `M4`, so it goes dark when the head stands still and dims at corners.
