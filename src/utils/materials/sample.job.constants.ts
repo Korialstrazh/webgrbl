@@ -10,7 +10,6 @@
  */
 export const SAMPLE_SIZE_MM = 50;
 export const SAMPLE_MARGIN_MM = 5;
-export const SAMPLE_REPEAT_OFFSET_MM = 10;
 export const SAMPLE_GRADIENT_INSET_MM = 5;
 export const SAMPLE_OUTLINE_WIDTH_MM = 0.1;
 export const SAMPLE_CUT_COLOUR = '#ff0000';

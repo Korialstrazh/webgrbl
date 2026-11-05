@@ -16,6 +16,7 @@ import type { BedDimensions } from '../bed/interfaces/BedDimensions';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
+import { getFreeBedSpot } from '../project/get.free.bed.spot';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
@@ -25,6 +26,7 @@ import {
   MAX_PROJECT_OBJECTS,
 } from '../project/project.constants';
 import { getFileNameWithoutExtension } from '../svg/get.file.name.without.extension';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import type { SanitizedSvg } from '../svg/interfaces/SanitizedSvg';
 import type { SvgImportFailure } from '../svg/interfaces/SvgImportFailure';
 import { isSvgImportFailure } from '../svg/is.svg.import.failure';
@@ -44,9 +46,26 @@ import { ToastShown } from './toast.state';
 const isLargerThanBed = (svg: SanitizedSvg, bed: BedDimensions): boolean =>
   svg.widthMm > bed.widthMm || svg.heightMm > bed.heightMm;
 
-const newImportedObject = (acceptedFile: AcceptedSvgFile, placementIndex: number): ProjectObject => {
-  const placementMm: number = (placementIndex % IMPORT_PLACEMENT_CASCADE_LENGTH) * IMPORT_PLACEMENT_OFFSET_MM;
+/** The first free spot on the bed, or the corner cascade when nothing fits. */
+const getImportPlacement = (
+  acceptedFile: AcceptedSvgFile,
+  placementIndex: number,
+  objectsOnBed: readonly ProjectObject[],
+  bed: BedDimensions,
+): GeometryPoint => {
+  const cascadeMm: number = (placementIndex % IMPORT_PLACEMENT_CASCADE_LENGTH) * IMPORT_PLACEMENT_OFFSET_MM;
 
+  return getFreeBedSpot({
+    widthMm: acceptedFile.svg.widthMm,
+    heightMm: acceptedFile.svg.heightMm,
+    startSpot: { x: 0, y: 0 },
+    existingObjects: objectsOnBed,
+    bedWidthMm: bed.widthMm,
+    bedHeightMm: bed.heightMm,
+  }) ?? { x: cascadeMm, y: cascadeMm };
+};
+
+const newImportedObject = (acceptedFile: AcceptedSvgFile, placement: GeometryPoint): ProjectObject => {
   return newProjectObject({
     name: getFileNameWithoutExtension(acceptedFile.fileName),
     svgText: acceptedFile.svg.svgText,
@@ -54,8 +73,8 @@ const newImportedObject = (acceptedFile: AcceptedSvgFile, placementIndex: number
     intrinsicHeightMm: acceptedFile.svg.heightMm,
     widthMm: acceptedFile.svg.widthMm,
     heightMm: acceptedFile.svg.heightMm,
-    xMm: placementMm,
-    yMm: placementMm,
+    xMm: placement.x,
+    yMm: placement.y,
   });
 };
 
@@ -86,16 +105,24 @@ function* getCurrentBed(): Generator<unknown, BedDimensions> {
   return getBedDimensions(settings, isConnected, activeProfile);
 }
 
-function* addAcceptedFiles(acceptedFiles: AcceptedSvgFile[]): Generator<unknown, boolean> {
+function* addAcceptedFiles(acceptedFiles: AcceptedSvgFile[], bed: BedDimensions): Generator<unknown, boolean> {
   // Read again after the awaited file reads: other imports, deletes or undo may have changed the count meanwhile.
   const projectDocument: ProjectDocument = (yield select(selectProjectDocument)) as ProjectDocument;
   const existingObjects: ProjectObject[] = projectDocument.objects;
   const roomCount: number = Math.max(MAX_PROJECT_OBJECTS - existingObjects.length, 0);
   const fittingFiles: AcceptedSvgFile[] = acceptedFiles.slice(0, roomCount);
-  const importedObjects: ProjectObject[] = fittingFiles.map(
-    (acceptedFile: AcceptedSvgFile, fileIndex: number): ProjectObject =>
-      newImportedObject(acceptedFile, existingObjects.length + fileIndex),
-  );
+  const importedObjects: ProjectObject[] = [];
+
+  for (const acceptedFile of fittingFiles) {
+    const placement: GeometryPoint = getImportPlacement(
+      acceptedFile,
+      existingObjects.length + importedObjects.length,
+      [...existingObjects, ...importedObjects],
+      bed,
+    );
+
+    importedObjects.push(newImportedObject(acceptedFile, placement));
+  }
 
   if (importedObjects.length) {
     const derivedLayers: ProjectLayer[] = (yield call(
@@ -141,7 +168,7 @@ export function* importSvgFiles(action: SvgFilesImportRequested): Generator {
     yield call(showToastsOfAcceptedFile, importResult, file.name, bed);
   }
 
-  const hasTrimmedFiles: boolean = (yield call(addAcceptedFiles, acceptedFiles)) as boolean;
+  const hasTrimmedFiles: boolean = (yield call(addAcceptedFiles, acceptedFiles, bed)) as boolean;
 
   if (isLimitReached || hasTrimmedFiles) {
     yield call(showToast, TOAST_SEVERITY.ERROR, DEFAULT.TOAST_SVG_IMPORT_LIMIT_REACHED, {

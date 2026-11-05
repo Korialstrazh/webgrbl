@@ -253,9 +253,6 @@ describe(fitsSampleJob.name, () => {
 });
 
 describe('getSampleJobObject placement of repeats', () => {
-  const WORK_AREA_MM = 100;
-  const area: ToolpathMachineArea = newToolpathMachineArea({ workAreaXMm: WORK_AREA_MM, workAreaYMm: WORK_AREA_MM });
-
   const addSamples = (machineArea: ToolpathMachineArea, count: number): ProjectObject[] => {
     const objects: ProjectObject[] = [];
 
@@ -266,23 +263,37 @@ describe('getSampleJobObject placement of repeats', () => {
     return objects;
   };
 
-  it('offsets a repeat so it does not sit on the first sample', () => {
-    const [first, second] = addSamples(area, 2);
+  const ROOMY_AREA_MM = 300;
+  const roomyArea: ToolpathMachineArea = newToolpathMachineArea({
+    workAreaXMm: ROOMY_AREA_MM,
+    workAreaYMm: ROOMY_AREA_MM,
+  });
+  const ROOMY_SAMPLE_COUNT = 4;
 
-    expect([second?.xMm, second?.yMm]).not.toEqual([first?.xMm, first?.yMm]);
+  const isOverlapping = (first: ProjectObject, second: ProjectObject): boolean =>
+    first.xMm < second.xMm + second.widthMm && second.xMm < first.xMm + first.widthMm
+    && first.yMm < second.yMm + second.heightMm && second.yMm < first.yMm + first.heightMm;
+
+  it('places a repeat where it does not overlap the first sample', () => {
+    const [first, second] = addSamples(roomyArea, 2);
+
+    expect(first && second && isOverlapping(first, second)).toBe(false);
   });
 
-  it('keeps every repeat on the bed, on separate spots, from any origin corner', () => {
+  it('keeps every repeat on the bed and clear of the others, from any origin corner', () => {
     Object.values(MACHINE_ORIGIN_CORNER).forEach((originCorner: MachineOriginCorner): void => {
-      const objects: ProjectObject[] = addSamples({ ...area, originCorner }, 12);
-      const spots: Set<string> = new Set(objects.map(({ xMm, yMm }: ProjectObject): string => `${xMm}/${yMm}`));
+      const objects: ProjectObject[] = addSamples({ ...roomyArea, originCorner }, ROOMY_SAMPLE_COUNT);
 
-      expect(spots.size).toBe(objects.length);
-      objects.forEach(({ xMm, yMm, widthMm, heightMm }: ProjectObject): void => {
+      objects.forEach((projectObject: ProjectObject, objectIndex: number): void => {
+        const { xMm, yMm, widthMm, heightMm } = projectObject;
+
         expect(xMm).toBeGreaterThanOrEqual(0);
         expect(yMm).toBeGreaterThanOrEqual(0);
-        expect(xMm + widthMm).toBeLessThanOrEqual(WORK_AREA_MM);
-        expect(yMm + heightMm).toBeLessThanOrEqual(WORK_AREA_MM);
+        expect(xMm + widthMm).toBeLessThanOrEqual(ROOMY_AREA_MM);
+        expect(yMm + heightMm).toBeLessThanOrEqual(ROOMY_AREA_MM);
+        objects.slice(objectIndex + 1).forEach((otherObject: ProjectObject): void => {
+          expect(isOverlapping(projectObject, otherObject)).toBe(false);
+        });
       });
     });
   });
