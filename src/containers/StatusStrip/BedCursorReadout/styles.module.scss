@@ -1,3 +1,5 @@
+@use '../../../styles/accessibility' as accessibility;
+
 .bedCursorReadout {
   display: flex;
   flex-shrink: 0;
@@ -26,4 +28,8 @@
   .bedCursorReadout {
     display: none;
   }
+}
+
+.termLabel {
+  @include accessibility.visually-hidden;
 }

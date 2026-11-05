@@ -10,8 +10,15 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ArrowDownOutlined, ArrowUpOutlined, HolderOutlined } from '@ant-design/icons';
-import { Button, Checkbox } from 'antd';
+import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  DashboardOutlined,
+  HolderOutlined,
+  SyncOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
+import { Button, Checkbox, Tooltip } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +26,7 @@ import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/an
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
 import { getLayerSummaryParts } from '../../../utils/layers/get.layer.summary.parts';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { LayerSummaryText } from '../../../views/LayerSummaryText';
 import { LayerSwatch } from '../../../views/LayerSwatch';
 import type { LayerRowProps } from '../interfaces/LayerRowProps';
@@ -58,11 +66,13 @@ export const LayerRow = ({
       onDrop={onDrop}
     >
       <HolderOutlined className={styles.handle} aria-hidden="true" />
-      <Checkbox
-        checked={layer.enabled}
-        aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
-        onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
-      />
+      <Tooltip title={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}>
+        <Checkbox
+          checked={layer.enabled}
+          aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
+          onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
+        />
+      </Tooltip>
       <Button
         ref={openButtonRef}
         className={styles.openButton}
@@ -74,7 +84,16 @@ export const LayerRow = ({
           <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
         </span>
         <span className={styles.name} title={layerName}>{layerName}</span>
-        <LayerSummaryText className={styles.summary} parts={getLayerSummaryParts(t, settings)} />
+        <LayerSummaryText
+          className={styles.summary}
+          parts={getLayerSummaryParts(t, settings)}
+          iconComponents={[
+            <LayerModeIcon key={settings.mode} mode={settings.mode} />,
+            <ThunderboltOutlined key={DEFAULT.LAYERS_SUMMARY_POWER} />,
+            <DashboardOutlined key={DEFAULT.LAYERS_SUMMARY_SPEED} />,
+            <SyncOutlined key={DEFAULT.LAYERS_SUMMARY_PASSES} />,
+          ]}
+        />
         {hasNoPaletteEntry && <span className={styles.note}>{t(DEFAULT.LAYERS_NOT_IN_PALETTE)}</span>}
       </Button>
       <div className={styles.moveButtons}>

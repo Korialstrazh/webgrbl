@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { ExperimentOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -32,7 +33,11 @@ export const BurnPreviewToolbar = (): ReactNode => {
           ? t(DEFAULT.BURN_PREVIEW_MATERIAL_CURRENT, { name: activeMaterial.name })
           : t(DEFAULT.BURN_PREVIEW_MATERIAL_NONE)}
       </span>
-      <Button disabled={!activeMaterial} onClick={() => setIsTestSampleDialogOpen(true)}>
+      <Button
+        icon={<ExperimentOutlined aria-hidden />}
+        disabled={!activeMaterial}
+        onClick={() => setIsTestSampleDialogOpen(true)}
+      >
         {t(DEFAULT.BURN_PREVIEW_ENTER_TEST_RESULT)}
       </Button>
       {activeMaterial && (

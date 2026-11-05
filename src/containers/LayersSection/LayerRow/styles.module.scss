@@ -62,8 +62,7 @@
 }
 
 // At most two lines each; only a name or summary longer than that is cut short, and its title shows it in full.
-.name,
-.summary {
+.name {
   display: -webkit-box;
   overflow: hidden;
   overflow-wrap: anywhere;
@@ -73,7 +72,6 @@
 }
 
 .summary {
-  font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }
@@ -87,7 +85,6 @@
 }
 
 .summary {
-  font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }

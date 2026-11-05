@@ -99,10 +99,14 @@ const getRow = (rowIndex: number): HTMLElement => {
   return row;
 };
 
+const SUMMARY_TITLE_SELECTOR = 'span[title*="mm/min"]';
+
 const getRowTexts = (): string[] =>
   within(screen.getByRole('list', { name: LAYERS_LIST_NAME }))
     .getAllByRole(ROW_ROLE)
-    .map((row: HTMLElement): string => row.textContent ?? '');
+    // The summary is icons and values; its title holds the whole line.
+    .map((row: HTMLElement): string =>
+      [row.textContent, row.querySelector(SUMMARY_TITLE_SELECTOR)?.getAttribute('title')].join(' '));
 
 describe(LayersSection.name, () => {
   it('shows a hint while the design has no layers', () => {

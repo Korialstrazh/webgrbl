@@ -43,10 +43,8 @@ const EXPORT_LABEL = 'Export G-code';
 const ESTIMATE_NOTE = 'Estimate from your test.';
 const GUESS_NOTE = 'This is a guess: no test has been made with this material on this machine.';
 const TEST_SAMPLE_POINTER = 'Add the test sample in Design, burn it, then enter the result to get an estimate.';
-const OUT_OF_DATE_TEXT = /^Out of date: the design changed/;
 const BUILDING_TEXT = 'Building the 3D view';
 const FAILED_TEXT = /^The 3D view could not be built/;
-const NO_MATERIAL_TEXT = /^Pick a material in Design/;
 const NOT_THROUGH_HINT = 'Part 3 stays attached: the cut does not reach through, so it cannot be lifted.';
 
 const newPart = (id: number, status: BurnPart['status']): BurnPart => ({
@@ -336,22 +334,15 @@ describe(CutCheckPanel.name, () => {
       store.dispatch(new LayerToggled({ layerKey: UNKNOWN_LAYER_KEY, enabled: false }));
     });
 
-    expect(screen.getByText(OUT_OF_DATE_TEXT)).toBeInTheDocument();
     expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
     expect(screen.queryByText(ESTIMATE_NOTE)).not.toBeInTheDocument();
   });
 
-  it('says when no material is chosen', () => {
-    renderPanel(newStore());
-
-    expect(screen.getByText(NO_MATERIAL_TEXT)).toBeInTheDocument();
-  });
-
   it.each([
     ['building', (): BurnModelRequested => new BurnModelRequested({ materialId: MATERIAL.id }), BUILDING_TEXT],
     ['failed', (): BurnModelFailed => new BurnModelFailed(), FAILED_TEXT],
-  ])('explains a %s model and shows no old parts', (_title, newAction, expectedText) => {
+  ])('leaves a %s model to the 3D view and shows no old parts', (_title, newAction, expectedText) => {
     const store: AppStore = newReadyStore();
 
     store.dispatch(new MaterialSaved({ material: MATERIAL }));
@@ -366,7 +357,7 @@ describe(CutCheckPanel.name, () => {
       store.dispatch(newAction());
     });
 
-    expect(screen.getByText(expectedText)).toBeInTheDocument();
+    expect(screen.queryByText(expectedText)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^Part / })).not.toBeInTheDocument();
   });
 });

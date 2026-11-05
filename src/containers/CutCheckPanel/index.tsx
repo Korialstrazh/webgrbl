@@ -1,8 +1,8 @@
 /**
  * The Cut check of the 3D view: the part counts, the warnings put together by what they say, a list with one row per
  * part that selects it, cut down to the selected row when it is long so Layers stays near, and whether this is an
- * estimate from a test or a guess. Without a current model it says why and shows no old parts. Warnings never block
- * export.
+ * estimate from a test or a guess. Without a current model it is the heading only, as the 3D view says why, and it
+ * shows no old parts. Warnings never block export.
  *
  * @author michael.morosov
  *
@@ -11,6 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { CheckSquareOutlined } from '@ant-design/icons';
 import { Alert, Button, Tag } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
@@ -36,9 +37,6 @@ import {
   selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
-import { BURN_PREVIEW_EMPTY_STATE_TEXT_KEYS } from '../../utils/states/burn.preview.empty.state.constants';
-import type { BurnPreviewEmptyState } from '../../utils/states/burn.preview.empty.state.constants';
-import { selectBurnPreviewEmptyState } from '../../utils/states/burn.preview.selectors';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { selectProjectLayers } from '../../utils/states/project.document.state';
@@ -76,7 +74,6 @@ export const CutCheckPanel = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
-  const emptyState: BurnPreviewEmptyState | undefined = useSelector(selectBurnPreviewEmptyState);
   const selectedPartId: number | undefined = useSelector(selectSelectedBurnPartId);
   const hoveredPartId: number | undefined = useSelector(selectHoveredBurnPartId);
   const selectedRowRef: RefObject<HTMLLIElement | null> = useRef<HTMLLIElement>(null);
@@ -95,11 +92,7 @@ export const CutCheckPanel = (): ReactNode => {
   }, [selectedPartId, isPartListExpanded]);
 
   if (!model) {
-    return (
-      <Panel title={t(DEFAULT.CUT_CHECK_TITLE)}>
-        {emptyState && <p className={styles.note}>{t(BURN_PREVIEW_EMPTY_STATE_TEXT_KEYS[emptyState])}</p>}
-      </Panel>
-    );
+    return <Panel iconComponent={<CheckSquareOutlined />} title={t(DEFAULT.CUT_CHECK_TITLE)} />;
   }
 
   const { freePartCount, borderlinePartCount, attachedPartCount, warnings, isGuess } = model.cutCheck;
@@ -111,7 +104,7 @@ export const CutCheckPanel = (): ReactNode => {
     : model.parts;
 
   return (
-    <Panel title={t(DEFAULT.CUT_CHECK_TITLE)}>
+    <Panel iconComponent={<CheckSquareOutlined />} title={t(DEFAULT.CUT_CHECK_TITLE)}>
       <div className={styles.cutCheckPanel}>
         <div className={styles.summary}>
           <strong>{t(DEFAULT.CUT_CHECK_PART_COUNT, { count: model.parts.length })}</strong>

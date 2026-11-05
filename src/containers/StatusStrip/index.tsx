@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { CodeOutlined, ColumnWidthOutlined, FieldTimeOutlined } from '@ant-design/icons';
 import { Layout, Switch, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,7 +51,10 @@ export const StatusStrip = (): ReactNode => {
         {/* A description list keeps the term and value pairing; antd Descriptions renders a table instead. */}
         <dl className={styles.readouts}>
           <div className={styles.readout}>
-            <dt>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</dt>
+            <dt>
+              <ColumnWidthOutlined aria-hidden />
+              <span className={styles.termLabel}>{t(DEFAULT.STATUS_STRIP_JOB_SIZE)}</span>
+            </dt>
             <Tooltip
               title={t(jobBounds ? DEFAULT.STATUS_STRIP_JOB_SIZE_EXPLANATION : DEFAULT.STATUS_STRIP_JOB_SIZE_HINT)}
               trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
@@ -61,8 +65,11 @@ export const StatusStrip = (): ReactNode => {
               </dd>
             </Tooltip>
           </div>
-          <div className={styles.readout}>
-            <dt>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</dt>
+          <div className={[styles.readout, styles.estimateReadout].join(' ')}>
+            <dt>
+              <FieldTimeOutlined aria-hidden />
+              <span className={styles.termLabel}>{t(DEFAULT.STATUS_STRIP_ESTIMATE)}</span>
+            </dt>
             {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
             <dd>{totalTimeS === undefined ? pendingValueText : getJobEstimateText(t, totalTimeS)}</dd>
           </div>
@@ -83,6 +90,7 @@ export const StatusStrip = (): ReactNode => {
           checked={isConsoleOpen}
           onChange={(isChecked: boolean) => dispatch(new ConsoleOpenChanged({ isConsoleOpen: isChecked }))}
         />
+        <CodeOutlined aria-hidden />
         {t(DEFAULT.CONSOLE_TOGGLE)}
       </label>
     </Layout.Footer>
