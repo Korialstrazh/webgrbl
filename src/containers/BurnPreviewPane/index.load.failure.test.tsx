@@ -10,7 +10,7 @@ const CHUNK_ERROR_TEXT = 'chunk at /assets/three-abc.js is gone';
 const THREE_D_VIEW_LABEL = '3D';
 const DESIGN_VIEW_LABEL = 'Design';
 const BED_ZOOM_LABEL = 'Bed zoom';
-const CUT_CHECK_TITLE = 'Cut check';
+const LAYERS_TITLE = 'Layers';
 
 vi.mock('../../utils/burn.scene/burn.scene.runtime', () => {
   throw new Error('chunk at /assets/three-abc.js is gone');
@@ -39,7 +39,7 @@ describe('BurnPreviewPane with a chunk that fails to load', () => {
     expect(await screen.findByText(NO_WEBGL_TEXT)).toBeInTheDocument();
     expect(screen.queryByText(new RegExp(CHUNK_ERROR_TEXT))).not.toBeInTheDocument();
     expect(consoleErrorSpy).toHaveBeenCalled();
-    expect(screen.getByRole('heading', { name: CUT_CHECK_TITLE })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: LAYERS_TITLE })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL }));
 

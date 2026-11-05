@@ -92,7 +92,7 @@ export const CutCheckPanel = (): ReactNode => {
   }, [selectedPartId, isPartListExpanded]);
 
   if (!model) {
-    return <Panel iconComponent={<CheckSquareOutlined />} title={t(DEFAULT.CUT_CHECK_TITLE)} />;
+    return null;
   }
 
   const { freePartCount, borderlinePartCount, attachedPartCount, warnings, isGuess } = model.cutCheck;
