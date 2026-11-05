@@ -35,3 +35,11 @@
 .viewSwitch :global(.ant-segmented-item-selected:hover) {
   color: var(--color-accent);
 }
+
+// At phone width the items close up, so the bed tools beside the switch fit without scrolling.
+@media (width < 30rem) {
+  .viewSwitch :global(.ant-segmented-item-label) {
+    min-width: 2.75rem;
+    padding-inline: var(--space-1);
+  }
+}
