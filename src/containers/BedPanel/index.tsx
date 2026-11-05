@@ -20,7 +20,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ApiOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -40,6 +39,7 @@ import { selectProjectObjects } from '../../utils/states/project.document.state'
 import { selectToolpathMachineArea } from '../../utils/states/toolpath.machine.area.selector';
 import type { ToolpathMachineArea } from '../../utils/toolpath/interfaces/ToolpathMachineArea';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
+import { PlugBadge } from '../../views/PlugBadge';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
 import { BedEmptyCard } from '../BedEmptyCard';
 import { BedObjects } from '../BedObjects';
@@ -160,8 +160,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           )}
           {!isThreeDView && hasNoObjects && placeholderKey && (
             <span className={styles.placeholderChip}>
-              <ApiOutlined aria-hidden />
-              {t(placeholderKey)}
+              <PlugBadge reasonText={t(placeholderKey)} />
             </span>
           )}
           {viewMode === BED_VIEW_MODE.DESIGN && hasNoObjects && <BedEmptyCard />}

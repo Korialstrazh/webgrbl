@@ -1,6 +1,6 @@
 /**
  * The heading-line toggle of a machine card that cannot act while no laser is connected: a short hint, such as
- * "Connect to move", and a chevron that opens the card anyway, disabled, for a user who wants to see it first.
+ * a plug badge with the reason in its tooltip, and a chevron that opens the card anyway, disabled, for a user who wants to see it first.
  *
  * @author michael.morosov
  *
@@ -12,6 +12,7 @@
 import { DownOutlined, UpOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { IconActionButton } from '../IconActionButton';
+import { PlugBadge } from '../PlugBadge';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import type { CollapsedCardToggleProps } from './interfaces/CollapsedCardToggleProps';
 import styles from './styles.module.scss';
@@ -22,7 +23,7 @@ export const CollapsedCardToggle = (props: CollapsedCardToggleProps): ReactNode 
   return (
     <span className={styles.collapsedSummary}>
       {/* Kept while the card is open, so the disabled controls below it still say why they are disabled. */}
-      <span className={styles.collapsedHint}>{hintText}</span>
+      <PlugBadge reasonText={hintText} />
       <IconActionButton
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}

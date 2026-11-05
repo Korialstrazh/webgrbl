@@ -88,7 +88,8 @@ export const ConnectionPill = (): ReactNode => {
         <span className={styles.status}>{statusText}</span>
         {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
         {activeProfile && <span className={styles.profile}>{activeProfile.name}</span>}
-        <span className={styles.port}>{portText}</span>
+        {/* "No port chosen" beside "Not connected" says nothing new, so only a chosen port is shown. */}
+        {selectedPortId && <span className={styles.port}>{portText}</span>}
         {!isWebSerialSupported && (
           <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
         )}

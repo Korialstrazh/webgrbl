@@ -79,6 +79,11 @@ export const LaserStateChip = (): ReactNode => {
   const laserChipState: LaserChipState = useSelector(selectLaserChipState);
   const { iconComponent, labelKey, hintKey, className }: LaserChipLook = LASER_CHIP_LOOK[laserChipState];
 
+  // The connection pill beside it already says there is no link.
+  if (laserChipState === LASER_CHIP_STATE.NOT_CONNECTED) {
+    return null;
+  }
+
   return (
     <Tooltip title={t(hintKey)} trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}>
       {/* Focusable, so a keyboard user can read the sentence; it is a readout, not a control. */}

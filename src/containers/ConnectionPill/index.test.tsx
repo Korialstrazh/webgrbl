@@ -60,12 +60,12 @@ const settle = async (): Promise<void> => {
 };
 
 describe(ConnectionPill.name, () => {
-  it('shows Not connected with the selected port and a Connect verb, and opens the popover on click', () => {
+  it('shows Not connected and a Connect verb, without the empty port, and opens the popover on click', () => {
     renderConnectionPill();
 
     const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
 
-    expect(screen.getByText(NO_PORT_CHOSEN_LABEL)).toBeInTheDocument();
+    expect(screen.queryByText(NO_PORT_CHOSEN_LABEL)).not.toBeInTheDocument();
     expect(within(pillButton).getByText(CONNECT_VERB_TEXT)).toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: POPOVER_LABEL })).not.toBeInTheDocument();
 

@@ -51,7 +51,7 @@ import { TOOLPATH_BURN_PATH_TEST_ID } from '../ToolpathLayer/toolpath.layer.cons
 import { BED_DROP_AREA_TEST_ID } from './bed.panel.constants';
 
 const NOT_RESPONDING_TEXT = 'The controller is not responding.';
-const NO_MACHINE_TEXT = 'Connect a machine to see its bed';
+const NO_MACHINE_TEXT = 'Add a laser profile to set the bed size';
 const WORK_POSITION: GrblAxisPosition = { x: 10, y: 20, z: 0 };
 const WORK_COORDINATE_OFFSET: GrblAxisPosition = { x: 100, y: 30, z: 0 };
 const EXPECTED_HEAD_TRANSFORM = 'translate(10 380) scale(1)';
@@ -168,7 +168,7 @@ describe(BedPanel.name, () => {
   it('asks for a machine while disconnected', () => {
     renderPanel(newStore());
 
-    expect(screen.getByText(NO_MACHINE_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: NO_MACHINE_TEXT })).toBeInTheDocument();
   });
 
   it('draws the bed from the active profile without the placeholder while disconnected', () => {
@@ -186,7 +186,7 @@ describe(BedPanel.name, () => {
     });
 
     expect(screen.getByLabelText(PROFILE_BED_LABEL, { exact: false })).toBeInTheDocument();
-    expect(screen.queryByText(NO_MACHINE_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: NO_MACHINE_TEXT })).not.toBeInTheDocument();
   });
 
   it('status with only WPos and a cached WCO still places the crosshair', () => {

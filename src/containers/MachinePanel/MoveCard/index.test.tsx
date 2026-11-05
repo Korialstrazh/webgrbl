@@ -93,10 +93,10 @@ const getRequestedLines = (dispatchSpy: ReturnType<typeof vi.spyOn>): string[] =
 };
 
 describe(MoveCard.name, () => {
-  it('collapses to one line with a hint while disconnected, without any move control', () => {
+  it('collapses to one line with a plug badge while disconnected, without any move control', () => {
     renderMoveCard(newStore());
 
-    expect(screen.getByText(COLLAPSED_HINT_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: COLLAPSED_HINT_TEXT })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: SHOW_CONTROLS_LABEL })).toHaveAttribute(ARIA_EXPANDED_ATTRIBUTE, 'false');
     expect(screen.queryByRole('button', { name: JOG_NORTH_EAST_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('spinbutton', { name: JOG_SPEED_LABEL })).not.toBeInTheDocument();
@@ -114,7 +114,7 @@ describe(MoveCard.name, () => {
       screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL }),
     );
     expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeDisabled();
-    expect(screen.getByText(COLLAPSED_HINT_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: COLLAPSED_HINT_TEXT })).toBeInTheDocument();
 
     fireEvent.click(hideButton);
 
@@ -129,7 +129,7 @@ describe(MoveCard.name, () => {
 
     expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: SHOW_CONTROLS_LABEL })).not.toBeInTheDocument();
-    expect(screen.queryByText(COLLAPSED_HINT_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: COLLAPSED_HINT_TEXT })).not.toBeInTheDocument();
   });
 
   it('jogs north-east at step 1 with the default feed rate', () => {

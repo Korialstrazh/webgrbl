@@ -27,6 +27,7 @@ const NOT_CONNECTED_TEXT = 'Not connected';
 const STATUS_CARD_TITLE = 'Status';
 const STATUS_CONNECT_LABEL = 'Connect...';
 const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
+const JOB_CARD_TITLE = 'Job';
 const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
 const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
 
@@ -66,13 +67,11 @@ const receiveState = (store: AppStore, machineState: GrblResolvedStatus['machine
 };
 
 describe(MachinePanel.name, () => {
-  it('collapses the status card to one line while not connected, without readouts or buttons', () => {
+  it('hides the status card while not connected, so the top bar alone tells the state', () => {
     renderMachinePanel();
 
-    const statusCard: HTMLElement = screen.getByRole('region', { name: STATUS_CARD_TITLE });
-
-    expect(within(statusCard).getByText(NOT_CONNECTED_TEXT)).toBeInTheDocument();
-    expect(within(statusCard).queryByText(MISSING_VALUE_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: STATUS_CARD_TITLE })).not.toBeInTheDocument();
+    expect(screen.queryByText(NOT_CONNECTED_TEXT)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
   });
@@ -109,7 +108,7 @@ describe(MachinePanel.name, () => {
   });
 
   it('puts the main task first: status, job, move, then the laser pointer', () => {
-    renderMachinePanel();
+    connect(renderMachinePanel());
 
     const cardTitles: (string | null)[] = screen.getAllByRole('heading')
       .map((heading: HTMLElement) => heading.textContent);
@@ -190,7 +189,7 @@ describe(MachinePanel.name, () => {
     const cardsArea: Element | null | undefined = stopFooter?.previousElementSibling;
 
     expect(stopFooter?.parentElement).toBe(cardsArea?.parentElement);
-    expect(cardsArea).toContainElement(screen.getByText(NOT_CONNECTED_TEXT));
+    expect(cardsArea).toContainElement(screen.getByRole('region', { name: JOB_CARD_TITLE }));
     expect(cardsArea).not.toContainElement(stopFooter ?? null);
   });
 });
