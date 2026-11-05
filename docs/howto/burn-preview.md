@@ -35,7 +35,7 @@ The gradient only helps you judge shading by eye. To change shading, change the 
 
 ## Parts and lifting
 
-- A part is a region enclosed by through cuts. Status: **Free**, **May stay attached** (borderline) or **Attached** (not through).
+- A part is a region enclosed by through cuts. Status: **Free**, **May stay attached** (borderline) or **Attached** (not through). The summary shows each status as an icon with its count, and each part row carries one status icon; the words are the tooltip and are read out by screen readers.
 - Hover a part or its row to highlight it; click either to select it. With more than 4 parts the list starts cut down to the selected row, with **Show all N parts**; the selected row scrolls into view within the panel, with a margin. Free and borderline parts show an orange arrow: drag it up or down. The bar below the scene shows the height ("Lifted 40.0 mm"); with it focused, the arrow keys lift too (1 mm a step). Lifted parts show their height in their row, and **Put all back** resets every lift.
 - Orbit stops about 80 degrees from vertical. **Fit** brings back the first view with the sheet filling most of the canvas, and **Top** looks straight down at the same fit. A part lifted far may leave the frame.
 - No upper limit. 0.0 is absolute: the part's place in the sheet, also for a part nested in a lifted parent. Nested parts rise with their parent.
