@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { InboxOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,7 +41,7 @@ export const ObjectsSection = (): ReactNode => {
   if (!projectObjects.length) {
     return (
       <div className={styles.empty}>
-        <p className={styles.hint}>{t(DEFAULT.OBJECTS_EMPTY_HINT)}</p>
+        <p className={styles.hint}><InboxOutlined aria-hidden />{t(DEFAULT.OBJECTS_EMPTY_HINT)}</p>
       </div>
     );
   }

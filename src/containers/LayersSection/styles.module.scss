@@ -7,7 +7,11 @@
   list-style: none;
 }
 
+// An empty tray leads the empty-state line, so the empty card reads at a glance.
 .hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   font-size: 0.8125rem;
   color: var(--color-text-muted);
