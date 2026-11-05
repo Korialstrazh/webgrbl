@@ -38,7 +38,7 @@ Then log out and back in. Only one application or browser tab can hold a port at
 
 ## Stop, Reset, Unlock
 
-- Pressing **Escape** in the main view stops the machine like the STOP button, but only while connected and no popover, dialog or drawer is open (Escape then just closes it). See [workbench-shell.md](workbench-shell.md).
+- Pressing **Escape** in the main view stops the machine like the STOP button, while connected. With a drawer open it also closes the drawer; with a popover or dialog open it only closes that. See [workbench-shell.md](workbench-shell.md).
 - **Stop** sends a feed hold (which also cancels a jog), waits until the machine has come to rest (at most 2 s), then soft-resets. The position is kept and no alarm is raised.
 - **Reset** soft-resets at once. Moving machines lose steps and raise `ALARM:3`, so home again afterwards.
 - **Unlock** sends `$X` to clear an Alarm lock.

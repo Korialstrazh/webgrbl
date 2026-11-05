@@ -28,6 +28,11 @@ export interface UiOverlayState {
 export const UI_OVERLAY_STATE_NAME = 'uiOverlay';
 // #endregion
 
+// #region Overlay kinds
+/** Starts the id of every drawer overlay. A drawer leaves the machine panel in use, so Escape-to-STOP stays live. */
+export const DRAWER_OVERLAY_ID_PREFIX = 'drawer/';
+// #endregion
+
 // #region Action type
 const actionType: ActionTypeFormatter = actionTypePrefixer(UI_OVERLAY_STATE_NAME);
 // #endregion
@@ -89,6 +94,9 @@ type RootState = { [UI_OVERLAY_STATE_NAME]: UiOverlayState };
 
 export const selectIsAnyOverlayOpen = (state: RootState): boolean =>
   !!state[UI_OVERLAY_STATE_NAME].openOverlayIds.length;
+
+export const selectIsDrawerOverlayOpen = (state: RootState): boolean =>
+  state[UI_OVERLAY_STATE_NAME].openOverlayIds.some((overlayId: string) => overlayId.startsWith(DRAWER_OVERLAY_ID_PREFIX));
 
 export const selectIsConnectionPopoverOpen = (state: RootState): boolean =>
   state[UI_OVERLAY_STATE_NAME].isConnectionPopoverOpen;

@@ -13,7 +13,7 @@ import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.stat
 import { MachineStopRequested } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
-import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
+import { DRAWER_OVERLAY_ID_PREFIX, OverlayOpened, selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const CONSOLE_INPUT_LABEL = 'Console command';
@@ -229,6 +229,18 @@ describe(StopHotkey.name, () => {
 
     expect(stopSpy()).toBe(0);
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+  });
+
+  it('Escape with a drawer overlay open stops, also with a dialog on top of it', () => {
+    const { store, stopSpy } = renderHotkey(true);
+
+    act(() => {
+      store.dispatch(new OverlayOpened({ overlayId: [DRAWER_OVERLAY_ID_PREFIX, DRAWER_OVERLAY_ID].join('') }));
+      store.dispatch(new OverlayOpened({ overlayId: MODAL_OVERLAY_ID }));
+    });
+    fireEvent.keyDown(document.body, { key: ESCAPE_KEY });
+
+    expect(stopSpy()).toBe(1);
   });
 
   it('held Escape (repeat) stops only once', () => {
