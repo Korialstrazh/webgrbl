@@ -203,7 +203,7 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL })).toContainElement(stopButton ?? null);
   });
 
-  it('shows the machine panel and STOP beside the Cut check in the 3D view', async () => {
+  it('shows the machine panel and STOP beside the design panel in the 3D view', async () => {
     renderAppRoute();
     await waitForRegions();
     fireEvent.click(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL }));
@@ -211,7 +211,7 @@ describe(AppRoute.name, () => {
     const designPanel: HTMLElement = screen.getByRole('complementary', { name: DESIGN_PANEL_LABEL });
     const machinePanel: HTMLElement = screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL });
 
-    expect(within(designPanel).getByRole('heading', { name: CUT_CHECK_TITLE })).toBeInTheDocument();
+    expect(within(designPanel).queryByRole('heading', { name: CUT_CHECK_TITLE })).not.toBeInTheDocument();
     expect(within(machinePanel).getByRole('button', { name: STOP_LABEL })).toBeInTheDocument();
     expect(designPanel).not.toContainElement(machinePanel);
   });

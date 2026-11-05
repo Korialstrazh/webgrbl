@@ -53,13 +53,13 @@ describe(DesignPanel.name, () => {
     expect(screen.queryByRole('heading', { name: CUT_CHECK_TITLE })).not.toBeInTheDocument();
   });
 
-  it('in 3D shows the Cut check above Layers and hides Objects', () => {
+  it('in 3D hides Objects, and the Cut check while it has no content', () => {
     const store: AppStore = newStore();
 
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
     renderDesignPanel(store);
 
-    expect(getHeadingNames()).toEqual([CUT_CHECK_TITLE, LAYERS_TITLE]);
+    expect(getHeadingNames()).toEqual([LAYERS_TITLE]);
   });
 
   it('puts Add test sample in the Layers panel', () => {
