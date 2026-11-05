@@ -17,15 +17,26 @@
   gap: 0.125rem;
   white-space: nowrap;
 
-  // Glyphs a size above the digits in the muted tone, so they read as icons while the number reads first.
+  // Glyphs a size above the digits, each in its own colour, so they read as icons while the number reads first.
   :global(.anticon) {
-    color: var(--color-text-muted);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
   }
 }
 
+.powerCell :global(.anticon) {
+  color: var(--color-warning);
+}
+
+.speedCell :global(.anticon) {
+  color: var(--color-info);
+}
+
+.passesCell :global(.anticon) {
+  color: var(--color-success);
+}
+
 .cell:not(:last-of-type) {
-  min-width: 3rem;
+  min-width: 2.75rem;
 }
 
 .summaryText {

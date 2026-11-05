@@ -119,8 +119,7 @@
 }
 
 .summary {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
+  margin-top: 0.125rem;
 }
 
 .note {
@@ -178,6 +177,12 @@
   }
 }
 
+// The mode is a plain glyph with no box, set apart from the filled swatch by a thin divider, so the two never read as
+// the same kind of control.
 .modeIcon {
+  display: inline-flex;
+  padding-inline-end: var(--space-2);
+  border-inline-end: 1px solid var(--color-border);
   color: var(--color-text-muted);
+  font-size: 1rem;
 }

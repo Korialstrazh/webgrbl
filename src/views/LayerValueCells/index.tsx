@@ -27,6 +27,8 @@ const CELL_HINT_KEYS: readonly string[] = [
   DEFAULT.LAYERS_CELL_PASSES_HINT,
 ];
 const CELL_ICONS: readonly ReactNode[] = [<ThunderboltOutlined />, <DashboardOutlined />, <SyncOutlined />];
+// Each value has its own glyph colour, so power, speed and passes tell apart at a glance.
+const CELL_CLASS_NAMES: readonly (string | undefined)[] = [styles.powerCell, styles.speedCell, styles.passesCell];
 
 interface LayerValueCellsProps {
   settings: LayerSummarySettings;
@@ -42,7 +44,7 @@ export const LayerValueCells = ({ settings, className }: LayerValueCellsProps): 
       <span className={styles.summaryText}>{summaryText}</span>
       {getLayerValueCells(t, settings).map((cellText: string, cellIndex: number) => (
         <Tooltip key={cellIndex} title={t(CELL_HINT_KEYS[cellIndex] ?? '')}>
-          <span className={styles.cell} aria-hidden>
+          <span className={[styles.cell, CELL_CLASS_NAMES[cellIndex]].join(' ')} aria-hidden>
             {CELL_ICONS[cellIndex]}
             {cellText}
           </span>

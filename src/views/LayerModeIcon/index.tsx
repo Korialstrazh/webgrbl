@@ -1,5 +1,5 @@
 /**
- * The pictogram of a layer mode: an outline for Line, scan lines for Fill.
+ * The pictogram of a layer mode: a vector path with corner nodes for Line, scan lines for Fill.
  *
  * @author michael.morosov
  *
@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BorderOutlined, MenuOutlined } from '@ant-design/icons';
+import { GatewayOutlined, MenuOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { LAYER_MODE } from '../../utils/palette/palette.constants';
 import type { LayerMode } from '../../utils/palette/palette.constants';
@@ -18,4 +18,4 @@ interface LayerModeIconProps {
 }
 
 export const LayerModeIcon = ({ mode }: LayerModeIconProps): ReactNode =>
-  mode === LAYER_MODE.FILL ? <MenuOutlined aria-hidden /> : <BorderOutlined aria-hidden />;
+  mode === LAYER_MODE.FILL ? <MenuOutlined aria-hidden /> : <GatewayOutlined aria-hidden />;
