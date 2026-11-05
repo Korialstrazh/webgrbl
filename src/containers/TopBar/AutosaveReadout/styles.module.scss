@@ -11,6 +11,11 @@
   white-space: nowrap;
 }
 
+// Room for the longest state ("Not saved"), so a change of state never shifts the buttons after it.
+.label {
+  min-inline-size: 4.5rem;
+}
+
 .icon {
   display: inline-flex;
   font-size: 1rem;
@@ -36,6 +41,8 @@
   }
 
   .label {
+    min-inline-size: 0;
+
     @include accessibility.visually-hidden;
   }
 }

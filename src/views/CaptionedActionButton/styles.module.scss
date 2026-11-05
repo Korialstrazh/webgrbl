@@ -49,8 +49,10 @@
 // Doubled class: a caller that sizes every icon in its button must not enlarge the badge.
 .icon .lockBadge.lockBadge:global(.anticon) {
   position: absolute;
-  inset-block-end: -0.25rem;
-  inset-inline-end: -0.5rem;
+  // Centred on the icon's lower corner, so it marks the icon without covering its middle.
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  transform: translate(60%, 45%);
   padding: 0.0625rem;
   border-radius: 50%;
   background-color: var(--color-surface-1);

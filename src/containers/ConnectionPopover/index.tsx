@@ -222,6 +222,8 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       // Below the pill and right-aligned to it, so it covers neither the top bar nor the views; its fields sit on
       // one line each, which keeps it short enough to stop above the Connect laser button of the Job card.
       placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+      // A clear edge, shadow and arrow tie it to the pill, so it never reads as part of the Job card under it.
+      rootClassName={styles.connectionPopoverRoot}
       content={contentComponent}
       destroyOnHidden
     >

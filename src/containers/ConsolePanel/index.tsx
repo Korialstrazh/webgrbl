@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { CodeOutlined } from '@ant-design/icons';
 import { Checkbox, Input } from 'antd';
 import type { ChangeEvent, KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -106,7 +107,10 @@ export const ConsolePanel = (): ReactNode => {
   return (
     <section className={styles.consolePanel}>
       <header className={styles.header}>
-        <h2 className={styles.title}>{t(DEFAULT.CONSOLE_TITLE)}</h2>
+        <h2 className={styles.title}>
+          <CodeOutlined aria-hidden />
+          {t(DEFAULT.CONSOLE_TITLE)}
+        </h2>
         <Checkbox
           className={styles.statusReports}
           checked={isStatusReportVisible}

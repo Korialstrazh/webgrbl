@@ -31,7 +31,8 @@
 
   :global(.ant-btn) {
     flex-direction: row;
-    gap: var(--space-2);
+    // Room for the lock badge that sits on the icon's corner, so it never touches the word.
+    gap: var(--space-3);
     height: 3.25rem;
     font-size: 1rem;
     font-weight: 600;
@@ -51,10 +52,10 @@
   min-width: 0;
 }
 
-// Frame and its gear read as one split button.
+// Frame and its gear read as one split button, as wide as Export beside it.
 .frameSplit {
   display: flex;
-  flex: 1.4 1 0;
+  flex: 1 1 0;
   min-width: 0;
 
   > span:first-child {
@@ -73,8 +74,9 @@
   }
 }
 
+// A full-size icon button, so the gear reads as a control of its own and not as a sliver of Frame.
 .frameGear:global(.ant-btn) {
-  width: 1.75rem;
+  width: 2.75rem;
   height: 3.25rem;
   padding: 0;
   border-start-start-radius: 0;
