@@ -1,8 +1,8 @@
 // Each view is an icon over one word, so the switch explains itself without a hover.
 .viewSwitch :global(.ant-segmented-item-label) {
-  min-width: 3.25rem;
+  min-width: 3.75rem;
   min-height: 2.25rem;
-  padding-inline: var(--space-1);
+  padding-inline: var(--space-2);
   line-height: 1;
   text-align: center;
 }
@@ -18,7 +18,7 @@
 }
 
 .caption {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
 }
 
 // The current view stands out from a hovered one by the accent, as the speed chips of the Toolpath view do.

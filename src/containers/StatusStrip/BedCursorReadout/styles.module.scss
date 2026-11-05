@@ -30,6 +30,10 @@
   }
 }
 
+.unknownPoint {
+  visibility: hidden;
+}
+
 .termLabel {
   @include accessibility.visually-hidden;
 }

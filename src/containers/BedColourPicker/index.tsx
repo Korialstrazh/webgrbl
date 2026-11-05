@@ -24,7 +24,6 @@ import type { BedColourPreset } from '../../utils/bed/interfaces/BedColourPreset
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { BedColourChanged, selectBedColour } from '../../utils/states/bed.appearance.state';
 import type { AppDispatch } from '../../utils/states/new.store';
-import { BedColourIcon } from '../../views/BedColourIcon';
 import styles from './styles.module.scss';
 
 type BedColourPickerPanelRender = NonNullable<ColorPickerProps['panelRender']>;
@@ -89,15 +88,13 @@ export const BedColourPicker = (): ReactNode => {
     >
       <Tooltip title={labelText}>
         <Button className={styles.bedColourButton} aria-label={labelText}>
-          <span className={styles.glyphs} aria-hidden="true">
-            <BedColourIcon />
-            {/* A plain swatch of the current colour; only its fill changes at run time. */}
-            <span
-              className={styles.swatch}
-              // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
-              style={{ backgroundColor: bedColour }}
-            />
-          </span>
+          {/* One swatch of the current colour reads as the bed itself; only its fill changes at run time. */}
+          <span
+            className={[styles.swatch, styles.currentSwatch].join(' ')}
+            aria-hidden="true"
+            // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
+            style={{ backgroundColor: bedColour }}
+          />
           {/* A caption under the glyphs, like the view switch beside it, so the swatch says what it colours. */}
           <span className={styles.caption} aria-hidden="true">{t(DEFAULT.BED_COLOUR_CAPTION)}</span>
         </Button>

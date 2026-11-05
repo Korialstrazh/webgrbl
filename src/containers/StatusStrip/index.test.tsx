@@ -78,33 +78,35 @@ describe(StatusStrip.name, () => {
     expect(screen.queryByText(SOON_LABEL)).not.toBeInTheDocument();
   });
 
-  it('shows the bed point under the pointer once the next frame comes, and a dash after the pointer leaves', () => {
+  it('shows the bed point under the pointer once the next frame comes, and hides it while the pointer is off the bed', () => {
     const animationFrames: AnimationFrameStub = new AnimationFrameStub();
 
     animationFrames.install();
     renderStatusStrip();
     const cursorReadout: HTMLElement | null = screen.getByText(CURSOR_LABEL).closest('div');
 
-    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+    expect(cursorReadout).toHaveAttribute('aria-hidden', 'true');
+    expect(cursorReadout).not.toHaveTextContent(MISSING_VALUE_TEXT);
 
     act(() => {
       BED_CURSOR_STORE.setBedCursorPoint({ xMm: 12.34, yMm: 56.78 });
       BED_CURSOR_STORE.setBedCursorPoint(CURSOR_POINT);
     });
 
-    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+    expect(cursorReadout).toHaveAttribute('aria-hidden', 'true');
     expect(animationFrames.getRequestCount()).toBe(1);
 
     animationFrames.runFrame(FRAME_TIME_MS);
 
     expect(cursorReadout).toHaveTextContent(CURSOR_TEXT);
+    expect(cursorReadout).toHaveAttribute('aria-hidden', 'false');
 
     act(() => {
       BED_CURSOR_STORE.setBedCursorPoint(undefined);
     });
     animationFrames.runFrame(FRAME_TIME_MS);
 
-    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+    expect(cursorReadout).toHaveAttribute('aria-hidden', 'true');
     vi.unstubAllGlobals();
   });
 

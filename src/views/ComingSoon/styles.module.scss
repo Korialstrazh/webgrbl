@@ -9,7 +9,7 @@
 }
 
 // The disabled control lets the pointer through to the wrapper, which shows the tooltip. A control that is not built
-// yet is a ghost: no fill, a dashed outline and muted text, so it never reads as one that works.
+// yet is plain muted text and icon with no outline, so with its Soon tag it reads as a note, never as a button.
 .control {
   display: inline-flex;
   min-width: 0;
@@ -19,8 +19,7 @@
   }
 
   > :global(.ant-btn:disabled) {
-    border-style: dashed;
-    border-color: var(--color-border);
+    border-color: transparent;
     background-color: transparent;
     box-shadow: none;
     color: var(--color-disabled-text);
