@@ -34,13 +34,18 @@
   min-width: 0;
 }
 
-.activeCheck {
-  color: var(--color-success);
-}
-
-.activeLabel {
-  color: var(--color-text-muted);
+.activeBadge {
+  display: inline-flex;
+  flex: none;
+  gap: var(--space-1);
+  align-items: center;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-success);
+  color: var(--color-surface-1);
   font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25rem;
 }
 
 .profileName {

@@ -43,7 +43,11 @@ import type { ReportedMachineProfileValues } from '../../../utils/profiles/inter
 import { MACHINE_ORIGIN_CORNER } from '../../../utils/profiles/machine.profile.constants';
 import type { MachineOriginCorner } from '../../../utils/profiles/machine.profile.constants';
 import { selectGrblSettings, selectIsConnected } from '../../../utils/states/grbl.connection.state';
-import { MachineProfileSaved } from '../../../utils/states/machine.profile.state';
+import {
+  ActiveMachineProfileSelected,
+  MachineProfileSaved,
+  selectActiveMachineProfile,
+} from '../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { isFiniteNumber } from '../../../utils/type.guards/is.finite.number';
 import { MACHINE_ORIGIN_CORNER_LABEL_KEY } from '../machine.profiles.dialog.constants';
@@ -117,6 +121,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
   const formId: string = useId();
   const isConnected: boolean = useSelector(selectIsConnected);
   const grblSettings: Record<number, string> = useSelector(selectGrblSettings);
+  const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const [draft, setDraft] = useState<MachineProfile>(profile);
   const [fieldErrors, setFieldErrors] = useState<MachineProfileFieldError[]>([]);
   const [reportedLaserValues, setReportedLaserValues] = useState<ReportedMachineProfileValues | undefined>(undefined);
@@ -151,6 +156,11 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
     }
 
     dispatch(new MachineProfileSaved({ profile: draft }));
+
+    // Only the first choice is made for the user: a save never replaces the laser they already picked.
+    if (!activeProfile) {
+      dispatch(new ActiveMachineProfileSelected({ profileId: draft.id }));
+    }
   };
 
   const readDraftFromLaser = (): void => {

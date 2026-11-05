@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckCircleFilled, CheckOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { CheckOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Popconfirm } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +18,6 @@ import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import type { MachineProfilesDocument } from '../../../utils/profiles/interfaces/MachineProfilesDocument';
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
-import { IconActionButton } from '../../../views/IconActionButton';
 import type { ProfileListProps } from './interfaces/ProfileListProps';
 import styles from './styles.module.scss';
 
@@ -37,6 +36,7 @@ export const ProfileList = (props: ProfileListProps): ReactNode => {
           const isActive: boolean = profile.id === activeProfileId;
           const isEdited: boolean = profile.id === editedProfileId;
           const deleteLabel: string = t(DEFAULT.MACHINE_PROFILES_DELETE, { name: profile.name });
+          const setActiveLabel: string = t(DEFAULT.MACHINE_PROFILES_SET_ACTIVE, { name: profile.name });
 
           return (
             <li key={profile.id} className={isEdited ? [styles.card, styles.editedCard].join(' ') : styles.card}>
@@ -46,18 +46,21 @@ export const ProfileList = (props: ProfileListProps): ReactNode => {
                 aria-current={isEdited}
                 onClick={() => onSelect(profile.id)}
               >
-                {isActive && <CheckCircleFilled className={styles.activeCheck} aria-hidden />}
                 <span className={styles.profileName}>{profile.name}</span>
-                {isActive && <span className={styles.activeLabel}>{t(DEFAULT.MACHINE_PROFILES_ACTIVE)}</span>}
+                {isActive && (
+                  <span className={styles.activeBadge}>
+                    <CheckOutlined aria-hidden />
+                    {t(DEFAULT.MACHINE_PROFILES_ACTIVE)}
+                  </span>
+                )}
               </Button>
-              <IconActionButton
-                type={ANTD_BUTTON_TYPE_TEXT}
-                size={ANTD_BUTTON_SIZE_SMALL}
-                labelText={t(DEFAULT.MACHINE_PROFILES_SET_ACTIVE, { name: profile.name })}
-                iconComponent={<CheckOutlined />}
-                isDisabled={isActive}
-                onClick={() => onSetActive(profile.id)}
-              />
+              {!isActive && (
+                <DismissibleTooltip title={setActiveLabel}>
+                  <Button size={ANTD_BUTTON_SIZE_SMALL} aria-label={setActiveLabel} onClick={() => onSetActive(profile.id)}>
+                    {t(DEFAULT.MACHINE_PROFILES_USE)}
+                  </Button>
+                </DismissibleTooltip>
+              )}
               <DismissibleTooltip title={isOnlyProfile ? t(DEFAULT.MACHINE_PROFILES_DELETE_LAST_HINT) : deleteLabel}>
                 <Popconfirm
                   title={t(DEFAULT.MACHINE_PROFILES_DELETE_CONFIRM, { name: profile.name })}

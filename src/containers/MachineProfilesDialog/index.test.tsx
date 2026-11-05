@@ -49,6 +49,7 @@ const READ_FROM_LASER_LABEL = 'Read from connected laser';
 const IMPORT_LABEL = 'Import profiles file';
 const EXPORT_LABEL = 'Export';
 const ACTIVE_PATTERN = /Active/;
+const SECOND_PROFILE_NAME = 'Garage laser';
 const SPARE_PROFILE_NAME = 'Spare laser';
 const WORKSHOP_NAME = 'Workshop laser';
 const GARAGE_NAME = 'Garage laser';
@@ -159,7 +160,31 @@ describe(MachineProfilesDialog.name, () => {
     expect(selectMachineProfiles(store.getState())).toEqual([
       expect.objectContaining({ name: WORKSHOP_NAME, workAreaXMm: EDITED_WORK_AREA_X_MM }),
     ]);
-    expect(selectActiveMachineProfile(store.getState())).toBeUndefined();
+    expect(selectActiveMachineProfile(store.getState())?.name).toBe(WORKSHOP_NAME);
+  });
+
+  it('keeps the active profile when another profile is saved', () => {
+    const store: AppStore = newStore();
+
+    saveProfile(store, { name: WORKSHOP_NAME });
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: selectMachineProfiles(store.getState())[0]?.id ?? '' }));
+    renderDialog(store);
+    clickButton(NEW_PROFILE_LABEL);
+    changeField(NAME_LABEL, SECOND_PROFILE_NAME);
+    clickButton(SAVE_LABEL);
+
+    expect(selectMachineProfiles(store.getState())).toHaveLength(2);
+    expect(selectActiveMachineProfile(store.getState())?.name).toBe(WORKSHOP_NAME);
+  });
+
+  it('shows the active profile with a badge and offers no Use button on its row', () => {
+    const store: AppStore = newStore();
+
+    saveProfile(store, { name: WORKSHOP_NAME });
+    renderDialog(store);
+    clickButton(`Make ${WORKSHOP_NAME} active`);
+
+    expect(screen.queryByRole('button', { name: `Make ${WORKSHOP_NAME} active` })).not.toBeInTheDocument();
   });
 
   it('sets the selected profile active', () => {
