@@ -1,6 +1,7 @@
 /**
  * The heading-line toggle of a machine card that cannot act while no laser is connected: a short hint, such as
- * a plug badge with the reason in its tooltip, and a chevron that opens the card anyway, disabled, for a user who wants to see it first.
+ * a plug badge with the reason in its tooltip, and a chevron that opens the card anyway, disabled, for a user who
+ * wants to see it first.
  *
  * @author michael.morosov
  *

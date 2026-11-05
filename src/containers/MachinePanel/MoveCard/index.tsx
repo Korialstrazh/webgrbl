@@ -1,6 +1,7 @@
 /**
  * The move card. While a laser is connected it shows the move controls. While none is connected none of them can act,
- * so the card is one line, a plug badge with the reason in its tooltip, with a chevron that opens the controls anyway, disabled, for a user
+ * so the card is one line, a plug badge with the reason in its tooltip, with a chevron that opens the controls anyway,
+ * disabled, for a user
  * who wants to see them first.
  *
  * @author michael.morosov

@@ -18,4 +18,6 @@ const UndoArrowIconDrawing = (): ReactNode => (
   </svg>
 );
 
-export const UndoArrowIcon = (props: IconComponentProps): ReactNode => <Icon component={UndoArrowIconDrawing} {...props} />;
+export const UndoArrowIcon = (props: IconComponentProps): ReactNode => (
+  <Icon component={UndoArrowIconDrawing} {...props} />
+);

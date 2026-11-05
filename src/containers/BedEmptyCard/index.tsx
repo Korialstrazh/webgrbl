@@ -30,7 +30,10 @@ export const BedEmptyCard = (): ReactNode => {
         <CloudUploadOutlined className={styles.icon} aria-hidden />
         <p className={styles.hint}>{t(DEFAULT.BED_EMPTY_DROP_HINT)}</p>
         <div className={styles.actions}>
-          <SvgImportButton buttonType={isDesignNextStep ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT} iconComponent={<ImportOutlined aria-hidden />} />
+          <SvgImportButton
+            buttonType={isDesignNextStep ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT}
+            iconComponent={<ImportOutlined aria-hidden />}
+          />
           <AddTestSampleButton />
         </div>
       </div>

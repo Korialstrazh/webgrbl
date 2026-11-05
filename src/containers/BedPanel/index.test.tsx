@@ -59,10 +59,9 @@ const VIEW_MODE_LABEL = 'Bed view';
 const DESIGN_VIEW_LABEL = 'Design';
 const PROFILE_WIDTH_MM = 300;
 const PROFILE_HEIGHT_MM = 200;
-const PROFILE_BED_LABEL = 'Machine bed, 300 by 200 mm';
+const PROFILE_BED_LABEL = 'Laser bed, 300 by 200 mm';
 const OBJECT_NAME = 'Logo';
 const EDIT_NODES_LABEL = /^Edit nodes/;
-const ALIGN_LABEL = /^Align/;
 const SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
 const DROP_TARGET_ATTRIBUTE = 'data-drop-target';
 const TRUE_TEXT = 'true';
@@ -79,9 +78,6 @@ const PHOTO_FILE_NAME = 'photo.png';
 const TOOLPATH_VIEW_LABEL = 'Toolpath';
 // The name of each More entry starts with its tool name and also carries its Soon tag and description.
 const THREE_D_VIEW_LABEL = /^3D/;
-const MORE_TOOLS_LABEL = /^More bed tools/;
-const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
-const SOON_TAG_TEXT = 'Soon';
 const REGENERATE_LABEL = 'Regenerate';
 const OUT_OF_DATE_TEXT = 'Out of date';
 const BED_ZOOM_LABEL = 'Bed zoom';
@@ -222,31 +218,6 @@ describe(BedPanel.name, () => {
 
     expect(screen.getByRole('radiogroup', { name: VIEW_MODE_LABEL, hidden: true })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).toBeChecked();
-  });
-
-  it('lists Edit nodes and Align under More as disabled entries with a Soon tag, and no longer 3D', async () => {
-    renderPanel(newStore());
-    fireEvent.click(screen.getByRole('button', { name: MORE_TOOLS_LABEL }));
-
-    for (const soonLabel of [EDIT_NODES_LABEL, ALIGN_LABEL]) {
-      const soonEntry: HTMLElement = await screen.findByRole('menuitem', { name: soonLabel });
-
-      expect(soonEntry).toHaveAttribute(ARIA_DISABLED_ATTRIBUTE, 'true');
-      expect(soonEntry).toHaveTextContent(SOON_TAG_TEXT);
-    }
-
-    expect(screen.queryByRole('menuitem', { name: THREE_D_VIEW_LABEL })).not.toBeInTheDocument();
-  });
-
-  it('dispatches nothing from the coming-soon entries under More', async () => {
-    const store: AppStore = newStore();
-    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
-
-    renderPanel(store);
-    fireEvent.click(screen.getByRole('button', { name: MORE_TOOLS_LABEL }));
-    fireEvent.click(await screen.findByRole('menuitem', { name: EDIT_NODES_LABEL }));
-
-    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
   it('shows the zoom, Fit and bed colour controls in the header, never over the bed drawing', () => {

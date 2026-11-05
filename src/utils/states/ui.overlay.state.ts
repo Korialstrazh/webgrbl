@@ -96,7 +96,9 @@ export const selectIsAnyOverlayOpen = (state: RootState): boolean =>
   !!state[UI_OVERLAY_STATE_NAME].openOverlayIds.length;
 
 export const selectIsDrawerOverlayOpen = (state: RootState): boolean =>
-  state[UI_OVERLAY_STATE_NAME].openOverlayIds.some((overlayId: string) => overlayId.startsWith(DRAWER_OVERLAY_ID_PREFIX));
+  state[UI_OVERLAY_STATE_NAME].openOverlayIds.some(
+    (overlayId: string): boolean => overlayId.startsWith(DRAWER_OVERLAY_ID_PREFIX),
+  );
 
 export const selectIsConnectionPopoverOpen = (state: RootState): boolean =>
   state[UI_OVERLAY_STATE_NAME].isConnectionPopoverOpen;

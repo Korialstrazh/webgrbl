@@ -18,4 +18,6 @@ const RedoArrowIconDrawing = (): ReactNode => (
   </svg>
 );
 
-export const RedoArrowIcon = (props: IconComponentProps): ReactNode => <Icon component={RedoArrowIconDrawing} {...props} />;
+export const RedoArrowIcon = (props: IconComponentProps): ReactNode => (
+  <Icon component={RedoArrowIconDrawing} {...props} />
+);

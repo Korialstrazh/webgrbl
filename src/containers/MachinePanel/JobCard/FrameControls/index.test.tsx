@@ -285,7 +285,7 @@ describe(FrameControls.name, () => {
     fireEvent.mouseEnter(getFrameJobButton().parentElement as HTMLElement);
 
     expect(getFrameJobButton()).toBeDisabled();
-    expect(await screen.findByText('The machine has not reported its position yet.')).toBeInTheDocument();
+    expect(await screen.findByText('The laser has not reported its position yet.')).toBeInTheDocument();
   });
 
   it('turns the controls off while a frame runs', () => {

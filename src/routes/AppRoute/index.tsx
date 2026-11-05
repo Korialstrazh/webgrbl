@@ -1,7 +1,8 @@
 /**
  * Top-level page of the app: the workbench with the top bar, design panel, bed, machine panel and status strip,
  * plus the overlays. It fills the window as an antd Layout; in a narrow window a segmented bar shows one region at a
- * time, the bed first so the first screen shows the work, and Start and STOP move to a sticky bar. It shares the bed region element, which bed-region
+ * time, the bed first so the first screen shows the work, and Start and STOP move to a sticky bar. It shares the bed
+ * region element, which bed-region
  * dialogs and drawers render into.
  *
  * In a wide window the three panels sit in a splitter the user can resize, and the console, while open, sits below the

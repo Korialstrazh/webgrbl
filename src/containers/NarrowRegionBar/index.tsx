@@ -35,7 +35,11 @@ export const NarrowRegionBar = (): ReactNode => {
         aria-label={t(DEFAULT.NARROW_REGION_BAR_LABEL)}
         value={narrowRegion}
         options={[
-          { value: WORKBENCH_REGION.DESIGN, icon: <EditOutlined aria-hidden />, label: t(DEFAULT.NARROW_REGION_DESIGN) },
+          {
+            value: WORKBENCH_REGION.DESIGN,
+            icon: <EditOutlined aria-hidden />,
+            label: t(DEFAULT.NARROW_REGION_DESIGN),
+          },
           { value: WORKBENCH_REGION.BED, icon: <DashboardOutlined aria-hidden />, label: t(DEFAULT.NARROW_REGION_BED) },
           { value: WORKBENCH_REGION.JOB, icon: <ProfileOutlined aria-hidden />, label: t(DEFAULT.NARROW_REGION_JOB) },
         ]}

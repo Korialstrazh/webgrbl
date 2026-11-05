@@ -93,7 +93,7 @@ describe(MaterialSection.name, () => {
 
     renderSection(store);
 
-    expect(screen.getByRole('button', { name: 'Pick an active machine to use presets' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Choose a laser profile to use presets' })).toBeInTheDocument();
     act(() => {
       store.dispatch(new MachineProfileSaved({ profile: PROFILE }));
       store.dispatch(new ActiveMachineProfileSelected({ profileId: PROFILE.id }));

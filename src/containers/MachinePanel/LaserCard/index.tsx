@@ -1,6 +1,7 @@
 /**
  * The laser pointer card: pointer power, hold to fire and air assist. While no laser is connected none of them can
- * act, so the card is one line, a plug badge with the reason in its tooltip, with a chevron that opens the controls anyway, disabled.
+ * act, so the card is one line, a plug badge with the reason in its tooltip, with a chevron that opens the controls
+ * anyway, disabled.
  *
  * @author michael.morosov
  *

@@ -23,7 +23,7 @@ const BED_COLUMN_DRAGGER_SELECTOR = `.ant-splitter-vertical > .ant-splitter-bar 
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const ARIA_DISABLED_VALUE = 'true';
 const DESIGN_HANDLE_LABEL = 'Resize the design panel';
-const MACHINE_HANDLE_LABEL = 'Resize the machine panel';
+const MACHINE_HANDLE_LABEL = 'Resize the laser panel';
 const CONSOLE_HANDLE_LABEL = 'Resize the console';
 // The default design panel, 20.5rem of 1600 px, and one 1rem step of 16 px, 1 %, to the right.
 const DESIGN_DEFAULT_PERCENT = 20.5;

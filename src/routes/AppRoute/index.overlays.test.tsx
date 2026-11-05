@@ -131,7 +131,6 @@ describe.each([
 
     expect(countStopRequests()).toBe(1);
   });
-
 });
 
 describe('AppRoute with Escape pressed over an open overlay', () => {

@@ -51,7 +51,7 @@ const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 const SIXTY_SIX_SECOND_MOVE_END_X_MM = 6590;
 const TWO_LAYERS_ONE_OFF = `2 layers ${MIDDLE_DOT} 1 off`;
 const ONE_LAYER = '1 layer';
-const NEEDS_PROFILE_TOOLTIP = 'Add a machine profile to export G-code.';
+const NEEDS_PROFILE_TOOLTIP = 'Add a laser profile to export G-code.';
 const NEEDS_LAYER_TOOLTIP = 'Switch on a layer to export G-code.';
 const THREE_COLOUR_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="30mm" height="10mm" viewBox="0 0 30 10">'
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/>'

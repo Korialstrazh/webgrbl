@@ -31,7 +31,7 @@ const FEED_HOLD_TEXT = '!';
 const ENTRY_TIMESTAMP = 1_000;
 const ANTD_INPUT_CLASS_NAME = 'ant-input';
 const ANTD_CHECKBOX_CLASS_NAME = 'ant-checkbox-input';
-const EMPTY_HINT_TEXT = 'No messages yet. Connect a machine to see what it sends.';
+const EMPTY_HINT_TEXT = 'No messages yet. Connect a laser to see what it sends.';
 
 const renderConsolePanel = (): AppStore => {
   const store: AppStore = newStore();
