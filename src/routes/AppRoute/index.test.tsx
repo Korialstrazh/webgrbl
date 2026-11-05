@@ -213,7 +213,8 @@ describe(AppRoute.name, () => {
     const designPanel: HTMLElement = screen.getByRole('complementary', { name: DESIGN_PANEL_LABEL });
     const machinePanel: HTMLElement = screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL });
 
-    expect(within(designPanel).queryByRole('heading', { name: CUT_CHECK_TITLE })).not.toBeInTheDocument();
+    // The Cut check keeps its slot as a heading line even before a model exists.
+    expect(within(designPanel).getByRole('heading', { name: CUT_CHECK_TITLE })).toBeInTheDocument();
     expect(within(machinePanel).getByRole('button', { name: STOP_LABEL })).toBeInTheDocument();
     expect(designPanel).not.toContainElement(machinePanel);
   });
