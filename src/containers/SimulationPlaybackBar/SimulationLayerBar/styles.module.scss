@@ -1,15 +1,16 @@
-// The caption above a thin strip over the full width of the slider; the segments share the strip by their burn time.
+@use '../../../styles/accessibility' as accessibility;
+
+// The strip is the slider's own rail: the playback bar lays it under the slider, so one track shows both the layers
+// and the time. The pointer goes through to the slider; the caption stays for screen readers only.
 .simulationLayerBar {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  align-self: center;
+  pointer-events: none;
 }
 
 .caption {
-  color: var(--color-text-muted);
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  line-height: 1.2;
+  @include accessibility.visually-hidden;
 }
 
 .layerBar {

@@ -77,7 +77,7 @@
 }
 
 // Too narrow for the widest view's tools beside the rest: the tools take a row of their own below, in every view alike.
-@container (width < 62rem) {
+@container (width < 44rem) {
   .header:not(.threeDHeader) {
     grid-template-areas:
       'extras view'

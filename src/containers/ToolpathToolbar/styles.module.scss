@@ -1,3 +1,5 @@
+@use '../../styles/accessibility' as accessibility;
+
 // The Toolpath view controls in the bed header, at the one control height of the header: they keep their width and stay on one line, so on a narrow bed the
 // whole group wraps to a row of its own; a bed narrower still clips the row rather than squeezing the controls.
 .toolpathToolbar {
@@ -12,6 +14,24 @@
   > * {
     flex: none;
   }
+}
+
+.modeOption {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  font-size: 1.125rem;
+}
+
+// The name is in the tooltip and read by screen readers; the icon says it on screen.
+.modeName {
+  @include accessibility.visually-hidden;
+}
+
+.travelIcon {
+  color: var(--color-text-muted);
+  font-size: 1.125rem;
 }
 
 .travelSwitch {
