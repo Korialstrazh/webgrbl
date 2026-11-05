@@ -48,8 +48,7 @@ const APP_TITLE = 'webgrbl';
 const AUTOSAVE_TEXT = 'Saved';
 const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
-const MACHINE_PROFILES_LABEL = 'Machine profiles';
-const MORE_LABEL = 'More';
+const MACHINE_PROFILES_LABEL = 'Laser profiles';
 const MATERIALS_LABEL = 'Materials';
 const SOON_LABEL = 'Soon';
 const PROJECT_MENU_LABEL = 'Project';
@@ -156,24 +155,6 @@ describe(TopBar.name, () => {
 
     expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
-  });
-
-  it('opens the machine profiles dialog from the overflow menu of a narrow bar', async () => {
-    renderWorkbenchTopBar(newStore());
-
-    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
-    fireEvent.click(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL }));
-
-    expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
-  });
-
-  it('lists no Materials entry in the overflow menu', async () => {
-    renderWorkbenchTopBar(newStore());
-
-    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
-
-    expect(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: new RegExp(`^${MATERIALS_LABEL}`) })).not.toBeInTheDocument();
   });
 
   it('closes the machine profiles dialog on Escape without stopping the machine', () => {

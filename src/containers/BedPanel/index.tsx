@@ -52,7 +52,6 @@ import { ToolpathLayer } from '../ToolpathLayer';
 import { ToolpathStatusOverlay } from '../ToolpathStatusOverlay';
 import { ToolpathToolbar } from '../ToolpathToolbar';
 import { ToolpathWarningsPanel } from '../ToolpathWarningsPanel';
-import { BedMoreToolsMenu } from './BedMoreToolsMenu';
 import { BedViewModeSwitch } from './BedViewModeSwitch';
 import { BED_DROP_AREA_TEST_ID, BED_VIEWPORT_KEY_SEPARATOR } from './bed.panel.constants';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
@@ -111,8 +110,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           <div className={styles.viewTools}>
             {/* A plain slot: the bed viewport renders its zoom, Fit and bed colour controls in here. */}
             <div ref={setViewControlsHost} className={styles.viewControlsHost} />
-            {/* Its entries are about editing, which the 3D view does not do. */}
-            {!isThreeDView && <BedMoreToolsMenu />}
           </div>
           <div className={styles.viewSwitchSlot}>
             <BedViewModeSwitch viewMode={viewMode} changeBedViewMode={changeBedViewMode} />

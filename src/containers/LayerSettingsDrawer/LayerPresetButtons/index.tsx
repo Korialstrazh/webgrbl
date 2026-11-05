@@ -13,7 +13,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { BookOutlined, SaveOutlined } from '@ant-design/icons';
-import { Button, Popover } from 'antd';
+import { Button, Popover, Tooltip } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -146,15 +146,20 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
           }}
         >
           {/* The icons carry labels of their own, so each button names itself to keep its name to its text. */}
-          <Button
-            type={ANTD_BUTTON_TYPE_DEFAULT}
-            icon={<SaveOutlined />}
-            aria-label={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
-            disabled={!isSaveAllowed}
-            onClick={handleSaveClick}
-          >
-            {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
-          </Button>
+          <span>
+            <Tooltip title={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}>
+              <Button
+                type={ANTD_BUTTON_TYPE_DEFAULT}
+                icon={<SaveOutlined />}
+                aria-label={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+                aria-description={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}
+                disabled={!isSaveAllowed}
+                onClick={handleSaveClick}
+              >
+                {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+              </Button>
+            </Tooltip>
+          </span>
         </Popover>
         <Button
           type={ANTD_BUTTON_TYPE_DEFAULT}
@@ -165,7 +170,6 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
           {t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
         </Button>
       </div>
-      {!activeMaterial && <p className={styles.note} role="note">{t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}</p>}
       <p className={styles.status} role="status">{statusText}</p>
       <MaterialLibraryDrawer
         isOpen={isLibraryOpen}

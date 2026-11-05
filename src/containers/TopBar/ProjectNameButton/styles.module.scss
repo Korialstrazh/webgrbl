@@ -1,10 +1,21 @@
 .nameButton {
   max-width: min(16rem, 100%);
   height: auto;
-  padding: 0 var(--space-1);
+  padding: 0;
   line-height: 1.5;
   font-size: 0.8125rem;
   color: var(--color-text-muted);
+
+  // The pencil shows that the name can be changed, only when the pointer or the focus is on it.
+  .pencil {
+    margin-inline-start: var(--space-1);
+    opacity: 0;
+  }
+
+  &:hover .pencil,
+  &:focus-visible .pencil {
+    opacity: 1;
+  }
 
   // The button label is the project name, so a long one is cut instead of widening the top bar.
   > span {

@@ -30,7 +30,6 @@ import { SvgImportButton } from '../SvgImportButton';
 import { AutosaveReadout } from './AutosaveReadout';
 import { ProjectMenu } from './ProjectMenu';
 import { ProjectNameButton } from './ProjectNameButton';
-import { TopBarOverflowMenu } from './TopBarOverflowMenu';
 import styles from './styles.module.scss';
 
 export const TopBar = (): ReactNode => {
@@ -82,7 +81,6 @@ export const TopBar = (): ReactNode => {
           isDisabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
-        <TopBarOverflowMenu onOpenMachineProfiles={() => changeProfilesDialogOpen(true)} />
       </div>
       <div className={styles.trailing}>
         <AppUpdatePrompt />

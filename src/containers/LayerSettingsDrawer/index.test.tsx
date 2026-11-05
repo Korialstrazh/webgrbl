@@ -399,7 +399,8 @@ describe(LayerSettingsDrawer.name, () => {
     const presetButton: HTMLElement = screen.getByRole('button', { name: PRESET_LABEL });
 
     expect(presetButton).toBeDisabled();
-    expect(screen.getByRole('note')).toHaveTextContent('Pick the material of the project');
+    expect(screen.getByRole('button', { name: 'Save as material preset' }))
+      .toHaveAccessibleDescription(/Pick the material of the project/);
   });
 
   it('saves the layer as a preset of the project material and the active machine, in watts', () => {

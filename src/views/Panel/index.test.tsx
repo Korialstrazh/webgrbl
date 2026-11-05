@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { Panel } from '.';
 
-const PANEL_TITLE = 'Machine';
+const PANEL_TITLE = 'Laser';
 const BODY_TEXT = 'Body content';
 const ACTION_LABEL = 'Panel action';
 

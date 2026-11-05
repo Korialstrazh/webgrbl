@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { EditOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -58,6 +59,7 @@ export const ProjectNameButton = (): ReactNode => {
       onClick={() => setIsRenaming(true)}
     >
       {shownName}
+      <EditOutlined className={styles.pencil} aria-hidden />
     </Button>
   );
 };

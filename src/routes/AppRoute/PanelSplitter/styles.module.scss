@@ -18,7 +18,8 @@
   display: flex;
 }
 
-// The grip of a bar shows clearly while the pointer is over the bar, so the bars are easy to find.
+// The bar lights up in the accent while the pointer is over it, so the bars are easy to find.
+.panelSplitter :global(.ant-splitter-bar-dragger:hover)::before,
 .panelSplitter :global(.ant-splitter-bar-dragger:hover)::after {
-  background-color: var(--color-text-muted);
+  background-color: var(--color-accent);
 }
