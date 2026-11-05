@@ -199,7 +199,7 @@ describe(MachineProfilesDialog.name, () => {
     renderDialog(store);
     changeField(NAME_LABEL, IMPORTED_NAME);
     fireEvent.click(screen.getByRole('button', { name: GARAGE_NAME }));
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(WORKSHOP_NAME) }));
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${WORKSHOP_NAME}`) }));
 
     expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(WORKSHOP_NAME);
   });
