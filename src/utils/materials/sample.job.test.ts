@@ -12,6 +12,7 @@ import { getBedDrawables } from '../toolpath/get.bed.drawables';
 import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
 import { getToolpath } from '../toolpath/get.toolpath';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
+import { newProjectObject } from '../project/new.project.object';
 import type { Palette } from '../palette/interfaces/Palette';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachineArea';
@@ -295,6 +296,25 @@ describe('getSampleJobObject placement of repeats', () => {
           expect(isOverlapping(projectObject, otherObject)).toBe(false);
         });
       });
+    });
+  });
+
+  it('places the sample clear of artwork already at the origin corner, as in the round 11 review', () => {
+    const ARTWORK_WIDTH_MM = 120;
+    const ARTWORK_HEIGHT_MM = 80;
+    const ARTWORK_GAP_MM = 20;
+    const artworks: ProjectObject[] = [0, ARTWORK_WIDTH_MM + ARTWORK_GAP_MM].map(
+      (xMm: number): ProjectObject => newProjectObject({
+        xMm,
+        yMm: 0,
+        widthMm: ARTWORK_WIDTH_MM,
+        heightMm: ARTWORK_HEIGHT_MM,
+      }),
+    );
+    const sample: ProjectObject = getSampleJobObject(roomyArea, undefined, artworks);
+
+    artworks.forEach((artwork: ProjectObject): void => {
+      expect(isOverlapping(sample, artwork)).toBe(false);
     });
   });
 
