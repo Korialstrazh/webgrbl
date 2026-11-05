@@ -89,7 +89,7 @@ const newReadyStore = (model: BurnModel = newModel()): AppStore => {
 const renderPanel = (store: AppStore): void => {
   render(
     <Provider store={store}>
-      <CutCheckPanel />
+      <CutCheckPanel isActive />
     </Provider>,
   );
 };
@@ -97,6 +97,18 @@ const renderPanel = (store: AppStore): void => {
 const getPartRow = (partId: number): HTMLElement => screen.getByRole('button', { name: new RegExp(`^Part ${partId}`) });
 
 describe(CutCheckPanel.name, () => {
+  it('outside the 3D view is a muted heading whose note says it runs in 3D', () => {
+    render(
+      <Provider store={newReadyStore()}>
+        <CutCheckPanel isActive={false} />
+      </Provider>,
+    );
+
+    expect(screen.getByRole('heading', { name: 'Cut check' })).toBeInTheDocument();
+    expect(screen.getByRole('note', { name: 'The cut check runs in the 3D view.' })).toHaveAttribute('tabindex', '0');
+    expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
+  });
+
   it('shows the part counts and the estimate note, without the guess note, when there is a test', () => {
     renderPanel(newReadyStore());
 
@@ -144,7 +156,7 @@ describe(CutCheckPanel.name, () => {
 
     render(
       <Provider store={store}>
-        <CutCheckPanel />
+        <CutCheckPanel isActive />
         <BurnPartLiftControl />
       </Provider>,
     );
@@ -312,7 +324,7 @@ describe(CutCheckPanel.name, () => {
       <Provider store={store}>
         <AntdTestProvider>
           <BedRegionTestHost>
-            <CutCheckPanel />
+            <CutCheckPanel isActive />
             <JobCard />
           </BedRegionTestHost>
         </AntdTestProvider>

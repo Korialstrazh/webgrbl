@@ -6,6 +6,17 @@
   background-color: var(--color-surface-1);
 }
 
+// A section with nothing to show in this view: a quieter heading line that keeps its place in the stack.
+.mutedPanel {
+  border-style: dashed;
+  background-color: transparent;
+
+  .title {
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+}
+
 .header {
   display: flex;
   // A header action that does not fit beside the title moves to a line of its own instead of being cut.

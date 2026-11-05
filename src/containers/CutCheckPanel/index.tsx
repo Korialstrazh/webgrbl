@@ -3,7 +3,8 @@
  * tooltip explains it, one compact icon row per group of warnings with a button to that layer's settings, and a list
  * with one row per part that selects it and carries one status icon, cut down to the selected row when it is long so
  * Layers stays near. Without a current model it is the heading only, as the 3D view says why, and it shows no old
- * parts. Warnings never block export.
+ * parts. Outside the 3D view it is a muted heading line whose note says it runs in 3D, so it keeps its place in the
+ * panel. Warnings never block export.
  *
  * @author michael.morosov
  *
@@ -68,7 +69,12 @@ const getScrollingAncestor = (element: HTMLElement): HTMLElement | undefined => 
   return undefined;
 };
 
-export const CutCheckPanel = (): ReactNode => {
+interface CutCheckPanelProps {
+  /** Whether the 3D view is shown; elsewhere the Cut check is only its muted heading line. */
+  isActive: boolean;
+}
+
+export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
@@ -89,8 +95,18 @@ export const CutCheckPanel = (): ReactNode => {
     }
   }, [selectedPartId, isPartListExpanded]);
 
+  if (!isActive) {
+    return (
+      <Panel
+        iconComponent={<CheckSquareOutlined />}
+        title={t(DEFAULT.CUT_CHECK_TITLE)}
+        noteText={t(DEFAULT.CUT_CHECK_3D_ONLY_NOTE)}
+      />
+    );
+  }
+
   if (!model) {
-    return null;
+    return <Panel iconComponent={<CheckSquareOutlined />} title={t(DEFAULT.CUT_CHECK_TITLE)} />;
   }
 
   const { warnings, isGuess } = model.cutCheck;

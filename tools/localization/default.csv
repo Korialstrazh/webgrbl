@@ -109,6 +109,7 @@ CONSOLE_REALTIME_STATUS_QUERY;Status query
 CONSOLE_SHOW_STATUS_REPORTS;Show status reports
 CONSOLE_TITLE;Console
 CONSOLE_TOGGLE;Console
+CUT_CHECK_3D_ONLY_NOTE;The cut check runs in the 3D view.
 CUT_CHECK_BADGE_ESTIMATE;Estimate
 CUT_CHECK_BADGE_GUESS;Guess
 CUT_CHECK_DEPTH_COMPARISON;{{predicted}} / {{needed}} mm
@@ -140,7 +141,9 @@ CUT_CHECK_WARNING_PARTS_ATTACHED;Layer {{layer}}: {{count}} parts stay attached 
 CUT_CHECK_WARNING_PARTS_MAY_STAY_ATTACHED;Layer {{layer}}: {{count}} parts may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
 CUT_CHECK_WARNINGS_LABEL;Cut check warnings
 DESIGN_LAYERS_TITLE;Layers
+DESIGN_MATERIAL_DESIGN_ONLY_NOTE;The material is chosen in the Design view.
 DESIGN_MATERIAL_TITLE;Material
+DESIGN_OBJECTS_NOT_IN_3D_NOTE;Objects are edited in the Design and Toolpath views.
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Layers and objects
 FIELD_CAPTION_MAX;max

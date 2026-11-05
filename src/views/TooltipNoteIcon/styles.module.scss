@@ -1,0 +1,21 @@
+// A 1.75rem target around the icon, so the tooltip is easy to reach by pointer and the focus ring has room.
+.tooltipNoteIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 1.125rem;
+  cursor: help;
+}
+
+.warning {
+  color: var(--color-warning);
+}
+
+.icon {
+  display: inline-flex;
+}

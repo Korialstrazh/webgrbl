@@ -1,7 +1,8 @@
 /**
- * The left region for the design tools: the material of the project with its library, layers and objects. The
- * material and the test sample are chosen and added in the Design view only. In the 3D view it shows the Cut check
- * above the layers, and the objects leave, as they cannot be edited there.
+ * The left region for the design tools: layers, the material of the project with its library, objects and the Cut
+ * check, in the same order and places in every view so Layers never moves. The material and the test sample are chosen
+ * and added in the Design view only, objects are not edited in 3D and the Cut check runs in 3D only: a card that does
+ * not apply stays as a muted heading line whose info icon says where it applies.
  *
  * @author michael.morosov
  *
@@ -48,12 +49,6 @@ export const DesignPanel = (): ReactNode => {
       width={DESIGN_PANEL_WIDTH}
       aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}
     >
-      {isThreeDView && <CutCheckPanel />}
-      {isDesignView && (
-        <Panel iconComponent={<MaterialSheetIcon />} title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
-          <MaterialSection />
-        </Panel>
-      )}
       <Panel
         iconComponent={<BlockOutlined />}
         title={t(DEFAULT.DESIGN_LAYERS_TITLE)}
@@ -71,11 +66,21 @@ export const DesignPanel = (): ReactNode => {
       >
         <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
       </Panel>
-      {!isThreeDView && (
-        <Panel iconComponent={<GroupOutlined />} title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>
-          <ObjectsSection />
-        </Panel>
-      )}
+      <Panel
+        iconComponent={<MaterialSheetIcon />}
+        title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}
+        noteText={isDesignView ? undefined : t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_NOTE)}
+      >
+        <MaterialSection />
+      </Panel>
+      <Panel
+        iconComponent={<GroupOutlined />}
+        title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}
+        noteText={isThreeDView ? t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_NOTE) : undefined}
+      >
+        <ObjectsSection />
+      </Panel>
+      <CutCheckPanel isActive={isThreeDView} />
       <PaletteDialog isOpen={isPaletteDialogOpen} onClose={() => setIsPaletteDialogOpen(false)} />
     </Layout.Sider>
   );

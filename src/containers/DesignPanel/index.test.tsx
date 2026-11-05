@@ -19,6 +19,9 @@ const CUT_CHECK_TITLE = 'Cut check';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PALETTE_BUTTON_LABEL = 'Palette';
 const PALETTE_LIST_LABEL = 'Palette colours';
+const CUT_CHECK_NOTE = 'The cut check runs in the 3D view.';
+const OBJECTS_NOTE = 'Objects are edited in the Design and Toolpath views.';
+const MATERIAL_NOTE = 'The material is chosen in the Design view.';
 
 const renderDesignPanel = (store: AppStore): void => {
   render(
@@ -33,10 +36,22 @@ const getHeadingNames = (): (string | null)[] => screen.getAllByRole('heading').
 );
 
 describe(DesignPanel.name, () => {
-  it('shows the material, layers and objects panels in that order in the Design view', () => {
+  it.each([BED_VIEW_MODE.DESIGN, BED_VIEW_MODE.TOOLPATH, BED_VIEW_MODE.THREE_D])(
+    'keeps layers, material, objects and the Cut check in that order in the %s view',
+    (viewMode: BedViewMode) => {
+      const store: AppStore = newStore();
+
+      store.dispatch(new BedViewModeChanged({ viewMode }));
+      renderDesignPanel(store);
+
+      expect(getHeadingNames()).toEqual([LAYERS_TITLE, MATERIAL_TITLE, OBJECTS_TITLE, CUT_CHECK_TITLE]);
+    },
+  );
+
+  it('shows the material select and a muted Cut check note in the Design view', () => {
     renderDesignPanel(newStore());
 
-    expect(getHeadingNames()).toEqual([MATERIAL_TITLE, LAYERS_TITLE, OBJECTS_TITLE]);
+    expect(screen.getByRole('note', { name: CUT_CHECK_NOTE })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: MATERIAL_TITLE })).toBeInTheDocument();
     expect(document.querySelectorAll(DISABLED_REGION_SELECTOR)).toHaveLength(0);
   });
@@ -47,19 +62,15 @@ describe(DesignPanel.name, () => {
     expect(screen.queryByRole('button', { name: IMPORT_SVG_LABEL })).not.toBeInTheDocument();
   });
 
-  it('leaves the Cut check out of the Design view', () => {
-    renderDesignPanel(newStore());
-
-    expect(screen.queryByRole('heading', { name: CUT_CHECK_TITLE })).not.toBeInTheDocument();
-  });
-
-  it('in 3D hides Objects, and the Cut check while it has no content', () => {
+  it('in 3D collapses Objects and Material to muted notes', () => {
     const store: AppStore = newStore();
 
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
     renderDesignPanel(store);
 
-    expect(getHeadingNames()).toEqual([LAYERS_TITLE]);
+    expect(screen.getByRole('note', { name: OBJECTS_NOTE })).toBeInTheDocument();
+    expect(screen.getByRole('note', { name: MATERIAL_NOTE })).toBeInTheDocument();
+    expect(screen.queryByRole('note', { name: CUT_CHECK_NOTE })).not.toBeInTheDocument();
   });
 
   it('puts Add test sample in the Layers panel', () => {
