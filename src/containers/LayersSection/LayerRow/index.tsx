@@ -1,7 +1,7 @@
 /**
- * A row of the layer list: a drag handle, an on/off checkbox drawn as an eye (the row dims while off) and a button that opens the layer settings, showing the
- * swatch, the name, a summary and a note when the colour is not in the palette. Move buttons reorder it
- * without a pointer.
+ * A row of the layer list: a drag handle, an on/off checkbox drawn as an eye (the row dims while off) and a button
+ * that opens the layer settings, showing the swatch, the name, a summary and a note when the colour is not in the
+ * palette. Move buttons reorder it without a pointer.
  *
  * @author michael.morosov
  *
@@ -69,7 +69,7 @@ export const LayerRow = ({
         <HolderOutlined className={styles.handle} aria-hidden="true" />
       </Tooltip>
       <Tooltip title={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}>
-        {/* Still a real checkbox for the keyboard and for screen readers; only its look is an eye that is open while the layer is sent. */}
+        {/* Still a real checkbox for the keyboard and for screen readers; only its look is an eye, open while sent. */}
         <Checkbox
           className={styles.sendToggle}
           checked={layer.enabled}
