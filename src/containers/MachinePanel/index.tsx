@@ -18,6 +18,7 @@ import { useIsScrollContentCutOff } from '../../utils/hooks/use.is.scroll.conten
 import { MACHINE_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { StopButton } from '../StopButton';
+import { StopSettingsButton } from '../StopSettingsButton';
 import { JobCard } from './JobCard';
 import { LaserCard } from './LaserCard';
 import { MachineStatusCard } from './MachineStatusCard';
@@ -46,6 +47,7 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
       {isWide && (
         <div className={styles.stopFooter}>
           <StopButton />
+          <StopSettingsButton />
         </div>
       )}
     </Layout.Sider>

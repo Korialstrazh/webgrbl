@@ -127,3 +127,6 @@ export const ANTD_INPUT_NUMBER_STATUS_ERROR: InputNumberProps['status'] = 'error
 /** Antd's class names for a modal's content box and title, for moving the focus into a dialog that opened. */
 export const ANTD_MODAL_CONTENT_SELECTOR = '.ant-modal-content';
 export const ANTD_MODAL_TITLE_SELECTOR = '.ant-modal-title';
+
+/** A popover that opens above its anchor and ends at its right edge. */
+export const ANTD_POPOVER_PLACEMENT_TOP_RIGHT: PopoverProps['placement'] = 'topRight';

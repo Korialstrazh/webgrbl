@@ -11,11 +11,13 @@
 import type { ReactNode } from 'react';
 import { JobStartButton } from '../JobStartButton';
 import { StopButton } from '../StopButton';
+import { StopSettingsButton } from '../StopSettingsButton';
 import styles from './styles.module.scss';
 
 export const StickyStopBar = (): ReactNode => (
   <div className={styles.stickyStopBar}>
     <div className={styles.start}><JobStartButton /></div>
     <StopButton />
+    <StopSettingsButton />
   </div>
 );

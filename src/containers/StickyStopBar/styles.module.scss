@@ -15,10 +15,23 @@
 
   gap: var(--space-2);
 
-  > * {
+  // STOP is the widest control in the bar, twice the width of Start, so it reads first; the gear keeps its own size.
+  > .start {
     flex: 1;
+    max-width: 15rem;
+  }
+
+  > :global(.ant-btn-dangerous) {
+    flex: 2;
     max-width: 30rem;
   }
+}
+
+// Start before it is ready: a dashed outline and readable grey text, so it reads as waiting, not as broken.
+.start :global(.ant-btn:disabled) {
+  border-style: dashed;
+  border-color: var(--color-text-muted);
+  color: var(--color-disabled-text);
 }
 
 // Start beside Stop, both as tall as the bar allows: one row, so the caption sits beside its icon here.

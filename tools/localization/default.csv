@@ -625,6 +625,8 @@ STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
 STATUS_STRIP_TITLE;Status
+STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN;Esc stops the laser even when a panel is open
+STOP_SETTINGS_TITLE;Stop settings
 TEST_SAMPLE_DIALOG_CANCEL;Cancel
 TEST_SAMPLE_DIALOG_CUT_THROUGH;Cut through
 TEST_SAMPLE_DIALOG_DEPTH;Depth (mm)
