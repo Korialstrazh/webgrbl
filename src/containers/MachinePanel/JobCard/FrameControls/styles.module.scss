@@ -1,12 +1,15 @@
+@use '../../../../styles/accessibility' as accessibility;
+
 .frameControls {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-// The job actions in one row: Start takes most room, then Frame with its gear, then Export.
+// Start is the goal and takes a row of its own; Frame with its gear and Export share the row below.
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 
   :global(.ant-btn) {
@@ -23,8 +26,24 @@
 }
 
 .startAction {
-  flex: 1.5 1 0;
+  flex: 1 0 100%;
   min-width: 0;
+
+  :global(.ant-btn) {
+    flex-direction: row;
+    gap: var(--space-2);
+    height: 3.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  :global(.ant-btn) span {
+    font-size: 1rem;
+  }
+
+  :global(.ant-btn) :global(.anticon) {
+    font-size: 1.25rem;
+  }
 }
 
 .exportAction {
@@ -65,7 +84,27 @@
 .settings {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  width: 17rem;
+  max-width: 100%;
+}
+
+.hiddenLabel {
+  @include accessibility.visually-hidden;
+}
+
+.offReason {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+
+  :global(.anticon) {
+    flex: none;
+    margin-top: 0.1875rem;
+    color: var(--color-warning);
+  }
 }
 
 .field {

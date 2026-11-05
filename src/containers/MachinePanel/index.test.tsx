@@ -25,7 +25,7 @@ const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
 const NOT_CONNECTED_TEXT = 'Not connected';
 const STATUS_CARD_TITLE = 'Status';
-const STATUS_CONNECT_LABEL = 'Connect...';
+const STATUS_CONNECT_LABEL = 'Connect';
 const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
 const JOB_CARD_TITLE = 'Job';
 const PROFILE_STEP_LABEL = 'Profile: to do';
@@ -83,12 +83,12 @@ describe(MachinePanel.name, () => {
     expect(screen.queryByRole('button', { name: STATUS_CONNECT_LABEL })).not.toBeInTheDocument();
   });
 
-  it('has one filled call to action while the job cannot start: the first open readiness step', () => {
+  it('has no filled call to action while the job cannot start: the stepper marks the next step instead', () => {
     renderMachinePanel();
 
     // STOP is a danger button of its own, not a next step, so it is not counted.
-    expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(1);
-    expect(screen.getByRole('button', { name: PROFILE_STEP_LABEL })).toHaveClass('ant-btn-primary');
+    expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(0);
+    expect(screen.getByRole('button', { name: PROFILE_STEP_LABEL })).toHaveAttribute('aria-current', 'step');
   });
 
   it('drops the Connect button from the status card once connected', () => {

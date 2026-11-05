@@ -1,6 +1,6 @@
 /**
- * The readiness row of the Job card: Profile, Design, Material and Connect as small icons with a live tick. Each one
- * goes to where it is set, and the first one still open is the one accent action on the screen.
+ * The readiness stepper of the Job card: Profile, Design, Material and Connect joined by a line that leads to Start.
+ * Each step goes to where it is set, a done step shows a large check, and the first one still open is outlined as next.
  *
  * @author michael.morosov
  *
@@ -9,12 +9,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ApiOutlined, AppstoreOutlined, CheckCircleFilled, ImportOutlined, ToolOutlined } from '@ant-design/icons';
+import { ApiOutlined, CheckOutlined, ImportOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
 import { BED_VIEW_MODE } from '../../../../utils/bed/bed.view.constants';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
@@ -29,9 +29,13 @@ import { ConnectionPopoverOpenChanged } from '../../../../utils/states/ui.overla
 import { MachineProfilesDialogOpenChanged, NarrowRegionChanged } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
 import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
+import { LaserMachineIcon } from '../../../../views/LaserMachineIcon';
+import { MaterialSheetIcon } from '../../../../views/MaterialSheetIcon';
 import { PROJECT_MATERIAL_SELECT_ID } from '../../../ProjectMaterialSelect/project.material.select.constants';
 import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
 import styles from './styles.module.scss';
+
+const ARIA_CURRENT_STEP = 'step';
 
 interface JobReadinessLook {
   step: JobReadinessStep;
@@ -43,7 +47,7 @@ interface JobReadinessLook {
 const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
   {
     step: JOB_READINESS_STEP.PROFILE,
-    iconComponent: <ToolOutlined aria-hidden />,
+    iconComponent: <LaserMachineIcon aria-hidden />,
     captionKey: DEFAULT.JOB_READINESS_PROFILE,
     hintKey: DEFAULT.JOB_READINESS_PROFILE_HINT,
   },
@@ -55,7 +59,7 @@ const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
   },
   {
     step: JOB_READINESS_STEP.MATERIAL,
-    iconComponent: <AppstoreOutlined aria-hidden />,
+    iconComponent: <MaterialSheetIcon aria-hidden />,
     captionKey: DEFAULT.JOB_READINESS_MATERIAL,
     hintKey: DEFAULT.JOB_READINESS_MATERIAL_HINT,
   },
@@ -78,21 +82,30 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
   const isNextStep: boolean = useSelector(selectFirstUnmetJobReadinessStep) === step;
   const captionText: string = t(captionKey);
 
+  const cellClassName: string = [
+    styles.stepCell,
+    isMet ? styles.metStep : undefined,
+    isNextStep ? styles.nextStep : undefined,
+  ].join(' ');
+
   return (
-    <DismissibleTooltip title={isNextStep ? undefined : t(hintKey)}>
-      <Button
-        className={styles.step}
-        type={isNextStep ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_TEXT}
-        aria-label={t(isMet ? DEFAULT.JOB_READINESS_STEP_MET : DEFAULT.JOB_READINESS_STEP_OPEN, { step: captionText })}
-        onClick={() => onGoToStep(step)}
-      >
-        <span className={styles.stepIcon}>
-          {iconComponent}
-          {isMet && <CheckCircleFilled className={styles.tick} aria-hidden />}
-        </span>
-        <span className={styles.caption}>{captionText}</span>
-      </Button>
-    </DismissibleTooltip>
+    <li className={cellClassName}>
+      <DismissibleTooltip title={isNextStep ? undefined : t(hintKey)}>
+        <Button
+          className={styles.step}
+          type={ANTD_BUTTON_TYPE_TEXT}
+          aria-label={t(
+            isMet ? DEFAULT.JOB_READINESS_STEP_MET : DEFAULT.JOB_READINESS_STEP_OPEN,
+            { step: captionText },
+          )}
+          aria-current={isNextStep ? ARIA_CURRENT_STEP : undefined}
+          onClick={() => onGoToStep(step)}
+        >
+          <span className={styles.marker}>{isMet ? <CheckOutlined aria-hidden /> : iconComponent}</span>
+          <span className={styles.caption}>{captionText}</span>
+        </Button>
+      </DismissibleTooltip>
+    </li>
   );
 };
 
@@ -127,11 +140,13 @@ export const JobReadinessRow = (): ReactNode => {
   };
 
   return (
-    <div className={styles.jobReadinessRow} role="group" aria-label={t(DEFAULT.JOB_READINESS_LABEL)}>
-      {JOB_READINESS_LOOKS.map((look: JobReadinessLook) => (
-        <JobReadinessButton key={look.step} {...look} onGoToStep={goToStep} />
-      ))}
+    <>
+      <ol className={styles.jobReadinessRow} aria-label={t(DEFAULT.JOB_READINESS_LABEL)}>
+        {JOB_READINESS_LOOKS.map((look: JobReadinessLook) => (
+          <JobReadinessButton key={look.step} {...look} onGoToStep={goToStep} />
+        ))}
+      </ol>
       {fileInputComponent}
-    </div>
+    </>
   );
 };

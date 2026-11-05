@@ -10,7 +10,7 @@ import { selectIsMachineProfilesDialogOpen, selectNarrowRegion } from '../../../
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
 import { AntdTestProvider } from '../../../../utils/test.support/antd.test.provider';
 
-const PRIMARY_SELECTOR = '.ant-btn-primary';
+const CURRENT_STEP_SELECTOR = '[aria-current="step"]';
 const PROFILE_OPEN = 'Profile: to do';
 const CONNECT_OPEN = 'Connect: to do';
 const CONNECT_MET = 'Connect: done';
@@ -25,13 +25,13 @@ const renderRow = (): AppStore => {
 };
 
 describe(JobReadinessRow.name, () => {
-  it('makes only the first open step the accent action', () => {
+  it('marks only the first open step as the current one', () => {
     renderRow();
 
-    const accentButtons: NodeListOf<Element> = document.querySelectorAll(PRIMARY_SELECTOR);
+    const currentSteps: NodeListOf<Element> = document.querySelectorAll(CURRENT_STEP_SELECTOR);
 
-    expect(accentButtons).toHaveLength(1);
-    expect(accentButtons[0]).toBe(screen.getByRole('button', { name: PROFILE_OPEN }));
+    expect(currentSteps).toHaveLength(1);
+    expect(currentSteps[0]).toBe(screen.getByRole('button', { name: PROFILE_OPEN }));
   });
 
   it('ticks Connect live from the connection state', () => {
