@@ -10,6 +10,7 @@
  */
 import type {
   AlertProps,
+  BadgeProps,
   ButtonProps,
   ColorPickerProps,
   DrawerProps,
@@ -31,6 +32,9 @@ import type {
 
 /** The compact button size, for actions inside a chip or a bar. */
 export const ANTD_BUTTON_SIZE_SMALL: ButtonProps['size'] = 'small';
+
+/** The compact badge, for a count on an icon button. */
+export const ANTD_BADGE_SIZE_SMALL: BadgeProps['size'] = 'small';
 
 /** The large button size, for machine controls that need the full touch target. */
 export const ANTD_BUTTON_SIZE_LARGE: ButtonProps['size'] = 'large';

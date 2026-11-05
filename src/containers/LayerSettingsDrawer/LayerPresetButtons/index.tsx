@@ -1,9 +1,9 @@
 /**
- * The preset buttons of the layer settings drawer: Save as material preset stores the layer for the project material
- * and the active machine, and Use a material preset opens the library for this layer. When a preset for the same
- * material, operation and machine exists, saving asks in a popover under the button whether to update it, add a new
- * one or do nothing, so a second click never leaves two rows that look the same. The confirmation line under the
- * buttons clears itself after a moment, and at once when the question opens.
+ * The preset icon buttons of the layer settings drawer, each named by its tooltip: Save as material preset stores the
+ * layer for the project material and the active machine, and Use a material preset opens the library for this layer.
+ * When a preset for the same material, operation and machine exists, saving asks in a popover under the button whether
+ * to update it, add a new one or do nothing, so a second click never leaves two rows that look the same. The
+ * confirmation line under the buttons clears itself after a moment, and at once when the question opens.
  *
  * @author michael.morosov
  *
@@ -13,7 +13,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { FileAddOutlined } from '@ant-design/icons';
-import { Button, Popover, Tooltip } from 'antd';
+import { Button, Popover } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +40,7 @@ import { selectActiveMachineProfile } from '../../../utils/states/machine.profil
 import { MaterialPresetSaved, selectMaterialPresets } from '../../../utils/states/material.preset.state';
 import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { IconActionButton } from '../../../views/IconActionButton';
 import { MaterialSheetIcon } from '../../../views/MaterialSheetIcon';
 import { MaterialLibraryDrawer } from '../../MaterialLibraryDrawer';
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../../MaterialLibraryDrawer/material.library.drawer.constants';
@@ -62,9 +63,6 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
   // The question renders into the button row, so it stays inside the drawer instead of floating over the layer list.
   const actionsRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const layerKey: string = getLayerKey(layer);
-  const saveTooltipKey: string = activeMaterial
-    ? DEFAULT.LAYER_SETTINGS_PRESET_SAVE_HINT
-    : DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL;
   // A preset at 0 W could never be saved again in the library, so it is not offered.
   const isSaveAllowed: boolean = Boolean(activeMaterial && machineProfile && layer.settings.maxPowerPercent);
   const matchingPreset: MaterialPreset | undefined = activeMaterial && machineProfile
@@ -150,28 +148,22 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
           }}
         >
           <span>
-            <Tooltip
-              title={t(saveTooltipKey)}
-            >
-              <Button
-                type={ANTD_BUTTON_TYPE_DEFAULT}
-                icon={<FileAddOutlined aria-hidden />}
-                aria-description={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}
-                disabled={!isSaveAllowed}
-                onClick={handleSaveClick}
-              >
-                {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
-              </Button>
-            </Tooltip>
+            <IconActionButton
+              type={ANTD_BUTTON_TYPE_DEFAULT}
+              labelText={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+              iconComponent={<FileAddOutlined aria-hidden />}
+              blockedReasonText={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}
+              isDisabled={!isSaveAllowed}
+              onClick={handleSaveClick}
+            />
           </span>
         </Popover>
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_DEFAULT}
-          icon={<MaterialSheetIcon aria-hidden />}
+          labelText={t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
+          iconComponent={<MaterialSheetIcon aria-hidden />}
           onClick={() => setIsLibraryOpen(true)}
-        >
-          {t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
-        </Button>
+        />
       </div>
       <p className={styles.status} role="status">{statusText}</p>
       <MaterialLibraryDrawer

@@ -319,7 +319,6 @@ LAYER_SETTINGS_PRESET_EXISTS;{{name}}, {{thickness}} mm · {{operation}} already
 LAYER_SETTINGS_PRESET_EXISTS_QUESTION;Update it with these settings, or save a new one?
 LAYER_SETTINGS_PRESET_NEEDS_MATERIAL;Pick the material of the project in the Material panel to save a preset.
 LAYER_SETTINGS_PRESET_SAVE;Save preset
-LAYER_SETTINGS_PRESET_SAVE_HINT;Save these values as a material preset
 LAYER_SETTINGS_PRESET_SAVE_NEW;Save as new
 LAYER_SETTINGS_PRESET_SAVED;Saved {{name}}, {{thickness}} mm · {{operation}} as a preset for {{machine}}.
 LAYER_SETTINGS_PRESET_UPDATE;Update existing
@@ -602,7 +601,7 @@ PALETTE_ERROR_MIN_POWER_INVALID;Minimum power must be from {{min}} to {{max}} %
 PALETTE_ERROR_NAME_REQUIRED;Enter a name for the colour
 PALETTE_ERROR_PASSES_INVALID;Passes must be a whole number from {{min}} to {{max}}
 PALETTE_ERROR_SPEED_INVALID;Speed must be from {{min}} to {{max}} mm/min
-PALETTE_EXPORT;Export
+PALETTE_EXPORT_LABEL;Export for Inkscape
 PALETTE_FIELD_COLOUR;Colour
 PALETTE_FIELD_NAME;Name
 PALETTE_INKSCAPE_HELP;Using the file in Inkscape
@@ -613,9 +612,9 @@ PALETTE_LIST;Palette colours
 PALETTE_MOVE_DOWN;Move {{name}} down
 PALETTE_MOVE_UP;Move {{name}} up
 PALETTE_NEW;New colour
-PALETTE_RESET;Reset
 PALETTE_RESET_CANCEL;Cancel
 PALETTE_RESET_CONFIRM;Replace the whole palette with the default colours? Your changes to the palette are lost.
+PALETTE_RESET_LABEL;Reset to default colours
 PALETTE_RESET_OK;Yes, reset
 PALETTE_SAVE;Save
 PALETTE_SHADING_COLOUR_NOTE;The shading colour is fixed: it covers every grey from black to white.

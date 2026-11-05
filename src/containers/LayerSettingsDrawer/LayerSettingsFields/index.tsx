@@ -17,7 +17,7 @@ import {
   SyncOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { Button, Segmented, Switch } from 'antd';
+import { Segmented, Switch } from 'antd';
 import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +42,7 @@ import {
   LayerSettingsChanged,
   LayerToggled,
 } from '../../../utils/states/project.document.state';
+import { IconActionButton } from '../../../views/IconActionButton';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { PaletteIcon } from '../../../views/PaletteIcon';
 import type { LayerNumberFieldConfig } from '../interfaces/LayerNumberFieldConfig';
@@ -159,12 +160,16 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
       <div className={styles.actions}>
         <LayerPresetButtons layer={layer} />
         <div className={styles.paletteActions}>
-          <Button icon={<SaveOutlined aria-hidden />} onClick={savePaletteEntry}>
-            {t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE)}
-          </Button>
-          <Button icon={<PaletteIcon aria-hidden />} onClick={onEditPalette}>
-            {t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
-          </Button>
+          <IconActionButton
+            labelText={t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE)}
+            iconComponent={<SaveOutlined aria-hidden />}
+            onClick={savePaletteEntry}
+          />
+          <IconActionButton
+            labelText={t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
+            iconComponent={<PaletteIcon aria-hidden />}
+            onClick={onEditPalette}
+          />
         </div>
       </div>
     </div>
