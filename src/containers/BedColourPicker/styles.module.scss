@@ -2,8 +2,20 @@
 .bedColourButton:global(.ant-btn) {
   min-width: 2rem;
   height: 2.5rem;
+  flex-direction: column;
   padding-inline: var(--space-2);
+  gap: 0;
+}
+
+.glyphs {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-1);
+}
+
+.caption {
+  font-size: 0.6875rem;
+  line-height: 1;
 }
 
 .swatch {

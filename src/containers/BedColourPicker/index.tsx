@@ -89,14 +89,17 @@ export const BedColourPicker = (): ReactNode => {
     >
       <Tooltip title={labelText}>
         <Button className={styles.bedColourButton} aria-label={labelText}>
-          <BedColourIcon aria-hidden />
-          {/* A plain swatch of the current colour; only its fill changes at run time. */}
-          <span
-            className={styles.swatch}
-            aria-hidden="true"
-            // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
-            style={{ backgroundColor: bedColour }}
-          />
+          <span className={styles.glyphs} aria-hidden="true">
+            <BedColourIcon />
+            {/* A plain swatch of the current colour; only its fill changes at run time. */}
+            <span
+              className={styles.swatch}
+              // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
+              style={{ backgroundColor: bedColour }}
+            />
+          </span>
+          {/* A caption under the glyphs, like the view switch beside it, so the swatch says what it colours. */}
+          <span className={styles.caption} aria-hidden="true">{t(DEFAULT.BED_COLOUR_CAPTION)}</span>
         </Button>
       </Tooltip>
     </ColorPicker>

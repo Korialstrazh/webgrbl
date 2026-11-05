@@ -63,7 +63,7 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
   const actionsRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const layerKey: string = getLayerKey(layer);
   const saveTooltipKey: string = activeMaterial
-    ? DEFAULT.LAYER_SETTINGS_PRESET_SAVE
+    ? DEFAULT.LAYER_SETTINGS_PRESET_SAVE_HINT
     : DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL;
   // A preset at 0 W could never be saved again in the library, so it is not offered.
   const isSaveAllowed: boolean = Boolean(activeMaterial && machineProfile && layer.settings.maxPowerPercent);
@@ -155,20 +155,19 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
             >
               <Button
                 type={ANTD_BUTTON_TYPE_DEFAULT}
-                icon={<FileAddOutlined />}
-                aria-label={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+                icon={<FileAddOutlined aria-hidden />}
                 aria-description={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}
                 disabled={!isSaveAllowed}
                 onClick={handleSaveClick}
-              />
+              >
+                {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+              </Button>
             </Tooltip>
           </span>
         </Popover>
-        {/* The one text action of the row: the icon alone would not say what the sheet does here. */}
         <Button
           type={ANTD_BUTTON_TYPE_DEFAULT}
-          icon={<MaterialSheetIcon />}
-          aria-label={t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
+          icon={<MaterialSheetIcon aria-hidden />}
           onClick={() => setIsLibraryOpen(true)}
         >
           {t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}

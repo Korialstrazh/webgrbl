@@ -13,13 +13,13 @@ Each colour in your drawing becomes a layer with laser settings. From the layers
 
 ## The palette
 
-Open it with "Palette". Select an entry to edit it, drag entries (or use Move up / Move down) to reorder, "+ New colour" to add one, and Delete (it asks first) to remove one; the edited entry is highlighted across its whole row, and the Delete cross is quiet, shown on hover, keyboard focus or for the edited entry. Nothing changes until you press Save, and Save refuses an entry with an error (empty name, a power outside 0..100 %, speed outside 1..20000 mm/min, passes outside 1..50, line interval outside 0.02..2 mm, min power above max power, or a colour another entry already uses). "Reset to defaults" replaces the whole palette after you confirm.
+Open it with "Palette". Select an entry to edit it, drag entries (or use Move up / Move down) to reorder, "+ New colour" to add one, and Delete (it asks first) to remove one; the edited entry is highlighted across its whole row, and the Delete cross is quiet, shown on hover, keyboard focus or for the edited entry. Nothing changes until you press Save, and Save refuses an entry with an error (empty name, a power outside 0..100 %, speed outside 1..20000 mm/min, passes outside 1..50, line interval outside 0.02..2 mm, min power above max power, or a colour another entry already uses). "Reset" replaces the whole palette after you confirm.
 
 The Shading entry is built in: it cannot be deleted and its colour is fixed (see "Greys" below).
 
 ### Export the palette for Inkscape
 
-"Export for Inkscape" downloads `webgrbl.gpl`, a GIMP palette file (the format Inkscape reads) with one swatch per entry, named like the entry. Put it in the Inkscape user palette folder:
+"Export" (download icon, beside the Inkscape help) downloads `webgrbl.gpl`, a GIMP palette file (the format Inkscape reads) with one swatch per entry, named like the entry. Put it in the Inkscape user palette folder:
 
 | System | Folder |
 | --- | --- |

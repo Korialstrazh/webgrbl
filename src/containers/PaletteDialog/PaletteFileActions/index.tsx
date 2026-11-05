@@ -15,12 +15,11 @@ import { Button, Popconfirm, Popover } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { ANTD_POPOVER_TRIGGER_CLICK } from '../../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_TEXT, ANTD_POPOVER_TRIGGER_CLICK } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { PaletteExportRequested, PaletteResetRequested } from '../../../utils/states/palette.state';
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
-import { IconActionButton } from '../../../views/IconActionButton';
 import type { PaletteFileActionsProps } from '../interfaces/PaletteFileActionsProps';
 import styles from './styles.module.scss';
 
@@ -31,11 +30,9 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
   return (
     <div className={styles.paletteFileActions}>
       <div className={styles.actions}>
-        <IconActionButton
-          labelText={t(DEFAULT.PALETTE_EXPORT)}
-          iconComponent={<DownloadOutlined />}
-          onClick={() => dispatch(new PaletteExportRequested())}
-        />
+        <Button icon={<DownloadOutlined aria-hidden />} onClick={() => dispatch(new PaletteExportRequested())}>
+          {t(DEFAULT.PALETTE_EXPORT)}
+        </Button>
         <DismissibleTooltip title={t(DEFAULT.PALETTE_INKSCAPE_HELP)}>
           <Popover
             trigger={ANTD_POPOVER_TRIGGER_CLICK}
@@ -53,20 +50,21 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
           </Popover>
         </DismissibleTooltip>
         <span className={styles.resetAction}>
-          <DismissibleTooltip title={t(DEFAULT.PALETTE_RESET)}>
-            <Popconfirm
-              title={t(DEFAULT.PALETTE_RESET_CONFIRM)}
-              okText={t(DEFAULT.PALETTE_RESET_OK)}
-              cancelText={t(DEFAULT.PALETTE_RESET_CANCEL)}
-              okButtonProps={{ danger: true }}
-              onConfirm={() => {
-                dispatch(new PaletteResetRequested());
-                onReset();
-              }}
-            >
-              <Button danger icon={<ReloadOutlined />} aria-label={t(DEFAULT.PALETTE_RESET)} />
-            </Popconfirm>
-          </DismissibleTooltip>
+          <Popconfirm
+            title={t(DEFAULT.PALETTE_RESET_CONFIRM)}
+            okText={t(DEFAULT.PALETTE_RESET_OK)}
+            cancelText={t(DEFAULT.PALETTE_RESET_CANCEL)}
+            okButtonProps={{ danger: true }}
+            onConfirm={() => {
+              dispatch(new PaletteResetRequested());
+              onReset();
+            }}
+          >
+            {/* Quiet text until asked: the confirmation, with its red OK, is where the reset turns loud. */}
+            <Button type={ANTD_BUTTON_TYPE_TEXT} danger icon={<ReloadOutlined aria-hidden />}>
+              {t(DEFAULT.PALETTE_RESET)}
+            </Button>
+          </Popconfirm>
         </span>
       </div>
     </div>
