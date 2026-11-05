@@ -9,7 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Switch } from 'antd';
+import { ColumnHeightOutlined, ColumnWidthOutlined, LockOutlined, RotateRightOutlined } from '@ant-design/icons';
+import { Switch, Tooltip } from 'antd';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +26,13 @@ import type { ObjectTransformFieldsProps } from '../interfaces/ObjectTransformFi
 import { OBJECT_FIELD_KEY_SEPARATOR, OBJECT_TRANSFORM_FIELDS } from '../objects.section.constants';
 import { ObjectTransformField } from './ObjectTransformField';
 import styles from './styles.module.scss';
+
+// X and Y need no picture: their short label is the prefix.
+const OBJECT_FIELD_ICONS: Partial<Record<ObjectTransformFieldConfig['field'], ReactNode>> = {
+  widthMm: <ColumnWidthOutlined />,
+  heightMm: <ColumnHeightOutlined />,
+  rotationDeg: <RotateRightOutlined />,
+};
 
 export const ObjectTransformFields = ({ projectObject }: ObjectTransformFieldsProps): ReactNode => {
   const { t } = useTranslation();
@@ -47,20 +55,24 @@ export const ObjectTransformFields = ({ projectObject }: ObjectTransformFieldsPr
           <ObjectTransformField
             key={[projectObject.id, config.field].join(OBJECT_FIELD_KEY_SEPARATOR)}
             label={t(config.labelKey)}
+            prefixComponent={OBJECT_FIELD_ICONS[config.field] ?? t(config.labelKey)}
             value={projectObject[config.field]}
             decimals={config.decimals}
             onCommit={(fieldValue: number) => commitField(config.field, fieldValue)}
           />
         ))}
-      </div>
-      <div className={styles.lock}>
-        <Switch
-          size={ANTD_SWITCH_SIZE_SMALL}
-          checked={isRatioLocked}
-          onChange={setIsRatioLocked}
-          aria-labelledby={lockLabelId}
-        />
-        <span id={lockLabelId}>{t(DEFAULT.OBJECTS_LOCK_RATIO)}</span>
+        <Tooltip title={t(DEFAULT.OBJECTS_LOCK_RATIO)}>
+          <div className={styles.lock}>
+            <LockOutlined aria-hidden />
+            <Switch
+              size={ANTD_SWITCH_SIZE_SMALL}
+              checked={isRatioLocked}
+              onChange={setIsRatioLocked}
+              aria-labelledby={lockLabelId}
+            />
+            <span id={lockLabelId} className={styles.lockLabel}>{t(DEFAULT.OBJECTS_LOCK_RATIO)}</span>
+          </div>
+        </Tooltip>
       </div>
     </div>
   );

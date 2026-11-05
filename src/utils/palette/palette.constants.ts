@@ -8,7 +8,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ARROW_RIGHT } from '../characters.constants';
 import { DEFAULT } from '../localization/default.locales';
 import type { Palette } from './interfaces/Palette';
 import type { PaletteEntry } from './interfaces/PaletteEntry';
@@ -102,7 +101,7 @@ export const DEFAULT_FILL_ENTRY: PaletteEntry = {
 export const DEFAULT_SHADING_ENTRY: PaletteEntry = {
   ...DEFAULT_ENTRY_BASE,
   id: SHADING_ENTRY_ID,
-  name: `Shading (black ${ARROW_RIGHT} white)`,
+  name: 'Shading',
   colour: '#000000',
   mode: LAYER_MODE.FILL,
   maxPowerPercent: 60,

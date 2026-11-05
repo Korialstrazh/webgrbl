@@ -107,3 +107,9 @@
   --color-bed-text: var(--color-bed-on-light-text);
   --color-bed-chip-border: var(--color-bed-on-light-chip-border);
 }
+
+// A thin dark scrollbar everywhere, so no classic grey bar with arrow buttons sits beside the shell.
+* {
+  scrollbar-color: var(--color-border) transparent;
+  scrollbar-width: thin;
+}
