@@ -20,6 +20,7 @@ import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { PaletteExportRequested, PaletteResetRequested } from '../../../utils/states/palette.state';
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
+import { IconActionButton } from '../../../views/IconActionButton';
 import type { PaletteFileActionsProps } from '../interfaces/PaletteFileActionsProps';
 import styles from './styles.module.scss';
 
@@ -44,10 +45,11 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
             <Button icon={<ReloadOutlined />} aria-label={t(DEFAULT.PALETTE_RESET)} />
           </Popconfirm>
         </DismissibleTooltip>
-        {/* Icon and word, as in the material library. */}
-        <Button icon={<DownloadOutlined aria-hidden />} onClick={() => dispatch(new PaletteExportRequested())}>
-          {t(DEFAULT.PALETTE_EXPORT)}
-        </Button>
+        <IconActionButton
+          labelText={t(DEFAULT.PALETTE_EXPORT)}
+          iconComponent={<DownloadOutlined />}
+          onClick={() => dispatch(new PaletteExportRequested())}
+        />
         <DismissibleTooltip title={t(DEFAULT.PALETTE_INKSCAPE_HELP)}>
           <Popover
             trigger={ANTD_POPOVER_TRIGGER_CLICK}

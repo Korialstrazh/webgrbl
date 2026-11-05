@@ -12,7 +12,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BookOutlined, SaveOutlined } from '@ant-design/icons';
+import { FileAddOutlined } from '@ant-design/icons';
 import { Button, Popover, Tooltip } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
@@ -40,6 +40,7 @@ import { selectActiveMachineProfile } from '../../../utils/states/machine.profil
 import { MaterialPresetSaved, selectMaterialPresets } from '../../../utils/states/material.preset.state';
 import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { MaterialSheetIcon } from '../../../views/MaterialSheetIcon';
 import { MaterialLibraryDrawer } from '../../MaterialLibraryDrawer';
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../../MaterialLibraryDrawer/material.library.drawer.constants';
 import type { LayerPresetButtonsProps } from '../interfaces/LayerPresetButtonsProps';
@@ -61,6 +62,9 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
   // The question renders into the button row, so it stays inside the drawer instead of floating over the layer list.
   const actionsRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const layerKey: string = getLayerKey(layer);
+  const saveTooltipKey: string = activeMaterial
+    ? DEFAULT.LAYER_SETTINGS_PRESET_SAVE
+    : DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL;
   // A preset at 0 W could never be saved again in the library, so it is not offered.
   const isSaveAllowed: boolean = Boolean(activeMaterial && machineProfile && layer.settings.maxPowerPercent);
   const matchingPreset: MaterialPreset | undefined = activeMaterial && machineProfile
@@ -145,25 +149,25 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
             }
           }}
         >
-          {/* The icons carry labels of their own, so each button names itself to keep its name to its text. */}
           <span>
-            <Tooltip title={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}>
+            <Tooltip
+              title={t(saveTooltipKey)}
+            >
               <Button
                 type={ANTD_BUTTON_TYPE_DEFAULT}
-                icon={<SaveOutlined />}
+                icon={<FileAddOutlined />}
                 aria-label={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
                 aria-description={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}
                 disabled={!isSaveAllowed}
                 onClick={handleSaveClick}
-              >
-                {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
-              </Button>
+              />
             </Tooltip>
           </span>
         </Popover>
+        {/* The one text action of the row: the icon alone would not say what the sheet does here. */}
         <Button
           type={ANTD_BUTTON_TYPE_DEFAULT}
-          icon={<BookOutlined />}
+          icon={<MaterialSheetIcon />}
           aria-label={t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
           onClick={() => setIsLibraryOpen(true)}
         >

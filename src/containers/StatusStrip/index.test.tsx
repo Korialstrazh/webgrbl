@@ -64,7 +64,7 @@ describe(StatusStrip.name, () => {
   it('keeps the console collapsed by default', () => {
     renderStatusStrip();
 
-    expect(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL })).toHaveAttribute('aria-pressed', 'false');
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });
 
@@ -165,12 +165,12 @@ describe(StatusStrip.name, () => {
     const store: AppStore = newStore();
     renderStatusStrip(store);
 
-    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(selectIsConsoleOpen(store.getState())).toBe(true);
-    expect(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL })).toBeChecked();
+    expect(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL })).toHaveAttribute('aria-pressed', 'true');
 
-    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(selectIsConsoleOpen(store.getState())).toBe(false);
   });
@@ -178,7 +178,7 @@ describe(StatusStrip.name, () => {
   it('never draws the console inside the strip', () => {
     renderStatusStrip();
 
-    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });

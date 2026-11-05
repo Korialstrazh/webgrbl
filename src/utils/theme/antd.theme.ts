@@ -31,7 +31,7 @@ const COLOR_DANGER_BUTTON_ACTIVE = '#9d2326';
 // Error text (form messages, error alerts) needs a lighter red than the buttons to stay above 4.5:1 on every surface.
 const COLOR_DANGER_TEXT = '#ff6b6b';
 const COLOR_DISABLED_BG = '#1a1d21';
-const COLOR_DISABLED_TEXT = '#8b9097';
+const COLOR_DISABLED_TEXT = '#9aa0a6';
 // antd's dark algorithm derives a bright blue-grey disabled border that made disabled buttons look more prominent than
 // enabled ones; this one is fainter than the enabled border.
 const COLOR_DISABLED_BORDER = '#23272c';

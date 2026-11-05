@@ -18,14 +18,14 @@
   height: var(--control-height);
 }
 
-// The summary reads as a link at rest: in the text colour with an accent chevron right after the text, which says
-// it leads to the presets it counts; hovered, it takes the accent and an underline. The antd class outranks antd's
+// The summary reads as a link at rest: in the accent colour with a chevron right after the text, which says it leads
+// on; hovered, it also takes an underline. The antd class outranks antd's
 // own link colours.
 .presetSummary:global(.ant-btn-link) {
   justify-content: flex-start;
   min-height: 2rem;
   padding-inline: var(--space-1);
-  color: var(--color-text);
+  color: var(--color-accent);
   font-size: 0.75rem;
   text-align: left;
   white-space: normal;
@@ -44,6 +44,15 @@
 
 .presetSummaryChevron {
   margin-left: var(--space-1);
-  color: var(--color-accent);
   font-size: 0.625rem;
+}
+
+.presetSummaryIcon {
+  margin-right: var(--space-1);
+  font-size: 1rem;
+  vertical-align: text-bottom;
+}
+
+.selectRow :global(.ant-btn .anticon) {
+  font-size: 1.25rem;
 }

@@ -11,7 +11,6 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import {
-  BgColorsOutlined,
   ColumnHeightOutlined,
   DashboardOutlined,
   QuestionCircleOutlined,
@@ -47,6 +46,7 @@ import {
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
+import { PaletteIcon } from '../../../views/PaletteIcon';
 import type { LayerNumberFieldConfig } from '../interfaces/LayerNumberFieldConfig';
 import type { LayerSettingsFieldsProps } from '../interfaces/LayerSettingsFieldsProps';
 import { LayerNumberField } from '../LayerNumberField';
@@ -165,7 +165,7 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         />
         <IconActionButton
           labelText={t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
-          iconComponent={<BgColorsOutlined />}
+          iconComponent={<PaletteIcon />}
           onClick={onEditPalette}
         />
         <DismissibleTooltip title={t(DEFAULT.LAYER_SETTINGS_HELP_LABEL)}>
@@ -176,8 +176,8 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
             <Button icon={<QuestionCircleOutlined />} aria-label={t(DEFAULT.LAYER_SETTINGS_HELP_LABEL)} />
           </Popover>
         </DismissibleTooltip>
+        <LayerPresetButtons layer={layer} />
       </div>
-      <LayerPresetButtons layer={layer} />
     </div>
   );
 };

@@ -39,15 +39,14 @@
   font-weight: 600;
 }
 
-.consoleSwitch {
-  display: inline-flex;
+.consoleToggle:global(.ant-btn) {
   flex-shrink: 0;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
-  cursor: pointer;
+  font-size: 1.125rem;
+}
+
+.consoleToggleOn:global(.ant-btn) {
+  background-color: var(--color-surface-3);
+  color: var(--color-accent);
 }
 
 .readouts {

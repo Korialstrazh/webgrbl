@@ -28,6 +28,12 @@ export const WORKBENCH_PANEL_COUNT = 3;
  */
 export const DESIGN_PANEL_DEFAULT_WIDTH_REM = 20.5;
 
+/** On a window at least this wide the design panel opens at its roomy width. */
+export const ROOMY_WORKBENCH_MIN_WIDTH_REM = 100;
+
+/** Width of the design panel until the user resizes it on a roomy window. */
+export const DESIGN_PANEL_ROOMY_DEFAULT_WIDTH_REM = 24;
+
 /** Width of the machine panel until the user resizes it; must match $machine-panel-width in layout.scss. */
 export const MACHINE_PANEL_DEFAULT_WIDTH_REM = 22;
 

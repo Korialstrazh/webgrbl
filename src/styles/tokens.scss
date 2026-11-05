@@ -55,9 +55,9 @@
   --color-surface-hover: #212429;
   --color-surface-active: #23272c;
   // One disabled look for every control: a darker fill than an enabled button, a border fainter than the enabled one,
-  // and grey text that stays readable (5.3:1), so a disabled control never looks more prominent than an enabled one.
+  // and grey text that stays readable (6.5:1), so a disabled control never looks more prominent than an enabled one.
   --color-disabled-bg: #1a1d21;
-  --color-disabled-text: #8b9097;
+  --color-disabled-text: #9aa0a6;
   --color-disabled-border: #23272c;
   // STOP while it cannot act: the disabled look with a dark red outline, so it still reads as the emergency control.
   --color-danger-disabled-border: #5a2a2c;

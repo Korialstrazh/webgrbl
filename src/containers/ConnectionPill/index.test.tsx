@@ -20,7 +20,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const ONLINE_OR_OFFLINE_PATTERN = /Online|Offline/;
 const DISCONNECTED_PATTERN = /^Connection: Not connected.*Open the connection menu\.$/;
-const CONNECT_VERB_TEXT = 'Connect...';
+const CONNECT_VERB_TEXT = 'Connect';
 const CONNECT_LABEL = 'Connect';
 const DISCONNECT_LABEL = 'Disconnect';
 const UNGRANTED_PORT_ID = 'serial-ungranted';

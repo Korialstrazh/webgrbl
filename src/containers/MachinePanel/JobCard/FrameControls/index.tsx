@@ -2,8 +2,7 @@
  * Frame job: the button that starts the trace and a gear that opens its settings in a popover: the grid, margin and
  * speed, how long it takes and at what power. Changing them only edits the active profile and sends nothing to the
  * laser, so they work while disconnected; the popover says why they are off without a profile or during a run. A frame
- * that would leave the bed is
- * off with the edge and distance, and an alarm during a frame is told here.
+ * that would leave the bed is off with the edge and distance, and an alarm during a frame is told here.
  *
  * @author michael.morosov
  *

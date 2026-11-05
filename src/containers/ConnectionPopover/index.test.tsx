@@ -18,7 +18,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const CONNECT_LABEL = 'Connect';
 const DISCONNECT_LABEL = 'Disconnect';
-const CHOOSE_PORT_LABEL = 'Choose port...';
+const CHOOSE_PORT_LABEL = 'Choose port';
 const PORT_LABEL = 'Port';
 const BAUD_LABEL = 'Baud rate';
 const SIMULATED_LASER_LABEL = 'Simulated laser (no hardware)';

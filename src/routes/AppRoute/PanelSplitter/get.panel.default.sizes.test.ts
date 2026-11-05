@@ -4,6 +4,7 @@ import type { PanelDefaultSize } from './interfaces/PanelDefaultSize';
 const ROOT_FONT_SIZE_PX = 16;
 const WORKBENCH_WIDTH_PX = 1600;
 const WIDE_WORKBENCH_WIDTH_PX = 1920;
+const BELOW_ROOMY_WORKBENCH_WIDTH_PX = 1500;
 // 28rem at a 16 px root font is 448 px, 23.33 % of 1920 px; the bed takes what the side panels give up.
 const WIDE_SIDE_PANEL_PERCENT = 448 / 1920 * 100;
 const WIDE_BED_PERCENT = 100 - 2 * WIDE_SIDE_PANEL_PERCENT;
@@ -56,7 +57,15 @@ describe(getPanelDefaultSizes.name, () => {
     expect(getPanelDefaultSizes({
       storedPanelSizePercents: undefined,
       rootFontSizePx: ROOT_FONT_SIZE_PX,
-      workbenchWidthPx: WORKBENCH_WIDTH_PX,
+      workbenchWidthPx: BELOW_ROOMY_WORKBENCH_WIDTH_PX,
     })).toEqual([328, undefined, 352]);
+  });
+
+  it('opens the design panel wider on a roomy window when nothing is stored', () => {
+    expect(getPanelDefaultSizes({
+      storedPanelSizePercents: undefined,
+      rootFontSizePx: ROOT_FONT_SIZE_PX,
+      workbenchWidthPx: WIDE_WORKBENCH_WIDTH_PX,
+    })).toEqual([384, undefined, 352]);
   });
 });

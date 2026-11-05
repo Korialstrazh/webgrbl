@@ -16,10 +16,12 @@ import {
   DESIGN_PANEL_DEFAULT_WIDTH_REM,
   DESIGN_PANEL_MAX_WIDTH_REM,
   DESIGN_PANEL_MIN_WIDTH_REM,
+  DESIGN_PANEL_ROOMY_DEFAULT_WIDTH_REM,
   MACHINE_PANEL_DEFAULT_WIDTH_REM,
   MACHINE_PANEL_MAX_WIDTH_REM,
   MACHINE_PANEL_MIN_WIDTH_REM,
   PANEL_SIZE_PERCENT_TOTAL,
+  ROOMY_WORKBENCH_MIN_WIDTH_REM,
 } from '../../../utils/layout.constants';
 import type { PanelDefaultSize } from './interfaces/PanelDefaultSize';
 import type { PanelDefaultSizesRequest } from './interfaces/PanelDefaultSizesRequest';
@@ -56,11 +58,15 @@ const getSidePanelPercent = (
 };
 
 export const getPanelDefaultSizes = (request: PanelDefaultSizesRequest): PanelDefaultSize[] => {
-  const { storedPanelSizePercents, rootFontSizePx } = request;
+  const { storedPanelSizePercents, rootFontSizePx, workbenchWidthPx } = request;
 
   if (!storedPanelSizePercents) {
+    const designWidthRem: number = workbenchWidthPx >= ROOMY_WORKBENCH_MIN_WIDTH_REM * rootFontSizePx
+      ? DESIGN_PANEL_ROOMY_DEFAULT_WIDTH_REM
+      : DESIGN_PANEL_DEFAULT_WIDTH_REM;
+
     return [
-      DESIGN_PANEL_DEFAULT_WIDTH_REM * rootFontSizePx,
+      designWidthRem * rootFontSizePx,
       undefined,
       MACHINE_PANEL_DEFAULT_WIDTH_REM * rootFontSizePx,
     ];

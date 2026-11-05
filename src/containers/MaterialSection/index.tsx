@@ -2,7 +2,7 @@
  * The Material panel of the design view: the material select with the Library button beside it, and a link below
  * that says how many presets the project material has on the active machine. The button opens the whole library;
  * the link opens it filtered to the project material, so the presets of a material are found where the material is
- * chosen.
+ * chosen. With no laser profile the link is a small chip that opens the profiles instead.
  *
  * @author michael.morosov
  *
@@ -11,25 +11,30 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BookOutlined, RightOutlined } from '@ant-design/icons';
+import { RightOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_LINK } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectActiveMaterial, selectActiveMaterialPresetCount } from '../../utils/states/material.selectors';
+import type { AppDispatch } from '../../utils/states/new.store';
+import { MachineProfilesDialogOpenChanged } from '../../utils/states/ui.workbench.state';
 import { IconActionButton } from '../../views/IconActionButton';
+import { LaserMachineIcon } from '../../views/LaserMachineIcon';
+import { MaterialSheetIcon } from '../../views/MaterialSheetIcon';
 import { MaterialLibraryDrawer } from '../MaterialLibraryDrawer';
 import { ProjectMaterialSelect } from '../ProjectMaterialSelect';
 import styles from './styles.module.scss';
 
 export const MaterialSection = (): ReactNode => {
   const { t } = useTranslation();
+  const dispatch: AppDispatch = useDispatch();
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const activePresetCount: number = useSelector(selectActiveMaterialPresetCount);
@@ -62,6 +67,10 @@ export const MaterialSection = (): ReactNode => {
     setIsLibraryOpen(true);
   };
 
+  const openProfilesDialog = (): void => {
+    dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen: true }));
+  };
+
   return (
     <div className={styles.materialSection}>
       <div className={styles.selectRow}>
@@ -69,7 +78,7 @@ export const MaterialSection = (): ReactNode => {
         {/* Its tooltip goes on the click: left open it would cover the drawer and take the drawer's Escape. */}
         <IconActionButton
           labelText={t(DEFAULT.MATERIAL_SECTION_OPEN_LIBRARY)}
-          iconComponent={<BookOutlined />}
+          iconComponent={<MaterialSheetIcon />}
           onClick={() => openLibrary(undefined)}
         />
       </div>
@@ -77,10 +86,11 @@ export const MaterialSection = (): ReactNode => {
         className={styles.presetSummary}
         type={ANTD_BUTTON_TYPE_LINK}
         size={ANTD_BUTTON_SIZE_SMALL}
-        onClick={() => openLibrary(activeMaterial?.id)}
+        onClick={activeProfile ? () => openLibrary(activeMaterial?.id) : openProfilesDialog}
       >
         {/* One span, so the chevron follows the last word even when the text wraps, instead of the end of the line. */}
         <span className={styles.presetSummaryText}>
+          {!activeProfile && <LaserMachineIcon className={styles.presetSummaryIcon} aria-hidden />}
           {getPresetSummaryText()}
           <RightOutlined className={styles.presetSummaryChevron} aria-hidden />
         </span>

@@ -251,7 +251,7 @@ describe(ObjectsSection.name, () => {
     loadObjects(store);
     selectFirst(store);
     renderSection(store);
-    fireEvent.click(screen.getByRole('switch', { name: LOCK_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: LOCK_LABEL }));
     commitField(WIDTH_LABEL, NEW_WIDTH_TEXT);
 
     expect(getObjectById(store, FIRST_ID)).toMatchObject({ widthMm: NEW_WIDTH_MM, heightMm: WIDE_HEIGHT_MM });
@@ -264,7 +264,7 @@ describe(ObjectsSection.name, () => {
     selectFirst(store);
     renderSection(store);
 
-    expect(screen.getByRole('switch', { name: LOCK_LABEL })).toBeChecked();
+    expect(screen.getByRole('button', { name: LOCK_LABEL })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it.each([

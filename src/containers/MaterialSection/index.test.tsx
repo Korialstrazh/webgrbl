@@ -13,6 +13,7 @@ import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/s
 import { MaterialPresetSaved } from '../../utils/states/material.preset.state';
 import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
+import { selectIsMachineProfilesDialogOpen } from '../../utils/states/ui.workbench.state';
 import type { AppStore } from '../../utils/states/new.store';
 import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
@@ -93,7 +94,8 @@ describe(MaterialSection.name, () => {
 
     renderSection(store);
 
-    expect(screen.getByRole('button', { name: 'Choose a laser profile to use presets' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Laser profile' }));
+    expect(selectIsMachineProfilesDialogOpen(store.getState())).toBe(true);
     act(() => {
       store.dispatch(new MachineProfileSaved({ profile: PROFILE }));
       store.dispatch(new ActiveMachineProfileSelected({ profileId: PROFILE.id }));

@@ -11,11 +11,11 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { CodeOutlined, ColumnWidthOutlined, FieldTimeOutlined } from '@ant-design/icons';
-import { Layout, Switch, Tooltip } from 'antd';
+import { Layout, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_TEXT, ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsOnline } from '../../utils/states/browser.environment.state';
 import { MISSING_VALUE_TEXT } from '../../utils/missing.value.constants';
@@ -27,6 +27,7 @@ import { TOOLPATH_STATUS } from '../../utils/states/toolpath.status.constants';
 import { selectReadyToolpathBounds, selectReadyToolpathTotalTimeS } from '../../utils/states/toolpath.timeline.selectors';
 import type { ToolpathBounds } from '../../utils/toolpath/interfaces/ToolpathBounds';
 import { getJobEstimateText } from '../../utils/toolpath/get.job.estimate.text';
+import { IconActionButton } from '../../views/IconActionButton';
 import { BedCursorReadout } from './BedCursorReadout';
 import { getJobSizeReadoutText } from './get.job.size.readout.text';
 import styles from './styles.module.scss';
@@ -85,14 +86,15 @@ export const StatusStrip = (): ReactNode => {
           </span>
         </Tooltip>
       )}
-      <label className={styles.consoleSwitch}>
-        <Switch
-          checked={isConsoleOpen}
-          onChange={(isChecked: boolean) => dispatch(new ConsoleOpenChanged({ isConsoleOpen: isChecked }))}
-        />
-        <CodeOutlined aria-hidden />
-        {t(DEFAULT.CONSOLE_TOGGLE)}
-      </label>
+      {/* A panel toggle, not a setting: quiet until pressed. */}
+      <IconActionButton
+        className={[styles.consoleToggle, isConsoleOpen ? styles.consoleToggleOn : undefined].join(' ')}
+        type={ANTD_BUTTON_TYPE_TEXT}
+        labelText={t(DEFAULT.CONSOLE_TOGGLE)}
+        iconComponent={<CodeOutlined aria-hidden />}
+        aria-pressed={isConsoleOpen}
+        onClick={() => dispatch(new ConsoleOpenChanged({ isConsoleOpen: !isConsoleOpen }))}
+      />
     </Layout.Footer>
   );
 };
