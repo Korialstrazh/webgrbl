@@ -1,10 +1,9 @@
 :root {
   --color-bg: #121417;
   --color-bed: #0e1012;
-  // The work surface: a light grey by default, like a sheet of material, so black artwork stays visible on it (9.2:1);
-  // the user can choose another colour, which the bed sets on its element. The area around it and the panel chrome
-  // stay dark.
-  --color-bed-surface: #a7acb1;
+  // The work surface: a dark charcoal by default, matching the theme; the user can choose another colour, which the bed
+  // sets on its element. The area around it and the panel chrome stay darker. Must match DEFAULT_BED_COLOUR.
+  --color-bed-surface: #2a2e34;
   // Two sets of mark colours: dark marks for a light bed and light marks for a dark one; getBedOverlayTone picks the
   // set from the bed colour's luminance. Markers keep 3:1 and marks and text 4.5:1 against the default bed of their
   // side (tokens.contrast.test.ts).
@@ -22,13 +21,13 @@
   --color-bed-on-dark-ink: #f1f3f5;
   --color-bed-on-dark-text: #d5d9de;
   --color-bed-on-dark-chip-border: #6b7178;
-  --color-bed-accent: var(--color-bed-on-light-accent);
-  --color-bed-laser-head: var(--color-bed-on-light-laser-head);
-  --color-bed-danger: var(--color-bed-on-light-danger);
-  --color-bed-travel: var(--color-bed-on-light-travel);
-  --color-bed-ink: var(--color-bed-on-light-ink);
-  --color-bed-text: var(--color-bed-on-light-text);
-  --color-bed-chip-border: var(--color-bed-on-light-chip-border);
+  --color-bed-accent: var(--color-bed-on-dark-accent);
+  --color-bed-laser-head: var(--color-bed-on-dark-laser-head);
+  --color-bed-danger: var(--color-bed-on-dark-danger);
+  --color-bed-travel: var(--color-bed-on-dark-travel);
+  --color-bed-ink: var(--color-bed-on-dark-ink);
+  --color-bed-text: var(--color-bed-on-dark-text);
+  --color-bed-chip-border: var(--color-bed-on-dark-chip-border);
   --color-surface-1: #16191c;
   --color-surface-2: #1d2024;
   --color-surface-3: #23272c;
@@ -94,17 +93,17 @@
 }
 
 [data-bed-tone='on-dark'] {
-  --color-bed-grid-minor: color-mix(in oklab, var(--color-bed-surface), #fff 10%);
-  --color-bed-grid-major: color-mix(in oklab, var(--color-bed-surface), #fff 20%);
+  --color-bed-grid-minor: color-mix(in oklab, var(--color-bed-surface), #fff 5%);
+  --color-bed-grid-major: color-mix(in oklab, var(--color-bed-surface), #fff 12%);
 }
 
-// A dark bed colour takes the light set of marks. Must match BED_OVERLAY_TONE.ON_DARK.
-[data-bed-tone='on-dark'] {
-  --color-bed-accent: var(--color-bed-on-dark-accent);
-  --color-bed-laser-head: var(--color-bed-on-dark-laser-head);
-  --color-bed-danger: var(--color-bed-on-dark-danger);
-  --color-bed-travel: var(--color-bed-on-dark-travel);
-  --color-bed-ink: var(--color-bed-on-dark-ink);
-  --color-bed-text: var(--color-bed-on-dark-text);
-  --color-bed-chip-border: var(--color-bed-on-dark-chip-border);
+// A light bed colour takes the dark set of marks. Must match BED_OVERLAY_TONE.ON_LIGHT.
+[data-bed-tone='on-light'] {
+  --color-bed-accent: var(--color-bed-on-light-accent);
+  --color-bed-laser-head: var(--color-bed-on-light-laser-head);
+  --color-bed-danger: var(--color-bed-on-light-danger);
+  --color-bed-travel: var(--color-bed-on-light-travel);
+  --color-bed-ink: var(--color-bed-on-light-ink);
+  --color-bed-text: var(--color-bed-on-light-text);
+  --color-bed-chip-border: var(--color-bed-on-light-chip-border);
 }

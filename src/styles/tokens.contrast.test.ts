@@ -39,7 +39,6 @@ const MUTED_TOKEN = '--color-text-muted';
 const MUTED_STRONG_TOKEN = '--color-text-muted-strong';
 const BG_TOKEN = '--color-bg';
 const BED_TOKEN = '--color-bed';
-const BED_SURFACE_TOKEN = '--color-bed-surface';
 const HEX_PREFIX = '#';
 const ACCENT_BUTTON_TOKEN = '--color-accent';
 const DANGER_TEXT_TOKEN = '--color-danger-text';
@@ -47,7 +46,7 @@ const DARK_TEXT_ON_ACCENT = '#121417';
 // Black artwork and the marks and text drawn on the light bed need 4.5:1; markers and outlines need 3:1.
 const BLACK_ARTWORK = '#000000';
 const BED_TONE_PREFIXES = ['--color-bed-on-light-', '--color-bed-on-dark-'] as const;
-// The darkest light bed and the lightest dark bed each set is meant for: the default grey and the dark grey preset.
+// The darkest light bed and the lightest dark bed each set is meant for: the grey preset and the dark grey preset.
 type BedTonePrefix = (typeof BED_TONE_PREFIXES)[number];
 const BED_SURFACE_OF_TONE: Readonly<Record<BedTonePrefix, string>> = {
   '--color-bed-on-light-': '#a7acb1',
@@ -176,8 +175,9 @@ describe('design token contrast', () => {
     expect(disabledTextContrast).toBeLessThan(enabledTextContrast);
   });
 
-  it('keeps black artwork clearly visible on the bed surface', () => {
-    expect(getContrastRatio(BLACK_ARTWORK, requireToken(BED_SURFACE_TOKEN))).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+  it('keeps black artwork clearly visible on the grey bed preset; dark beds give artwork a light rim instead', () => {
+    expect(getContrastRatio(BLACK_ARTWORK, BED_SURFACE_OF_TONE['--color-bed-on-light-']))
+      .toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
   });
 
   it.each(BED_TONE_PREFIXES)('keeps the marks and text of %s readable on its bed', (tonePrefix: BedTonePrefix) => {

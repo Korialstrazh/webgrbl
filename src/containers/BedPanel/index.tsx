@@ -20,6 +20,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { ApiOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -35,10 +36,12 @@ import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedColour } from '../../utils/states/bed.appearance.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
+import { selectProjectObjects } from '../../utils/states/project.document.state';
 import { selectToolpathMachineArea } from '../../utils/states/toolpath.machine.area.selector';
 import type { ToolpathMachineArea } from '../../utils/toolpath/interfaces/ToolpathMachineArea';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
+import { BedEmptyCard } from '../BedEmptyCard';
 import { BedObjects } from '../BedObjects';
 import { BedViewport } from '../BedViewport';
 import { BurnPreviewPane } from '../BurnPreviewPane';
@@ -70,6 +73,7 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const bedColour: string = useSelector(selectBedColour);
   const bedSurfaceStyle: BedSurfaceStyle = { '--color-bed-surface': bedColour };
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
+  const hasNoObjects: boolean = !useSelector(selectProjectObjects).length;
   const [viewControlsHost, setViewControlsHost] = useState<HTMLDivElement | null>(null);
   const [toolpathDisplayMode, setToolpathDisplayMode] = useState<ToolpathDisplayMode>(DEFAULT_TOOLPATH_DISPLAY_MODE);
   const [isTravelShown, setIsTravelShown] = useState<boolean>(false);
@@ -142,7 +146,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               // add a second crosshair.
               headPosition={isToolpathView ? undefined : headBedPoint}
               workOriginPosition={isToolpathView ? undefined : workZeroBedPoint}
-              placeholderLabel={placeholderKey && t(placeholderKey)}
             >
               {isToolpathView ? (
                 <ToolpathLayer
@@ -155,6 +158,13 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               )}
             </BedViewport>
           )}
+          {!isThreeDView && hasNoObjects && placeholderKey && (
+            <span className={styles.placeholderChip}>
+              <ApiOutlined aria-hidden />
+              {t(placeholderKey)}
+            </span>
+          )}
+          {viewMode === BED_VIEW_MODE.DESIGN && hasNoObjects && <BedEmptyCard />}
           {(isToolpathView || isThreeDView) && <ToolpathStatusOverlay isGeneratingOrFailedOnly={isThreeDView} />}
         </div>
         {isToolpathView && <SimulationPlaybackBar />}

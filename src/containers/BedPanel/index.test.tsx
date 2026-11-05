@@ -549,11 +549,20 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('leaves the material select and the test sample to the design panel; 3D shows the material as text', () => {
+  it('offers the import and the test sample on the card of an empty bed, not in the 3D view', () => {
+    renderPanel(newHeldToolpathStore());
+
+    expect(screen.getByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).toBeInTheDocument();
+
+    openThreeDView();
+
+    expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('leaves the material select to the design panel; 3D shows the material as text', () => {
     renderPanel(newHeldToolpathStore());
 
     expect(screen.queryByRole('combobox', { name: MATERIAL_LABEL })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
 
     openThreeDView();
 

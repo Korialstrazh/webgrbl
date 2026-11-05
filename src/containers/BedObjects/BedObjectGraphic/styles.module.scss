@@ -2,6 +2,13 @@
   cursor: move;
 }
 
+// On a dark bed, black artwork would melt into the surface, so the drawing gets a thin light rim. Must match
+// BED_OVERLAY_TONE.ON_DARK.
+:global([data-bed-tone='on-dark']) .bedObject > image,
+:global([data-bed-tone='on-dark']) .bedObject > g {
+  filter: drop-shadow(0 0 0.0625rem rgb(255 255 255 / 75%));
+}
+
 // The whole box takes the presses of an object drawn as outlines, as the artwork image does for a filled one.
 .hitArea {
   fill: transparent;

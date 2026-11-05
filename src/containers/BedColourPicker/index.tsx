@@ -1,7 +1,8 @@
 /**
  * The bed colour button of the bed's view controls: a swatch of the current bed colour that opens an antd ColorPicker
- * with presets (the default grey, a light grey, white, a dark grey and a wood tone), a note that a very dark bed hides
- * black artwork, and Reset to default. Every change goes to the bed at once and is stored app-wide.
+ * with presets (the default charcoal, a grey, a light grey, white, a dark grey and a wood tone), a note on
+ * the light rim dark beds give artwork, and Reset to default. Every change goes to the bed at once and is stored
+ * app-wide.
  *
  * @author michael.morosov
  *

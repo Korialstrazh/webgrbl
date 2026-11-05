@@ -71,7 +71,6 @@ const renderBedViewport = (store: AppStore = newStore(), isWide: boolean = true)
           controlsHost={controlsHost}
           headPosition={undefined}
           workOriginPosition={undefined}
-          placeholderLabel={undefined}
         />
       </AntdTestProvider>
     </Provider>,

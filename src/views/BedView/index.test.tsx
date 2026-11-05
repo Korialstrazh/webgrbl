@@ -8,7 +8,6 @@ import { BED_HEAD_TEST_ID, BED_WORK_ORIGIN_TEST_ID } from './bed.view.constants'
 
 const DIMENSIONS: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
 const HEAD_POSITION = { x: 100, y: 50, z: 0 };
-const PLACEHOLDER_TEXT = 'Nothing here yet';
 const ZOOMED_VIEW_BOX: BedViewBox = { xMm: 50, yMm: 75, widthMm: 100, heightMm: 75 };
 const ZOOM_FOUR_TIMES = 4;
 const OUTSIDE_POSITION = { x: -50, y: 20, z: 0 };
@@ -26,7 +25,6 @@ const renderBed = (overrides: Partial<ComponentProps<typeof BedView>>): HTMLElem
       dimensions={DIMENSIONS}
       headPosition={undefined}
       workOriginPosition={undefined}
-      placeholderLabel={undefined}
       {...overrides}
     />,
   );
@@ -71,12 +69,6 @@ describe(BedView.name, () => {
     renderBed({});
 
     expect(screen.queryByTestId(BED_HEAD_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('shows the placeholder text', () => {
-    renderBed({ placeholderLabel: PLACEHOLDER_TEXT });
-
-    expect(screen.getByText(PLACEHOLDER_TEXT)).toBeInTheDocument();
   });
 
   it('keeps a head left of the bed visible at the edge in the outside style', () => {

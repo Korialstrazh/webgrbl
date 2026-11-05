@@ -9,12 +9,19 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const BED_COLOUR_LABEL = 'Bed colour';
 const RESET_LABEL = 'Reset to default';
-const DARK_NOTE_TEXT = 'A very dark bed hides black artwork.';
+const DARK_NOTE_TEXT = 'On a dark bed, artwork gets a thin light rim so black stays visible.';
 const TYPED_BED_COLOUR = '#d4d7da';
 const HEX_INPUT_SELECTOR = '.ant-color-picker-hex-input input';
 const PRESETS_GROUP_LABEL = 'Presets';
 const PLYWOOD_LABEL = 'Plywood';
-const PRESET_NAMES: readonly string[] = ['Grey (default)', 'Light grey', 'White', 'Dark grey', PLYWOOD_LABEL];
+const PRESET_NAMES: readonly string[] = [
+  'Charcoal (default)',
+  'Grey',
+  'Light grey',
+  'White',
+  'Dark grey',
+  PLYWOOD_LABEL,
+];
 
 const renderPicker = (store: AppStore = newStore()): AppStore => {
   render(

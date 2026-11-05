@@ -1,5 +1,5 @@
 /**
- * The bed tools and views that are not built yet (Edit nodes, Align, 3D), gathered behind one More button, so the bed
+ * The bed tools and views that are not built yet (Edit nodes, Align, 3D), gathered behind one icon button, so the bed
  * header stays one row. Each entry is disabled and says what it will do, with a Soon tag.
  *
  * @author michael.morosov
@@ -43,9 +43,7 @@ export const BedMoreToolsMenu = (): ReactNode => {
       menu={{ items: menuItems }}
       classNames={{ root: styles.moreToolsMenu }}
     >
-      <Button icon={<EllipsisOutlined />} aria-label={t(DEFAULT.BED_MORE_TOOLS_LABEL)}>
-        {t(DEFAULT.TOP_BAR_MORE)}
-      </Button>
+      <Button icon={<EllipsisOutlined />} aria-label={t(DEFAULT.BED_MORE_TOOLS_LABEL)} />
     </Dropdown>
   );
 };
