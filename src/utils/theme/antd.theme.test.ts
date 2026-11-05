@@ -93,6 +93,7 @@ const themeTokens: Record<string, unknown> = { ...ANTD_THEME.token };
 const layoutTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Layout };
 const buttonTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Button };
 const segmentedTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Segmented };
+const checkboxTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Checkbox };
 const switchTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Switch };
 const sliderTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Slider };
 const selectTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Select };
@@ -154,6 +155,10 @@ describe('ANTD_THEME', () => {
 
   it.each(SEGMENTED_TOKEN_SOURCES)('paints the segmented %s from %s', (segmentedToken: string, scssToken: string) => {
     expect(segmentedTokens[segmentedToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it('outlines the checkbox in --color-control-border', () => {
+    expect(checkboxTokens.colorBorder).toBe(requireScssToken('--color-control-border'));
   });
 
   it.each(SWITCH_TOKEN_SOURCES)('paints the switch %s from %s', (switchToken: string, scssToken: string) => {

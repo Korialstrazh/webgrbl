@@ -29,6 +29,8 @@
   border-style: dashed;
   border-color: var(--color-disabled-border-dashed);
   background-color: transparent;
+  // The caption keeps the readable disabled grey (at least 4.5:1 on every surface), never antd's dimmer default.
+  color: var(--color-disabled-text);
 
   .icon > :global(.anticon):first-child {
     opacity: 0.55;

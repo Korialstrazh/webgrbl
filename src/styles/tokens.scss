@@ -38,6 +38,8 @@
   --color-accent: #ff8a1f;
   --color-accent-hover: #ff9a3d;
   --color-accent-active: #e67a14;
+  // The fill of a selected segment: a dark accent tint that keeps the accent text above 4.5:1.
+  --color-accent-tint: #3a2a1c;
   --color-warning: #ffb547;
   --color-success: #3fcf8e;
   --color-danger: #e5383b;
@@ -56,6 +58,8 @@
   --color-surface-active: #23272c;
   // One disabled look for every control: a darker fill than an enabled button, a border fainter than the enabled one,
   // and grey text that stays readable (6.5:1), so a disabled control never looks more prominent than an enabled one.
+  // The outline of an unchecked checkbox or radio: at least 3:1 against every surface, so an empty box stays visible.
+  --color-control-border: #8a8f98;
   --color-disabled-bg: #1a1d21;
   --color-disabled-text: #9aa0a6;
   --color-disabled-border: #23272c;

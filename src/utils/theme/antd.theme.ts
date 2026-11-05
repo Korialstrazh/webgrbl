@@ -30,6 +30,8 @@ const COLOR_DANGER_BUTTON_HOVER = '#a82629';
 const COLOR_DANGER_BUTTON_ACTIVE = '#9d2326';
 // Error text (form messages, error alerts) needs a lighter red than the buttons to stay above 4.5:1 on every surface.
 const COLOR_DANGER_TEXT = '#ff6b6b';
+// An unchecked checkbox drew in the faint border colour, almost black on black; this outline keeps 3:1 or more.
+const COLOR_CONTROL_BORDER = '#8a8f98';
 const COLOR_DISABLED_BG = '#1a1d21';
 const COLOR_DISABLED_TEXT = '#9aa0a6';
 // antd's dark algorithm derives a bright blue-grey disabled border that made disabled buttons look more prominent than
@@ -125,6 +127,9 @@ export const ANTD_THEME: ThemeConfig = {
     Menu: {
       itemSelectedBg: COLOR_SURFACE_3,
       itemSelectedColor: COLOR_TEXT,
+    },
+    Checkbox: {
+      colorBorder: COLOR_CONTROL_BORDER,
     },
     Switch: {
       colorPrimary: COLOR_ACCENT,

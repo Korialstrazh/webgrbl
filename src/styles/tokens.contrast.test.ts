@@ -155,6 +155,16 @@ describe('design token contrast', () => {
     );
   });
 
+  it.each([BG_TOKEN, ...SURFACE_TOKENS])('keeps an empty checkbox outline visible on %s', (surfaceToken: string) => {
+    expect(getContrastRatio(requireToken('--color-control-border'), requireToken(surfaceToken)))
+      .toBeGreaterThanOrEqual(MIN_GRAPHIC_CONTRAST);
+  });
+
+  it.each([BG_TOKEN, ...SURFACE_TOKENS])('keeps a disabled caption readable on %s', (surfaceToken: string) => {
+    expect(getContrastRatio(requireToken(DISABLED_TEXT_TOKEN), requireToken(surfaceToken)))
+      .toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+  });
+
   it('keeps the text of a disabled control readable on its fill', () => {
     expect(getContrastRatio(requireToken(DISABLED_TEXT_TOKEN), requireToken(DISABLED_BG_TOKEN))).toBeGreaterThanOrEqual(
       MIN_TEXT_CONTRAST,
