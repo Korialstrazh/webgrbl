@@ -19,6 +19,10 @@ export interface ProfileNumberFieldDefinition {
   labelKey: string;
   /** Localization key of a short explanation of a GRBL term in the label, shown from an info icon. */
   hintKey?: string;
-  /** The icon before the label. */
+  /** The icon before the value. */
   iconComponent: ReactNode;
+  /** Localization key of the unit after the value. */
+  unitKey?: string;
+  /** Localization key of a short word beside the icon. */
+  captionKey?: string;
 }

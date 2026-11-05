@@ -12,20 +12,24 @@
  */
 import {
   BorderOuterOutlined,
+  CloudOutlined,
   ColumnHeightOutlined,
   ColumnWidthOutlined,
   ControlOutlined,
   DragOutlined,
+  HomeOutlined,
+  SettingOutlined,
   TagOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { Button, Form, Input, InputNumber, Select, Switch, Tooltip } from 'antd';
+import { Button, Collapse, Form, Input, Select, Switch, Tooltip } from 'antd';
 import { useId, useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ANTD_BUTTON_TYPE_PRIMARY,
+  ANTD_COLLAPSE_SIZE_SMALL,
   ANTD_FORM_ITEM_STATUS_ERROR,
   ANTD_FORM_LAYOUT_VERTICAL,
 } from '../../../utils/antd.constants';
@@ -48,39 +52,58 @@ import type { ProfileFieldStatus } from './interfaces/ProfileFieldStatus';
 import type { ProfileFormProps } from './interfaces/ProfileFormProps';
 import type { ProfileNumberFieldDefinition } from './interfaces/ProfileNumberFieldDefinition';
 import { LaserReadingAlerts } from './LaserReadingAlerts';
-import { IconFieldLabel } from '../../../views/IconFieldLabel';
+import { IconNumberField } from '../../../views/IconNumberField';
+import { LaserMachineIcon } from '../../../views/LaserMachineIcon';
 import styles from './styles.module.scss';
 
 const FIELD_ID_SEPARATOR = '-';
 
-const PROFILE_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
+const MACHINE_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
   {
     field: 'maxPowerWatts',
     labelKey: DEFAULT.MACHINE_PROFILES_FIELD_MAX_POWER,
     iconComponent: <ThunderboltOutlined />,
-  },
-  {
-    field: 'workAreaXMm',
-    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_X,
-    iconComponent: <ColumnWidthOutlined />,
-  },
-  {
-    field: 'workAreaYMm',
-    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_Y,
-    iconComponent: <ColumnHeightOutlined />,
-  },
-  {
-    field: 'sValueMax',
-    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX,
-    hintKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX_HINT,
-    iconComponent: <ControlOutlined />,
+    unitKey: DEFAULT.FIELD_UNIT_WATTS,
   },
   {
     field: 'jogFeedRate',
     labelKey: DEFAULT.MACHINE_PROFILES_FIELD_JOG_FEED_RATE,
     iconComponent: <DragOutlined />,
+    unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
   },
 ];
+
+const BED_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
+  {
+    field: 'workAreaXMm',
+    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_X,
+    iconComponent: <ColumnWidthOutlined />,
+    unitKey: DEFAULT.FIELD_UNIT_MM,
+  },
+  {
+    field: 'workAreaYMm',
+    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_Y,
+    iconComponent: <ColumnHeightOutlined />,
+    unitKey: DEFAULT.FIELD_UNIT_MM,
+  },
+];
+
+const ADVANCED_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
+  {
+    field: 'sValueMax',
+    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX,
+    hintKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX_HINT,
+    iconComponent: <ControlOutlined />,
+    captionKey: DEFAULT.MACHINE_PROFILES_FIELD_S_VALUE_MAX_CAPTION,
+  },
+];
+
+const ADVANCED_PANEL_KEY = 'advanced';
+
+/** Whether a failed check is on a field inside the collapsed Advanced panel, which must then open to show it. */
+const hasAdvancedFieldError = (errors: MachineProfileFieldError[]): boolean =>
+  errors.some(({ field }: MachineProfileFieldError): boolean =>
+    ADVANCED_NUMBER_FIELDS.some((definition: ProfileNumberFieldDefinition): boolean => definition.field === field));
 
 const NAME_FIELD: keyof MachineProfile = 'name';
 const ORIGIN_CORNER_FIELD: keyof MachineProfile = 'originCorner';
@@ -97,6 +120,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
   const [draft, setDraft] = useState<MachineProfile>(profile);
   const [fieldErrors, setFieldErrors] = useState<MachineProfileFieldError[]>([]);
   const [reportedLaserValues, setReportedLaserValues] = useState<ReportedMachineProfileValues | undefined>(undefined);
+  const [openAdvancedKeys, setOpenAdvancedKeys] = useState<string[]>([]);
 
   const changeDraft = (changes: MachineProfileChanges): void => {
     setDraft({ ...draft, ...changes });
@@ -118,6 +142,10 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
 
     setFieldErrors(draftErrors);
 
+    if (hasAdvancedFieldError(draftErrors)) {
+      setOpenAdvancedKeys([ADVANCED_PANEL_KEY]);
+    }
+
     if (draftErrors.length) {
       return;
     }
@@ -133,68 +161,109 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
     setReportedLaserValues(reportedValues);
   };
 
+  const renderNumberFields = (definitions: readonly ProfileNumberFieldDefinition[]): ReactNode =>
+    definitions.map((definition: ProfileNumberFieldDefinition) => {
+      const { field, labelKey, hintKey, iconComponent, unitKey, captionKey } = definition;
+
+      return (
+        <Form.Item key={field} {...getFieldStatus(field)}>
+          <IconNumberField
+            inputId={getFieldId(field)}
+            labelText={t(labelKey)}
+            hintText={hintKey && t(hintKey)}
+            iconComponent={iconComponent}
+            captionText={captionKey && t(captionKey)}
+            unitText={unitKey && t(unitKey)}
+            value={getInputNumberValue(draft[field])}
+            onChange={(value: number | null) => changeDraft({ [field]: value ?? Number.NaN })}
+          />
+        </Form.Item>
+      );
+    });
+
   return (
     <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
       <div className={styles.profileForm}>
-        <Form.Item
-          label={<IconFieldLabel iconComponent={<TagOutlined />} labelText={t(DEFAULT.MACHINE_PROFILES_FIELD_NAME)} />}
-          htmlFor={getFieldId(NAME_FIELD)}
-          {...getFieldStatus(NAME_FIELD)}
-        >
-          <Input
-            id={getFieldId(NAME_FIELD)}
-            value={draft.name}
-            onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => changeDraft({ name: changeEvent.target.value })}
-          />
-        </Form.Item>
-        <div className={styles.numberFields}>
-          {PROFILE_NUMBER_FIELDS.map(({ field, labelKey, hintKey, iconComponent }: ProfileNumberFieldDefinition) => (
-            <Form.Item
-              key={field}
-              label={<IconFieldLabel iconComponent={iconComponent} labelText={t(labelKey)} />}
-              tooltip={hintKey && t(hintKey)}
-              htmlFor={getFieldId(field)}
-              {...getFieldStatus(field)}
-            >
-              <InputNumber
-                id={getFieldId(field)}
-                className={styles.numberInput}
-                value={getInputNumberValue(draft[field])}
-                onChange={(value: number | null) => changeDraft({ [field]: value ?? Number.NaN })}
-              />
-            </Form.Item>
-          ))}
-          <Form.Item
-            label={(
-              <IconFieldLabel
-                iconComponent={<BorderOuterOutlined />}
-                labelText={t(DEFAULT.MACHINE_PROFILES_FIELD_ORIGIN_CORNER)}
-              />
-            )}
-            htmlFor={getFieldId(ORIGIN_CORNER_FIELD)}
-          >
-            <Select
-              id={getFieldId(ORIGIN_CORNER_FIELD)}
-              value={draft.originCorner}
-              options={Object.values(MACHINE_ORIGIN_CORNER).map((originCorner: MachineOriginCorner) => ({
-                value: originCorner,
-                label: t(MACHINE_ORIGIN_CORNER_LABEL_KEY[originCorner]),
-              }))}
-              onChange={(originCorner: MachineOriginCorner) => changeDraft({ originCorner })}
+        <section className={styles.group} aria-label={t(DEFAULT.MACHINE_PROFILES_GROUP_MACHINE)}>
+          <h3 className={styles.groupTitle}>
+            <LaserMachineIcon aria-hidden />
+            {t(DEFAULT.MACHINE_PROFILES_GROUP_MACHINE)}
+          </h3>
+          <Form.Item {...getFieldStatus(NAME_FIELD)}>
+            <Input
+              id={getFieldId(NAME_FIELD)}
+              prefix={<TagOutlined aria-hidden />}
+              aria-label={t(DEFAULT.MACHINE_PROFILES_FIELD_NAME)}
+              placeholder={t(DEFAULT.MACHINE_PROFILES_FIELD_NAME)}
+              value={draft.name}
+              onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => {
+                changeDraft({ name: changeEvent.target.value });
+              }}
             />
           </Form.Item>
-        </div>
-        <label className={styles.switchField}>
-          <Switch checked={draft.hasAirAssist} onChange={(hasAirAssist: boolean) => changeDraft({ hasAirAssist })} />
-          {t(DEFAULT.MACHINE_PROFILES_FIELD_AIR_ASSIST)}
-        </label>
-        <label className={styles.switchField}>
-          <Switch
-            checked={draft.hasHomingSwitches}
-            onChange={(hasHomingSwitches: boolean) => changeDraft({ hasHomingSwitches })}
-          />
-          {t(DEFAULT.MACHINE_PROFILES_FIELD_HOMING)}
-        </label>
+          <div className={styles.numberFields}>{renderNumberFields(MACHINE_NUMBER_FIELDS)}</div>
+        </section>
+        <section className={styles.group} aria-label={t(DEFAULT.MACHINE_PROFILES_GROUP_BED)}>
+          <h3 className={styles.groupTitle}>
+            <BorderOuterOutlined aria-hidden />
+            {t(DEFAULT.MACHINE_PROFILES_GROUP_BED)}
+          </h3>
+          <div className={styles.numberFields}>
+            {renderNumberFields(BED_NUMBER_FIELDS)}
+            <Form.Item>
+              <Tooltip title={t(DEFAULT.MACHINE_PROFILES_FIELD_ORIGIN_CORNER)}>
+                <Select
+                  id={getFieldId(ORIGIN_CORNER_FIELD)}
+                  prefix={<BorderOuterOutlined aria-hidden />}
+                  aria-label={t(DEFAULT.MACHINE_PROFILES_FIELD_ORIGIN_CORNER)}
+                  value={draft.originCorner}
+                  options={Object.values(MACHINE_ORIGIN_CORNER).map((originCorner: MachineOriginCorner) => ({
+                    value: originCorner,
+                    label: t(MACHINE_ORIGIN_CORNER_LABEL_KEY[originCorner]),
+                  }))}
+                  onChange={(originCorner: MachineOriginCorner) => changeDraft({ originCorner })}
+                />
+              </Tooltip>
+            </Form.Item>
+          </div>
+        </section>
+        <section className={styles.group} aria-label={t(DEFAULT.MACHINE_PROFILES_GROUP_OPTIONS)}>
+          <h3 className={styles.groupTitle}>
+            <SettingOutlined aria-hidden />
+            {t(DEFAULT.MACHINE_PROFILES_GROUP_OPTIONS)}
+          </h3>
+          <div className={styles.switchFields}>
+            <label className={styles.switchField}>
+              <Switch
+                checked={draft.hasAirAssist}
+                onChange={(hasAirAssist: boolean) => changeDraft({ hasAirAssist })}
+              />
+              <CloudOutlined aria-hidden />
+              {t(DEFAULT.MACHINE_PROFILES_FIELD_AIR_ASSIST)}
+            </label>
+            <label className={styles.switchField}>
+              <Switch
+                checked={draft.hasHomingSwitches}
+                onChange={(hasHomingSwitches: boolean) => changeDraft({ hasHomingSwitches })}
+              />
+              <HomeOutlined aria-hidden />
+              {t(DEFAULT.MACHINE_PROFILES_FIELD_HOMING)}
+            </label>
+          </div>
+        </section>
+        {/* Rendered while collapsed, so an error on a field inside can open it with the field already in place. */}
+        <Collapse
+          ghost
+          size={ANTD_COLLAPSE_SIZE_SMALL}
+          activeKey={openAdvancedKeys}
+          onChange={(panelKeys: string[]) => setOpenAdvancedKeys(panelKeys)}
+          items={[{
+            key: ADVANCED_PANEL_KEY,
+            label: t(DEFAULT.MACHINE_PROFILES_GROUP_ADVANCED),
+            forceRender: true,
+            children: <div className={styles.numberFields}>{renderNumberFields(ADVANCED_NUMBER_FIELDS)}</div>,
+          }]}
+        />
         {reportedLaserValues && <LaserReadingAlerts reportedValues={reportedLaserValues} />}
         <div className={styles.actions}>
           <Tooltip title={isConnected ? undefined : t(DEFAULT.MACHINE_PROFILES_READ_NEEDS_CONNECTION)}>

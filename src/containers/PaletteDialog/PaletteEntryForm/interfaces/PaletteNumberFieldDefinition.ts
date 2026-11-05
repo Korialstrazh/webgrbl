@@ -22,6 +22,10 @@ export interface PaletteNumberFieldDefinition {
   labelKey: string;
   /** The icon before the label. */
   iconComponent: ReactNode;
+  /** Localization key of a short word beside the icon, where two fields share one. */
+  captionKey?: string;
+  /** Localization key of the unit after the value. */
+  unitKey?: string;
   /** Whether the field applies to fill entries only. */
   isFillOnly: boolean;
 }

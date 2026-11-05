@@ -137,6 +137,17 @@ const newDocumentText = (profiles: MachineProfile[]): string => JSON.stringify({
 } satisfies MachineProfilesDocument);
 
 describe(MachineProfilesDialog.name, () => {
+  it('keeps the GRBL field under a collapsed Advanced panel and opens it when that field fails a check', () => {
+    renderDialog(newStore());
+
+    expect(screen.getByRole('button', { name: 'Advanced' })).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.change(screen.getByLabelText(S_VALUE_MAX_LABEL), { target: { value: '0' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(screen.getByRole('button', { name: 'Advanced' })).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('creates and saves a profile without activating it', () => {
     const store: AppStore = newStore();
 
