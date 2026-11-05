@@ -44,9 +44,9 @@ const DEFAULT_SPEED_TEXT = '6000';
 const GRID_20_LABEL = '2 cm';
 const SELECT_OPTION_SELECTOR = '.ant-select-item-option';
 // The 100 mm by 50 mm outline has a 300 mm perimeter, 3 s at 6000 mm/min.
-const FRAME_TIME_TEXT = '0 min 3 s';
+const FRAME_TIME_TEXT = '3 s';
 // The same perimeter at 3000 mm/min takes 6 s.
-const SLOWER_FRAME_TIME_TEXT = '0 min 6 s';
+const SLOWER_FRAME_TIME_TEXT = '6 s';
 const SPEED_ERROR_TEXT = 'Frame speed must be between 100 and 10000 mm/min';
 const MARGIN_ERROR_TEXT = 'Frame margin must not be negative';
 const ALARM_TEXT_PATTERN = /reported an alarm, possibly a limit/;
@@ -170,7 +170,7 @@ describe(FrameControls.name, () => {
     renderFrameControls(newFrameStore(OUTLINE_END_X_MM));
 
     expect(screen.getByText(FRAME_TIME_TEXT)).toBeInTheDocument();
-    expect(screen.getByText(`about 0.05 W (${PROFILE_NAME}, assumed 10 W laser)`)).toBeInTheDocument();
+    expect(screen.getByText('\u2248 0.05 W')).toBeInTheDocument();
   });
 
   it('starts the frame at once, with no confirmation', () => {

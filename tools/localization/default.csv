@@ -158,9 +158,11 @@ FRAME_EDGE_RIGHT;right
 FRAME_GRID_CELL;{{cellCm}} cm
 FRAME_GRID_LABEL;Frame grid
 FRAME_GRID_NONE;Rectangle only
+FRAME_MARGIN_CAPTION;margin
 FRAME_MARGIN_LABEL;Frame margin (mm)
+FRAME_POWER_DETAIL;{{profileName}}, assumed {{maxPowerWatts}} W laser
 FRAME_POWER_LABEL;Dot power
-FRAME_POWER_VALUE;about {{watts}} W ({{profileName}}, assumed {{maxPowerWatts}} W laser)
+FRAME_POWER_VALUE;≈ {{watts}} W
 FRAME_RUN_STATUS_COMPLETED;Frame finished
 FRAME_RUN_STATUS_FINISHING;Framing
 FRAME_RUN_STATUS_INTERRUPTED;Frame stopped before the end
@@ -171,6 +173,7 @@ FRAME_SETTINGS_NEEDS_PROFILE;Set up a laser profile first.
 FRAME_SETTINGS_RUN_LOCKED;Fixed while a job runs.
 FRAME_SETTINGS_SHOW;Show frame settings
 FRAME_SETTINGS_TITLE;Frame settings
+FRAME_SPEED_CAPTION;speed
 FRAME_SPEED_LABEL;Frame speed (mm/min)
 FRAME_START_BLOCKED_BED_OVERRUN;The frame would leave the bed.
 FRAME_START_BLOCKED_LASER_MODE;Laser mode ($32=1) must be confirmed on to frame a job.
@@ -537,9 +540,9 @@ MATERIAL_SECTION_LIBRARY;Library
 MATERIAL_SECTION_OPEN_LIBRARY;Open the material library
 MATERIAL_SECTION_PRESETS_NO_MACHINE;Laser profile
 MATERIAL_SECTION_PRESETS_NO_MATERIAL;Choose a material to see its presets
-MATERIAL_SECTION_PRESETS_NONE;No presets yet for {{name}}, {{thickness}} mm on {{machine}}
-MATERIAL_SECTION_PRESETS_one;{{count}} preset for {{name}}, {{thickness}} mm on {{machine}}
-MATERIAL_SECTION_PRESETS_other;{{count}} presets for {{name}}, {{thickness}} mm on {{machine}}
+MATERIAL_SECTION_PRESETS_NONE;No presets · Add
+MATERIAL_SECTION_PRESETS_one;{{count}} preset
+MATERIAL_SECTION_PRESETS_other;{{count}} presets
 NARROW_REGION_BAR_LABEL;Workbench region
 NARROW_REGION_BED;Bed
 NARROW_REGION_DESIGN;Layers
@@ -694,6 +697,7 @@ TOOLPATH_DISPLAY_LABEL;Toolpath colours
 TOOLPATH_DISPLAY_POWER_SHADING;Power shading
 TOOLPATH_ESTIMATE_HOURS;{{hours}} h {{minutes}} min
 TOOLPATH_ESTIMATE_MINUTES;{{minutes}} min {{seconds}} s
+TOOLPATH_ESTIMATE_SECONDS;{{seconds}} s
 TOOLPATH_FAILED;The toolpath could not be generated
 TOOLPATH_GENERATE;Generate
 TOOLPATH_GENERATING;Generating… {{percent}} %

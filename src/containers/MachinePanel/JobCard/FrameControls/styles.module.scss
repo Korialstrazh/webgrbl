@@ -134,3 +134,11 @@
     text-align: right;
   }
 }
+
+// The power with an (i) whose tooltip names the profile and the laser power it assumes.
+.powerValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: help;
+}

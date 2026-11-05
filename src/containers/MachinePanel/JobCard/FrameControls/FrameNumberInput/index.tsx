@@ -32,6 +32,8 @@ interface FrameNumberInputProps {
   /** Localization key of the label. */
   labelKey: string;
   iconComponent: ReactNode;
+  /** Localization key of the short visible name beside the icon. */
+  captionKey: string;
   /** Localization key of the unit after the value. */
   unitKey: string;
   /** The value in use, shown while the user has typed nothing. */
@@ -45,6 +47,7 @@ export const FrameNumberInput = ({
   inputId,
   labelKey,
   iconComponent,
+  captionKey,
   unitKey,
   savedValue,
   isDisabled,
@@ -85,6 +88,7 @@ export const FrameNumberInput = ({
         inputId={inputId}
         labelText={t(labelKey)}
         iconComponent={iconComponent}
+        captionText={t(captionKey)}
         unitText={t(unitKey)}
         status={fieldError ? ANTD_INPUT_NUMBER_STATUS_ERROR : undefined}
         aria-describedby={fieldError ? errorId : undefined}

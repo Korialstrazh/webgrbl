@@ -169,6 +169,7 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
             inputId={FRAME_MARGIN_INPUT_ID}
             labelKey={DEFAULT.FRAME_MARGIN_LABEL}
             iconComponent={<RadiusSettingOutlined />}
+            captionKey={DEFAULT.FRAME_MARGIN_CAPTION}
             unitKey={DEFAULT.FIELD_UNIT_MM}
             savedValue={marginMm}
             isDisabled={isJobRunActive}
@@ -179,6 +180,7 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
             inputId={FRAME_SPEED_INPUT_ID}
             labelKey={DEFAULT.FRAME_SPEED_LABEL}
             iconComponent={<DashboardOutlined />}
+            captionKey={DEFAULT.FRAME_SPEED_CAPTION}
             unitKey={DEFAULT.FIELD_UNIT_MM_PER_MIN}
             savedValue={feedMmPerMin}
             isDisabled={isJobRunActive}
@@ -192,13 +194,19 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
             </dd>
             <dt><ThunderboltOutlined aria-hidden /> {t(DEFAULT.FRAME_POWER_LABEL)}</dt>
             <dd>
-              {activeProfile
-                ? t(DEFAULT.FRAME_POWER_VALUE, {
-                  watts: FRAME_DOT_WATTS,
-                  profileName: activeProfile.name,
-                  maxPowerWatts: activeProfile.maxPowerWatts,
-                })
-                : MISSING_VALUE_TEXT}
+              {activeProfile ? (
+                <Tooltip
+                  title={t(DEFAULT.FRAME_POWER_DETAIL, {
+                    profileName: activeProfile.name,
+                    maxPowerWatts: activeProfile.maxPowerWatts,
+                  })}
+                >
+                  <span className={styles.powerValue} tabIndex={0}>
+                    {t(DEFAULT.FRAME_POWER_VALUE, { watts: FRAME_DOT_WATTS })}
+                    <InfoCircleOutlined aria-hidden />
+                  </span>
+                </Tooltip>
+              ) : MISSING_VALUE_TEXT}
             </dd>
           </dl>
         </>

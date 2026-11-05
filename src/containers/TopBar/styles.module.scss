@@ -60,7 +60,7 @@
 
   .heading {
     flex-shrink: 1;
-    min-width: 0;
+    min-width: 8.5rem;
     // The heading shrinks to make room, so its title and project name are cut instead of drawing over the menus.
     overflow: hidden;
   }
@@ -82,15 +82,20 @@
   white-space: nowrap;
 }
 
-// The profile button gives up its name first; Import SVG, the core action, keeps its label down to 37.5rem.
+// Import SVG gives up its label first (its icon and tooltip stay), so the project name and the profile name keep
+// room; the profile name goes at 37.5rem.
 @media (width < 62.5rem) {
-  .profileName {
+  .compactHiddenLabel {
     @include accessibility.visually-hidden;
+  }
+
+  .profileName {
+    max-width: 6rem;
   }
 }
 
 @media (width < 37.5rem) {
-  .compactHiddenLabel {
+  .profileName {
     @include accessibility.visually-hidden;
   }
 }
