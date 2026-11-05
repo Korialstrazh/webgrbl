@@ -131,40 +131,13 @@ describe.each([
 
     expect(countStopRequests()).toBe(1);
   });
-});
 
-describe('AppRoute with Escape pressed over an open overlay', () => {
-  it('a dialog closes and the machine does not stop', async () => {
+  it('asks to close on Escape without stopping the machine', async () => {
     const closeSpy = vi.fn();
-    const { store, countStopRequests } = await renderWorkbench(newTestModal(closeSpy));
+    const { store, countStopRequests } = await renderWorkbench(newOverlayComponent(closeSpy));
 
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
 
-    fireEvent.keyDown(screen.getByRole('dialog'), { key: ESCAPE_KEY });
-
-    expect(countStopRequests()).toBe(0);
-    expect(closeSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('a drawer closes and the connected machine stops', async () => {
-    const closeSpy = vi.fn();
-    const { store, countStopRequests } = await renderWorkbench(newTestDrawer(closeSpy));
-
-    expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
-
-    fireEvent.keyDown(screen.getByRole('dialog'), { key: ESCAPE_KEY });
-
-    expect(countStopRequests()).toBe(1);
-    expect(closeSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('a drawer closes without a stop request while disconnected', async () => {
-    const closeSpy = vi.fn();
-    const { store, countStopRequests } = await renderWorkbench(newTestDrawer(closeSpy));
-
-    act(() => {
-      store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }));
-    });
     fireEvent.keyDown(screen.getByRole('dialog'), { key: ESCAPE_KEY });
 
     expect(countStopRequests()).toBe(0);

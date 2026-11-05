@@ -1,8 +1,7 @@
 /**
  * An antd Drawer rendered into the bed region, with a clear mask over the bed only, so the machine panel and STOP stay
  * visible and clickable and the bed stays in view; a click on the bed still closes the drawer. It registers as an open
- * drawer overlay while shown: Escape closes it and, while connected, also stops the machine. Features open drawers
- * only through this
+ * overlay while shown, so Escape closes it instead of stopping the machine. Features open drawers only through this
  * wrapper, never through a raw antd Drawer.
  *
  * @author michael.morosov
@@ -17,7 +16,6 @@ import { useContext } from 'react';
 import type { ReactNode } from 'react';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
-import { DRAWER_OVERLAY_ID_PREFIX } from '../../utils/states/ui.overlay.state';
 import type { BedRegionDrawerProps } from './interfaces/BedRegionDrawerProps';
 import styles from './styles.module.scss';
 
@@ -27,7 +25,7 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
   // Without the bed region the drawer would fall back to the whole window, over STOP, so it waits for the region.
   const isShown: boolean = isOpen && Boolean(bedRegionHost);
 
-  useOverlayRegistration([DRAWER_OVERLAY_ID_PREFIX, overlayIdPrefix].join(''), isShown);
+  useOverlayRegistration(overlayIdPrefix, isShown);
 
   if (!bedRegionHost) {
     return null;
