@@ -2,11 +2,15 @@
   cursor: move;
 }
 
-// On a dark bed, black artwork would melt into the surface, so the drawing gets a thin light rim. Must match
-// BED_OVERLAY_TONE.ON_DARK.
+// On a dark bed, black fills and dark blue strokes would melt into the surface, so the drawing gets a light halo: a
+// crisp inner rim and a softer outer glow. Only the design view draws it; colours, toolpath and G-code are untouched.
+// Must match BED_OVERLAY_TONE.ON_DARK.
 :global([data-bed-tone='on-dark']) .bedObject > image,
 :global([data-bed-tone='on-dark']) .bedObject > g {
-  filter: drop-shadow(0 0 0.0625rem rgb(255 255 255 / 75%));
+  filter:
+    drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
+    drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
+    drop-shadow(0 0 0.1875rem rgb(255 255 255 / 35%));
 }
 
 // The whole box takes the presses of an object drawn as outlines, as the artwork image does for a filled one.
