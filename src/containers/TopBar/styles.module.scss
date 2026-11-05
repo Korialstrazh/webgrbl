@@ -79,3 +79,22 @@
     @include accessibility.visually-hidden;
   }
 }
+
+// The main icons of the bar are large enough to read without a tooltip.
+.group :global(.ant-btn .anticon) {
+  font-size: 1.25rem;
+}
+
+// At phone width the menus scroll sideways behind the pill, which never gives up space.
+@media (width < 30rem) {
+  .heading {
+    display: none;
+  }
+
+  .activeMenus {
+    flex-shrink: 1;
+    min-width: 2.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}

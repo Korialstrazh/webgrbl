@@ -139,3 +139,16 @@
   outline: 0.125rem dashed var(--color-accent);
   outline-offset: -0.125rem;
 }
+
+// At phone width the view controls scroll sideways rather than being cut off.
+@media (width < 30rem) {
+  .viewTools {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .viewControlsHost {
+    flex: none;
+  }
+}

@@ -87,3 +87,22 @@
     max-width: 7rem;
   }
 }
+
+// At phone width the pill is its dot and the Connect verb, or the dot alone once there is a link: it must always fit.
+@media (width < 30rem) {
+  .pill {
+    padding: 0 var(--space-2);
+  }
+
+  .status,
+  .profile,
+  .caret,
+  .warningNote {
+    display: none;
+  }
+
+  .connectVerb {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
