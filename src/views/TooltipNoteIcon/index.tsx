@@ -1,6 +1,7 @@
 /**
- * A short note shown as one icon instead of a standing sentence: the text is its tooltip, and the icon takes the
- * keyboard focus and carries the text as its accessible name, so keyboard and screen reader users still reach it.
+ * A short note shown as one icon instead of a standing sentence: the text opens in a popover on a hover, a tap or a
+ * click, or Enter or Space from the keyboard, so it never needs a hover. The icon sits in a tinted circle that reads as
+ * tappable, takes the keyboard focus and carries the text as its accessible name for screen reader users.
  *
  * @author michael.morosov
  *
@@ -10,9 +11,12 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
-import type { ReactNode } from 'react';
+import { Popover } from 'antd';
+import { useState } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
+import { ANTD_POPOVER_TRIGGER_HOVER_AND_CLICK } from '../../utils/antd.constants';
 import { ARIA_ROLE_NOTE } from '../../utils/aria.constants';
+import { ENTER_KEY, SPACE_KEY } from '../../utils/browser/browser.events.constants';
 import { KEYBOARD_FOCUSABLE_TAB_INDEX } from '../../utils/tab.index.constants';
 import styles from './styles.module.scss';
 
@@ -24,15 +28,35 @@ interface TooltipNoteIconProps {
   isWarning?: boolean;
 }
 
-export const TooltipNoteIcon = ({ noteText, iconComponent, isWarning = false }: TooltipNoteIconProps): ReactNode => (
-  <Tooltip title={noteText}>
-    <span
-      className={[styles.tooltipNoteIcon, isWarning ? styles.warning : undefined].join(' ')}
-      role={ARIA_ROLE_NOTE}
-      tabIndex={KEYBOARD_FOCUSABLE_TAB_INDEX}
-      aria-label={noteText}
+const NOTE_TOGGLE_KEYS: readonly string[] = [ENTER_KEY, SPACE_KEY];
+
+export const TooltipNoteIcon = ({ noteText, iconComponent, isWarning = false }: TooltipNoteIconProps): ReactNode => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  // Enter and Space open and close it from the keyboard, like a tap does.
+  const handleKeyDown = (keyEvent: KeyboardEvent<HTMLSpanElement>): void => {
+    if (NOTE_TOGGLE_KEYS.includes(keyEvent.key)) {
+      keyEvent.preventDefault();
+      setIsOpen(!isOpen);
+    }
+  };
+
+  return (
+    <Popover
+      content={<span className={styles.noteText}>{noteText}</span>}
+      trigger={ANTD_POPOVER_TRIGGER_HOVER_AND_CLICK}
+      open={isOpen}
+      onOpenChange={setIsOpen}
     >
-      <span className={styles.icon} aria-hidden>{iconComponent ?? <InfoCircleOutlined />}</span>
-    </span>
-  </Tooltip>
-);
+      <span
+        className={[styles.tooltipNoteIcon, isWarning ? styles.warning : undefined].join(' ')}
+        role={ARIA_ROLE_NOTE}
+        tabIndex={KEYBOARD_FOCUSABLE_TAB_INDEX}
+        aria-label={noteText}
+        onKeyDown={handleKeyDown}
+      >
+        <span className={styles.icon} aria-hidden>{iconComponent ?? <InfoCircleOutlined />}</span>
+      </span>
+    </Popover>
+  );
+};

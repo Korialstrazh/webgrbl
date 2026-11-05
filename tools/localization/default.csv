@@ -45,6 +45,7 @@ BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached.
 BURN_PART_LIFT_HINT_FREE;Part {{part}} comes free.
 BURN_PART_LIFT_HINT_NOT_THROUGH;Part {{part}} stays attached: the cut does not reach through, so it cannot be lifted.
 BURN_PART_LIFT_HINT_RISES_WITH_PARENT;Part {{part}} stays attached to Part {{parent}}, so it rises with it and cannot be lifted on its own.
+BURN_PART_LIFT_IDLE_CAPTION;Lift a part
 BURN_PART_LIFT_KEY_HINT;Up and down keys: {{step}} mm a step.
 BURN_PART_LIFT_LABEL;Lift selected part
 BURN_PART_LIFT_NOT_LIFTED;Not lifted
@@ -586,6 +587,7 @@ OPEN_PROJECT_OPEN;Open
 OPEN_PROJECT_OPEN_FILE;Open file…
 OPEN_PROJECT_RENAME;Rename
 OPEN_PROJECT_RENAME_INPUT;New name for {{name}}
+OPEN_PROJECT_STORED_CAPTION;In this browser
 OPEN_PROJECT_TITLE;Open project
 PALETTE_DELETE;Delete {{name}}
 PALETTE_DELETE_CANCEL;Cancel
@@ -617,6 +619,7 @@ PALETTE_RESET_CONFIRM;Replace the whole palette with the default colours? Your c
 PALETTE_RESET_OK;Yes, reset
 PALETTE_SAVE;Save
 PALETTE_SHADING_COLOUR_NOTE;The shading colour is fixed: it covers every grey from black to white.
+PALETTE_SHADING_LOCKED;Shading is built in and cannot be deleted.
 PALETTE_TITLE;Palette
 PROJECT_FILE_INPUT;Open a project file
 SIMULATION_BACK_TO_START;Back to start
@@ -701,8 +704,10 @@ TOAST_TOOLPATH_FAILED;The toolpath could not be generated. Try again, or simplif
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
 TOOLPATH_CANCEL;Cancel
 TOOLPATH_DISPLAY_BY_LAYER;By layer
+TOOLPATH_DISPLAY_BY_LAYER_CAPTION;Layers
 TOOLPATH_DISPLAY_LABEL;Toolpath colours
 TOOLPATH_DISPLAY_POWER_SHADING;Power shading
+TOOLPATH_DISPLAY_POWER_SHADING_CAPTION;Power
 TOOLPATH_ESTIMATE_HOURS;{{hours}} h {{minutes}} min
 TOOLPATH_ESTIMATE_MINUTES;{{minutes}} min {{seconds}} s
 TOOLPATH_ESTIMATE_SECONDS;{{seconds}} s
@@ -714,6 +719,7 @@ TOOLPATH_NOT_GENERATED;No toolpath yet
 TOOLPATH_OUT_OF_DATE;Out of date
 TOOLPATH_REGENERATE;Regenerate
 TOOLPATH_SHOW_TRAVEL;Show travel moves
+TOOLPATH_SHOW_TRAVEL_CAPTION;Travel
 TOOLPATH_WARNINGS_KIND_CLIPPED;clipped parts burn in full ({{count}})
 TOOLPATH_WARNINGS_KIND_IMAGE;images left out ({{count}})
 TOOLPATH_WARNINGS_KIND_OFF_PAGE;parts off the page ({{count}})

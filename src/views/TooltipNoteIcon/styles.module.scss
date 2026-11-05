@@ -1,4 +1,4 @@
-// A 1.75rem target around the icon, so the tooltip is easy to reach by pointer and the focus ring has room.
+// A 1.75rem round target with a faint tint, so the note reads as something to tap and the focus ring has room.
 .tooltipNoteIcon {
   display: inline-flex;
   flex: none;
@@ -6,10 +6,20 @@
   justify-content: center;
   min-width: 1.75rem;
   min-height: 1.75rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-3);
   color: var(--color-text-muted);
   font-size: 1.125rem;
-  cursor: help;
+  cursor: pointer;
+}
+
+.tooltipNoteIcon:hover {
+  color: var(--color-text);
+}
+
+.noteText {
+  display: block;
+  max-width: 16rem;
 }
 
 .warning {

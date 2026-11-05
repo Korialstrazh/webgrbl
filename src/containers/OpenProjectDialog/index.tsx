@@ -32,6 +32,7 @@ export const OpenProjectDialog = ({ isOpen, onClose }: OpenProjectDialogProps): 
       footer={(
         <span className={styles.footerNote}>
           <TooltipNoteIcon noteText={t(DEFAULT.OPEN_PROJECT_FOOTER)} iconComponent={<HddOutlined />} />
+          <span className={styles.footerCaption} aria-hidden>{t(DEFAULT.OPEN_PROJECT_STORED_CAPTION)}</span>
         </span>
       )}
       maxWidth={OPEN_PROJECT_DIALOG_WIDTH}

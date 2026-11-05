@@ -50,6 +50,9 @@ export const ANTD_BUTTON_TYPE_LINK: ButtonProps['type'] = 'link';
 /** The popover opens and closes when its anchor is clicked, and closes on a click outside. */
 export const ANTD_POPOVER_TRIGGER_CLICK: PopoverProps['trigger'] = 'click';
 
+/** The popover opens on a hover or on a tap or click, so it never depends on a hover alone. */
+export const ANTD_POPOVER_TRIGGER_HOVER_AND_CLICK: PopoverProps['trigger'] = ['hover', 'click'];
+
 /** The popover opens below its anchor, aligned to the anchor's right edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT: PopoverProps['placement'] = 'bottomRight';
 

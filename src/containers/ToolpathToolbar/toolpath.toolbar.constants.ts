@@ -17,7 +17,13 @@ export const TOOLPATH_DISPLAY_MODE_OPTIONS: readonly ToolpathDisplayModeOption[]
   {
     value: TOOLPATH_DISPLAY_MODE.POWER_SHADING,
     labelKey: DEFAULT.TOOLPATH_DISPLAY_POWER_SHADING,
+    captionKey: DEFAULT.TOOLPATH_DISPLAY_POWER_SHADING_CAPTION,
     IconComponent: BgColorsOutlined,
   },
-  { value: TOOLPATH_DISPLAY_MODE.BY_LAYER, labelKey: DEFAULT.TOOLPATH_DISPLAY_BY_LAYER, IconComponent: BlockOutlined },
+  {
+    value: TOOLPATH_DISPLAY_MODE.BY_LAYER,
+    labelKey: DEFAULT.TOOLPATH_DISPLAY_BY_LAYER,
+    captionKey: DEFAULT.TOOLPATH_DISPLAY_BY_LAYER_CAPTION,
+    IconComponent: BlockOutlined,
+  },
 ];

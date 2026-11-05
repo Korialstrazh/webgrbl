@@ -16,22 +16,37 @@
   }
 }
 
-.modeOption {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.75rem;
-  font-size: 1.125rem;
+.modeSwitch :global(.ant-segmented-item-label) {
+  min-height: 2.25rem;
+  padding-inline: var(--space-2);
+  line-height: 1;
 }
 
-// The name is in the tooltip and read by screen readers; the icon says it on screen.
+// An icon over one word, like the view switch, so the colour mode reads without a hover.
+.modeOption,
+.travelCaption {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.25rem;
+  font-size: 1rem;
+}
+
+.caption {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+// The full name is in the tooltip and read by screen readers; the icon and its caption say it on screen.
 .modeName {
   @include accessibility.visually-hidden;
 }
 
 .travelIcon {
-  color: var(--color-text-muted);
-  font-size: 1.125rem;
+  font-size: 1rem;
 }
 
 .travelSwitch {

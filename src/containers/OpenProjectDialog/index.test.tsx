@@ -24,6 +24,7 @@ import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host
 import { getDispatchedActionCalls } from '../../utils/test.support/get.dispatched.action.calls';
 import { StopHotkey } from '../StopHotkey';
 
+const STORED_CAPTION = 'In this browser';
 const DIALOG_LABEL = 'Open project';
 const LIST_LABEL = 'Stored projects';
 const NEWEST_ID = 'project-newest';
@@ -88,6 +89,7 @@ describe(OpenProjectDialog.name, () => {
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
     expect(getDispatchedActionCalls(dispatchSpy, ProjectSummariesRequested)).toHaveLength(1);
     expect(screen.getByRole('note', { name: FOOTER_PATTERN })).toBeInTheDocument();
+    expect(screen.getByText(STORED_CAPTION)).toBeInTheDocument();
     expect(await screen.findByText(NEWEST_NAME)).toBeInTheDocument();
   });
 

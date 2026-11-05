@@ -15,5 +15,7 @@ import type { ToolpathDisplayMode } from '../../../utils/toolpath/toolpath.drawi
 export interface ToolpathDisplayModeOption {
   value: ToolpathDisplayMode;
   labelKey: string;
+  /** The one-word caption shown under the icon; the full name stays in the tooltip and the accessible name. */
+  captionKey: string;
   IconComponent: ComponentType<IconComponentProps>;
 }
