@@ -136,5 +136,16 @@
 // One line of metadata: icons and values that do not fit are cut, and the title on the summary shows them in full.
 .openButton .summary {
   flex-wrap: nowrap;
+  gap: 0 var(--space-1);
   overflow: hidden;
+  font-size: 0.6875rem;
+
+  // The mode shows as its icon alone: Line and Fill are told apart by the picture, and this keeps all values in view.
+  > :first-child {
+    font-size: 0;
+
+    :global(.anticon) {
+      font-size: 0.75rem;
+    }
+  }
 }
