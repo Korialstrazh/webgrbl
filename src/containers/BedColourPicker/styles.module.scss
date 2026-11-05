@@ -1,7 +1,7 @@
-// As tall as the zoom buttons it sits beside, a 2rem target.
+// As tall as the zoom buttons it sits beside.
 .bedColourButton:global(.ant-btn) {
   min-width: 2rem;
-  height: 2rem;
+  height: 2.5rem;
   padding-inline: var(--space-2);
   gap: var(--space-1);
 }

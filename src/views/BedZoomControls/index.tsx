@@ -38,9 +38,7 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
       <Tooltip title={t(DEFAULT.BED_ZOOM_PAN_HINT)}>
         {/* A plain readout: it shows the zoom and carries the pan hint, it is not a control. */}
         <span className={styles.zoomPercent} aria-live="polite">
-          {t(isFitted ? DEFAULT.BED_ZOOM_PERCENT_FIT : DEFAULT.BED_ZOOM_PERCENT, {
-            percent: zoomPercent,
-          })}
+          {t(DEFAULT.BED_ZOOM_PERCENT, { percent: zoomPercent })}
         </span>
       </Tooltip>
       <DismissibleTooltip title={t(DEFAULT.BED_ZOOM_IN_HINT)}>
@@ -56,6 +54,7 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
         <Button
           className={styles.zoomButton}
           aria-label={t(DEFAULT.BED_ZOOM_FIT_HINT)}
+          aria-pressed={isFitted}
           onClick={onFit}
           icon={<ExpandOutlined />}
         />

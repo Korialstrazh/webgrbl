@@ -3,10 +3,10 @@
   flex: none;
 }
 
-// At least a 2rem target each, the size of a comfortable pointer target in a pro tool.
+// As tall as the view switch beside it, so the two groups share one line.
 .zoomButton:global(.ant-btn) {
-  min-width: 2rem;
-  height: 2rem;
+  min-width: 2.25rem;
+  height: 2.5rem;
   padding-inline: var(--space-2);
 }
 
@@ -15,9 +15,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 3.5rem;
+  min-width: 3rem;
   white-space: nowrap;
-  height: 2rem;
+  height: 2.5rem;
   padding: 0 var(--space-2);
   border: 1px solid var(--color-border);
   border-inline: none;
@@ -26,4 +26,11 @@
   font-family: var(--font-ui);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
+}
+
+// Phone width: the buttons say enough and the number gives way, so the group fits with no scrolling.
+@media (width < 30rem) {
+  .zoomPercent {
+    display: none;
+  }
 }
