@@ -76,7 +76,7 @@ M5 S0
 
 ### Export
 
-"Export G-code" is available when there is an active machine profile and at least one layer is switched on, and not while the toolpath is generating (the tooltip says what is missing). If the toolpath is not ready, it is made first. If parts of the design are left out of the job or burn differently than the bed shows, you see a list of the objects and the reasons: "Export anyway" downloads the file, Cancel downloads nothing. Opening another project while an export waits cancels it (with a toast).
+"Export G-code" is available when there is an active machine profile and at least one layer is switched on, and not while the toolpath is generating (the tooltip says what is missing). If the toolpath is not ready, it is made first. If parts of the design are left out of the job or burn differently than the bed shows, you see a list of the objects and the reasons: "Export anyway" downloads the file, Cancel downloads nothing. After a download a toast names the file. Opening another project while an export waits cancels it (with a toast).
 
 ## Toolpath view and simulation
 
