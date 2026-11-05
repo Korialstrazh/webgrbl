@@ -43,10 +43,8 @@ const WORK_AREA_X_LABEL = 'Work area width (mm)';
 const WORK_AREA_Y_LABEL = 'Work area height (mm)';
 const S_VALUE_MAX_LABEL = 'Maximum S value ($30)';
 const SAVE_LABEL = 'Save';
-const SET_ACTIVE_LABEL = 'Set active';
-const DELETE_LABEL = 'Delete';
 const DELETE_CONFIRM_LABEL = 'Yes, delete';
-const NEW_PROFILE_LABEL = '+ New profile';
+const NEW_PROFILE_LABEL = 'New profile';
 const READ_FROM_LASER_LABEL = 'Read from connected laser';
 const IMPORT_LABEL = 'Import profiles file';
 const EXPORT_LABEL = 'Export';
@@ -158,10 +156,10 @@ describe(MachineProfilesDialog.name, () => {
 
     saveProfile(store, { name: WORKSHOP_NAME });
     renderDialog(store);
-    clickButton(SET_ACTIVE_LABEL);
+    clickButton(`Make ${WORKSHOP_NAME} active`);
 
     expect(selectActiveMachineProfile(store.getState())?.name).toBe(WORKSHOP_NAME);
-    expect(screen.getByRole('menuitem', { name: ACTIVE_PATTERN })).toHaveTextContent(WORKSHOP_NAME);
+    expect(screen.getByRole('button', { name: ACTIVE_PATTERN })).toHaveTextContent(WORKSHOP_NAME);
   });
 
   it('edits and saves an existing profile in place', () => {
@@ -200,8 +198,8 @@ describe(MachineProfilesDialog.name, () => {
     saveProfile(store, { name: GARAGE_NAME });
     renderDialog(store);
     changeField(NAME_LABEL, IMPORTED_NAME);
-    fireEvent.click(screen.getByRole('menuitem', { name: GARAGE_NAME }));
-    fireEvent.click(screen.getByRole('menuitem', { name: WORKSHOP_NAME }));
+    fireEvent.click(screen.getByRole('button', { name: GARAGE_NAME }));
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(WORKSHOP_NAME) }));
 
     expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(WORKSHOP_NAME);
   });
@@ -246,7 +244,7 @@ describe(MachineProfilesDialog.name, () => {
       store.dispatch(new MachineProfileSaved({ profile: spareProfile }));
     });
     renderDialog(store);
-    clickButton(DELETE_LABEL);
+    clickButton(`Delete ${WORKSHOP_NAME}`);
     clickButton(DELETE_CONFIRM_LABEL);
 
     expect(selectMachineProfiles(store.getState())).toEqual([spareProfile]);
@@ -258,7 +256,7 @@ describe(MachineProfilesDialog.name, () => {
     saveProfile(store, { name: WORKSHOP_NAME });
     renderDialog(store);
 
-    expect(screen.getByRole('button', { name: DELETE_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: `Delete ${WORKSHOP_NAME}` })).toBeDisabled();
   });
 
   describe('with the simulated laser', () => {
@@ -396,7 +394,7 @@ describe(MachineProfilesDialog.name, () => {
     expect(clashedProfile).toEqual({ ...clashingProfile, id: expect.any(String) });
     expect(clashedProfile?.id).not.toBe(workshopProfile.id);
     expect(addedProfile).toEqual(importedProfile);
-    expect(screen.getByRole('menuitem', { name: IMPORTED_NAME })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: IMPORTED_NAME })).toBeInTheDocument();
   });
 
   it.each([
@@ -475,7 +473,7 @@ describe(MachineProfilesDialog.name, () => {
     });
     renderDialog(store);
 
-    const activeItem: HTMLElement = screen.getByRole('menuitem', { name: ACTIVE_PATTERN });
+    const activeItem: HTMLElement = screen.getByRole('button', { name: ACTIVE_PATTERN });
 
     expect(within(activeItem).getByText(GARAGE_NAME)).toBeInTheDocument();
     expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(GARAGE_NAME);

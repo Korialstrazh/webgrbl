@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { DragEvent, ReactNode } from 'react';
 import { useState } from 'react';
@@ -77,7 +78,7 @@ export const PaletteEntryList = (props: PaletteEntryListProps): ReactNode => {
           />
         ))}
       </ul>
-      <Button block onClick={onCreate}>{t(DEFAULT.PALETTE_NEW)}</Button>
+      <Button block icon={<PlusOutlined aria-hidden />} onClick={onCreate}>{t(DEFAULT.PALETTE_NEW)}</Button>
     </div>
   );
 };

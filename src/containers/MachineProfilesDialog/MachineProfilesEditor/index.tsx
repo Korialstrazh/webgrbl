@@ -45,8 +45,12 @@ export const MachineProfilesEditor = (): ReactNode => {
 
   const deleteProfile = (profileId: string): void => {
     dispatch(new MachineProfileDeleted({ profileId }));
-    // Read the store again: the document of this render still contains the deleted profile.
-    setEditedProfile(getProfileToEdit(selectMachineProfilesDocument(store.getState())));
+
+    // Deleting another card leaves the open form and its draft alone.
+    if (profileId === editedProfile.id) {
+      // Read the store again: the document of this render still contains the deleted profile.
+      setEditedProfile(getProfileToEdit(selectMachineProfilesDocument(store.getState())));
+    }
   };
 
   return (

@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { DownloadOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
@@ -31,6 +32,7 @@ import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../../utils/states/toast
 import { ToastShown } from '../../../utils/states/toast.state';
 import { useAppStore } from '../../../utils/states/use.app.store';
 import { ComingSoon } from '../../../views/ComingSoon';
+import { IconActionButton } from '../../../views/IconActionButton';
 import {
   MACHINE_PROFILES_EXPORT_FILE_NAME,
   MACHINE_PROFILES_FILE_ACCEPT,
@@ -97,8 +99,17 @@ export const ProfileFileActions = (): ReactNode => {
   return (
     <div className={styles.profileFileActions}>
       <div className={styles.transferButtons}>
-        <Button onClick={() => fileInputRef.current?.click()}>{t(DEFAULT.MACHINE_PROFILES_IMPORT)}</Button>
-        <Button disabled={!profiles.length} onClick={exportProfiles}>{t(DEFAULT.MACHINE_PROFILES_EXPORT)}</Button>
+        <IconActionButton
+          labelText={t(DEFAULT.MACHINE_PROFILES_IMPORT)}
+          iconComponent={<UploadOutlined />}
+          onClick={() => fileInputRef.current?.click()}
+        />
+        <IconActionButton
+          labelText={t(DEFAULT.MACHINE_PROFILES_EXPORT)}
+          iconComponent={<DownloadOutlined />}
+          isDisabled={!profiles.length}
+          onClick={exportProfiles}
+        />
       </div>
       {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
       <input
@@ -110,7 +121,7 @@ export const ProfileFileActions = (): ReactNode => {
         onChange={handleFileInputChange}
       />
       <ComingSoon description={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}>
-        <Button disabled>{t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}</Button>
+        <Button disabled icon={<SettingOutlined aria-hidden />}>{t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}</Button>
       </ComingSoon>
     </div>
   );

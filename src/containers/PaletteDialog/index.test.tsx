@@ -31,12 +31,13 @@ import { PALETTE_DRAG_DATA_TYPE } from './palette.dialog.constants';
 const NAME_LABEL = 'Name';
 const MAX_POWER_LABEL = 'Max power (%)';
 const SAVE_LABEL = 'Save';
-const NEW_COLOUR_LABEL = '+ New colour';
+const NEW_COLOUR_LABEL = 'New colour';
 const RESET_LABEL = 'Reset to defaults';
 const RESET_CONFIRM_LABEL = 'Yes, reset';
 const RESET_CONFIRM_TEXT = 'Replace the whole palette with the default colours? Your changes to the palette are lost.';
 const EXPORT_LABEL = 'Export for Inkscape';
 const DELETE_CONFIRM_LABEL = 'Yes, delete';
+const INKSCAPE_HELP_LABEL = 'Using the file in Inkscape';
 const LIST_LABEL = 'Palette colours';
 const DIALOG_TITLE = 'Palette';
 const LINUX_PATH_TEXT = 'Linux: ~/.config/inkscape/palettes/';
@@ -117,12 +118,16 @@ describe(PaletteDialog.name, () => {
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
   });
 
-  it('lists the palette entries with the Inkscape folder hint', () => {
+  it('lists the palette entries, with the Inkscape folders behind the help button', () => {
     renderDialog(newStore());
 
     const paletteList: HTMLElement = screen.getByRole('list', { name: LIST_LABEL });
 
     expect(within(paletteList).getAllByRole('listitem')).toHaveLength(DEFAULT_PALETTE.entries.length);
+    expect(screen.queryByText(LINUX_PATH_TEXT)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: INKSCAPE_HELP_LABEL }));
+
     expect(screen.getByText(LINUX_PATH_TEXT)).toBeInTheDocument();
     expect(screen.getByText(WINDOWS_PATH_TEXT)).toBeInTheDocument();
   });

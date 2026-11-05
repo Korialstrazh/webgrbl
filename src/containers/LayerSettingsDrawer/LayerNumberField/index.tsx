@@ -20,7 +20,8 @@ import styles from './styles.module.scss';
 const isDraftValueChanged = (draftValue: number | null | undefined, storedValue: number): draftValue is number =>
   isFiniteNumber(draftValue) && draftValue !== storedValue;
 
-export const LayerNumberField = ({ label, value, decimals, hintText, onCommit }: LayerNumberFieldProps): ReactNode => {
+export const LayerNumberField = (props: LayerNumberFieldProps): ReactNode => {
+  const { label, iconComponent, value, decimals, hintText, onCommit } = props;
   const inputId: string = useId();
   // No draft means the user is not editing, so the stored value is shown. A cleared field is a draft with no value.
   const [draft, setDraft] = useState<LayerFieldDraft | undefined>(undefined);
@@ -38,7 +39,10 @@ export const LayerNumberField = ({ label, value, decimals, hintText, onCommit }:
 
   return (
     <div className={styles.field}>
-      <label className={styles.label} htmlFor={inputId}>{label}</label>
+      <label className={styles.label} htmlFor={inputId}>
+        {iconComponent && <span className={styles.labelIcon} aria-hidden>{iconComponent}</span>}
+        {label}
+      </label>
       <InputNumber
         id={inputId}
         className={styles.input}
