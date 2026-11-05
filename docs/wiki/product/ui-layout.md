@@ -23,7 +23,7 @@ The approved screen layout of webgrbl and the order in which features get built.
 - **Power by colour:** one range, black (layer max power) → white (no power). Real gradients are followed; off-grey colours are ignored within a tolerance.
 - **Any GRBL laser:** machine profiles hold bed size, maximum watts, `$30`, origin and air assist. Material presets are stored in watts per profile and rescaled on import.
 - **Design tokens:**
-  - dark theme: bg `#121417`, surfaces `#16191c`/`#1d2024`/`#23272c`, border `#2a2e34`, text `#e6e8eb`/`#a3a9b0` (muted, at least 4.5:1 on every surface, also dimmed at 0.8 opacity);
+  - dark theme: bg `#121417`, surfaces `#16191c`/`#1d2024`/`#23272c`, border `#2a2e34`, text `#e6e8eb`/`#b0b6bd` (muted, at least 4.5:1 on every surface, also dimmed at 0.8 opacity);
   - accent `#ff8a1f`, danger `#e5383b`;
   - fonts Inter and JetBrains Mono, self-hosted;
   - 44 px targets for machine controls.

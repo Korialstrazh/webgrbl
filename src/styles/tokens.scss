@@ -33,8 +33,8 @@
   --color-surface-3: #23272c;
   --color-border: #2a2e34;
   --color-text: #e6e8eb;
-  // Labels and secondary text: 6.3:1 on surface-3 and 7.4:1 on surface-1, so muted text passes AA everywhere it is used.
-  --color-text-muted: #a3a9b0;
+  // Labels and secondary text: 7.3:1 on surface-3 and 8.6:1 on surface-1, so it stays above AA when dimmed.
+  --color-text-muted: #b0b6bd;
   --color-accent: #ff8a1f;
   --color-accent-hover: #ff9a3d;
   --color-accent-active: #e67a14;

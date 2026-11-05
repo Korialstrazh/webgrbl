@@ -20,7 +20,7 @@ const COLOR_SURFACE_HOVER = '#212429';
 const COLOR_SURFACE_ACTIVE = '#23272c';
 const COLOR_BORDER = '#2a2e34';
 const COLOR_TEXT = '#e6e8eb';
-const COLOR_TEXT_MUTED = '#a3a9b0';
+const COLOR_TEXT_MUTED = '#b0b6bd';
 const COLOR_ACCENT = '#ff8a1f';
 const COLOR_ACCENT_HOVER = '#ff9a3d';
 const COLOR_ACCENT_ACTIVE = '#e67a14';
@@ -77,6 +77,10 @@ export const ANTD_THEME: ThemeConfig = {
     colorBorder: COLOR_BORDER,
     colorText: COLOR_TEXT,
     colorTextSecondary: COLOR_TEXT_MUTED,
+    // antd derives these from translucent white (2.3:1 to 4:1 on our surfaces); muted text keeps them at AA.
+    colorTextTertiary: COLOR_TEXT_MUTED,
+    colorTextDescription: COLOR_TEXT_MUTED,
+    colorTextPlaceholder: COLOR_TEXT_MUTED,
     colorError: COLOR_DANGER_BUTTON,
     colorErrorHover: COLOR_DANGER_BUTTON_HOVER,
     colorErrorActive: COLOR_DANGER_BUTTON_ACTIVE,
