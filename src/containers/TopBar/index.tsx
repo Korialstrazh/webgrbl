@@ -11,7 +11,6 @@
  */
 import { ImportOutlined, RedoOutlined, ToolOutlined, UndoOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,6 +18,7 @@ import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
+import { MachineProfilesDialogOpenChanged, selectIsMachineProfilesDialogOpen } from '../../utils/states/ui.workbench.state';
 import { IconActionButton } from '../../views/IconActionButton';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
@@ -36,7 +36,11 @@ export const TopBar = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const canUndo: boolean = useSelector(selectCanUndo);
   const canRedo: boolean = useSelector(selectCanRedo);
-  const [isProfilesDialogOpen, setIsProfilesDialogOpen] = useState<boolean>(false);
+  const isProfilesDialogOpen: boolean = useSelector(selectIsMachineProfilesDialogOpen);
+
+  const changeProfilesDialogOpen = (isMachineProfilesDialogOpen: boolean): void => {
+    dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen }));
+  };
 
   return (
     <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
@@ -54,7 +58,7 @@ export const TopBar = (): ReactNode => {
             size={ANTD_BUTTON_SIZE_LARGE}
             labelText={t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES)}
             iconComponent={<ToolOutlined />}
-            onClick={() => setIsProfilesDialogOpen(true)}
+            onClick={() => changeProfilesDialogOpen(true)}
           />
         </span>
         <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.compactHiddenLabel} />
@@ -76,14 +80,14 @@ export const TopBar = (): ReactNode => {
           isDisabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
-        <TopBarOverflowMenu onOpenMachineProfiles={() => setIsProfilesDialogOpen(true)} />
+        <TopBarOverflowMenu onOpenMachineProfiles={() => changeProfilesDialogOpen(true)} />
       </div>
       <div className={styles.trailing}>
         <AppUpdatePrompt />
         <LaserStateChip />
         <ConnectionPill />
       </div>
-      <MachineProfilesDialog isOpen={isProfilesDialogOpen} onClose={() => setIsProfilesDialogOpen(false)} />
+      <MachineProfilesDialog isOpen={isProfilesDialogOpen} onClose={() => changeProfilesDialogOpen(false)} />
     </Layout.Header>
   );
 };

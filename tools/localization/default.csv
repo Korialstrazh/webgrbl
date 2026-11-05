@@ -225,6 +225,17 @@ GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot rec
 GRBL_ERROR_UNKNOWN;Unknown error.
 JOB_PAUSE;Pause
 JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.
+JOB_READINESS_CONNECT;Connect
+JOB_READINESS_CONNECT_HINT;Connect the laser
+JOB_READINESS_DESIGN;Design
+JOB_READINESS_DESIGN_HINT;Import an SVG
+JOB_READINESS_LABEL;Ready to cut?
+JOB_READINESS_MATERIAL;Material
+JOB_READINESS_MATERIAL_HINT;Choose the material
+JOB_READINESS_PROFILE;Profile
+JOB_READINESS_PROFILE_HINT;Set up a laser profile
+JOB_READINESS_STEP_MET;{{step}}: done
+JOB_READINESS_STEP_OPEN;{{step}}: to do
 JOB_RESUME;Resume
 JOB_RESUME_WAITING;Wait until the machine has stopped and any door is closed.
 JOB_RUN_PROGRESS_DETAIL;{{answered}} of {{total}} lines answered, {{elapsed}} elapsed

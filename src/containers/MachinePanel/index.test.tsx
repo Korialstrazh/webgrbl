@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MachinePanel } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
@@ -28,6 +28,7 @@ const STATUS_CARD_TITLE = 'Status';
 const STATUS_CONNECT_LABEL = 'Connect...';
 const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
 const JOB_CARD_TITLE = 'Job';
+const PROFILE_STEP_LABEL = 'Profile: to do';
 const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
 const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
 
@@ -82,11 +83,12 @@ describe(MachinePanel.name, () => {
     expect(screen.queryByRole('button', { name: STATUS_CONNECT_LABEL })).not.toBeInTheDocument();
   });
 
-  it('has no filled call to action while the job cannot start', () => {
+  it('has one filled call to action while the job cannot start: the first open readiness step', () => {
     renderMachinePanel();
 
     // STOP is a danger button of its own, not a next step, so it is not counted.
-    expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(0);
+    expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(1);
+    expect(screen.getByRole('button', { name: PROFILE_STEP_LABEL })).toHaveClass('ant-btn-primary');
   });
 
   it('drops the Connect button from the status card once connected', () => {

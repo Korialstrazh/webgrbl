@@ -1,7 +1,8 @@
 /**
  * The Job card: the layers that go to the laser, the time estimate and the job actions. Start job is the main
  * action, filled in the accent colour once it can run, and runs the job on the connected laser after a confirmation.
- * What keeps Start job and Export G-code off is written below them. Frame job, with its settings behind a gear, traces
+ * A readiness row says what is still open; other reasons Start job is off are written below it, and Export G-code gives
+ * its reason in a tooltip. Frame job, with its settings behind a gear, traces
  * the outline of the job.
  *
  * @author michael.morosov
@@ -43,6 +44,7 @@ import {
 } from '../../../utils/states/job.run.state';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
+import { selectFirstUnmetJobReadinessStep } from '../../../utils/states/job.readiness.selector';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/states/project.document.state';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
@@ -52,12 +54,18 @@ import { IconActionButton } from '../../../views/IconActionButton';
 import { Panel } from '../../../views/Panel';
 import { FrameControls } from './FrameControls';
 import { JobPauseButton } from './JobPauseButton';
+import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobRunStatusKey } from './get.job.run.status.key';
 import styles from './styles.module.scss';
 
 const JOB_START_CONFIRM_OVERLAY_ID = 'job-start-confirm';
+/** These reasons are what the readiness row already shows, so a sentence would only repeat it. */
+const READINESS_ROW_REASON_KEYS: readonly string[] = [
+  DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED,
+  DEFAULT.JOB_START_BLOCKED_NO_PROFILE,
+];
 
 export const JobCard = (): ReactNode => {
   const { t } = useTranslation();
@@ -77,6 +85,8 @@ export const JobCard = (): ReactNode => {
     JOB_PAUSED_CONTROLS.includes(pauseControl),
   );
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
+  const isReadinessComplete: boolean = !useSelector(selectFirstUnmetJobReadinessStep);
+  const isStartTheNextAction: boolean = isReadinessComplete && !jobStartBlockedReasonKey;
   const [isStartConfirmOpen, setIsStartConfirmOpen] = useState<boolean>(false);
 
   // Escape must only close the confirmation here, not also stop the machine.
@@ -115,6 +125,7 @@ export const JobCard = (): ReactNode => {
             </div>
           )}
         </dl>
+        {!isJobRunActive && <JobReadinessRow />}
         {isJobRunActive && <JobRunProgress />}
         <JobPauseButton />
         <Popconfirm
@@ -130,15 +141,16 @@ export const JobCard = (): ReactNode => {
         >
           <Button
             block
-            type={jobStartBlockedReasonKey ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
+            type={isStartTheNextAction ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT}
             size={ANTD_BUTTON_SIZE_LARGE}
             icon={<PlayCircleFilled aria-hidden />}
             disabled={!!jobStartBlockedReasonKey}
+            aria-description={jobStartBlockedReasonKey && t(jobStartBlockedReasonKey)}
           >
             {t(DEFAULT.MACHINE_START_JOB)}
           </Button>
         </Popconfirm>
-        {jobStartBlockedReasonKey && (
+        {jobStartBlockedReasonKey && !READINESS_ROW_REASON_KEYS.includes(jobStartBlockedReasonKey) && (
           <p className={styles.blockedReason}>
             <InfoCircleOutlined aria-hidden />
             {t(jobStartBlockedReasonKey)}
@@ -156,12 +168,6 @@ export const JobCard = (): ReactNode => {
             />
           )}
         />
-        {gcodeExportBlockedReasonKey && (
-          <p className={styles.blockedReason}>
-            <DownloadOutlined aria-hidden />
-            {t(gcodeExportBlockedReasonKey)}
-          </p>
-        )}
       </div>
     </Panel>
   );

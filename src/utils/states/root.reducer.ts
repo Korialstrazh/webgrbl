@@ -31,6 +31,7 @@ import { SIMULATION_STATE_NAME, simulationReducer } from './simulation.state';
 import { TOAST_STATE_NAME, toastReducer } from './toast.state';
 import { TOOLPATH_STATE_NAME, toolpathReducer } from './toolpath.state';
 import { UI_OVERLAY_STATE_NAME, uiOverlayReducer } from './ui.overlay.state';
+import { UI_WORKBENCH_STATE_NAME, uiWorkbenchReducer } from './ui.workbench.state';
 
 export const rootReducer = combineReducers({
   [BROWSER_ENVIRONMENT_STATE_NAME]: browserEnvironmentReducer,
@@ -48,6 +49,7 @@ export const rootReducer = combineReducers({
   [GRBL_CONSOLE_STATE_NAME]: grblConsoleReducer,
   [TOAST_STATE_NAME]: toastReducer,
   [UI_OVERLAY_STATE_NAME]: uiOverlayReducer,
+  [UI_WORKBENCH_STATE_NAME]: uiWorkbenchReducer,
   [BED_GESTURE_STATE_NAME]: bedGestureReducer,
   [BED_APPEARANCE_STATE_NAME]: bedAppearanceReducer,
   [TOOLPATH_STATE_NAME]: toolpathReducer,

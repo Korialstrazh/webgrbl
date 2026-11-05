@@ -120,6 +120,7 @@ const getFirstLayerKey = (store: AppStore): string => {
 
 const START_JOB_NAME = 'Start job';
 const NOT_CONNECTED_REASON = 'Connect the laser to start a job.';
+const CONNECT_STEP_OPEN_LABEL = 'Connect: to do';
 
 describe(JobCard.name, () => {
   afterEach(() => {
@@ -164,8 +165,7 @@ describe(JobCard.name, () => {
 
     expect(startJobButton).toBeDisabled();
     expect(startJobButton).not.toHaveClass(PRIMARY_BUTTON_CLASS);
-    fireEvent.mouseEnter(startJobButton.parentElement as HTMLElement);
-    expect(await screen.findByText('Connect the laser to start a job.')).toBeInTheDocument();
+    expect(startJobButton).toHaveAccessibleDescription(NOT_CONNECTED_REASON);
   });
 
   it('starts the job only after the confirmation, which the Escape-to-STOP hotkey treats as an overlay', async () => {
@@ -236,10 +236,11 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
   });
 
-  it('writes why Start job is off beside it', async () => {
+  it('leaves a reason the readiness row shows to that row', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
-    expect(screen.getByText(NOT_CONNECTED_REASON)).toBeInTheDocument();
+    expect(screen.queryByText(NOT_CONNECTED_REASON)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: CONNECT_STEP_OPEN_LABEL })).toBeInTheDocument();
   });
 
   it('has no Soon tag any more, since Frame job works', async () => {

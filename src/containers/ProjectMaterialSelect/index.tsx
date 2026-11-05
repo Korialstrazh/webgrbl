@@ -32,6 +32,7 @@ import { selectMaterials } from '../../utils/states/material.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
 import { MaterialDialog } from '../MaterialDialog';
+import { PROJECT_MATERIAL_SELECT_ID } from './project.material.select.constants';
 import styles from './styles.module.scss';
 
 // Material ids are random UUIDs, so they never match this.
@@ -86,6 +87,7 @@ export const ProjectMaterialSelect = (): ReactNode => {
   return (
     <>
       <Select<string>
+        id={PROJECT_MATERIAL_SELECT_ID}
         className={styles.materialSelect}
         aria-label={t(DEFAULT.BURN_PREVIEW_MATERIAL_LABEL)}
         placeholder={t(DEFAULT.BURN_PREVIEW_MATERIAL_PLACEHOLDER)}
