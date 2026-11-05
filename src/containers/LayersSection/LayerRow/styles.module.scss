@@ -19,6 +19,55 @@
   box-shadow: inset -0.1875rem 0 0 var(--color-accent);
 }
 
+// The send toggle: on is a green chip with the send arrow, off a dashed chip with a stop sign, so the state reads
+// without colour alone. antd's box stays as the real, focusable input, hidden behind the chip.
+.sendToggle:global(.ant-checkbox-wrapper) {
+  position: relative;
+  margin: 0;
+  :global(.ant-checkbox) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+  :global(.ant-checkbox-input) {
+    width: 100%;
+    height: 100%;
+  }
+  :global(.ant-checkbox-label) {
+    padding: 0;
+  }
+}
+
+.sendToggleFace {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px dashed var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.sendToggle:has(input:checked) .sendToggleFace {
+  border: 1px solid var(--color-success);
+  background-color: color-mix(in oklab, var(--color-success) 18%, transparent);
+  color: var(--color-success);
+}
+
+.sendToggle:has(input:focus-visible) .sendToggleFace {
+  outline: var(--focus-outline-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-outline-offset);
+}
+
+// A layer that stays home steps back, so the rows that will burn stand out.
+.row:has(.sendToggle input:not(:checked)) .openButton {
+  opacity: 0.75;
+}
+
 // A decoration only: the Move buttons are the keyboard path.
 .handle {
   padding: 0 var(--space-1);
@@ -32,7 +81,7 @@
 // with them, so they stay inside it. antd centres a button's content on one line, so the button is laid out as a start-aligned grid.
 .openButton {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr);
   gap: 0 var(--space-2);
   align-items: center;
   justify-content: stretch;
@@ -121,6 +170,7 @@
 
   .moveButtons {
     position: static;
+    flex-direction: column;
     opacity: 1;
     pointer-events: auto;
   }

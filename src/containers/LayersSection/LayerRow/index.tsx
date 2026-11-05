@@ -14,6 +14,8 @@ import {
   ArrowDownOutlined,
   ArrowUpOutlined,
   HolderOutlined,
+  SendOutlined,
+  StopOutlined,
 } from '@ant-design/icons';
 import { Button, Checkbox, Tooltip } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
@@ -21,7 +23,9 @@ import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
+import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { IconActionButton } from '../../../views/IconActionButton';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { LayerSwatch } from '../../../views/LayerSwatch';
 import { LayerValueCells } from '../../../views/LayerValueCells';
@@ -61,13 +65,21 @@ export const LayerRow = ({
       onDragOver={allowDropOnRow}
       onDrop={onDrop}
     >
-      <HolderOutlined className={styles.handle} aria-hidden="true" />
+      <Tooltip title={t(DEFAULT.LAYERS_DRAG_HINT)}>
+        <HolderOutlined className={styles.handle} aria-hidden="true" />
+      </Tooltip>
       <Tooltip title={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}>
+        {/* Still a real checkbox for the keyboard and for screen readers; only its look is a send toggle. */}
         <Checkbox
+          className={styles.sendToggle}
           checked={layer.enabled}
           aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
           onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
-        />
+        >
+          <span className={styles.sendToggleFace} aria-hidden>
+            {layer.enabled ? <SendOutlined /> : <StopOutlined />}
+          </span>
+        </Checkbox>
       </Tooltip>
       <Button
         ref={openButtonRef}
@@ -76,29 +88,33 @@ export const LayerRow = ({
         aria-expanded={isOpen}
         onClick={onOpen}
       >
-        <span className={styles.swatch}>
-          <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
-        </span>
+        <Tooltip title={t(DEFAULT.LAYERS_COLOUR_HINT)}>
+          <span className={styles.swatch}>
+            <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
+          </span>
+        </Tooltip>
+        <Tooltip title={t(LAYER_MODE_LABEL_KEY[settings.mode])}>
+          <span className={styles.modeIcon} aria-hidden><LayerModeIcon mode={settings.mode} /></span>
+        </Tooltip>
         <span className={styles.name} title={layerName}>{layerName}</span>
-        <span className={styles.modeIcon} aria-hidden><LayerModeIcon mode={settings.mode} /></span>
         <LayerValueCells className={styles.summary} settings={settings} />
         {hasNoPaletteEntry && <span className={styles.note}>{t(DEFAULT.LAYERS_NOT_IN_PALETTE)}</span>}
       </Button>
       <div className={styles.moveButtons}>
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
-          icon={<ArrowUpOutlined />}
-          disabled={isFirst}
-          aria-label={t(DEFAULT.LAYERS_MOVE_UP, { name: layerName })}
+          iconComponent={<ArrowUpOutlined />}
+          isDisabled={isFirst}
+          labelText={t(DEFAULT.LAYERS_MOVE_UP, { name: layerName })}
           onClick={onMoveUp}
         />
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
-          icon={<ArrowDownOutlined />}
-          disabled={isLast}
-          aria-label={t(DEFAULT.LAYERS_MOVE_DOWN, { name: layerName })}
+          iconComponent={<ArrowDownOutlined />}
+          isDisabled={isLast}
+          labelText={t(DEFAULT.LAYERS_MOVE_DOWN, { name: layerName })}
           onClick={onMoveDown}
         />
       </div>

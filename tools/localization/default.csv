@@ -37,8 +37,7 @@ BED_ZOOM_FIT_HINT;Fit the bed to the view (0)
 BED_ZOOM_IN_HINT;Zoom in (+). The mouse wheel zooms around the pointer.
 BED_ZOOM_OUT_HINT;Zoom out (-)
 BED_ZOOM_PAN_HINT;Zoom relative to the fitted bed: 100 % (fit) shows the whole bed. Drag with the middle mouse button, or hold Space and drag, to move the view.
-BED_ZOOM_PERCENT;{{percent}} %
-BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
+BED_ZOOM_PERCENT;{{percent}}%
 BURN_PART_LIFT_CLICK_HINT;Click a part to check it and lift it.
 BURN_PART_LIFT_HEIGHT;Lifted {{height}} mm
 BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached.
@@ -160,7 +159,7 @@ FRAME_RUN_STATUS_INTERRUPTED;Frame stopped before the end
 FRAME_RUN_STATUS_PAUSED;Framing: paused
 FRAME_RUN_STATUS_SENDING;Framing
 FRAME_SETTINGS_HIDE;Hide frame settings
-FRAME_SETTINGS_NEEDS_PROFILE;Choose a laser profile: it holds these settings.
+FRAME_SETTINGS_NEEDS_PROFILE;Set up a laser profile first.
 FRAME_SETTINGS_RUN_LOCKED;Fixed while a job runs.
 FRAME_SETTINGS_SHOW;Show frame settings
 FRAME_SETTINGS_TITLE;Frame settings
@@ -169,6 +168,7 @@ FRAME_START_BLOCKED_BED_OVERRUN;The frame would leave the bed.
 FRAME_START_BLOCKED_LASER_MODE;Laser mode ($32=1) must be confirmed on to frame a job.
 FRAME_START_BLOCKED_NO_BURN_MOVES;The toolpath has no burn moves to frame.
 FRAME_START_BLOCKED_NO_WORK_POSITION;The laser has not reported its position yet.
+FRAME_START_BLOCKED_NOT_CONNECTED;Connect the laser to trace the frame.
 FRAME_TIME_LABEL;Frame time
 GCODE_EXPORT_NEEDS_LAYER;Switch on a layer to export G-code.
 GCODE_EXPORT_NEEDS_PROFILE;Add a laser profile to export G-code.
@@ -232,13 +232,18 @@ GRBL_ERROR_UNKNOWN;Unknown error.
 JOB_PAUSE;Pause
 JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.
 JOB_READINESS_CONNECT;Connect
+JOB_READINESS_CONNECT_ACTION;Connect laser
 JOB_READINESS_CONNECT_HINT;Connect the laser
 JOB_READINESS_DESIGN;Design
+JOB_READINESS_DESIGN_ACTION;Import SVG
 JOB_READINESS_DESIGN_HINT;Import an SVG
+JOB_READINESS_DESIGN_MET_HINT;Import another SVG
 JOB_READINESS_LABEL;Ready to cut?
 JOB_READINESS_MATERIAL;Material
+JOB_READINESS_MATERIAL_ACTION;Choose material
 JOB_READINESS_MATERIAL_HINT;Choose the material
 JOB_READINESS_PROFILE;Profile
+JOB_READINESS_PROFILE_ACTION;Set up laser
 JOB_READINESS_PROFILE_HINT;Set up a laser profile
 JOB_READINESS_STEP_MET;{{step}}: done
 JOB_READINESS_STEP_OPEN;{{step}}: to do
@@ -304,9 +309,14 @@ LAYER_SETTINGS_PRESET_UPDATED;Updated the {{name}}, {{thickness}} mm · {{operat
 LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
 LAYER_SETTINGS_SEND;Send to laser
 LAYER_SETTINGS_SPEED;Speed (mm/min)
+LAYERS_CELL_PASSES_HINT;Passes
 LAYERS_CELL_POWER;{{power}}%
+LAYERS_CELL_POWER_HINT;Power
 LAYERS_CELL_SPEED;{{speed}}
-LAYERS_EMPTY_HINT;No layers yet. Layers appear when the design has colours.
+LAYERS_CELL_SPEED_HINT;Speed (mm/min)
+LAYERS_COLOUR_HINT;Layer colour
+LAYERS_DRAG_HINT;Drag to reorder
+LAYERS_EMPTY_HINT;No layers yet
 LAYERS_LIST_LABEL;Project layers
 LAYERS_MOVE_DOWN;Move {{name}} down
 LAYERS_MOVE_UP;Move {{name}} up
@@ -405,7 +415,7 @@ MACHINE_PROFILES_ORIGIN_BACK_LEFT;Back left
 MACHINE_PROFILES_ORIGIN_BACK_RIGHT;Back right
 MACHINE_PROFILES_ORIGIN_FRONT_LEFT;Front left
 MACHINE_PROFILES_ORIGIN_FRONT_RIGHT;Front right
-MACHINE_PROFILES_READ_FROM_LASER;Read from connected laser
+MACHINE_PROFILES_READ_FROM_LASER;Read from laser
 MACHINE_PROFILES_READ_NEEDS_CONNECTION;Connect the laser to read its settings.
 MACHINE_PROFILES_READ_NO;no
 MACHINE_PROFILES_READ_NOTHING;The laser reported none of these settings, so the form was not changed.
@@ -465,13 +475,13 @@ MATERIAL_LIBRARY_DELETE_CANCEL;Cancel
 MATERIAL_LIBRARY_DELETE_CONFIRM;Delete this preset?
 MATERIAL_LIBRARY_DELETE_OK;Yes, delete
 MATERIAL_LIBRARY_DELETED;Preset deleted.
-MATERIAL_LIBRARY_EMPTY_MATERIAL_TEXT;Add one here, or save the settings of a layer from its drawer. The chip above hides the other materials.
+MATERIAL_LIBRARY_EMPTY_MATERIAL_TEXT;Add one, or clear the filter.
 MATERIAL_LIBRARY_EMPTY_MATERIAL_TITLE;No presets yet for {{name}}, {{thickness}} mm
 MATERIAL_LIBRARY_EMPTY_NO_MACHINE_TITLE;No laser profile
 MATERIAL_LIBRARY_EMPTY_NO_MATERIALS_TITLE;No materials yet
 MATERIAL_LIBRARY_EMPTY_SEARCH_TEXT;Try fewer words, or clear the search.
 MATERIAL_LIBRARY_EMPTY_SEARCH_TITLE;Nothing matches "{{search}}"
-MATERIAL_LIBRARY_EMPTY_TEXT;Add a preset here, or save the settings of a layer from its drawer.
+MATERIAL_LIBRARY_EMPTY_TEXT;Add one, or save it from a layer.
 MATERIAL_LIBRARY_EMPTY_TITLE;No presets yet
 MATERIAL_LIBRARY_EXPORT;Export
 MATERIAL_LIBRARY_EXPORT_COUNT;Export ({{count}})
