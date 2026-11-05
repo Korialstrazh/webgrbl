@@ -53,6 +53,9 @@ export const ANTD_POPOVER_TRIGGER_CLICK: PopoverProps['trigger'] = 'click';
 /** The popover opens below its anchor, aligned to the anchor's right edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT: PopoverProps['placement'] = 'bottomRight';
 
+/** The popover opens to the left of its anchor, aligned to the anchor's top edge. */
+export const ANTD_POPOVER_PLACEMENT_LEFT_TOP: PopoverProps['placement'] = 'leftTop';
+
 /** The popover opens below its anchor, aligned to the anchor's left edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT: PopoverProps['placement'] = 'bottomLeft';
 

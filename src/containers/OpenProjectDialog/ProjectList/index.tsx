@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { UploadOutlined } from '@ant-design/icons';
 import { Button, Empty } from 'antd';
 import { useEffect, useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
@@ -41,7 +42,9 @@ export const ProjectList = ({ onClose }: ProjectListProps): ReactNode => {
   return (
     <div className={styles.projectList}>
       <div className={styles.toolbar}>
-        <Button onClick={() => fileInputRef.current?.click()}>{t(DEFAULT.OPEN_PROJECT_OPEN_FILE)}</Button>
+        <Button icon={<UploadOutlined aria-hidden />} onClick={() => fileInputRef.current?.click()}>
+          {t(DEFAULT.OPEN_PROJECT_OPEN_FILE)}
+        </Button>
         <ProjectFileInput inputRef={fileInputRef} />
       </div>
       {summaries.length ? (

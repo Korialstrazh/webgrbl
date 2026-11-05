@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   ANTD_BUTTON_TYPE_DEFAULT,
   ANTD_BUTTON_TYPE_PRIMARY,
-  ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT,
+  ANTD_POPOVER_PLACEMENT_LEFT_TOP,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../utils/antd.constants';
 import { GRBL_BAUD_RATES, GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
@@ -219,7 +219,9 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       onOpenChange={handleOpenChange}
       afterOpenChange={handleAfterOpenChange}
       trigger={ANTD_POPOVER_TRIGGER_CLICK}
-      placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+      // Beside the pill, over the bed: below it, it covered the Connect laser button of the Job card. A window too
+      // narrow for that flips it below.
+      placement={ANTD_POPOVER_PLACEMENT_LEFT_TOP}
       content={contentComponent}
       destroyOnHidden
     >

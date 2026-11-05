@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { SettingOutlined, WarningFilled } from '@ant-design/icons';
+import { ToolOutlined, WarningFilled } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +41,7 @@ export const CutCheckWarningRow = ({ warning, layerName, partCount }: CutCheckWa
         <span className={styles.depth}>{depthText}</span>
         <Button
           size={ANTD_BUTTON_SIZE_SMALL}
-          icon={<SettingOutlined aria-hidden />}
+          icon={<ToolOutlined aria-hidden />}
           aria-label={t(DEFAULT.CUT_CHECK_OPEN_LAYER_SETTINGS, { layer: layerName })}
           onClick={() => dispatch(new LayerSettingsOpenChanged({ openLayerSettingsKey: warning.layerKey }))}
         >

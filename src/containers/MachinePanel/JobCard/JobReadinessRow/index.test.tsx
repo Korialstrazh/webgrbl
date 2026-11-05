@@ -52,6 +52,30 @@ const renderRow = (): AppStore => {
 };
 
 describe(JobReadinessRow.name, () => {
+  it('makes the steps one tab stop, on the current step, and moves between them with the arrow keys', () => {
+    renderRow();
+
+    const profileStep: HTMLElement = screen.getByRole('button', { name: PROFILE_OPEN });
+    const connectStep: HTMLElement = screen.getByRole('button', { name: CONNECT_OPEN });
+    const materialStep: HTMLElement = screen.getByRole('button', { name: MATERIAL_OPEN });
+
+    expect(profileStep).toHaveAttribute('tabindex', '0');
+    expect(connectStep).toHaveAttribute('tabindex', '-1');
+
+    act(() => profileStep.focus());
+    fireEvent.keyDown(profileStep, { key: 'ArrowLeft' });
+
+    expect(connectStep).toHaveFocus();
+    expect(connectStep).toHaveAttribute('tabindex', '0');
+    expect(profileStep).toHaveAttribute('tabindex', '-1');
+
+    fireEvent.keyDown(connectStep, { key: 'Home' });
+    fireEvent.keyDown(profileStep, { key: 'ArrowRight' });
+    fireEvent.keyDown(document.activeElement ?? profileStep, { key: 'ArrowRight' });
+
+    expect(materialStep).toHaveFocus();
+  });
+
   it('marks only the first open step as the current one', () => {
     renderRow();
 

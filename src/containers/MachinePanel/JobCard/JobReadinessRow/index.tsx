@@ -1,6 +1,7 @@
 /**
  * The readiness stepper of the Job card: Profile, Design, Material and Connect joined by a line that leads to Start.
  * Each step goes to where it is set, a done step shows a large check, and the first one still open is outlined as next.
+ * The steps are one tab stop: the arrow keys, Home and End move between them (a roving tab index).
  *
  * @author michael.morosov
  *
@@ -11,11 +12,20 @@
  */
 import { ApiOutlined, CheckOutlined, ImportOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import type { ReactNode } from 'react';
+import { useRef, useState } from 'react';
+import type { KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
 import { BED_VIEW_MODE } from '../../../../utils/bed/bed.view.constants';
+import {
+  ARROW_DOWN_KEY,
+  ARROW_LEFT_KEY,
+  ARROW_RIGHT_KEY,
+  ARROW_UP_KEY,
+  END_KEY,
+  HOME_KEY,
+} from '../../../../utils/browser/browser.events.constants';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
 import {
@@ -28,6 +38,7 @@ import type { AppDispatch } from '../../../../utils/states/new.store';
 import { ConnectionPopoverOpenChanged } from '../../../../utils/states/ui.overlay.state';
 import { MachineProfilesDialogOpenChanged, NarrowRegionChanged } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
+import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
 import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
 import { LaserMachineIcon } from '../../../../views/LaserMachineIcon';
 import { MaterialSheetIcon } from '../../../../views/MaterialSheetIcon';
@@ -36,6 +47,26 @@ import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
 import styles from './styles.module.scss';
 
 const ARIA_CURRENT_STEP = 'step';
+const STEP_BUTTON_SELECTOR = 'button';
+const PREVIOUS_STEP_KEYS: readonly string[] = [ARROW_LEFT_KEY, ARROW_UP_KEY];
+const NEXT_STEP_KEYS: readonly string[] = [ARROW_RIGHT_KEY, ARROW_DOWN_KEY];
+
+/** The index of the step a roving key moves to, or undefined for a key that does not move. */
+const getMovedStepIndex = (key: string, index: number, count: number): number | undefined => {
+  if (PREVIOUS_STEP_KEYS.includes(key)) {
+    return (index - 1 + count) % count;
+  }
+
+  if (NEXT_STEP_KEYS.includes(key)) {
+    return (index + 1) % count;
+  }
+
+  if (key === HOME_KEY) {
+    return 0;
+  }
+
+  return key === END_KEY ? count - 1 : undefined;
+};
 
 interface JobReadinessLook {
   step: JobReadinessStep;
@@ -81,11 +112,14 @@ const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
 ];
 
 interface JobReadinessButtonProps extends JobReadinessLook {
+  /** Whether this step holds the one tab stop of the row. */
+  isTabStop: boolean;
   onGoToStep: (step: JobReadinessStep) => void;
+  onFocusStep: (step: JobReadinessStep) => void;
 }
 
 const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
-  const { step, iconComponent, captionKey, hintKey, metHintKey, onGoToStep } = props;
+  const { step, iconComponent, captionKey, hintKey, metHintKey, isTabStop, onGoToStep, onFocusStep } = props;
   const { t } = useTranslation();
   const isMet: boolean = useSelector(selectIsJobReadinessStepMet(step));
   const isNextStep: boolean = useSelector(selectFirstUnmetJobReadinessStep) === step;
@@ -108,6 +142,8 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
             { step: captionText },
           )}
           aria-current={isNextStep ? ARIA_CURRENT_STEP : undefined}
+          tabIndex={isTabStop ? KEYBOARD_FOCUSABLE_TAB_INDEX : SCRIPT_FOCUS_ONLY_TAB_INDEX}
+          onFocus={() => onFocusStep(step)}
           onClick={() => onGoToStep(step)}
         >
           <span className={styles.marker}>{isMet ? <CheckOutlined aria-hidden /> : iconComponent}</span>
@@ -125,6 +161,28 @@ export const JobReadinessRow = (): ReactNode => {
   const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
   const nextLook: JobReadinessLook | undefined =
     JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
+  const listRef: RefObject<HTMLOListElement | null> = useRef<HTMLOListElement>(null);
+  // The step last focused keeps the tab stop; until then it is the next step, or the first when all are done.
+  const [focusedStep, setFocusedStep] = useState<JobReadinessStep | undefined>(undefined);
+  const tabStopStep: JobReadinessStep | undefined = focusedStep ?? nextStep ?? JOB_READINESS_LOOKS[0]?.step;
+
+  const handleRowKeyDown = (keyEvent: KeyboardEvent<HTMLOListElement>): void => {
+    const stepButtons: HTMLButtonElement[] = [
+      ...(listRef.current?.querySelectorAll<HTMLButtonElement>(STEP_BUTTON_SELECTOR) ?? []),
+    ];
+    const currentIndex: number = stepButtons.findIndex(
+      (stepButton: HTMLButtonElement): boolean => stepButton === document.activeElement,
+    );
+    const movedIndex: number | undefined = currentIndex < 0
+      ? undefined
+      : getMovedStepIndex(keyEvent.key, currentIndex, stepButtons.length);
+
+    // eslint-disable-next-line no-restricted-syntax -- index 0 (the first step) is a real move, distinct from none
+    if (movedIndex !== undefined) {
+      keyEvent.preventDefault();
+      stepButtons[movedIndex]?.focus();
+    }
+  };
 
   const goToMaterialSelect = (): void => {
     dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }));
@@ -153,9 +211,20 @@ export const JobReadinessRow = (): ReactNode => {
 
   return (
     <>
-      <ol className={styles.jobReadinessRow} aria-label={t(DEFAULT.JOB_READINESS_LABEL)}>
+      <ol
+        ref={listRef}
+        className={styles.jobReadinessRow}
+        aria-label={t(DEFAULT.JOB_READINESS_LABEL)}
+        onKeyDown={handleRowKeyDown}
+      >
         {JOB_READINESS_LOOKS.map((look: JobReadinessLook) => (
-          <JobReadinessButton key={look.step} {...look} onGoToStep={goToStep} />
+          <JobReadinessButton
+            key={look.step}
+            {...look}
+            isTabStop={look.step === tabStopStep}
+            onGoToStep={goToStep}
+            onFocusStep={setFocusedStep}
+          />
         ))}
       </ol>
       {nextLook && (
