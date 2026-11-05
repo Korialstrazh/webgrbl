@@ -506,6 +506,10 @@ MATERIAL_SECTION_PRESETS_NO_MATERIAL;Choose a material to see its presets
 MATERIAL_SECTION_PRESETS_NONE;No presets yet for {{name}}, {{thickness}} mm on {{machine}}
 MATERIAL_SECTION_PRESETS_one;{{count}} preset for {{name}}, {{thickness}} mm on {{machine}}
 MATERIAL_SECTION_PRESETS_other;{{count}} presets for {{name}}, {{thickness}} mm on {{machine}}
+NARROW_REGION_BAR_LABEL;Workbench region
+NARROW_REGION_BED;Bed
+NARROW_REGION_DESIGN;Design
+NARROW_REGION_JOB;Job
 OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visible part.
 OBJECT_WARNING_IMAGE;Images are not engraved yet.
 OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.

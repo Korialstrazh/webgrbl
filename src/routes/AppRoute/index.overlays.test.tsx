@@ -83,6 +83,16 @@ const getOverlayRoot = (selector: string): HTMLElement => {
   return overlayRoot;
 };
 
+const getNarrowRegionsHost = (): HTMLElement => {
+  const narrowRegionsHost: HTMLElement | null = screen.getByRole('main').parentElement?.parentElement ?? null;
+
+  if (!narrowRegionsHost) {
+    throw new Error('No narrow regions box');
+  }
+
+  return narrowRegionsHost;
+};
+
 describe.each([
   {
     overlayName: 'dialog',
@@ -109,8 +119,11 @@ describe.each([
     const stopButton: HTMLElement = screen.getByRole('button', { name: STOP_LABEL });
 
     expect(screen.getByRole('dialog')).toContainElement(screen.getByText(title));
-    expect(screen.getByRole('main')).toContainElement(overlayRoot);
-    expect(screen.getByRole('main')).toContainElement(overlayRoot.querySelector(maskSelector));
+    // Wide, they fill the bed; narrow, the box of the shown region, whichever that is.
+    const overlayHost: HTMLElement = isWide ? screen.getByRole('main') : getNarrowRegionsHost();
+
+    expect(overlayHost).toContainElement(overlayRoot);
+    expect(overlayHost).toContainElement(overlayRoot.querySelector(maskSelector));
     expect(overlayRoot).not.toContainElement(stopButton);
     expect(stopButton).toBeEnabled();
 

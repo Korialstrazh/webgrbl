@@ -11,8 +11,9 @@
 import type { Ref } from 'react';
 
 export interface BedPanelProps {
-  /** Receives the bed region element below the bed header, which dialogs and drawers render into. */
-  hostRef: Ref<HTMLDivElement>;
+  /** Receives the bed region element below the bed header, which dialogs and drawers render into; in a narrow window the
+   * workbench gives them a larger box instead. */
+  hostRef?: Ref<HTMLDivElement>;
   /** Whether the window is wide; narrower, the toasts are pinned to the window. */
   isWide: boolean;
 }

@@ -17,14 +17,28 @@
   overflow: auto;
 }
 
-// Below the wide breakpoint the regions stack and scroll together; 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+// Below the wide breakpoint one region shows at a time and scrolls on its own; 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
 @media (width < 80rem) {
   .appRoute {
     --design-panel-width: auto;
     --machine-panel-width: auto;
-
-    .regions {
-      display: block;
-    }
   }
+}
+
+// Holds the dialogs and drawers too, so its position makes them fill this box.
+.narrowRegions {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.narrowRegion {
+  height: 100%;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.hiddenRegion {
+  display: none;
 }

@@ -39,7 +39,7 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
     >
       <div ref={cardsRef} className={isCardsCutOff ? [styles.cards, styles.cardsCutOff].join(' ') : styles.cards}>
         <MachineStatusCard />
-        <JobCard />
+        <JobCard isStartShown={isWide} />
         <MoveCard />
         <LaserCard />
       </div>
