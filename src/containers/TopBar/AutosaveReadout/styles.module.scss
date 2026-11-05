@@ -11,26 +11,25 @@
   white-space: nowrap;
 }
 
-.dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
+.icon {
+  display: inline-flex;
+  font-size: 1rem;
 }
 
 .saved {
-  background-color: var(--color-success);
+  color: var(--color-success);
 }
 
 .saving {
-  background-color: var(--color-warning);
+  color: var(--color-warning);
 }
 
 .unsaved {
-  background-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
-// Below 62.5rem only the coloured dot stays on screen, so Import SVG and the connection pill keep their room; the label
-// is still read out. 62.5rem must match the TopBar styles.
+// Below 62.5rem only the coloured icon stays on screen, so Import SVG and the connection pill keep their room; its
+// tooltip and accessible name still give the state. 62.5rem must match the TopBar styles.
 @media (width < 62.5rem) {
   .autosave {
     margin-right: 0;

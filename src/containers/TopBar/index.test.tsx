@@ -481,5 +481,16 @@ describe(TopBar.name, () => {
 
       expect(screen.getByRole('status')).toHaveTextContent(expectedText);
     });
+
+    it('names the save state on the readout itself, so the icon alone still has a meaning', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.SAVED }));
+      });
+
+      expect(screen.getByRole('status', { name: AUTOSAVE_TEXT })).toBeInTheDocument();
+    });
   });
 });

@@ -28,3 +28,23 @@
 .renameBox {
   width: 14rem;
 }
+
+// In a narrow bar the app name is hidden, so the project name takes its place and may wrap onto a second line.
+@media (width < 62.5rem) {
+  .nameButton {
+    max-width: 100%;
+    font-size: 0.875rem;
+    line-height: 1.25;
+    color: var(--color-text);
+    text-align: start;
+    white-space: normal;
+
+    > span {
+      display: -webkit-box;
+      overflow: hidden;
+      white-space: normal;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+  }
+}
