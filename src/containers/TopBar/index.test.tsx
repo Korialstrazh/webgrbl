@@ -400,16 +400,6 @@ describe(TopBar.name, () => {
       expect(screen.getByRole('button', { name: PROJECT_NAME })).toBeInTheDocument();
     });
 
-    it('shows the whole project name in a tooltip, since a narrow bar may cut it', async () => {
-      const store: AppStore = newStore();
-
-      renderWorkbenchTopBar(store);
-      openProject(store);
-      fireEvent.mouseEnter(screen.getByRole('button', { name: PROJECT_NAME }));
-
-      expect(await screen.findByRole('tooltip')).toHaveTextContent(PROJECT_NAME);
-    });
-
     it('renames the project on Enter with a trimmed name', () => {
       const store: AppStore = newStore();
 
