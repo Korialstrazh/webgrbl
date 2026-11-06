@@ -72,7 +72,7 @@
 
 // A decoration only: the Move buttons are the keyboard path.
 .handle {
-  padding: 0 var(--space-1);
+  padding: 0 0.125rem;
   color: var(--color-text-muted);
   font-size: 1rem;
   cursor: grab;
@@ -89,7 +89,7 @@
   justify-content: stretch;
   height: auto;
   min-width: 0;
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-1);
   overflow: hidden;
   text-align: left;
   white-space: normal;

@@ -29,6 +29,7 @@ const CELL_HINT_KEYS: readonly string[] = [
 const CELL_ICONS: readonly ReactNode[] = [<ThunderboltOutlined />, <DashboardOutlined />, <SyncOutlined />];
 // Each value has its own glyph colour, so power, speed and passes tell apart at a glance.
 const CELL_CLASS_NAMES: readonly (string | undefined)[] = [styles.powerCell, styles.speedCell, styles.passesCell];
+const SPEED_CELL_INDEX = 1;
 
 interface LayerValueCellsProps {
   settings: LayerSummarySettings;
@@ -47,6 +48,14 @@ export const LayerValueCells = ({ settings, className }: LayerValueCellsProps): 
           <span className={[styles.cell, CELL_CLASS_NAMES[cellIndex]].join(' ')} aria-hidden>
             {CELL_ICONS[cellIndex]}
             {cellText}
+            {cellIndex === SPEED_CELL_INDEX && (
+              // Only the speed has a unit of its own: mm over min as a small stacked fraction, narrow enough for one
+              // line. Power has its % and passes their x in the value text.
+              <span className={styles.unit}>
+                <span className={styles.unitLength}>{t(DEFAULT.LAYERS_CELL_SPEED_UNIT_LENGTH)}</span>
+                <span>{t(DEFAULT.LAYERS_CELL_SPEED_UNIT_PER)}</span>
+              </span>
+            )}
           </span>
         </Tooltip>
       ))}

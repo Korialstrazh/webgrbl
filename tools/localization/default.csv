@@ -335,9 +335,14 @@ LAYERS_CELL_POWER;{{power}} %
 LAYERS_CELL_POWER_HINT;Power (%)
 LAYERS_CELL_SPEED;{{speed}}
 LAYERS_CELL_SPEED_HINT;Speed (mm/min)
+LAYERS_CELL_SPEED_UNIT_LENGTH;mm
+LAYERS_CELL_SPEED_UNIT_PER;min
 LAYERS_COLOUR_HINT;Layer colour
 LAYERS_DRAG_HINT;Drag to reorder
 LAYERS_EMPTY_HINT;No layers yet
+LAYERS_LEGEND_PASSES;Passes
+LAYERS_LEGEND_POWER;Power
+LAYERS_LEGEND_SPEED;Speed
 LAYERS_LIST_LABEL;Project layers
 LAYERS_MOVE_DOWN;Move {{name}} down
 LAYERS_MOVE_UP;Move {{name}} up
@@ -623,6 +628,7 @@ PALETTE_RESET_CONFIRM;Replace the whole palette with the default colours? Your c
 PALETTE_RESET_LABEL;Reset to default colours
 PALETTE_RESET_OK;Yes, reset
 PALETTE_SAVE;Save
+PALETTE_SHADING_BUILT_IN;Built-in
 PALETTE_SHADING_COLOUR_NOTE;The shading colour is fixed: it covers every grey from black to white.
 PALETTE_SHADING_LOCKED;Shading is built in and cannot be deleted.
 PALETTE_TITLE;Palette

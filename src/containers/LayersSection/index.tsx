@@ -25,6 +25,7 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { LayerToggled, LayersReordered, selectProjectLayers } from '../../utils/states/project.document.state';
 import { LayerSettingsOpenChanged, selectOpenLayerSettingsKey } from '../../utils/states/ui.workbench.state';
+import { LayerValueLegend } from '../../views/LayerValueLegend';
 import { LayerSettingsDrawer } from '../LayerSettingsDrawer';
 import type { LayersSectionProps } from './interfaces/LayersSectionProps';
 import { LayerRow } from './LayerRow';
@@ -111,30 +112,33 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
 
   return (
     <>
-      <ul className={styles.list} aria-label={t(DEFAULT.LAYERS_LIST_LABEL)}>
-        {layers.map((layer: ProjectLayer, layerIndex: number) => {
-          const layerKey: string = getLayerKey(layer);
+      <div className={styles.layerList}>
+        <LayerValueLegend />
+        <ul className={styles.list} aria-label={t(DEFAULT.LAYERS_LIST_LABEL)}>
+          {layers.map((layer: ProjectLayer, layerIndex: number) => {
+            const layerKey: string = getLayerKey(layer);
 
-          return (
-            <LayerRow
-              key={layerKey}
-              layer={layer}
-              layerEntry={getLayerPaletteEntry(layer, paletteEntries)}
-              isFirst={layerIndex === 0}
-              isLast={layerIndex === layers.length - 1}
-              isOpen={layerKey === openLayerKey}
-              onOpen={() => setOpenLayerKey(layerKey)}
-              openButtonRef={(openButton: HTMLButtonElement | null) => registerOpenButton(layerKey, openButton)}
-              onToggle={(enabled: boolean) => dispatch(new LayerToggled({ layerKey, enabled }))}
-              onMoveUp={() => moveLayerToIndex(layerKey, layerIndex - 1)}
-              onMoveDown={() => moveLayerToIndex(layerKey, layerIndex + 1)}
-              onDragStart={(dragEvent: DragEvent<HTMLLIElement>) => startDrag(dragEvent, layerKey)}
-              onDragEnd={() => setDraggedLayerKey(undefined)}
-              onDrop={() => dropOnLayer(layerKey)}
-            />
-          );
-        })}
-      </ul>
+            return (
+              <LayerRow
+                key={layerKey}
+                layer={layer}
+                layerEntry={getLayerPaletteEntry(layer, paletteEntries)}
+                isFirst={layerIndex === 0}
+                isLast={layerIndex === layers.length - 1}
+                isOpen={layerKey === openLayerKey}
+                onOpen={() => setOpenLayerKey(layerKey)}
+                openButtonRef={(openButton: HTMLButtonElement | null) => registerOpenButton(layerKey, openButton)}
+                onToggle={(enabled: boolean) => dispatch(new LayerToggled({ layerKey, enabled }))}
+                onMoveUp={() => moveLayerToIndex(layerKey, layerIndex - 1)}
+                onMoveDown={() => moveLayerToIndex(layerKey, layerIndex + 1)}
+                onDragStart={(dragEvent: DragEvent<HTMLLIElement>) => startDrag(dragEvent, layerKey)}
+                onDragEnd={() => setDraggedLayerKey(undefined)}
+                onDrop={() => dropOnLayer(layerKey)}
+              />
+            );
+          })}
+        </ul>
+      </div>
       <LayerSettingsDrawer
         layer={openLayer}
         onClose={closeLayerSettings}

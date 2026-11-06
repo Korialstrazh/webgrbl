@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { getLayerKeysWithMovedLayer } from '../../../utils/layers/get.layer.keys.with.moved.layer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntry';
+import { LayerValueLegend } from '../../../views/LayerValueLegend';
 import { PALETTE_DRAG_DATA_TYPE, PALETTE_DRAG_EFFECT } from '../palette.dialog.constants';
 import type { PaletteEntryListProps } from './interfaces/PaletteEntryListProps';
 import { PaletteEntryRow } from './PaletteEntryRow';
@@ -60,6 +61,7 @@ export const PaletteEntryList = (props: PaletteEntryListProps): ReactNode => {
 
   return (
     <div className={styles.paletteEntryList}>
+      <LayerValueLegend />
       <ul className={styles.list} aria-label={t(DEFAULT.PALETTE_LIST)}>
         {entries.map((entry: PaletteEntry, entryIndex: number) => (
           <PaletteEntryRow

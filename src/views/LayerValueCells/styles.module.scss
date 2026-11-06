@@ -5,9 +5,9 @@
 .cells {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--space-1);
+  gap: 0 0.375rem;
   color: var(--color-text);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -19,7 +19,7 @@
 
   // Glyphs a size above the digits, each in its own colour, so they read as icons while the number reads first.
   :global(.anticon) {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
   }
 }
 
@@ -35,9 +35,24 @@
   color: var(--color-success);
 }
 
-// Wide enough for "100 %" and "12000", so the values line up from row to row.
-.cell:not(:last-of-type) {
-  min-width: 3.25rem;
+// Wide enough for "100 %", so the speeds line up from row to row.
+.powerCell {
+  min-width: 2.75rem;
+}
+
+// The speed unit, mm over min as a small muted fraction, so the number reads first and the row stays on one line.
+.unit {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-inline-start: 0.125rem;
+  color: var(--color-text-muted);
+  font-size: 0.5625rem;
+  line-height: 1;
+}
+
+.unitLength {
+  border-bottom: 1px solid currentcolor;
 }
 
 .summaryText {

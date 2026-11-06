@@ -34,3 +34,14 @@ describe(LayerValueCells.name, () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Power (%)');
   });
 });
+
+describe(`${LayerValueCells.name} speed unit`, () => {
+  it('shows a small mm over min unit after the speed', () => {
+    render(
+      <LayerValueCells settings={{ mode: LAYER_MODE.LINE, maxPowerPercent: 100, speedMmPerMin: 300, passes: 3 }} />,
+    );
+
+    expect(screen.getByText('mm')).toBeInTheDocument();
+    expect(screen.getByText('min')).toBeInTheDocument();
+  });
+});

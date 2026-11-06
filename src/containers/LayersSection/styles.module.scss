@@ -1,3 +1,10 @@
+// The value key sits just above the rows it explains.
+.layerList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
 .list {
   display: flex;
   flex-direction: column;
