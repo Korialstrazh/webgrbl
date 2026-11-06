@@ -93,6 +93,8 @@
   }
 }
 
+// 13 px at medium weight in the muted colour (8.6:1), so the step names read as easily as the buttons below.
 .caption {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
