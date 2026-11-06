@@ -24,12 +24,14 @@ export const MACHINE_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
     labelKey: DEFAULT.MACHINE_PROFILES_FIELD_MAX_POWER,
     iconComponent: <ThunderboltOutlined />,
     unitKey: DEFAULT.FIELD_UNIT_WATTS,
+    captionKey: DEFAULT.MACHINE_PROFILES_FIELD_MAX_POWER_CAPTION,
   },
   {
     field: 'jogFeedRate',
     labelKey: DEFAULT.MACHINE_PROFILES_FIELD_JOG_FEED_RATE,
     iconComponent: <DragOutlined />,
     unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
+    captionKey: DEFAULT.MACHINE_PROFILES_FIELD_JOG_FEED_RATE_CAPTION,
   },
 ];
 
