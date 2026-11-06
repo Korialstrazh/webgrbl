@@ -1,8 +1,9 @@
 /**
  * An antd Drawer rendered into the bed region, with a clear mask over the bed only, so the machine panel and STOP stay
  * visible and clickable and the bed stays in view; a click on the bed still closes the drawer. It registers as an open
- * overlay while shown, so Escape closes it instead of stopping the machine. Features open drawers only through this
- * wrapper, never through a raw antd Drawer.
+ * overlay while shown, so Escape closes it instead of stopping the machine. While a left drawer is open it sets its
+ * width on the host, so on a wide window the bed moves aside instead of being covered. Features open drawers only
+ * through this wrapper, never through a raw antd Drawer.
  *
  * @author michael.morosov
  *
@@ -12,9 +13,11 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Drawer } from 'antd';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { BED_REGION_DRAWER_INSET_PROPERTY } from '../../utils/bed/bed.region.drawer.constants';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
+import { getBedRegionDrawerInset } from '../../utils/bed/get.bed.region.drawer.inset';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
 import type { BedRegionDrawerProps } from './interfaces/BedRegionDrawerProps';
 import styles from './styles.module.scss';
@@ -25,7 +28,19 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
   // Without the bed region the drawer would fall back to the whole window, over STOP, so it waits for the region.
   const isShown: boolean = isOpen && Boolean(bedRegionHost);
 
+  const insetValue: string | undefined = getBedRegionDrawerInset(drawerProps.placement, drawerProps.size);
+
   useOverlayRegistration(overlayIdPrefix, isShown);
+
+  useEffect(() => {
+    if (!bedRegionHost || !isShown || !insetValue) {
+      return undefined;
+    }
+
+    bedRegionHost.style.setProperty(BED_REGION_DRAWER_INSET_PROPERTY, insetValue);
+
+    return () => bedRegionHost.style.removeProperty(BED_REGION_DRAWER_INSET_PROPERTY);
+  }, [bedRegionHost, isShown, insetValue]);
 
   if (!bedRegionHost) {
     return null;

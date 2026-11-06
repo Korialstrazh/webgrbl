@@ -132,6 +132,16 @@
   position: relative;
   flex: 1 1 auto;
   min-height: 12rem;
+  // Matches the antd drawer slide.
+  transition: margin-inline-start 0.3s ease;
+}
+
+// On a wide window an open left drawer (BED_REGION_DRAWER_INSET_PROPERTY, set on this host) pushes the bed aside, so
+// the rulers stay whole and the object being edited stays in view. Narrow, the drawer still covers the region.
+@media (width >= 80rem) {
+  .bed {
+    margin-inline-start: var(--bed-region-drawer-inset, 0);
+  }
 }
 
 // The profile hint while the bed is empty: a small badge in the corner of the drawing, never over the work.
