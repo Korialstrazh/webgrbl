@@ -39,7 +39,9 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
 
     bedRegionHost.style.setProperty(BED_REGION_DRAWER_INSET_PROPERTY, insetValue);
 
-    return () => bedRegionHost.style.removeProperty(BED_REGION_DRAWER_INSET_PROPERTY);
+    return (): void => {
+      bedRegionHost.style.removeProperty(BED_REGION_DRAWER_INSET_PROPERTY);
+    };
   }, [bedRegionHost, isShown, insetValue]);
 
   if (!bedRegionHost) {
