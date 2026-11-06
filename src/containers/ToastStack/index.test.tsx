@@ -130,7 +130,7 @@ describe(ToastStack.name, () => {
   });
 });
 
-describe('ToastStack undo action', () => {
+describe(`${ToastStack.name} undo action`, () => {
   const showUndoToast = (store: AppStore): void => {
     act(() => {
       store.dispatch(new ToastShown({

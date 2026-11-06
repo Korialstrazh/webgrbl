@@ -54,7 +54,7 @@ describe(getAppModalWidth.name, () => {
   });
 });
 
-describe('AppModal focus', () => {
+describe(`${AppModal.name} focus`, () => {
   it('moves the focus to the first field of the dialog once it has opened', async () => {
     render(
       <Provider store={newStore()}>

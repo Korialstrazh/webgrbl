@@ -16,7 +16,7 @@ const renderWorkbench = async (store: AppStore): Promise<void> => {
   await screen.findByRole('main');
 };
 
-describe('AppRoute in a narrow window', () => {
+describe(`${AppRoute.name} in a narrow window`, () => {
   it('pins one Start beside Stop, and it keeps its guard while no laser is connected', async () => {
     setMatchMediaMatches(false);
     await renderWorkbench(newStore());

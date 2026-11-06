@@ -253,7 +253,7 @@ describe(fitsSampleJob.name, () => {
   });
 });
 
-describe('getSampleJobObject placement of repeats', () => {
+describe(`${getSampleJobObject.name} placement of repeats`, () => {
   const addSamples = (machineArea: ToolpathMachineArea, count: number): ProjectObject[] => {
     const objects: ProjectObject[] = [];
 
