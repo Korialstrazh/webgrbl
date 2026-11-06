@@ -69,7 +69,10 @@ export const PaletteEntryRow = ({
         <span className={styles.swatch}>
           <LayerSwatch colour={entry.colour} isShading={isShading} />
         </span>
-        <span className={styles.name} title={entryName}>{entryName}</span>
+        <span className={styles.nameCell}>
+          <span className={styles.name} title={entryName}>{entryName}</span>
+          {isShading && <span className={styles.builtInTag}>{t(DEFAULT.PALETTE_SHADING_BUILT_IN)}</span>}
+        </span>
         <span className={styles.modeIcon} aria-hidden><LayerModeIcon mode={entry.mode} /></span>
         <LayerValueCells className={styles.summary} settings={entry} />
       </Button>

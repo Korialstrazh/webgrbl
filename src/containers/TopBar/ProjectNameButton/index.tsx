@@ -10,7 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { EditOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -52,14 +52,17 @@ export const ProjectNameButton = (): ReactNode => {
   }
 
   return (
-    <Button
-      className={styles.nameButton}
-      type={ANTD_BUTTON_TYPE_TEXT}
-      disabled={!projectId}
-      onClick={() => setIsRenaming(true)}
-    >
-      {shownName}
-      <EditOutlined className={styles.pencil} aria-hidden />
-    </Button>
+    // The name stays on one line and may be cut, so the tooltip shows it whole.
+    <Tooltip title={shownName}>
+      <Button
+        className={styles.nameButton}
+        type={ANTD_BUTTON_TYPE_TEXT}
+        disabled={!projectId}
+        onClick={() => setIsRenaming(true)}
+      >
+        {shownName}
+        <EditOutlined className={styles.pencil} aria-hidden />
+      </Button>
+    </Tooltip>
   );
 };

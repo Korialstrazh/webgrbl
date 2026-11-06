@@ -98,8 +98,6 @@ export const BedColourPicker = (): ReactNode => {
               style={{ backgroundColor: bedColour }}
             />
           </span>
-          {/* A caption under the glyphs, like the view switch beside it, so the swatch says what it colours. */}
-          <span className={styles.caption} aria-hidden="true">{t(DEFAULT.BED_COLOUR_CAPTION)}</span>
         </Button>
       </Tooltip>
     </ColorPicker>

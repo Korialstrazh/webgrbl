@@ -49,14 +49,18 @@
   font-size: 1rem;
 }
 
-.travelSwitch {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--control-height);
-  gap: var(--space-2);
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
-  white-space: nowrap;
-  cursor: pointer;
+.travelToggle:global(.ant-btn) {
+  height: auto;
+  min-height: 2.25rem;
+  padding: 0.125rem var(--space-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+// Pressed: the accent tint and accent glyph of a selected segment, so on and off read at a glance.
+.travelToggle.travelToggleOn:global(.ant-btn),
+.travelToggle.travelToggleOn:global(.ant-btn:not(:disabled):hover) {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-tint);
+  color: var(--color-accent);
 }

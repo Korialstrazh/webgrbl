@@ -12,7 +12,6 @@ BED_ARIA_HEAD_OUTSIDE;Laser head at X {{x}}, Y {{y}} (work coordinates), outside
 BED_ARIA_LABEL;Laser bed, {{width}} by {{height}} mm
 BED_ARIA_WORK_ORIGIN;Work zero at X {{x}}, Y {{y}} (work coordinates)
 BED_ARIA_WORK_ORIGIN_OUTSIDE;Work zero at X {{x}}, Y {{y}} (work coordinates), outside the bed
-BED_COLOUR_CAPTION;Colour
 BED_COLOUR_DARK_NOTE;On a dark bed, artwork gets a thin light rim so black stays visible.
 BED_COLOUR_LABEL;Bed colour
 BED_COLOUR_PRESET_CHARCOAL;Charcoal (default)

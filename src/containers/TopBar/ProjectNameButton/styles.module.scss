@@ -29,23 +29,12 @@
   width: 14rem;
 }
 
-// In a narrow bar the app name is hidden, so the project name takes its place on up to two lines, so a usual name
-// such as "Untitled project" reads whole; only a longer one is cut with an ellipsis.
+// In a narrow bar the app name is hidden, so the project name takes its place, a size larger and in the main text
+// colour, still on one line: a long name is cut with an ellipsis and its tooltip shows it whole.
 @media (width < 62.5rem) {
   .nameButton {
     max-width: min(10rem, 100%);
     font-size: 0.875rem;
-    line-height: 1.25;
     color: var(--color-text);
-    text-align: start;
-
-    > span {
-      display: -webkit-box;
-      white-space: normal;
-      overflow-wrap: anywhere;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-    }
   }
 }

@@ -1,31 +1,9 @@
-@use '../../styles/accessibility' as accessibility;
-
-// As tall as the zoom buttons it sits beside.
+// As tall as the zoom buttons it sits beside, and like them a glyph only: the bucket and swatch say what it does, the
+// name is in the tooltip and read out.
 .bedColourButton:global(.ant-btn) {
   min-width: 2rem;
   height: 2.5rem;
-  flex-direction: column;
   padding-inline: var(--space-2);
-  gap: 0.125rem;
-}
-
-.caption {
-  color: var(--color-text);
-  font-size: 0.875rem;
-  line-height: 1;
-}
-
-// The Toolpath view adds its own options to the toolbar, so the caption goes there too and the bucket and swatch speak
-// for themselves; the name stays read out. 'toolpath' is BED_VIEW_MODE.TOOLPATH, set on the bed header by BedPanel.
-:global([data-bed-view='toolpath']) .caption {
-  @include accessibility.visually-hidden;
-}
-
-// At phone width the toolbar has no room for the caption; the bucket and swatch stay, and the name stays read out.
-@media (width < 30rem) {
-  .caption {
-    @include accessibility.visually-hidden;
-  }
 }
 
 .glyphs {

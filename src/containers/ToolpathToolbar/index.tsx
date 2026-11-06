@@ -12,9 +12,10 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { NodeIndexOutlined } from '@ant-design/icons';
-import { Segmented, Switch, Tooltip } from 'antd';
+import { Button, Segmented, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayModeOption } from './interfaces/ToolpathDisplayModeOption';
@@ -52,14 +53,20 @@ export const ToolpathToolbar = ({
         value={displayMode}
         onChange={onDisplayModeChange}
       />
+      {/* A toggle button shaped like a segment: icon over its word, the accent tint while travel moves are shown. */}
       <Tooltip title={t(DEFAULT.TOOLPATH_SHOW_TRAVEL)}>
-        <label className={styles.travelSwitch}>
+        <Button
+          className={[styles.travelToggle, isTravelShown ? styles.travelToggleOn : undefined].join(' ')}
+          type={ANTD_BUTTON_TYPE_TEXT}
+          aria-pressed={isTravelShown}
+          aria-label={t(DEFAULT.TOOLPATH_SHOW_TRAVEL)}
+          onClick={() => onTravelShownChange(!isTravelShown)}
+        >
           <span className={styles.travelCaption} aria-hidden>
             <NodeIndexOutlined className={styles.travelIcon} />
             <span className={styles.caption}>{t(DEFAULT.TOOLPATH_SHOW_TRAVEL_CAPTION)}</span>
           </span>
-          <Switch checked={isTravelShown} onChange={onTravelShownChange} aria-label={t(DEFAULT.TOOLPATH_SHOW_TRAVEL)} />
-        </label>
+        </Button>
       </Tooltip>
     </div>
   );

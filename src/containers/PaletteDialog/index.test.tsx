@@ -278,6 +278,8 @@ describe(PaletteDialog.name, () => {
     expect(within(getRow(SHADING_NAME_PATTERN)).queryByRole('button', { name: DELETE_NAME_PATTERN }))
       .not.toBeInTheDocument();
     expect(within(getRow(SHADING_NAME_PATTERN)).getByRole('note', { name: SHADING_LOCKED_TEXT })).toBeInTheDocument();
+    // A single tag on the page, and it sits in the shading row.
+    expect(screen.getByText('Built-in').closest('li')).toHaveTextContent(SHADING_NAME_PATTERN);
     expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
     expect(within(getRow(CUT_NAME_PATTERN)).queryByRole('note')).not.toBeInTheDocument();
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).not.toBeInTheDocument();
