@@ -1,7 +1,7 @@
 /**
- * The toasts on screen, newest last. Each one can be dismissed; warnings and errors are announced as alerts. The stack
- * is pinned bottom-centre over the status strip, clear of the bed drawing and the region switcher; in a narrow window it
- * is lifted above the sticky STOP bar, and extra toasts scroll inside it.
+ * The toasts on screen, newest last. Each one can be dismissed; warnings and errors are announced as alerts. The
+ * stack is pinned bottom-centre over the status strip, clear of the bed drawing and the region switcher; in a narrow
+ * window it is lifted above the sticky STOP bar, and extra toasts scroll inside it.
  *
  * @author michael.morosov
  *

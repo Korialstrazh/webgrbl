@@ -1,8 +1,8 @@
 /**
  * The sizes the workbench panels open with. With stored sizes each panel takes its stored share of the workbench width,
  * but a side panel whose share would be narrower than its minimum or wider than its maximum on this screen is kept at
- * that limit, and the bed takes the difference. Without stored sizes the side panels open at their default widths, which
- * grow in proportion to the window from 1600 px up to their maximum widths, and the bed takes the rest.
+ * that limit, and the bed takes the difference. Without stored sizes the side panels open at their default widths,
+ * which grow in proportion to the window from 1600 px up to their maximum widths, and the bed takes the rest.
  *
  * @author michael.morosov
  *
@@ -64,7 +64,11 @@ export const getPanelDefaultSizes = (request: PanelDefaultSizesRequest): PanelDe
     const roomyMinWidthPx: number = ROOMY_WORKBENCH_MIN_WIDTH_REM * rootFontSizePx;
 
     if (workbenchWidthPx < roomyMinWidthPx) {
-      return [DESIGN_PANEL_DEFAULT_WIDTH_REM * rootFontSizePx, undefined, MACHINE_PANEL_DEFAULT_WIDTH_REM * rootFontSizePx];
+      return [
+        DESIGN_PANEL_DEFAULT_WIDTH_REM * rootFontSizePx,
+        undefined,
+        MACHINE_PANEL_DEFAULT_WIDTH_REM * rootFontSizePx,
+      ];
     }
 
     const growth: number = workbenchWidthPx / roomyMinWidthPx;
