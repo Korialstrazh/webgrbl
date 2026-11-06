@@ -314,6 +314,8 @@ describe(BurnPreviewPane.name, () => {
     renderPane(store);
 
     expect(screen.getByText(BUILDING_TEXT)).toBeInTheDocument();
+    expect(screen.getByText(BUILDING_TEXT).closest('[role="status"]')?.querySelector('.ant-skeleton-active'))
+      .toBeInTheDocument();
 
     act(() => {
       store.dispatch(new BurnModelFailed());

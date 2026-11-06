@@ -9,12 +9,12 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Alert, Spin } from 'antd';
+import { Alert, Skeleton, Spin } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { ANTD_ALERT_TYPE_WARNING } from '../../../utils/antd.constants';
+import { ANTD_ALERT_TYPE_WARNING, ANTD_SPIN_SIZE_SMALL } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import {
   BURN_PREVIEW_EMPTY_STATE,
@@ -23,6 +23,7 @@ import {
 import type { BurnPreviewEmptyState } from '../../../utils/states/burn.preview.empty.state.constants';
 import { selectBurnPreviewEmptyState } from '../../../utils/states/burn.preview.selectors';
 import { selectMaterials } from '../../../utils/states/material.state';
+import { CubeIcon } from '../../../views/CubeIcon';
 import { EmptyState } from '../../../views/EmptyState';
 import { MaterialSheetIcon } from '../../../views/MaterialSheetIcon';
 import { MaterialDialog } from '../../MaterialDialog';
@@ -48,8 +49,13 @@ export const BurnPreviewStateMessage = ({ isSceneUnavailable }: BurnPreviewState
     if (emptyState === BURN_PREVIEW_EMPTY_STATE.BUILDING) {
       return (
         <div className={styles.building} role="status">
-          <Spin aria-hidden="true" />
-          <span>{t(DEFAULT.BURN_PREVIEW_BUILDING)}</span>
+          <Skeleton.Node active className={styles.buildingPlate}>
+            <CubeIcon className={styles.buildingIcon} aria-hidden />
+          </Skeleton.Node>
+          <span className={styles.buildingLabel}>
+            <Spin size={ANTD_SPIN_SIZE_SMALL} aria-hidden="true" />
+            {t(DEFAULT.BURN_PREVIEW_BUILDING)}
+          </span>
         </div>
       );
     }

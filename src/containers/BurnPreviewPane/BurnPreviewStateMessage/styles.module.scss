@@ -4,12 +4,34 @@
   max-width: calc(100% - 2 * var(--space-3));
 }
 
+// A shimmering plate with the 3D cube on it, so the wait reads as loading at once rather than as an empty view.
 .building {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.buildingPlate {
+  &:global(.ant-skeleton-element .ant-skeleton-node) {
+    width: 12rem;
+    height: 8rem;
+    border-radius: var(--radius-lg);
+  }
+}
+
+.buildingIcon {
+  color: var(--color-text-muted);
+  font-size: 2.5rem;
+}
+
+.buildingLabel {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-2);
+  font-size: 0.875rem;
 }
 
 // The same card the empty bed shows, so the 3D view without a material reads as a next step, not as a blank view.

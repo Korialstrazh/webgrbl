@@ -21,8 +21,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Layout } from 'antd';
-import { useState } from 'react';
-import type { ReactNode } from 'react';
+import { useRef, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
@@ -45,6 +45,7 @@ import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.
 import { BedEmptyCard } from '../BedEmptyCard';
 import { BedObjects } from '../BedObjects';
 import { BedViewport } from '../BedViewport';
+import type { KeptBedViewportRef } from '../BedViewport/interfaces/KeptBedViewportRef';
 import { BurnPreviewPane } from '../BurnPreviewPane';
 import { BurnPreviewToolbar } from '../BurnPreviewToolbar';
 import { SimulationPlaybackBar } from '../SimulationPlaybackBar';
@@ -70,6 +71,16 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const { t } = useTranslation();
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
   const dimensions: BedDimensions = useBedDimensions();
+  const viewportKey: string = [dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR);
+  // The zoom and pan of the 2D views, kept while the 3D view is shown; a new bed size starts fitted again.
+  const keptViewportRef: KeptBedViewportRef = useRef<KeptBedViewportRef['current']>(undefined);
+  const keptViewportKeyRef: RefObject<string> = useRef<string>(viewportKey);
+
+  if (keptViewportKeyRef.current !== viewportKey) {
+    keptViewportKeyRef.current = viewportKey;
+    keptViewportRef.current = undefined;
+  }
+
   const bedColour: string = useSelector(selectBedColour);
   const bedSurfaceStyle: BedSurfaceStyle = { '--color-bed-surface': bedColour };
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
@@ -136,10 +147,11 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           ) : (
             <BedViewport
             // A new bed size starts a new view, fitted to the new bed.
-              key={[dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR)}
+              key={viewportKey}
               dimensions={dimensions}
               isWide={isWide}
               controlsHost={viewControlsHost}
+              keptViewportRef={keptViewportRef}
               // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
               // add a second crosshair.
               headPosition={isToolpathView ? undefined : headBedPoint}

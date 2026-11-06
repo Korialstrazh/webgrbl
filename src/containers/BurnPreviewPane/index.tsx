@@ -19,6 +19,8 @@ import { ANTD_ALERT_TYPE_WARNING } from '../../utils/antd.constants';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectCurrentBurnModel } from '../../utils/states/burn.model.state';
+import { BURN_PREVIEW_EMPTY_STATE } from '../../utils/states/burn.preview.empty.state.constants';
+import { selectBurnPreviewEmptyState } from '../../utils/states/burn.preview.selectors';
 import { BurnSceneViewControls } from '../../views/BurnSceneViewControls';
 import { BurnPartLiftControl } from './BurnPartLiftControl';
 import { BurnPreviewStateMessage } from './BurnPreviewStateMessage';
@@ -38,6 +40,8 @@ export const BurnPreviewPane = (): ReactNode => {
   const model: BurnModel | undefined = useSelector(selectCurrentBurnModel);
   const isSceneUnavailable: boolean = isSceneFailed
     || runtimeLoad.status === BURN_SCENE_RUNTIME_LOAD_STATUS.FAILED;
+  // While the model builds, its placeholder already reads as loading; a second spinner would only repeat it.
+  const isModelBuilding: boolean = useSelector(selectBurnPreviewEmptyState) === BURN_PREVIEW_EMPTY_STATE.BUILDING;
 
   return (
     <div className={styles.burnPreviewPane}>
@@ -47,7 +51,7 @@ export const BurnPreviewPane = (): ReactNode => {
         {isSceneUnavailable && (
           <Alert className={styles.message} type={ANTD_ALERT_TYPE_WARNING} title={t(DEFAULT.BURN_PREVIEW_NO_WEBGL)} />
         )}
-        {!isSceneUnavailable && runtimeLoad.status === BURN_SCENE_RUNTIME_LOAD_STATUS.LOADING && (
+        {!isSceneUnavailable && !isModelBuilding && runtimeLoad.status === BURN_SCENE_RUNTIME_LOAD_STATUS.LOADING && (
           <div className={styles.loading} role="status">
             <Spin aria-hidden="true" />
             <span>{t(DEFAULT.BURN_PREVIEW_LOADING)}</span>

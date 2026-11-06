@@ -22,6 +22,7 @@ import type {
   PopoverProps,
   ProgressProps,
   SegmentedProps,
+  SpinProps,
   SplitterProps,
   SwitchProps,
   TableColumnType,
@@ -109,6 +110,9 @@ export const ANTD_SPLITTER_ORIENTATION_VERTICAL: SplitterProps['orientation'] = 
 
 /** The compact segmented control size, for secondary choices next to larger controls. */
 export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
+
+/** The small spinner, for a spinner inline with a line of text. */
+export const ANTD_SPIN_SIZE_SMALL: SpinProps['size'] = 'small';
 
 /** The compact table size, for a table beside an edit panel. */
 export const ANTD_TABLE_SIZE_SMALL: TableProps['size'] = 'small';

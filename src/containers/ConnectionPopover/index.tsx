@@ -98,6 +98,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
   const isLinkLocked: boolean = isConnected || isConnecting;
   const contentRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const wasConnectingRef: RefObject<boolean> = useRef<boolean>(isConnecting);
+  const isOpenedByPointerRef: RefObject<boolean> = useRef<boolean>(false);
   const portSelectId: string = useId();
   const baudSelectId: string = useId();
   const portOptions: SelectProps<string>['options'] = [
@@ -111,10 +112,34 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
 
   useOverlayRegistration(CONNECTION_POPOVER_OVERLAY_ID, isOpen);
 
+  // Opened with the mouse or a touch, the returned focus draws no ring, so the pill does not look like an alert; opened
+  // from the keyboard it keeps the ring.
+  useEffect(() => {
+    const anchorElement: HTMLElement | null = anchorRef.current;
+    const markPointer = (): void => {
+      isOpenedByPointerRef.current = true;
+    };
+    const markKeyboard = (): void => {
+      isOpenedByPointerRef.current = false;
+    };
+
+    anchorElement?.addEventListener('pointerdown', markPointer);
+    anchorElement?.addEventListener('keydown', markKeyboard);
+
+    return () => {
+      anchorElement?.removeEventListener('pointerdown', markPointer);
+      anchorElement?.removeEventListener('keydown', markKeyboard);
+    };
+  }, [anchorRef]);
+
+  const returnFocusToAnchor = (): void => {
+    anchorRef.current?.focus({ focusVisible: !isOpenedByPointerRef.current });
+  };
+
   const handleOpenChange = (isNextOpen: boolean): void => {
     // antd hides the popover without moving focus, which would leave keyboard users on the page body.
     if (!isNextOpen && isFocusInsideElement(contentRef.current)) {
-      anchorRef.current?.focus();
+      returnFocusToAnchor();
     }
 
     onOpenChange(isNextOpen);

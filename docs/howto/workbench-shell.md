@@ -41,7 +41,7 @@ Every unbuilt control is wrapped, one control at a time, in `ComingSoon` (`src/v
 
 ## Bed zoom and pan
 
-`BedViewport` (`src/containers/BedViewport/`) wraps `BedView` and owns the session-only viewport (`BedViewport` in `src/utils/bed/interfaces/`: zoom against the fitted bed and the view centre in bed SVG mm). It starts fitted and starts over when the bed size changes (`BedPanel` keys it by the bed size).
+`BedViewport` (`src/containers/BedViewport/`) wraps `BedView` and owns the session-only viewport (`BedViewport` in `src/utils/bed/interfaces/`: zoom against the fitted bed and the view centre in bed SVG mm). It starts fitted and starts over when the bed size changes (`BedPanel` keys it by the bed size). `BedPanel` keeps the latest viewport in a `KeptBedViewportRef` and passes it as `keptViewportRef`, so leaving for the 3D view (which unmounts the viewport) and coming back keeps the zoom and pan; opening the console only changes the screen size, so a zoomed view keeps its zoom and a fitted one re-fits. A new bed size empties the kept viewport.
 
 - Mouse wheel: zooms around the pointer, gently (`BED_WHEEL_ZOOM_PER_PIXEL` 0.0006: 6 to 15 % per notch) in a wide window; in a narrow window, where the page scrolls, only Ctrl or Cmd plus the wheel zooms (`useBedWheelZoom`).
 - Pan: drag with the middle mouse button, or hold Space over the bed and drag (`useBedPanGesture`). The press is caught in the capture phase, so selecting and dragging objects keep their own left drag.
