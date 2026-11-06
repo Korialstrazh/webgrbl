@@ -18,6 +18,23 @@
     z-index: 10;
     // Short by default, so most of the bed stays in view under the sheet.
     height: min(12rem, 45%);
+    padding-top: var(--space-4);
+    border-top-left-radius: var(--radius-xl);
+    border-top-right-radius: var(--radius-xl);
     box-shadow: 0 -0.25rem 1rem rgb(0 0 0 / 40%);
+  }
+
+  // The grab handle of a bottom sheet, so the console reads as a sheet laid over the bed; the close button in its
+  // header and the console toggle in the status strip put it away.
+  .consoleDock::before {
+    position: absolute;
+    top: var(--space-2);
+    left: 50%;
+    width: 2.5rem;
+    height: 0.25rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-control-border);
+    content: '';
+    transform: translateX(-50%);
   }
 }

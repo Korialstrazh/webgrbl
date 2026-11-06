@@ -95,6 +95,7 @@ CONNECTION_POPOVER_SERIAL_PORT;Serial port
 CONNECTION_POPOVER_SIMULATED_LASER;Simulated laser (no hardware)
 CONNECTION_POPOVER_USB_PORT;USB {{vendorId}}:{{productId}}
 CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
+CONSOLE_CLOSE;Close the console
 CONSOLE_EMPTY_HINT;No messages yet. Connect a laser to see what it sends.
 CONSOLE_INPUT_LABEL;Console command
 CONSOLE_INPUT_PLACEHOLDER;Type a command, for example $$
@@ -147,8 +148,8 @@ DESIGN_MATERIAL_TITLE;Material
 DESIGN_OBJECTS_NOT_IN_3D_NOTE;Objects are edited in the Design and Toolpath views.
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Layers and objects
-FIELD_CAPTION_MAX;max
-FIELD_CAPTION_MIN;min
+FIELD_CAPTION_MAX;Max
+FIELD_CAPTION_MIN;Min
 FIELD_UNIT_MM;mm
 FIELD_UNIT_MM_PER_MIN;mm/min
 FIELD_UNIT_PERCENT;%
@@ -163,7 +164,7 @@ FRAME_EDGE_RIGHT;right
 FRAME_GRID_CELL;{{cellCm}} cm
 FRAME_GRID_LABEL;Frame grid
 FRAME_GRID_NONE;Rectangle only
-FRAME_MARGIN_CAPTION;margin
+FRAME_MARGIN_CAPTION;Margin
 FRAME_MARGIN_LABEL;Frame margin (mm)
 FRAME_POWER_DETAIL;{{profileName}}, assumed {{maxPowerWatts}} W laser
 FRAME_POWER_LABEL;Dot power
@@ -178,7 +179,7 @@ FRAME_SETTINGS_NEEDS_PROFILE;Set up a laser profile first.
 FRAME_SETTINGS_RUN_LOCKED;Fixed while a job runs.
 FRAME_SETTINGS_SHOW;Show frame settings
 FRAME_SETTINGS_TITLE;Frame settings
-FRAME_SPEED_CAPTION;speed
+FRAME_SPEED_CAPTION;Speed
 FRAME_SPEED_LABEL;Frame speed (mm/min)
 FRAME_START_BLOCKED_BED_OVERRUN;The frame would leave the bed.
 FRAME_START_BLOCKED_LASER_MODE;Laser mode ($32=1) must be confirmed on to frame a job.

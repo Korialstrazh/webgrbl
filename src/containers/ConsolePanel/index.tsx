@@ -9,12 +9,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CodeOutlined } from '@ant-design/icons';
+import { CloseOutlined, CodeOutlined } from '@ant-design/icons';
 import { Checkbox, Input } from 'antd';
 import type { ChangeEvent, KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY } from '../../utils/browser/browser.events.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsConnected } from '../../utils/states/grbl.connection.state';
@@ -27,7 +28,9 @@ import {
 } from '../../utils/states/grbl.console.state';
 import type { GrblConsoleViewEntry } from '../../utils/states/interfaces/GrblConsoleViewEntry';
 import type { AppDispatch } from '../../utils/states/new.store';
+import { ConsoleOpenChanged } from '../../utils/states/panel.layout.state';
 import { ConsoleEntryList } from '../../views/ConsoleEntryList';
+import { IconActionButton } from '../../views/IconActionButton';
 import { EMPTY_INPUT_TEXT, NO_HISTORY_OFFSET } from './console.history.constants';
 import { getConsoleHistoryRecall } from './get.console.history.recall';
 import type { ConsoleHistoryRecall } from './interfaces/ConsoleHistoryRecall';
@@ -118,6 +121,12 @@ export const ConsolePanel = (): ReactNode => {
         >
           {t(DEFAULT.CONSOLE_SHOW_STATUS_REPORTS)}
         </Checkbox>
+        <IconActionButton
+          type={ANTD_BUTTON_TYPE_TEXT}
+          labelText={t(DEFAULT.CONSOLE_CLOSE)}
+          iconComponent={<CloseOutlined aria-hidden />}
+          onClick={() => dispatch(new ConsoleOpenChanged({ isConsoleOpen: false }))}
+        />
       </header>
       <div
         ref={scrollElementRef}

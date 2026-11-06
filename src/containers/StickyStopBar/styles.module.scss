@@ -27,10 +27,12 @@
   }
 }
 
-// Start before it is ready: a dashed outline and readable grey text, so it reads as waiting, not as broken.
+// Start before it is ready: the locked look of the Job card (solid outline, dark fill) and readable grey text, so it
+// reads as locked, not as broken and not as a drop zone.
 .start :global(.ant-btn:disabled) {
-  border-style: dashed;
-  border-color: var(--color-text-muted);
+  border-style: solid;
+  border-color: var(--color-disabled-border-locked);
+  background-color: var(--color-disabled-bg);
   color: var(--color-disabled-text);
 }
 

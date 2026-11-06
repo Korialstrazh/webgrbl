@@ -63,9 +63,9 @@
   --color-disabled-bg: #1a1d21;
   --color-disabled-text: #9aa0a6;
   --color-disabled-border: #23272c;
-  // The dashed outline of an off action button with no fill: at least 3:1 on every surface (3.05:1 on surface-3), so
-  // it stays visible, while its dashes and the lock still set it apart from an enabled one.
-  --color-disabled-border-dashed: #6b7178;
+  // The solid outline of a locked action button: at least 3:1 on every surface (3.05:1 on surface-3), so it stays
+  // visible, while the dark fill and the lock badge set it apart from an enabled one. Dashes are kept for drop zones.
+  --color-disabled-border-locked: #6b7178;
   // STOP while it cannot act: the disabled look with a dark red outline, so it still reads as the emergency control.
   --color-danger-disabled-border: #5a2a2c;
 

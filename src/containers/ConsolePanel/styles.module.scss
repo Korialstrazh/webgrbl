@@ -10,8 +10,7 @@
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
 // The terminal icon of the console toggle leads the title, so the open panel is matched to its button at a glance.
@@ -27,6 +26,7 @@
 }
 
 .statusReports {
+  margin-inline-start: auto;
   font-size: 0.8125rem;
 }
 

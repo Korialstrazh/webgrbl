@@ -12,7 +12,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ColumnHeightOutlined, TagOutlined } from '@ant-design/icons';
+import { CheckOutlined, ColumnHeightOutlined, TagOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
 import type { InputRef } from 'antd';
 import { useId, useRef, useState } from 'react';
@@ -106,7 +106,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
       title={t(DEFAULT.MATERIAL_DIALOG_TITLE)}
       okText={t(DEFAULT.MATERIAL_DIALOG_SAVE)}
       cancelText={t(DEFAULT.MATERIAL_DIALOG_CANCEL)}
-      okButtonProps={{ disabled: !isSaveAllowed }}
+      okButtonProps={{ disabled: !isSaveAllowed, icon: <CheckOutlined aria-hidden /> }}
       onOk={saveMaterial}
       // The dialog takes the focus for itself when it opens, so the field asks for it back after that.
       afterOpenChange={(isDialogOpen: boolean) => {
