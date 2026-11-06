@@ -5,6 +5,7 @@ import { BED_ZOOM_STEP_FACTOR } from '../../utils/bed/bed.zoom.constants';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
+import { newCoverBedViewport } from '../../utils/bed/new.cover.bed.viewport';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
 import type { KeptBedViewportRef } from './interfaces/KeptBedViewportRef';
@@ -40,5 +41,41 @@ describe(useBedViewportControls.name, () => {
 
     expect(keptViewportRef.current).toEqual(zoomedViewport);
     expect(second.result.current.viewport).toEqual(zoomedViewport);
+  });
+});
+
+describe(`${useBedViewportControls.name} with a drawer`, () => {
+  const STRIP_SIZE: BedScreenSize = { widthPx: 300, heightPx: 700 };
+
+  it('fills the strip while a drawer is open and gives the earlier zoom back once it closes', () => {
+    const hook: RenderHookResult<BedViewportControls, { isCoverFitWanted: boolean }> = renderHook(
+      ({ isCoverFitWanted }: { isCoverFitWanted: boolean }): BedViewportControls =>
+        useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, isCoverFitWanted),
+      { initialProps: { isCoverFitWanted: false } },
+    );
+
+    act(() => {
+      hook.result.current.zoomBedBy(BED_ZOOM_STEP_FACTOR);
+    });
+    const zoomedViewport: BedViewport = hook.result.current.viewport;
+
+    hook.rerender({ isCoverFitWanted: true });
+
+    expect(hook.result.current.viewport).toEqual(newCoverBedViewport(DIMENSIONS, STRIP_SIZE));
+
+    hook.rerender({ isCoverFitWanted: false });
+
+    expect(hook.result.current.viewport).toEqual(zoomedViewport);
+  });
+
+  it('starts the first zoom inside the drawer from the filled strip', () => {
+    const { result } = renderHook(() => useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, true));
+    const coverViewport: BedViewport = newCoverBedViewport(DIMENSIONS, STRIP_SIZE);
+
+    act(() => {
+      result.current.zoomBedBy(BED_ZOOM_STEP_FACTOR);
+    });
+
+    expect(result.current.viewport.zoom).toBeCloseTo(coverViewport.zoom * BED_ZOOM_STEP_FACTOR);
   });
 });
