@@ -33,6 +33,7 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
       <div className={styles.actions}>
         <IconActionButton
           labelText={t(DEFAULT.PALETTE_EXPORT_LABEL)}
+          captionText={t(DEFAULT.PALETTE_EXPORT_CAPTION)}
           iconComponent={<DownloadOutlined aria-hidden />}
           onClick={() => dispatch(new PaletteExportRequested())}
         />
@@ -49,7 +50,9 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
               </div>
             )}
           >
-            <Button icon={<QuestionCircleOutlined />} aria-label={t(DEFAULT.PALETTE_INKSCAPE_HELP)} />
+            <Button icon={<QuestionCircleOutlined aria-hidden />} aria-label={t(DEFAULT.PALETTE_INKSCAPE_HELP)}>
+              {t(DEFAULT.PALETTE_INKSCAPE_HELP_CAPTION)}
+            </Button>
           </Popover>
         </DismissibleTooltip>
         <span className={styles.resetAction}>
@@ -70,7 +73,9 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
                 danger
                 icon={<ReloadOutlined aria-hidden />}
                 aria-label={t(DEFAULT.PALETTE_RESET_LABEL)}
-              />
+              >
+                {t(DEFAULT.PALETTE_RESET_CAPTION)}
+              </Button>
             </Popconfirm>
           </DismissibleTooltip>
         </span>

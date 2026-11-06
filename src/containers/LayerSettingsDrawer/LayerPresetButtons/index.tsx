@@ -1,8 +1,8 @@
 /**
- * The preset buttons of the layer settings drawer, each an icon with a short caption: Save as material preset stores the
- * layer for the project material and the active machine, and Use a material preset opens the library for this layer.
- * When a preset for the same material, operation and machine exists, saving asks in a popover under the button whether
- * to update it, add a new one or do nothing, so a second click never leaves two rows that look the same. The
+ * The preset buttons of the layer settings drawer, each an icon with a short caption: Save as material preset stores
+ * the layer for the project material and the active machine, and Use a material preset opens the library for this
+ * layer. When a preset for the same material, operation and machine exists, saving asks in a popover under the button
+ * whether to update it, add a new one or do nothing, so a second click never leaves two rows that look the same. The
  * confirmation line under the buttons clears itself after a moment, and at once when the question opens.
  *
  * @author michael.morosov

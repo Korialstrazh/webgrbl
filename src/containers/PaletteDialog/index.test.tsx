@@ -110,6 +110,16 @@ const getRow = (namePattern: RegExp): HTMLElement => {
 };
 
 describe(PaletteDialog.name, () => {
+  it.each([
+    [EXPORT_LABEL, 'Export'],
+    [INKSCAPE_HELP_LABEL, 'Help'],
+    [RESET_LABEL, 'Reset'],
+  ])('shows a short visible caption on the %s footer action', (labelText: string, captionText: string) => {
+    renderDialog(newStore());
+
+    expect(screen.getByRole('button', { name: labelText })).toHaveTextContent(captionText);
+  });
+
   it('registers an overlay while it is open', () => {
     const store: AppStore = newStore();
 
