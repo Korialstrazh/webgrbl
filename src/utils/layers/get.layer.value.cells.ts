@@ -1,6 +1,6 @@
 /**
- * Gets the three short cells of a layer row: power, speed and passes as bare numbers. The units stay in the tooltips
- * and the spoken summary, so the row reads as icons and values.
+ * Gets the three short cells of a layer row: power with a percent sign, speed as a bare number and passes with a times
+ * sign, so the three tell apart at a glance. The full units stay in the tooltips and the spoken summary.
  *
  * @author michael.morosov
  *

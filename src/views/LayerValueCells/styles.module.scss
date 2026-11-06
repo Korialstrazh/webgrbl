@@ -5,7 +5,7 @@
 .cells {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--space-2);
+  gap: 0 var(--space-1);
   color: var(--color-text);
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
@@ -35,8 +35,9 @@
   color: var(--color-success);
 }
 
+// Wide enough for "100 %" and "12000", so the values line up from row to row.
 .cell:not(:last-of-type) {
-  min-width: 2.75rem;
+  min-width: 3.25rem;
 }
 
 .summaryText {
