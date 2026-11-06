@@ -128,6 +128,12 @@ describe('ANTD_THEME', () => {
     expect(ANTD_THEME.algorithm).toBe(theme.darkAlgorithm);
   });
 
+  it('dims the app behind a dialog more than antd does by default', () => {
+    const maskAlpha: number = parseFloat(String(ANTD_THEME.token?.colorBgMask).split(',').at(-1) ?? '');
+
+    expect(maskAlpha).toBeGreaterThanOrEqual(0.6);
+  });
+
   it.each(COLOR_TOKEN_SOURCES)('takes %s from %s', (antdToken: string, scssToken: string) => {
     expect(themeTokens[antdToken]).toBe(requireScssToken(scssToken));
   });

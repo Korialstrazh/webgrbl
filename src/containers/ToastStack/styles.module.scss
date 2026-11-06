@@ -1,29 +1,32 @@
 @use '../../styles/layout' as layout;
 
-// Anchored to the top right of the bed, under the toolbar: clear of the playback bar below, of any drawer (they all open
-// on the left) and of STOP (in another region), and above the console overlay (z-index 30).
+// Pinned bottom-centre over the status strip at every width: clear of the bed drawing, the bed toolbar, the narrow
+// region switcher and the STOP button. Its width leaves room for the console toggle at the strip's right end, and
+// z-index 40 keeps it above the console overlay (z-index 30). Extra toasts grow upward and scroll inside the stack.
 .toastStack {
-  position: absolute;
-  top: 6.75rem;
-  right: var(--space-5);
+  position: fixed;
+  bottom: calc((#{layout.$status-strip-height} - 2.5rem) / 2);
+  left: 50%;
   z-index: 40;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: var(--space-2);
-  max-width: min(24rem, calc(100% - 2 * var(--space-4)));
+  width: max-content;
+  max-width: min(28rem, calc(100vw - 2 * (var(--space-4) + 3rem)));
+  max-height: calc(100dvh - #{layout.$top-bar-height} - #{layout.$status-strip-height} - 2 * var(--space-4));
+  overflow-y: auto;
+  transform: translateX(-50%);
   pointer-events: none;
 }
 
-// Narrow, the regions stack and scroll, so the stack is pinned to the window just below the top bar; z-index 40 keeps it
-// above the console overlay and the sticky stop bar. Its height is capped so it ends above the sticky stop bar (never
-// over it, so STOP stays clickable); toasts beyond the cap scroll inside the stack.
-.pinnedToWindow {
-  position: fixed;
-  top: calc(#{layout.$top-bar-height} + var(--space-4));
-  max-width: min(24rem, calc(100vw - 2 * var(--space-4)));
-  max-height: calc(100dvh - #{layout.$top-bar-height} - #{layout.$sticky-stop-bar-height} - 2 * var(--space-4));
-  overflow-y: auto;
+// Narrow, the sticky STOP bar sits under the status strip, so the stack is lifted by its height and never covers STOP.
+.aboveStopBar {
+  bottom: calc(#{layout.$sticky-stop-bar-height} + (#{layout.$status-strip-height} - 2.5rem) / 2);
+  max-height: calc(
+    100dvh - #{layout.$top-bar-height} - #{layout.$status-strip-height} - #{layout.$sticky-stop-bar-height}
+      - 2 * var(--space-4)
+  );
 }
 
 .toast {
@@ -38,6 +41,7 @@
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.875rem;
+  box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 40%);
   pointer-events: auto;
 }
 

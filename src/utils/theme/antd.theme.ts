@@ -41,6 +41,10 @@ const COLOR_WARNING = '#ffb547';
 const COLOR_SUCCESS = '#3fcf8e';
 const COLOR_INFO = '#4aa3ff';
 const COLOR_FOCUS_RING = '#ff8a1f';
+// antd's default mask (45 % black) barely dims the dark panels; 65 % sets an open dialog clearly apart from them.
+const COLOR_BG_MASK = 'rgba(0, 0, 0, 0.65)';
+// A dialog lifts off the dimmed app with a soft, deep shadow.
+const DIALOG_SHADOW = `0 1rem 3rem rgba(0, 0, 0, 0.6), 0 0 0 1px ${COLOR_BORDER}`;
 /** --focus-outline-width (0.125rem) in pixels. */
 const FOCUS_OUTLINE_WIDTH_PIXELS = 2;
 /** The grip on a splitter bar is 2rem long, so the bar is easy to find and to grab. */
@@ -98,6 +102,7 @@ export const ANTD_THEME: ThemeConfig = {
     // antd draws its focus outline in colorPrimaryBorder, which the dark algorithm derives as a dark brown (1.6:1).
     colorPrimaryBorder: COLOR_FOCUS_RING,
     lineWidthFocus: FOCUS_OUTLINE_WIDTH_PIXELS,
+    colorBgMask: COLOR_BG_MASK,
   },
   components: {
     // antd paints the header and siders navy by default; the regions use our surfaces instead.
@@ -162,6 +167,9 @@ export const ANTD_THEME: ThemeConfig = {
       controlItemBgActiveHover: COLOR_ACCENT_ACTIVE,
       colorFill: COLOR_TEXT_MUTED,
       splitBarDraggableSize: SPLITTER_GRIP_LENGTH_PIXELS,
+    },
+    Modal: {
+      boxShadow: DIALOG_SHADOW,
     },
     Segmented: {
       trackBg: COLOR_SURFACE_1,

@@ -86,6 +86,14 @@
   }
 }
 
+// Wide, the toolbar is centred over the bed drawing (which is centred too) instead of drifting to the far corner.
+@container (width >= 64rem) {
+  .header:not(.threeDHeader) {
+    grid-template-columns: auto auto auto;
+    justify-content: center;
+  }
+}
+
 // The 3D view has no extras and few tools, so they share the top row with the switch, which stays where it is.
 .threeDHeader {
   grid-template-areas: 'tools view';
