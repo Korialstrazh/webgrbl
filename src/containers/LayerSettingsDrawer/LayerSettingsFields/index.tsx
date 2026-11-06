@@ -162,11 +162,15 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         <div className={styles.paletteActions}>
           <IconActionButton
             labelText={t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE)}
+            captionText={t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE_CAPTION)}
+            block
             iconComponent={<SaveOutlined aria-hidden />}
             onClick={savePaletteEntry}
           />
           <IconActionButton
             labelText={t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
+            captionText={t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE_CAPTION)}
+            block
             iconComponent={<PaletteIcon aria-hidden />}
             onClick={onEditPalette}
           />

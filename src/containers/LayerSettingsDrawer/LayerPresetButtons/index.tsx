@@ -1,5 +1,5 @@
 /**
- * The preset icon buttons of the layer settings drawer, each named by its tooltip: Save as material preset stores the
+ * The preset buttons of the layer settings drawer, each an icon with a short caption: Save as material preset stores the
  * layer for the project material and the active machine, and Use a material preset opens the library for this layer.
  * When a preset for the same material, operation and machine exists, saving asks in a popover under the button whether
  * to update it, add a new one or do nothing, so a second click never leaves two rows that look the same. The
@@ -151,6 +151,8 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
             <IconActionButton
               type={ANTD_BUTTON_TYPE_DEFAULT}
               labelText={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+              captionText={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+              block
               iconComponent={<FileAddOutlined aria-hidden />}
               blockedReasonText={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}
               isDisabled={!isSaveAllowed}
@@ -161,6 +163,8 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
         <IconActionButton
           type={ANTD_BUTTON_TYPE_DEFAULT}
           labelText={t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
+          captionText={t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
+          block
           iconComponent={<MaterialSheetIcon aria-hidden />}
           onClick={() => setIsLibraryOpen(true)}
         />

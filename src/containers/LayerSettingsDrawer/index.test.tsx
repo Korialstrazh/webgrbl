@@ -190,6 +190,19 @@ describe(LayerSettingsDrawer.name, () => {
     expect(layerName.previousElementSibling).toHaveTextContent(DRAWER_OVERLINE);
   });
 
+  it.each([
+    [SAVE_TO_PALETTE_LABEL, 'Add swatch'],
+    ['Edit palette…', 'Palette'],
+    ['Save preset', 'Save preset'],
+    ['Use preset', 'Use preset'],
+  ])('shows a short visible caption on the %s action', (labelText: string, captionText: string) => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    renderDrawer(store, CUT_COLOUR);
+
+    expect(screen.getByRole('button', { name: labelText })).toHaveTextContent(captionText);
+  });
+
   it('shows the watts of the active profile next to the power', () => {
     const store: AppStore = newStore();
     loadColours(store, [FILL_COLOUR]);

@@ -305,6 +305,7 @@ LAYER_SETTINGS_BAR_BLACK;Black: {{power}}
 LAYER_SETTINGS_BAR_LABEL;Power from black to white
 LAYER_SETTINGS_BAR_WHITE;White: {{power}}
 LAYER_SETTINGS_EDIT_PALETTE;Edit palette…
+LAYER_SETTINGS_EDIT_PALETTE_CAPTION;Palette
 LAYER_SETTINGS_HELP;Line follows the shapes, Fill scans across them. More power, less speed or more passes burn deeper.
 LAYER_SETTINGS_HELP_LABEL;About these settings
 LAYER_SETTINGS_LINE_INTERVAL;Line interval (mm)
@@ -324,6 +325,7 @@ LAYER_SETTINGS_PRESET_SAVED;Saved {{name}}, {{thickness}} mm · {{operation}} as
 LAYER_SETTINGS_PRESET_UPDATE;Update existing
 LAYER_SETTINGS_PRESET_UPDATED;Updated the {{name}}, {{thickness}} mm · {{operation}} preset for {{machine}}.
 LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
+LAYER_SETTINGS_SAVE_TO_PALETTE_CAPTION;Add swatch
 LAYER_SETTINGS_SEND;Send to laser
 LAYER_SETTINGS_SPEED;Speed (mm/min)
 LAYERS_CELL_PASSES;{{passes}}
