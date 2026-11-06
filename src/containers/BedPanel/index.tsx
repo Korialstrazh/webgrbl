@@ -104,7 +104,11 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       {/* One structure in every view: only the tools slot differs, so nothing beside the switch can move it. */}
       <div className={styles.headerContainer}>
-        <div className={isThreeDView ? [styles.header, styles.threeDHeader].join(' ') : styles.header}>
+        {/* The view name lets the toolbar controls quieten in a crowded view (see BedColourPicker). */}
+        <div
+          className={isThreeDView ? [styles.header, styles.threeDHeader].join(' ') : styles.header}
+          data-bed-view={viewMode}
+        >
           <div className={styles.editingTools}>
             {isToolpathView && (
               <>

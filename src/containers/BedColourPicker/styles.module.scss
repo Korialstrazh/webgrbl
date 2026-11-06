@@ -15,6 +15,12 @@
   line-height: 1;
 }
 
+// The Toolpath view adds its own options to the toolbar, so the caption goes there too and the bucket and swatch speak
+// for themselves; the name stays read out. 'toolpath' is BED_VIEW_MODE.TOOLPATH, set on the bed header by BedPanel.
+:global([data-bed-view='toolpath']) .caption {
+  @include accessibility.visually-hidden;
+}
+
 // At phone width the toolbar has no room for the caption; the bucket and swatch stay, and the name stays read out.
 @media (width < 30rem) {
   .caption {
