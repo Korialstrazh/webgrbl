@@ -13,4 +13,7 @@ import { useSyncExternalStore } from 'react';
 import { BED_REGION_DRAWER_STORE } from '../bed/bed.region.drawer.store';
 
 export const useIsBedRegionDrawerOpen = (): boolean =>
-  useSyncExternalStore(BED_REGION_DRAWER_STORE.subscribeToBedRegionDrawers, BED_REGION_DRAWER_STORE.isBedRegionDrawerOpen);
+  useSyncExternalStore(
+    BED_REGION_DRAWER_STORE.subscribeToBedRegionDrawers,
+    BED_REGION_DRAWER_STORE.isBedRegionDrawerOpen,
+  );

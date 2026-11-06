@@ -44,14 +44,19 @@ describe(useBedViewportControls.name, () => {
   });
 });
 
+interface CoverFitProps {
+  isCoverFitWanted: boolean;
+}
+
 describe(`${useBedViewportControls.name} with a drawer`, () => {
   const STRIP_SIZE: BedScreenSize = { widthPx: 300, heightPx: 700 };
 
   it('fills the strip while a drawer is open and gives the earlier zoom back once it closes', () => {
-    const hook: RenderHookResult<BedViewportControls, { isCoverFitWanted: boolean }> = renderHook(
-      ({ isCoverFitWanted }: { isCoverFitWanted: boolean }): BedViewportControls =>
+    const initialProps: CoverFitProps = { isCoverFitWanted: false };
+    const hook: RenderHookResult<BedViewportControls, CoverFitProps> = renderHook(
+      ({ isCoverFitWanted }: CoverFitProps): BedViewportControls =>
         useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, isCoverFitWanted),
-      { initialProps: { isCoverFitWanted: false } },
+      { initialProps },
     );
 
     act(() => {
