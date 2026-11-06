@@ -1,5 +1,6 @@
 /**
- * A row of the object list: a button that selects the object, with its name, size, a note when it is outside the
+ * A row of the object list: a button that selects the object, with an icon for its kind (imported drawing or test
+ * sample), its name, its size, a note when it is outside the
  * bed and the warnings for content the job leaves out (text, images, ...), and a button that deletes it.
  *
  * @author michael.morosov
@@ -9,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CloseOutlined } from '@ant-design/icons';
+import { CloseOutlined, ColumnWidthOutlined, FileImageOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
@@ -17,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { isSampleJobObject } from '../../../utils/materials/is.sample.job.object';
 import { selectToolpath, selectToolpathStatus } from '../../../utils/states/toolpath.state';
 import { TOOLPATH_STATUS } from '../../../utils/states/toolpath.status.constants';
 import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.constants';
@@ -24,7 +26,8 @@ import type { ObjectWarning } from '../../../utils/toolpath/interfaces/ObjectWar
 import type { Toolpath } from '../../../utils/toolpath/interfaces/Toolpath';
 import { OBJECT_WARNING_TEXT_KEY } from '../../../utils/toolpath/object.warning.text.key';
 import type { ObjectRowProps } from '../interfaces/ObjectRowProps';
-import { OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
+import { OBJECT_KIND, OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
+import { TestSampleIcon } from '../../../views/TestSampleIcon';
 import { getObjectWarningKinds } from './get.object.warning.kinds';
 import styles from './styles.module.scss';
 
@@ -45,6 +48,9 @@ export const ObjectRow = ({
     [projectObject, readyToolpathWarnings],
   );
 
+  const isSample: boolean = isSampleJobObject(projectObject);
+  const kindText: string = t(isSample ? DEFAULT.OBJECTS_KIND_SAMPLE : DEFAULT.OBJECTS_KIND_SVG);
+
   return (
     <li className={rowClassName}>
       <Button
@@ -53,17 +59,28 @@ export const ObjectRow = ({
         aria-pressed={isSelected}
         onClick={() => onSelect(projectObject.id)}
       >
-        <span className={styles.name} title={projectObject.name}>{projectObject.name}</span>
-        <span className={styles.size} title={t(DEFAULT.OBJECTS_SIZE_HINT)}>
-          {t(DEFAULT.OBJECTS_SIZE, {
-            widthMm: projectObject.widthMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
-            heightMm: projectObject.heightMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
-          })}
+        <span
+          className={[styles.kindIcon, isSample ? styles.sampleKind : styles.svgKind].join(' ')}
+          title={kindText}
+          data-object-kind={isSample ? OBJECT_KIND.SAMPLE : OBJECT_KIND.SVG}
+          aria-hidden
+        >
+          {isSample ? <TestSampleIcon /> : <FileImageOutlined />}
         </span>
-        {isOutsideBed && <span className={styles.outsideNote}>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</span>}
-        {warningKinds.map((warningKind: SvgUnsupportedKind) => (
-          <span key={warningKind} className={styles.warningNote}>{t(OBJECT_WARNING_TEXT_KEY[warningKind])}</span>
-        ))}
+        <span className={styles.details}>
+          <span className={styles.name} title={projectObject.name}>{projectObject.name}</span>
+          <span className={styles.size} title={t(DEFAULT.OBJECTS_SIZE_HINT)}>
+            <ColumnWidthOutlined className={styles.sizeIcon} aria-hidden />
+            {t(DEFAULT.OBJECTS_SIZE, {
+              widthMm: projectObject.widthMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
+              heightMm: projectObject.heightMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
+            })}
+          </span>
+          {isOutsideBed && <span className={styles.outsideNote}>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</span>}
+          {warningKinds.map((warningKind: SvgUnsupportedKind) => (
+            <span key={warningKind} className={styles.warningNote}>{t(OBJECT_WARNING_TEXT_KEY[warningKind])}</span>
+          ))}
+        </span>
       </Button>
       <Button
         type={ANTD_BUTTON_TYPE_TEXT}

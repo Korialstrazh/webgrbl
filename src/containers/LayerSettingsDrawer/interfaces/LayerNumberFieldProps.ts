@@ -8,8 +8,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { ReactNode } from 'react';
+
 export interface LayerNumberFieldProps {
   label: string;
+  /** The icon at the start of the field. */
+  iconComponent: ReactNode;
+  captionText?: string;
+  unitText?: string;
   /** The value stored in the project. */
   value: number;
   decimals: number;

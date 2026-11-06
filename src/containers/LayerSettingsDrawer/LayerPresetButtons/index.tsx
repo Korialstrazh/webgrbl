@@ -1,9 +1,9 @@
 /**
- * The preset buttons of the layer settings drawer: Save as material preset stores the layer for the project material
- * and the active machine, and Use a material preset opens the library for this layer. When a preset for the same
- * material, operation and machine exists, saving asks in a popover under the button whether to update it, add a new
- * one or do nothing, so a second click never leaves two rows that look the same. The confirmation line under the
- * buttons clears itself after a moment, and at once when the question opens.
+ * The preset buttons of the layer settings drawer, each an icon with a short caption: Save as material preset stores
+ * the layer for the project material and the active machine, and Use a material preset opens the library for this
+ * layer. When a preset for the same material, operation and machine exists, saving asks in a popover under the button
+ * whether to update it, add a new one or do nothing, so a second click never leaves two rows that look the same. The
+ * confirmation line under the buttons clears itself after a moment, and at once when the question opens.
  *
  * @author michael.morosov
  *
@@ -12,7 +12,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BookOutlined, SaveOutlined } from '@ant-design/icons';
+import { FileAddOutlined } from '@ant-design/icons';
 import { Button, Popover } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
@@ -40,6 +40,8 @@ import { selectActiveMachineProfile } from '../../../utils/states/machine.profil
 import { MaterialPresetSaved, selectMaterialPresets } from '../../../utils/states/material.preset.state';
 import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { IconActionButton } from '../../../views/IconActionButton';
+import { MaterialSheetIcon } from '../../../views/MaterialSheetIcon';
 import { MaterialLibraryDrawer } from '../../MaterialLibraryDrawer';
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../../MaterialLibraryDrawer/material.library.drawer.constants';
 import type { LayerPresetButtonsProps } from '../interfaces/LayerPresetButtonsProps';
@@ -145,27 +147,28 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
             }
           }}
         >
-          {/* The icons carry labels of their own, so each button names itself to keep its name to its text. */}
-          <Button
-            type={ANTD_BUTTON_TYPE_DEFAULT}
-            icon={<SaveOutlined />}
-            aria-label={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
-            disabled={!isSaveAllowed}
-            onClick={handleSaveClick}
-          >
-            {t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
-          </Button>
+          <span>
+            <IconActionButton
+              type={ANTD_BUTTON_TYPE_DEFAULT}
+              labelText={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+              captionText={t(DEFAULT.LAYER_SETTINGS_PRESET_SAVE)}
+              block
+              iconComponent={<FileAddOutlined aria-hidden />}
+              blockedReasonText={activeMaterial ? undefined : t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}
+              isDisabled={!isSaveAllowed}
+              onClick={handleSaveClick}
+            />
+          </span>
         </Popover>
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_DEFAULT}
-          icon={<BookOutlined />}
-          aria-label={t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
+          labelText={t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
+          captionText={t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
+          block
+          iconComponent={<MaterialSheetIcon aria-hidden />}
           onClick={() => setIsLibraryOpen(true)}
-        >
-          {t(DEFAULT.LAYER_SETTINGS_PRESET_APPLY)}
-        </Button>
+        />
       </div>
-      {!activeMaterial && <p className={styles.note} role="note">{t(DEFAULT.LAYER_SETTINGS_PRESET_NEEDS_MATERIAL)}</p>}
       <p className={styles.status} role="status">{statusText}</p>
       <MaterialLibraryDrawer
         isOpen={isLibraryOpen}

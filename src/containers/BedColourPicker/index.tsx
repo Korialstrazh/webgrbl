@@ -1,7 +1,8 @@
 /**
  * The bed colour button of the bed's view controls: a swatch of the current bed colour that opens an antd ColorPicker
- * with presets (the default grey, a light grey, white, a dark grey and a wood tone), a note that a very dark bed hides
- * black artwork, and Reset to default. Every change goes to the bed at once and is stored app-wide.
+ * with presets (the default charcoal, a grey, a light grey, white, a dark grey and a wood tone), a note on
+ * the light rim dark beds give artwork, and Reset to default. Every change goes to the bed at once and is stored
+ * app-wide.
  *
  * @author michael.morosov
  *
@@ -10,6 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { BgColorsOutlined } from '@ant-design/icons';
 import { Button, ColorPicker, Tooltip } from 'antd';
 import type { ColorPickerProps } from 'antd';
 import type { Color } from 'antd/es/color-picker';
@@ -87,13 +89,15 @@ export const BedColourPicker = (): ReactNode => {
     >
       <Tooltip title={labelText}>
         <Button className={styles.bedColourButton} aria-label={labelText}>
-          {/* A plain swatch of the current colour; only its fill changes at run time. */}
-          <span
-            className={styles.swatch}
-            aria-hidden="true"
-            // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
-            style={{ backgroundColor: bedColour }}
-          />
+          {/* A paint bucket beside a swatch of the current colour: the control paints the bed. */}
+          <span className={styles.glyphs} aria-hidden="true">
+            <BgColorsOutlined className={styles.bucket} />
+            <span
+              className={[styles.swatch, styles.currentSwatch].join(' ')}
+              // eslint-disable-next-line no-restricted-syntax -- runtime-only colour
+              style={{ backgroundColor: bedColour }}
+            />
+          </span>
         </Button>
       </Tooltip>
     </ColorPicker>

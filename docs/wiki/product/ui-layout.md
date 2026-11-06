@@ -12,7 +12,7 @@ The approved screen layout of webgrbl and the order in which features get built.
 
 - **Workbench layout.** One screen, with no modes:
   - top bar: project, menus, undo/redo, connection pill, autosave state;
-  - left panel: material select with a Library button beside it and a link below with the preset count of the material on the active machine, which opens the library filtered to that material (Design view); the library itself is a narrow left drawer in the bed region, directly beside the panel, that leaves most of the bed in view: a compact list, replaced by the edit view of one preset with a Back button, and a New material entry beside Add preset, layers (on/off; off is never sent) with Add test sample below the list (Design view), objects; in 3D the Cut check above Layers, Objects hidden; the top bar has no Materials entry;
+  - left panel: material select with a Library button beside it and a link below with the preset count of the material on the active machine, which opens the library filtered to that material (Design view); the library itself is a narrow left drawer in the bed region, directly beside the panel, that leaves most of the bed in view: a compact list, replaced by the edit view of one preset with a Back button, and a New material entry beside Add preset, layers (on/off; off is never sent) with Add test sample below the list (Design view), objects; the cards keep one order in every view (Layers, Material, Objects, Cut check) so Layers never moves; a card that does not apply in a view (Material outside Design, Objects in 3D, Cut check outside 3D) folds to a muted heading line with an info icon whose tooltip says where it applies; the top bar has no Materials entry;
   - centre: the bed to scale, with a Design / Toolpath / 3D switch and a status strip with a collapsible console;
   - right panel, main task first: machine state (one line while not connected), job (estimate, export, Start), jog, low-power pointer, frame, air assist, and a large STOP that is always visible; the pre-flight check is planned (roadmap item 5);
 - **Running a job** changes the Workbench's state (progress, overrides, jog locked); there is no separate screen.
@@ -23,7 +23,7 @@ The approved screen layout of webgrbl and the order in which features get built.
 - **Power by colour:** one range, black (layer max power) → white (no power). Real gradients are followed; off-grey colours are ignored within a tolerance.
 - **Any GRBL laser:** machine profiles hold bed size, maximum watts, `$30`, origin and air assist. Material presets are stored in watts per profile and rescaled on import.
 - **Design tokens:**
-  - dark theme: bg `#121417`, surfaces `#16191c`/`#1d2024`/`#23272c`, border `#2a2e34`, text `#e6e8eb`/`#a3a9b0` (muted, at least 4.5:1 on every surface, also dimmed at 0.8 opacity);
+  - dark theme: bg `#121417`, surfaces `#16191c`/`#1d2024`/`#23272c`, border `#2a2e34`, text `#e6e8eb`/`#b0b6bd` (muted, at least 4.5:1 on every surface, also dimmed at 0.8 opacity);
   - accent `#ff8a1f`, danger `#e5383b`;
   - fonts Inter and JetBrains Mono, self-hosted;
   - 44 px targets for machine controls.

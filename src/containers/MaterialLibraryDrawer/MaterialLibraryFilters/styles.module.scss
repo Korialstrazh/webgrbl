@@ -33,6 +33,13 @@
   font-size: 0.8125rem;
 }
 
+// Dashed like the Soon tag: it narrows this list only, and is not the material of the project.
+.materialFilterChip {
+  border-style: dashed;
+  background-color: transparent;
+  color: var(--color-text-muted);
+}
+
 // The layer the rows apply to carries an accent mark, as the layer rows of the design panel do.
 .layerChip {
   border-color: color-mix(in oklab, var(--color-accent) 40%, var(--color-border));

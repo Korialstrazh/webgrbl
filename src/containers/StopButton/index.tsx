@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { StopFilled } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +34,7 @@ export const StopButton = (): ReactNode => {
       type={ANTD_BUTTON_TYPE_PRIMARY}
       size={ANTD_BUTTON_SIZE_LARGE}
       danger
+      icon={<StopFilled aria-hidden />}
       disabled={!isConnected}
       aria-keyshortcuts={ESCAPE_KEY}
       onClick={() => dispatch(new MachineStopRequested())}

@@ -13,17 +13,24 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Button, Popover } from 'antd';
 import type { DrawerProps } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { ANTD_DRAWER_PLACEMENT_LEFT } from '../../utils/antd.constants';
+import {
+  ANTD_BUTTON_TYPE_TEXT,
+  ANTD_DRAWER_PLACEMENT_LEFT,
+  ANTD_POPOVER_TRIGGER_CLICK,
+} from '../../utils/antd.constants';
 import { getLayerDisplayName } from '../../utils/layers/get.layer.display.name';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../utils/layers/get.layer.palette.entry';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
+import { DismissibleTooltip } from '../../views/DismissibleTooltip';
 import { BedRegionDrawer } from '../BedRegionDrawer';
 import type { LayerSettingsDrawerProps } from './interfaces/LayerSettingsDrawerProps';
 import { LayerSettingsFields } from './LayerSettingsFields';
@@ -54,6 +61,20 @@ export const LayerSettingsDrawer = (props: LayerSettingsDrawerProps): ReactNode 
       placement={ANTD_DRAWER_PLACEMENT_LEFT}
       size={LAYER_SETTINGS_DRAWER_WIDTH}
       focusable={LAYER_SETTINGS_DRAWER_FOCUS}
+      extra={(
+        <DismissibleTooltip title={t(DEFAULT.LAYER_SETTINGS_HELP_LABEL)}>
+          <Popover
+            trigger={ANTD_POPOVER_TRIGGER_CLICK}
+            content={<p className={styles.help}>{t(DEFAULT.LAYER_SETTINGS_HELP)}</p>}
+          >
+            <Button
+              type={ANTD_BUTTON_TYPE_TEXT}
+              icon={<QuestionCircleOutlined />}
+              aria-label={t(DEFAULT.LAYER_SETTINGS_HELP_LABEL)}
+            />
+          </Popover>
+        </DismissibleTooltip>
+      )}
       onClose={onClose}
     >
       {layer && <LayerSettingsFields key={getLayerKey(layer)} layer={layer} onEditPalette={onEditPalette} />}

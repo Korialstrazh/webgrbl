@@ -17,6 +17,7 @@ import {
 import { MachineStatusReceived } from '../../../../utils/states/machine.status.state';
 import type { AppDispatch, AppStore } from '../../../../utils/states/new.store';
 import { newStore } from '../../../../utils/states/new.store';
+import { selectIsAnyOverlayOpen } from '../../../../utils/states/ui.overlay.state';
 import { ToolpathReady, selectToolpathDocumentVersion } from '../../../../utils/states/toolpath.state';
 import { AntdTestProvider } from '../../../../utils/test.support/antd.test.provider';
 import { FakeToolpathWorkerClient } from '../../../../utils/toolpath/test.support/fake.toolpath.worker.client';
@@ -24,6 +25,7 @@ import { newToolpath } from '../../../../utils/toolpath/test.support/new.toolpat
 import { newToolpathMove } from '../../../../utils/toolpath/test.support/new.toolpath.move';
 
 const FRAME_JOB_LABEL = 'Frame job';
+const NEEDS_PROFILE_TEXT = 'Set up a laser profile first.';
 const GRID_LABEL = 'Frame grid';
 const MARGIN_LABEL = 'Frame margin (mm)';
 const SPEED_LABEL = 'Frame speed (mm/min)';
@@ -42,9 +44,9 @@ const DEFAULT_SPEED_TEXT = '6000';
 const GRID_20_LABEL = '2 cm';
 const SELECT_OPTION_SELECTOR = '.ant-select-item-option';
 // The 100 mm by 50 mm outline has a 300 mm perimeter, 3 s at 6000 mm/min.
-const FRAME_TIME_TEXT = '0 min 3 s';
+const FRAME_TIME_TEXT = '3 s';
 // The same perimeter at 3000 mm/min takes 6 s.
-const SLOWER_FRAME_TIME_TEXT = '0 min 6 s';
+const SLOWER_FRAME_TIME_TEXT = '6 s';
 const SPEED_ERROR_TEXT = 'Frame speed must be between 100 and 10000 mm/min';
 const MARGIN_ERROR_TEXT = 'Frame margin must not be negative';
 const ALARM_TEXT_PATTERN = /reported an alarm, possibly a limit/;
@@ -93,6 +95,8 @@ const newFrameStore = (endX: number): AppStore => {
   return store;
 };
 
+const SHOW_SETTINGS_LABEL = 'Show frame settings';
+
 const renderFrameControls = (store: AppStore): void => {
   render(
     <Provider store={store}>
@@ -101,6 +105,7 @@ const renderFrameControls = (store: AppStore): void => {
       </AntdTestProvider>
     </Provider>,
   );
+  fireEvent.click(screen.getByRole('button', { name: SHOW_SETTINGS_LABEL }));
 };
 
 const getFrameJobButton = (): HTMLElement => screen.getByRole('button', { name: FRAME_JOB_LABEL });
@@ -116,11 +121,56 @@ const getActiveProfile = (store: AppStore): MachineProfile => {
 };
 
 describe(FrameControls.name, () => {
+  it('keeps the frame settings closed until the gear is pressed', () => {
+    render(
+      <Provider store={newFrameStore(OUTLINE_END_X_MM)}>
+        <AntdTestProvider>
+          <FrameControls />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    expect(screen.queryByLabelText('Frame margin (mm)')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: SHOW_SETTINGS_LABEL })).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByRole('button', { name: SHOW_SETTINGS_LABEL }));
+
+    expect(screen.getByLabelText('Frame margin (mm)')).toBeInTheDocument();
+  });
+
+  it('registers the open settings as an overlay, so Escape only closes them', () => {
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
+
+    renderFrameControls(store);
+
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
+  });
+
+  it('says why the settings are off while no profile is active', () => {
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+
+    renderFrameControls(store);
+
+    expect(screen.getByText(NEEDS_PROFILE_TEXT)).toBeInTheDocument();
+    expect(screen.queryByLabelText(MARGIN_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('keeps the settings editable while disconnected, as they only change the stored profile', () => {
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
+
+    store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }));
+    renderFrameControls(store);
+    fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: String(SAVED_MARGIN_MM) } });
+    fireEvent.blur(screen.getByLabelText(MARGIN_LABEL));
+
+    expect(getActiveProfile(store).frameMarginMm).toBe(SAVED_MARGIN_MM);
+  });
+
   it('shows the frame time, the dot power and the profile the power is worked out for', () => {
     renderFrameControls(newFrameStore(OUTLINE_END_X_MM));
 
     expect(screen.getByText(FRAME_TIME_TEXT)).toBeInTheDocument();
-    expect(screen.getByText(`about 0.05 W (${PROFILE_NAME}, assumed 10 W laser)`)).toBeInTheDocument();
+    expect(screen.getByText('\u2248 0.05 W')).toBeInTheDocument();
   });
 
   it('starts the frame at once, with no confirmation', () => {
@@ -251,7 +301,7 @@ describe(FrameControls.name, () => {
 
     renderFrameControls(store);
 
-    expect(getFrameJobButton()).toBeDisabled();
+    expect(getFrameJobButton()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText(
       `The frame goes ${OVERRUN_MM} mm past the right edge of the bed. Move the job before framing.`,
     )).toBeInTheDocument();
@@ -264,8 +314,20 @@ describe(FrameControls.name, () => {
     renderFrameControls(store);
     fireEvent.mouseEnter(getFrameJobButton().parentElement as HTMLElement);
 
-    expect(getFrameJobButton()).toBeDisabled();
-    expect(await screen.findByText('The machine has not reported its position yet.')).toBeInTheDocument();
+    expect(getFrameJobButton()).toHaveAttribute('aria-disabled', 'true');
+    expect(await screen.findByText('The laser has not reported its position yet.')).toBeInTheDocument();
+  });
+
+  it('keeps a blocked Frame focusable and starts no frame on a click', () => {
+    const store: AppStore = newFrameStore(getActiveProfile(newFrameStore(0)).workAreaXMm + OVERRUN_MM);
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderFrameControls(store);
+    getFrameJobButton().focus();
+    fireEvent.click(getFrameJobButton());
+
+    expect(getFrameJobButton()).toHaveFocus();
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(FrameStartRequested));
   });
 
   it('turns the controls off while a frame runs', () => {
@@ -274,7 +336,7 @@ describe(FrameControls.name, () => {
     store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.FRAME }));
     renderFrameControls(store);
 
-    expect(getFrameJobButton()).toBeDisabled();
+    expect(getFrameJobButton()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByRole('combobox', { name: GRID_LABEL })).toBeDisabled();
     expect(screen.getByLabelText(MARGIN_LABEL)).toBeDisabled();
     expect(screen.getByLabelText(SPEED_LABEL)).toBeDisabled();

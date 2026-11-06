@@ -2,9 +2,10 @@
  * The bed view: the bed drawing, its rulers in bands along the top and left, and the zoom cluster, with zoom and pan.
  * The mouse wheel zooms around the pointer, a middle drag or Space plus a drag pans, and the buttons and the plus,
  * minus and zero keys zoom in, zoom out and fit the bed. The bed point under the pointer goes to the status strip
- * through the bed cursor store. The view lives for the session and starts fitted. The zoom is the drawing's view box,
- * so the objects layer and the Toolpath layer read pointer positions through the SVG's screen matrix as before; every
- * position is read in the drawing area, which starts where the ruler bands end.
+ * through the bed cursor store. The view lives for the session and starts fitted; the bed panel keeps it while the 3D
+ * view is shown. While a drawer pushes the bed aside the bed fills the strip left, and gets its zoom back after. The
+ * zoom is the drawing's view box, so the objects layer and the Toolpath layer read pointer positions through the SVG's
+ * screen matrix as before; every position is read in the drawing area, which starts where the ruler bands end.
  *
  * @author michael.morosov
  *
@@ -27,6 +28,7 @@ import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewBox } from '../../utils/bed/interfaces/BedViewBox';
 import { isBedViewportFitted } from '../../utils/bed/is.bed.viewport.fitted';
 import { getRootFontSizePixels } from '../../utils/browser/get.root.font.size.pixels';
+import { useIsBedRegionDrawerOpen } from '../../utils/hooks/use.is.bed.region.drawer.open';
 import { PERCENT_DIVISOR } from '../../utils/percent.constants';
 import { BedRulers } from '../../views/BedRulers';
 import { BedView } from '../../views/BedView';
@@ -51,12 +53,14 @@ const getDrawingAreaClassName = ({ isPanReady, isPanning }: BedPanGesture): stri
 };
 
 export const BedViewport = (props: BedViewportProps): ReactNode => {
-  const { dimensions, isWide, controlsHost, children, ...markerProps } = props;
+  const { dimensions, isWide, controlsHost, keptViewportRef, children, ...markerProps } = props;
   const viewRef = useRef<HTMLDivElement>(null);
   const screenSize: BedScreenSize = useBedScreenSize(viewRef);
   const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
+  // Only a wide window pushes the bed aside; a narrow one lets the drawer cover it.
+  const isPushedAside: boolean = useIsBedRegionDrawerOpen() && isWide;
   const { viewport, zoomBedBy, panBedBy, fitBedToView }: BedViewportControls =
-    useBedViewportControls(dimensions, screenSize);
+    useBedViewportControls(dimensions, screenSize, keptViewportRef, isPushedAside);
   const panGesture: BedPanGesture = useBedPanGesture(panBedBy);
   const viewBox: BedViewBox = getBedViewBox({ viewport, screenSize, dimensions });
   const rulers: BedRulerLayout = useMemo(

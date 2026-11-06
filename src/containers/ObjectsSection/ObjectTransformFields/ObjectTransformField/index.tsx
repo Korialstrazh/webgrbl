@@ -20,7 +20,8 @@ import styles from './styles.module.scss';
 const isDraftValueChanged = (draftValue: number | null | undefined, storedValue: number): draftValue is number =>
   isFiniteNumber(draftValue) && draftValue !== storedValue;
 
-export const ObjectTransformField = ({ label, value, decimals, onCommit }: ObjectTransformFieldProps): ReactNode => {
+export const ObjectTransformField = (props: ObjectTransformFieldProps): ReactNode => {
+  const { label, prefixComponent, value, decimals, onCommit } = props;
   const inputId: string = useId();
   // No draft means the user is not editing, so the stored value is shown. A cleared field is a draft with no value.
   const [draft, setDraft] = useState<ObjectFieldDraft | undefined>(undefined);
@@ -43,6 +44,7 @@ export const ObjectTransformField = ({ label, value, decimals, onCommit }: Objec
       <InputNumber
         id={inputId}
         className={styles.input}
+        prefix={<span className={styles.prefix} aria-hidden>{prefixComponent}</span>}
         value={draft ? draft.fieldValue : value}
         precision={decimals}
         controls={false}

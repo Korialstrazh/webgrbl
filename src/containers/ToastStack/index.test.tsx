@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ToastStack } from '.';
@@ -6,7 +7,8 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
-import { ToastShown } from '../../utils/states/toast.state';
+import { ProjectUndoRequested } from '../../utils/states/project.document.state';
+import { ToastShown, selectToasts } from '../../utils/states/toast.state';
 
 const ERROR_CODE = 9;
 const ERROR_TEXT = 'Error 9: G-code is locked during an alarm or jog.';
@@ -15,11 +17,12 @@ const STOPPED_ON_ERROR_TEXT = 'Job stopped at line 5: error 9 - G-code is locked
 const NOT_RESPONDING_TEXT = 'The controller is not responding.';
 const CONNECTED_TEXT = 'Connected to Grbl 1.1h';
 const DISMISS_LABEL = 'Dismiss';
+const DEFAULT_UNDO_LABEL = 'Undo';
 const ANTD_BUTTON_CLASS_NAME = 'ant-btn';
 const ANTD_SMALL_BUTTON_CLASS_NAME = 'ant-btn-sm';
 const TWICE_LABEL = '\u00D72';
 
-const PINNED_TO_WINDOW_CLASS_NAME = 'pinnedToWindow';
+const ABOVE_STOP_BAR_CLASS_NAME = 'aboveStopBar';
 
 const renderToastStack = (isWide: boolean = true): AppStore => {
   const store: AppStore = newStore();
@@ -114,15 +117,47 @@ describe(ToastStack.name, () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('pins the stack to the window in a narrow window, so it stays visible while the regions scroll', () => {
+  it('lifts the stack above the sticky STOP bar in a narrow window', () => {
     renderToastStack(false);
 
-    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).toContain(PINNED_TO_WINDOW_CLASS_NAME);
+    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).toContain(ABOVE_STOP_BAR_CLASS_NAME);
   });
 
-  it('keeps the stack in the bed region in a wide window', () => {
+  it('keeps the stack on the status strip in a wide window, with no stop bar to clear', () => {
     renderToastStack(true);
 
-    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).not.toContain(PINNED_TO_WINDOW_CLASS_NAME);
+    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).not.toContain(ABOVE_STOP_BAR_CLASS_NAME);
+  });
+});
+
+describe(`${ToastStack.name} undo action`, () => {
+  const showUndoToast = (store: AppStore): void => {
+    act(() => {
+      store.dispatch(new ToastShown({
+        severity: TOAST_SEVERITY.INFO,
+        messageKey: DEFAULT.TOAST_SAMPLE_ADDED,
+        messageParameters: NO_TOAST_PARAMETERS,
+        isUndoOffered: true,
+      }));
+    });
+  };
+
+  it('undoes the change and closes the toast', () => {
+    const store: AppStore = renderToastStack();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    showUndoToast(store);
+    fireEvent.click(screen.getByRole('button', { name: DEFAULT_UNDO_LABEL }));
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ProjectUndoRequested));
+    expect(selectToasts(store.getState())).toHaveLength(0);
+  });
+
+  it('offers no undo on other toasts', () => {
+    const store: AppStore = renderToastStack();
+
+    showErrorToast(store);
+
+    expect(screen.queryByRole('button', { name: DEFAULT_UNDO_LABEL })).not.toBeInTheDocument();
   });
 });

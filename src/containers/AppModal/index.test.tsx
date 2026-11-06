@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { AppModal } from '.';
 import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
@@ -14,6 +14,7 @@ const MODAL_MAX_WIDTH = '56rem';
 const MODAL_ROOT_SELECTOR = '.ant-modal-root';
 const MODAL_MASK_SELECTOR = '.ant-modal-mask';
 const REGION_TEST_ID = 'region';
+const FIRST_FIELD_LABEL = 'First field';
 
 const renderAppModal = (store: AppStore, isOpen: boolean, onClose: () => void = vi.fn()): void => {
   render(
@@ -50,6 +51,35 @@ const getModalRoot = (): HTMLElement => {
 describe(getAppModalWidth.name, () => {
   it('caps the width at the window width less both gutters', () => {
     expect(getAppModalWidth(MODAL_MAX_WIDTH)).toBe('min(56rem, calc(100vw - 2rem))');
+  });
+});
+
+describe(`${AppModal.name} focus`, () => {
+  it('moves the focus to the first field of the dialog once it has opened', async () => {
+    render(
+      <Provider store={newStore()}>
+        <AntdTestProvider>
+          <AppModal
+            isOpen
+            overlayIdPrefix={MODAL_OVERLAY_ID}
+            maxWidth={MODAL_MAX_WIDTH}
+            title={MODAL_TITLE}
+            footer={null}
+            onClose={vi.fn()}
+          >
+            <input aria-label={FIRST_FIELD_LABEL} />
+          </AppModal>
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    await waitFor(() => expect(screen.getByLabelText(FIRST_FIELD_LABEL)).toHaveFocus());
+  });
+
+  it('moves the focus to the title when the dialog has no field', async () => {
+    renderAppModal(newStore(), true);
+
+    await waitFor(() => expect(document.activeElement).toHaveTextContent(MODAL_TITLE));
   });
 });
 

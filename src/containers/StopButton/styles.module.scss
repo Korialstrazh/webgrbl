@@ -10,6 +10,11 @@
   border-color: var(--color-danger-disabled-border);
   background-color: var(--color-disabled-bg);
   color: var(--color-disabled-text);
+
+  // The stop sign keeps its red, so STOP is recognised at a glance even while it cannot act.
+  :global(.anticon) {
+    color: var(--color-danger-text);
+  }
 }
 
 .shortcutHint {
@@ -17,7 +22,7 @@
   border: 1px solid currentcolor;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.125rem;
   opacity: 0.85;

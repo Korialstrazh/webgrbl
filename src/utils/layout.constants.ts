@@ -28,14 +28,23 @@ export const WORKBENCH_PANEL_COUNT = 3;
  */
 export const DESIGN_PANEL_DEFAULT_WIDTH_REM = 20.5;
 
+/** On a window at least this wide the design panel opens at its roomy width. */
+export const ROOMY_WORKBENCH_MIN_WIDTH_REM = 100;
+
+/**
+ * Width of the design panel until the user resizes it on a window exactly as wide as the roomy minimum; a wider window
+ * grows it, and the machine panel, in proportion, up to their maximum widths.
+ */
+export const DESIGN_PANEL_ROOMY_DEFAULT_WIDTH_REM = 24;
+
 /** Width of the machine panel until the user resizes it; must match $machine-panel-width in layout.scss. */
 export const MACHINE_PANEL_DEFAULT_WIDTH_REM = 22;
 
 /** The design panel never gets narrower than this, so a layer row keeps its name and a one-line summary. */
 export const DESIGN_PANEL_MIN_WIDTH_REM = 16.25;
 
-/** The design panel never gets wider than this, so on a wide screen the bed takes the extra width. */
-export const DESIGN_PANEL_MAX_WIDTH_REM = 28;
+/** The design panel never gets wider than this, so on a very wide screen the bed takes the rest of the extra width. */
+export const DESIGN_PANEL_MAX_WIDTH_REM = 32;
 
 /** The bed never gets narrower than this, so its toolbar and the bed drawing stay usable. */
 export const BED_PANEL_MIN_WIDTH_REM = 30;
@@ -43,8 +52,8 @@ export const BED_PANEL_MIN_WIDTH_REM = 30;
 /** The machine panel never gets narrower than this, so the cards fit without a sideways scrollbar. */
 export const MACHINE_PANEL_MIN_WIDTH_REM = 20;
 
-/** The machine panel never gets wider than this, so on a wide screen the bed takes the extra width. */
-export const MACHINE_PANEL_MAX_WIDTH_REM = 28;
+/** The machine panel never gets wider than this, so on a very wide screen the bed takes the rest of the extra width. */
+export const MACHINE_PANEL_MAX_WIDTH_REM = 32;
 
 /** One arrow key step of a keyboard splitter handle, in rem: 16 px at the default font size. */
 export const SPLITTER_KEYBOARD_STEP_REM = 1;

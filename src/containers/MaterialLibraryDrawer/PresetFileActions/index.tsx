@@ -11,11 +11,12 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, Tooltip } from 'antd';
+import { Badge } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_BADGE_SIZE_SMALL } from '../../../utils/antd.constants';
 import { downloadTextFile } from '../../../utils/browser/download.text.file';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getImportedMaterialPresets } from '../../../utils/materials/get.imported.material.presets';
@@ -35,6 +36,7 @@ import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../../utils/states/toast.constants';
 import { ToastShown } from '../../../utils/states/toast.state';
 import { useAppStore } from '../../../utils/states/use.app.store';
+import { IconActionButton } from '../../../views/IconActionButton';
 import type { PresetFileActionsProps } from '../interfaces/PresetFileActionsProps';
 import styles from './styles.module.scss';
 
@@ -114,29 +116,22 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
 
   return (
     <div className={styles.presetFileActions}>
-      {/* Import takes a file in and Export gives one out, so the icons are the file upload and download arrows. The
-          icons carry labels of their own, so each button names itself to keep its name to its text. */}
-      <Button
-        icon={<UploadOutlined />}
-        aria-label={t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
-        disabled={!activeProfile}
+      {/* Import takes a file in and Export gives one out, so the icons are the file upload and download arrows; the
+          tooltip names each, and a badge on Export counts the ticked presets. */}
+      <IconActionButton
+        labelText={t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
+        iconComponent={<UploadOutlined aria-hidden />}
+        isDisabled={!activeProfile}
         onClick={() => fileInputRef.current?.click()}
-      >
-        {t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
-      </Button>
-      {/* Export waits for ticks, and says so: a disabled button fires no hover events, so a plain wrapper does. */}
-      <Tooltip title={selectedPresets.length ? undefined : t(DEFAULT.MATERIAL_LIBRARY_EXPORT_HINT)}>
-        <span className={styles.exportButtonWrapper}>
-          <Button
-            icon={<DownloadOutlined />}
-            aria-label={exportLabel}
-            disabled={!selectedPresets.length}
-            onClick={exportPresets}
-          >
-            {exportLabel}
-          </Button>
-        </span>
-      </Tooltip>
+      />
+      <Badge count={selectedPresets.length} size={ANTD_BADGE_SIZE_SMALL}>
+        <IconActionButton
+          labelText={exportLabel}
+          iconComponent={<DownloadOutlined aria-hidden />}
+          blockedReasonText={selectedPresets.length ? undefined : t(DEFAULT.MATERIAL_LIBRARY_EXPORT_HINT)}
+          onClick={exportPresets}
+        />
+      </Badge>
       {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
       <input
         ref={fileInputRef}

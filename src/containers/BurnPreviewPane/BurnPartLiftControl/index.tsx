@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { SelectOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +35,7 @@ import {
   selectSelectedBurnPartId,
 } from '../../../utils/states/burn.model.state';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { TooltipNoteIcon } from '../../../views/TooltipNoteIcon';
 import styles from './styles.module.scss';
 
 const NO_PART_ID = 0;
@@ -79,7 +81,11 @@ export const BurnPartLiftControl = (): ReactNode => {
   if (!part) {
     return (
       <div className={styles.burnPartLiftControl}>
-        <span className={[styles.status, styles.hint].join(' ')}>{t(DEFAULT.BURN_PART_LIFT_CLICK_HINT)}</span>
+        <span className={[styles.status, styles.idleStatus].join(' ')}>
+          {/* An icon with a short caption instead of a standing sentence; a tap or the focus opens the full prompt. */}
+          <TooltipNoteIcon noteText={t(DEFAULT.BURN_PART_LIFT_CLICK_HINT)} iconComponent={<SelectOutlined />} />
+          <span className={styles.idleCaption} aria-hidden>{t(DEFAULT.BURN_PART_LIFT_IDLE_CAPTION)}</span>
+        </span>
         {putAllBackComponent}
       </div>
     );

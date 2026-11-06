@@ -102,7 +102,8 @@ const getRow = (rowIndex: number): HTMLElement => {
 const getRowTexts = (): string[] =>
   within(screen.getByRole('list', { name: LAYERS_LIST_NAME }))
     .getAllByRole(ROW_ROLE)
-    .map((row: HTMLElement): string => row.textContent ?? '');
+    // The summary is icons and values; a text for screen readers in the row holds the whole line.
+    .map((row: HTMLElement): string => row.textContent);
 
 describe(LayersSection.name, () => {
   it('shows a hint while the design has no layers', () => {

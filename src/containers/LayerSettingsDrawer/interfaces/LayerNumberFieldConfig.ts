@@ -14,5 +14,9 @@ export interface LayerNumberFieldConfig {
   field: LayerNumberSettingName;
   /** Translation key of the label. */
   labelKey: string;
+  /** Translation key of a short word beside the icon, where two fields share an icon. */
+  captionKey?: string;
+  /** Translation key of the unit at the end of the field. */
+  unitKey?: string;
   decimals: number;
 }

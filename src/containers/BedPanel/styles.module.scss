@@ -17,6 +17,7 @@
 // 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
 @media (width < 80rem) {
   .bedPanel {
+    height: 100%;
     min-height: 28rem;
   }
 }
@@ -76,12 +77,20 @@
 }
 
 // Too narrow for the widest view's tools beside the rest: the tools take a row of their own below, in every view alike.
-@container (width < 62rem) {
+@container (width < 44rem) {
   .header:not(.threeDHeader) {
     grid-template-areas:
       'extras view'
       'tools tools';
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+// Wide, the toolbar is centred over the bed drawing (which is centred too) instead of drifting to the far corner.
+@container (width >= 64rem) {
+  .header:not(.threeDHeader) {
+    grid-template-columns: auto auto auto;
+    justify-content: center;
   }
 }
 
@@ -123,10 +132,41 @@
   position: relative;
   flex: 1 1 auto;
   min-height: 12rem;
+  // Matches the antd drawer slide.
+  transition: margin-inline-start 0.3s ease;
+}
+
+// On a wide window an open left drawer (BED_REGION_DRAWER_INSET_PROPERTY, set on this host) pushes the bed aside, so
+// the rulers stay whole and the object being edited stays in view. Narrow, the drawer still covers the region.
+@media (width >= 80rem) {
+  .bed {
+    margin-inline-start: var(--bed-region-drawer-inset, 0);
+  }
+}
+
+// The profile hint while the bed is empty: a small badge in the corner of the drawing, never over the work.
+.placeholderChip {
+  position: absolute;
+  top: 2.75rem;
+  right: var(--space-3);
+  display: inline-flex;
 }
 
 // Shown while files are dragged over the bed, so the user can see it takes the drop.
 .dropTarget {
   outline: 0.125rem dashed var(--color-accent);
   outline-offset: -0.125rem;
+}
+
+// At phone width the view controls scroll sideways rather than being cut off.
+@media (width < 30rem) {
+  .viewTools {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .viewControlsHost {
+    flex: none;
+  }
 }

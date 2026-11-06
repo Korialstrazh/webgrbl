@@ -22,5 +22,9 @@ export const getJobEstimateText = (t: TFunction, totalTimeS: number): string => 
     return t(DEFAULT.TOOLPATH_ESTIMATE_HOURS, { hours, minutes });
   }
 
+  if (!minutes) {
+    return t(DEFAULT.TOOLPATH_ESTIMATE_SECONDS, { seconds: roundedTimeS });
+  }
+
   return t(DEFAULT.TOOLPATH_ESTIMATE_MINUTES, { minutes, seconds: roundedTimeS % SECONDS_PER_MINUTE });
 };

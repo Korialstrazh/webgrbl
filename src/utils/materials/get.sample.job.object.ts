@@ -1,5 +1,6 @@
 /**
- * Builds the test sample as a project object, at its margin from the machine's origin corner.
+ * Builds the test sample as a project object, at its margin from the machine's origin corner, or at the first free
+ * spot on the bed when it would overlap an object already there, so new samples never hide other objects.
  *
  * @author michael.morosov
  *
@@ -8,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { getFreeBedSpot } from '../project/get.free.bed.spot';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
@@ -21,6 +23,7 @@ import { SAMPLE_MARGIN_MM, SAMPLE_OBJECT_NAME, SAMPLE_SIZE_MM } from './sample.j
 export const getSampleJobObject = (
   machineArea: ToolpathMachineArea,
   svgParts?: SampleSvgParts,
+  existingObjects: readonly ProjectObject[] = [],
 ): ProjectObject => {
   const nearPoint: GeometryPoint = getOriginMappedPoint(
     { x: SAMPLE_MARGIN_MM, y: SAMPLE_MARGIN_MM },
@@ -33,6 +36,17 @@ export const getSampleJobObject = (
     machineArea,
   );
 
+  const firstSpot: GeometryPoint = { x: Math.min(nearPoint.x, farPoint.x), y: Math.min(nearPoint.y, farPoint.y) };
+  // A full bed falls back to the first spot.
+  const freeSpot: GeometryPoint = getFreeBedSpot({
+    widthMm: SAMPLE_SIZE_MM,
+    heightMm: SAMPLE_SIZE_MM,
+    startSpot: firstSpot,
+    existingObjects,
+    bedWidthMm: machineArea.workAreaXMm,
+    bedHeightMm: machineArea.workAreaYMm,
+  }) ?? firstSpot;
+
   return newProjectObject({
     name: SAMPLE_OBJECT_NAME,
     svgText: getSampleSvgText(svgParts),
@@ -40,7 +54,7 @@ export const getSampleJobObject = (
     intrinsicHeightMm: SAMPLE_SIZE_MM,
     widthMm: SAMPLE_SIZE_MM,
     heightMm: SAMPLE_SIZE_MM,
-    xMm: Math.min(nearPoint.x, farPoint.x),
-    yMm: Math.min(nearPoint.y, farPoint.y),
+    xMm: freeSpot.x,
+    yMm: freeSpot.y,
   });
 };

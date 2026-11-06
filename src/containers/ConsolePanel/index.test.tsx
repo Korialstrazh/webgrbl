@@ -11,6 +11,7 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import { ConnectRequested, SerialPortSelected } from '../../utils/states/grbl.connection.state';
 import { ConsoleEntryReceived, ConsoleInfoAdded, selectIsStatusReportVisible } from '../../utils/states/grbl.console.state';
 import { newStore } from '../../utils/states/new.store';
+import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
 import type { AppStore } from '../../utils/states/new.store';
 
 const INPUT_LABEL = 'Console command';
@@ -31,7 +32,8 @@ const FEED_HOLD_TEXT = '!';
 const ENTRY_TIMESTAMP = 1_000;
 const ANTD_INPUT_CLASS_NAME = 'ant-input';
 const ANTD_CHECKBOX_CLASS_NAME = 'ant-checkbox-input';
-const EMPTY_HINT_TEXT = 'No messages yet. Connect a machine to see what it sends.';
+const EMPTY_HINT_TEXT = 'No messages yet. Connect a laser to see what it sends.';
+const CLOSE_LABEL = 'Close the console';
 
 const renderConsolePanel = (): AppStore => {
   const store: AppStore = newStore();
@@ -99,6 +101,17 @@ describe(ConsolePanel.name, () => {
     });
 
     expect(screen.queryByText(EMPTY_HINT_TEXT)).not.toBeInTheDocument();
+  });
+
+  it('closes itself from the close button in its header', () => {
+    const store: AppStore = renderConsolePanel();
+
+    act(() => {
+      store.dispatch(new ConsoleOpenChanged({ isConsoleOpen: true }));
+    });
+    fireEvent.click(screen.getByRole('button', { name: CLOSE_LABEL }));
+
+    expect(selectIsConsoleOpen(store.getState())).toBe(false);
   });
 
   beforeEach(() => {

@@ -14,10 +14,10 @@ export interface CollapsedCardToggleProps {
   hintText: string;
   /** The id of the card body the toggle shows and hides. */
   controlsId: string;
-  /** The visible toggle text: Show while collapsed, Hide while open. */
-  toggleText: string;
   /** The accessible name of the toggle, which names the controls it shows or hides. */
   toggleLabel: string;
   /** Called when the toggle is pressed. */
   onToggle: () => void;
+  /** Called when the plug is pressed, to open the connection popover; it must not connect. */
+  onPlugClick?: () => void;
 }

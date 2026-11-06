@@ -11,7 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { DownOutlined } from '@ant-design/icons';
+import { ApiOutlined, DownOutlined } from '@ant-design/icons';
 import { useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
+import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectIsWebSerialSupported } from '../../utils/states/browser.environment.state';
@@ -57,6 +58,10 @@ export const ConnectionPill = (): ReactNode => {
   const selectedPortId: string = useSelector(selectSelectedPortId);
   const firmwareIdentity: GrblFirmwareIdentity | undefined = useSelector(selectFirmwareIdentity);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const isWide: boolean = useIsWideLayout();
+  // Side by side the Job card always offers Connect beside the pill. In the narrow layout the pill keeps the Connect
+  // verb on every tab, so its content never changes from one tab to the next.
+  const isJobCardShown: boolean = isWide;
   const statusText: string = t(CONNECTION_PILL_STATUS_LABEL_KEY[connectionStatus]);
   const firmwareText: string | undefined = isConnected && firmwareIdentity
     ? t(DEFAULT.CONNECTION_PILL_FIRMWARE, {
@@ -88,12 +93,16 @@ export const ConnectionPill = (): ReactNode => {
         <span className={styles.status}>{statusText}</span>
         {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
         {activeProfile && <span className={styles.profile}>{activeProfile.name}</span>}
-        <span className={styles.port}>{portText}</span>
+        {/* "No port chosen" beside "Not connected" says nothing new, so only a chosen port is shown. */}
+        {selectedPortId && <span className={styles.port}>{portText}</span>}
         {!isWebSerialSupported && (
           <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
         )}
-        {isConnectOffered(connectionStatus) && (
-          <span className={styles.connectVerb}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
+        {isConnectOffered(connectionStatus) && !isJobCardShown && (
+          <span className={styles.connectVerb}>
+            <ApiOutlined aria-hidden="true" />
+            {` ${t(DEFAULT.CONNECTION_CONNECT_MENU)}`}
+          </span>
         )}
         <DownOutlined className={styles.caret} aria-hidden="true" />
       </button>

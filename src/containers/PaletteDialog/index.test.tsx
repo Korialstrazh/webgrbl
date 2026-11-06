@@ -31,12 +31,13 @@ import { PALETTE_DRAG_DATA_TYPE } from './palette.dialog.constants';
 const NAME_LABEL = 'Name';
 const MAX_POWER_LABEL = 'Max power (%)';
 const SAVE_LABEL = 'Save';
-const NEW_COLOUR_LABEL = '+ New colour';
-const RESET_LABEL = 'Reset to defaults';
+const NEW_COLOUR_LABEL = 'New colour';
+const RESET_LABEL = 'Reset to default colours';
 const RESET_CONFIRM_LABEL = 'Yes, reset';
 const RESET_CONFIRM_TEXT = 'Replace the whole palette with the default colours? Your changes to the palette are lost.';
 const EXPORT_LABEL = 'Export for Inkscape';
 const DELETE_CONFIRM_LABEL = 'Yes, delete';
+const INKSCAPE_HELP_LABEL = 'Using the file in Inkscape';
 const LIST_LABEL = 'Palette colours';
 const DIALOG_TITLE = 'Palette';
 const LINUX_PATH_TEXT = 'Linux: ~/.config/inkscape/palettes/';
@@ -52,6 +53,7 @@ const COLOUR_PICKER_DISABLED_SELECTOR = '.ant-color-picker-trigger-disabled';
 const COLOUR_PICKER_SELECTOR = '.ant-color-picker-trigger';
 const CUT_NAME_PATTERN = /^Cut/;
 const SHADING_NAME_PATTERN = /^Shading/;
+const SHADING_LOCKED_TEXT = 'Shading is built in and cannot be deleted.';
 const SCORE_NAME_PATTERN = /^Score/;
 const NEW_ENTRY_COLOUR = '#12ab34';
 const FIRST_CANDIDATE_COLOUR: string = NEW_PALETTE_ENTRY_COLOUR_CANDIDATES[0] ?? '';
@@ -108,6 +110,16 @@ const getRow = (namePattern: RegExp): HTMLElement => {
 };
 
 describe(PaletteDialog.name, () => {
+  it.each([
+    [EXPORT_LABEL, 'Export'],
+    [INKSCAPE_HELP_LABEL, 'Help'],
+    [RESET_LABEL, 'Reset'],
+  ])('shows a short visible caption on the %s footer action', (labelText: string, captionText: string) => {
+    renderDialog(newStore());
+
+    expect(screen.getByRole('button', { name: labelText })).toHaveTextContent(captionText);
+  });
+
   it('registers an overlay while it is open', () => {
     const store: AppStore = newStore();
 
@@ -117,12 +129,16 @@ describe(PaletteDialog.name, () => {
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
   });
 
-  it('lists the palette entries with the Inkscape folder hint', () => {
+  it('lists the palette entries, with the Inkscape folders behind the help button', () => {
     renderDialog(newStore());
 
     const paletteList: HTMLElement = screen.getByRole('list', { name: LIST_LABEL });
 
     expect(within(paletteList).getAllByRole('listitem')).toHaveLength(DEFAULT_PALETTE.entries.length);
+    expect(screen.queryByText(LINUX_PATH_TEXT)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: INKSCAPE_HELP_LABEL }));
+
     expect(screen.getByText(LINUX_PATH_TEXT)).toBeInTheDocument();
     expect(screen.getByText(WINDOWS_PATH_TEXT)).toBeInTheDocument();
   });
@@ -261,7 +277,11 @@ describe(PaletteDialog.name, () => {
 
     expect(within(getRow(SHADING_NAME_PATTERN)).queryByRole('button', { name: DELETE_NAME_PATTERN }))
       .not.toBeInTheDocument();
+    expect(within(getRow(SHADING_NAME_PATTERN)).getByRole('note', { name: SHADING_LOCKED_TEXT })).toBeInTheDocument();
+    // A single tag on the page, and it sits in the shading row.
+    expect(screen.getByText('Built-in').closest('li')).toHaveTextContent(SHADING_NAME_PATTERN);
     expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
+    expect(within(getRow(CUT_NAME_PATTERN)).queryByRole('note')).not.toBeInTheDocument();
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: SHADING_NAME_PATTERN }));

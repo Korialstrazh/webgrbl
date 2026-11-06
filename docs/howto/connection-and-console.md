@@ -12,7 +12,7 @@ webgrbl talks to a GRBL laser over the Web Serial API. This page covers using it
 ## Connect
 
 1. Click the connection pill in the top bar to open its popover and pick a baud rate (115200 by default).
-2. In the popover press **Choose port...** to pick a real USB serial port in the browser dialog, or **Simulated laser (no hardware)** to use the built-in fake machine, then press **Connect**. No port is chosen for you, not even the simulated laser, so Connect stays disabled until you pick one. The top-bar pill and the Status card both open this popover with **Connect...**.
+2. In the popover press **+ USB** beside the port list to pick a real USB serial port in the browser dialog, or **Simulated laser (no hardware)** to use the built-in fake machine, then press **Connect**. No port is chosen for you, not even the simulated laser, so Connect stays disabled until you pick one. The top-bar pill and the Status card both open this popover with **Connect**. It drops below the pill, right-aligned, with the port and baud rate each on one line. In the narrow layout the pill shows its **Connect** verb on every tab.
 3. When the handshake succeeds the pill shows the firmware, and the machine panel shows the machine state and position.
 
 Chrome and Edge are required (Web Serial). A connection that gets no banner within 10 s fails with a toast.
@@ -38,7 +38,7 @@ Then log out and back in. Only one application or browser tab can hold a port at
 
 ## Stop, Reset, Unlock
 
-- Pressing **Escape** in the main view stops the machine like the STOP button, but only while connected and no popover, dialog or drawer is open (Escape then just closes it). See [workbench-shell.md](workbench-shell.md).
+- Pressing **Escape** in the main view stops the machine like the STOP button, but only while connected and no popover, dialog or drawer is open (Escape then just closes it). To make Escape stop the laser even then, open the gear beside STOP and tick **Esc stops the laser even when a panel is open** (off by default, remembered on this device): Escape then closes the panel and stops in one press, still only while connected. See [workbench-shell.md](workbench-shell.md).
 - **Stop** sends a feed hold (which also cancels a jog), waits until the machine has come to rest (at most 2 s), then soft-resets. The position is kept and no alarm is raised.
 - **Reset** soft-resets at once. Moving machines lose steps and raise `ALARM:3`, so home again afterwards.
 - **Unlock** sends `$X` to clear an Alarm lock.

@@ -1,26 +1,48 @@
-import { ConfigProvider } from 'antd';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { Button } from 'antd';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DismissibleTooltip } from '.';
 
-const TOOLTIP_TEXT = 'Look from above';
-const BUTTON_TEXT = 'Top';
+const TOOLTIP_TEXT = 'Open the library';
+const HOVER_WAIT_MS = 1000;
+
+const hoverAndWait = (element: HTMLElement): void => {
+  fireEvent.mouseEnter(element);
+  act(() => {
+    vi.advanceTimersByTime(HOVER_WAIT_MS);
+  });
+};
 
 describe(DismissibleTooltip.name, () => {
-  it('shows on hover and goes away on a click', async () => {
-    render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
-        <DismissibleTooltip title={TOOLTIP_TEXT} mouseEnterDelay={0}>
-          <button>{BUTTON_TEXT}</button>
-        </DismissibleTooltip>
-      </ConfigProvider>,
-    );
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
 
-    fireEvent.mouseEnter(screen.getByText(BUTTON_TEXT).parentElement as HTMLElement);
-    expect(await screen.findByText(TOOLTIP_TEXT)).toBeInTheDocument();
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
-    fireEvent.click(screen.getByText(BUTTON_TEXT));
-    await waitFor(() => {
-      expect(document.querySelector('.ant-tooltip:not(.ant-tooltip-hidden)')).toBeNull();
+  // A tooltip left open sits on top of antd's Escape stack and would take the Escape meant for the drawer.
+  it('stays away after a click, also when the hover timer ends after it, until the pointer comes back', () => {
+    render(<DismissibleTooltip title={TOOLTIP_TEXT}><Button>Open</Button></DismissibleTooltip>);
+
+    const wrapper: HTMLElement | null = screen.getByRole('button').parentElement;
+
+    if (!wrapper) {
+      throw new Error('The tooltip wrapper is missing.');
+    }
+
+    fireEvent.mouseEnter(wrapper);
+    fireEvent.click(screen.getByRole('button'));
+    act(() => {
+      vi.advanceTimersByTime(HOVER_WAIT_MS);
     });
+
+    expect(screen.queryByText(TOOLTIP_TEXT)).not.toBeInTheDocument();
+
+    fireEvent.mouseLeave(wrapper);
+    hoverAndWait(wrapper);
+
+    expect(screen.getByText(TOOLTIP_TEXT)).toBeInTheDocument();
   });
 });

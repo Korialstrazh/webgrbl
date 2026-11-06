@@ -47,7 +47,7 @@ const LINE_INTERVAL_LABEL = 'Line interval (mm)';
 const SAVE_TO_PALETTE_LABEL = 'Save to palette';
 const SEND_LABEL = 'Send to laser';
 const FILL_MODE_LABEL = 'Fill';
-const PRESET_LABEL = 'Save as material preset';
+const PRESET_LABEL = 'Save preset';
 const SIXTY_PERCENT_WATTS_TEXT = '6.0 W';
 const BAR_LABEL = 'Power from black to white';
 const BLACK_END_TEXT = 'Black: 6.0 W';
@@ -188,6 +188,19 @@ describe(LayerSettingsDrawer.name, () => {
 
     expect(layerName).toHaveTextContent(CUT_LAYER_NAME);
     expect(layerName.previousElementSibling).toHaveTextContent(DRAWER_OVERLINE);
+  });
+
+  it.each([
+    [SAVE_TO_PALETTE_LABEL, 'Add swatch'],
+    ['Edit palette…', 'Palette'],
+    ['Save preset', 'Save preset'],
+    ['Use preset', 'Use preset'],
+  ])('shows a short visible caption on the %s action', (labelText: string, captionText: string) => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    renderDrawer(store, CUT_COLOUR);
+
+    expect(screen.getByRole('button', { name: labelText })).toHaveTextContent(captionText);
   });
 
   it('shows the watts of the active profile next to the power', () => {
@@ -391,7 +404,7 @@ describe(LayerSettingsDrawer.name, () => {
     expect(getLayer(store, UNKNOWN_COLOUR).paletteEntryId).toBe(createdEntry?.id);
   });
 
-  it('shows Save as material preset as a disabled button with a Soon tag', () => {
+  it('shows Save preset as a disabled button with a Soon tag', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR]);
     renderDrawer(store, CUT_COLOUR);
@@ -399,7 +412,8 @@ describe(LayerSettingsDrawer.name, () => {
     const presetButton: HTMLElement = screen.getByRole('button', { name: PRESET_LABEL });
 
     expect(presetButton).toBeDisabled();
-    expect(screen.getByRole('note')).toHaveTextContent('Pick the material of the project');
+    expect(screen.getByRole('button', { name: PRESET_LABEL }))
+      .toHaveAccessibleDescription(/Pick the material of the project/);
   });
 
   it('saves the layer as a preset of the project material and the active machine, in watts', () => {

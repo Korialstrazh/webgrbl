@@ -9,6 +9,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import {
+  CodeOutlined,
+  DownloadOutlined,
+  FileAddOutlined,
+  FolderOpenOutlined,
+  HistoryOutlined,
+  SaveOutlined,
+} from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 import { ANTD_MENU_ITEM_TYPE_DIVIDER } from '../../../utils/antd.constants';
@@ -19,10 +27,11 @@ import { PROJECT_MENU_KEY } from './project.menu.constants';
 import styles from './styles.module.scss';
 
 export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvailability): ProjectMenuItems => [
-  { key: PROJECT_MENU_KEY.NEW, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_NEW) },
-  { key: PROJECT_MENU_KEY.OPEN, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN) },
+  { key: PROJECT_MENU_KEY.NEW, icon: <FileAddOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_NEW) },
+  { key: PROJECT_MENU_KEY.OPEN, icon: <HistoryOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN) },
   {
     key: PROJECT_MENU_KEY.SAVE,
+    icon: <SaveOutlined aria-hidden />,
     label: (
       <span className={styles.menuEntry}>
         <span>{t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE)}</span>
@@ -31,11 +40,20 @@ export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvaila
     ),
   },
   { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
-  { key: PROJECT_MENU_KEY.SAVE_AS_FILE, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE_AS_FILE) },
-  { key: PROJECT_MENU_KEY.OPEN_FILE, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN_FILE) },
+  {
+    key: PROJECT_MENU_KEY.SAVE_AS_FILE,
+    icon: <DownloadOutlined aria-hidden />,
+    label: t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE_AS_FILE),
+  },
+  {
+    key: PROJECT_MENU_KEY.OPEN_FILE,
+    icon: <FolderOpenOutlined aria-hidden />,
+    label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN_FILE),
+  },
   { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
   {
     key: PROJECT_MENU_KEY.EXPORT_GCODE,
+    icon: <CodeOutlined aria-hidden />,
     disabled: !gcodeExport.isGcodeExportEnabled,
     label: (
       <Tooltip title={gcodeExport.gcodeExportBlockedReasonKey && t(gcodeExport.gcodeExportBlockedReasonKey)}>

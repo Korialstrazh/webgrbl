@@ -20,7 +20,7 @@ const COLOR_SURFACE_HOVER = '#212429';
 const COLOR_SURFACE_ACTIVE = '#23272c';
 const COLOR_BORDER = '#2a2e34';
 const COLOR_TEXT = '#e6e8eb';
-const COLOR_TEXT_MUTED = '#a3a9b0';
+const COLOR_TEXT_MUTED = '#b0b6bd';
 const COLOR_ACCENT = '#ff8a1f';
 const COLOR_ACCENT_HOVER = '#ff9a3d';
 const COLOR_ACCENT_ACTIVE = '#e67a14';
@@ -30,8 +30,10 @@ const COLOR_DANGER_BUTTON_HOVER = '#a82629';
 const COLOR_DANGER_BUTTON_ACTIVE = '#9d2326';
 // Error text (form messages, error alerts) needs a lighter red than the buttons to stay above 4.5:1 on every surface.
 const COLOR_DANGER_TEXT = '#ff6b6b';
+// An unchecked checkbox drew in the faint border colour, almost black on black; this outline keeps 3:1 or more.
+const COLOR_CONTROL_BORDER = '#8a8f98';
 const COLOR_DISABLED_BG = '#1a1d21';
-const COLOR_DISABLED_TEXT = '#8b9097';
+const COLOR_DISABLED_TEXT = '#9aa0a6';
 // antd's dark algorithm derives a bright blue-grey disabled border that made disabled buttons look more prominent than
 // enabled ones; this one is fainter than the enabled border.
 const COLOR_DISABLED_BORDER = '#23272c';
@@ -39,6 +41,10 @@ const COLOR_WARNING = '#ffb547';
 const COLOR_SUCCESS = '#3fcf8e';
 const COLOR_INFO = '#4aa3ff';
 const COLOR_FOCUS_RING = '#ff8a1f';
+// antd's default mask (45 % black) barely dims the dark panels; 65 % sets an open dialog clearly apart from them.
+const COLOR_BG_MASK = 'rgba(0, 0, 0, 0.65)';
+// A dialog lifts off the dimmed app with a soft, deep shadow.
+const DIALOG_SHADOW = `0 1rem 3rem rgba(0, 0, 0, 0.6), 0 0 0 1px ${COLOR_BORDER}`;
 /** --focus-outline-width (0.125rem) in pixels. */
 const FOCUS_OUTLINE_WIDTH_PIXELS = 2;
 /** The grip on a splitter bar is 2rem long, so the bar is easy to find and to grab. */
@@ -70,9 +76,15 @@ export const ANTD_THEME: ThemeConfig = {
     colorBgBase: COLOR_BG,
     colorBgContainer: COLOR_SURFACE_1,
     colorBgElevated: COLOR_SURFACE_2,
+    // Tooltips share the dark surface of the popovers instead of antd's slate.
+    colorBgSpotlight: COLOR_SURFACE_3,
     colorBorder: COLOR_BORDER,
     colorText: COLOR_TEXT,
     colorTextSecondary: COLOR_TEXT_MUTED,
+    // antd derives these from translucent white (2.3:1 to 4:1 on our surfaces); muted text keeps them at AA.
+    colorTextTertiary: COLOR_TEXT_MUTED,
+    colorTextDescription: COLOR_TEXT_MUTED,
+    colorTextPlaceholder: COLOR_TEXT_MUTED,
     colorError: COLOR_DANGER_BUTTON,
     colorErrorHover: COLOR_DANGER_BUTTON_HOVER,
     colorErrorActive: COLOR_DANGER_BUTTON_ACTIVE,
@@ -90,6 +102,7 @@ export const ANTD_THEME: ThemeConfig = {
     // antd draws its focus outline in colorPrimaryBorder, which the dark algorithm derives as a dark brown (1.6:1).
     colorPrimaryBorder: COLOR_FOCUS_RING,
     lineWidthFocus: FOCUS_OUTLINE_WIDTH_PIXELS,
+    colorBgMask: COLOR_BG_MASK,
   },
   components: {
     // antd paints the header and siders navy by default; the regions use our surfaces instead.
@@ -124,6 +137,9 @@ export const ANTD_THEME: ThemeConfig = {
       itemSelectedBg: COLOR_SURFACE_3,
       itemSelectedColor: COLOR_TEXT,
     },
+    Checkbox: {
+      colorBorder: COLOR_CONTROL_BORDER,
+    },
     Switch: {
       colorPrimary: COLOR_ACCENT,
       colorPrimaryHover: COLOR_ACCENT_HOVER,
@@ -151,6 +167,9 @@ export const ANTD_THEME: ThemeConfig = {
       controlItemBgActiveHover: COLOR_ACCENT_ACTIVE,
       colorFill: COLOR_TEXT_MUTED,
       splitBarDraggableSize: SPLITTER_GRIP_LENGTH_PIXELS,
+    },
+    Modal: {
+      boxShadow: DIALOG_SHADOW,
     },
     Segmented: {
       trackBg: COLOR_SURFACE_1,

@@ -15,6 +15,9 @@ const COLOR_TOKEN_SOURCES = [
   ['colorBorder', '--color-border'],
   ['colorText', '--color-text'],
   ['colorTextSecondary', '--color-text-muted'],
+  ['colorTextTertiary', '--color-text-muted'],
+  ['colorTextDescription', '--color-text-muted'],
+  ['colorTextPlaceholder', '--color-text-muted'],
   ['colorPrimaryHover', '--color-accent-hover'],
   ['colorPrimaryActive', '--color-accent-active'],
   ['colorError', '--color-danger-button'],
@@ -93,6 +96,7 @@ const themeTokens: Record<string, unknown> = { ...ANTD_THEME.token };
 const layoutTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Layout };
 const buttonTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Button };
 const segmentedTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Segmented };
+const checkboxTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Checkbox };
 const switchTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Switch };
 const sliderTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Slider };
 const selectTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Select };
@@ -122,6 +126,12 @@ const getRemTokenPixels = (tokenName: string): number => {
 describe('ANTD_THEME', () => {
   it('uses the dark algorithm', () => {
     expect(ANTD_THEME.algorithm).toBe(theme.darkAlgorithm);
+  });
+
+  it('dims the app behind a dialog more than antd does by default', () => {
+    const maskAlpha: number = parseFloat(String(ANTD_THEME.token?.colorBgMask).split(',').at(-1) ?? '');
+
+    expect(maskAlpha).toBeGreaterThanOrEqual(0.6);
   });
 
   it.each(COLOR_TOKEN_SOURCES)('takes %s from %s', (antdToken: string, scssToken: string) => {
@@ -154,6 +164,10 @@ describe('ANTD_THEME', () => {
 
   it.each(SEGMENTED_TOKEN_SOURCES)('paints the segmented %s from %s', (segmentedToken: string, scssToken: string) => {
     expect(segmentedTokens[segmentedToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it('outlines the checkbox in --color-control-border', () => {
+    expect(checkboxTokens.colorBorder).toBe(requireScssToken('--color-control-border'));
   });
 
   it.each(SWITCH_TOKEN_SOURCES)('paints the switch %s from %s', (switchToken: string, scssToken: string) => {

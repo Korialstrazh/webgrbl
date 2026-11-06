@@ -11,9 +11,9 @@
   gap: var(--space-1);
 }
 
-// A count of 0 stays in place, so the summary keeps its shape, but asks for no attention.
-.emptyCount {
-  color: var(--color-text-muted);
+// Each count is an icon with a number; a count of 0 stays in place in grey, so the summary keeps its shape.
+.countTag {
+  margin-inline-end: 0;
 }
 
 // A list cut to nothing takes no room and no gap.
@@ -27,12 +27,6 @@
   @media (pointer: coarse) {
     min-height: 2.75rem;
   }
-}
-
-.note {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
 }
 
 .list {
@@ -66,4 +60,18 @@
     background-color: var(--color-surface-2);
     font-weight: 600;
   }
+}
+
+.warningList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.accuracyTag {
+  margin-inline-start: auto;
+  cursor: help;
 }

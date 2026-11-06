@@ -1,7 +1,7 @@
 key;en
 ADD_TEST_SAMPLE;Add test sample
 ADD_TEST_SAMPLE_PROJECT_FULL;The project has the most objects it can hold.
-ADD_TEST_SAMPLE_TOO_SMALL;The 5 × 5 cm sample does not fit the work area of this machine.
+ADD_TEST_SAMPLE_TOO_SMALL;The 5 × 5 cm sample does not fit the work area of this laser.
 APP_TITLE;webgrbl
 APP_UPDATE_DISMISS;Dismiss
 APP_UPDATE_NEED_REFRESH;A new version of webgrbl is available.
@@ -9,28 +9,25 @@ APP_UPDATE_OFFLINE_READY;webgrbl is ready to work offline.
 APP_UPDATE_RELOAD;Reload
 BED_ARIA_HEAD;Laser head at X {{x}}, Y {{y}} (work coordinates)
 BED_ARIA_HEAD_OUTSIDE;Laser head at X {{x}}, Y {{y}} (work coordinates), outside the bed
-BED_ARIA_LABEL;Machine bed, {{width}} by {{height}} mm
+BED_ARIA_LABEL;Laser bed, {{width}} by {{height}} mm
 BED_ARIA_WORK_ORIGIN;Work zero at X {{x}}, Y {{y}} (work coordinates)
 BED_ARIA_WORK_ORIGIN_OUTSIDE;Work zero at X {{x}}, Y {{y}} (work coordinates), outside the bed
-BED_COLOUR_DARK_NOTE;A very dark bed hides black artwork.
+BED_COLOUR_DARK_NOTE;On a dark bed, artwork gets a thin light rim so black stays visible.
 BED_COLOUR_LABEL;Bed colour
+BED_COLOUR_PRESET_CHARCOAL;Charcoal (default)
 BED_COLOUR_PRESET_DARK_GREY;Dark grey
-BED_COLOUR_PRESET_GREY;Grey (default)
+BED_COLOUR_PRESET_GREY;Grey
 BED_COLOUR_PRESET_LIGHT_GREY;Light grey
 BED_COLOUR_PRESET_PLYWOOD;Plywood
 BED_COLOUR_PRESET_WHITE;White
 BED_COLOUR_PRESETS;Presets
 BED_COLOUR_RESET;Reset to default
-BED_MORE_TOOLS_LABEL;More bed tools, coming in a later release
-BED_NO_MACHINE;Connect a machine to see its bed
+BED_EMPTY_DROP_HINT;Drop an SVG here
+BED_NO_MACHINE;Add a laser profile to set the bed size
 BED_OBJECTS_LABEL;Design objects: arrow keys move the selection, Delete removes it
 BED_PANEL_TITLE;Bed
 BED_RULER_UNIT;mm
 BED_SIZE_UNKNOWN;Bed size unknown, showing a default bed
-BED_TOOL_ALIGN;Align
-BED_TOOL_ALIGN_DESCRIPTION;Line up the selected objects with each other or with the bed.
-BED_TOOL_EDIT_NODES;Edit nodes
-BED_TOOL_EDIT_NODES_DESCRIPTION;Move the points of a shape to change its outline.
 BED_VIEW_3D;3D
 BED_VIEW_DESIGN;Design
 BED_VIEW_MODE_LABEL;Bed view
@@ -40,20 +37,21 @@ BED_ZOOM_FIT_HINT;Fit the bed to the view (0)
 BED_ZOOM_IN_HINT;Zoom in (+). The mouse wheel zooms around the pointer.
 BED_ZOOM_OUT_HINT;Zoom out (-)
 BED_ZOOM_PAN_HINT;Zoom relative to the fitted bed: 100 % (fit) shows the whole bed. Drag with the middle mouse button, or hold Space and drag, to move the view.
-BED_ZOOM_PERCENT;{{percent}} %
-BED_ZOOM_PERCENT_FIT;{{percent}} % (fit)
+BED_ZOOM_PERCENT;{{percent}}%
 BURN_PART_LIFT_CLICK_HINT;Click a part to check it and lift it.
 BURN_PART_LIFT_HEIGHT;Lifted {{height}} mm
 BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached.
 BURN_PART_LIFT_HINT_FREE;Part {{part}} comes free.
 BURN_PART_LIFT_HINT_NOT_THROUGH;Part {{part}} stays attached: the cut does not reach through, so it cannot be lifted.
 BURN_PART_LIFT_HINT_RISES_WITH_PARENT;Part {{part}} stays attached to Part {{parent}}, so it rises with it and cannot be lifted on its own.
+BURN_PART_LIFT_IDLE_CAPTION;Lift a part
 BURN_PART_LIFT_KEY_HINT;Up and down keys: {{step}} mm a step.
 BURN_PART_LIFT_LABEL;Lift selected part
 BURN_PART_LIFT_NOT_LIFTED;Not lifted
 BURN_PART_LIFT_PUT_ALL_BACK;Put all back
 BURN_PREVIEW_ADD_MATERIAL;Add material…
 BURN_PREVIEW_BUILDING;Building the 3D view
+BURN_PREVIEW_CHOOSE_MATERIAL_TITLE;Pick the material to see the cut
 BURN_PREVIEW_ENTER_TEST_RESULT;Enter test result
 BURN_PREVIEW_FAILED;The 3D view could not be built. Switch to another view and back to try again.
 BURN_PREVIEW_LOADING;Loading the 3D view
@@ -61,12 +59,12 @@ BURN_PREVIEW_MATERIAL_CURRENT;Material: {{name}}
 BURN_PREVIEW_MATERIAL_DETAIL_PRESETS_one;{{count}} preset
 BURN_PREVIEW_MATERIAL_DETAIL_PRESETS_other;{{count}} presets
 BURN_PREVIEW_MATERIAL_DETAIL_TESTED;Burn test {{date}}
-BURN_PREVIEW_MATERIAL_DETAIL_UNTESTED;No burn test on this machine
+BURN_PREVIEW_MATERIAL_DETAIL_UNTESTED;No burn test on this laser
 BURN_PREVIEW_MATERIAL_LABEL;Material
 BURN_PREVIEW_MATERIAL_NONE;Material: none
 BURN_PREVIEW_MATERIAL_OPTION;{{name}}, {{thickness}} mm
 BURN_PREVIEW_MATERIAL_PLACEHOLDER;Choose a material
-BURN_PREVIEW_NO_MATERIAL;Pick a material in Design to see how the cut will turn out.
+BURN_PREVIEW_NO_MATERIAL;Add a material to see the cut
 BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
 BURN_PREVIEW_OUT_OF_DATE;Out of date: the design changed. The 3D view comes back when the toolpath is generated again.
 BURN_SCENE_CANVAS_LABEL;3D view of the sheet. Drag to orbit, scroll to zoom, click a part to select it.
@@ -74,7 +72,8 @@ BURN_SCENE_VIEW_FIT_HINT;Fit: back to the first view of the whole sheet
 BURN_SCENE_VIEW_LABEL;3D view
 BURN_SCENE_VIEW_TOP_HINT;Top: look straight down at the sheet
 COMING_SOON;Soon
-CONNECTION_CONNECT_MENU;Connect...
+COMING_SOON_LIST;Coming soon
+CONNECTION_CONNECT_MENU;Connect
 CONNECTION_NO_PORT_CHOSEN;No port chosen
 CONNECTION_PILL_CONNECTED;Connected
 CONNECTION_PILL_CONNECTING;Connecting
@@ -84,7 +83,8 @@ CONNECTION_PILL_LABEL;Connection: {{details}}. Open the connection menu.
 CONNECTION_PILL_LOST;Connection lost
 CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED;No Web Serial
 CONNECTION_POPOVER_BAUD;Baud rate
-CONNECTION_POPOVER_CHOOSE_PORT;Choose port...
+CONNECTION_POPOVER_CHOOSE_PORT;USB
+CONNECTION_POPOVER_CHOOSE_PORT_LABEL;Choose a USB port
 CONNECTION_POPOVER_CONNECT;Connect
 CONNECTION_POPOVER_CONNECTING;Connecting...
 CONNECTION_POPOVER_DISCONNECT;Disconnect
@@ -94,7 +94,8 @@ CONNECTION_POPOVER_SERIAL_PORT;Serial port
 CONNECTION_POPOVER_SIMULATED_LASER;Simulated laser (no hardware)
 CONNECTION_POPOVER_USB_PORT;USB {{vendorId}}:{{productId}}
 CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
-CONSOLE_EMPTY_HINT;No messages yet. Connect a machine to see what it sends.
+CONSOLE_CLOSE;Close the console
+CONSOLE_EMPTY_HINT;No messages yet. Connect a laser to see what it sends.
 CONSOLE_INPUT_LABEL;Console command
 CONSOLE_INPUT_PLACEHOLDER;Type a command, for example $$
 CONSOLE_JOB_RUNNING;The console is locked while a job runs.
@@ -109,8 +110,14 @@ CONSOLE_REALTIME_STATUS_QUERY;Status query
 CONSOLE_SHOW_STATUS_REPORTS;Show status reports
 CONSOLE_TITLE;Console
 CONSOLE_TOGGLE;Console
+CUT_CHECK_3D_ONLY_NOTE;The cut check runs in the 3D view.
+CUT_CHECK_BADGE_ESTIMATE;Estimate
+CUT_CHECK_BADGE_GUESS;Guess
+CUT_CHECK_DEPTH_COMPARISON;{{predicted}} / {{needed}} mm
+CUT_CHECK_FIX;Fix
 CUT_CHECK_NOTE_ESTIMATE;Estimate from your test.
-CUT_CHECK_NOTE_GUESS;This is a guess: no test has been made with this material on this machine.
+CUT_CHECK_NOTE_GUESS;This is a guess: no test has been made with this material on this laser.
+CUT_CHECK_OPEN_LAYER_SETTINGS;Fix in {{layer}} settings
 CUT_CHECK_PART_COUNT_one;{{count}} part
 CUT_CHECK_PART_COUNT_other;{{count}} parts
 CUT_CHECK_PART_LIFTED;{{height}} mm
@@ -133,11 +140,21 @@ CUT_CHECK_WARNING_PART_ATTACHED;Layer {{layer}}: Part {{part}} stays attached (p
 CUT_CHECK_WARNING_PART_MAY_STAY_ATTACHED;Layer {{layer}}: Part {{part}} may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
 CUT_CHECK_WARNING_PARTS_ATTACHED;Layer {{layer}}: {{count}} parts stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
 CUT_CHECK_WARNING_PARTS_MAY_STAY_ATTACHED;Layer {{layer}}: {{count}} parts may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
+CUT_CHECK_WARNINGS_LABEL;Cut check warnings
 DESIGN_LAYERS_TITLE;Layers
+DESIGN_MATERIAL_DESIGN_ONLY_NOTE;The material is chosen in the Design view.
 DESIGN_MATERIAL_TITLE;Material
+DESIGN_OBJECTS_NOT_IN_3D_NOTE;Objects are edited in the Design and Toolpath views.
 DESIGN_OBJECTS_TITLE;Objects
-DESIGN_PANEL_TITLE;Design
-FRAME_ALARMED;The machine reported an alarm, possibly a limit. Check the machine and clear the alarm before framing again.
+DESIGN_PANEL_TITLE;Layers and objects
+FIELD_CAPTION_MAX;Max
+FIELD_CAPTION_MIN;Min
+FIELD_UNIT_MM;mm
+FIELD_UNIT_MM_PER_MIN;mm/min
+FIELD_UNIT_PERCENT;%
+FIELD_UNIT_TIMES;×
+FIELD_UNIT_WATTS;W
+FRAME_ALARMED;The laser reported an alarm, possibly a limit. Check the laser and clear the alarm before framing again.
 FRAME_BED_OVERRUN;The frame goes {{distanceMm}} mm past the {{edge}} edge of the bed. Move the job before framing.
 FRAME_EDGE_BACK;back
 FRAME_EDGE_FRONT;front
@@ -146,32 +163,41 @@ FRAME_EDGE_RIGHT;right
 FRAME_GRID_CELL;{{cellCm}} cm
 FRAME_GRID_LABEL;Frame grid
 FRAME_GRID_NONE;Rectangle only
+FRAME_MARGIN_CAPTION;Margin
 FRAME_MARGIN_LABEL;Frame margin (mm)
+FRAME_POWER_DETAIL;{{profileName}}, assumed {{maxPowerWatts}} W laser
 FRAME_POWER_LABEL;Dot power
-FRAME_POWER_VALUE;about {{watts}} W ({{profileName}}, assumed {{maxPowerWatts}} W laser)
+FRAME_POWER_VALUE;≈ {{watts}} W
 FRAME_RUN_STATUS_COMPLETED;Frame finished
 FRAME_RUN_STATUS_FINISHING;Framing
 FRAME_RUN_STATUS_INTERRUPTED;Frame stopped before the end
 FRAME_RUN_STATUS_PAUSED;Framing: paused
 FRAME_RUN_STATUS_SENDING;Framing
+FRAME_SETTINGS_HIDE;Hide frame settings
+FRAME_SETTINGS_NEEDS_PROFILE;Set up a laser profile first.
+FRAME_SETTINGS_RUN_LOCKED;Fixed while a job runs.
+FRAME_SETTINGS_SHOW;Show frame settings
+FRAME_SETTINGS_TITLE;Frame settings
+FRAME_SPEED_CAPTION;Speed
 FRAME_SPEED_LABEL;Frame speed (mm/min)
 FRAME_START_BLOCKED_BED_OVERRUN;The frame would leave the bed.
 FRAME_START_BLOCKED_LASER_MODE;Laser mode ($32=1) must be confirmed on to frame a job.
 FRAME_START_BLOCKED_NO_BURN_MOVES;The toolpath has no burn moves to frame.
-FRAME_START_BLOCKED_NO_WORK_POSITION;The machine has not reported its position yet.
+FRAME_START_BLOCKED_NO_WORK_POSITION;The laser has not reported its position yet.
+FRAME_START_BLOCKED_NOT_CONNECTED;Connect the laser to trace the frame.
 FRAME_TIME_LABEL;Frame time
 GCODE_EXPORT_NEEDS_LAYER;Switch on a layer to export G-code.
-GCODE_EXPORT_NEEDS_PROFILE;Add a machine profile to export G-code.
+GCODE_EXPORT_NEEDS_PROFILE;Add a laser profile to export G-code.
 GCODE_WARNINGS_CANCEL;Cancel
 GCODE_WARNINGS_CONFIRM;Export anyway
 GCODE_WARNINGS_INTRO;Some content is left out of the job or burns differently than the bed shows:
 GCODE_WARNINGS_ITEM;{{objectName}}: {{warning}}
 GCODE_WARNINGS_LIST_LABEL;Toolpath warnings
 GCODE_WARNINGS_TITLE;Export G-code with warnings?
-GRBL_ALARM_1;Hard limit triggered - the machine position is probably lost so home again. If this appears on connecting, the head may be resting on a limit switch: move it away.
+GRBL_ALARM_1;Hard limit triggered - the laser position is probably lost so home again. If this appears on connecting, the head may be resting on a limit switch: move it away.
 GRBL_ALARM_10;Emergency stop asserted - clear it and reset.
-GRBL_ALARM_2;Soft limit alarm - the G-code target is beyond the machine travel. The position is kept and it is safe to unlock.
-GRBL_ALARM_3;Reset during a move - the machine position is probably lost so home again.
+GRBL_ALARM_2;Soft limit alarm - the G-code target is beyond the laser travel. The position is kept and it is safe to unlock.
+GRBL_ALARM_3;Reset during a move - the laser position is probably lost so home again.
 GRBL_ALARM_4;Probe fail - the probe was not in its expected start state.
 GRBL_ALARM_5;Probe fail - the probe did not touch the workpiece within the travel.
 GRBL_ALARM_6;Homing fail - the homing cycle was reset.
@@ -185,7 +211,7 @@ GRBL_ERROR_11;Line too long - the command was not executed.
 GRBL_ERROR_12;A setting makes the step rate exceed the 30 kHz maximum.
 GRBL_ERROR_13;The safety door is open.
 GRBL_ERROR_14;The startup or build info line is too long to store.
-GRBL_ERROR_15;The jog target is beyond the machine travel.
+GRBL_ERROR_15;The jog target is beyond the laser travel.
 GRBL_ERROR_16;Invalid jog command.
 GRBL_ERROR_17;Laser mode requires PWM output.
 GRBL_ERROR_18;Emergency stop engaged - release the button.
@@ -215,14 +241,31 @@ GRBL_ERROR_4;Negative value received where a positive one is expected.
 GRBL_ERROR_5;Homing is not enabled in the settings.
 GRBL_ERROR_6;Step pulse time must be at least 3 microseconds.
 GRBL_ERROR_7;Reading the settings failed - defaults were restored.
-GRBL_ERROR_8;This $ command only works while the machine is idle.
+GRBL_ERROR_8;This $ command only works while the laser is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
+JOB_ACTIONS_BLOCKED_NOT_CONNECTED;Connect the laser to start or frame.
 JOB_PAUSE;Pause
 JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.
+JOB_READINESS_CONNECT;Connect
+JOB_READINESS_CONNECT_ACTION;Connect laser
+JOB_READINESS_CONNECT_HINT;Connect the laser
+JOB_READINESS_DESIGN;Artwork
+JOB_READINESS_DESIGN_ACTION;Import SVG
+JOB_READINESS_DESIGN_HINT;Import an SVG
+JOB_READINESS_DESIGN_MET_HINT;Import another SVG
+JOB_READINESS_LABEL;Ready to cut?
+JOB_READINESS_MATERIAL;Material
+JOB_READINESS_MATERIAL_ACTION;Choose material
+JOB_READINESS_MATERIAL_HINT;Choose the material
+JOB_READINESS_PROFILE;Profile
+JOB_READINESS_PROFILE_ACTION;Set up laser
+JOB_READINESS_PROFILE_HINT;Set up a laser profile
+JOB_READINESS_STEP_MET;{{step}}: done
+JOB_READINESS_STEP_OPEN;{{step}}: to do
 JOB_RESUME;Resume
-JOB_RESUME_WAITING;Wait until the machine has stopped and any door is closed.
+JOB_RESUME_WAITING;Wait until the laser has stopped and any door is closed.
 JOB_RUN_PROGRESS_DETAIL;{{answered}} of {{total}} lines answered, {{elapsed}} elapsed
 JOB_RUN_PROGRESS_LABEL;Job progress
 JOB_RUN_STATUS_COMPLETED;Finished
@@ -231,16 +274,28 @@ JOB_RUN_STATUS_INTERRUPTED;Stopped before the end
 JOB_RUN_STATUS_LABEL;Status
 JOB_RUN_STATUS_PAUSED;Paused
 JOB_RUN_STATUS_SENDING;Running
-JOB_START_BLOCKED_NO_PROFILE;Add a machine profile to start a job.
+JOB_START_BLOCKED_NO_PROFILE;Add a laser profile to start a job.
 JOB_START_BLOCKED_NO_TOOLPATH;Wait for an up-to-date toolpath with something to burn.
 JOB_START_BLOCKED_NOT_CONNECTED;Connect the laser to start a job.
 JOB_START_BLOCKED_NOT_IDLE;The laser must be idle to start a job.
 JOB_START_BLOCKED_RUNNING;A job is running.
 JOB_START_BLOCKED_WARNINGS;Fix the toolpath warnings to start a job.
 JOB_START_CONFIRM_CANCEL;Cancel
-JOB_START_CONFIRM_DESCRIPTION;Check the material, focus and work zero. Keep protective glasses on and stay with the machine.
+JOB_START_CONFIRM_DESCRIPTION;Check the material, focus and work zero. Keep protective glasses on and stay with the laser.
 JOB_START_CONFIRM_OK;Start and fire
 JOB_START_CONFIRM_TITLE;Start the job? The laser will fire.
+LASER_STATE_FIRING;Power on
+LASER_STATE_FIRING_HINT;The laser reports power above zero. It may be firing.
+LASER_STATE_JOB_RUNNING;Job running
+LASER_STATE_JOB_RUNNING_HINT;A job is running. The laser can fire at any moment.
+LASER_STATE_NOT_CONNECTED;No link
+LASER_STATE_NOT_CONNECTED_HINT;No laser is connected, so its state is unknown.
+LASER_STATE_POINTER_ON;Pointer on
+LASER_STATE_POINTER_ON_HINT;The laser pointer is firing at low power.
+LASER_STATE_POWER_UNKNOWN;Power unknown
+LASER_STATE_POWER_UNKNOWN_HINT;The laser has not reported its power.
+LASER_STATE_ZERO_POWER;0 power
+LASER_STATE_ZERO_POWER_HINT;The last report from the laser shows zero power.
 LAYER_MODE_FILL;Fill
 LAYER_MODE_LINE;Line
 LAYER_POWER_PERCENT;{{percent}} %
@@ -250,26 +305,43 @@ LAYER_SETTINGS_BAR_BLACK;Black: {{power}}
 LAYER_SETTINGS_BAR_LABEL;Power from black to white
 LAYER_SETTINGS_BAR_WHITE;White: {{power}}
 LAYER_SETTINGS_EDIT_PALETTE;Edit palette…
+LAYER_SETTINGS_EDIT_PALETTE_CAPTION;Palette
+LAYER_SETTINGS_HELP;Line follows the shapes, Fill scans across them. More power, less speed or more passes burn deeper.
+LAYER_SETTINGS_HELP_LABEL;About these settings
 LAYER_SETTINGS_LINE_INTERVAL;Line interval (mm)
 LAYER_SETTINGS_MAX_POWER;Max power (%)
 LAYER_SETTINGS_MIN_POWER;Min power (%)
 LAYER_SETTINGS_MODE;Mode
 LAYER_SETTINGS_OVERLINE;Layer settings
 LAYER_SETTINGS_PASSES;Passes
-LAYER_SETTINGS_PRESET_APPLY;Use a material preset
+LAYER_SETTINGS_PRESET_APPLY;Use preset
 LAYER_SETTINGS_PRESET_CANCEL;Cancel
 LAYER_SETTINGS_PRESET_EXISTS;{{name}}, {{thickness}} mm · {{operation}} already has a preset for {{machine}}.
 LAYER_SETTINGS_PRESET_EXISTS_QUESTION;Update it with these settings, or save a new one?
 LAYER_SETTINGS_PRESET_NEEDS_MATERIAL;Pick the material of the project in the Material panel to save a preset.
-LAYER_SETTINGS_PRESET_SAVE;Save as material preset
+LAYER_SETTINGS_PRESET_SAVE;Save preset
 LAYER_SETTINGS_PRESET_SAVE_NEW;Save as new
 LAYER_SETTINGS_PRESET_SAVED;Saved {{name}}, {{thickness}} mm · {{operation}} as a preset for {{machine}}.
 LAYER_SETTINGS_PRESET_UPDATE;Update existing
 LAYER_SETTINGS_PRESET_UPDATED;Updated the {{name}}, {{thickness}} mm · {{operation}} preset for {{machine}}.
 LAYER_SETTINGS_SAVE_TO_PALETTE;Save to palette
+LAYER_SETTINGS_SAVE_TO_PALETTE_CAPTION;Add swatch
 LAYER_SETTINGS_SEND;Send to laser
 LAYER_SETTINGS_SPEED;Speed (mm/min)
-LAYERS_EMPTY_HINT;No layers yet. Layers appear when the design has colours.
+LAYERS_CELL_PASSES;{{passes}}×
+LAYERS_CELL_PASSES_HINT;Passes
+LAYERS_CELL_POWER;{{power}} %
+LAYERS_CELL_POWER_HINT;Power (%)
+LAYERS_CELL_SPEED;{{speed}}
+LAYERS_CELL_SPEED_HINT;Speed (mm/min)
+LAYERS_CELL_SPEED_UNIT_LENGTH;mm
+LAYERS_CELL_SPEED_UNIT_PER;min
+LAYERS_COLOUR_HINT;Layer colour
+LAYERS_DRAG_HINT;Drag to reorder
+LAYERS_EMPTY_HINT;No layers yet
+LAYERS_LEGEND_PASSES;Passes
+LAYERS_LEGEND_POWER;Power
+LAYERS_LEGEND_SPEED;Speed
 LAYERS_LIST_LABEL;Project layers
 LAYERS_MOVE_DOWN;Move {{name}} down
 LAYERS_MOVE_UP;Move {{name}} up
@@ -281,7 +353,7 @@ LAYERS_SUMMARY_SPEED;{{speed}} mm/min
 LAYERS_TOGGLE;Send {{name}} to the laser
 LAYOUT_RESIZE_CONSOLE;Resize the console
 LAYOUT_RESIZE_DESIGN_PANEL;Resize the design panel
-LAYOUT_RESIZE_MACHINE_PANEL;Resize the machine panel
+LAYOUT_RESIZE_MACHINE_PANEL;Resize the laser panel
 MACHINE_CARD_HIDE;Hide
 MACHINE_CARD_SHOW;Show
 MACHINE_CONTROL_RESET;Reset
@@ -289,8 +361,10 @@ MACHINE_CONTROL_STOP;Stop
 MACHINE_CONTROL_STOP_SHORTCUT;Esc
 MACHINE_CONTROL_UNLOCK;Unlock
 MACHINE_JOB_ESTIMATE_LABEL;Estimate
+MACHINE_JOB_EXPORT_CAPTION;Export
 MACHINE_JOB_EXPORT_GCODE;Export G-code
 MACHINE_JOB_FRAME;Frame job
+MACHINE_JOB_FRAME_CAPTION;Frame
 MACHINE_JOB_LAYER_COUNT_one;{{count}} layer
 MACHINE_JOB_LAYER_COUNT_other;{{count}} layers
 MACHINE_JOB_LAYERS_LABEL;Layers
@@ -324,44 +398,51 @@ MACHINE_MOVE_SHOW_CONTROLS_LABEL;Show the move controls
 MACHINE_MOVE_STEP_LABEL;Step size
 MACHINE_MOVE_STEP_OPTION;{{distance}} mm
 MACHINE_MOVE_TITLE;Move
-MACHINE_PANEL_TITLE;Machine
+MACHINE_PANEL_TITLE;Laser
 MACHINE_PROFILE_ERROR_FRAME_FEED_RATE_INVALID;Frame speed must be between {{min}} and {{max}} mm/min
 MACHINE_PROFILE_ERROR_FRAME_MARGIN_INVALID;Frame margin must not be negative
 MACHINE_PROFILE_ERROR_JOG_FEED_RATE_INVALID;Jog feed must be between {{min}} and {{max}} mm/min
 MACHINE_PROFILE_ERROR_MAX_POWER_INVALID;Laser power must be greater than 0 W and at most {{max}} W
-MACHINE_PROFILE_ERROR_NAME_REQUIRED;Enter a name for the machine
+MACHINE_PROFILE_ERROR_NAME_REQUIRED;Enter a name for the laser
 MACHINE_PROFILE_ERROR_S_VALUE_MAX_INVALID;Maximum S value must be a whole number from {{min}} to {{max}}
 MACHINE_PROFILE_ERROR_WORK_AREA_X_INVALID;Work area width must be greater than 0 and at most {{max}} mm
 MACHINE_PROFILE_ERROR_WORK_AREA_Y_INVALID;Work area height must be greater than 0 and at most {{max}} mm
 MACHINE_PROFILES_ACTIVE;Active
-MACHINE_PROFILES_DELETE;Delete
+MACHINE_PROFILES_DELETE;Delete {{name}}
 MACHINE_PROFILES_DELETE_CANCEL;Cancel
 MACHINE_PROFILES_DELETE_CONFIRM;Delete the profile {{name}} and its material presets?
-MACHINE_PROFILES_DELETE_LAST_HINT;Keep at least one machine profile. Add another before deleting this one.
+MACHINE_PROFILES_DELETE_LAST_HINT;Keep at least one laser profile. Add another before deleting this one.
 MACHINE_PROFILES_DELETE_OK;Yes, delete
 MACHINE_PROFILES_EXPORT;Export
 MACHINE_PROFILES_FIELD_AIR_ASSIST;Air assist
 MACHINE_PROFILES_FIELD_HOMING;Homing switches
 MACHINE_PROFILES_FIELD_JOG_FEED_RATE;Jog feed (mm/min)
+MACHINE_PROFILES_FIELD_JOG_FEED_RATE_CAPTION;Jog
 MACHINE_PROFILES_FIELD_MAX_POWER;Laser power (W)
+MACHINE_PROFILES_FIELD_MAX_POWER_CAPTION;Power
 MACHINE_PROFILES_FIELD_NAME;Name
 MACHINE_PROFILES_FIELD_ORIGIN_CORNER;Origin corner
 MACHINE_PROFILES_FIELD_S_VALUE_MAX;Maximum S value ($30)
+MACHINE_PROFILES_FIELD_S_VALUE_MAX_CAPTION;S max
 MACHINE_PROFILES_FIELD_S_VALUE_MAX_HINT;The S value GRBL treats as full laser power, its setting $30. Usually 1000.
 MACHINE_PROFILES_FIELD_WORK_AREA_X;Work area width (mm)
 MACHINE_PROFILES_FIELD_WORK_AREA_Y;Work area height (mm)
-MACHINE_PROFILES_GRBL_SETTINGS;GRBL settings ($$)...
+MACHINE_PROFILES_GRBL_SETTINGS;GRBL settings ($$)
 MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION;View and change the settings stored in the laser.
-MACHINE_PROFILES_IMPORT;Import...
+MACHINE_PROFILES_GROUP_ADVANCED;Advanced
+MACHINE_PROFILES_GROUP_BED;Bed
+MACHINE_PROFILES_GROUP_MACHINE;Machine
+MACHINE_PROFILES_GROUP_OPTIONS;Options
+MACHINE_PROFILES_IMPORT;Import
 MACHINE_PROFILES_IMPORT_FILE;Import profiles file
 MACHINE_PROFILES_LASER_MODE_OFF;This laser reports laser mode off ($32=0), so it may burn spots where it slows down. Send $32=1 in the console to turn it on.
 MACHINE_PROFILES_LIST;Profiles
-MACHINE_PROFILES_NEW;+ New profile
+MACHINE_PROFILES_NEW;New profile
 MACHINE_PROFILES_ORIGIN_BACK_LEFT;Back left
 MACHINE_PROFILES_ORIGIN_BACK_RIGHT;Back right
 MACHINE_PROFILES_ORIGIN_FRONT_LEFT;Front left
 MACHINE_PROFILES_ORIGIN_FRONT_RIGHT;Front right
-MACHINE_PROFILES_READ_FROM_LASER;Read from connected laser
+MACHINE_PROFILES_READ_FROM_LASER;Read from laser
 MACHINE_PROFILES_READ_NEEDS_CONNECTION;Connect the laser to read its settings.
 MACHINE_PROFILES_READ_NO;no
 MACHINE_PROFILES_READ_NOTHING;The laser reported none of these settings, so the form was not changed.
@@ -369,9 +450,12 @@ MACHINE_PROFILES_READ_SUMMARY;Read from the laser. Press Save to keep these valu
 MACHINE_PROFILES_READ_VALUE;{{label}}: {{value}}
 MACHINE_PROFILES_READ_YES;yes
 MACHINE_PROFILES_SAVE;Save
-MACHINE_PROFILES_SET_ACTIVE;Set active
-MACHINE_PROFILES_TITLE;Machine profiles
+MACHINE_PROFILES_SET_ACTIVE;Make {{name}} active
+MACHINE_PROFILES_TITLE;Laser profiles
+MACHINE_PROFILES_UNSAVED;New, not saved
+MACHINE_PROFILES_USE;Use
 MACHINE_START_JOB;Start job
+MACHINE_START_JOB_CAPTION;Start
 MACHINE_START_JOB_TITLE;Job
 MACHINE_STATE_ALARM;Alarm
 MACHINE_STATE_CHECK;Check
@@ -383,8 +467,7 @@ MACHINE_STATE_JOG;Jog
 MACHINE_STATE_RUN;Run
 MACHINE_STATE_SLEEP;Sleep
 MACHINE_STATUS_FEED;Feed
-MACHINE_STATUS_MACHINE_POSITION;Machine position
-MACHINE_STATUS_NOT_CONNECTED;Not connected
+MACHINE_STATUS_MACHINE_POSITION;Laser position
 MACHINE_STATUS_POWER;Power
 MACHINE_STATUS_TITLE;Status
 MACHINE_STATUS_WORK_POSITION;Work position
@@ -419,33 +502,33 @@ MATERIAL_LIBRARY_DELETE_CANCEL;Cancel
 MATERIAL_LIBRARY_DELETE_CONFIRM;Delete this preset?
 MATERIAL_LIBRARY_DELETE_OK;Yes, delete
 MATERIAL_LIBRARY_DELETED;Preset deleted.
-MATERIAL_LIBRARY_EMPTY_MATERIAL_TEXT;Add one here, or save the settings of a layer from its drawer. The chip above hides the other materials.
+MATERIAL_LIBRARY_EMPTY_MATERIAL_TEXT;Add one, or clear the filter.
 MATERIAL_LIBRARY_EMPTY_MATERIAL_TITLE;No presets yet for {{name}}, {{thickness}} mm
-MATERIAL_LIBRARY_EMPTY_NO_MACHINE_TITLE;No active machine
+MATERIAL_LIBRARY_EMPTY_NO_MACHINE_TITLE;No laser profile
 MATERIAL_LIBRARY_EMPTY_NO_MATERIALS_TITLE;No materials yet
 MATERIAL_LIBRARY_EMPTY_SEARCH_TEXT;Try fewer words, or clear the search.
 MATERIAL_LIBRARY_EMPTY_SEARCH_TITLE;Nothing matches "{{search}}"
-MATERIAL_LIBRARY_EMPTY_TEXT;Add a preset here, or save the settings of a layer from its drawer.
+MATERIAL_LIBRARY_EMPTY_TEXT;Add one, or save it from a layer.
 MATERIAL_LIBRARY_EMPTY_TITLE;No presets yet
 MATERIAL_LIBRARY_EXPORT;Export
 MATERIAL_LIBRARY_EXPORT_COUNT;Export ({{count}})
 MATERIAL_LIBRARY_EXPORT_HINT;Tick presets to export
 MATERIAL_LIBRARY_IMPORT;Import
 MATERIAL_LIBRARY_IMPORT_FILE;Open a material presets file
-MATERIAL_LIBRARY_IMPORTED;Imported {{count}} for this machine. Power was rescaled from the source laser, so test before a real job.
+MATERIAL_LIBRARY_IMPORTED;Imported {{count}} for this laser. Power was rescaled from the source laser, so test before a real job.
 MATERIAL_LIBRARY_LAYER_TARGET;Layer: {{layer}}
-MATERIAL_LIBRARY_MACHINE_DELETED;Deleted machine
+MATERIAL_LIBRARY_MACHINE_DELETED;Deleted laser profile
 MATERIAL_LIBRARY_MATERIAL;Material
-MATERIAL_LIBRARY_MATERIAL_FILTER;Material: {{name}}, {{thickness}} mm
+MATERIAL_LIBRARY_MATERIAL_FILTER;Filter: {{name}}, {{thickness}} mm
 MATERIAL_LIBRARY_MATERIAL_FILTER_CLEAR;Show all materials
 MATERIAL_LIBRARY_MATERIAL_OPTION;{{name}}, {{thickness}} mm
 MATERIAL_LIBRARY_NEW_MATERIAL;New material
 MATERIAL_LIBRARY_NEW_MATERIAL_OPTION;New material…
 MATERIAL_LIBRARY_NEW_PRESET;New preset
-MATERIAL_LIBRARY_NO_ACTIVE_MACHINE;Pick an active machine in Machine profiles, in the top bar. Presets belong to one laser.
+MATERIAL_LIBRARY_NO_ACTIVE_MACHINE;Choose a laser profile in the top bar. Presets belong to one laser.
 MATERIAL_LIBRARY_NO_MATERIALS;Presets belong to a material. Add your first one here.
 MATERIAL_LIBRARY_NOTES;Notes
-MATERIAL_LIBRARY_ONLY_THIS_MACHINE;Only for this machine
+MATERIAL_LIBRARY_ONLY_THIS_MACHINE;Only for this laser
 MATERIAL_LIBRARY_OPERATION;Operation
 MATERIAL_LIBRARY_OPERATION_CUT;Cut
 MATERIAL_LIBRARY_OPERATION_ENGRAVE;Engrave
@@ -470,11 +553,15 @@ MATERIAL_LIBRARY_TICK_FOR_EXPORT;Select for export
 MATERIAL_LIBRARY_TITLE;Material library
 MATERIAL_SECTION_LIBRARY;Library
 MATERIAL_SECTION_OPEN_LIBRARY;Open the material library
-MATERIAL_SECTION_PRESETS_NO_MACHINE;Pick an active machine to use presets
+MATERIAL_SECTION_PRESETS_NO_MACHINE;Laser profile
 MATERIAL_SECTION_PRESETS_NO_MATERIAL;Choose a material to see its presets
-MATERIAL_SECTION_PRESETS_NONE;No presets yet for {{name}}, {{thickness}} mm on {{machine}}
-MATERIAL_SECTION_PRESETS_one;{{count}} preset for {{name}}, {{thickness}} mm on {{machine}}
-MATERIAL_SECTION_PRESETS_other;{{count}} presets for {{name}}, {{thickness}} mm on {{machine}}
+MATERIAL_SECTION_PRESETS_NONE;Add preset
+MATERIAL_SECTION_PRESETS_one;{{count}} preset
+MATERIAL_SECTION_PRESETS_other;{{count}} presets
+NARROW_REGION_BAR_LABEL;Workbench region
+NARROW_REGION_BED;Bed
+NARROW_REGION_DESIGN;Layers
+NARROW_REGION_JOB;Job
 OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visible part.
 OBJECT_WARNING_IMAGE;Images are not engraved yet.
 OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.
@@ -482,16 +569,18 @@ OBJECT_WARNING_TEXT;Text is not converted to paths. In Inkscape use Path > Objec
 OBJECT_WARNING_UNREADABLE;The drawing could not be read, so nothing of it burns. Import the SVG again.
 OBJECT_WARNING_USE_LIMIT;The design repeats too many elements, so some repeated parts are left out.
 OBJECTS_DELETE;Delete {{name}}
-OBJECTS_EMPTY_HINT;No objects yet. Import an SVG or drop one on the bed.
+OBJECTS_EMPTY_HINT;Nothing on the bed yet.
 OBJECTS_FIELD_HEIGHT;Height
 OBJECTS_FIELD_ROTATION;Rotation
 OBJECTS_FIELD_WIDTH;Width
 OBJECTS_FIELD_X;X
 OBJECTS_FIELD_Y;Y
+OBJECTS_KIND_SAMPLE;Test sample
+OBJECTS_KIND_SVG;Imported SVG drawing
 OBJECTS_LIST_LABEL;Project objects
 OBJECTS_LOCK_RATIO;Lock aspect ratio
 OBJECTS_OUTSIDE_BED;Outside the bed
-OBJECTS_SIZE;Frame {{widthMm}} × {{heightMm}} mm
+OBJECTS_SIZE;{{widthMm}} × {{heightMm}} mm
 OBJECTS_SIZE_HINT;The size of the drawing's frame (its SVG page), empty margins included. The job size in the status strip is what actually burns.
 OPEN_PROJECT_DELETE;Delete
 OPEN_PROJECT_DELETE_CANCEL;Cancel
@@ -506,6 +595,7 @@ OPEN_PROJECT_OPEN;Open
 OPEN_PROJECT_OPEN_FILE;Open file…
 OPEN_PROJECT_RENAME;Rename
 OPEN_PROJECT_RENAME_INPUT;New name for {{name}}
+OPEN_PROJECT_STORED_CAPTION;In this browser
 OPEN_PROJECT_TITLE;Open project
 PALETTE_DELETE;Delete {{name}}
 PALETTE_DELETE_CANCEL;Cancel
@@ -520,22 +610,28 @@ PALETTE_ERROR_MIN_POWER_INVALID;Minimum power must be from {{min}} to {{max}} %
 PALETTE_ERROR_NAME_REQUIRED;Enter a name for the colour
 PALETTE_ERROR_PASSES_INVALID;Passes must be a whole number from {{min}} to {{max}}
 PALETTE_ERROR_SPEED_INVALID;Speed must be from {{min}} to {{max}} mm/min
-PALETTE_EXPORT;Export for Inkscape
+PALETTE_EXPORT_CAPTION;Export
+PALETTE_EXPORT_LABEL;Export for Inkscape
 PALETTE_FIELD_COLOUR;Colour
 PALETTE_FIELD_NAME;Name
+PALETTE_INKSCAPE_HELP;Using the file in Inkscape
+PALETTE_INKSCAPE_HELP_CAPTION;Help
 PALETTE_INKSCAPE_HINT;To use the exported file in Inkscape, put it in its palettes folder:
 PALETTE_INKSCAPE_PATH_LINUX;Linux: ~/.config/inkscape/palettes/
 PALETTE_INKSCAPE_PATH_WINDOWS;Windows: %APPDATA%\inkscape\palettes\
 PALETTE_LIST;Palette colours
 PALETTE_MOVE_DOWN;Move {{name}} down
 PALETTE_MOVE_UP;Move {{name}} up
-PALETTE_NEW;+ New colour
-PALETTE_RESET;Reset to defaults
+PALETTE_NEW;New colour
 PALETTE_RESET_CANCEL;Cancel
+PALETTE_RESET_CAPTION;Reset
 PALETTE_RESET_CONFIRM;Replace the whole palette with the default colours? Your changes to the palette are lost.
+PALETTE_RESET_LABEL;Reset to default colours
 PALETTE_RESET_OK;Yes, reset
 PALETTE_SAVE;Save
+PALETTE_SHADING_BUILT_IN;Built-in
 PALETTE_SHADING_COLOUR_NOTE;The shading colour is fixed: it covers every grey from black to white.
+PALETTE_SHADING_LOCKED;Shading is built in and cannot be deleted.
 PALETTE_TITLE;Palette
 PROJECT_FILE_INPUT;Open a project file
 SIMULATION_BACK_TO_START;Back to start
@@ -564,13 +660,15 @@ STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
 STATUS_STRIP_TITLE;Status
+STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN;Esc stops the laser even when a panel is open
+STOP_SETTINGS_TITLE;Stop settings
 TEST_SAMPLE_DIALOG_CANCEL;Cancel
 TEST_SAMPLE_DIALOG_CUT_THROUGH;Cut through
 TEST_SAMPLE_DIALOG_DEPTH;Depth (mm)
 TEST_SAMPLE_DIALOG_DEPTH_HINT;Depth is optional. Without it, the preview says it is less sure.
 TEST_SAMPLE_DIALOG_DEPTH_INVALID;Enter a depth above 0 and at most {{max}} mm.
 TEST_SAMPLE_DIALOG_INVALID_SETTINGS;Enter power {{powerMin}} to {{powerMax}} %, speed {{speedMin}} to {{speedMax}} mm/min and passes {{passesMin}} to {{passesMax}}.
-TEST_SAMPLE_DIALOG_NO_PROFILE;Choose a machine profile to save the result.
+TEST_SAMPLE_DIALOG_NO_PROFILE;Choose a laser profile to save the result.
 TEST_SAMPLE_DIALOG_NOT_THROUGH;Not through
 TEST_SAMPLE_DIALOG_PASSES;Passes
 TEST_SAMPLE_DIALOG_POWER;Power (%)
@@ -588,7 +686,8 @@ TOAST_CONNECTION_LOST;Connection lost. The laser may still finish moves it had a
 TOAST_CONTROLLER_RESET;The controller reset itself - running work was stopped.
 TOAST_DISMISS;Dismiss
 TOAST_GCODE_EXPORT_DROPPED;The G-code export was stopped because another project was opened.
-TOAST_GRBL_ALARM;Alarm {{code}}: {{description}} - unlock or home the machine.
+TOAST_GCODE_EXPORTED;Downloaded {{fileName}}
+TOAST_GRBL_ALARM;Alarm {{code}}: {{description}} - unlock or home the laser.
 TOAST_GRBL_ERROR;Error {{code}}: {{description}}
 TOAST_LASER_MODE_OFF;Laser mode is off ($32=0): the laser may burn spots where it slows down. Send $32=1 in the console to turn it on.
 TOAST_MATERIAL_PRESET_SAVE_FAILED;The material preset change could not be saved - the browser storage may be full. Your changes stay on screen until you reload the page.
@@ -598,13 +697,14 @@ TOAST_NOT_RESPONDING;The controller is not responding.
 TOAST_PORT_ACCESS_DENIED_OR_BUSY;Could not open the port. On Linux, add your user to the dialout group. On any system, close other apps or tabs using the port.
 TOAST_PORT_NOT_FOUND;The port is gone - check the USB cable.
 TOAST_PORT_OPEN_FAILED;Could not open the port.
-TOAST_PROFILE_CREATED;Created the machine profile {{name}} from the laser's settings.
-TOAST_PROFILE_DIFFERS;The laser reports a work area of {{laserWidth}} x {{laserHeight}} mm, but the profile {{name}} has {{profileWidth}} x {{profileHeight}} mm. Nothing was changed - you can update the profile from the laser in the Machine profiles dialog.
-TOAST_PROFILE_IMPORT_INVALID;The file is not a machine profiles file. Nothing was imported.
+TOAST_PROFILE_CREATED;Created the laser profile {{name}} from the laser's settings.
+TOAST_PROFILE_DIFFERS;The laser reports a work area of {{laserWidth}} x {{laserHeight}} mm, but the profile {{name}} has {{profileWidth}} x {{profileHeight}} mm. Nothing was changed - you can update the profile from the laser in the Laser profiles dialog.
+TOAST_PROFILE_IMPORT_INVALID;The file is not a laser profiles file. Nothing was imported.
 TOAST_PROGRAM_STOPPED_ON_ERROR;Job stopped at line {{lineNumber}}: error {{code}} - {{description}}
 TOAST_PROJECT_FILE_INVALID;The file is not a webgrbl project file. Nothing was opened.
 TOAST_PROJECT_SAVE_FAILED;The project could not be saved - the browser storage may be full. Your changes stay on screen, and the next change tries to save again.
 TOAST_PROJECT_STORAGE_FAILED;The saved projects could not be read or changed. Try again, or reload the page.
+TOAST_SAMPLE_ADDED;Test sample added
 TOAST_SAMPLE_WITHOUT_GRADIENT;The shading layer is off or not in Fill mode, so the test sample has its cut square only. Set that layer to Fill and on, then add the sample again for the gradient.
 TOAST_SVG_CONTENT_REMOVED;Parts of {{fileName}} were left out: embedded web content, linked images or external styles.
 TOAST_SVG_IMPORT_FAILED_NO_SIZE;{{fileName}} was skipped: it has no size (width and height or a viewBox).
@@ -616,10 +716,13 @@ TOAST_TOOLPATH_FAILED;The toolpath could not be generated. Try again, or simplif
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
 TOOLPATH_CANCEL;Cancel
 TOOLPATH_DISPLAY_BY_LAYER;By layer
+TOOLPATH_DISPLAY_BY_LAYER_CAPTION;Layers
 TOOLPATH_DISPLAY_LABEL;Toolpath colours
 TOOLPATH_DISPLAY_POWER_SHADING;Power shading
+TOOLPATH_DISPLAY_POWER_SHADING_CAPTION;Power
 TOOLPATH_ESTIMATE_HOURS;{{hours}} h {{minutes}} min
 TOOLPATH_ESTIMATE_MINUTES;{{minutes}} min {{seconds}} s
+TOOLPATH_ESTIMATE_SECONDS;{{seconds}} s
 TOOLPATH_FAILED;The toolpath could not be generated
 TOOLPATH_GENERATE;Generate
 TOOLPATH_GENERATING;Generating… {{percent}} %
@@ -628,6 +731,7 @@ TOOLPATH_NOT_GENERATED;No toolpath yet
 TOOLPATH_OUT_OF_DATE;Out of date
 TOOLPATH_REGENERATE;Regenerate
 TOOLPATH_SHOW_TRAVEL;Show travel moves
+TOOLPATH_SHOW_TRAVEL_CAPTION;Travel
 TOOLPATH_WARNINGS_KIND_CLIPPED;clipped parts burn in full ({{count}})
 TOOLPATH_WARNINGS_KIND_IMAGE;images left out ({{count}})
 TOOLPATH_WARNINGS_KIND_OFF_PAGE;parts off the page ({{count}})
@@ -640,9 +744,8 @@ TOP_BAR_AUTOSAVE_SAVED;Saved
 TOP_BAR_AUTOSAVE_SAVING;Saving…
 TOP_BAR_AUTOSAVE_UNSAVED;Not saved
 TOP_BAR_MENU_IMPORT_SVG;Import SVG
-TOP_BAR_MENU_MACHINE_PROFILES;Machine profiles
+TOP_BAR_MENU_MACHINE_PROFILES;Laser profiles
 TOP_BAR_MENU_PROJECT;Project
-TOP_BAR_MORE;More
 TOP_BAR_PROJECT_MENU_EXPORT_GCODE;Export G-code
 TOP_BAR_PROJECT_MENU_NEW;New project
 TOP_BAR_PROJECT_MENU_OPEN;Open from this browser…

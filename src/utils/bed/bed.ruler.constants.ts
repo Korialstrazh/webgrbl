@@ -11,7 +11,7 @@
  */
 
 /** Must match the font size of the ruler labels in the BedRulers stylesheet. */
-export const BED_RULER_FONT_SIZE_REM = 0.6875;
+export const BED_RULER_FONT_SIZE_REM = 0.75;
 
 /** The gap between a ruler label and its tick position. */
 export const BED_RULER_LABEL_OFFSET_REM = 0.25;

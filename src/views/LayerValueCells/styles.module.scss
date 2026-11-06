@@ -1,0 +1,60 @@
+@use '../../styles/accessibility' as accessibility;
+
+// Fixed cell widths line the values up from row to row. Wrapping, never clipping: only a panel narrower than the
+// default moves a cell to a second line.
+.cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.375rem;
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  white-space: nowrap;
+
+  // Glyphs a size above the digits, each in its own colour, so they read as icons while the number reads first.
+  :global(.anticon) {
+    font-size: 0.875rem;
+  }
+}
+
+.powerCell :global(.anticon) {
+  color: var(--color-warning);
+}
+
+.speedCell :global(.anticon) {
+  color: var(--color-info);
+}
+
+.passesCell :global(.anticon) {
+  color: var(--color-success);
+}
+
+// Wide enough for "100 %", so the speeds line up from row to row.
+.powerCell {
+  min-width: 2.75rem;
+}
+
+// The speed unit, mm over min as a small muted fraction, so the number reads first and the row stays on one line.
+.unit {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-inline-start: 0.125rem;
+  color: var(--color-text-muted);
+  font-size: 0.5625rem;
+  line-height: 1;
+}
+
+.unitLength {
+  border-bottom: 1px solid currentcolor;
+}
+
+.summaryText {
+  @include accessibility.visually-hidden;
+}

@@ -57,6 +57,8 @@ export const APP_STATE_KEY = {
   CONSOLE_PANEL_SIZE: 'consolePanelSize',
   /** The bed colour the user chose, app-wide, as a JSON hex colour string. */
   BED_COLOUR: 'bedColour',
+  /** Whether Escape also stops the laser while a panel is open, app-wide, as a JSON boolean. */
+  ESC_STOPS_WITH_OVERLAY_OPEN: 'escStopsWithOverlayOpen',
 } as const;
 
 export type AppStateKey = (typeof APP_STATE_KEY)[keyof typeof APP_STATE_KEY];

@@ -1,6 +1,8 @@
 /**
- * Frame job: the grid, margin and speed of the trace, how long it takes and at what power, and the button that starts
- * it. A frame that would leave the bed is off with the edge and distance, and an alarm during a frame is told here.
+ * Frame job: the button that starts the trace and a gear that opens its settings in a popover: the grid, margin and
+ * speed, how long it takes and at what power. Changing them only edits the active profile and sends nothing to the
+ * laser, so they work while disconnected; the popover says why they are off without a profile or during a run. A frame
+ * that would leave the bed is off with the edge and distance, and an alarm during a frame is told here.
  *
  * @author michael.morosov
  *
@@ -9,11 +11,25 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Alert, Button, Divider, Select, Tooltip } from 'antd';
+import {
+  BorderlessTableOutlined,
+  ClockCircleOutlined,
+  DashboardOutlined,
+  InfoCircleOutlined,
+  RadiusSettingOutlined,
+  SettingOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
+import { Alert, Popover, Select, Tooltip } from 'antd';
+import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_ALERT_TYPE_WARNING, ANTD_BUTTON_SIZE_LARGE } from '../../../../utils/antd.constants';
+import {
+  ANTD_ALERT_TYPE_WARNING,
+  ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT,
+  ANTD_POPOVER_TRIGGER_CLICK,
+} from '../../../../utils/antd.constants';
 import {
   FRAME_DOT_WATTS,
   FRAME_EDGE,
@@ -25,6 +41,7 @@ import type { FrameEdge } from '../../../../utils/frame/frame.constants';
 import { getFrameDurationSeconds } from '../../../../utils/frame/get.frame.duration.seconds';
 import type { FrameBedOverrun } from '../../../../utils/frame/interfaces/FrameBedOverrun';
 import type { FrameRectangle } from '../../../../utils/frame/interfaces/FrameRectangle';
+import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.registration';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../../utils/missing.value.constants';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
@@ -49,10 +66,15 @@ import {
   selectFrameMarginMm,
 } from '../../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../../utils/states/new.store';
+import { FrameSettingsOpenChanged, selectIsFrameSettingsOpen } from '../../../../utils/states/ui.workbench.state';
 import { getJobEstimateText } from '../../../../utils/toolpath/get.job.estimate.text';
+import { CaptionedActionButton } from '../../../../views/CaptionedActionButton';
+import { FrameTraceIcon } from '../../../../views/FrameTraceIcon';
+import { IconActionButton } from '../../../../views/IconActionButton';
 import { FrameNumberInput } from './FrameNumberInput';
 import styles from './styles.module.scss';
 
+const FRAME_SETTINGS_OVERLAY_ID = 'frame-settings';
 const FRAME_GRID_SELECT_ID = 'frame-grid-select';
 const FRAME_MARGIN_FIELD = 'frameMarginMm';
 const FRAME_MARGIN_INPUT_ID = 'frame-margin-input';
@@ -66,7 +88,23 @@ const FRAME_EDGE_TEXT_KEYS: Record<FrameEdge, string> = {
   [FRAME_EDGE.BACK]: DEFAULT.FRAME_EDGE_BACK,
 };
 
-export const FrameControls = (): ReactNode => {
+interface FrameControlsProps {
+  /** Start job, first in the row of job actions; absent where it is pinned elsewhere. */
+  startActionComponent?: ReactNode;
+  /** Export G-code, last in the row of job actions. */
+  exportActionComponent?: ReactNode;
+}
+
+/** Why the settings are off: a profile holds them, and a run keeps them fixed. */
+const getFrameSettingsOffReasonKey = (hasActiveProfile: boolean, isJobRunActive: boolean): string | undefined => {
+  if (!hasActiveProfile) {
+    return DEFAULT.FRAME_SETTINGS_NEEDS_PROFILE;
+  }
+
+  return isJobRunActive ? DEFAULT.FRAME_SETTINGS_RUN_LOCKED : undefined;
+};
+
+export const FrameControls = ({ startActionComponent, exportActionComponent }: FrameControlsProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
@@ -79,77 +117,141 @@ export const FrameControls = (): ReactNode => {
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const latestRunKind: JobRunKind = useSelector(selectJobRunKind);
   const isFrameAlarmed: boolean = useSelector(selectIsFrameAlarmed);
+  const isSettingsOpen: boolean = useSelector(selectIsFrameSettingsOpen);
+  const settingsId: string = useId();
   const isAlarmShown: boolean = isFrameAlarmed && latestRunKind === JOB_RUN_KIND.FRAME && !isJobRunActive;
+  const settingsOffReasonKey: string | undefined = getFrameSettingsOffReasonKey(Boolean(activeProfile), isJobRunActive);
+
+  // Escape must only close the settings here, not also stop the machine.
+  useOverlayRegistration(FRAME_SETTINGS_OVERLAY_ID, isSettingsOpen);
+
+  const changeSettingsOpen = (isFrameSettingsOpen: boolean): void => {
+    dispatch(new FrameSettingsOpenChanged({ isFrameSettingsOpen }));
+  };
+
+  const settingsComponent: ReactNode = (
+    <div id={settingsId} className={styles.settings}>
+      {settingsOffReasonKey && (
+        <p className={styles.offReason}>
+          <InfoCircleOutlined aria-hidden />
+          {t(settingsOffReasonKey)}
+        </p>
+      )}
+      {activeProfile && (
+        <>
+          <div className={styles.field}>
+            <label className={styles.hiddenLabel} htmlFor={FRAME_GRID_SELECT_ID}>{t(DEFAULT.FRAME_GRID_LABEL)}</label>
+            <Tooltip title={t(DEFAULT.FRAME_GRID_LABEL)}>
+              <Select<number>
+                id={FRAME_GRID_SELECT_ID}
+                prefix={<BorderlessTableOutlined aria-hidden />}
+                disabled={!activeProfile || isJobRunActive}
+                value={gridCellMm}
+                options={FRAME_GRID_CELL_OPTIONS_MM.map((cellMm: number) => ({
+                  value: cellMm,
+                  label: cellMm === FRAME_GRID_CELL_NONE_MM
+                    ? t(DEFAULT.FRAME_GRID_NONE)
+                    : t(DEFAULT.FRAME_GRID_CELL, { cellCm: cellMm / FRAME_MM_PER_CM }),
+                }))}
+                // Above the popover, which the default container would draw it under when both are in the body.
+                getPopupContainer={(triggerNode: HTMLElement): HTMLElement => triggerNode.parentElement ?? triggerNode}
+                onChange={(frameGridCellMm: number): void => {
+                  if (activeProfile) {
+                    dispatch(new MachineProfileSaved({ profile: { ...activeProfile, frameGridCellMm } }));
+                  }
+                }}
+              />
+            </Tooltip>
+          </div>
+          <FrameNumberInput
+            key={`${FRAME_MARGIN_FIELD}-${activeProfile?.id}`}
+            field={FRAME_MARGIN_FIELD}
+            inputId={FRAME_MARGIN_INPUT_ID}
+            labelKey={DEFAULT.FRAME_MARGIN_LABEL}
+            iconComponent={<RadiusSettingOutlined />}
+            captionKey={DEFAULT.FRAME_MARGIN_CAPTION}
+            unitKey={DEFAULT.FIELD_UNIT_MM}
+            savedValue={marginMm}
+            isDisabled={isJobRunActive}
+          />
+          <FrameNumberInput
+            key={`${FRAME_SPEED_FIELD}-${activeProfile?.id}`}
+            field={FRAME_SPEED_FIELD}
+            inputId={FRAME_SPEED_INPUT_ID}
+            labelKey={DEFAULT.FRAME_SPEED_LABEL}
+            iconComponent={<DashboardOutlined />}
+            captionKey={DEFAULT.FRAME_SPEED_CAPTION}
+            unitKey={DEFAULT.FIELD_UNIT_MM_PER_MIN}
+            savedValue={feedMmPerMin}
+            isDisabled={isJobRunActive}
+          />
+          <dl className={styles.facts}>
+            <dt><ClockCircleOutlined aria-hidden /> {t(DEFAULT.FRAME_TIME_LABEL)}</dt>
+            <dd>
+              {rectangle
+                ? getJobEstimateText(t, getFrameDurationSeconds(rectangle, gridCellMm, feedMmPerMin))
+                : MISSING_VALUE_TEXT}
+            </dd>
+            <dt><ThunderboltOutlined aria-hidden /> {t(DEFAULT.FRAME_POWER_LABEL)}</dt>
+            <dd>
+              {activeProfile ? (
+                <Tooltip
+                  title={t(DEFAULT.FRAME_POWER_DETAIL, {
+                    profileName: activeProfile.name,
+                    maxPowerWatts: activeProfile.maxPowerWatts,
+                  })}
+                >
+                  <span className={styles.powerValue} tabIndex={0}>
+                    {t(DEFAULT.FRAME_POWER_VALUE, { watts: FRAME_DOT_WATTS })}
+                    <InfoCircleOutlined aria-hidden />
+                  </span>
+                </Tooltip>
+              ) : MISSING_VALUE_TEXT}
+            </dd>
+          </dl>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <div className={styles.frameControls}>
-      <Divider className={styles.divider} />
-      <div className={styles.field}>
-        <label htmlFor={FRAME_GRID_SELECT_ID}>{t(DEFAULT.FRAME_GRID_LABEL)}</label>
-        <Select<number>
-          id={FRAME_GRID_SELECT_ID}
-          disabled={!activeProfile || isJobRunActive}
-          value={gridCellMm}
-          options={FRAME_GRID_CELL_OPTIONS_MM.map((cellMm: number) => ({
-            value: cellMm,
-            label: cellMm === FRAME_GRID_CELL_NONE_MM
-              ? t(DEFAULT.FRAME_GRID_NONE)
-              : t(DEFAULT.FRAME_GRID_CELL, { cellCm: cellMm / FRAME_MM_PER_CM }),
-          }))}
-          onChange={(frameGridCellMm: number): void => {
-            if (activeProfile) {
-              dispatch(new MachineProfileSaved({ profile: { ...activeProfile, frameGridCellMm } }));
-            }
-          }}
-        />
-      </div>
-      <FrameNumberInput
-        key={`${FRAME_MARGIN_FIELD}-${activeProfile?.id}`}
-        field={FRAME_MARGIN_FIELD}
-        inputId={FRAME_MARGIN_INPUT_ID}
-        labelKey={DEFAULT.FRAME_MARGIN_LABEL}
-        savedValue={marginMm}
-        isDisabled={isJobRunActive}
-      />
-      <FrameNumberInput
-        key={`${FRAME_SPEED_FIELD}-${activeProfile?.id}`}
-        field={FRAME_SPEED_FIELD}
-        inputId={FRAME_SPEED_INPUT_ID}
-        labelKey={DEFAULT.FRAME_SPEED_LABEL}
-        savedValue={feedMmPerMin}
-        isDisabled={isJobRunActive}
-      />
-      <dl className={styles.facts}>
-        <dt>{t(DEFAULT.FRAME_TIME_LABEL)}</dt>
-        <dd>
-          {rectangle
-            ? getJobEstimateText(t, getFrameDurationSeconds(rectangle, gridCellMm, feedMmPerMin))
-            : MISSING_VALUE_TEXT}
-        </dd>
-        <dt>{t(DEFAULT.FRAME_POWER_LABEL)}</dt>
-        <dd>
-          {activeProfile
-            ? t(DEFAULT.FRAME_POWER_VALUE, {
-              watts: FRAME_DOT_WATTS,
-              profileName: activeProfile.name,
-              maxPowerWatts: activeProfile.maxPowerWatts,
-            })
-            : MISSING_VALUE_TEXT}
-        </dd>
-      </dl>
-      <Tooltip title={blockedReasonKey && t(blockedReasonKey)}>
-        {/* A plain wrapper: a disabled button fires no hover events, so the tooltip listens on the wrapper. */}
-        <span className={styles.fullWidthButtonWrapper}>
-          <Button
-            block
-            size={ANTD_BUTTON_SIZE_LARGE}
-            disabled={!!blockedReasonKey}
+      <div className={styles.actions}>
+        {startActionComponent && <div className={styles.startAction}>{startActionComponent}</div>}
+        {/* The gear is joined to Frame: it holds the settings of the frame, not of the job. */}
+        <div className={styles.frameSplit}>
+          <CaptionedActionButton
+            labelText={t(DEFAULT.MACHINE_JOB_FRAME)}
+            captionText={t(DEFAULT.MACHINE_JOB_FRAME_CAPTION)}
+            iconComponent={<FrameTraceIcon />}
+            blockedReasonText={blockedReasonKey && t(
+              blockedReasonKey === DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED
+                ? DEFAULT.FRAME_START_BLOCKED_NOT_CONNECTED
+                : blockedReasonKey,
+            )}
             onClick={() => dispatch(new FrameStartRequested())}
+          />
+          <Popover
+            open={isSettingsOpen}
+            trigger={ANTD_POPOVER_TRIGGER_CLICK}
+            placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+            title={t(DEFAULT.FRAME_SETTINGS_TITLE)}
+            content={settingsComponent}
+            onOpenChange={changeSettingsOpen}
           >
-            {t(DEFAULT.MACHINE_JOB_FRAME)}
-          </Button>
-        </span>
-      </Tooltip>
+            <span>
+              <IconActionButton
+                className={styles.frameGear}
+                labelText={t(isSettingsOpen ? DEFAULT.FRAME_SETTINGS_HIDE : DEFAULT.FRAME_SETTINGS_SHOW)}
+                iconComponent={<SettingOutlined />}
+                aria-expanded={isSettingsOpen}
+                aria-controls={isSettingsOpen ? settingsId : undefined}
+              />
+            </span>
+          </Popover>
+        </div>
+        <div className={styles.exportAction}>{exportActionComponent}</div>
+      </div>
       {bedOverrun && (
         <Alert
           type={ANTD_ALERT_TYPE_WARNING}

@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, FolderOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
@@ -27,6 +27,7 @@ import {
 } from '../../../utils/states/project.state';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
 import { OpenProjectDialog } from '../../OpenProjectDialog';
+import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { ProjectFileInput } from '../../ProjectFileInput';
 import type { ProjectMenuClickInfo } from '../interfaces/ProjectMenuClickInfo';
 import { getProjectMenuItems } from './get.project.menu.items';
@@ -67,15 +68,17 @@ export const ProjectMenu = (): ReactNode => {
 
   return (
     <>
-      <Dropdown
-        trigger={ANTD_DROPDOWN_TRIGGER_CLICK}
-        menu={{ items: getProjectMenuItems(t, gcodeExport), onClick: handleMenuClick }}
-      >
-        <Button type={ANTD_BUTTON_TYPE_TEXT}>
-          {t(DEFAULT.TOP_BAR_MENU_PROJECT)}
-          <DownOutlined className={styles.caret} aria-hidden="true" />
-        </Button>
-      </Dropdown>
+      <DismissibleTooltip title={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>
+        <Dropdown
+          trigger={ANTD_DROPDOWN_TRIGGER_CLICK}
+          menu={{ items: getProjectMenuItems(t, gcodeExport), onClick: handleMenuClick }}
+        >
+          <Button type={ANTD_BUTTON_TYPE_TEXT} aria-label={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>
+            <FolderOutlined aria-hidden="true" />
+            <DownOutlined className={styles.caret} aria-hidden="true" />
+          </Button>
+        </Dropdown>
+      </DismissibleTooltip>
       <ProjectFileInput inputRef={fileInputRef} />
       <OpenProjectDialog isOpen={isOpenDialogShown} onClose={() => setIsOpenDialogShown(false)} />
     </>

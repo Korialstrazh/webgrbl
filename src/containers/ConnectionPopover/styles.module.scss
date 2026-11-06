@@ -1,19 +1,46 @@
+// The panel floats over the Job card, so it gets the control outline (3:1 or more) and a deep shadow.
+.connectionPopoverRoot :global(.ant-popover-container) {
+  border: 1px solid var(--color-control-border);
+  background-color: var(--color-surface-3);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 60%);
+}
+
+.connectionPopoverRoot :global(.ant-popover-arrow-content)::before {
+  background-color: var(--color-control-border);
+}
+
 .connectionPopover {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  min-width: 15rem;
+  gap: var(--space-2);
+  min-width: 20rem;
 }
 
 .field {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  align-items: center;
+  gap: var(--space-2);
   font-size: 0.75rem;
   color: var(--color-text-muted);
 }
 
+.fieldLabel {
+  display: inline-flex;
+  flex: 0 0 5rem;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.portRow {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
 .select {
+  flex: 1;
+  min-width: 0;
   width: 100%;
 }
 

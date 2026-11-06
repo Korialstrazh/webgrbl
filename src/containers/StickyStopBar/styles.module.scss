@@ -13,8 +13,32 @@
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface-2);
 
-  > * {
+  gap: var(--space-2);
+
+  // STOP is the widest control in the bar, twice the width of Start, so it reads first; the gear keeps its own size.
+  > .start {
     flex: 1;
+    max-width: 15rem;
+  }
+
+  > :global(.ant-btn-dangerous) {
+    flex: 2;
     max-width: 30rem;
   }
+}
+
+// Start before it is ready: the locked look of the Job card (solid outline, dark fill) and readable grey text, so it
+// reads as locked, not as broken and not as a drop zone.
+.start :global(.ant-btn:disabled) {
+  border-style: solid;
+  border-color: var(--color-disabled-border-locked);
+  background-color: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+}
+
+// Start beside Stop, both as tall as the bar allows: one row, so the caption sits beside its icon here.
+.start :global(.ant-btn) {
+  flex-direction: row;
+  gap: var(--space-2);
+  height: var(--target-min);
 }

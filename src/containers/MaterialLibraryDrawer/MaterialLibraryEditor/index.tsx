@@ -235,6 +235,7 @@ export const MaterialLibraryEditor = (props: MaterialLibraryEditorProps): ReactN
         searchText={searchText}
         isOnlyActiveMachine={Boolean(listedProfileId)}
         hasActiveMachine={Boolean(activeProfile)}
+        hasMaterials={Boolean(firstMaterial)}
         filteredMaterial={filteredMaterial}
         targetLayerName={initialLayerName}
         isAddAllowed={Boolean(newPresetMaterial && activeProfile)}

@@ -1,6 +1,6 @@
 /**
  * The console in its place below the bed: a surface that holds the console panel and fills the space it gets, the
- * lower splitter panel in a wide window or a block of fixed height in a narrow one.
+ * lower splitter panel in a wide window or a bottom sheet in a narrow one.
  *
  * @author michael.morosov
  *

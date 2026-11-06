@@ -11,6 +11,7 @@
 import { all, fork } from 'redux-saga/effects';
 import type { BurnModelWorkerClient } from '../burn.model/interfaces/BurnModelWorkerClient';
 import type { ToolpathWorkerClient } from '../toolpath/interfaces/ToolpathWorkerClient';
+import { watchAppPreferences } from './app.preferences.saga';
 import { watchBedAppearance } from './bed.appearance.saga';
 import { watchOnlineStatus } from './browser.environment.state';
 import { watchBurnModel } from './burn.model.saga';
@@ -41,6 +42,7 @@ export function* rootSaga(
     fork(watchPalette),
     fork(watchPanelLayout),
     fork(watchBedAppearance),
+    fork(watchAppPreferences),
     fork(watchLaserPointer),
     fork(watchProjects),
     fork(watchGrblController, grblControllerSagaDependencies),

@@ -14,3 +14,6 @@ export const ARIA_ORIENTATION = {
   HORIZONTAL: 'horizontal',
   VERTICAL: 'vertical',
 } as const;
+
+/** The role of a short note kept behind an icon, read with its text as the name. */
+export const ARIA_ROLE_NOTE = 'note';

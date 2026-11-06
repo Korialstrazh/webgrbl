@@ -34,6 +34,10 @@ export const MachineProfilesEditor = (): ReactNode => {
   const profilesDocument: MachineProfilesDocument = useSelector(selectMachineProfilesDocument);
   const [editedProfile, setEditedProfile] = useState<MachineProfile>(() => getProfileToEdit(profilesDocument));
 
+  const isEditedProfileStored: boolean = profilesDocument.profiles.some(
+    (profile: MachineProfile): boolean => profile.id === editedProfile.id,
+  );
+
   const selectProfile = (profileId: string): void => {
     const selectedProfile: MachineProfile | undefined =
       profilesDocument.profiles.find((profile: MachineProfile): boolean => profile.id === profileId);
@@ -45,8 +49,12 @@ export const MachineProfilesEditor = (): ReactNode => {
 
   const deleteProfile = (profileId: string): void => {
     dispatch(new MachineProfileDeleted({ profileId }));
-    // Read the store again: the document of this render still contains the deleted profile.
-    setEditedProfile(getProfileToEdit(selectMachineProfilesDocument(store.getState())));
+
+    // Deleting another card leaves the open form and its draft alone.
+    if (profileId === editedProfile.id) {
+      // Read the store again: the document of this render still contains the deleted profile.
+      setEditedProfile(getProfileToEdit(selectMachineProfilesDocument(store.getState())));
+    }
   };
 
   return (
@@ -55,6 +63,7 @@ export const MachineProfilesEditor = (): ReactNode => {
         <ProfileList
           profilesDocument={profilesDocument}
           editedProfileId={editedProfile.id}
+          unsavedProfileName={isEditedProfileStored ? undefined : editedProfile.name}
           onSelect={selectProfile}
           onCreate={() => setEditedProfile(newMachineProfile())}
           onDelete={deleteProfile}

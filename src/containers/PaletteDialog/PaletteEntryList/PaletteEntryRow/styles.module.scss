@@ -1,4 +1,5 @@
 .row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -17,12 +18,11 @@
 }
 
 // The button takes the row width the handle and the icon buttons leave: the swatch beside the name, the summary below
-// it across the button. The name and the summary each wrap to a second line instead of being cut short, and the button
-// grows with them, so they never run under the icon buttons.
+// it across the button, each on one line, so the row never breaks a value away from its icon.
 .selectButton {
   display: grid;
   flex: 1;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0 var(--space-2);
   align-items: center;
   height: auto;
@@ -49,43 +49,90 @@
   height: 1.5rem;
 }
 
-// At most two lines each; only longer text is cut short, and its title shows it in full.
-.name,
-.summary {
-  display: -webkit-box;
+// One line each, like a layer row; longer text is cut short, and its title shows it in full.
+// The name, and for Shading a small Built-in tag that says, without a hover, why its row has a lock and no delete.
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.builtInTag {
+  flex: none;
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 0.625rem;
+  line-height: 1.4;
+}
+
+.name {
   min-width: 0;
   overflow: hidden;
-  overflow-wrap: anywhere;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .summary {
   grid-column: 1 / -1;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  min-width: 0;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+// Out of sight until the row is hovered or holds the focus, and then only over the name line, so they never cover a
+// value. They stay in the tab order, and delete asks before it deletes.
+.rowActions {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: flex;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+
+  > :global(.ant-btn) {
+    width: 1.75rem;
+    height: 1.5rem;
+  }
+}
+
+.row:hover .rowActions,
+.row:focus-within .rowActions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// A touch screen has no hover, so the buttons stay in view on a line of their own above the row content.
+@media (hover: none) {
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .rowActions {
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.modeIcon {
   color: var(--color-text-muted);
 }
 
-// The move and delete buttons are a 2rem target each, though their icons are small.
-.row > :global(.ant-btn.ant-btn-icon-only) {
-  flex: none;
-  width: 2rem;
-  height: 2rem;
+// Shading cannot be deleted: a lock stands where the delete button would be, and a tap says why.
+.lockNote {
+  width: 1.75rem;
+  min-height: 1.5rem;
+  font-size: 0.875rem;
 }
 
-// Delete is quiet until the row is hovered, focused or edited, so a row does not show a red cross all the time. It
-// stays in the tab order: focusing it shows it, and it asks before it deletes.
 .deleteButton:global(.ant-btn) {
   color: var(--color-text-muted);
-  opacity: 0;
-}
-
-.row:hover .deleteButton:global(.ant-btn),
-.row:focus-within .deleteButton:global(.ant-btn),
-.editedRow .deleteButton:global(.ant-btn) {
-  opacity: 1;
 }
 
 .deleteButton:global(.ant-btn):hover {

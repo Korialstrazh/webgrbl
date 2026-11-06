@@ -4,11 +4,11 @@ The 3D view shows how a job will turn out before material is spent: the engraved
 
 ## Open it
 
-1. In **Design**, pick a material in the Material panel on the left (the user moved it to Design from 3D; 3D shows it as read-only text and, with none chosen, tells you to pick one in Design), or choose **Add material...** and enter a name and a thickness (0.1 to 100 mm). Save waits for both to be valid. A name and thickness you already have bring a note and **Use that one**; saving a copy stays allowed. Each option shows the thickness and, for the active machine, the test date or **not tested**; the current material has a check mark. The material belongs to the project; the project file carries a copy, so it opens elsewhere.
+1. In **Design**, pick a material in the Material panel on the left (the user moved it to Design from 3D; 3D shows it as read-only text and, with none chosen, shows a centred card: a material select when materials exist, or **Add material...** when none do), or choose **Add material...** and enter a name and a thickness (0.1 to 100 mm). Save waits for both to be valid. A name and thickness you already have bring a note and **Use that one**; saving a copy stays allowed. Each option shows the thickness and, for the active machine, the test date or **not tested**; the current material has a check mark. The material belongs to the project; the project file carries a copy, so it opens elsewhere.
 2. Switch the bed to **3D** (the cube icon of the view switch). It needs a material and a ready toolpath; the toolpath is requested for you.
 3. Orbit, zoom and pan the sheet. The camera is orthographic only.
 
-In 3D the left panel shows the **Cut check** above Layers; Objects is hidden. STOP stays visible. Dropping an SVG onto the bed does nothing in 3D.
+The left panel keeps one order in every view: Layers, Material, Objects, **Cut check**. In 3D the Cut check opens and Material and Objects fold to a muted heading line whose info icon says where they apply; in Design and Toolpath the Cut check is that muted line. Press **Fix** (wrench) on a warning to open that layer's settings; the pointer icon above the scene, when no part is selected, tells you to click a part to check and lift it. Each warning is one short row (warning icon, layer, predicted / needed depth); hover it for the full sentence and press **Fix** to open that layer's settings. The **Estimate** or **Guess** tag explains in its tooltip how sure the check is. STOP stays visible. Dropping an SVG onto the bed does nothing in 3D.
 
 ## Test sample
 
@@ -35,7 +35,7 @@ The gradient only helps you judge shading by eye. To change shading, change the 
 
 ## Parts and lifting
 
-- A part is a region enclosed by through cuts. Status: **Free**, **May stay attached** (borderline) or **Attached** (not through).
+- A part is a region enclosed by through cuts. Status: **Free**, **May stay attached** (borderline) or **Attached** (not through). The summary shows each status as an icon with its count, and each part row carries one status icon; the words are the tooltip and are read out by screen readers.
 - Hover a part or its row to highlight it; click either to select it. With more than 4 parts the list starts cut down to the selected row, with **Show all N parts**; the selected row scrolls into view within the panel, with a margin. Free and borderline parts show an orange arrow: drag it up or down. The bar below the scene shows the height ("Lifted 40.0 mm"); with it focused, the arrow keys lift too (1 mm a step). Lifted parts show their height in their row, and **Put all back** resets every lift.
 - Orbit stops about 80 degrees from vertical. **Fit** brings back the first view with the sheet filling most of the canvas, and **Top** looks straight down at the same fit. A part lifted far may leave the frame.
 - No upper limit. 0.0 is absolute: the part's place in the sheet, also for a part nested in a lifted parent. Nested parts rise with their parent.

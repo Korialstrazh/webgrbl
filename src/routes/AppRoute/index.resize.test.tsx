@@ -23,14 +23,14 @@ const BED_COLUMN_DRAGGER_SELECTOR = `.ant-splitter-vertical > .ant-splitter-bar 
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const ARIA_DISABLED_VALUE = 'true';
 const DESIGN_HANDLE_LABEL = 'Resize the design panel';
-const MACHINE_HANDLE_LABEL = 'Resize the machine panel';
+const MACHINE_HANDLE_LABEL = 'Resize the laser panel';
 const CONSOLE_HANDLE_LABEL = 'Resize the console';
 // The default design panel, 20.5rem of 1600 px, and one 1rem step of 16 px, 1 %, to the right.
 const DESIGN_DEFAULT_PERCENT = 20.5;
 const DESIGN_STEPPED_PERCENT = 21.5;
-// The design panel limits, 16.25rem and 28rem of 1600 px, rounded for the ARIA values.
+// The design panel limits, 16.25rem and 32rem of 1600 px, rounded for the ARIA values.
 const DESIGN_MIN_PERCENT = 16;
-const DESIGN_MAX_PERCENT = 28;
+const DESIGN_MAX_PERCENT = 32;
 const DESIGN_MIN_EXACT_PERCENT = 16.25;
 // The default console of 30 % grows by one 16 px step of the 1000 px column.
 const CONSOLE_STEPPED_PERCENT = 31.6;

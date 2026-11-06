@@ -51,7 +51,7 @@ const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 const SIXTY_SIX_SECOND_MOVE_END_X_MM = 6590;
 const TWO_LAYERS_ONE_OFF = `2 layers ${MIDDLE_DOT} 1 off`;
 const ONE_LAYER = '1 layer';
-const NEEDS_PROFILE_TOOLTIP = 'Add a machine profile to export G-code.';
+const NEEDS_PROFILE_TOOLTIP = 'Add a laser profile to export G-code.';
 const NEEDS_LAYER_TOOLTIP = 'Switch on a layer to export G-code.';
 const THREE_COLOUR_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="30mm" height="10mm" viewBox="0 0 30 10">'
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/>'
@@ -118,6 +118,12 @@ const getFirstLayerKey = (store: AppStore): string => {
   return getLayerKey(firstLayer);
 };
 
+const START_JOB_NAME = 'Start job';
+const NOT_CONNECTED_REASON = 'Connect the laser to start a job.';
+const CONNECT_STEP_OPEN_LABEL = 'Connect: to do';
+const ACTIONS_NOT_CONNECTED_REASON = 'Connect the laser to start or frame.';
+const QUIET_BUTTON_CLASS = 'quiet';
+
 describe(JobCard.name, () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -133,7 +139,7 @@ describe(JobCard.name, () => {
     });
 
     expect(screen.getByText(TWO_LAYERS_ONE_OFF)).toBeInTheDocument();
-    expect(screen.getByText(ESTIMATE_LABEL).nextElementSibling).toHaveTextContent(ESTIMATE_PLACEHOLDER);
+    expect(screen.getByText(ESTIMATE_LABEL).closest('div')).toHaveTextContent(ESTIMATE_PLACEHOLDER);
   });
 
   it('shows the estimate of a ready toolpath', () => {
@@ -159,10 +165,25 @@ describe(JobCard.name, () => {
     renderJobCard(await newGcodeExportTestStore());
     const startJobButton: HTMLElement = screen.getByRole('button', { name: START_JOB_LABEL });
 
-    expect(startJobButton).toBeDisabled();
+    expect(startJobButton).toHaveAttribute('aria-disabled', 'true');
     expect(startJobButton).not.toHaveClass(PRIMARY_BUTTON_CLASS);
-    fireEvent.mouseEnter(startJobButton.parentElement as HTMLElement);
-    expect(await screen.findByText('Connect the laser to start a job.')).toBeInTheDocument();
+    expect(startJobButton).toHaveAccessibleDescription(NOT_CONNECTED_REASON);
+  });
+
+  it('opens no start confirmation from a blocked Start job, which stays focusable', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderJobCard(store);
+    const startJobButton: HTMLElement = screen.getByRole('button', { name: START_JOB_LABEL });
+
+    startJobButton.focus();
+    fireEvent.click(startJobButton);
+
+    expect(startJobButton).toHaveFocus();
+    expect(screen.queryByRole('button', { name: START_CONFIRM_OK_LABEL })).not.toBeInTheDocument();
+    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(JobStartRequested));
   });
 
   it('starts the job only after the confirmation, which the Escape-to-STOP hotkey treats as an overlay', async () => {
@@ -225,10 +246,33 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('status')).toHaveTextContent('Framing: paused');
   });
 
-  it('makes Export G-code the filled main action, the one job action that works today', async () => {
+  it('never fills Export G-code, and fills Start job only when it can run', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
-    expect(getExportButton()).toHaveClass(PRIMARY_BUTTON_CLASS);
+    expect(getExportButton()).not.toHaveClass(PRIMARY_BUTTON_CLASS);
+    expect(screen.getByRole('button', { name: START_JOB_NAME })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
+  });
+
+  it('gives one shared reason behind a focusable icon while Start and Frame wait for a connection', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    expect(screen.getByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).toHaveAttribute('tabindex', '0');
+    expect(screen.queryByText(ACTIONS_NOT_CONNECTED_REASON)).not.toBeInTheDocument();
+    expect(screen.queryByText(NOT_CONNECTED_REASON)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: CONNECT_STEP_OPEN_LABEL })).toBeInTheDocument();
+  });
+
+  it('shows no reason icon once Start and Frame can run', () => {
+    renderJobCard(newStartableJobStore());
+
+    expect(screen.queryByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).not.toBeInTheDocument();
+  });
+
+  it('shows Export G-code as the quiet secondary action', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    expect(getExportButton().className).toContain(QUIET_BUTTON_CLASS);
   });
 
   it('has no Soon tag any more, since Frame job works', async () => {
@@ -251,7 +295,7 @@ describe(JobCard.name, () => {
   it('disables export without an active machine profile and says a profile is needed', async () => {
     renderJobCard(await newGcodeExportTestStore({ activeProfile: undefined }));
 
-    expect(getExportButton()).toBeDisabled();
+    expect(getExportButton()).toHaveAttribute('aria-disabled', 'true');
 
     fireEvent.mouseEnter(getExportButton().parentElement ?? getExportButton());
 
@@ -278,7 +322,7 @@ describe(JobCard.name, () => {
 
     renderJobCard(store);
 
-    expect(getExportButton()).toBeDisabled();
+    expect(getExportButton()).toHaveAttribute('aria-disabled', 'true');
     fireEvent.mouseEnter(getExportButton().parentElement ?? getExportButton());
     expect(await screen.findByText(NEEDS_LAYER_TOOLTIP)).toBeInTheDocument();
     expect(drawableSet.drawables.length).toBeGreaterThan(0);

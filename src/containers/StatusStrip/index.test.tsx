@@ -64,7 +64,7 @@ describe(StatusStrip.name, () => {
   it('keeps the console collapsed by default', () => {
     renderStatusStrip();
 
-    expect(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL })).toHaveAttribute('aria-pressed', 'false');
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });
 
@@ -78,33 +78,35 @@ describe(StatusStrip.name, () => {
     expect(screen.queryByText(SOON_LABEL)).not.toBeInTheDocument();
   });
 
-  it('shows the bed point under the pointer once the next frame comes, and a dash after the pointer leaves', () => {
+  it('shows the bed point under the pointer once the next frame comes, hiding it off the bed', () => {
     const animationFrames: AnimationFrameStub = new AnimationFrameStub();
 
     animationFrames.install();
     renderStatusStrip();
     const cursorReadout: HTMLElement | null = screen.getByText(CURSOR_LABEL).closest('div');
 
-    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+    expect(cursorReadout).toHaveAttribute('aria-hidden', 'true');
+    expect(cursorReadout).not.toHaveTextContent(MISSING_VALUE_TEXT);
 
     act(() => {
       BED_CURSOR_STORE.setBedCursorPoint({ xMm: 12.34, yMm: 56.78 });
       BED_CURSOR_STORE.setBedCursorPoint(CURSOR_POINT);
     });
 
-    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+    expect(cursorReadout).toHaveAttribute('aria-hidden', 'true');
     expect(animationFrames.getRequestCount()).toBe(1);
 
     animationFrames.runFrame(FRAME_TIME_MS);
 
     expect(cursorReadout).toHaveTextContent(CURSOR_TEXT);
+    expect(cursorReadout).toHaveAttribute('aria-hidden', 'false');
 
     act(() => {
       BED_CURSOR_STORE.setBedCursorPoint(undefined);
     });
     animationFrames.runFrame(FRAME_TIME_MS);
 
-    expect(cursorReadout).toHaveTextContent(`${CURSOR_LABEL}${MISSING_VALUE_TEXT}`);
+    expect(cursorReadout).toHaveAttribute('aria-hidden', 'true');
     vi.unstubAllGlobals();
   });
 
@@ -165,12 +167,12 @@ describe(StatusStrip.name, () => {
     const store: AppStore = newStore();
     renderStatusStrip(store);
 
-    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(selectIsConsoleOpen(store.getState())).toBe(true);
-    expect(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL })).toBeChecked();
+    expect(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL })).toHaveAttribute('aria-pressed', 'true');
 
-    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(selectIsConsoleOpen(store.getState())).toBe(false);
   });
@@ -178,7 +180,7 @@ describe(StatusStrip.name, () => {
   it('never draws the console inside the strip', () => {
     renderStatusStrip();
 
-    fireEvent.click(screen.getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: CONSOLE_TOGGLE_LABEL }));
 
     expect(screen.queryByLabelText(INPUT_LABEL)).not.toBeInTheDocument();
   });

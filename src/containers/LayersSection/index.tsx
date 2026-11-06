@@ -10,6 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { InboxOutlined } from '@ant-design/icons';
 import type { DragEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,8 @@ import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { LayerToggled, LayersReordered, selectProjectLayers } from '../../utils/states/project.document.state';
+import { LayerSettingsOpenChanged, selectOpenLayerSettingsKey } from '../../utils/states/ui.workbench.state';
+import { LayerValueLegend } from '../../views/LayerValueLegend';
 import { LayerSettingsDrawer } from '../LayerSettingsDrawer';
 import type { LayersSectionProps } from './interfaces/LayersSectionProps';
 import { LayerRow } from './LayerRow';
@@ -34,7 +37,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
   const dispatch: AppDispatch = useDispatch();
   const layers: ProjectLayer[] = useSelector(selectProjectLayers);
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
-  const [openLayerKey, setOpenLayerKey] = useState<string | undefined>(undefined);
+  const openLayerKey: string | undefined = useSelector(selectOpenLayerSettingsKey);
   const [draggedLayerKey, setDraggedLayerKey] = useState<string | undefined>(undefined);
   const openButtonsRef = useRef<Map<string, HTMLButtonElement>>(new Map<string, HTMLButtonElement>());
   const closedLayerKeyRef = useRef<string | undefined>(undefined);
@@ -73,6 +76,10 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
     setDraggedLayerKey(undefined);
   };
 
+  const setOpenLayerKey = (layerKey: string | undefined): void => {
+    dispatch(new LayerSettingsOpenChanged({ openLayerSettingsKey: layerKey }));
+  };
+
   const closeLayerSettings = (): void => {
     closedLayerKeyRef.current = openLayerKey;
     setOpenLayerKey(undefined);
@@ -100,35 +107,38 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
   };
 
   if (!layers.length) {
-    return <p className={styles.hint}>{t(DEFAULT.LAYERS_EMPTY_HINT)}</p>;
+    return <p className={styles.hint}><InboxOutlined aria-hidden />{t(DEFAULT.LAYERS_EMPTY_HINT)}</p>;
   }
 
   return (
     <>
-      <ul className={styles.list} aria-label={t(DEFAULT.LAYERS_LIST_LABEL)}>
-        {layers.map((layer: ProjectLayer, layerIndex: number) => {
-          const layerKey: string = getLayerKey(layer);
+      <div className={styles.layerList}>
+        <LayerValueLegend />
+        <ul className={styles.list} aria-label={t(DEFAULT.LAYERS_LIST_LABEL)}>
+          {layers.map((layer: ProjectLayer, layerIndex: number) => {
+            const layerKey: string = getLayerKey(layer);
 
-          return (
-            <LayerRow
-              key={layerKey}
-              layer={layer}
-              layerEntry={getLayerPaletteEntry(layer, paletteEntries)}
-              isFirst={layerIndex === 0}
-              isLast={layerIndex === layers.length - 1}
-              isOpen={layerKey === openLayerKey}
-              onOpen={() => setOpenLayerKey(layerKey)}
-              openButtonRef={(openButton: HTMLButtonElement | null) => registerOpenButton(layerKey, openButton)}
-              onToggle={(enabled: boolean) => dispatch(new LayerToggled({ layerKey, enabled }))}
-              onMoveUp={() => moveLayerToIndex(layerKey, layerIndex - 1)}
-              onMoveDown={() => moveLayerToIndex(layerKey, layerIndex + 1)}
-              onDragStart={(dragEvent: DragEvent<HTMLLIElement>) => startDrag(dragEvent, layerKey)}
-              onDragEnd={() => setDraggedLayerKey(undefined)}
-              onDrop={() => dropOnLayer(layerKey)}
-            />
-          );
-        })}
-      </ul>
+            return (
+              <LayerRow
+                key={layerKey}
+                layer={layer}
+                layerEntry={getLayerPaletteEntry(layer, paletteEntries)}
+                isFirst={layerIndex === 0}
+                isLast={layerIndex === layers.length - 1}
+                isOpen={layerKey === openLayerKey}
+                onOpen={() => setOpenLayerKey(layerKey)}
+                openButtonRef={(openButton: HTMLButtonElement | null) => registerOpenButton(layerKey, openButton)}
+                onToggle={(enabled: boolean) => dispatch(new LayerToggled({ layerKey, enabled }))}
+                onMoveUp={() => moveLayerToIndex(layerKey, layerIndex - 1)}
+                onMoveDown={() => moveLayerToIndex(layerKey, layerIndex + 1)}
+                onDragStart={(dragEvent: DragEvent<HTMLLIElement>) => startDrag(dragEvent, layerKey)}
+                onDragEnd={() => setDraggedLayerKey(undefined)}
+                onDrop={() => dropOnLayer(layerKey)}
+              />
+            );
+          })}
+        </ul>
+      </div>
       <LayerSettingsDrawer
         layer={openLayer}
         onClose={closeLayerSettings}

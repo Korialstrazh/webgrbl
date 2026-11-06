@@ -1,0 +1,31 @@
+// A 1.75rem round target with a faint tint, so the note reads as something to tap and the focus ring has room.
+.tooltipNoteIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-3);
+  color: var(--color-text-muted);
+  font-size: 1.125rem;
+  cursor: pointer;
+}
+
+.tooltipNoteIcon:hover {
+  color: var(--color-text);
+}
+
+.noteText {
+  display: block;
+  max-width: 16rem;
+}
+
+.warning {
+  color: var(--color-warning);
+}
+
+.icon {
+  display: inline-flex;
+}

@@ -1,5 +1,6 @@
 /**
- * The autosave readout of the top bar: a dot and the state of the open project, Saved, Saving or Not saved.
+ * The autosave readout of the top bar: an icon and the state of the open project, Saved, Saving or Not saved. When the
+ * bar is narrow only the icon stays; its tooltip and accessible name still give the state.
  *
  * @author michael.morosov
  *
@@ -8,6 +9,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { CheckCircleFilled, ExclamationCircleFilled, SyncOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -17,20 +20,34 @@ import { selectProjectSaveStatus } from '../../../utils/states/project.state';
 import { PROJECT_SAVE_STATUS_LABEL_KEY } from '../ProjectMenu/project.menu.constants';
 import styles from './styles.module.scss';
 
-const DOT_CLASS_NAME: Record<ProjectSaveStatus, string | undefined> = {
+const ICON_CLASS_NAME: Record<ProjectSaveStatus, string | undefined> = {
   [PROJECT_SAVE_STATUS.SAVED]: styles.saved,
   [PROJECT_SAVE_STATUS.SAVING]: styles.saving,
   [PROJECT_SAVE_STATUS.UNSAVED]: styles.unsaved,
+};
+
+const getSaveStatusIconComponent = (saveStatus: ProjectSaveStatus): ReactNode => {
+  if (saveStatus === PROJECT_SAVE_STATUS.SAVING) {
+    return <SyncOutlined spin />;
+  }
+
+  return saveStatus === PROJECT_SAVE_STATUS.SAVED ? <CheckCircleFilled /> : <ExclamationCircleFilled />;
 };
 
 export const AutosaveReadout = (): ReactNode => {
   const { t } = useTranslation();
   const saveStatus: ProjectSaveStatus = useSelector(selectProjectSaveStatus);
 
+  const statusLabel: string = t(PROJECT_SAVE_STATUS_LABEL_KEY[saveStatus]);
+
   return (
-    <p className={styles.autosave} role="status">
-      <span className={[styles.dot, DOT_CLASS_NAME[saveStatus]].join(' ')} aria-hidden />
-      <span className={styles.label}>{t(PROJECT_SAVE_STATUS_LABEL_KEY[saveStatus])}</span>
-    </p>
+    <Tooltip title={statusLabel}>
+      <p className={styles.autosave} role="status" aria-label={statusLabel}>
+        <span className={[styles.icon, ICON_CLASS_NAME[saveStatus]].join(' ')} aria-hidden>
+          {getSaveStatusIconComponent(saveStatus)}
+        </span>
+        <span className={styles.label}>{statusLabel}</span>
+      </p>
+    </Tooltip>
   );
 };

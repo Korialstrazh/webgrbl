@@ -19,8 +19,12 @@
   }
 }
 
-.layersContent {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+.layersActions {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+// Small buttons, but the icons that say what they do stay large enough to read.
+.layersActions :global(.ant-btn .anticon) {
+  font-size: 1.125rem;
 }

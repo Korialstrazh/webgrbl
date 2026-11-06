@@ -12,7 +12,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Form, Input, InputNumber } from 'antd';
+import { CheckOutlined, ColumnHeightOutlined, TagOutlined } from '@ant-design/icons';
+import { Button, Form, Input } from 'antd';
 import type { InputRef } from 'antd';
 import { useId, useRef, useState } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
@@ -36,10 +37,12 @@ import {
   MATERIAL_THICKNESS_MM_MIN,
 } from '../../utils/materials/material.constants';
 import { newMaterial } from '../../utils/materials/new.material';
+import { selectActiveMaterial } from '../../utils/states/material.selectors';
 import { MaterialSaved, selectMaterials } from '../../utils/states/material.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
 import { isFiniteNumber } from '../../utils/type.guards/is.finite.number';
+import { IconNumberField } from '../../views/IconNumberField';
 import { BedRegionModal } from '../BedRegionModal';
 import type { MaterialDialogProps } from './interfaces/MaterialDialogProps';
 import { MATERIAL_DIALOG_OVERLAY_ID } from './material.dialog.constants';
@@ -62,6 +65,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
   const [isNameChanged, setIsNameChanged] = useState<boolean>(false);
   const [thicknessMm, setThicknessMm] = useState<number>(DEFAULT_MATERIAL_THICKNESS_MM);
   const materials: Material[] = useSelector(selectMaterials);
+  const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const nameInputRef: RefObject<InputRef | null> = useRef<InputRef>(null);
   const fieldErrors: MaterialFieldErrors = getMaterialFieldErrors(materialName, thicknessMm);
   const isSaveAllowed: boolean = !hasMaterialFieldError(fieldErrors);
@@ -86,6 +90,12 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
     const material: Material = newMaterial({ name: materialName.trim(), thicknessMm });
 
     dispatch(new MaterialSaved({ material }));
+
+    // Choosing a material changes no layer value, so the first one a project gets can safely become its material.
+    if (!activeMaterial) {
+      dispatch(new ProjectMaterialSelected({ materialId: material.id }));
+    }
+
     chooseMaterial(material.id);
   };
 
@@ -96,7 +106,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
       title={t(DEFAULT.MATERIAL_DIALOG_TITLE)}
       okText={t(DEFAULT.MATERIAL_DIALOG_SAVE)}
       cancelText={t(DEFAULT.MATERIAL_DIALOG_CANCEL)}
-      okButtonProps={{ disabled: !isSaveAllowed }}
+      okButtonProps={{ disabled: !isSaveAllowed, icon: <CheckOutlined aria-hidden /> }}
       onOk={saveMaterial}
       // The dialog takes the focus for itself when it opens, so the field asks for it back after that.
       afterOpenChange={(isDialogOpen: boolean) => {
@@ -108,8 +118,6 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
     >
       <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
         <Form.Item
-          label={t(DEFAULT.MATERIAL_DIALOG_NAME)}
-          htmlFor={nameFieldId}
           validateStatus={nameErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
           help={nameErrorKey && t(nameErrorKey, {
             min: MATERIAL_NAME_LENGTH_MIN,
@@ -120,6 +128,9 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
             ref={nameInputRef}
             id={nameFieldId}
             autoFocus
+            prefix={<TagOutlined aria-hidden />}
+            aria-label={t(DEFAULT.MATERIAL_DIALOG_NAME)}
+            placeholder={t(DEFAULT.MATERIAL_DIALOG_NAME)}
             value={materialName}
             onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => {
               setMaterialName(changeEvent.target.value);
@@ -128,8 +139,6 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
           />
         </Form.Item>
         <Form.Item
-          label={t(DEFAULT.MATERIAL_DIALOG_THICKNESS)}
-          htmlFor={thicknessFieldId}
           validateStatus={fieldErrors.thicknessErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
           help={fieldErrors.thicknessErrorKey && t(fieldErrors.thicknessErrorKey, {
             min: MATERIAL_THICKNESS_MM_MIN,
@@ -137,9 +146,11 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
           })}
         >
           {/* An emptied input holds NaN, which the checks reject; the input then shows nothing. */}
-          <InputNumber
-            id={thicknessFieldId}
-            className={styles.thicknessInput}
+          <IconNumberField
+            inputId={thicknessFieldId}
+            labelText={t(DEFAULT.MATERIAL_DIALOG_THICKNESS)}
+            iconComponent={<ColumnHeightOutlined />}
+            unitText={t(DEFAULT.FIELD_UNIT_MM)}
             value={isFiniteNumber(thicknessMm) ? thicknessMm : null}
             onChange={(value: number | null) => setThicknessMm(value ?? Number.NaN)}
           />

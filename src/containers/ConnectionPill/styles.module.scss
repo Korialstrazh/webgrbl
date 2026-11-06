@@ -73,17 +73,40 @@
   font-size: 0.75rem;
 }
 
+// The profile button of the top bar names the laser, so the pill only repeats it once there is a link to name.
+.profile:has(~ .connectVerb) {
+  display: none;
+}
+
 // In a narrow window the pill keeps the state and the Connect verb, or the machine name once connected; the port and
 // the firmware move to its popover. 62.5rem must match the TopBar styles.
 @media (width < 62.5rem) {
   .firmware,
   .port,
-  .connectVerb ~ .caret,
-  .profile:has(~ .connectVerb) {
+  .connectVerb ~ .caret {
     display: none;
   }
 
   .profile {
     max-width: 7rem;
+  }
+}
+
+// At phone width the pill is its dot and the Connect verb, or the dot alone once there is a link: it must always fit.
+@media (width < 30rem) {
+  .pill {
+    padding: 0 var(--space-2);
+  }
+
+  .status,
+  .profile,
+  .caret,
+  .warningNote {
+    display: none;
+  }
+
+  .connectVerb {
+    padding-left: 0;
+    border-left: 0;
   }
 }

@@ -12,6 +12,7 @@ import { getBedDrawables } from '../toolpath/get.bed.drawables';
 import { getOriginMappedPoint } from '../toolpath/get.origin.mapped.point';
 import { getToolpath } from '../toolpath/get.toolpath';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
+import { newProjectObject } from '../project/new.project.object';
 import type { Palette } from '../palette/interfaces/Palette';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathMachineArea } from '../toolpath/interfaces/ToolpathMachineArea';
@@ -249,5 +250,78 @@ describe(fitsSampleJob.name, () => {
     expect(fitsSampleJob(newToolpathMachineArea({ workAreaXMm: SMALL_MACHINE_MM, workAreaYMm: SMALL_MACHINE_MM })))
       .toBe(false);
     expect(fitsSampleJob(newToolpathMachineArea())).toBe(true);
+  });
+});
+
+describe(`${getSampleJobObject.name} placement of repeats`, () => {
+  const addSamples = (machineArea: ToolpathMachineArea, count: number): ProjectObject[] => {
+    const objects: ProjectObject[] = [];
+
+    for (let sampleIndex = 0; sampleIndex < count; ++sampleIndex) {
+      objects.push(getSampleJobObject(machineArea, undefined, objects));
+    }
+
+    return objects;
+  };
+
+  const ROOMY_AREA_MM = 300;
+  const roomyArea: ToolpathMachineArea = newToolpathMachineArea({
+    workAreaXMm: ROOMY_AREA_MM,
+    workAreaYMm: ROOMY_AREA_MM,
+  });
+  const ROOMY_SAMPLE_COUNT = 4;
+
+  const isOverlapping = (first: ProjectObject, second: ProjectObject): boolean =>
+    first.xMm < second.xMm + second.widthMm && second.xMm < first.xMm + first.widthMm
+    && first.yMm < second.yMm + second.heightMm && second.yMm < first.yMm + first.heightMm;
+
+  it('places a repeat where it does not overlap the first sample', () => {
+    const [first, second] = addSamples(roomyArea, 2);
+
+    expect(first && second && isOverlapping(first, second)).toBe(false);
+  });
+
+  it('keeps every repeat on the bed and clear of the others, from any origin corner', () => {
+    Object.values(MACHINE_ORIGIN_CORNER).forEach((originCorner: MachineOriginCorner): void => {
+      const objects: ProjectObject[] = addSamples({ ...roomyArea, originCorner }, ROOMY_SAMPLE_COUNT);
+
+      objects.forEach((projectObject: ProjectObject, objectIndex: number): void => {
+        const { xMm, yMm, widthMm, heightMm } = projectObject;
+
+        expect(xMm).toBeGreaterThanOrEqual(0);
+        expect(yMm).toBeGreaterThanOrEqual(0);
+        expect(xMm + widthMm).toBeLessThanOrEqual(ROOMY_AREA_MM);
+        expect(yMm + heightMm).toBeLessThanOrEqual(ROOMY_AREA_MM);
+        objects.slice(objectIndex + 1).forEach((otherObject: ProjectObject): void => {
+          expect(isOverlapping(projectObject, otherObject)).toBe(false);
+        });
+      });
+    });
+  });
+
+  it('places the sample clear of artwork already at the origin corner, as in the round 11 review', () => {
+    const ARTWORK_WIDTH_MM = 120;
+    const ARTWORK_HEIGHT_MM = 80;
+    const ARTWORK_GAP_MM = 20;
+    const artworks: ProjectObject[] = [0, ARTWORK_WIDTH_MM + ARTWORK_GAP_MM].map(
+      (xMm: number): ProjectObject => newProjectObject({
+        xMm,
+        yMm: 0,
+        widthMm: ARTWORK_WIDTH_MM,
+        heightMm: ARTWORK_HEIGHT_MM,
+      }),
+    );
+    const sample: ProjectObject = getSampleJobObject(roomyArea, undefined, artworks);
+
+    artworks.forEach((artwork: ProjectObject): void => {
+      expect(isOverlapping(sample, artwork)).toBe(false);
+    });
+  });
+
+  it('falls back to the first spot when no other spot is free on a bed just big enough', () => {
+    const tightArea: ToolpathMachineArea = newToolpathMachineArea({ workAreaXMm: 55, workAreaYMm: 55 });
+    const [first, second] = addSamples(tightArea, 2);
+
+    expect([second?.xMm, second?.yMm]).toEqual([first?.xMm, first?.yMm]);
   });
 });

@@ -10,8 +10,8 @@ const CONNECTION_PILL_PATTERN = /^Connection: Not connected/;
 const STOP_LABEL = 'Stop';
 const CONSOLE_TITLE = 'Console';
 const CONSOLE_TOGGLE_LABEL = 'Console';
-const DESIGN_PANEL_LABEL = 'Design';
-const MACHINE_PANEL_LABEL = 'Machine';
+const DESIGN_PANEL_LABEL = 'Layers and objects';
+const MACHINE_PANEL_LABEL = 'Laser';
 const ONLY_STOP_COUNT = 1;
 const THREE_D_VIEW_LABEL = '3D';
 const CUT_CHECK_TITLE = 'Cut check';
@@ -58,7 +58,7 @@ const getBedColumnPanels = (): HTMLElement[] =>
   Array.from(document.querySelectorAll<HTMLElement>(`${VERTICAL_SPLITTER_SELECTOR} > ${SPLITTER_PANEL_SELECTOR}`));
 
 const toggleConsole = (): void => {
-  fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('switch', { name: CONSOLE_TOGGLE_LABEL }));
+  fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('button', { name: CONSOLE_TOGGLE_LABEL }));
 };
 
 const getSplitterPanelFlexBases = (): string[] =>
@@ -145,7 +145,7 @@ describe(AppRoute.name, () => {
     expect(getBedColumnPanels()[1]?.style.flexBasis).toBe('30%');
   });
 
-  it('stacks the open console below the bed in a narrow window', () => {
+  it('opens the console as a sheet inside the regions box in a narrow window, outside any region', () => {
     setMatchMediaMatches(false);
     renderAppRoute();
 
@@ -156,6 +156,8 @@ describe(AppRoute.name, () => {
     expect(document.querySelector(SPLITTER_SELECTOR)).not.toBeInTheDocument();
     expect(screen.getByRole('main').compareDocumentPosition(consoleHeading))
       .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    // Not inside the Bed region, so it shows over whichever region is on screen.
+    expect(screen.getByRole('main').parentElement?.contains(consoleHeading)).toBe(false);
   });
 
   it('puts the bed first in a narrow window, so the first screen shows the work', () => {
@@ -203,7 +205,7 @@ describe(AppRoute.name, () => {
     expect(screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL })).toContainElement(stopButton ?? null);
   });
 
-  it('shows the machine panel and STOP beside the Cut check in the 3D view', async () => {
+  it('shows the machine panel and STOP beside the design panel in the 3D view', async () => {
     renderAppRoute();
     await waitForRegions();
     fireEvent.click(screen.getByRole('radio', { name: THREE_D_VIEW_LABEL }));
@@ -211,6 +213,7 @@ describe(AppRoute.name, () => {
     const designPanel: HTMLElement = screen.getByRole('complementary', { name: DESIGN_PANEL_LABEL });
     const machinePanel: HTMLElement = screen.getByRole('complementary', { name: MACHINE_PANEL_LABEL });
 
+    // The Cut check keeps its slot as a heading line even before a model exists.
     expect(within(designPanel).getByRole('heading', { name: CUT_CHECK_TITLE })).toBeInTheDocument();
     expect(within(machinePanel).getByRole('button', { name: STOP_LABEL })).toBeInTheDocument();
     expect(designPanel).not.toContainElement(machinePanel);

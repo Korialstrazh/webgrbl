@@ -17,12 +17,18 @@ import { useSelector } from 'react-redux';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import { selectActiveMaterial } from '../../utils/states/material.selectors';
+import { selectMaterials } from '../../utils/states/material.state';
 import { TestSampleDialog } from '../TestSampleDialog';
 import styles from './styles.module.scss';
+import { TestSampleIcon } from '../../views/TestSampleIcon';
 
 export const BurnPreviewToolbar = (): ReactNode => {
   const { t } = useTranslation();
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
+  const hasMaterials: boolean = Boolean(useSelector(selectMaterials).length);
+  const noMaterialKey: string = hasMaterials
+    ? DEFAULT.BURN_PREVIEW_MATERIAL_PLACEHOLDER
+    : DEFAULT.BURN_PREVIEW_MATERIAL_NONE;
   const [isTestSampleDialogOpen, setIsTestSampleDialogOpen] = useState<boolean>(false);
 
   return (
@@ -30,9 +36,13 @@ export const BurnPreviewToolbar = (): ReactNode => {
       <span className={styles.materialText}>
         {activeMaterial
           ? t(DEFAULT.BURN_PREVIEW_MATERIAL_CURRENT, { name: activeMaterial.name })
-          : t(DEFAULT.BURN_PREVIEW_MATERIAL_NONE)}
+          : t(noMaterialKey)}
       </span>
-      <Button disabled={!activeMaterial} onClick={() => setIsTestSampleDialogOpen(true)}>
+      <Button
+        icon={<TestSampleIcon aria-hidden />}
+        disabled={!activeMaterial}
+        onClick={() => setIsTestSampleDialogOpen(true)}
+      >
         {t(DEFAULT.BURN_PREVIEW_ENTER_TEST_RESULT)}
       </Button>
       {activeMaterial && (

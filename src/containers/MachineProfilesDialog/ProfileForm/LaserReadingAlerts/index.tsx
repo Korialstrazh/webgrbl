@@ -1,5 +1,5 @@
 /**
- * What "Read from connected laser" found: the values the laser reported, or a note that it reported none of them,
+ * What "Read from laser" found: the values the laser reported, or a note that it reported none of them,
  * plus a warning when the laser reports laser mode off. A value the laser did not report is not listed, and an
  * unreported laser mode gives no warning.
  *

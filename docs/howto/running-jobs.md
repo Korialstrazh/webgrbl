@@ -10,6 +10,8 @@ While a job runs, the Job card shows a progress bar, lines answered and elapsed 
 
 While a job runs, the console, jog, home, set zero, pointer and air assist are locked. After a lost connection the laser may still run what it has buffered, and the app cannot stop it, so use the machine's own power switch or emergency stop.
 
+The Job card shows a stepper (Profile, Artwork, Material, Connect) and, under it, one filled button for the current step: **Set up laser**, **Import SVG**, **Choose material** or **Connect laser**. It opens what the step opens and starts nothing: **Connect laser** only opens the connection popover, which opens beside the connection pill so it never covers this button. The steps are one tab stop; move between them with the arrow keys, Home and End. Filled orange is kept for this button and for Start.
+
 ## Frame job
 
 **Not yet verified on a real laser.** The checks on the ACMER are pending: the dot visible at about 0.05 W including at corners, dark while paused, and dark when the head stops. The dot uses `M4`, so it goes dark when the head stands still and dims at corners.
@@ -22,7 +24,7 @@ Frame job traces the job with a dim dot, so you can see where it lands before yo
 4. Press **Frame job**. There is no confirmation. The head traces the rectangle around the job, then the grid lines, switches the dot off and returns to where it started.
 5. **Pause**, **Resume** and **STOP** work as for a job. The dot is off while paused. While a frame runs, the same locks as for a job apply.
 
-Frame job is off, with the reason in its tooltip, when the job cannot start, when laser mode is not confirmed on (`$32=1`, read at connect), when there is nothing to burn, or when the frame would leave the bed. A message then names the edge and by how many mm the frame goes past it. Work zero counts as the origin of the bed, so this check only tells you the frame fits from where work zero is; it is a first filter. The app does not know how far the head can really travel.
+Frame job is off (no fill, a dashed outline and a small lock on its icon, like Start while it cannot run; a ready Export keeps a solid outline and bright text), with the reason in its tooltip (an off Start or Frame still takes keyboard focus, so Tab reaches it and a screen reader reads the reason; pressing it does nothing) and behind the amber info icon in the Job card heading (hover or focus it for one shared reason, "Connect the laser to start or frame.", while neither can run for want of a connection), when the job cannot start, when laser mode is not confirmed on (`$32=1`, read at connect), when there is nothing to burn, or when the frame would leave the bed. A message then names the edge and by how many mm the frame goes past it. Work zero counts as the origin of the bed, so this check only tells you the frame fits from where work zero is; it is a first filter. The app does not know how far the head can really travel.
 
 **The machine reports a limit only if it can.** Without soft limits (`$20=1` and a homed machine) or hard limit switches, GRBL reports nothing when the head reaches the end of its travel, and the head can stall against the frame of the machine. The app cannot detect that, so watch the head and press STOP. If the machine does report an alarm, the frame ends and the card says so; clear the alarm before framing again.
 

@@ -1,3 +1,5 @@
+@use '../../styles/accessibility' as accessibility;
+
 // The Toolpath view controls in the bed header, at the one control height of the header: they keep their width and stay on one line, so on a narrow bed the
 // whole group wraps to a row of its own; a bed narrower still clips the row rather than squeezing the controls.
 .toolpathToolbar {
@@ -14,14 +16,51 @@
   }
 }
 
-.travelSwitch {
+.modeSwitch :global(.ant-segmented-item-label) {
+  min-height: 2.25rem;
+  padding-inline: var(--space-2);
+  line-height: 1;
+}
+
+// An icon over one word, like the view switch, so the colour mode reads without a hover.
+.modeOption,
+.travelCaption {
   display: inline-flex;
+  flex-direction: column;
+  gap: 0.125rem;
   align-items: center;
-  min-height: var(--control-height);
-  gap: var(--space-2);
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
-  white-space: nowrap;
-  cursor: pointer;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.25rem;
+  font-size: 1rem;
+}
+
+.caption {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+// The full name is in the tooltip and read by screen readers; the icon and its caption say it on screen.
+.modeName {
+  @include accessibility.visually-hidden;
+}
+
+.travelIcon {
+  font-size: 1rem;
+}
+
+.travelToggle:global(.ant-btn) {
+  height: auto;
+  min-height: 2.25rem;
+  padding: 0.125rem var(--space-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+// Pressed: the accent tint and accent glyph of a selected segment, so on and off read at a glance.
+.travelToggle.travelToggleOn:global(.ant-btn),
+.travelToggle.travelToggleOn:global(.ant-btn:not(:disabled):hover) {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-tint);
+  color: var(--color-accent);
 }

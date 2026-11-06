@@ -1,7 +1,7 @@
 /**
- * A row of the layer list: a drag handle, an on/off checkbox and a button that opens the layer settings, showing the
- * swatch, the name, a summary and a note when the colour is not in the palette. Move buttons reorder it
- * without a pointer.
+ * A row of the layer list: a drag handle, an on/off checkbox drawn as an eye (the row dims while off) and a button
+ * that opens the layer settings, showing the swatch, the name, a summary and a note when the colour is not in the
+ * palette. Move buttons reorder it without a pointer.
  *
  * @author michael.morosov
  *
@@ -10,17 +10,25 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ArrowDownOutlined, ArrowUpOutlined, HolderOutlined } from '@ant-design/icons';
-import { Button, Checkbox } from 'antd';
+import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  HolderOutlined,
+} from '@ant-design/icons';
+import { Button, Checkbox, Tooltip } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
-import { getLayerSummaryParts } from '../../../utils/layers/get.layer.summary.parts';
+import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
-import { LayerSummaryText } from '../../../views/LayerSummaryText';
+import { IconActionButton } from '../../../views/IconActionButton';
+import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { LayerSwatch } from '../../../views/LayerSwatch';
+import { LayerValueCells } from '../../../views/LayerValueCells';
 import type { LayerRowProps } from '../interfaces/LayerRowProps';
 import styles from './styles.module.scss';
 
@@ -57,12 +65,22 @@ export const LayerRow = ({
       onDragOver={allowDropOnRow}
       onDrop={onDrop}
     >
-      <HolderOutlined className={styles.handle} aria-hidden="true" />
-      <Checkbox
-        checked={layer.enabled}
-        aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
-        onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
-      />
+      <Tooltip title={t(DEFAULT.LAYERS_DRAG_HINT)}>
+        <HolderOutlined className={styles.handle} aria-hidden="true" />
+      </Tooltip>
+      <Tooltip title={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}>
+        {/* Still a real checkbox for the keyboard and for screen readers; only its look is an eye, open while sent. */}
+        <Checkbox
+          className={styles.sendToggle}
+          checked={layer.enabled}
+          aria-label={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}
+          onChange={(changeEvent: CheckboxChangeEvent) => onToggle(changeEvent.target.checked)}
+        >
+          <span className={styles.sendToggleFace} aria-hidden>
+            {layer.enabled ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+          </span>
+        </Checkbox>
+      </Tooltip>
       <Button
         ref={openButtonRef}
         className={styles.openButton}
@@ -70,28 +88,33 @@ export const LayerRow = ({
         aria-expanded={isOpen}
         onClick={onOpen}
       >
-        <span className={styles.swatch}>
-          <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
-        </span>
+        <Tooltip title={t(DEFAULT.LAYERS_COLOUR_HINT)}>
+          <span className={styles.swatch}>
+            <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
+          </span>
+        </Tooltip>
+        <Tooltip title={t(LAYER_MODE_LABEL_KEY[settings.mode])}>
+          <span className={styles.modeIcon} aria-hidden><LayerModeIcon mode={settings.mode} /></span>
+        </Tooltip>
         <span className={styles.name} title={layerName}>{layerName}</span>
-        <LayerSummaryText className={styles.summary} parts={getLayerSummaryParts(t, settings)} />
+        <LayerValueCells className={styles.summary} settings={settings} />
         {hasNoPaletteEntry && <span className={styles.note}>{t(DEFAULT.LAYERS_NOT_IN_PALETTE)}</span>}
       </Button>
       <div className={styles.moveButtons}>
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
-          icon={<ArrowUpOutlined />}
-          disabled={isFirst}
-          aria-label={t(DEFAULT.LAYERS_MOVE_UP, { name: layerName })}
+          iconComponent={<ArrowUpOutlined />}
+          isDisabled={isFirst}
+          labelText={t(DEFAULT.LAYERS_MOVE_UP, { name: layerName })}
           onClick={onMoveUp}
         />
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
-          icon={<ArrowDownOutlined />}
-          disabled={isLast}
-          aria-label={t(DEFAULT.LAYERS_MOVE_DOWN, { name: layerName })}
+          iconComponent={<ArrowDownOutlined />}
+          isDisabled={isLast}
+          labelText={t(DEFAULT.LAYERS_MOVE_DOWN, { name: layerName })}
           onClick={onMoveDown}
         />
       </div>

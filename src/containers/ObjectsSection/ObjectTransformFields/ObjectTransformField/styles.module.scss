@@ -1,13 +1,17 @@
+@use '../../../../styles/accessibility' as accessibility;
+
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
   min-width: 0;
 }
 
+// The prefix in the input shows what the field is; the label stays for screen readers.
 .label {
-  font-size: 0.75rem;
+  @include accessibility.visually-hidden;
+}
+
+.prefix {
   color: var(--color-text-muted);
+  font-size: 0.75rem;
 }
 
 .input {

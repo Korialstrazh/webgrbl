@@ -51,37 +51,81 @@
   gap: var(--space-3);
 }
 
-// In a narrow window the secondary entries move into the overflow menu and the gaps close up, so the connection pill
-// keeps its place; 62.5rem must match the TopBarOverflowMenu styles.
+// In a narrow window the gaps close up, so the connection pill keeps its place.
 @media (width < 62.5rem) {
   .topBar {
     gap: var(--space-2);
     padding: 0 var(--space-3);
   }
 
-  .secondaryItem:global(.ant-btn) {
-    display: none;
-  }
-
+  // The app name goes so the project name can use the whole heading, on up to two lines.
   .heading {
     flex-shrink: 1;
-    min-width: 0;
-    // The heading shrinks to make room, so its title and project name are cut instead of drawing over the menus.
+    min-width: 7.5rem;
+    max-width: 10rem;
     overflow: hidden;
   }
 
   .title {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include accessibility.visually-hidden;
   }
 }
 
-// At the narrowest widths (the 684 px window included) Import SVG keeps only its icon, so the app title and the
-// project name keep room to show. 46rem must match the AutosaveReadout styles.
+.profileName {
+  display: inline-block;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+// The save word, the project name and the profile name give up room first, so Import SVG keeps its label and the
+// connection pill stays whole at 50rem; Import SVG drops its label at 46rem and the profile name at 37.5rem.
+@media (width < 62.5rem) {
+  .profileName {
+    max-width: 5rem;
+  }
+
+  .activeMenus :global(.ant-btn) {
+    padding-inline: var(--space-2);
+  }
+}
+
 @media (width < 46rem) {
   .compactHiddenLabel {
     @include accessibility.visually-hidden;
+  }
+}
+
+@media (width < 37.5rem) {
+  .profileName {
+    @include accessibility.visually-hidden;
+  }
+}
+
+// The main icons of the bar are large enough to read without a tooltip.
+.group :global(.ant-btn .anticon) {
+  font-size: 1.25rem;
+}
+
+// At phone width the title, the name and the save word go, and the buttons close up, so everything fits with no scroll.
+@media (width < 30rem) {
+  .heading {
+    display: none;
+  }
+
+  .topBar {
+    gap: var(--space-1);
+    padding: 0 var(--space-2);
+  }
+
+  .activeMenus {
+    gap: 0;
+  }
+
+  .activeMenus :global(.ant-btn) {
+    min-width: 2.125rem;
+    padding-inline: var(--space-1);
   }
 }

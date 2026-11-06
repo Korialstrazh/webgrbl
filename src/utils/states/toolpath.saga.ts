@@ -223,12 +223,18 @@ function* waitForReadyToolpath(exportProjectId: string | undefined): Generator {
 function* downloadGcode(toolpath: Toolpath, profile: MachineProfile): Generator {
   const projectName: string = (yield select(selectProjectName)) as string;
   const gcodeText: string = (yield call(getProjectGcodeText, toolpath, profile)) as string;
+  const fileName: string = getGcodeFileName(projectName);
 
   yield call(downloadTextFile, {
     text: gcodeText,
-    fileName: getGcodeFileName(projectName),
+    fileName,
     mimeType: GCODE_MIME_TYPE,
   });
+  yield put(new ToastShown({
+    severity: TOAST_SEVERITY.INFO,
+    messageKey: DEFAULT.TOAST_GCODE_EXPORTED,
+    messageParameters: { fileName },
+  }));
 }
 
 function* exportGcode(action: GcodeExportRequested): Generator {

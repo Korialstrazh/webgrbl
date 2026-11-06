@@ -5,18 +5,8 @@
   min-width: 0;
 }
 
-.label {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
-
-.input {
-  width: 100%;
-  font-family: var(--font-mono);
-}
-
+// Sans text a step below the value, in the muted colour that keeps AA on every surface.
 .hint {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--color-text-muted);
 }

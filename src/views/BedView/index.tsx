@@ -4,7 +4,7 @@
  * outside style. Only the children take pointer presses; the rest of the drawing lets them through.
  *
  * The view box is the part of the bed in view, so the zoom and pan live in the SVG itself and every pointer position
- * read through the SVG's screen matrix is already in bed millimetres. The markers and the placeholder text are divided
+ * read through the SVG's screen matrix is already in bed millimetres. The markers are divided
  * by the zoom, so they keep their size on screen. The rulers are drawn over the view by BedRulers, in screen space.
  *
  * @author michael.morosov
@@ -29,9 +29,7 @@ import {
   VIEW_BOX_SEPARATOR,
   BED_HEAD_TEST_ID,
   BED_WORK_ORIGIN_TEST_ID,
-  CENTER_FRACTION,
   CROSSHAIR_ARM_MM,
-  PLACEHOLDER_FONT_SIZE_MM,
   WORK_ORIGIN_MARKER_RADIUS_MM,
 } from './bed.view.constants';
 import type { BedViewProps } from './interfaces/BedViewProps';
@@ -79,7 +77,7 @@ const getViewBoxText = (viewBox: BedViewBox): string =>
 
 export const BedView = (props: BedViewProps): ReactNode => {
   const { t } = useTranslation();
-  const { dimensions, headPosition, workOriginPosition, placeholderLabel, viewBox, zoom = 1, children } = props;
+  const { dimensions, headPosition, workOriginPosition, viewBox, zoom = 1, children } = props;
   const { widthMm, heightMm } = dimensions;
   const markerScale: number = 1 / zoom;
   const minorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, false), [widthMm, heightMm]);
@@ -118,16 +116,6 @@ export const BedView = (props: BedViewProps): ReactNode => {
         >
           <path d={`M${-CROSSHAIR_ARM_MM} 0H${CROSSHAIR_ARM_MM}M0 ${-CROSSHAIR_ARM_MM}V${CROSSHAIR_ARM_MM}`} />
         </g>
-      )}
-      {placeholderLabel && (
-        <text
-          className={styles.placeholder}
-          x={widthMm * CENTER_FRACTION}
-          y={heightMm * CENTER_FRACTION}
-          fontSize={PLACEHOLDER_FONT_SIZE_MM * markerScale}
-        >
-          {placeholderLabel}
-        </text>
       )}
     </svg>
   );

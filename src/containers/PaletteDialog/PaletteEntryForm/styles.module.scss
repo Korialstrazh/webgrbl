@@ -10,20 +10,27 @@
   }
 }
 
-.numberFields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-  gap: var(--space-3);
+.identityRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
 }
 
-.numberInput {
-  width: 100%;
+.nameField {
+  flex: 1;
+  min-width: 0;
+}
+
+.numberFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
 }
 
 .switchField {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   min-height: var(--target-min);
   color: var(--color-text);
   font-family: var(--font-ui);
@@ -36,4 +43,10 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--space-2);
+}
+
+.shadingNote {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
 }

@@ -14,8 +14,7 @@
 .minorGrid,
 .majorGrid,
 .workOrigin,
-.head,
-.placeholder {
+.head {
   pointer-events: none;
 }
 
@@ -46,13 +45,6 @@
 .head path {
   stroke: var(--color-bed-laser-head);
   stroke-width: 2;
-}
-
-.placeholder {
-  fill: var(--color-bed-text);
-  font-family: var(--font-ui);
-  text-anchor: middle;
-  dominant-baseline: middle;
 }
 
 .outsideBed path,

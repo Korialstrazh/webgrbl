@@ -16,6 +16,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { BedZoomControlsProps } from './interfaces/BedZoomControlsProps';
+import { DismissibleTooltip } from '../DismissibleTooltip';
 import styles from './styles.module.scss';
 
 export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
@@ -25,7 +26,7 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
   return (
     <Space.Compact className={styles.bedZoomControls} role="group" aria-label={t(DEFAULT.BED_ZOOM_CONTROLS_LABEL)}>
       {leadingControlComponent}
-      <Tooltip title={t(DEFAULT.BED_ZOOM_OUT_HINT)}>
+      <DismissibleTooltip title={t(DEFAULT.BED_ZOOM_OUT_HINT)}>
         <Button
           className={styles.zoomButton}
           aria-label={t(DEFAULT.BED_ZOOM_OUT_HINT)}
@@ -33,16 +34,14 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
           onClick={onZoomOut}
           icon={<MinusOutlined />}
         />
-      </Tooltip>
+      </DismissibleTooltip>
       <Tooltip title={t(DEFAULT.BED_ZOOM_PAN_HINT)}>
         {/* A plain readout: it shows the zoom and carries the pan hint, it is not a control. */}
         <span className={styles.zoomPercent} aria-live="polite">
-          {t(isFitted ? DEFAULT.BED_ZOOM_PERCENT_FIT : DEFAULT.BED_ZOOM_PERCENT, {
-            percent: zoomPercent,
-          })}
+          {t(DEFAULT.BED_ZOOM_PERCENT, { percent: zoomPercent })}
         </span>
       </Tooltip>
-      <Tooltip title={t(DEFAULT.BED_ZOOM_IN_HINT)}>
+      <DismissibleTooltip title={t(DEFAULT.BED_ZOOM_IN_HINT)}>
         <Button
           className={styles.zoomButton}
           aria-label={t(DEFAULT.BED_ZOOM_IN_HINT)}
@@ -50,15 +49,16 @@ export const BedZoomControls = (props: BedZoomControlsProps): ReactNode => {
           onClick={onZoomIn}
           icon={<PlusOutlined />}
         />
-      </Tooltip>
-      <Tooltip title={t(DEFAULT.BED_ZOOM_FIT_HINT)}>
+      </DismissibleTooltip>
+      <DismissibleTooltip title={t(DEFAULT.BED_ZOOM_FIT_HINT)}>
         <Button
           className={styles.zoomButton}
           aria-label={t(DEFAULT.BED_ZOOM_FIT_HINT)}
+          aria-pressed={isFitted}
           onClick={onFit}
           icon={<ExpandOutlined />}
         />
-      </Tooltip>
+      </DismissibleTooltip>
     </Space.Compact>
   );
 };

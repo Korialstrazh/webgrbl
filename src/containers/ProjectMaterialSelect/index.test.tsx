@@ -26,7 +26,7 @@ const DIALOG_TITLE = 'Add material';
 const SELECT_OPTION_SELECTOR = '.ant-select-item-option';
 const BIRCH: Material = newMaterial({ name: 'Birch', thicknessMm: 4 });
 const BIRCH_OPTION_LABEL = 'Birch, 4 mm';
-const UNTESTED_TEXT = 'No burn test on this machine';
+const UNTESTED_TEXT = 'No burn test on this laser';
 
 const newPresetFixture = (materialId: string, machineProfileId: string): MaterialPreset => newMaterialPreset({
   materialId,

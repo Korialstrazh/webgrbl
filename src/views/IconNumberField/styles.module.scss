@@ -1,0 +1,28 @@
+@use '../../styles/accessibility' as accessibility;
+
+.field {
+  min-width: 0;
+}
+
+.label {
+  @include accessibility.visually-hidden;
+}
+
+.adornment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  // Captions and units in the sans UI font, like every other label; only the value stays monospace.
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+
+  :global(.anticon) {
+    font-size: 0.875rem;
+  }
+}
+
+.input {
+  width: 100%;
+  font-family: var(--font-mono);
+}

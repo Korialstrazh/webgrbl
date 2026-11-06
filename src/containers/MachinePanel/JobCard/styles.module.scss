@@ -1,13 +1,16 @@
+@use '../../../styles/accessibility' as accessibility;
+
 .jobCard {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
+// Icon and value side by side; the term stays for screen readers.
 .facts {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-1) var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
   margin: 0;
   color: var(--color-text);
   font-family: var(--font-ui);
@@ -19,11 +22,15 @@
 
   dd {
     margin: 0;
-    text-align: right;
   }
 }
 
-// A button with a tooltip on its wrapper takes the card width.
-.fullWidthButtonWrapper {
-  display: block;
+.fact {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.factLabel {
+  @include accessibility.visually-hidden;
 }

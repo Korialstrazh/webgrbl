@@ -13,6 +13,7 @@ import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/s
 import { MaterialPresetSaved } from '../../utils/states/material.preset.state';
 import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
+import { selectIsMachineProfilesDialogOpen } from '../../utils/states/ui.workbench.state';
 import type { AppStore } from '../../utils/states/new.store';
 import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
@@ -26,7 +27,6 @@ const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
 const MACHINE_NAME = 'Test Laser';
 const PROFILE: MachineProfile = newMachineProfile({ name: MACHINE_NAME, maxPowerWatts: 10 });
 const PLYWOOD: Material = newMaterial({ name: 'Plywood', thicknessMm: 3 });
-const PLYWOOD_ON_MACHINE = `Plywood, 3 mm on ${MACHINE_NAME}`;
 
 const newPresetFixture = (): MaterialPreset => newMaterialPreset({
   materialId: PLYWOOD.id,
@@ -79,13 +79,13 @@ describe(MaterialSection.name, () => {
   it('counts the presets of the project material on the active machine', () => {
     renderSection(newStoreWithMaterial(2));
 
-    expect(screen.getByRole('button', { name: `2 presets for ${PLYWOOD_ON_MACHINE}` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '2 presets' })).toBeInTheDocument();
   });
 
   it('says there are no presets yet', () => {
     renderSection(newStoreWithMaterial(0));
 
-    expect(screen.getByRole('button', { name: `No presets yet for ${PLYWOOD_ON_MACHINE}` })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add preset' })).toBeInTheDocument();
   });
 
   it('asks for a material when none is chosen, and for a machine when none is active', () => {
@@ -93,7 +93,8 @@ describe(MaterialSection.name, () => {
 
     renderSection(store);
 
-    expect(screen.getByRole('button', { name: 'Pick an active machine to use presets' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Laser profile' }));
+    expect(selectIsMachineProfilesDialogOpen(store.getState())).toBe(true);
     act(() => {
       store.dispatch(new MachineProfileSaved({ profile: PROFILE }));
       store.dispatch(new ActiveMachineProfileSelected({ profileId: PROFILE.id }));
@@ -116,9 +117,9 @@ describe(MaterialSection.name, () => {
   it('opens the material library filtered to the project material from the summary link', async () => {
     renderSection(newStoreWithMaterial(1));
 
-    fireEvent.click(screen.getByRole('button', { name: `1 preset for ${PLYWOOD_ON_MACHINE}` }));
+    fireEvent.click(screen.getByRole('button', { name: '1 preset' }));
 
     expect((await screen.findByText(LIBRARY_TITLE)).closest(DRAWER_ROOT_SELECTOR)).toBeInTheDocument();
-    expect(screen.getByText('Material: Plywood, 3 mm')).toBeInTheDocument();
+    expect(screen.getByText('Filter: Plywood, 3 mm')).toBeInTheDocument();
   });
 });

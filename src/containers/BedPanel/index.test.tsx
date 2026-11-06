@@ -51,7 +51,7 @@ import { TOOLPATH_BURN_PATH_TEST_ID } from '../ToolpathLayer/toolpath.layer.cons
 import { BED_DROP_AREA_TEST_ID } from './bed.panel.constants';
 
 const NOT_RESPONDING_TEXT = 'The controller is not responding.';
-const NO_MACHINE_TEXT = 'Connect a machine to see its bed';
+const NO_MACHINE_TEXT = 'Add a laser profile to set the bed size';
 const WORK_POSITION: GrblAxisPosition = { x: 10, y: 20, z: 0 };
 const WORK_COORDINATE_OFFSET: GrblAxisPosition = { x: 100, y: 30, z: 0 };
 const EXPECTED_HEAD_TRANSFORM = 'translate(10 380) scale(1)';
@@ -59,10 +59,9 @@ const VIEW_MODE_LABEL = 'Bed view';
 const DESIGN_VIEW_LABEL = 'Design';
 const PROFILE_WIDTH_MM = 300;
 const PROFILE_HEIGHT_MM = 200;
-const PROFILE_BED_LABEL = 'Machine bed, 300 by 200 mm';
+const PROFILE_BED_LABEL = 'Laser bed, 300 by 200 mm';
 const OBJECT_NAME = 'Logo';
 const EDIT_NODES_LABEL = /^Edit nodes/;
-const ALIGN_LABEL = /^Align/;
 const SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
 const DROP_TARGET_ATTRIBUTE = 'data-drop-target';
 const TRUE_TEXT = 'true';
@@ -79,9 +78,6 @@ const PHOTO_FILE_NAME = 'photo.png';
 const TOOLPATH_VIEW_LABEL = 'Toolpath';
 // The name of each More entry starts with its tool name and also carries its Soon tag and description.
 const THREE_D_VIEW_LABEL = /^3D/;
-const MORE_TOOLS_LABEL = /^More bed tools/;
-const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
-const SOON_TAG_TEXT = 'Soon';
 const REGENERATE_LABEL = 'Regenerate';
 const OUT_OF_DATE_TEXT = 'Out of date';
 const BED_ZOOM_LABEL = 'Bed zoom';
@@ -168,7 +164,7 @@ describe(BedPanel.name, () => {
   it('asks for a machine while disconnected', () => {
     renderPanel(newStore());
 
-    expect(screen.getByText(NO_MACHINE_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: NO_MACHINE_TEXT })).toBeInTheDocument();
   });
 
   it('draws the bed from the active profile without the placeholder while disconnected', () => {
@@ -186,7 +182,7 @@ describe(BedPanel.name, () => {
     });
 
     expect(screen.getByLabelText(PROFILE_BED_LABEL, { exact: false })).toBeInTheDocument();
-    expect(screen.queryByText(NO_MACHINE_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: NO_MACHINE_TEXT })).not.toBeInTheDocument();
   });
 
   it('status with only WPos and a cached WCO still places the crosshair', () => {
@@ -224,31 +220,6 @@ describe(BedPanel.name, () => {
     expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).toBeChecked();
   });
 
-  it('lists Edit nodes and Align under More as disabled entries with a Soon tag, and no longer 3D', async () => {
-    renderPanel(newStore());
-    fireEvent.click(screen.getByRole('button', { name: MORE_TOOLS_LABEL }));
-
-    for (const soonLabel of [EDIT_NODES_LABEL, ALIGN_LABEL]) {
-      const soonEntry: HTMLElement = await screen.findByRole('menuitem', { name: soonLabel });
-
-      expect(soonEntry).toHaveAttribute(ARIA_DISABLED_ATTRIBUTE, 'true');
-      expect(soonEntry).toHaveTextContent(SOON_TAG_TEXT);
-    }
-
-    expect(screen.queryByRole('menuitem', { name: THREE_D_VIEW_LABEL })).not.toBeInTheDocument();
-  });
-
-  it('dispatches nothing from the coming-soon entries under More', async () => {
-    const store: AppStore = newStore();
-    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
-
-    renderPanel(store);
-    fireEvent.click(screen.getByRole('button', { name: MORE_TOOLS_LABEL }));
-    fireEvent.click(await screen.findByRole('menuitem', { name: EDIT_NODES_LABEL }));
-
-    expect(dispatchSpy).not.toHaveBeenCalled();
-  });
-
   it('shows the zoom, Fit and bed colour controls in the header, never over the bed drawing', () => {
     renderPanel(newStore());
 
@@ -274,7 +245,7 @@ describe(BedPanel.name, () => {
     expect(regionElement).not.toContainElement(screen.getByRole('radiogroup', { name: 'Bed view' }));
   });
 
-  it('shows the views and Fit as icons with accessible names and tooltips, not text', async () => {
+  it('shows the views as an icon over one word, and Fit as an icon with an accessible name', () => {
     renderPanel(newStore());
 
     for (const label of [DESIGN_VIEW_LABEL, TOOLPATH_VIEW_LABEL, '3D']) {
@@ -282,17 +253,13 @@ describe(BedPanel.name, () => {
       const option: HTMLElement | null = radio.closest('label');
 
       expect(option?.querySelector('.anticon')).not.toBeNull();
-      expect(option).not.toHaveTextContent(label);
+      expect(option).toHaveTextContent(label);
     }
 
     const fitButton: HTMLElement = screen.getByRole('button', { name: /^Fit the bed/ });
 
     expect(fitButton.querySelector('.anticon')).not.toBeNull();
     expect(fitButton).not.toHaveTextContent('Fit');
-
-    fireEvent.mouseEnter(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL }).closest('label') as HTMLElement);
-
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(DESIGN_VIEW_LABEL);
   });
 
   it('keeps the view switch in one fixed slot at the end of the header in all three views', () => {
@@ -549,11 +516,20 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('leaves the material select and the test sample to the design panel; 3D shows the material as text', () => {
+  it('offers the import and the test sample on the card of an empty bed, not in the 3D view', () => {
+    renderPanel(newHeldToolpathStore());
+
+    expect(screen.getByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).toBeInTheDocument();
+
+    openThreeDView();
+
+    expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('leaves the material select to the design panel; 3D shows the material as text', () => {
     renderPanel(newHeldToolpathStore());
 
     expect(screen.queryByRole('combobox', { name: MATERIAL_LABEL })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
 
     openThreeDView();
 

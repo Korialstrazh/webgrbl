@@ -32,13 +32,16 @@
 }
 
 .stopFooter {
+  display: flex;
   flex: none;
   padding: var(--space-3);
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface-1);
 
-  > * {
-    width: 100%;
+  gap: var(--space-2);
+
+  > :first-child {
+    flex: 1;
   }
 }
 

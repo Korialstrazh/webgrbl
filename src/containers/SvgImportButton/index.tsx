@@ -11,17 +11,12 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Button } from 'antd';
-import { useRef } from 'react';
-import type { ChangeEvent, ReactNode, RefObject } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 import { ANTD_BUTTON_TYPE_DEFAULT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import type { AppDispatch } from '../../utils/states/new.store';
-import { SvgFilesImportRequested } from '../../utils/states/project.document.state';
 import type { SvgImportButtonProps } from './interfaces/SvgImportButtonProps';
-import styles from './styles.module.scss';
-import { EMPTY_FILE_INPUT_VALUE, SVG_FILE_PICKER_ACCEPT, SVG_IMPORT_INPUT_TEST_ID } from './svg.import.button.constants';
+import { useSvgFilePicker } from './use.svg.file.picker';
 
 export const SvgImportButton = ({
   buttonType = ANTD_BUTTON_TYPE_DEFAULT,
@@ -29,18 +24,7 @@ export const SvgImportButton = ({
   labelClassName,
 }: SvgImportButtonProps): ReactNode => {
   const { t } = useTranslation();
-  const dispatch: AppDispatch = useDispatch();
-  const inputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
-
-  const handleFilesPicked = (changeEvent: ChangeEvent<HTMLInputElement>): void => {
-    const pickedFiles: File[] = Array.from(changeEvent.target.files ?? []);
-
-    if (pickedFiles.length) {
-      dispatch(new SvgFilesImportRequested({ files: pickedFiles }));
-    }
-
-    changeEvent.target.value = EMPTY_FILE_INPUT_VALUE;
-  };
+  const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
 
   return (
     <>
@@ -48,21 +32,11 @@ export const SvgImportButton = ({
         type={buttonType}
         icon={iconComponent}
         aria-label={t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}
-        onClick={() => inputRef.current?.click()}
+        onClick={openSvgFilePicker}
       >
         <span className={labelClassName}>{t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}</span>
       </Button>
-      <input
-        ref={inputRef}
-        className={styles.hiddenInput}
-        type="file"
-        accept={SVG_FILE_PICKER_ACCEPT}
-        multiple
-        tabIndex={-1}
-        aria-hidden
-        data-testid={SVG_IMPORT_INPUT_TEST_ID}
-        onChange={handleFilesPicked}
-      />
+      {fileInputComponent}
     </>
   );
 };

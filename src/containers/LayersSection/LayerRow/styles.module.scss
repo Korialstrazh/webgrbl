@@ -1,9 +1,8 @@
-// The handle, the checkbox, the open button and the move buttons side by side. The move buttons have a column of their
-// own, so they never cover the name or the summary.
+// The handle, the checkbox and the open button side by side; the move buttons appear over the end of the row.
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-1);
   padding-left: var(--space-1);
@@ -20,9 +19,60 @@
   box-shadow: inset -0.1875rem 0 0 var(--color-accent);
 }
 
+// The send toggle: on is a green chip with the send arrow, off a dashed chip with a stop sign, so the state reads
+// without colour alone. antd's box stays as the real, focusable input, hidden behind the chip.
+.sendToggle:global(.ant-checkbox-wrapper) {
+  position: relative;
+  margin: 0;
+  :global(.ant-checkbox) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+  :global(.ant-checkbox-input) {
+    width: 100%;
+    height: 100%;
+  }
+  :global(.ant-checkbox-label) {
+    padding: 0;
+  }
+}
+
+.sendToggleFace {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+// An open eye: the layer is in the job. A crossed-out eye, muted: it stays home.
+.sendToggle:has(input:checked) .sendToggleFace {
+  color: var(--color-text);
+}
+
+.sendToggle:hover .sendToggleFace {
+  background-color: var(--color-surface-hover);
+}
+
+.sendToggle:has(input:focus-visible) .sendToggleFace {
+  outline: var(--focus-outline-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-outline-offset);
+}
+
+// A layer that stays home steps back, so the rows that will burn stand out; the eye keeps full strength to be found.
+.row:has(.sendToggle input:not(:checked)) .openButton {
+  opacity: 0.45;
+}
+
 // A decoration only: the Move buttons are the keyboard path.
 .handle {
-  padding: 0 var(--space-1);
+  padding: 0 0.125rem;
   color: var(--color-text-muted);
   font-size: 1rem;
   cursor: grab;
@@ -33,13 +83,13 @@
 // with them, so they stay inside it. antd centres a button's content on one line, so the button is laid out as a start-aligned grid.
 .openButton {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto auto minmax(0, 1fr);
   gap: 0 var(--space-2);
   align-items: center;
   justify-content: stretch;
   height: auto;
   min-width: 0;
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-1);
   overflow: hidden;
   text-align: left;
   white-space: normal;
@@ -61,21 +111,15 @@
   grid-column: 1 / -1;
 }
 
-// At most two lines each; only a name or summary longer than that is cut short, and its title shows it in full.
-.name,
-.summary {
-  display: -webkit-box;
+// One line each, so all rows are one height; a longer name is cut short, and its title shows it in full.
+.name {
   overflow: hidden;
-  overflow-wrap: anywhere;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .summary {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
+  margin-top: 0.125rem;
 }
 
 .note {
@@ -86,12 +130,6 @@
   white-space: nowrap;
 }
 
-.summary {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-}
-
 .note {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -100,30 +138,51 @@
   color: var(--color-danger-text);
 }
 
-// Faded out until the row is hovered or holds the focus, so a list of rows stays calm; their column keeps its width.
-// They stay in the tab order: tabbing onto one shows both.
+// Out of sight until the row is hovered or holds the focus, and then only over the name line, so they never cover a
+// value. They stay in the tab order: tabbing onto one shows both.
 .moveButtons {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
   display: flex;
-  flex-direction: column;
-  padding-right: var(--space-1);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-3);
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.12s;
 
-  // A 2rem target each, though the arrows are small.
   > :global(.ant-btn) {
-    width: 2rem;
-    height: 2rem;
+    width: 1.75rem;
+    height: 1.5rem;
   }
 }
 
 .row:hover .moveButtons,
 .row:focus-within .moveButtons {
   opacity: 1;
+  pointer-events: auto;
 }
 
 // A touch screen has no hover, so the buttons stay visible.
 @media (hover: none) {
-  .moveButtons {
-    opacity: 1;
+  .row {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
   }
+
+  .moveButtons {
+    position: static;
+    flex-direction: column;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// The mode is a plain glyph with no box, set apart from the filled swatch by a thin divider, so the two never read as
+// the same kind of control.
+.modeIcon {
+  display: inline-flex;
+  padding-inline-end: var(--space-2);
+  border-inline-end: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 1rem;
 }

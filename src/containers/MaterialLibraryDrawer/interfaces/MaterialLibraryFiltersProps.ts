@@ -17,6 +17,8 @@ export interface MaterialLibraryFiltersProps {
   isOnlyActiveMachine: boolean;
   /** Whether a machine is active, which the machine filter needs. */
   hasActiveMachine: boolean;
+  /** Whether any material exists; without one the empty list offers New material itself. */
+  hasMaterials: boolean;
   /** The material the list is filtered to; undefined lists every material. */
   filteredMaterial: Material | undefined;
   /** The name of the layer the rows apply to, when the library was opened from a layer. */

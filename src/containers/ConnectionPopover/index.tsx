@@ -10,7 +10,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Popover, Select } from 'antd';
+import { ApiOutlined, DashboardOutlined, DisconnectOutlined, PlusOutlined, UsbOutlined } from '@ant-design/icons';
+import { Button, Popover, Select, Tooltip } from 'antd';
 import type { SelectProps } from 'antd';
 import { useEffect, useId, useRef } from 'react';
 import type { ReactElement, ReactNode, RefObject } from 'react';
@@ -97,6 +98,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
   const isLinkLocked: boolean = isConnected || isConnecting;
   const contentRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const wasConnectingRef: RefObject<boolean> = useRef<boolean>(isConnecting);
+  const isOpenedByPointerRef: RefObject<boolean> = useRef<boolean>(false);
   const portSelectId: string = useId();
   const baudSelectId: string = useId();
   const portOptions: SelectProps<string>['options'] = [
@@ -110,10 +112,34 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
 
   useOverlayRegistration(CONNECTION_POPOVER_OVERLAY_ID, isOpen);
 
+  // Opened with the mouse or a touch, the returned focus draws no ring, so the pill does not look like an alert; opened
+  // from the keyboard it keeps the ring.
+  useEffect(() => {
+    const anchorElement: HTMLElement | null = anchorRef.current;
+    const markPointer = (): void => {
+      isOpenedByPointerRef.current = true;
+    };
+    const markKeyboard = (): void => {
+      isOpenedByPointerRef.current = false;
+    };
+
+    anchorElement?.addEventListener('pointerdown', markPointer);
+    anchorElement?.addEventListener('keydown', markKeyboard);
+
+    return () => {
+      anchorElement?.removeEventListener('pointerdown', markPointer);
+      anchorElement?.removeEventListener('keydown', markKeyboard);
+    };
+  }, [anchorRef]);
+
+  const returnFocusToAnchor = (): void => {
+    anchorRef.current?.focus({ focusVisible: !isOpenedByPointerRef.current });
+  };
+
   const handleOpenChange = (isNextOpen: boolean): void => {
     // antd hides the popover without moving focus, which would leave keyboard users on the page body.
     if (!isNextOpen && isFocusInsideElement(contentRef.current)) {
-      anchorRef.current?.focus();
+      returnFocusToAnchor();
     }
 
     onOpenChange(isNextOpen);
@@ -154,29 +180,42 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
     >
       {/* Plain labels: antd has no standalone label component outside Form, which this popover does not use. */}
       <div className={styles.field}>
-        <label htmlFor={portSelectId}>{t(DEFAULT.CONNECTION_POPOVER_PORT)}</label>
-        <Select<string>
-          id={portSelectId}
-          className={styles.select}
-          value={selectedPortId || undefined}
-          placeholder={t(DEFAULT.CONNECTION_NO_PORT_CHOSEN)}
-          options={portOptions}
-          disabled={isLinkLocked}
-          virtual={false}
-          onChange={(portId: string) => dispatch(new SerialPortSelected({ portId }))}
-        />
+        <label className={styles.fieldLabel} htmlFor={portSelectId}>
+          <UsbOutlined aria-hidden />
+          {t(DEFAULT.CONNECTION_POPOVER_PORT)}
+        </label>
+        {/* One control: the list of known ports, and beside it the browser's picker for a new USB port. */}
+        <div className={styles.portRow}>
+          <Select<string>
+            id={portSelectId}
+            className={styles.select}
+            value={selectedPortId || undefined}
+            placeholder={t(DEFAULT.CONNECTION_NO_PORT_CHOSEN)}
+            options={portOptions}
+            disabled={isLinkLocked}
+            virtual={false}
+            onChange={(portId: string) => dispatch(new SerialPortSelected({ portId }))}
+          />
+          <Tooltip title={t(DEFAULT.CONNECTION_POPOVER_CHOOSE_PORT_LABEL)}>
+            <Button
+              icon={<PlusOutlined aria-hidden />}
+              aria-label={t(DEFAULT.CONNECTION_POPOVER_CHOOSE_PORT_LABEL)}
+              disabled={!isWebSerialSupported || isLinkLocked}
+              onClick={() => dispatch(new SerialPortPickerRequested())}
+            >
+              {t(DEFAULT.CONNECTION_POPOVER_CHOOSE_PORT)}
+            </Button>
+          </Tooltip>
+        </div>
       </div>
-      <Button
-        disabled={!isWebSerialSupported || isLinkLocked}
-        onClick={() => dispatch(new SerialPortPickerRequested())}
-      >
-        {t(DEFAULT.CONNECTION_POPOVER_CHOOSE_PORT)}
-      </Button>
       {!isWebSerialSupported && (
         <p className={styles.unsupportedNotice}>{t(DEFAULT.CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED)}</p>
       )}
       <div className={styles.field}>
-        <label htmlFor={baudSelectId}>{t(DEFAULT.CONNECTION_POPOVER_BAUD)}</label>
+        <label className={styles.fieldLabel} htmlFor={baudSelectId}>
+          <DashboardOutlined aria-hidden />
+          {t(DEFAULT.CONNECTION_POPOVER_BAUD)}
+        </label>
         <Select<number>
           id={baudSelectId}
           className={styles.select}
@@ -189,6 +228,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       </div>
       <Button
         type={isConnected ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
+        icon={isConnected ? <DisconnectOutlined aria-hidden /> : <ApiOutlined aria-hidden />}
         disabled={isConnecting || !canToggleConnection(isConnected, selectedPortId)}
         onClick={toggleConnection}
       >
@@ -204,7 +244,11 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       onOpenChange={handleOpenChange}
       afterOpenChange={handleAfterOpenChange}
       trigger={ANTD_POPOVER_TRIGGER_CLICK}
+      // Below the pill and right-aligned to it, so it covers neither the top bar nor the views; its fields sit on
+      // one line each, which keeps it short enough to stop above the Connect laser button of the Job card.
       placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+      // A clear edge, shadow and arrow tie it to the pill, so it never reads as part of the Job card under it.
+      rootClassName={styles.connectionPopoverRoot}
       content={contentComponent}
       destroyOnHidden
     >

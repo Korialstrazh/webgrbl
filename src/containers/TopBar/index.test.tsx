@@ -8,6 +8,9 @@ import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import { PROJECT_FILE_MIME_TYPE } from '../../utils/project/project.constants';
 import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
+import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
 import { MachineStopRequested } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
@@ -48,8 +51,8 @@ const APP_TITLE = 'webgrbl';
 const AUTOSAVE_TEXT = 'Saved';
 const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
-const MACHINE_PROFILES_LABEL = 'Machine profiles';
-const MORE_LABEL = 'More';
+const MACHINE_PROFILES_LABEL = 'Laser profiles';
+const ACTIVE_PROFILE_NAME = 'Garage laser';
 const MATERIALS_LABEL = 'Materials';
 const SOON_LABEL = 'Soon';
 const PROJECT_MENU_LABEL = 'Project';
@@ -62,6 +65,8 @@ const OPEN_LABEL = 'Open from this browser\u2026';
 const SAVE_SHORTCUT_PATTERN = /Ctrl\+S/;
 const SAVE_AS_FILE_LABEL = 'Save as file';
 const OPEN_FILE_LABEL = 'Open project file\u2026';
+const ICON_SELECTOR = '[role="img"]';
+const FOLDER_OPEN_ICON_NAME = 'folder-open';
 const EXPORT_GCODE_PATTERN = /Export G-code/;
 const OPEN_PROJECT_DIALOG_LABEL = 'Open project';
 const PROJECT_FILE_INPUT_LABEL = 'Open a project file';
@@ -104,6 +109,17 @@ const renderWorkbenchTopBar = (store: AppStore): void => {
 describe(TopBar.name, () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('names the active profile on the profile button', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile({ name: ACTIVE_PROFILE_NAME });
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    renderWorkbenchTopBar(store);
+
+    expect(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL })).toHaveTextContent(ACTIVE_PROFILE_NAME);
   });
 
   it('shows the app name, the autosave readout and the connection pill', () => {
@@ -156,24 +172,6 @@ describe(TopBar.name, () => {
 
     expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
-  });
-
-  it('opens the machine profiles dialog from the overflow menu of a narrow bar', async () => {
-    renderWorkbenchTopBar(newStore());
-
-    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
-    fireEvent.click(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL }));
-
-    expect(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
-  });
-
-  it('lists no Materials entry in the overflow menu', async () => {
-    renderWorkbenchTopBar(newStore());
-
-    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
-
-    expect(await screen.findByRole('menuitem', { name: MACHINE_PROFILES_LABEL })).toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: new RegExp(`^${MATERIALS_LABEL}`) })).not.toBeInTheDocument();
   });
 
   it('closes the machine profiles dialog on Escape without stopping the machine', () => {
@@ -275,6 +273,21 @@ describe(TopBar.name, () => {
       fireEvent.click(screen.getByRole('menuitem', { name: SAVE_SHORTCUT_PATTERN }));
 
       expect(getDispatchedActionCalls(dispatchSpy, ProjectSaveRequested)).toHaveLength(1);
+    });
+
+    it('gives each project menu entry its own icon, so Save as file and Open project file never look alike', () => {
+      renderWorkbenchTopBar(newStore());
+      openProjectMenu();
+
+      const iconNames: (string | null)[] = screen.getAllByRole('menuitem').map(
+        (menuItem: HTMLElement): string | null =>
+          menuItem.querySelector(ICON_SELECTOR)?.getAttribute('aria-label') ?? null,
+      );
+
+      expect(iconNames).not.toContain(null);
+      expect(new Set(iconNames).size).toBe(iconNames.length);
+      expect(screen.getByRole('menuitem', { name: OPEN_FILE_LABEL }).querySelector(ICON_SELECTOR))
+        .toHaveAttribute('aria-label', FOLDER_OPEN_ICON_NAME);
     });
 
     it('requests a file export from Save as file', () => {
@@ -484,6 +497,17 @@ describe(TopBar.name, () => {
       });
 
       expect(screen.getByRole('status')).toHaveTextContent(expectedText);
+    });
+
+    it('names the save state on the readout itself, so the icon alone still has a meaning', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.SAVED }));
+      });
+
+      expect(screen.getByRole('status', { name: AUTOSAVE_TEXT })).toBeInTheDocument();
     });
   });
 });

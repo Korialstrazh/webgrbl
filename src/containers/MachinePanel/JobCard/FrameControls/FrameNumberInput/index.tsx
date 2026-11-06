@@ -9,7 +9,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { InputNumber } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +19,7 @@ import type { MachineProfile } from '../../../../../utils/profiles/interfaces/Ma
 import type { MachineProfileFieldError } from '../../../../../utils/profiles/interfaces/MachineProfileFieldError';
 import { MachineProfileSaved, selectActiveMachineProfile } from '../../../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../../../utils/states/new.store';
+import { IconNumberField } from '../../../../../views/IconNumberField';
 import styles from './styles.module.scss';
 
 type FrameNumberField = keyof Pick<MachineProfile, 'frameMarginMm' | 'frameFeedMmPerMin'>;
@@ -31,6 +31,11 @@ interface FrameNumberInputProps {
   inputId: string;
   /** Localization key of the label. */
   labelKey: string;
+  iconComponent: ReactNode;
+  /** Localization key of the short visible name beside the icon. */
+  captionKey: string;
+  /** Localization key of the unit after the value. */
+  unitKey: string;
   /** The value in use, shown while the user has typed nothing. */
   savedValue: number;
   /** True while a run keeps the settings fixed. */
@@ -41,6 +46,9 @@ export const FrameNumberInput = ({
   field,
   inputId,
   labelKey,
+  iconComponent,
+  captionKey,
+  unitKey,
   savedValue,
   isDisabled,
 }: FrameNumberInputProps): ReactNode => {
@@ -76,9 +84,12 @@ export const FrameNumberInput = ({
 
   return (
     <div className={styles.frameNumber}>
-      <label htmlFor={inputId}>{t(labelKey)}</label>
-      <InputNumber
-        id={inputId}
+      <IconNumberField
+        inputId={inputId}
+        labelText={t(labelKey)}
+        iconComponent={iconComponent}
+        captionText={t(captionKey)}
+        unitText={t(unitKey)}
         status={fieldError ? ANTD_INPUT_NUMBER_STATUS_ERROR : undefined}
         aria-describedby={fieldError ? errorId : undefined}
         disabled={!activeProfile || isDisabled}

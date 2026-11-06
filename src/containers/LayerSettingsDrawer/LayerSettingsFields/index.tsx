@@ -10,12 +10,19 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Segmented, Switch } from 'antd';
+import {
+  ColumnHeightOutlined,
+  DashboardOutlined,
+  SaveOutlined,
+  SyncOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
+import { Segmented, Switch } from 'antd';
 import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_DEFAULT, ANTD_SWITCH_SIZE_SMALL } from '../../../utils/antd.constants';
+import { ANTD_SWITCH_SIZE_SMALL } from '../../../utils/antd.constants';
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import { getLayerPaletteEntry } from '../../../utils/layers/get.layer.palette.entry';
 import { getPaletteEntryFromLayer } from '../../../utils/layers/get.palette.entry.from.layer';
@@ -35,6 +42,9 @@ import {
   LayerSettingsChanged,
   LayerToggled,
 } from '../../../utils/states/project.document.state';
+import { IconActionButton } from '../../../views/IconActionButton';
+import { LayerModeIcon } from '../../../views/LayerModeIcon';
+import { PaletteIcon } from '../../../views/PaletteIcon';
 import type { LayerNumberFieldConfig } from '../interfaces/LayerNumberFieldConfig';
 import type { LayerSettingsFieldsProps } from '../interfaces/LayerSettingsFieldsProps';
 import { LayerNumberField } from '../LayerNumberField';
@@ -82,10 +92,17 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
   const getWattsHint = (percent: number): string | undefined =>
     maxPowerWatts ? t(DEFAULT.LAYER_POWER_WATTS, { watts: getPowerWattsText(maxPowerWatts, percent) }) : undefined;
 
-  const renderNumberField = (config: LayerNumberFieldConfig, hintText: string | undefined): ReactNode => (
+  const renderNumberField = (
+    config: LayerNumberFieldConfig,
+    iconComponent: ReactNode,
+    hintText: string | undefined,
+  ): ReactNode => (
     <LayerNumberField
       key={[layerKey, config.field].join(LAYER_FIELD_KEY_SEPARATOR)}
       label={t(config.labelKey)}
+      iconComponent={iconComponent}
+      captionText={config.captionKey && t(config.captionKey)}
+      unitText={config.unitKey && t(config.unitKey)}
       value={settings[config.field]}
       decimals={config.decimals}
       hintText={hintText}
@@ -108,7 +125,11 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         block
         aria-label={t(DEFAULT.LAYER_SETTINGS_MODE)}
         value={settings.mode}
-        options={MODE_OPTION_VALUES.map((mode: LayerMode) => ({ value: mode, label: t(LAYER_MODE_LABEL_KEY[mode]) }))}
+        options={MODE_OPTION_VALUES.map((mode: LayerMode) => ({
+          value: mode,
+          icon: <LayerModeIcon mode={mode} />,
+          label: t(LAYER_MODE_LABEL_KEY[mode]),
+        }))}
         onChange={(mode: LayerMode) => changeSettings({ mode })}
       />
       {layer.isShading && (
@@ -119,11 +140,11 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         />
       )}
       <div className={styles.grid}>
-        {renderNumberField(LAYER_MAX_POWER_FIELD, getWattsHint(settings.maxPowerPercent))}
-        {renderNumberField(LAYER_MIN_POWER_FIELD, getWattsHint(settings.minPowerPercent))}
-        {renderNumberField(LAYER_SPEED_FIELD, undefined)}
-        {renderNumberField(LAYER_PASSES_FIELD, undefined)}
-        {isFill && renderNumberField(LAYER_LINE_INTERVAL_FIELD, undefined)}
+        {renderNumberField(LAYER_MAX_POWER_FIELD, <ThunderboltOutlined />, getWattsHint(settings.maxPowerPercent))}
+        {renderNumberField(LAYER_MIN_POWER_FIELD, <ThunderboltOutlined />, getWattsHint(settings.minPowerPercent))}
+        {renderNumberField(LAYER_SPEED_FIELD, <DashboardOutlined />, undefined)}
+        {renderNumberField(LAYER_PASSES_FIELD, <SyncOutlined />, undefined)}
+        {isFill && renderNumberField(LAYER_LINE_INTERVAL_FIELD, <ColumnHeightOutlined />, undefined)}
       </div>
       {machineProfile?.hasAirAssist && (
         <div className={styles.switchRow}>
@@ -137,14 +158,24 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         </div>
       )}
       <div className={styles.actions}>
-        <Button type={ANTD_BUTTON_TYPE_DEFAULT} onClick={savePaletteEntry}>
-          {t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE)}
-        </Button>
-        <Button type={ANTD_BUTTON_TYPE_DEFAULT} onClick={onEditPalette}>
-          {t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
-        </Button>
+        <LayerPresetButtons layer={layer} />
+        <div className={styles.paletteActions}>
+          <IconActionButton
+            labelText={t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE)}
+            captionText={t(DEFAULT.LAYER_SETTINGS_SAVE_TO_PALETTE_CAPTION)}
+            block
+            iconComponent={<SaveOutlined aria-hidden />}
+            onClick={savePaletteEntry}
+          />
+          <IconActionButton
+            labelText={t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE)}
+            captionText={t(DEFAULT.LAYER_SETTINGS_EDIT_PALETTE_CAPTION)}
+            block
+            iconComponent={<PaletteIcon aria-hidden />}
+            onClick={onEditPalette}
+          />
+        </div>
       </div>
-      <LayerPresetButtons layer={layer} />
     </div>
   );
 };

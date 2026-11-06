@@ -43,14 +43,13 @@ const WORK_AREA_X_LABEL = 'Work area width (mm)';
 const WORK_AREA_Y_LABEL = 'Work area height (mm)';
 const S_VALUE_MAX_LABEL = 'Maximum S value ($30)';
 const SAVE_LABEL = 'Save';
-const SET_ACTIVE_LABEL = 'Set active';
-const DELETE_LABEL = 'Delete';
 const DELETE_CONFIRM_LABEL = 'Yes, delete';
-const NEW_PROFILE_LABEL = '+ New profile';
-const READ_FROM_LASER_LABEL = 'Read from connected laser';
+const NEW_PROFILE_LABEL = 'New profile';
+const READ_FROM_LASER_LABEL = 'Read from laser';
 const IMPORT_LABEL = 'Import profiles file';
 const EXPORT_LABEL = 'Export';
 const ACTIVE_PATTERN = /Active/;
+const SECOND_PROFILE_NAME = 'Garage laser';
 const SPARE_PROFILE_NAME = 'Spare laser';
 const WORKSHOP_NAME = 'Workshop laser';
 const GARAGE_NAME = 'Garage laser';
@@ -61,7 +60,7 @@ const EDITED_WORK_AREA_X_MM = 300;
 const EDITED_MAX_POWER_WATTS = 20;
 const TOO_WIDE_WORK_AREA_MM = 6000;
 const WORK_AREA_X_ERROR_TEXT = 'Work area width must be greater than 0 and at most 5000 mm';
-const NAME_ERROR_TEXT = 'Enter a name for the machine';
+const NAME_ERROR_TEXT = 'Enter a name for the laser';
 const STORED_WORK_AREA_X_MM = 600;
 const STORED_WORK_AREA_Y_MM = 500;
 const STORED_S_VALUE_MAX = 255;
@@ -90,6 +89,9 @@ const LASER_MODE_OFF_SETTINGS: Record<number, string> = { 130: '400', 131: '400'
 const SETTINGS_WITHOUT_X_TRAVEL_AND_LASER_MODE: Record<number, string> = { 131: '200', 22: '1' };
 const SETTINGS_WITHOUT_PROFILE_VALUES: Record<number, string> = { 0: '10' };
 const RX_BUFFER_SIZE = 127;
+
+const COMING_SOON_LIST_NAME = 'Coming soon';
+const GRBL_SETTINGS_TEXT = 'GRBL settings ($$)';
 
 const renderDialog = (store: AppStore, onClose: () => void = vi.fn()): void => {
   render(
@@ -139,6 +141,26 @@ const newDocumentText = (profiles: MachineProfile[]): string => JSON.stringify({
 } satisfies MachineProfilesDocument);
 
 describe(MachineProfilesDialog.name, () => {
+  it('lists the GRBL settings editor as a coming-soon note, not as a button', () => {
+    renderDialog(newStore());
+
+    const comingSoonList: HTMLElement = screen.getByRole('region', { name: COMING_SOON_LIST_NAME });
+
+    expect(within(comingSoonList).getByText(GRBL_SETTINGS_TEXT)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: GRBL_SETTINGS_TEXT })).not.toBeInTheDocument();
+  });
+
+  it('keeps the GRBL field under a collapsed Advanced panel and opens it when that field fails a check', () => {
+    renderDialog(newStore());
+
+    expect(screen.getByRole('button', { name: 'Advanced' })).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.change(screen.getByLabelText(S_VALUE_MAX_LABEL), { target: { value: '0' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(screen.getByRole('button', { name: 'Advanced' })).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('creates and saves a profile without activating it', () => {
     const store: AppStore = newStore();
 
@@ -150,7 +172,32 @@ describe(MachineProfilesDialog.name, () => {
     expect(selectMachineProfiles(store.getState())).toEqual([
       expect.objectContaining({ name: WORKSHOP_NAME, workAreaXMm: EDITED_WORK_AREA_X_MM }),
     ]);
-    expect(selectActiveMachineProfile(store.getState())).toBeUndefined();
+    expect(selectActiveMachineProfile(store.getState())?.name).toBe(WORKSHOP_NAME);
+  });
+
+  it('keeps the active profile when another profile is saved', () => {
+    const store: AppStore = newStore();
+
+    const workshopProfile: MachineProfile = saveProfile(store, { name: WORKSHOP_NAME });
+
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: workshopProfile.id }));
+    renderDialog(store);
+    clickButton(NEW_PROFILE_LABEL);
+    changeField(NAME_LABEL, SECOND_PROFILE_NAME);
+    clickButton(SAVE_LABEL);
+
+    expect(selectMachineProfiles(store.getState())).toHaveLength(2);
+    expect(selectActiveMachineProfile(store.getState())?.name).toBe(WORKSHOP_NAME);
+  });
+
+  it('shows the active profile with a badge and offers no Use button on its row', () => {
+    const store: AppStore = newStore();
+
+    saveProfile(store, { name: WORKSHOP_NAME });
+    renderDialog(store);
+    clickButton(`Make ${WORKSHOP_NAME} active`);
+
+    expect(screen.queryByRole('button', { name: `Make ${WORKSHOP_NAME} active` })).not.toBeInTheDocument();
   });
 
   it('sets the selected profile active', () => {
@@ -158,10 +205,10 @@ describe(MachineProfilesDialog.name, () => {
 
     saveProfile(store, { name: WORKSHOP_NAME });
     renderDialog(store);
-    clickButton(SET_ACTIVE_LABEL);
+    clickButton(`Make ${WORKSHOP_NAME} active`);
 
     expect(selectActiveMachineProfile(store.getState())?.name).toBe(WORKSHOP_NAME);
-    expect(screen.getByRole('menuitem', { name: ACTIVE_PATTERN })).toHaveTextContent(WORKSHOP_NAME);
+    expect(screen.getByRole('button', { name: ACTIVE_PATTERN })).toHaveTextContent(WORKSHOP_NAME);
   });
 
   it('edits and saves an existing profile in place', () => {
@@ -175,6 +222,12 @@ describe(MachineProfilesDialog.name, () => {
     expect(selectMachineProfiles(store.getState())).toEqual([
       { ...workshopProfile, maxPowerWatts: EDITED_MAX_POWER_WATTS },
     ]);
+  });
+
+  it('marks a profile that is not stored yet as new and not saved in the list', () => {
+    renderDialog(newStore());
+
+    expect(screen.getByText('New, not saved')).toBeInTheDocument();
   });
 
   it('keeps a new profile out of the store until it is saved', () => {
@@ -200,8 +253,8 @@ describe(MachineProfilesDialog.name, () => {
     saveProfile(store, { name: GARAGE_NAME });
     renderDialog(store);
     changeField(NAME_LABEL, IMPORTED_NAME);
-    fireEvent.click(screen.getByRole('menuitem', { name: GARAGE_NAME }));
-    fireEvent.click(screen.getByRole('menuitem', { name: WORKSHOP_NAME }));
+    fireEvent.click(screen.getByRole('button', { name: GARAGE_NAME }));
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${WORKSHOP_NAME}`) }));
 
     expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(WORKSHOP_NAME);
   });
@@ -246,7 +299,7 @@ describe(MachineProfilesDialog.name, () => {
       store.dispatch(new MachineProfileSaved({ profile: spareProfile }));
     });
     renderDialog(store);
-    clickButton(DELETE_LABEL);
+    clickButton(`Delete ${WORKSHOP_NAME}`);
     clickButton(DELETE_CONFIRM_LABEL);
 
     expect(selectMachineProfiles(store.getState())).toEqual([spareProfile]);
@@ -258,7 +311,7 @@ describe(MachineProfilesDialog.name, () => {
     saveProfile(store, { name: WORKSHOP_NAME });
     renderDialog(store);
 
-    expect(screen.getByRole('button', { name: DELETE_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: `Delete ${WORKSHOP_NAME}` })).toBeDisabled();
   });
 
   describe('with the simulated laser', () => {
@@ -396,7 +449,7 @@ describe(MachineProfilesDialog.name, () => {
     expect(clashedProfile).toEqual({ ...clashingProfile, id: expect.any(String) });
     expect(clashedProfile?.id).not.toBe(workshopProfile.id);
     expect(addedProfile).toEqual(importedProfile);
-    expect(screen.getByRole('menuitem', { name: IMPORTED_NAME })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: IMPORTED_NAME })).toBeInTheDocument();
   });
 
   it.each([
@@ -475,7 +528,7 @@ describe(MachineProfilesDialog.name, () => {
     });
     renderDialog(store);
 
-    const activeItem: HTMLElement = screen.getByRole('menuitem', { name: ACTIVE_PATTERN });
+    const activeItem: HTMLElement = screen.getByRole('button', { name: ACTIVE_PATTERN });
 
     expect(within(activeItem).getByText(GARAGE_NAME)).toBeInTheDocument();
     expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(GARAGE_NAME);

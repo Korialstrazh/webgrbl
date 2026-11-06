@@ -54,7 +54,7 @@ const CLICK_Y_PX = 25;
 const DRAG_DISTANCE_PX = 40;
 const LAYER_KEY = '#ff0000';
 const OUT_OF_DATE_TEXT = /^Out of date: the design changed/;
-const NO_MATERIAL_TEXT = /^Pick a material in Design/;
+const NO_MATERIAL_TEXT = /^Add a material to see/;
 const BUILDING_TEXT = 'Building the 3D view';
 const FAILED_TEXT = /^The 3D view could not be built/;
 const ADD_MATERIAL_LABEL = 'Add material\u2026';
@@ -314,6 +314,8 @@ describe(BurnPreviewPane.name, () => {
     renderPane(store);
 
     expect(screen.getByText(BUILDING_TEXT)).toBeInTheDocument();
+    expect(screen.getByText(BUILDING_TEXT).closest('[role="status"]')?.querySelector('.ant-skeleton-active'))
+      .toBeInTheDocument();
 
     act(() => {
       store.dispatch(new BurnModelFailed());

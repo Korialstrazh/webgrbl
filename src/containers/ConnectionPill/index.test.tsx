@@ -16,11 +16,14 @@ import {
   selectIsAnyOverlayOpen,
   selectIsConnectionPopoverOpen,
 } from '../../utils/states/ui.overlay.state';
+import { NarrowRegionChanged } from '../../utils/states/ui.workbench.state';
+import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants';
+import type { WorkbenchRegion } from '../../utils/states/workbench.region.constants';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const ONLINE_OR_OFFLINE_PATTERN = /Online|Offline/;
 const DISCONNECTED_PATTERN = /^Connection: Not connected.*Open the connection menu\.$/;
-const CONNECT_VERB_TEXT = 'Connect...';
+const CONNECT_VERB_TEXT = 'Connect';
 const CONNECT_LABEL = 'Connect';
 const DISCONNECT_LABEL = 'Disconnect';
 const UNGRANTED_PORT_ID = 'serial-ungranted';
@@ -60,18 +63,29 @@ const settle = async (): Promise<void> => {
 };
 
 describe(ConnectionPill.name, () => {
-  it('shows Not connected with the selected port and a Connect verb, and opens the popover on click', () => {
+  it('shows Not connected and a Connect verb, without the empty port, and opens the popover on click', () => {
     renderConnectionPill();
 
     const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
 
-    expect(screen.getByText(NO_PORT_CHOSEN_LABEL)).toBeInTheDocument();
+    expect(screen.queryByText(NO_PORT_CHOSEN_LABEL)).not.toBeInTheDocument();
     expect(within(pillButton).getByText(CONNECT_VERB_TEXT)).toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: POPOVER_LABEL })).not.toBeInTheDocument();
 
     fireEvent.click(pillButton);
 
     expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toBeInTheDocument();
+  });
+
+  it.each(Object.values(WORKBENCH_REGION))('keeps the Connect verb on the narrow %s tab', (region: WorkbenchRegion) => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new NarrowRegionChanged({ narrowRegion: region }));
+    });
+
+    expect(within(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).getByText(CONNECT_VERB_TEXT))
+      .toBeInTheDocument();
   });
 
   it.each(Object.values(GRBL_CONNECTION_STATUS))('shows the label of the %s state', (status: GrblConnectionStatus) => {

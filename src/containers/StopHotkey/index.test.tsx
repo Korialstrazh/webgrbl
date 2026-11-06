@@ -9,6 +9,7 @@ import { ANTD_POPOVER_TRIGGER_CLICK } from '../../utils/antd.constants';
 import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
+import { EscStopPreferenceChanged } from '../../utils/states/app.preferences.state';
 import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
 import { MachineStopRequested } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
@@ -255,5 +256,64 @@ describe(StopHotkey.name, () => {
     fireEvent.keyDown(document.body, { key: ESCAPE_KEY });
 
     expect(stopSpy()).toBe(0);
+  });
+
+  describe('with Esc stops even when a panel is open turned on', () => {
+    const turnEscStopOn = (store: AppStore): void => {
+      act(() => {
+        store.dispatch(new EscStopPreferenceChanged({ isEscStoppingWithOverlayOpen: true }));
+      });
+    };
+
+    it('Escape with an antd Drawer open closes it and stops', () => {
+      const { store, stopSpy } = renderHotkey(true, <TestDrawer />);
+      turnEscStopOn(store);
+
+      fireEvent.keyDown(screen.getByRole('dialog', { name: DRAWER_TITLE }), { key: ESCAPE_KEY });
+
+      expect(stopSpy()).toBe(1);
+      expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+    });
+
+    it('Escape with an antd Modal open closes it and stops', () => {
+      const { store, stopSpy } = renderHotkey(true, <TestModal />);
+      turnEscStopOn(store);
+
+      fireEvent.keyDown(screen.getByRole('dialog', { name: MODAL_TITLE }), { key: ESCAPE_KEY });
+
+      expect(stopSpy()).toBe(1);
+      expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+    });
+
+    it('Escape with the connection popover open closes it and stops', () => {
+      const { store, stopSpy } = renderHotkey(true, <ConnectionPill />);
+      turnEscStopOn(store);
+
+      fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+      fireEvent.keyDown(screen.getByRole('dialog', { name: POPOVER_LABEL }), { key: ESCAPE_KEY });
+
+      expect(stopSpy()).toBe(1);
+      expect(screen.queryByRole('dialog', { name: POPOVER_LABEL })).not.toBeInTheDocument();
+    });
+
+    it('Escape with a drawer open while disconnected closes it and does not stop', () => {
+      const { store, stopSpy } = renderHotkey(false, <TestDrawer />);
+      turnEscStopOn(store);
+
+      fireEvent.keyDown(screen.getByRole('dialog', { name: DRAWER_TITLE }), { key: ESCAPE_KEY });
+
+      expect(stopSpy()).toBe(0);
+      expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+    });
+
+    it('held Escape with a drawer open stops only once', () => {
+      const { store, stopSpy } = renderHotkey(true, <TestDrawer />);
+      turnEscStopOn(store);
+
+      fireEvent.keyDown(screen.getByRole('dialog', { name: DRAWER_TITLE }), { key: ESCAPE_KEY });
+      fireEvent.keyDown(document.body, { key: ESCAPE_KEY, repeat: true });
+
+      expect(stopSpy()).toBe(1);
+    });
   });
 });

@@ -11,16 +11,34 @@
  */
 import { Tooltip } from 'antd';
 import type { TooltipProps } from 'antd';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 export const DismissibleTooltip = ({ children, ...tooltipProps }: TooltipProps): ReactNode => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  // A hover timer that started before the click must not bring the tooltip back while the pointer stays on the control.
+  const isDismissedRef = useRef<boolean>(false);
+
+  const changeOpen = (isNextOpen: boolean): void => {
+    setIsOpen(isNextOpen && !isDismissedRef.current);
+  };
+
+  const dismiss = (): void => {
+    isDismissedRef.current = true;
+    setIsOpen(false);
+  };
 
   return (
-    <Tooltip {...tooltipProps} open={isOpen} onOpenChange={setIsOpen}>
+    <Tooltip {...tooltipProps} open={isOpen} onOpenChange={changeOpen}>
       {/* A click on the control bubbles up to here, whatever the control does with it. */}
-      <span onClickCapture={() => setIsOpen(false)}>{children}</span>
+      <span
+        onClickCapture={dismiss}
+        onMouseLeave={() => {
+          isDismissedRef.current = false;
+        }}
+      >
+        {children}
+      </span>
     </Tooltip>
   );
 };

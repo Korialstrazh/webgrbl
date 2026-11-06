@@ -55,6 +55,10 @@ export const PROJECT_FILE_JSON_INDENT = 2;
 
 /** Tolerance for float noise when a rotated corner is compared with a bed edge. */
 export const BED_EDGE_EPSILON_MM = 1e-9;
+/** The grid a new object's free spot is searched on, in millimetres. */
+export const FREE_SPOT_STEP_MM = 5;
+/** The clear gap a new object keeps from the objects already on the bed, in millimetres. */
+export const FREE_SPOT_GAP_MM = 5;
 
 export const FULL_TURN_DEG = 360;
 export const HALF_TURN_DEG = FULL_TURN_DEG / 2;

@@ -10,6 +10,7 @@
  */
 import type {
   AlertProps,
+  BadgeProps,
   ButtonProps,
   ColorPickerProps,
   DrawerProps,
@@ -21,6 +22,7 @@ import type {
   PopoverProps,
   ProgressProps,
   SegmentedProps,
+  SpinProps,
   SplitterProps,
   SwitchProps,
   TableColumnType,
@@ -31,6 +33,9 @@ import type {
 
 /** The compact button size, for actions inside a chip or a bar. */
 export const ANTD_BUTTON_SIZE_SMALL: ButtonProps['size'] = 'small';
+
+/** The compact badge, for a count on an icon button. */
+export const ANTD_BADGE_SIZE_SMALL: BadgeProps['size'] = 'small';
 
 /** The large button size, for machine controls that need the full touch target. */
 export const ANTD_BUTTON_SIZE_LARGE: ButtonProps['size'] = 'large';
@@ -50,8 +55,14 @@ export const ANTD_BUTTON_TYPE_LINK: ButtonProps['type'] = 'link';
 /** The popover opens and closes when its anchor is clicked, and closes on a click outside. */
 export const ANTD_POPOVER_TRIGGER_CLICK: PopoverProps['trigger'] = 'click';
 
+/** The popover opens on a hover or on a tap or click, so it never depends on a hover alone. */
+export const ANTD_POPOVER_TRIGGER_HOVER_AND_CLICK: PopoverProps['trigger'] = ['hover', 'click'];
+
 /** The popover opens below its anchor, aligned to the anchor's right edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT: PopoverProps['placement'] = 'bottomRight';
+
+/** The popover opens to the left of its anchor, aligned to the anchor's top edge. */
+export const ANTD_POPOVER_PLACEMENT_LEFT_TOP: PopoverProps['placement'] = 'leftTop';
 
 /** The popover opens below its anchor, aligned to the anchor's left edge. */
 export const ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT: PopoverProps['placement'] = 'bottomLeft';
@@ -78,6 +89,8 @@ export const ANTD_MENU_MODE_INLINE: MenuProps['mode'] = 'inline';
 export const ANTD_INPUT_NUMBER_PRECISION_INTEGER: InputNumberProps['precision'] = 0;
 
 /** The compact switch size, for a switch next to small text. */
+export const ANTD_COLLAPSE_SIZE_SMALL = 'small';
+
 export const ANTD_SWITCH_SIZE_SMALL: SwitchProps['size'] = 'small';
 
 /** The dropdown opens and closes when its anchor is clicked. */
@@ -97,6 +110,9 @@ export const ANTD_SPLITTER_ORIENTATION_VERTICAL: SplitterProps['orientation'] = 
 
 /** The compact segmented control size, for secondary choices next to larger controls. */
 export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
+
+/** The small spinner, for a spinner inline with a line of text. */
+export const ANTD_SPIN_SIZE_SMALL: SpinProps['size'] = 'small';
 
 /** The compact table size, for a table beside an edit panel. */
 export const ANTD_TABLE_SIZE_SMALL: TableProps['size'] = 'small';
@@ -121,3 +137,10 @@ export const ANTD_TOOLTIP_PLACEMENT_LEFT: TooltipProps['placement'] = 'left';
 
 /** An input number outlined as having an invalid value. */
 export const ANTD_INPUT_NUMBER_STATUS_ERROR: InputNumberProps['status'] = 'error';
+
+/** Antd's class names for a modal's content box and title, for moving the focus into a dialog that opened. */
+export const ANTD_MODAL_CONTENT_SELECTOR = '.ant-modal-content';
+export const ANTD_MODAL_TITLE_SELECTOR = '.ant-modal-title';
+
+/** A popover that opens above its anchor and ends at its right edge. */
+export const ANTD_POPOVER_PLACEMENT_TOP_RIGHT: PopoverProps['placement'] = 'topRight';

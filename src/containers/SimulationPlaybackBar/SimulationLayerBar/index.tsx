@@ -1,6 +1,7 @@
 /**
- * The labelled layer bar above the simulation slider: one segment per layer of the ready toolpath, as wide as its share
- * of the burn time (travel left out), in the layer colour, with the layer name in a tooltip. With one layer or none it
+ * The layer strip under the simulation slider, drawn as its rail so the two read as one track: one segment per layer
+ * of the ready toolpath, as wide as its share of the burn time (travel left out), in the layer colour, named for
+ * screen readers. With one layer or none it
  * is not shown: a single full-width segment says nothing and reads as a second progress bar. The shading layer is
  * mid-grey, as in the By layer view of the bed. The shares are worked out once per toolpath, not per frame.
  *
@@ -11,7 +12,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Tooltip } from 'antd';
 import { memo, useId, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,18 +34,17 @@ import { getSimulationLayerSegments } from './get.simulation.layer.segments';
 import styles from './styles.module.scss';
 
 const renderLayerSegment = (segment: SimulationLayerSegment): ReactNode => (
-  <Tooltip key={segment.layerKey} title={segment.layerName}>
-    {/* A plain span: the segment is a coloured strip, which no antd component draws. */}
-    <span
-      className={segment.isShading ? [styles.segment, styles.shadingSegment].join(' ') : styles.segment}
-      // The width and the layer colour come from the toolpath at run time.
-      // eslint-disable-next-line no-restricted-syntax -- runtime-only width and colour
-      style={{ width: `${segment.widthPercent}%`, backgroundColor: segment.isShading ? undefined : segment.layerKey }}
-      role="img"
-      aria-label={segment.layerName}
-      data-testid={SIMULATION_LAYER_SEGMENT_TEST_ID}
-    />
-  </Tooltip>
+  // A plain span: the segment is a coloured strip, which no antd component draws.
+  <span
+    key={segment.layerKey}
+    className={segment.isShading ? [styles.segment, styles.shadingSegment].join(' ') : styles.segment}
+    // The width and the layer colour come from the toolpath at run time.
+    // eslint-disable-next-line no-restricted-syntax -- runtime-only width and colour
+    style={{ width: `${segment.widthPercent}%`, backgroundColor: segment.isShading ? undefined : segment.layerKey }}
+    role="img"
+    aria-label={segment.layerName}
+    data-testid={SIMULATION_LAYER_SEGMENT_TEST_ID}
+  />
 );
 
 /** One segment fills the bar and tells nothing, so the bar needs at least two layers. */

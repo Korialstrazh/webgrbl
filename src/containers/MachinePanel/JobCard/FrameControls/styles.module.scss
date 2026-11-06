@@ -1,11 +1,112 @@
+@use '../../../../styles/accessibility' as accessibility;
+
 .frameControls {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.divider {
+// Start is the goal and takes a row of its own; Frame with its gear and Export share the row below.
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  :global(.ant-btn) {
+    width: 100%;
+  }
+
+  span {
+    display: block;
+  }
+
+  :global(.ant-btn) span {
+    display: inline;
+  }
+}
+
+.startAction {
+  flex: 1 0 100%;
+  min-width: 0;
+
+  :global(.ant-btn) {
+    flex-direction: row;
+    // Room for the lock badge that sits on the icon's corner, so it never touches the word.
+    gap: var(--space-3);
+    height: 3.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  :global(.ant-btn) span {
+    font-size: 1rem;
+  }
+
+  :global(.ant-btn) :global(.anticon) {
+    font-size: 1.25rem;
+  }
+}
+
+.exportAction {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+// Frame and its gear read as one split button, as wide as Export beside it.
+.frameSplit {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+
+  > span:first-child {
+    flex: 1 1 0;
+    min-width: 0;
+
+    :global(.ant-btn) {
+      border-start-end-radius: 0;
+      border-end-end-radius: 0;
+    }
+  }
+
+  > span:last-child {
+    flex: none;
+    margin-inline-start: -1px;
+  }
+}
+
+// A full-size icon button, so the gear reads as a control of its own and not as a sliver of Frame.
+.frameGear:global(.ant-btn) {
+  width: 2.75rem;
+  height: 3.25rem;
+  padding: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 17rem;
+  max-width: 100%;
+}
+
+.hiddenLabel {
+  @include accessibility.visually-hidden;
+}
+
+.offReason {
+  display: flex;
+  gap: var(--space-2);
   margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+
+  :global(.anticon) {
+    flex: none;
+    margin-top: 0.1875rem;
+    color: var(--color-warning);
+  }
 }
 
 .field {
@@ -36,6 +137,10 @@
   }
 }
 
-.fullWidthButtonWrapper {
-  display: block;
+// The power with an (i) whose tooltip names the profile and the laser power it assumes.
+.powerValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: help;
 }

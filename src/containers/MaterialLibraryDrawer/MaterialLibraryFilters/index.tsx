@@ -1,7 +1,8 @@
 /**
  * The toolbar above the material library list: the search and the "Only for this machine" filter on one line, under
  * it the chips that name the material the list is kept to (with the one way to see every material again) and the
- * layer the rows apply to, and then Add preset and New material, side by side as both add to the library.
+ * layer the rows apply to, and then Add preset, shown once it can be used, and New material, which the empty list
+ * offers itself until a material exists.
  *
  * @author michael.morosov
  *
@@ -10,7 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { AppstoreAddOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { AppstoreAddOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Input, Tag } from 'antd';
 import type { CheckboxChangeEvent } from 'antd';
 import type { ChangeEvent, ReactNode } from 'react';
@@ -23,8 +24,8 @@ const SEARCH_INPUT_TYPE = 'search';
 
 export const MaterialLibraryFilters = (props: MaterialLibraryFiltersProps): ReactNode => {
   const {
-    searchText, isOnlyActiveMachine, hasActiveMachine, filteredMaterial, targetLayerName, isAddAllowed,
-    onSearch, onOnlyActiveMachineChange, onClearMaterialFilter, onAdd, onNewMaterial,
+    searchText, isOnlyActiveMachine, hasActiveMachine, hasMaterials, filteredMaterial, targetLayerName,
+    isAddAllowed, onSearch, onOnlyActiveMachineChange, onClearMaterialFilter, onAdd, onNewMaterial,
   } = props;
   const { t } = useTranslation();
   const hasChips: boolean = Boolean(filteredMaterial || targetLayerName);
@@ -54,7 +55,8 @@ export const MaterialLibraryFilters = (props: MaterialLibraryFiltersProps): Reac
         <div className={styles.filterChips}>
           {filteredMaterial && (
             <Tag
-              className={styles.filterChip}
+              className={[styles.filterChip, styles.materialFilterChip].join(' ')}
+              icon={<FilterOutlined aria-hidden />}
               closable={{ 'aria-label': t(DEFAULT.MATERIAL_LIBRARY_MATERIAL_FILTER_CLEAR) }}
               onClose={onClearMaterialFilter}
             >
@@ -71,24 +73,23 @@ export const MaterialLibraryFilters = (props: MaterialLibraryFiltersProps): Reac
           )}
         </div>
       )}
-      <div className={styles.addActions}>
-        {/* The icons carry labels of their own, so each button names itself to keep its name to its text. */}
-        <Button
-          icon={<PlusOutlined />}
-          aria-label={t(DEFAULT.MATERIAL_LIBRARY_ADD)}
-          disabled={!isAddAllowed}
-          onClick={onAdd}
-        >
-          {t(DEFAULT.MATERIAL_LIBRARY_ADD)}
-        </Button>
-        <Button
-          icon={<AppstoreAddOutlined />}
-          aria-label={t(DEFAULT.MATERIAL_LIBRARY_NEW_MATERIAL)}
-          onClick={onNewMaterial}
-        >
-          {t(DEFAULT.MATERIAL_LIBRARY_NEW_MATERIAL)}
-        </Button>
-      </div>
+      {hasMaterials && (
+        <div className={styles.addActions}>
+          {/* The icons carry labels of their own, so each button names itself to keep its name to its text. */}
+          {isAddAllowed && (
+            <Button icon={<PlusOutlined />} aria-label={t(DEFAULT.MATERIAL_LIBRARY_ADD)} onClick={onAdd}>
+              {t(DEFAULT.MATERIAL_LIBRARY_ADD)}
+            </Button>
+          )}
+          <Button
+            icon={<AppstoreAddOutlined />}
+            aria-label={t(DEFAULT.MATERIAL_LIBRARY_NEW_MATERIAL)}
+            onClick={onNewMaterial}
+          >
+            {t(DEFAULT.MATERIAL_LIBRARY_NEW_MATERIAL)}
+          </Button>
+        </div>
+      )}
     </>
   );
 };

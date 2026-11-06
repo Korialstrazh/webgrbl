@@ -11,18 +11,49 @@
   border-color: var(--color-accent);
 }
 
-// The button grows to the row width and stacks its name, size and notes, one per line, so a narrow panel still shows
-// the name.
+// The button grows to the row width: the kind icon on the left, then the name, size and notes stacked one per line,
+// so a narrow panel still shows the name.
 .selectButton {
-  display: grid;
+  display: flex;
   flex: 1;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0 var(--space-2);
+  gap: var(--space-3);
   align-items: center;
   height: auto;
   min-width: 0;
   padding: var(--space-2) var(--space-3);
   text-align: left;
+}
+
+// The kind icon sits in a tile beside the stacked text.
+.kindIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-3);
+  font-size: 1.125rem;
+}
+
+.svgKind {
+  color: var(--color-info);
+}
+
+.sampleKind {
+  color: var(--color-accent);
+}
+
+.details {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+
+.sizeIcon {
+  margin-inline-end: var(--space-1);
 }
 
 .name {
@@ -35,8 +66,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
 }
 

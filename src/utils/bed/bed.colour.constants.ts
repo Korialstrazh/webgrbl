@@ -12,17 +12,20 @@
 import { DEFAULT } from '../localization/default.locales';
 import type { BedColourPreset } from './interfaces/BedColourPreset';
 
-/** The default bed: a mid-to-light grey on which black artwork stays clearly visible (9.2:1). */
-export const DEFAULT_BED_COLOUR = '#a7acb1';
+/** The default bed: a dark charcoal that matches the theme. Black artwork gets a light rim on it (BedObjectGraphic). */
+export const DEFAULT_BED_COLOUR = '#2a2e34';
+
+export const GREY_BED_COLOUR = '#a7acb1';
 
 export const LIGHT_GREY_BED_COLOUR = '#d4d7da';
 export const WHITE_BED_COLOUR = '#ffffff';
 export const DARK_GREY_BED_COLOUR = '#3a3e43';
 export const WOOD_BED_COLOUR = '#c8a27a';
 
-/** The named presets of the bed colour picker: the default grey, a light grey, white, a dark grey and plywood. */
+/** The named presets of the bed colour picker: charcoal (default), grey, light grey, white, dark grey and plywood. */
 export const BED_COLOUR_PRESETS: readonly BedColourPreset[] = [
-  { colour: DEFAULT_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_GREY },
+  { colour: DEFAULT_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_CHARCOAL },
+  { colour: GREY_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_GREY },
   { colour: LIGHT_GREY_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_LIGHT_GREY },
   { colour: WHITE_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_WHITE },
   { colour: DARK_GREY_BED_COLOUR, labelKey: DEFAULT.BED_COLOUR_PRESET_DARK_GREY },

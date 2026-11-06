@@ -19,6 +19,8 @@ export interface AppToast {
   messageKey: string;
   /** Values for the placeholders of the message, for example an error code. */
   messageParameters: Record<string, string | number>;
+  /** Whether the toast offers to undo the change it reports. */
+  isUndoOffered?: boolean;
   /** How many times this same toast was shown while it was open; 1 for a single occurrence. */
   repeatCount: number;
 }

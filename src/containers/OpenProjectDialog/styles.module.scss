@@ -1,6 +1,13 @@
+// The storage note sits at the start of the footer: the drive icon opens the full note, and a short caption beside it
+// says what the icon means without a tap.
 .footerNote {
-  margin: 0;
-  font-size: 0.8125rem;
-  text-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-1);
+}
+
+.footerCaption {
   color: var(--color-text-muted);
+  font-size: 0.75rem;
 }

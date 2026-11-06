@@ -16,21 +16,24 @@ import styles from './styles.module.scss';
 interface EmptyStateProps {
   iconComponent: ReactNode;
   titleText: string;
-  bodyText: string;
+  bodyText?: string;
   /** Label of the one action; none shows no button. */
   actionLabel?: string;
   onAction?: () => void;
+  /** A control of its own, where a plain button would not do. */
+  actionComponent?: ReactNode;
 }
 
 export const EmptyState = (props: EmptyStateProps): ReactNode => {
-  const { iconComponent, titleText, bodyText, actionLabel, onAction } = props;
+  const { iconComponent, titleText, bodyText, actionLabel, onAction, actionComponent } = props;
 
   return (
     <div className={styles.emptyState} role="note">
       <span className={styles.icon} aria-hidden>{iconComponent}</span>
       <p className={styles.title}>{titleText}</p>
-      <p className={styles.body}>{bodyText}</p>
+      {bodyText && <p className={styles.body}>{bodyText}</p>}
       {actionLabel && <Button onClick={onAction}>{actionLabel}</Button>}
+      {actionComponent}
     </div>
   );
 };

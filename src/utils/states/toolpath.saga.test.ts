@@ -36,6 +36,7 @@ import {
   selectProjectObjects,
 } from './project.document.state';
 import { ProjectOpened } from './project.state';
+import { TOAST_SEVERITY } from './toast.constants';
 import { selectToasts } from './toast.state';
 import { selectToolpathMachineArea } from './toolpath.machine.area.selector';
 import { watchToolpath } from './toolpath.saga';
@@ -336,6 +337,11 @@ describe(watchToolpath.name, () => {
       expect(downloadSpy).toHaveBeenCalledTimes(1);
     });
     expect(downloadSpy.mock.calls[0]?.[0]).toMatchObject({ fileName: GCODE_FILE_NAME, mimeType: GCODE_MIME_TYPE });
+    expect(selectToasts(store.getState())).toContainEqual(expect.objectContaining({
+      severity: TOAST_SEVERITY.INFO,
+      messageKey: DEFAULT.TOAST_GCODE_EXPORTED,
+      messageParameters: { fileName: GCODE_FILE_NAME },
+    }));
     expect(getDownloadedText(downloadSpy)).toContain(GCODE_LASER_MODE_ON);
     expect(getDownloadedText(downloadSpy)).toContain(PROFILE_HEADER_TEXT);
   });
@@ -354,6 +360,8 @@ describe(watchToolpath.name, () => {
     expect(selectToolpath(store.getState())?.warnings.map((warning: ObjectWarning) => warning.kind))
       .toEqual([SVG_UNSUPPORTED_KIND.TEXT]);
     expect(downloadSpy).not.toHaveBeenCalled();
+    expect(selectToasts(store.getState()).map((toast: AppToast) => toast.messageKey))
+      .not.toContain(DEFAULT.TOAST_GCODE_EXPORTED);
   });
 
   it('downloads a toolpath with warnings once the warnings are confirmed', async () => {

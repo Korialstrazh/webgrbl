@@ -10,7 +10,15 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, ColorPicker, Form, Input, InputNumber, Segmented, Switch } from 'antd';
+import {
+  CloudOutlined,
+  ColumnHeightOutlined,
+  DashboardOutlined,
+  SyncOutlined,
+  TagOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
+import { Button, ColorPicker, Form, Input, Segmented, Switch, Tooltip } from 'antd';
 import type { Color } from 'antd/es/color-picker';
 import { useId, useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
@@ -37,6 +45,8 @@ import type { PaletteEntryChanges } from './interfaces/PaletteEntryChanges';
 import type { PaletteEntryFormProps } from './interfaces/PaletteEntryFormProps';
 import type { PaletteFieldStatus } from './interfaces/PaletteFieldStatus';
 import type { PaletteNumberFieldDefinition } from './interfaces/PaletteNumberFieldDefinition';
+import { IconNumberField } from '../../../views/IconNumberField';
+import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import styles from './styles.module.scss';
 
 const FIELD_ID_SEPARATOR = '-';
@@ -48,11 +58,43 @@ const MODE_FIELD: keyof PaletteEntry = 'mode';
 const MODE_OPTION_VALUES: readonly LayerMode[] = [LAYER_MODE.LINE, LAYER_MODE.FILL];
 
 const PALETTE_NUMBER_FIELDS: readonly PaletteNumberFieldDefinition[] = [
-  { field: 'maxPowerPercent', labelKey: DEFAULT.LAYER_SETTINGS_MAX_POWER, isFillOnly: false },
-  { field: 'minPowerPercent', labelKey: DEFAULT.LAYER_SETTINGS_MIN_POWER, isFillOnly: false },
-  { field: 'speedMmPerMin', labelKey: DEFAULT.LAYER_SETTINGS_SPEED, isFillOnly: false },
-  { field: 'passes', labelKey: DEFAULT.LAYER_SETTINGS_PASSES, isFillOnly: false },
-  { field: 'lineIntervalMm', labelKey: DEFAULT.LAYER_SETTINGS_LINE_INTERVAL, isFillOnly: true },
+  {
+    field: 'maxPowerPercent',
+    labelKey: DEFAULT.LAYER_SETTINGS_MAX_POWER,
+    isFillOnly: false,
+    iconComponent: <ThunderboltOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_MAX,
+    unitKey: DEFAULT.FIELD_UNIT_PERCENT,
+  },
+  {
+    field: 'minPowerPercent',
+    labelKey: DEFAULT.LAYER_SETTINGS_MIN_POWER,
+    isFillOnly: false,
+    iconComponent: <ThunderboltOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_MIN,
+    unitKey: DEFAULT.FIELD_UNIT_PERCENT,
+  },
+  {
+    field: 'speedMmPerMin',
+    labelKey: DEFAULT.LAYER_SETTINGS_SPEED,
+    isFillOnly: false,
+    iconComponent: <DashboardOutlined />,
+    unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
+  },
+  {
+    field: 'passes',
+    labelKey: DEFAULT.LAYER_SETTINGS_PASSES,
+    isFillOnly: false,
+    iconComponent: <SyncOutlined />,
+    unitKey: DEFAULT.FIELD_UNIT_TIMES,
+  },
+  {
+    field: 'lineIntervalMm',
+    labelKey: DEFAULT.LAYER_SETTINGS_LINE_INTERVAL,
+    isFillOnly: true,
+    iconComponent: <ColumnHeightOutlined />,
+    unitKey: DEFAULT.FIELD_UNIT_MM,
+  },
 ];
 
 /** An emptied number input holds NaN in the draft, which the entry checks reject; the input then shows nothing. */
@@ -101,37 +143,41 @@ export const PaletteEntryForm = ({ entry, otherEntries }: PaletteEntryFormProps)
   return (
     <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
       <div className={styles.paletteEntryForm}>
-        <Form.Item
-          label={t(DEFAULT.PALETTE_FIELD_NAME)}
-          htmlFor={getFieldId(NAME_FIELD)}
-          {...getFieldStatus(NAME_FIELD)}
-        >
-          <Input
-            id={getFieldId(NAME_FIELD)}
-            value={draft.name}
-            onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => changeDraft({ name: changeEvent.target.value })}
-          />
-        </Form.Item>
-        <Form.Item
-          label={t(DEFAULT.PALETTE_FIELD_COLOUR)}
-          extra={isShading ? t(DEFAULT.PALETTE_SHADING_COLOUR_NOTE) : undefined}
-          {...getFieldStatus(COLOUR_FIELD)}
-        >
-          <ColorPicker
-            value={draft.colour}
-            format={ANTD_COLOR_PICKER_FORMAT_HEX}
-            disabled={isShading}
-            disabledAlpha
-            showText
-            onChange={changeColour}
-          />
-        </Form.Item>
-        <Form.Item label={t(DEFAULT.LAYER_SETTINGS_MODE)} htmlFor={getFieldId(MODE_FIELD)}>
+        <div className={styles.identityRow}>
+          <Form.Item className={styles.nameField} {...getFieldStatus(NAME_FIELD)}>
+            <Input
+              id={getFieldId(NAME_FIELD)}
+              prefix={<TagOutlined aria-hidden />}
+              aria-label={t(DEFAULT.PALETTE_FIELD_NAME)}
+              placeholder={t(DEFAULT.PALETTE_FIELD_NAME)}
+              value={draft.name}
+              onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => {
+                changeDraft({ name: changeEvent.target.value });
+              }}
+            />
+          </Form.Item>
+          <Form.Item {...getFieldStatus(COLOUR_FIELD)}>
+            <Tooltip title={t(DEFAULT.PALETTE_FIELD_COLOUR)}>
+              <ColorPicker
+                value={draft.colour}
+                format={ANTD_COLOR_PICKER_FORMAT_HEX}
+                disabled={isShading}
+                disabledAlpha
+                showText
+                onChange={changeColour}
+              />
+            </Tooltip>
+          </Form.Item>
+        </div>
+        {isShading && <p className={styles.shadingNote}>{t(DEFAULT.PALETTE_SHADING_COLOUR_NOTE)}</p>}
+        <Form.Item htmlFor={getFieldId(MODE_FIELD)}>
           <Segmented<LayerMode>
             id={getFieldId(MODE_FIELD)}
+            aria-label={t(DEFAULT.LAYER_SETTINGS_MODE)}
             value={draft.mode}
             options={MODE_OPTION_VALUES.map((mode: LayerMode) => ({
               value: mode,
+              icon: <LayerModeIcon mode={mode} />,
               label: t(LAYER_MODE_LABEL_KEY[mode]),
             }))}
             onChange={(mode: LayerMode) => changeDraft({ mode })}
@@ -140,11 +186,14 @@ export const PaletteEntryForm = ({ entry, otherEntries }: PaletteEntryFormProps)
         <div className={styles.numberFields}>
           {PALETTE_NUMBER_FIELDS.filter(
             ({ isFillOnly }: PaletteNumberFieldDefinition): boolean => isFill || !isFillOnly,
-          ).map(({ field, labelKey }: PaletteNumberFieldDefinition) => (
-            <Form.Item key={field} label={t(labelKey)} htmlFor={getFieldId(field)} {...getFieldStatus(field)}>
-              <InputNumber
-                id={getFieldId(field)}
-                className={styles.numberInput}
+          ).map(({ field, labelKey, iconComponent, captionKey, unitKey }: PaletteNumberFieldDefinition) => (
+            <Form.Item key={field} {...getFieldStatus(field)}>
+              <IconNumberField
+                inputId={getFieldId(field)}
+                labelText={t(labelKey)}
+                iconComponent={iconComponent}
+                captionText={captionKey && t(captionKey)}
+                unitText={unitKey && t(unitKey)}
                 value={getInputNumberValue(draft[field])}
                 onChange={(value: number | null) => changeDraft({ [field]: value ?? Number.NaN })}
               />
@@ -153,6 +202,7 @@ export const PaletteEntryForm = ({ entry, otherEntries }: PaletteEntryFormProps)
         </div>
         <label className={styles.switchField}>
           <Switch checked={draft.airAssist} onChange={(airAssist: boolean) => changeDraft({ airAssist })} />
+          <CloudOutlined aria-hidden />
           {t(DEFAULT.LAYER_SETTINGS_AIR_ASSIST)}
         </label>
         <div className={styles.actions}>

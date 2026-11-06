@@ -170,7 +170,8 @@ describe(BurnPartLiftControl.name, () => {
   it('asks for a click before any selection, and still offers to put all back', () => {
     const store: AppStore = renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), undefined);
 
-    expect(screen.getByText(CLICK_HINT)).toBeInTheDocument();
+    expect(screen.getByRole('note', { name: CLICK_HINT })).toBeInTheDocument();
+    expect(screen.getByText('Lift a part')).toBeInTheDocument();
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
 
     act(() => {
@@ -184,7 +185,7 @@ describe(BurnPartLiftControl.name, () => {
     renderControl(newModel([newPart(PART_ID, BURN_PART_STATUS.FREE)]), OTHER_PART_ID);
 
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
-    expect(screen.getByText(CLICK_HINT)).toBeInTheDocument();
+    expect(screen.getByRole('note', { name: CLICK_HINT })).toBeInTheDocument();
   });
 
   it('hides once the model is out of date', () => {

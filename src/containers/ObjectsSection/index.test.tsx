@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { ObjectsSection } from '.';
 import { ENTER_KEY } from '../../utils/browser/browser.events.constants';
+import { getSampleJobObject } from '../../utils/materials/get.sample.job.object';
 import { MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
@@ -17,6 +18,8 @@ import {
 } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
+import { newToolpathMachineArea } from '../../utils/toolpath/test.support/new.toolpath.machine.area';
+import { OBJECT_KIND } from './objects.section.constants';
 
 const FIRST_ID = 'first';
 const SECOND_ID = 'second';
@@ -38,12 +41,12 @@ const ROTATION_LABEL = 'Rotation';
 const X_LABEL = 'X';
 const LOCK_LABEL = 'Lock aspect ratio';
 const OUTSIDE_NOTE = 'Outside the bed';
-const FIRST_SIZE_TEXT = `Frame 100.0 ${MULTIPLICATION_SIGN} 50.0 mm`;
-const SECOND_SIZE_TEXT = `Frame 20.0 ${MULTIPLICATION_SIGN} 20.0 mm`;
+const FIRST_SIZE_TEXT = `100.0 ${MULTIPLICATION_SIGN} 50.0 mm`;
+const SECOND_SIZE_TEXT = `20.0 ${MULTIPLICATION_SIGN} 20.0 mm`;
 const SECOND_SIZE_MM = 20;
 const OBJECTS_LIST_NAME = 'Project objects';
 const IMPORT_LABEL = 'Import SVG';
-const EMPTY_HINT_PATTERN = /No objects yet/;
+const EMPTY_HINT_PATTERN = /Nothing on the bed yet/;
 const SECOND_ROW_NAME_PATTERN = /^Moon/;
 const PRESSED_ATTRIBUTE = 'aria-pressed';
 const TRUE_TEXT = 'true';
@@ -126,12 +129,33 @@ const getObjectById = (store: AppStore, objectId: string): ProjectObject | undef
   );
 
 describe(ObjectsSection.name, () => {
-  it('shows a hint and an import button when there are no objects', () => {
+  it('shows a hint and no import button when there are no objects', () => {
     renderSection(newStore());
 
     expect(screen.getByText(EMPTY_HINT_PATTERN)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: IMPORT_LABEL })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: IMPORT_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
+  });
+
+  it('marks each row with the icon of its kind, imported drawing or test sample', () => {
+    const store: AppStore = newStore();
+
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({
+        document: {
+          objects: [newProjectObject({ id: FIRST_ID, name: FIRST_NAME }), getSampleJobObject(newToolpathMachineArea())],
+          layers: [],
+        },
+      }));
+    });
+    renderSection(store);
+
+    const rows: HTMLElement[] = within(screen.getByRole('list', { name: OBJECTS_LIST_NAME })).getAllByRole('listitem');
+    const rowKinds: (string | null)[] = rows.map(
+      (row: HTMLElement) => row.querySelector('[data-object-kind]')?.getAttribute('data-object-kind') ?? null,
+    );
+
+    expect(rowKinds).toEqual([OBJECT_KIND.SVG, OBJECT_KIND.SAMPLE]);
   });
 
   it('lists the objects with their sizes and no fields while nothing is selected', () => {
@@ -251,7 +275,7 @@ describe(ObjectsSection.name, () => {
     loadObjects(store);
     selectFirst(store);
     renderSection(store);
-    fireEvent.click(screen.getByRole('switch', { name: LOCK_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: LOCK_LABEL }));
     commitField(WIDTH_LABEL, NEW_WIDTH_TEXT);
 
     expect(getObjectById(store, FIRST_ID)).toMatchObject({ widthMm: NEW_WIDTH_MM, heightMm: WIDE_HEIGHT_MM });
@@ -264,7 +288,7 @@ describe(ObjectsSection.name, () => {
     selectFirst(store);
     renderSection(store);
 
-    expect(screen.getByRole('switch', { name: LOCK_LABEL })).toBeChecked();
+    expect(screen.getByRole('button', { name: LOCK_LABEL })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it.each([

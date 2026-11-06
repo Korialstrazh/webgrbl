@@ -13,7 +13,7 @@ import { DEFAULT_BED_SIZE_MM } from '../bed/bed.constants';
 import { DEFAULT } from '../localization/default.locales';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
-import { IMPORT_PLACEMENT_OFFSET_MM, MAX_PROJECT_OBJECTS } from '../project/project.constants';
+import { FREE_SPOT_GAP_MM, MAX_PROJECT_OBJECTS } from '../project/project.constants';
 import { MAX_SVG_FILE_BYTES, SVG_MIME_TYPE } from '../svg/svg.constants';
 import type { AppToast } from './interfaces/AppToast';
 import { newStore } from './new.store';
@@ -67,7 +67,7 @@ const getToastsOf = (store: AppStore, messageKey: string): AppToast[] =>
   selectToasts(store.getState()).filter((toast: AppToast): boolean => toast.messageKey === messageKey);
 
 describe(importSvgFiles.name, () => {
-  it('adds two valid files at stepped positions, selects both and records one undo step', async () => {
+  it('adds two valid files side by side without overlap, selects both and records one undo step', async () => {
     const store: AppStore = newStore();
 
     requestImport(store, [newSvgFile(FIRST_FILE_NAME), newSvgFile(SECOND_FILE_NAME)]);
@@ -77,7 +77,7 @@ describe(importSvgFiles.name, () => {
     expect(importedObjects.map((projectObject: ProjectObject) => projectObject.name)).toEqual(['first', 'second']);
     expect(importedObjects.map((projectObject: ProjectObject) => [projectObject.xMm, projectObject.yMm])).toEqual([
       [0, 0],
-      [IMPORT_PLACEMENT_OFFSET_MM, IMPORT_PLACEMENT_OFFSET_MM],
+      [SQUARE_SIZE_MM + FREE_SPOT_GAP_MM, 0],
     ]);
     expect(importedObjects[0]).toMatchObject({
       widthMm: SQUARE_SIZE_MM,
@@ -106,7 +106,7 @@ describe(importSvgFiles.name, () => {
 
     expect(importedObjects.map((projectObject: ProjectObject) => [projectObject.xMm, projectObject.yMm])).toEqual([
       [0, 0],
-      [IMPORT_PLACEMENT_OFFSET_MM, IMPORT_PLACEMENT_OFFSET_MM],
+      [SQUARE_SIZE_MM + FREE_SPOT_GAP_MM, 0],
     ]);
     expect(importedObjects[0]?.id).not.toBe(importedObjects[1]?.id);
 

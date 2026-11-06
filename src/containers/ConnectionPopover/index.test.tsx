@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import type { RefObject } from 'react';
 import { Provider } from 'react-redux';
-import type { Mock } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 import { ConnectionPopover } from '.';
 import { GRBL_BAUD_RATES, NO_SERIAL_PORT_ID, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
@@ -18,7 +18,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const CONNECT_LABEL = 'Connect';
 const DISCONNECT_LABEL = 'Disconnect';
-const CHOOSE_PORT_LABEL = 'Choose port...';
+const CHOOSE_PORT_LABEL = 'Choose a USB port';
 const PORT_LABEL = 'Port';
 const BAUD_LABEL = 'Baud rate';
 const SIMULATED_LASER_LABEL = 'Simulated laser (no hardware)';
@@ -142,6 +142,36 @@ describe(ConnectionPopover.name, () => {
     fireEvent.click(screen.getByRole('button', { name: ANCHOR_TEXT }));
 
     expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it.each([
+    ['without a ring after a pointer opened it', true, false],
+    ['with a ring after the keyboard opened it', false, true],
+  ])('returns focus to the anchor %s', async (_caseName: string, isPointerOpened: boolean, isRingExpected: boolean) => {
+    const anchorRef: RefObject<HTMLButtonElement | null> = newAnchorRef();
+    const onOpenChange: Mock<(isOpen: boolean) => void> = vi.fn<(isOpen: boolean) => void>();
+
+    render(
+      <Provider store={newStore()}>
+        <AntdTestProvider>
+          <ConnectionPopover isOpen onOpenChange={onOpenChange} anchorRef={anchorRef}>
+            <button ref={anchorRef} type="button">{ANCHOR_TEXT}</button>
+          </ConnectionPopover>
+        </AntdTestProvider>
+      </Provider>,
+    );
+    const anchorButton: HTMLElement = screen.getByRole('button', { name: ANCHOR_TEXT });
+    const focusSpy: MockInstance<(options?: FocusOptions) => void> = vi.spyOn(anchorButton, 'focus');
+
+    fireEvent[isPointerOpened ? 'pointerDown' : 'keyDown'](anchorButton);
+    await settle();
+    const portSelect: HTMLElement = screen.getByRole('combobox', { name: PORT_LABEL });
+    portSelect.focus();
+    fireEvent.keyDown(portSelect, { key: 'Escape' });
+    fireEvent.keyUp(portSelect, { key: 'Escape' });
+
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(focusSpy).toHaveBeenCalledWith({ focusVisible: isRingExpected });
   });
 
   it('is not rendered while closed', () => {

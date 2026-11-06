@@ -1,7 +1,7 @@
 /**
  * The file actions of the machine profiles dialog: import a profiles file, export all profiles as one, and the
- * GRBL settings editor that is not built yet. An import adds the file's profiles to the stored ones; a file that is
- * not a valid profiles file changes nothing and shows an error toast.
+ * GRBL settings editor that is not built yet, as a muted note in a Coming soon list. An import adds the file's
+ * profiles to the stored ones; a file that is not a valid profiles file changes nothing and shows an error toast.
  *
  * @author michael.morosov
  *
@@ -10,7 +10,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button } from 'antd';
+import { ClockCircleOutlined, DownloadOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons';
+import { Button, Tooltip } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +31,6 @@ import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../../utils/states/toast.constants';
 import { ToastShown } from '../../../utils/states/toast.state';
 import { useAppStore } from '../../../utils/states/use.app.store';
-import { ComingSoon } from '../../../views/ComingSoon';
 import {
   MACHINE_PROFILES_EXPORT_FILE_NAME,
   MACHINE_PROFILES_FILE_ACCEPT,
@@ -97,8 +97,13 @@ export const ProfileFileActions = (): ReactNode => {
   return (
     <div className={styles.profileFileActions}>
       <div className={styles.transferButtons}>
-        <Button onClick={() => fileInputRef.current?.click()}>{t(DEFAULT.MACHINE_PROFILES_IMPORT)}</Button>
-        <Button disabled={!profiles.length} onClick={exportProfiles}>{t(DEFAULT.MACHINE_PROFILES_EXPORT)}</Button>
+        {/* Icon and word, as in the material library. */}
+        <Button icon={<UploadOutlined aria-hidden />} onClick={() => fileInputRef.current?.click()}>
+          {t(DEFAULT.MACHINE_PROFILES_IMPORT)}
+        </Button>
+        <Button icon={<DownloadOutlined aria-hidden />} disabled={!profiles.length} onClick={exportProfiles}>
+          {t(DEFAULT.MACHINE_PROFILES_EXPORT)}
+        </Button>
       </div>
       {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
       <input
@@ -109,9 +114,20 @@ export const ProfileFileActions = (): ReactNode => {
         aria-label={t(DEFAULT.MACHINE_PROFILES_IMPORT_FILE)}
         onChange={handleFileInputChange}
       />
-      <ComingSoon description={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}>
-        <Button disabled>{t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}</Button>
-      </ComingSoon>
+      {/* Not built yet: a muted note in a Coming soon list, never a button, so it is not tabbed to as an action. */}
+      <section className={styles.comingSoonList} aria-label={t(DEFAULT.COMING_SOON_LIST)}>
+        <h3 className={styles.comingSoonHeading}>
+          <ClockCircleOutlined aria-hidden />
+          {t(DEFAULT.COMING_SOON_LIST)}
+        </h3>
+        <Tooltip title={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}>
+          <p className={styles.comingSoonItem}>
+            <SettingOutlined aria-hidden />
+            {t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}
+            <span className={styles.hiddenDescription}>{t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}</span>
+          </p>
+        </Tooltip>
+      </section>
     </div>
   );
 };

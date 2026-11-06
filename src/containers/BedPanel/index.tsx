@@ -21,8 +21,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Layout } from 'antd';
-import { useState } from 'react';
-import type { ReactNode } from 'react';
+import { useRef, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
@@ -35,12 +35,17 @@ import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedColour } from '../../utils/states/bed.appearance.state';
 import { selectMachineStatus } from '../../utils/states/machine.status.state';
+import { selectProjectObjects } from '../../utils/states/project.document.state';
 import { selectToolpathMachineArea } from '../../utils/states/toolpath.machine.area.selector';
 import type { ToolpathMachineArea } from '../../utils/toolpath/interfaces/ToolpathMachineArea';
 import { DEFAULT_TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
+import { LaserMachineIcon } from '../../views/LaserMachineIcon';
+import { PlugBadge } from '../../views/PlugBadge';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
+import { BedEmptyCard } from '../BedEmptyCard';
 import { BedObjects } from '../BedObjects';
 import { BedViewport } from '../BedViewport';
+import type { KeptBedViewportRef } from '../BedViewport/interfaces/KeptBedViewportRef';
 import { BurnPreviewPane } from '../BurnPreviewPane';
 import { BurnPreviewToolbar } from '../BurnPreviewToolbar';
 import { SimulationPlaybackBar } from '../SimulationPlaybackBar';
@@ -49,7 +54,6 @@ import { ToolpathLayer } from '../ToolpathLayer';
 import { ToolpathStatusOverlay } from '../ToolpathStatusOverlay';
 import { ToolpathToolbar } from '../ToolpathToolbar';
 import { ToolpathWarningsPanel } from '../ToolpathWarningsPanel';
-import { BedMoreToolsMenu } from './BedMoreToolsMenu';
 import { BedViewModeSwitch } from './BedViewModeSwitch';
 import { BED_DROP_AREA_TEST_ID, BED_VIEWPORT_KEY_SEPARATOR } from './bed.panel.constants';
 import { BED_PLACEHOLDER_LABEL_KEYS } from './bed.placeholder.constants';
@@ -67,9 +71,20 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
   const { t } = useTranslation();
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
   const dimensions: BedDimensions = useBedDimensions();
+  const viewportKey: string = [dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR);
+  // The zoom and pan of the 2D views, kept while the 3D view is shown; a new bed size starts fitted again.
+  const keptViewportRef: KeptBedViewportRef = useRef<KeptBedViewportRef['current']>(undefined);
+  const keptViewportKeyRef: RefObject<string> = useRef<string>(viewportKey);
+
+  if (keptViewportKeyRef.current !== viewportKey) {
+    keptViewportKeyRef.current = viewportKey;
+    keptViewportRef.current = undefined;
+  }
+
   const bedColour: string = useSelector(selectBedColour);
   const bedSurfaceStyle: BedSurfaceStyle = { '--color-bed-surface': bedColour };
   const placeholderKey: string | undefined = BED_PLACEHOLDER_LABEL_KEYS[dimensions.placeholderKind];
+  const hasNoObjects: boolean = !useSelector(selectProjectObjects).length;
   const [viewControlsHost, setViewControlsHost] = useState<HTMLDivElement | null>(null);
   const [toolpathDisplayMode, setToolpathDisplayMode] = useState<ToolpathDisplayMode>(DEFAULT_TOOLPATH_DISPLAY_MODE);
   const [isTravelShown, setIsTravelShown] = useState<boolean>(false);
@@ -89,7 +104,11 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
       <h2 className={styles.title}>{t(DEFAULT.BED_PANEL_TITLE)}</h2>
       {/* One structure in every view: only the tools slot differs, so nothing beside the switch can move it. */}
       <div className={styles.headerContainer}>
-        <div className={isThreeDView ? [styles.header, styles.threeDHeader].join(' ') : styles.header}>
+        {/* The view name lets the toolbar controls quieten in a crowded view (see BedColourPicker). */}
+        <div
+          className={isThreeDView ? [styles.header, styles.threeDHeader].join(' ') : styles.header}
+          data-bed-view={viewMode}
+        >
           <div className={styles.editingTools}>
             {isToolpathView && (
               <>
@@ -107,8 +126,6 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           <div className={styles.viewTools}>
             {/* A plain slot: the bed viewport renders its zoom, Fit and bed colour controls in here. */}
             <div ref={setViewControlsHost} className={styles.viewControlsHost} />
-            {/* Its entries are about editing, which the 3D view does not do. */}
-            {!isThreeDView && <BedMoreToolsMenu />}
           </div>
           <div className={styles.viewSwitchSlot}>
             <BedViewModeSwitch viewMode={viewMode} changeBedViewMode={changeBedViewMode} />
@@ -134,15 +151,15 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
           ) : (
             <BedViewport
             // A new bed size starts a new view, fitted to the new bed.
-              key={[dimensions.widthMm, dimensions.heightMm].join(BED_VIEWPORT_KEY_SEPARATOR)}
+              key={viewportKey}
               dimensions={dimensions}
               isWide={isWide}
               controlsHost={viewControlsHost}
+              keptViewportRef={keptViewportRef}
               // The Toolpath view draws the simulated head and the profile's work zero, so the live markers would only
               // add a second crosshair.
               headPosition={isToolpathView ? undefined : headBedPoint}
               workOriginPosition={isToolpathView ? undefined : workZeroBedPoint}
-              placeholderLabel={placeholderKey && t(placeholderKey)}
             >
               {isToolpathView ? (
                 <ToolpathLayer
@@ -155,6 +172,12 @@ export const BedPanel = ({ hostRef, isWide }: BedPanelProps): ReactNode => {
               )}
             </BedViewport>
           )}
+          {!isThreeDView && hasNoObjects && placeholderKey && (
+            <span className={styles.placeholderChip}>
+              <PlugBadge reasonText={t(placeholderKey)} iconComponent={<LaserMachineIcon />} />
+            </span>
+          )}
+          {viewMode === BED_VIEW_MODE.DESIGN && hasNoObjects && <BedEmptyCard />}
           {(isToolpathView || isThreeDView) && <ToolpathStatusOverlay isGeneratingOrFailedOnly={isThreeDView} />}
         </div>
         {isToolpathView && <SimulationPlaybackBar />}

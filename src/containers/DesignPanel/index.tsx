@@ -1,7 +1,8 @@
 /**
- * The left region for the design tools: the material of the project with its library, layers and objects. The
- * material and the test sample are chosen and added in the Design view only. In the 3D view it shows the Cut check
- * above the layers, and the objects leave, as they cannot be edited there.
+ * The left region for the design tools: layers, the material of the project with its library, objects and the Cut
+ * check, in the same order and places in every view so Layers never moves. The material and the test sample are chosen
+ * and added in the Design view only, objects are not edited in 3D and the Cut check runs in 3D only: a card that does
+ * not apply stays as a muted heading line whose info icon says where it applies.
  *
  * @author michael.morosov
  *
@@ -10,7 +11,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { Button, Layout } from 'antd';
+import { BlockOutlined, GroupOutlined } from '@ant-design/icons';
+import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +23,9 @@ import type { BedViewMode } from '../../utils/bed/bed.view.constants';
 import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedViewMode } from '../../utils/states/bed.view.state';
+import { IconActionButton } from '../../views/IconActionButton';
+import { MaterialSheetIcon } from '../../views/MaterialSheetIcon';
+import { PaletteIcon } from '../../views/PaletteIcon';
 import { Panel } from '../../views/Panel';
 import { AddTestSampleButton } from '../AddTestSampleButton';
 import { CutCheckPanel } from '../CutCheckPanel';
@@ -44,30 +49,38 @@ export const DesignPanel = (): ReactNode => {
       width={DESIGN_PANEL_WIDTH}
       aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}
     >
-      {isThreeDView && <CutCheckPanel />}
-      {isDesignView && (
-        <Panel title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}>
-          <MaterialSection />
-        </Panel>
-      )}
       <Panel
+        iconComponent={<BlockOutlined />}
         title={t(DEFAULT.DESIGN_LAYERS_TITLE)}
         headerActionComponent={
-          <Button size={ANTD_BUTTON_SIZE_SMALL} onClick={() => setIsPaletteDialogOpen(true)}>
-            {t(DEFAULT.LAYERS_OPEN_PALETTE)}
-          </Button>
+          <span className={styles.layersActions}>
+            {isDesignView && <AddTestSampleButton isIconOnly />}
+            <IconActionButton
+              size={ANTD_BUTTON_SIZE_SMALL}
+              labelText={t(DEFAULT.LAYERS_OPEN_PALETTE)}
+              iconComponent={<PaletteIcon />}
+              onClick={() => setIsPaletteDialogOpen(true)}
+            />
+          </span>
         }
       >
-        <div className={styles.layersContent}>
-          <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
-          {isDesignView && <AddTestSampleButton />}
-        </div>
+        <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
       </Panel>
-      {!isThreeDView && (
-        <Panel title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}>
-          <ObjectsSection />
-        </Panel>
-      )}
+      <Panel
+        iconComponent={<MaterialSheetIcon />}
+        title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}
+        noteText={isDesignView ? undefined : t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_NOTE)}
+      >
+        <MaterialSection />
+      </Panel>
+      <Panel
+        iconComponent={<GroupOutlined />}
+        title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}
+        noteText={isThreeDView ? t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_NOTE) : undefined}
+      >
+        <ObjectsSection />
+      </Panel>
+      <CutCheckPanel isActive={isThreeDView} />
       <PaletteDialog isOpen={isPaletteDialogOpen} onClose={() => setIsPaletteDialogOpen(false)} />
     </Layout.Sider>
   );

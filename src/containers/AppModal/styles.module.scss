@@ -7,3 +7,13 @@
     overscroll-behavior: contain;
   }
 }
+
+// A plain wrapper for finding the first field; it must not change how the body lays out what it holds.
+.focusRoot {
+  display: contents;
+}
+
+// The title takes the focus where a dialog has no field; it is not a control, so it shows no ring.
+.appModal :global(.ant-modal-title):focus {
+  outline: none;
+}

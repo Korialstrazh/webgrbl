@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MachinePanel } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
@@ -11,7 +11,6 @@ import {
 } from '../../utils/states/machine.status.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
-import { selectIsConnectionPopoverOpen } from '../../utils/states/ui.overlay.state';
 
 const WORK_POSITION_TEXT = '8.000';
 const MACHINE_POSITION_TEXT = '10.500';
@@ -26,10 +25,10 @@ const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
 const NOT_CONNECTED_TEXT = 'Not connected';
 const STATUS_CARD_TITLE = 'Status';
-const STATUS_CONNECT_LABEL = 'Connect...';
-const ANTD_PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
-const EXPORT_GCODE_LABEL = 'Export G-code';
+const STATUS_CONNECT_LABEL = 'Connect';
 const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
+const JOB_CARD_TITLE = 'Job';
+const PROFILE_STEP_LABEL = 'Profile: to do';
 const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
 const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
 
@@ -69,32 +68,28 @@ const receiveState = (store: AppStore, machineState: GrblResolvedStatus['machine
 };
 
 describe(MachinePanel.name, () => {
-  it('collapses the status card to one line while not connected, without readouts or buttons', () => {
+  it('hides the status card while not connected, so the top bar alone tells the state', () => {
     renderMachinePanel();
 
-    const statusCard: HTMLElement = screen.getByRole('region', { name: STATUS_CARD_TITLE });
-
-    expect(within(statusCard).getByText(NOT_CONNECTED_TEXT)).toBeInTheDocument();
-    expect(within(statusCard).queryByText(MISSING_VALUE_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: STATUS_CARD_TITLE })).not.toBeInTheDocument();
+    expect(screen.queryByText(NOT_CONNECTED_TEXT)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
   });
 
-  it('offers Connect in the status card while not connected, which opens the connection popover of the pill', () => {
-    const store: AppStore = renderMachinePanel();
-
-    fireEvent.click(screen.getByRole('button', { name: STATUS_CONNECT_LABEL }));
-
-    expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
-  });
-
-  it('keeps Export G-code the only filled primary button while not connected', () => {
+  it('leaves Connect to the top-bar pill while not connected', () => {
     renderMachinePanel();
 
-    expect(screen.getByRole('button', { name: STATUS_CONNECT_LABEL })).not.toHaveClass(ANTD_PRIMARY_BUTTON_CLASS);
+    expect(screen.queryByRole('button', { name: STATUS_CONNECT_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('has one filled call to action while the job cannot start: the action of the next step', () => {
+    renderMachinePanel();
+
     // STOP is a danger button of its own, not a next step, so it is not counted.
     expect(document.querySelectorAll(PRIMARY_CALL_TO_ACTION_SELECTOR)).toHaveLength(1);
-    expect(screen.getByRole('button', { name: EXPORT_GCODE_LABEL })).toHaveClass(ANTD_PRIMARY_BUTTON_CLASS);
+    expect(screen.getByRole('button', { name: 'Set up laser' })).toHaveClass('ant-btn-primary');
+    expect(screen.getByRole('button', { name: PROFILE_STEP_LABEL })).toHaveAttribute('aria-current', 'step');
   });
 
   it('drops the Connect button from the status card once connected', () => {
@@ -116,7 +111,7 @@ describe(MachinePanel.name, () => {
   });
 
   it('puts the main task first: status, job, move, then the laser pointer', () => {
-    renderMachinePanel();
+    connect(renderMachinePanel());
 
     const cardTitles: (string | null)[] = screen.getAllByRole('heading')
       .map((heading: HTMLElement) => heading.textContent);
@@ -197,7 +192,7 @@ describe(MachinePanel.name, () => {
     const cardsArea: Element | null | undefined = stopFooter?.previousElementSibling;
 
     expect(stopFooter?.parentElement).toBe(cardsArea?.parentElement);
-    expect(cardsArea).toContainElement(screen.getByText(NOT_CONNECTED_TEXT));
+    expect(cardsArea).toContainElement(screen.getByRole('region', { name: JOB_CARD_TITLE }));
     expect(cardsArea).not.toContainElement(stopFooter ?? null);
   });
 });
