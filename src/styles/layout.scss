@@ -21,6 +21,11 @@ $machine-control-max-width: 14.5rem;
 $top-bar-height: 3.5rem;
 $status-strip-height: 3rem;
 
+// The status strip readouts (job size, estimate and cursor) take up to this width from the strip's left edge, and the
+// console toggle this much at its right; the docked toast stack keeps between the two.
+$status-strip-readouts-width: 31rem;
+$status-strip-toggle-width: 2.5rem;
+
 // The sticky STOP bar at the bottom of a narrow window; the pinned toast stack stops short of it.
 $sticky-stop-bar-height: 4.5rem;
 
