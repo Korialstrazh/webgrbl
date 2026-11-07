@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ClockCircleOutlined, DownloadOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons';
+import { DownloadOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
@@ -31,6 +31,7 @@ import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../../utils/states/toast.constants';
 import { ToastShown } from '../../../utils/states/toast.state';
 import { useAppStore } from '../../../utils/states/use.app.store';
+import { SoonTag } from '../../../views/SoonTag';
 import {
   MACHINE_PROFILES_EXPORT_FILE_NAME,
   MACHINE_PROFILES_FILE_ACCEPT,
@@ -114,19 +115,15 @@ export const ProfileFileActions = (): ReactNode => {
         aria-label={t(DEFAULT.MACHINE_PROFILES_IMPORT_FILE)}
         onChange={handleFileInputChange}
       />
-      {/* Not built yet: a muted note in a Coming soon list, never a button, so it is not tabbed to as an action. */}
-      <section className={styles.comingSoonList} aria-label={t(DEFAULT.COMING_SOON_LIST)}>
-        <h3 className={styles.comingSoonHeading}>
-          <ClockCircleOutlined aria-hidden />
-          {t(DEFAULT.COMING_SOON_LIST)}
-        </h3>
+      {/* Not built yet: one muted row with a Soon tag, as elsewhere in the app, never a button or a form. */}
+      <section className={styles.comingSoonRow} aria-label={t(DEFAULT.COMING_SOON_LIST)}>
         <Tooltip title={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}>
-          <p className={styles.comingSoonItem}>
+          <span className={styles.comingSoonItem}>
             <SettingOutlined aria-hidden />
             {t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}
-            <span className={styles.hiddenDescription}>{t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}</span>
-          </p>
+          </span>
         </Tooltip>
+        <SoonTag description={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)} />
       </section>
     </div>
   );
