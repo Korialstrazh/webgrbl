@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MaterialDialog } from '.';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
@@ -50,6 +50,8 @@ const clickSave = (): void => {
   fireEvent.click(screen.getByRole('button', { name: SAVE_LABEL }));
 };
 
+const MODAL_MASK_SELECTOR = '.ant-modal-mask';
+
 describe(MaterialDialog.name, () => {
   describe('with a caller that takes the chosen material', () => {
     const saveNewMaterial = (store: AppStore): void => {
@@ -87,14 +89,22 @@ describe(MaterialDialog.name, () => {
     });
   });
 
-  it('registers an overlay, starts with an empty name in focus and keeps Save off', () => {
+  it('dims the whole window like the other dialogs, not only the bed region', () => {
+    renderDialog(newStore());
+
+    // The bed region stand-in is the first child of the render container; a whole-window dialog sits in the body.
+    expect(document.body.firstElementChild?.querySelector(MODAL_MASK_SELECTOR)).not.toBeInTheDocument();
+    expect(document.querySelector(MODAL_MASK_SELECTOR)).toBeInTheDocument();
+  });
+
+  it('registers an overlay, starts with an empty name in focus and keeps Save off', async () => {
     const store: AppStore = newStore();
 
     renderDialog(store);
 
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
     expect(screen.getByLabelText(NAME_LABEL)).toHaveValue('');
-    expect(screen.getByLabelText(NAME_LABEL)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(NAME_LABEL)).toHaveFocus());
     expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
     expect(screen.getByLabelText(THICKNESS_LABEL)).toHaveValue(String(DEFAULT_MATERIAL_THICKNESS_MM));
   });

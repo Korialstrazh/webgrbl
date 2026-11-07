@@ -23,8 +23,9 @@
   white-space: nowrap;
 }
 
-.openNow {
+.openNow:global(.ant-tag) {
   margin-inline-start: var(--space-2);
+  font-size: 0.8125rem;
 }
 
 .meta {

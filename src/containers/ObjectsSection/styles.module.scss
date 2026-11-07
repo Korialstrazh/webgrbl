@@ -17,6 +17,11 @@
   margin: 0;
   font-size: 0.8125rem;
   color: var(--color-text-muted);
+
+  // The empty-state pictogram, large enough to read at a glance, as in the other empty states.
+  > :global(.anticon) {
+    font-size: 1.125rem;
+  }
 }
 
 .list {

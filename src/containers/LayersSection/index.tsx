@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { InboxOutlined, OrderedListOutlined } from '@ant-design/icons';
+import { BlockOutlined, OrderedListOutlined } from '@ant-design/icons';
 import type { DragEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -107,7 +107,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
   };
 
   if (!layers.length) {
-    return <p className={styles.hint}><InboxOutlined aria-hidden />{t(DEFAULT.LAYERS_EMPTY_HINT)}</p>;
+    return <p className={styles.hint}><BlockOutlined aria-hidden />{t(DEFAULT.LAYERS_EMPTY_HINT)}</p>;
   }
 
   return (

@@ -43,9 +43,9 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
 import { isFiniteNumber } from '../../utils/type.guards/is.finite.number';
 import { IconNumberField } from '../../views/IconNumberField';
-import { BedRegionModal } from '../BedRegionModal';
+import { AppModal } from '../AppModal';
 import type { MaterialDialogProps } from './interfaces/MaterialDialogProps';
-import { MATERIAL_DIALOG_OVERLAY_ID } from './material.dialog.constants';
+import { MATERIAL_DIALOG_OVERLAY_ID, MATERIAL_DIALOG_WIDTH } from './material.dialog.constants';
 import styles from './styles.module.scss';
 
 type MaterialDialogContentProps = Pick<MaterialDialogProps, 'onClose' | 'onMaterialChosen'>;
@@ -101,9 +101,11 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
   };
 
   return (
-    <BedRegionModal
+    // Over the whole window with one full scrim, like every other dialog.
+    <AppModal
       isOpen
       overlayIdPrefix={MATERIAL_DIALOG_OVERLAY_ID}
+      maxWidth={MATERIAL_DIALOG_WIDTH}
       title={t(DEFAULT.MATERIAL_DIALOG_TITLE)}
       okText={t(DEFAULT.MATERIAL_DIALOG_SAVE)}
       cancelText={t(DEFAULT.MATERIAL_DIALOG_CANCEL)}
@@ -174,7 +176,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
           </Button>
         </div>
       )}
-    </BedRegionModal>
+    </AppModal>
   );
 };
 
