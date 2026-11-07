@@ -1,5 +1,5 @@
 /**
- * The right region, the main task first: the machine status (one line while not connected), the job, moving the head
+ * The right region, the main task first: the job, the compact machine status (only while connected), the positions, moving the head
  * and the laser pointer, and, in a wide window, STOP at the bottom. When the cards are cut off above STOP, their
  * bottom edge fades out, so it reads as a list that scrolls.
  *
@@ -21,6 +21,7 @@ import { StopButton } from '../StopButton';
 import { StopSettingsButton } from '../StopSettingsButton';
 import { JobCard } from './JobCard';
 import { LaserCard } from './LaserCard';
+import { MachineStatusCard } from './MachineStatusCard';
 import { MoveCard } from './MoveCard';
 import { PositionCard } from './PositionCard';
 import type { MachinePanelProps } from './interfaces/MachinePanelProps';
@@ -40,6 +41,7 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
     >
       <div ref={cardsRef} className={isCardsCutOff ? [styles.cards, styles.cardsCutOff].join(' ') : styles.cards}>
         <JobCard isStartShown={isWide} />
+        <MachineStatusCard />
         <PositionCard />
         <MoveCard />
         <LaserCard />

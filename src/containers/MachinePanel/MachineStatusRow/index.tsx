@@ -1,6 +1,6 @@
 /**
- * The status line of the Position card: feed and power behind the icons the layer rows use, then Reset and Unlock, all
- * in one row so Move stays on screen. The state itself sits in the card header.
+ * The one line of the Status card: feed and power, each an icon over a short caption beside its value, then Reset and
+ * Unlock. The state itself sits in the card header.
  *
  * @author michael.morosov
  *
@@ -29,7 +29,6 @@ export const MachineStatusRow = (): ReactNode => {
 
   return (
     <div className={styles.machineStatusRow}>
-      {/* The icons name the values on screen; the words stay for screen readers. */}
       <dl className={styles.values}>
         <dt>
           <DashboardOutlined aria-hidden />

@@ -1,5 +1,5 @@
 /**
- * The state of the laser as a coloured dot and word, shown in the Position card header.
+ * The state of the laser as a coloured dot and word, shown in the Status card header.
  *
  * @author michael.morosov
  *
