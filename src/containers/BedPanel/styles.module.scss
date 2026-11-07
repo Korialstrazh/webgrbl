@@ -124,6 +124,7 @@
   min-height: 0;
   margin: 0 calc(-1 * var(--space-3)) calc(-1 * var(--space-3));
   padding: 0 var(--space-3) var(--space-3);
+  container: bed-region / inline-size;
 }
 
 // The positioned parent of the Toolpath view overlays drawn over the bed. Its minimum height keeps the drawing
@@ -136,9 +137,10 @@
   transition: margin-inline-start 0.3s ease;
 }
 
-// On a wide window an open left drawer (BED_REGION_DRAWER_INSET_PROPERTY, set on this host) pushes the bed aside, so
-// the rulers stay whole and the object being edited stays in view. Narrow, the drawer still covers the region.
-@media (width >= 80rem) {
+// An open left drawer (BED_REGION_DRAWER_INSET_PROPERTY, set on this host) pushes the bed aside only when the region
+// is wide enough to leave a strip about as wide as the drawer, so the fitted bed stays large and centred. In a
+// narrower region the drawer covers the bed, which stays fitted to the whole region underneath.
+@container bed-region (width >= 58rem) {
   .bed {
     margin-inline-start: var(--bed-region-drawer-inset, 0);
   }

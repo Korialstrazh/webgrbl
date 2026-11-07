@@ -3,7 +3,7 @@
  * The mouse wheel zooms around the pointer, a middle drag or Space plus a drag pans, and the buttons and the plus,
  * minus and zero keys zoom in, zoom out and fit the bed. The bed point under the pointer goes to the status strip
  * through the bed cursor store. The view lives for the session and starts fitted; the bed panel keeps it while the 3D
- * view is shown. While a drawer pushes the bed aside the whole bed fits the strip left; the zoom comes back after. The
+ * view is shown. While a drawer is open the whole bed fits the space it leaves; the zoom comes back after. The
  * zoom is the drawing's view box, so the objects layer and the Toolpath layer read pointer positions through the SVG's
  * screen matrix as before; every position is read in the drawing area, which starts where the ruler bands end.
  *
@@ -57,7 +57,7 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
   const viewRef = useRef<HTMLDivElement>(null);
   const screenSize: BedScreenSize = useBedScreenSize(viewRef);
   const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
-  // Only a wide window pushes the bed aside; a narrow one lets the drawer cover it.
+  // A wide window fits the bed while a drawer is open: in the strip it pushes aside, or under it in a narrower region.
   const isPushedAside: boolean = useIsBedRegionDrawerOpen() && isWide;
   const { viewport, zoomBedBy, panBedBy, fitBedToView }: BedViewportControls =
     useBedViewportControls(dimensions, screenSize, keptViewportRef, isPushedAside);
