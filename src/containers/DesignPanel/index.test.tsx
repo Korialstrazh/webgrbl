@@ -23,7 +23,7 @@ const PALETTE_BUTTON_LABEL = 'Palette';
 const PALETTE_LIST_LABEL = 'Palette colours';
 const CUT_CHECK_NOTE = 'The cut check runs in the 3D view.';
 const OBJECTS_NOTE = 'Objects are edited in the Design and Toolpath views.';
-const MATERIAL_NOTE = 'The material is chosen in the Design view.';
+const MATERIAL_NOTE = 'The material is chosen in the Design and 3D views.';
 
 const renderDesignPanel = (store: AppStore): void => {
   render(
@@ -64,14 +64,15 @@ describe(DesignPanel.name, () => {
     expect(screen.queryByRole('button', { name: IMPORT_SVG_LABEL })).not.toBeInTheDocument();
   });
 
-  it('in 3D collapses Objects and Material to muted notes', () => {
+  it('in 3D collapses Objects to a muted note and keeps Material live, as it drives the burn look', () => {
     const store: AppStore = newStore();
 
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
     renderDesignPanel(store);
 
     expect(screen.getByRole('note', { name: OBJECTS_NOTE })).toBeInTheDocument();
-    expect(screen.getByRole('note', { name: MATERIAL_NOTE })).toBeInTheDocument();
+    expect(screen.queryByRole('note', { name: MATERIAL_NOTE })).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: MATERIAL_TITLE })).toBeInTheDocument();
     expect(screen.queryByRole('note', { name: CUT_CHECK_NOTE })).not.toBeInTheDocument();
   });
 
@@ -93,17 +94,27 @@ describe(DesignPanel.name, () => {
   });
 
   it.each([BED_VIEW_MODE.TOOLPATH, BED_VIEW_MODE.THREE_D])(
-    'leaves the material select and Add test sample out of the %s view',
+    'leaves Add test sample out of the %s view',
     (viewMode: BedViewMode) => {
       const store: AppStore = newStore();
 
       store.dispatch(new BedViewModeChanged({ viewMode }));
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
       renderDesignPanel(store);
 
-      expect(screen.queryByRole('combobox', { name: MATERIAL_TITLE })).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
     },
   );
+
+  it('mutes Material in the Toolpath view, where it does not apply', () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.TOOLPATH }));
+    renderDesignPanel(store);
+
+    expect(screen.getByRole('note', { name: MATERIAL_NOTE })).toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: MATERIAL_TITLE })).not.toBeInTheDocument();
+  });
 
   it('opens the palette dialog from the Palette button in the Layers header', () => {
     const store: AppStore = newStore();

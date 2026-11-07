@@ -1,8 +1,9 @@
 /**
  * The left region for the design tools: layers, the material of the project with its library, objects and the Cut
- * check, in the same order and places in every view so Layers never moves. The material and the test sample are chosen
- * and added in the Design view only, objects are not edited in 3D and the Cut check runs in 3D only: a card that does
- * not apply stays as a muted heading line whose info icon says where it applies.
+ * check, in the same order and places in every view so Layers never moves. The material is chosen in Design and 3D (it
+ * drives the burn look), the test sample is added in the Design view only, objects are not edited in 3D and the Cut
+ * check runs in 3D only: a card that does not apply stays as a muted heading line whose info icon says where it
+ * applies.
  *
  * @author michael.morosov
  *
@@ -42,6 +43,8 @@ export const DesignPanel = (): ReactNode => {
   const viewMode: BedViewMode = useSelector(selectBedViewMode);
   const isDesignView: boolean = viewMode === BED_VIEW_MODE.DESIGN;
   const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
+  // The material drives the 3D burn look, so its card is live in 3D as well as in Design.
+  const isMaterialView: boolean = isDesignView || isThreeDView;
   // On an empty bed the bed card offers the sample, so the Layers header does not repeat it.
   const hasObjects: boolean = useSelector(selectProjectObjects).length > 0;
 
@@ -73,7 +76,7 @@ export const DesignPanel = (): ReactNode => {
         <Panel
           iconComponent={<MaterialSheetIcon />}
           title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}
-          noteText={isDesignView ? undefined : t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_NOTE)}
+          noteText={isMaterialView ? undefined : t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_NOTE)}
           noteCaptionText={t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_CAPTION)}
         >
           <MaterialSection />
