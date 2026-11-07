@@ -1,3 +1,5 @@
+@use '../../styles/accessibility' as accessibility;
+
 // The theme already makes large buttons as tall as --target-min; the floor keeps STOP there if the theme changes.
 .stopButton {
   min-height: var(--target-min);
@@ -9,12 +11,26 @@
 .stopButton:global(.ant-btn.ant-btn-variant-solid):disabled {
   border-color: var(--color-danger-disabled-border);
   background-color: var(--color-disabled-bg);
-  color: var(--color-disabled-text);
+  // Brighter than other disabled labels: STOP must stay readable at rest.
+  color: var(--color-text-muted);
 
   // The stop sign keeps its red, so STOP is recognised at a glance even while it cannot act.
   :global(.anticon) {
     color: var(--color-danger-text);
   }
+
+  // The unplugged cue says why STOP is resting, in the label colour rather than red.
+  :global(.anticon).notConnectedCue {
+    color: var(--color-text-muted);
+  }
+}
+
+.notConnectedCue {
+  font-size: 0.875rem;
+}
+
+.notConnectedText {
+  @include accessibility.visually-hidden;
 }
 
 .shortcutHint {
