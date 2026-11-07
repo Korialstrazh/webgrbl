@@ -1,6 +1,6 @@
 /**
- * Gets the few words shown under the locked Start, Frame and Export buttons: each locked action keeps the short form
- * of its own reason, and actions that share a reason share one line. Nothing shows while a job is running.
+ * Gets the few words shown under each locked Start, Frame and Export button: the short form of that action's own
+ * reason, in plain text. Nothing shows while a job is running.
  *
  * @author michael.morosov
  *
@@ -11,7 +11,7 @@
  */
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { JobLockActionReason } from './interfaces/JobLockActionReason';
-import type { JobLockReasonGroup } from './interfaces/JobLockReasonGroup';
+import type { JobLockAction } from './job.lock.action.constants';
 
 const JOB_LOCK_SHORT_REASON_KEYS: Readonly<Record<string, string>> = {
   [DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED]: DEFAULT.JOB_LOCK_SHORT_CONNECT,
@@ -32,26 +32,23 @@ const JOB_LOCK_SHORT_REASON_KEYS: Readonly<Record<string, string>> = {
 const isJobRunReason = ({ blockedReasonKey }: JobLockActionReason): boolean =>
   blockedReasonKey === DEFAULT.JOB_START_BLOCKED_RUNNING;
 
-/** The action reasons in button order: Start, Frame, then Export. */
-export const getJobLockReasonGroups = (actionReasons: JobLockActionReason[]): JobLockReasonGroup[] => {
+/** The short reason key of each locked action; an action that is free, or has no short form, is left out. */
+export const getJobLockShortReasonKeys = (
+  actionReasons: JobLockActionReason[],
+): Partial<Record<JobLockAction, string>> => {
   if (actionReasons.some(isJobRunReason)) {
-    return [];
+    return {};
   }
 
-  const groups: JobLockReasonGroup[] = [];
+  const shortReasonKeys: Partial<Record<JobLockAction, string>> = {};
 
   for (const { action, blockedReasonKey } of actionReasons) {
     const shortReasonKey: string | undefined = blockedReasonKey && JOB_LOCK_SHORT_REASON_KEYS[blockedReasonKey];
-    const sharedGroup: JobLockReasonGroup | undefined = groups.find(
-      (group: JobLockReasonGroup): boolean => group.shortReasonKey === shortReasonKey,
-    );
 
-    if (sharedGroup) {
-      sharedGroup.actions.push(action);
-    } else if (shortReasonKey) {
-      groups.push({ shortReasonKey, actions: [action] });
+    if (shortReasonKey) {
+      shortReasonKeys[action] = shortReasonKey;
     }
   }
 
-  return groups;
+  return shortReasonKeys;
 };

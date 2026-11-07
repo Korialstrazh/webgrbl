@@ -47,15 +47,24 @@
   }
 }
 
-.exportAction {
+.exportAction,
+.frameColumn {
+  display: flex;
   flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--space-1);
   min-width: 0;
+}
+
+.startAction {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 // Frame and its gear read as one split button, as wide as Export beside it.
 .frameSplit {
   display: flex;
-  flex: 1 1 0;
   min-width: 0;
 
   > span:first-child {

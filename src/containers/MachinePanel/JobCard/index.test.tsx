@@ -1,8 +1,8 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { JobCard } from '.';
-import { JOB_LOCK_REASON_TEST_ID } from './job.card.constants';
+import { JOB_LOCK_NOTE_TEST_IDS } from './job.card.constants';
 import * as downloadModule from '../../../utils/browser/download.text.file';
 import { EM_DASH, MIDDLE_DOT } from '../../../utils/characters.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
@@ -278,10 +278,12 @@ describe(JobCard.name, () => {
     expect(screen.queryByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).not.toBeInTheDocument();
   });
 
-  it('writes a short visible lock reason under the actions while they wait for a connection', async () => {
+  it('writes a short plain reason under Start and under Frame while they wait for a connection', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
-    expect(screen.getByTestId(JOB_LOCK_REASON_TEST_ID)).toHaveTextContent(LOCK_REASON_CONNECT);
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toHaveTextContent(LOCK_REASON_CONNECT);
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toHaveTextContent(LOCK_REASON_CONNECT);
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toBeInTheDocument();
   });
 
   it('says Connect laser once, on the next-step button, while Connect is the next step', () => {
@@ -297,28 +299,28 @@ describe(JobCard.name, () => {
     renderJobCard(store);
 
     expect(screen.getAllByText(LOCK_REASON_CONNECT)).toHaveLength(1);
-    expect(screen.getByTestId(JOB_LOCK_REASON_TEST_ID)).not.toHaveTextContent(LOCK_REASON_CONNECT);
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
   });
 
   it('gives Export its own artwork reason in an empty project, not Connect laser', async () => {
     renderJobCard(await newGcodeExportTestStore({ objects: [] }));
 
-    const lockReasons: HTMLElement = screen.getByTestId(JOB_LOCK_REASON_TEST_ID);
-    const exportReason: HTMLElement | undefined = within(lockReasons).getAllByRole('listitem')
-      .find((item: HTMLElement): boolean => !!within(item).queryByText(EXPORT_LABEL));
-
-    expect(exportReason).toHaveTextContent(LOCK_REASON_ARTWORK);
-    expect(exportReason).not.toHaveTextContent(LOCK_REASON_CONNECT);
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).toHaveTextContent(LOCK_REASON_ARTWORK);
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toHaveTextContent(LOCK_REASON_CONNECT);
   });
 
-  it('names Start and Frame beside their own Connect laser reason', async () => {
-    renderJobCard(await newGcodeExportTestStore());
+  it('puts each reason right under its own button, in plain text without icons', async () => {
+    renderJobCard(await newGcodeExportTestStore({ objects: [] }));
 
-    const connectReason: HTMLElement = screen.getByText(LOCK_REASON_CONNECT).closest('li') ?? document.body;
+    const frameNote: HTMLElement = screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME);
+    const exportNote: HTMLElement = screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT);
 
-    expect(connectReason).toHaveTextContent(START_JOB_LABEL);
-    expect(connectReason).toHaveTextContent(FRAME_LABEL);
-    expect(connectReason).not.toHaveTextContent(EXPORT_LABEL);
+    expect(frameNote.parentElement).toContainElement(screen.getByRole('button', { name: FRAME_LABEL }));
+    expect(exportNote.parentElement).toContainElement(getExportButton());
+    expect(exportNote.parentElement).not.toContainElement(screen.getByRole('button', { name: FRAME_LABEL }));
+    expect(frameNote.querySelector('svg')).toBeNull();
+    expect(exportNote.querySelector('svg')).toBeNull();
   });
 
   it('stops asking for the connection once the laser is connected', () => {
