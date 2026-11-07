@@ -137,11 +137,10 @@
   transition: margin-inline-start 0.3s ease;
 }
 
-// In a wide window an open left drawer (BED_REGION_DRAWER_INSET_PROPERTY, set on this host) pushes the bed aside, and
-// the bed view fits the whole bed into the strip left beside it, so the selection stays in view; a narrower region
-// gets a narrower drawer for that. 80rem must match WIDE_LAYOUT_MEDIA_QUERY; below it the drawer covers the one region
-// on screen.
-@media (width >= 80rem) {
+// In a very wide window an open left drawer (BED_REGION_DRAWER_INSET_PROPERTY, set on this host) pushes the bed aside,
+// and the bed view fits the whole bed into the strip left beside it. 100rem must match BED_DRAWER_PUSH_MEDIA_QUERY;
+// below it the drawer slides over the bed, which keeps its size and moves right, out from under the drawer.
+@media (width >= 100rem) {
   .bed {
     margin-inline-start: var(--bed-region-drawer-inset, 0);
   }

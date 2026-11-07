@@ -17,6 +17,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useSelector } from 'react-redux';
 import { BED_CURSOR_STORE } from '../../utils/bed/bed.cursor.store';
 import { BedZoomContext } from '../../utils/bed/bed.zoom.context';
 import { BED_ZOOM_STEP_FACTOR, MAX_BED_ZOOM, MIN_BED_ZOOM } from '../../utils/bed/bed.zoom.constants';
@@ -28,7 +29,12 @@ import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewBox } from '../../utils/bed/interfaces/BedViewBox';
 import { isBedViewportFitted } from '../../utils/bed/is.bed.viewport.fitted';
 import { getRootFontSizePixels } from '../../utils/browser/get.root.font.size.pixels';
+import { useBedRegionDrawerInsetPx } from '../../utils/hooks/use.bed.region.drawer.inset.px';
 import { useIsBedRegionDrawerOpen } from '../../utils/hooks/use.is.bed.region.drawer.open';
+import { useMediaQueryMatches } from '../../utils/hooks/use.media.query.matches';
+import { BED_DRAWER_PUSH_MEDIA_QUERY } from '../../utils/layout.constants';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { selectSelectedObjects } from '../../utils/states/project.selection.state';
 import { PERCENT_DIVISOR } from '../../utils/percent.constants';
 import { BedRulers } from '../../views/BedRulers';
 import { BedView } from '../../views/BedView';
@@ -57,10 +63,17 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
   const viewRef = useRef<HTMLDivElement>(null);
   const screenSize: BedScreenSize = useBedScreenSize(viewRef);
   const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
-  // A wide window fits the bed while a drawer is open, into the strip the drawer pushes it aside to.
-  const isPushedAside: boolean = useIsBedRegionDrawerOpen() && isWide;
+  const selectedObjects: ProjectObject[] = useSelector(selectSelectedObjects);
+  const isDrawerOpen: boolean = useIsBedRegionDrawerOpen();
+  const drawerInsetPx: number = useBedRegionDrawerInsetPx();
+  const isPushWide: boolean = useMediaQueryMatches(BED_DRAWER_PUSH_MEDIA_QUERY);
+  // A very wide window fits the bed while a drawer is open, into the strip the drawer pushes it aside to.
+  const isPushedAside: boolean = isDrawerOpen && isWide && isPushWide;
+  // Between the wide and the very wide layout the drawer slides over the bed, which keeps its size and zoom and only
+  // moves right, out from under the drawer.
+  const overlayInsetPx: number = isDrawerOpen && isWide && !isPushWide ? drawerInsetPx : 0;
   const { viewport, zoomBedBy, panBedBy, fitBedToView }: BedViewportControls =
-    useBedViewportControls(dimensions, screenSize, keptViewportRef, isPushedAside);
+    useBedViewportControls(dimensions, screenSize, keptViewportRef, isPushedAside, overlayInsetPx, selectedObjects);
   const panGesture: BedPanGesture = useBedPanGesture(panBedBy);
   const viewBox: BedViewBox = getBedViewBox({ viewport, screenSize, dimensions });
   const rulers: BedRulerLayout = useMemo(

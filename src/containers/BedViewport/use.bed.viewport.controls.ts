@@ -14,13 +14,16 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BED_VIEW_CENTER_FRACTION } from '../../utils/bed/bed.zoom.constants';
+import { getBedOverlayShiftPx } from '../../utils/bed/get.bed.overlay.shift.px';
 import { getPannedBedViewport } from '../../utils/bed/get.panned.bed.viewport';
 import { getZoomedBedViewport } from '../../utils/bed/get.zoomed.bed.viewport';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { BedScreenPoint } from '../../utils/bed/interfaces/BedScreenPoint';
 import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
+import type { BedViewportFrame } from '../../utils/bed/interfaces/BedViewportFrame';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
 import type { KeptBedViewportRef } from './interfaces/KeptBedViewportRef';
 
@@ -34,6 +37,8 @@ export const useBedViewportControls = (
   screenSize: BedScreenSize,
   keptViewportRef?: KeptBedViewportRef,
   isStripFitWanted = false,
+  overlayInsetPx = 0,
+  selectedObjects: ProjectObject[] = [],
 ): BedViewportControls => {
   const [viewport, setViewport] = useState<BedViewport>(
     () => keptViewportRef?.current ?? newFitBedViewport(dimensions),
@@ -46,6 +51,12 @@ export const useBedViewportControls = (
   const isStripFitRef = useRef<boolean>(false);
   // The viewport from before the drawer opened, given back once it closes.
   const viewportBeforeStripRef = useRef<BedViewport | undefined>(undefined);
+  // The viewport from before a drawer slid over the bed, given back once it closes.
+  const viewportBeforeOverlayRef = useRef<BedViewport | undefined>(undefined);
+  // Read when a drawer opens; a later change of the selection does not move the bed again.
+  const selectedObjectsRef = useRef<ProjectObject[]>(selectedObjects);
+
+  selectedObjectsRef.current = selectedObjects;
 
   screenSizeRef.current = screenSize;
   viewportRef.current = viewport;
@@ -75,6 +86,31 @@ export const useBedViewportControls = (
       setViewport(viewportBeforeStrip);
     }
   }, [isStripFitWanted]);
+
+  // A drawer sliding over the bed keeps the zoom and only moves the bed right, so the selection clears it.
+  useEffect(() => {
+    if (overlayInsetPx > 0) {
+      const viewportBeforeOverlay: BedViewport = viewportRef.current;
+      const frame: BedViewportFrame = { viewport: viewportBeforeOverlay, screenSize: screenSizeRef.current, dimensions };
+      const shiftPx: number = getBedOverlayShiftPx(frame, overlayInsetPx, selectedObjectsRef.current);
+
+      viewportBeforeOverlayRef.current = viewportBeforeOverlay;
+
+      if (shiftPx > 0) {
+        setViewport(getPannedBedViewport({ ...frame, pointerDelta: { xPx: shiftPx, yPx: 0 } }));
+      }
+
+      return;
+    }
+
+    const viewportBeforeOverlay: BedViewport | undefined = viewportBeforeOverlayRef.current;
+
+    viewportBeforeOverlayRef.current = undefined;
+
+    if (viewportBeforeOverlay) {
+      setViewport(viewportBeforeOverlay);
+    }
+  }, [overlayInsetPx, dimensions]);
 
   /** The fitted bed, once, on the first step after a drawer opened; undefined when the step starts from the state. */
   const takeStripStartViewport = useCallback((): BedViewport | undefined => {

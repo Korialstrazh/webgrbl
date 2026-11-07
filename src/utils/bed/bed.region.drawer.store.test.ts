@@ -17,4 +17,14 @@ describe('BED_REGION_DRAWER_STORE', () => {
     expect(listener).toHaveBeenCalledTimes(4);
     unsubscribe();
   });
+
+  it('gives the width of the open drawer, and 0 once it closes', () => {
+    const closeDrawer: () => void = BED_REGION_DRAWER_STORE.openBedRegionDrawer(336);
+
+    expect(BED_REGION_DRAWER_STORE.getBedRegionDrawerInsetPx()).toBe(336);
+
+    closeDrawer();
+
+    expect(BED_REGION_DRAWER_STORE.getBedRegionDrawerInsetPx()).toBe(0);
+  });
 });

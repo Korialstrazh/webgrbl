@@ -13,6 +13,12 @@
 /** The window is at least 1280 px wide, so the regions fit side by side. */
 export const WIDE_LAYOUT_MEDIA_QUERY = '(min-width: 80rem)';
 
+/**
+ * The window is at least 1600 px wide, so a left bed drawer pushes the bed aside and the bed still keeps most of its
+ * width; below it the drawer slides over the bed, which keeps its size. Must match the media query in BedPanel styles.
+ */
+export const BED_DRAWER_PUSH_MEDIA_QUERY = '(min-width: 100rem)';
+
 /** Width of the design panel; the custom property is set from layout.scss by the workbench styles. */
 export const DESIGN_PANEL_WIDTH = 'var(--design-panel-width)';
 

@@ -20,6 +20,7 @@ import { BED_REGION_DRAWER_INSET_PROPERTY } from '../../utils/bed/bed.region.dra
 import { BED_REGION_DRAWER_STORE } from '../../utils/bed/bed.region.drawer.store';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
 import { getBedRegionDrawerInset } from '../../utils/bed/get.bed.region.drawer.inset';
+import { getBedRegionDrawerInsetPixels } from '../../utils/bed/get.bed.region.drawer.inset.pixels';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
 import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
 import type { BedRegionDrawerProps } from './interfaces/BedRegionDrawerProps';
@@ -40,9 +41,11 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
       return undefined;
     }
 
-    const closeStoredDrawer: () => void = BED_REGION_DRAWER_STORE.openBedRegionDrawer();
+        bedRegionHost.style.setProperty(BED_REGION_DRAWER_INSET_PROPERTY, insetValue);
 
-    bedRegionHost.style.setProperty(BED_REGION_DRAWER_INSET_PROPERTY, insetValue);
+    const closeStoredDrawer: () => void = BED_REGION_DRAWER_STORE.openBedRegionDrawer(
+      getBedRegionDrawerInsetPixels(bedRegionHost),
+    );
 
     return (): void => {
       bedRegionHost.style.removeProperty(BED_REGION_DRAWER_INSET_PROPERTY);

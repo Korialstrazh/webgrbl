@@ -13,6 +13,9 @@ class BedRegionDrawerStore {
   // How many pushing drawers are open now.
   private openDrawerCount = 0;
 
+  // The width in CSS pixels of the drawer opened last.
+  private insetPx = 0;
+
   // The readers to tell when a drawer opens or closes.
   private readonly listeners: Set<() => void> = new Set<() => void>();
 
@@ -26,8 +29,12 @@ class BedRegionDrawerStore {
 
   public isBedRegionDrawerOpen = (): boolean => this.openDrawerCount > 0;
 
-  /** Marks one pushing drawer as open and gives the step that marks it closed again. */
-  public openBedRegionDrawer(): () => void {
+  /** The width of the open drawer in CSS pixels, 0 while none is open. */
+  public getBedRegionDrawerInsetPx = (): number => (this.openDrawerCount > 0 ? this.insetPx : 0);
+
+  /** Marks one pushing drawer of the given width as open and gives the step that marks it closed again. */
+  public openBedRegionDrawer(insetPx = 0): () => void {
+    this.insetPx = insetPx;
     this.openDrawerCount++;
     this.notifyListeners();
 

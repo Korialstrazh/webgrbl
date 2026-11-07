@@ -6,6 +6,8 @@ import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
 import type { KeptBedViewportRef } from './interfaces/KeptBedViewportRef';
 import { useBedViewportControls } from './use.bed.viewport.controls';
@@ -81,5 +83,48 @@ describe(`${useBedViewportControls.name} with a drawer`, () => {
     });
 
     expect(result.current.viewport.zoom).toBeCloseTo(fitViewport.zoom * BED_ZOOM_STEP_FACTOR);
+  });
+});
+
+interface OverlayProps {
+  overlayInsetPx: number;
+}
+
+describe(`${useBedViewportControls.name} with a drawer over the bed`, () => {
+  const DRAWER_INSET_PX = 336;
+  const selectedObject: ProjectObject = newProjectObject({ xMm: 5, yMm: 5, widthMm: 110, heightMm: 70 });
+
+  it('keeps the zoom, moves the selection out from under the drawer, and gives the pan back once it closes', () => {
+    const initialProps: OverlayProps = { overlayInsetPx: 0 };
+    const hook: RenderHookResult<BedViewportControls, OverlayProps> = renderHook(
+      ({ overlayInsetPx }: OverlayProps): BedViewportControls =>
+        useBedViewportControls(DIMENSIONS, SCREEN_SIZE, undefined, false, overlayInsetPx, [selectedObject]),
+      { initialProps },
+    );
+    const viewportBefore: BedViewport = hook.result.current.viewport;
+
+    hook.rerender({ overlayInsetPx: DRAWER_INSET_PX });
+
+    expect(hook.result.current.viewport.zoom).toBe(viewportBefore.zoom);
+    expect(hook.result.current.viewport.centerYMm).toBe(viewportBefore.centerYMm);
+    expect(hook.result.current.viewport.centerXMm).toBeLessThan(viewportBefore.centerXMm);
+
+    hook.rerender({ overlayInsetPx: 0 });
+
+    expect(hook.result.current.viewport).toEqual(viewportBefore);
+  });
+
+  it('leaves the view as it is when nothing is selected', () => {
+    const initialProps: OverlayProps = { overlayInsetPx: 0 };
+    const hook: RenderHookResult<BedViewportControls, OverlayProps> = renderHook(
+      ({ overlayInsetPx }: OverlayProps): BedViewportControls =>
+        useBedViewportControls(DIMENSIONS, SCREEN_SIZE, undefined, false, overlayInsetPx),
+      { initialProps },
+    );
+    const viewportBefore: BedViewport = hook.result.current.viewport;
+
+    hook.rerender({ overlayInsetPx: DRAWER_INSET_PX });
+
+    expect(hook.result.current.viewport).toEqual(viewportBefore);
   });
 });
