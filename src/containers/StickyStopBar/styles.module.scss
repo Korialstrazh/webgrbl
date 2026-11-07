@@ -42,3 +42,12 @@
   gap: var(--space-2);
   height: var(--target-min);
 }
+
+// Start sits beside the large Stop, so its word and icon are a size up and read at a glance, locked or not.
+.start :global(.ant-btn) > span {
+  font-size: 0.9375rem;
+}
+
+.start :global(.ant-btn) > span:first-child {
+  font-size: 1.25rem;
+}

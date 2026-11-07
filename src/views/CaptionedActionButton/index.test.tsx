@@ -1,5 +1,5 @@
 import { PlayCircleFilled } from '@ant-design/icons';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { CaptionedActionButton } from '.';
 import { CAPTIONED_ACTION_LOCK_TEST_ID } from './captioned.action.constants';
@@ -39,6 +39,23 @@ describe(CaptionedActionButton.name, () => {
     expect(button).not.toBeDisabled();
     expect(button).toHaveFocus();
     expect(button).toHaveAccessibleDescription(BLOCKED_REASON_TEXT);
+  });
+
+  it('shows the reason a blocked action is off when it takes the keyboard focus', async () => {
+    render(
+      <CaptionedActionButton
+        labelText={LABEL_TEXT}
+        captionText={CAPTION_TEXT}
+        iconComponent={<PlayCircleFilled />}
+        blockedReasonText={BLOCKED_REASON_TEXT}
+      />,
+    );
+
+    act(() => {
+      fireEvent.focus(screen.getByRole('button', { name: LABEL_TEXT }));
+    });
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(BLOCKED_REASON_TEXT);
   });
 
   it.each(['click', 'Enter', ' '])('ignores %j while blocked, also in a wrapper', (activationKey: string) => {

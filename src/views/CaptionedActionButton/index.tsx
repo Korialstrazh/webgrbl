@@ -1,6 +1,6 @@
 /**
  * An action as an icon over one word, so it explains itself without a hover. The longer name stays the accessible name
- * and, with the reason it is off, the tooltip, which opens below the row and away from the actions above it. An off
+ * and, with the reason it is off, the tooltip (on hover and on focus), which opens below the row and away from the actions above it. An off
  * action has no fill, a dashed outline and a small lock on its icon, so it never looks like one that can be used; when
  * it is blocked for a reason it stays focusable (aria-disabled) and ignores activation.
  *
@@ -15,7 +15,7 @@ import { LockFilled } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ButtonProps } from 'antd';
 import type { MouseEvent, ReactNode } from 'react';
-import { ANTD_TOOLTIP_PLACEMENT_BOTTOM } from '../../utils/antd.constants';
+import { ANTD_TOOLTIP_PLACEMENT_BOTTOM, ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
 import { DismissibleTooltip } from '../DismissibleTooltip';
 import { CAPTIONED_ACTION_LOCK_TEST_ID } from './captioned.action.constants';
 import styles from './styles.module.scss';
@@ -65,7 +65,12 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
   };
 
   return (
-    <DismissibleTooltip title={tooltipText} placement={ANTD_TOOLTIP_PLACEMENT_BOTTOM}>
+    // The tooltip opens on keyboard focus too, so the reason a locked action is off shows without a pointer.
+    <DismissibleTooltip
+      title={tooltipText}
+      placement={ANTD_TOOLTIP_PLACEMENT_BOTTOM}
+      trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
+    >
       <Button
         {...buttonProps}
         className={[styles.captionedActionButton, isQuiet ? styles.quiet : undefined, className].join(' ')}
