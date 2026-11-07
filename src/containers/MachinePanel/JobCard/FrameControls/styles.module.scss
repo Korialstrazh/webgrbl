@@ -144,3 +144,15 @@
   gap: var(--space-1);
   cursor: help;
 }
+
+// The settings float beside the Job card, so they get the control outline (3:1 or more), a deep shadow and an arrow in
+// the outline colour, which shows at a glance which button opened them.
+.frameSettingsRoot :global(.ant-popover-container) {
+  border: 1px solid var(--color-control-border);
+  background-color: var(--color-surface-3);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 60%);
+}
+
+.frameSettingsRoot :global(.ant-popover-arrow)::before {
+  background-color: var(--color-control-border);
+}

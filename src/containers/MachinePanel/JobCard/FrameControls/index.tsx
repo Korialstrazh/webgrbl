@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ANTD_ALERT_TYPE_WARNING,
-  ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT,
+  ANTD_POPOVER_PLACEMENT_TOP_RIGHT,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../../../utils/antd.constants';
 import {
@@ -234,7 +234,10 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
           <Popover
             open={isSettingsOpen}
             trigger={ANTD_POPOVER_TRIGGER_CLICK}
-            placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+            // Above the gear, over the Job card it belongs to, never over the Move card; the arrow points at the gear.
+            placement={ANTD_POPOVER_PLACEMENT_TOP_RIGHT}
+            arrow={{ pointAtCenter: true }}
+            rootClassName={styles.frameSettingsRoot}
             title={t(DEFAULT.FRAME_SETTINGS_TITLE)}
             content={settingsComponent}
             onOpenChange={changeSettingsOpen}
