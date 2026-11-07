@@ -10,6 +10,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const SETTINGS_LABEL = 'Stop settings';
 const PREFERENCE_LABEL = 'Esc stops over panels too';
+const PREFERENCE_HINT = 'Ticked: one Esc closes a panel and stops the laser.';
 
 describe(StopSettingsButton.name, () => {
   it('opens a popover whose checkbox is off by default and turns the preference on', () => {
@@ -31,5 +32,6 @@ describe(StopSettingsButton.name, () => {
 
     expect(selectIsEscStoppingWithOverlayOpen(store.getState())).toBe(true);
     expect(screen.getByRole('checkbox', { name: PREFERENCE_LABEL })).toBeChecked();
+    expect(screen.getByText(PREFERENCE_HINT)).toBeInTheDocument();
   });
 });

@@ -8,9 +8,13 @@
 }
 
 .saveHint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   min-height: 1.25rem;
   margin: 0;
-  color: var(--color-text-muted);
+  // The warning colour (over 9:1), so the missing name reads as the one thing to fix before Save.
+  color: var(--color-warning);
   font-size: 0.8125rem;
 }
 

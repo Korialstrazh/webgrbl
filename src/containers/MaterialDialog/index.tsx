@@ -12,7 +12,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckOutlined, ColumnHeightOutlined, TagOutlined } from '@ant-design/icons';
+import { CheckOutlined, ColumnHeightOutlined, ExclamationCircleOutlined, TagOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
 import type { InputRef } from 'antd';
 import { useId, useRef, useState } from 'react';
@@ -157,7 +157,14 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
         </Form.Item>
       </Form>
       {/* The room stays reserved, so the text going away does not move the buttons. */}
-      <p className={styles.saveHint} role="note">{isSaveAllowed ? undefined : t(DEFAULT.MATERIAL_DIALOG_SAVE_HINT)}</p>
+      <p className={styles.saveHint} role="note">
+        {isSaveAllowed ? undefined : (
+          <>
+            <ExclamationCircleOutlined aria-hidden />
+            <span>{t(DEFAULT.MATERIAL_DIALOG_SAVE_HINT)}</span>
+          </>
+        )}
+      </p>
       {matchingMaterial && (
         <div className={styles.duplicateNote} role="note">
           <span>{t(DEFAULT.MATERIAL_DIALOG_DUPLICATE_NOTE, { name: matchingMaterial.name })}</span>

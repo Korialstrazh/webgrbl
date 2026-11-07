@@ -17,6 +17,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { TOOLPATH_DISPLAY_MODE } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayMode } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathDisplayModeOption } from './interfaces/ToolpathDisplayModeOption';
 import type { ToolpathToolbarProps } from './interfaces/ToolpathToolbarProps';
@@ -53,6 +54,14 @@ export const ToolpathToolbar = ({
         value={displayMode}
         onChange={onDisplayModeChange}
       />
+      {displayMode === TOOLPATH_DISPLAY_MODE.POWER_SHADING && (
+        // The ramp the burn paths are drawn in, so the shades on the bed read as power without a hover.
+        <span className={styles.powerLegend} role="img" aria-label={t(DEFAULT.TOOLPATH_POWER_LEGEND)}>
+          <span aria-hidden>{t(DEFAULT.TOOLPATH_POWER_LEGEND_LOW)}</span>
+          <span className={styles.powerRamp} aria-hidden />
+          <span aria-hidden>{t(DEFAULT.TOOLPATH_POWER_LEGEND_HIGH)}</span>
+        </span>
+      )}
       {/* A toggle button shaped like a segment: icon over its word, the accent tint while travel moves are shown. */}
       <Tooltip title={t(DEFAULT.TOOLPATH_SHOW_TRAVEL)}>
         <Button

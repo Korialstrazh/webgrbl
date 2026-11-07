@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { PlusOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { DragEvent, ReactNode } from 'react';
 import { useState } from 'react';
@@ -62,6 +62,11 @@ export const PaletteEntryList = (props: PaletteEntryListProps): ReactNode => {
   return (
     <div className={styles.paletteEntryList}>
       <LayerValueLegend />
+      {/* Both lists can be reordered, so this one says plainly that its order is not the order the laser cuts in. */}
+      <p className={styles.orderHint}>
+        <InfoCircleOutlined aria-hidden />
+        <span>{t(DEFAULT.PALETTE_LIST_ORDER_HINT)}</span>
+      </p>
       <ul className={styles.list} aria-label={t(DEFAULT.PALETTE_LIST)}>
         {entries.map((entry: PaletteEntry, entryIndex: number) => (
           <PaletteEntryRow

@@ -13,3 +13,12 @@
   padding: 0;
   list-style: none;
 }
+
+.orderHint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}

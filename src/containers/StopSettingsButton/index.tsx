@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { SettingOutlined } from '@ant-design/icons';
+import { SafetyOutlined, SettingOutlined } from '@ant-design/icons';
 import { Checkbox, Popover } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { useState } from 'react';
@@ -44,10 +44,19 @@ export const StopSettingsButton = (): ReactNode => {
       trigger={ANTD_POPOVER_TRIGGER_CLICK}
       placement={ANTD_POPOVER_PLACEMENT_TOP_RIGHT}
       title={t(DEFAULT.STOP_SETTINGS_TITLE)}
+      // The arrow points at the gear, so the popover reads as its settings and not as a loose note.
+      arrow={{ pointAtCenter: true }}
+      rootClassName={styles.stopSettingsPopoverRoot}
       content={(
-        <Checkbox className={styles.preference} checked={isEscStopping} onChange={handlePreferenceChange}>
-          {t(DEFAULT.STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN)}
-        </Checkbox>
+        <div className={styles.content}>
+          <Checkbox className={styles.preference} checked={isEscStopping} onChange={handlePreferenceChange}>
+            {t(DEFAULT.STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN)}
+          </Checkbox>
+          <p className={styles.hint}>
+            <SafetyOutlined aria-hidden />
+            <span>{t(DEFAULT.STOP_SETTINGS_ESC_HINT)}</span>
+          </p>
+        </div>
       )}
     >
       <IconActionButton

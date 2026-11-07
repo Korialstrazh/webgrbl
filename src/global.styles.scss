@@ -57,10 +57,10 @@ body {
   border-color: var(--color-danger-text);
 }
 
-// A primary button that cannot act yet keeps its solid shape in a dark accent tint, with the readable disabled grey
-// (5.3:1), so it still reads as the main action of its dialog and never as plain disabled text.
+// A primary button that cannot act yet takes the neutral locked outline (at least 3:1 on every surface) over the dark
+// disabled fill, with the readable disabled grey (5.3:1), instead of a brown accent tint that read below 3:1.
 .ant-btn.ant-btn-color-primary.ant-btn-variant-solid:disabled {
-  border-color: var(--color-accent-tint);
-  background-color: var(--color-accent-tint);
+  border-color: var(--color-disabled-border-locked);
+  background-color: var(--color-disabled-bg);
   color: var(--color-disabled-text);
 }

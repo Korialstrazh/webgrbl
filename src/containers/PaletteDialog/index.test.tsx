@@ -39,6 +39,7 @@ const EXPORT_LABEL = 'Export for Inkscape';
 const DELETE_CONFIRM_LABEL = 'Yes, delete';
 const INKSCAPE_HELP_LABEL = 'Using the file in Inkscape';
 const LIST_LABEL = 'Palette colours';
+const ORDER_HINT_TEXT = 'Swatch list only. Layers set the cut order.';
 const DIALOG_TITLE = 'Palette';
 const LINUX_PATH_TEXT = 'Linux: ~/.config/inkscape/palettes/';
 const WINDOWS_PATH_TEXT = 'Windows: %APPDATA%\\inkscape\\palettes\\';
@@ -118,6 +119,12 @@ describe(PaletteDialog.name, () => {
     renderDialog(newStore());
 
     expect(screen.getByRole('button', { name: labelText })).toHaveTextContent(captionText);
+  });
+
+  it('says the palette order is not the cut order, which the layers set', () => {
+    renderDialog(newStore());
+
+    expect(screen.getByText(ORDER_HINT_TEXT)).toBeInTheDocument();
   });
 
   it('registers an overlay while it is open', () => {

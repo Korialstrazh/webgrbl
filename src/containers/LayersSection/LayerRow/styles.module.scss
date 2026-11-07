@@ -169,6 +169,12 @@
     grid-template-columns: auto auto minmax(0, 1fr) auto;
   }
 
+  // A tap leaves the row "hovered" after its drawer closes, which read as a stuck selection; only the open row's
+  // accent shows which layer is being edited.
+  .row:not(.openRow) .openButton:global(.ant-btn):hover {
+    background-color: transparent;
+  }
+
   .moveButtons {
     position: static;
     flex-direction: column;
