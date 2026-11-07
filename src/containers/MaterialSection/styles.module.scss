@@ -5,22 +5,17 @@
   min-width: 0;
 }
 
-// The select takes the width that the Library button leaves; the button keeps the control height so the two line up.
-.selectRow {
+// The presets entry and the Library button share one row under the select; they wrap only in a very narrow panel.
+.entryRow {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   align-items: center;
   min-width: 0;
 }
 
-.libraryButton {
-  flex: none;
-  height: var(--control-height);
-}
-
 // The presets entry is a small outlined button with an icon and its label, so it reads as a control, not as a note.
 .presetSummary:global(.ant-btn) {
-  align-self: flex-start;
   max-width: 100%;
   height: auto;
   min-height: 1.75rem;
@@ -38,8 +33,4 @@
   display: inline-flex;
   color: var(--color-accent);
   font-size: 0.875rem;
-}
-
-.selectRow :global(.ant-btn .anticon) {
-  font-size: 1.25rem;
 }

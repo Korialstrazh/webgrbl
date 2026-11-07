@@ -86,24 +86,26 @@ export const MaterialSection = (): ReactNode => {
 
   return (
     <div className={styles.materialSection}>
-      <div className={styles.selectRow}>
-        <ProjectMaterialSelect />
+      <ProjectMaterialSelect />
+      {/* The presets entry and the library sit on one row of small captioned buttons under the full-width select. */}
+      <div className={styles.entryRow}>
+        <Button
+          className={styles.presetSummary}
+          size={ANTD_BUTTON_SIZE_SMALL}
+          icon={<span className={styles.presetSummaryIcon} aria-hidden>{getPresetSummaryIconComponent()}</span>}
+          onClick={activeProfile ? () => openLibrary(activeMaterial?.id) : openProfilesDialog}
+        >
+          <span className={styles.presetSummaryText}>{getPresetSummaryText()}</span>
+        </Button>
         {/* Its tooltip goes on the click: left open it would cover the drawer and take the drawer's Escape. */}
         <IconActionButton
+          size={ANTD_BUTTON_SIZE_SMALL}
           labelText={t(DEFAULT.MATERIAL_SECTION_OPEN_LIBRARY)}
           iconComponent={<MaterialSheetIcon />}
+          captionText={t(DEFAULT.MATERIAL_SECTION_LIBRARY_CAPTION)}
           onClick={() => openLibrary(undefined)}
         />
       </div>
-      {/* A small icon button with its label, like the other controls of the panel. */}
-      <Button
-        className={styles.presetSummary}
-        size={ANTD_BUTTON_SIZE_SMALL}
-        icon={<span className={styles.presetSummaryIcon} aria-hidden>{getPresetSummaryIconComponent()}</span>}
-        onClick={activeProfile ? () => openLibrary(activeMaterial?.id) : openProfilesDialog}
-      >
-        <span className={styles.presetSummaryText}>{getPresetSummaryText()}</span>
-      </Button>
       <MaterialLibraryDrawer
         isOpen={isLibraryOpen}
         initialMaterialId={libraryMaterialId}

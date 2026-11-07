@@ -16,7 +16,7 @@ import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BADGE_SIZE_SMALL } from '../../../utils/antd.constants';
+import { ANTD_BADGE_SIZE_SMALL, ANTD_BUTTON_SIZE_SMALL } from '../../../utils/antd.constants';
 import { downloadTextFile } from '../../../utils/browser/download.text.file';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getImportedMaterialPresets } from '../../../utils/materials/get.imported.material.presets';
@@ -117,10 +117,12 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
   return (
     <div className={styles.presetFileActions}>
       {/* Import takes a file in and Export gives one out, so the icons are the file upload and download arrows; the
-          tooltip names each, and a badge on Export counts the ticked presets. */}
+          short visible caption names each, and a badge on Export counts the ticked presets. */}
       <IconActionButton
         labelText={t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
         iconComponent={<UploadOutlined aria-hidden />}
+        captionText={t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
+        size={ANTD_BUTTON_SIZE_SMALL}
         isDisabled={!activeProfile}
         onClick={() => fileInputRef.current?.click()}
       />
@@ -128,6 +130,8 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
         <IconActionButton
           labelText={exportLabel}
           iconComponent={<DownloadOutlined aria-hidden />}
+          captionText={t(DEFAULT.MATERIAL_LIBRARY_EXPORT)}
+          size={ANTD_BUTTON_SIZE_SMALL}
           blockedReasonText={selectedPresets.length ? undefined : t(DEFAULT.MATERIAL_LIBRARY_EXPORT_HINT)}
           onClick={exportPresets}
         />

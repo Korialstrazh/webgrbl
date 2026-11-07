@@ -70,6 +70,8 @@ export const TopBar = (): ReactNode => {
             onClick={() => changeProfilesDialogOpen(true)}
           >
             <span className={styles.profileName}>{activeProfile?.name ?? profilesLabel}</span>
+            {/* In a narrow bar the name gives way to one short word, so the laser icon is never a bare guess. */}
+            <span className={styles.profileCaption} aria-hidden="true">{t(DEFAULT.TOP_BAR_PROFILE_CAPTION)}</span>
           </Button>
         </DismissibleTooltip>
         <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.compactHiddenLabel} />

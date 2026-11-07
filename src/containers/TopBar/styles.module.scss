@@ -96,12 +96,21 @@
   white-space: nowrap;
 }
 
+.profileCaption {
+  display: none;
+}
+
 // The save word and the profile name give up room first (the laser icon and its tooltip still name the profile), so
 // the project name stays readable, Import SVG keeps its label and the connection pill stays whole at 50rem; Import SVG
 // drops its label at 46rem.
 @media (width < 62.5rem) {
   .profileName {
     @include accessibility.visually-hidden;
+  }
+
+  .profileCaption {
+    display: inline;
+    font-size: 0.8125rem;
   }
 
   .activeMenus :global(.ant-btn) {
@@ -112,6 +121,10 @@
 @media (width < 46rem) {
   .compactHiddenLabel {
     @include accessibility.visually-hidden;
+  }
+
+  .profileCaption {
+    display: none;
   }
 }
 

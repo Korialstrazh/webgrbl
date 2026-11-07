@@ -103,6 +103,12 @@ describe(MaterialSection.name, () => {
     expect(screen.getByRole('button', { name: 'Choose a material to see its presets' })).toBeInTheDocument();
   });
 
+  it('captions the library button with one word', () => {
+    renderSection(newStoreWithMaterial(1));
+
+    expect(screen.getByRole('button', { name: LIBRARY_BUTTON_LABEL })).toHaveTextContent('Library');
+  });
+
   it('opens the material library as a left drawer in the bed region from the book button', async () => {
     const bedRegionHost: HTMLElement = renderSection(newStoreWithMaterial(1));
 

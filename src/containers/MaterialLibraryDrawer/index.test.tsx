@@ -188,6 +188,13 @@ const addMaterialInDialog = (): void => {
 };
 
 describe(MaterialLibraryDrawer.name, () => {
+  it('captions the file actions Import and Export, not icons alone', async () => {
+    renderDrawer();
+
+    expect(await screen.findByRole('button', { name: 'Import' })).toHaveTextContent('Import');
+    expect(screen.getByRole('button', { name: 'Export' })).toHaveTextContent('Export');
+  });
+
   it('saves a new preset for the active machine once a power is entered', async () => {
     const store: AppStore = renderDrawer();
 
