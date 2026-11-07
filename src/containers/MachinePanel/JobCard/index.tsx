@@ -18,6 +18,7 @@ import {
   ClockCircleOutlined,
   DownloadOutlined,
   LockFilled,
+  PlayCircleFilled,
   ProfileOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
@@ -48,6 +49,7 @@ import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
 import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.timeline.selectors';
 import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
 import { CaptionedActionButton } from '../../../views/CaptionedActionButton';
+import { FrameTraceIcon } from '../../../views/FrameTraceIcon';
 import { Panel } from '../../../views/Panel';
 import { TooltipNoteIcon } from '../../../views/TooltipNoteIcon';
 import { JobStartButton } from '../../JobStartButton';
@@ -57,13 +59,28 @@ import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
 import { getJobActionBlockedReasonKeys } from './get.job.action.blocked.reason.keys';
 import { getJobLayerCountText } from './get.job.layer.count.text';
-import { getJobLockShortReasonKey } from './get.job.lock.short.reason.key';
+import { getJobLockReasonGroups } from './get.job.lock.reason.groups';
 import { getJobRunStatusKey } from './get.job.run.status.key';
 import { isJobLockReasonOnNextStep } from './is.job.lock.reason.on.next.step';
+import type { JobLockReasonGroup } from './interfaces/JobLockReasonGroup';
 import { JOB_LOCK_REASON_TEST_ID } from './job.card.constants';
+import { JOB_LOCK_ACTION } from './job.lock.action.constants';
+import type { JobLockAction } from './job.lock.action.constants';
 import styles from './styles.module.scss';
 
 const REASON_SEPARATOR = ' ';
+
+const JOB_LOCK_ACTION_ICONS: Readonly<Record<JobLockAction, ReactNode>> = {
+  [JOB_LOCK_ACTION.START]: <PlayCircleFilled />,
+  [JOB_LOCK_ACTION.FRAME]: <FrameTraceIcon />,
+  [JOB_LOCK_ACTION.EXPORT]: <DownloadOutlined />,
+};
+
+const JOB_LOCK_ACTION_LABEL_KEYS: Readonly<Record<JobLockAction, string>> = {
+  [JOB_LOCK_ACTION.START]: DEFAULT.MACHINE_START_JOB,
+  [JOB_LOCK_ACTION.FRAME]: DEFAULT.MACHINE_JOB_FRAME,
+  [JOB_LOCK_ACTION.EXPORT]: DEFAULT.MACHINE_JOB_EXPORT_GCODE,
+};
 
 interface JobCardProps {
   /** False where Start job is pinned elsewhere, as in the narrow layout. */
@@ -87,16 +104,15 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const actionBlockedReasonText: string = actionBlockedReasonKeys
     .map((reasonKey: string): string => t(reasonKey))
     .join(REASON_SEPARATOR);
-  const lockShortReasonKey: string | undefined = getJobLockShortReasonKey([
-    isStartShown ? jobStartBlockedReasonKey : undefined,
-    frameStartBlockedReasonKey,
-    gcodeExportBlockedReasonKey,
-  ]);
   const nextReadinessStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
-  // The next-step button already asks for what this line would, so it is said once.
-  const shownLockReasonKey: string | undefined = isJobLockReasonOnNextStep(lockShortReasonKey, nextReadinessStep)
-    ? undefined
-    : lockShortReasonKey;
+  // Each locked action names its own reason; one the next-step button already asks for is said there only.
+  const lockReasonGroups: JobLockReasonGroup[] = getJobLockReasonGroups([
+    { action: JOB_LOCK_ACTION.START, blockedReasonKey: isStartShown ? jobStartBlockedReasonKey : undefined },
+    { action: JOB_LOCK_ACTION.FRAME, blockedReasonKey: frameStartBlockedReasonKey },
+    { action: JOB_LOCK_ACTION.EXPORT, blockedReasonKey: gcodeExportBlockedReasonKey },
+  ]).filter(
+    (group: JobLockReasonGroup): boolean => !isJobLockReasonOnNextStep(group.shortReasonKey, nextReadinessStep),
+  );
   const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
   const jobRunKind: JobRunKind = useSelector(selectJobRunKind);
@@ -158,12 +174,22 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
             />
           )}
         />
-        {shownLockReasonKey && (
+        {!!lockReasonGroups.length && (
           // Always on screen, so a touch screen without hover still shows why the buttons above are locked.
-          <p className={styles.lockReason} data-testid={JOB_LOCK_REASON_TEST_ID}>
-            <LockFilled aria-hidden />
-            <span>{t(shownLockReasonKey)}</span>
-          </p>
+          <ul className={styles.lockReasons} data-testid={JOB_LOCK_REASON_TEST_ID}>
+            {lockReasonGroups.map(({ shortReasonKey, actions }: JobLockReasonGroup): ReactNode => (
+              <li key={shortReasonKey} className={styles.lockReason}>
+                {actions.map((action: JobLockAction): ReactNode => (
+                  <span key={action} className={styles.lockAction}>
+                    <span aria-hidden>{JOB_LOCK_ACTION_ICONS[action]}</span>
+                    <span className={styles.lockActionLabel}>{t(JOB_LOCK_ACTION_LABEL_KEYS[action])}</span>
+                  </span>
+                ))}
+                <LockFilled className={styles.lockIcon} aria-hidden />
+                <span>{t(shortReasonKey)}</span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </Panel>

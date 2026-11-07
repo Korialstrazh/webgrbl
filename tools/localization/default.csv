@@ -190,6 +190,7 @@ FRAME_START_BLOCKED_NO_BURN_MOVES;The toolpath has no burn moves to frame.
 FRAME_START_BLOCKED_NO_WORK_POSITION;The laser has not reported its position yet.
 FRAME_START_BLOCKED_NOT_CONNECTED;Connect the laser to trace the frame.
 FRAME_TIME_LABEL;Frame time
+GCODE_EXPORT_NEEDS_ARTWORK;Add artwork to export G-code.
 GCODE_EXPORT_NEEDS_LAYER;Switch on a layer to export G-code.
 GCODE_EXPORT_NEEDS_PROFILE;Add a laser profile to export G-code.
 GCODE_WARNINGS_CANCEL;Cancel
@@ -250,6 +251,7 @@ GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
 JOB_ACTIONS_BLOCKED_NOT_CONNECTED;Connect the laser to start or frame.
+JOB_LOCK_SHORT_ARTWORK;Add artwork
 JOB_LOCK_SHORT_BUSY;Laser busy
 JOB_LOCK_SHORT_CONNECT;Connect laser
 JOB_LOCK_SHORT_LASER_MODE;Confirm laser mode

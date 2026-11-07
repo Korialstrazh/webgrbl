@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { JobCard } from '.';
@@ -46,6 +46,8 @@ import { newToolpath } from '../../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpath.move';
 
 const LOCK_REASON_CONNECT = 'Connect laser';
+const LOCK_REASON_ARTWORK = 'Add artwork';
+const FRAME_LABEL = 'Frame job';
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
 const START_CONFIRM_OK_LABEL = 'Start and fire';
@@ -295,7 +297,28 @@ describe(JobCard.name, () => {
     renderJobCard(store);
 
     expect(screen.getAllByText(LOCK_REASON_CONNECT)).toHaveLength(1);
-    expect(screen.queryByTestId(JOB_LOCK_REASON_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_REASON_TEST_ID)).not.toHaveTextContent(LOCK_REASON_CONNECT);
+  });
+
+  it('gives Export its own artwork reason in an empty project, not Connect laser', async () => {
+    renderJobCard(await newGcodeExportTestStore({ objects: [] }));
+
+    const lockReasons: HTMLElement = screen.getByTestId(JOB_LOCK_REASON_TEST_ID);
+    const exportReason: HTMLElement | undefined = within(lockReasons).getAllByRole('listitem')
+      .find((item: HTMLElement): boolean => !!within(item).queryByText(EXPORT_LABEL));
+
+    expect(exportReason).toHaveTextContent(LOCK_REASON_ARTWORK);
+    expect(exportReason).not.toHaveTextContent(LOCK_REASON_CONNECT);
+  });
+
+  it('names Start and Frame beside their own Connect laser reason', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    const connectReason: HTMLElement = screen.getByText(LOCK_REASON_CONNECT).closest('li') ?? document.body;
+
+    expect(connectReason).toHaveTextContent(START_JOB_LABEL);
+    expect(connectReason).toHaveTextContent(FRAME_LABEL);
+    expect(connectReason).not.toHaveTextContent(EXPORT_LABEL);
   });
 
   it('stops asking for the connection once the laser is connected', () => {
