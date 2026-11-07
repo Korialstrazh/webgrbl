@@ -47,6 +47,7 @@ import type { PaletteFieldStatus } from './interfaces/PaletteFieldStatus';
 import type { PaletteNumberFieldDefinition } from './interfaces/PaletteNumberFieldDefinition';
 import { IconNumberField } from '../../../views/IconNumberField';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
+import { InputCaption } from '../../../views/InputCaption';
 import styles from './styles.module.scss';
 
 const FIELD_ID_SEPARATOR = '-';
@@ -79,6 +80,7 @@ const PALETTE_NUMBER_FIELDS: readonly PaletteNumberFieldDefinition[] = [
     labelKey: DEFAULT.LAYER_SETTINGS_SPEED,
     isFillOnly: false,
     iconComponent: <DashboardOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_SPEED,
     unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
   },
   {
@@ -86,6 +88,7 @@ const PALETTE_NUMBER_FIELDS: readonly PaletteNumberFieldDefinition[] = [
     labelKey: DEFAULT.LAYER_SETTINGS_PASSES,
     isFillOnly: false,
     iconComponent: <SyncOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_PASSES,
     unitKey: DEFAULT.FIELD_UNIT_TIMES,
   },
   {
@@ -93,6 +96,7 @@ const PALETTE_NUMBER_FIELDS: readonly PaletteNumberFieldDefinition[] = [
     labelKey: DEFAULT.LAYER_SETTINGS_LINE_INTERVAL,
     isFillOnly: true,
     iconComponent: <ColumnHeightOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_INTERVAL,
     unitKey: DEFAULT.FIELD_UNIT_MM,
   },
 ];
@@ -147,9 +151,8 @@ export const PaletteEntryForm = ({ entry, otherEntries }: PaletteEntryFormProps)
           <Form.Item className={styles.nameField} {...getFieldStatus(NAME_FIELD)}>
             <Input
               id={getFieldId(NAME_FIELD)}
-              prefix={<TagOutlined aria-hidden />}
+              prefix={<InputCaption iconComponent={<TagOutlined />} captionText={t(DEFAULT.FIELD_CAPTION_NAME)} />}
               aria-label={t(DEFAULT.PALETTE_FIELD_NAME)}
-              placeholder={t(DEFAULT.PALETTE_FIELD_NAME)}
               value={draft.name}
               onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => {
                 changeDraft({ name: changeEvent.target.value });

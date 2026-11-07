@@ -141,6 +141,12 @@ const newDocumentText = (profiles: MachineProfile[]): string => JSON.stringify({
 } satisfies MachineProfilesDocument);
 
 describe(MachineProfilesDialog.name, () => {
+  it.each(['Name', 'Width', 'Depth'])('shows the short visible field name %s', (captionText: string) => {
+    renderDialog(newStore());
+
+    expect(within(screen.getByRole('dialog')).getByText(captionText)).toBeInTheDocument();
+  });
+
   it('lists the GRBL settings editor as a coming-soon note, not as a button', () => {
     renderDialog(newStore());
 

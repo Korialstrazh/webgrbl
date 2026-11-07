@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MaterialDialog } from '.';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
@@ -22,6 +22,8 @@ const CANCEL_LABEL = 'Cancel';
 const THICKNESS_ERROR = 'Enter a thickness from 0.1 to 100 mm.';
 const NAME_ERROR = 'Enter a name of 1 to 100 characters.';
 const SAVE_HINT = 'Name needed';
+const NAME_CAPTION = 'Name';
+const THICKNESS_CAPTION = 'Thickness';
 const ENTERED_NAME = '  Birch 4 mm ';
 const STORED_NAME = 'Birch 4 mm';
 const ENTERED_THICKNESS_MM = 4;
@@ -107,6 +109,15 @@ describe(MaterialDialog.name, () => {
     await waitFor(() => expect(screen.getByLabelText(NAME_LABEL)).toHaveFocus());
     expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
     expect(screen.getByLabelText(THICKNESS_LABEL)).toHaveValue(String(DEFAULT_MATERIAL_THICKNESS_MM));
+  });
+
+  it('shows a short visible name on each field and no empty hint row above the buttons', () => {
+    renderDialog(newStore());
+    const dialog: HTMLElement = screen.getByRole('dialog');
+
+    expect(within(dialog).getByText(NAME_CAPTION)).toBeInTheDocument();
+    expect(within(dialog).getByText(THICKNESS_CAPTION)).toBeInTheDocument();
+    expect(within(dialog).queryByRole('note')).not.toBeInTheDocument();
   });
 
   it('saves the trimmed material, selects it and closes', () => {

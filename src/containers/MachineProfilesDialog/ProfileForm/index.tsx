@@ -55,6 +55,7 @@ import { LaserReadingAlerts } from './LaserReadingAlerts';
 import { ADVANCED_NUMBER_FIELDS, BED_NUMBER_FIELDS, MACHINE_NUMBER_FIELDS } from './profile.form.fields';
 import { IconNumberField } from '../../../views/IconNumberField';
 import { LaserMachineIcon } from '../../../views/LaserMachineIcon';
+import { InputCaption } from '../../../views/InputCaption';
 import styles from './styles.module.scss';
 
 const FIELD_ID_SEPARATOR = '-';
@@ -159,9 +160,8 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
           <Form.Item {...getFieldStatus(NAME_FIELD)}>
             <Input
               id={getFieldId(NAME_FIELD)}
-              prefix={<TagOutlined aria-hidden />}
+              prefix={<InputCaption iconComponent={<TagOutlined />} captionText={t(DEFAULT.FIELD_CAPTION_NAME)} />}
               aria-label={t(DEFAULT.MACHINE_PROFILES_FIELD_NAME)}
-              placeholder={t(DEFAULT.MACHINE_PROFILES_FIELD_NAME)}
               value={draft.name}
               onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => {
                 changeDraft({ name: changeEvent.target.value });

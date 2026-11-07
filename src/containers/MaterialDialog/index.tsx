@@ -46,6 +46,7 @@ import { IconNumberField } from '../../views/IconNumberField';
 import { AppModal } from '../AppModal';
 import type { MaterialDialogProps } from './interfaces/MaterialDialogProps';
 import { MATERIAL_DIALOG_OVERLAY_ID, MATERIAL_DIALOG_WIDTH } from './material.dialog.constants';
+import { InputCaption } from '../../views/InputCaption';
 import styles from './styles.module.scss';
 
 type MaterialDialogContentProps = Pick<MaterialDialogProps, 'onClose' | 'onMaterialChosen'>;
@@ -131,9 +132,8 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
             ref={nameInputRef}
             id={nameFieldId}
             autoFocus
-            prefix={<TagOutlined aria-hidden />}
+            prefix={<InputCaption iconComponent={<TagOutlined />} captionText={t(DEFAULT.FIELD_CAPTION_NAME)} />}
             aria-label={t(DEFAULT.MATERIAL_DIALOG_NAME)}
-            placeholder={t(DEFAULT.MATERIAL_DIALOG_NAME)}
             value={materialName}
             onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => {
               setMaterialName(changeEvent.target.value);
@@ -142,6 +142,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
           />
         </Form.Item>
         <Form.Item
+          className={styles.lastField}
           validateStatus={fieldErrors.thicknessErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
           help={fieldErrors.thicknessErrorKey && t(fieldErrors.thicknessErrorKey, {
             min: MATERIAL_THICKNESS_MM_MIN,
@@ -153,21 +154,20 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
             inputId={thicknessFieldId}
             labelText={t(DEFAULT.MATERIAL_DIALOG_THICKNESS)}
             iconComponent={<ColumnHeightOutlined />}
+            captionText={t(DEFAULT.FIELD_CAPTION_THICKNESS)}
             unitText={t(DEFAULT.FIELD_UNIT_MM)}
             value={isFiniteNumber(thicknessMm) ? thicknessMm : null}
             onChange={(value: number | null) => setThicknessMm(value ?? Number.NaN)}
           />
         </Form.Item>
       </Form>
-      {/* The room stays reserved, so the text going away does not move the buttons. */}
-      <p className={styles.saveHint} role="note">
-        {isSaveAllowed || !isNameTouched ? undefined : (
-          <>
-            <ExclamationCircleOutlined aria-hidden />
-            <span>{t(DEFAULT.MATERIAL_DIALOG_SAVE_HINT)}</span>
-          </>
-        )}
-      </p>
+      {/* Only while the name is missing, so no empty row sits above the buttons. */}
+      {!isSaveAllowed && isNameTouched && (
+        <p className={styles.saveHint} role="note">
+          <ExclamationCircleOutlined aria-hidden />
+          <span>{t(DEFAULT.MATERIAL_DIALOG_SAVE_HINT)}</span>
+        </p>
+      )}
       {matchingMaterial && (
         <div className={styles.duplicateNote} role="note">
           <span>{t(DEFAULT.MATERIAL_DIALOG_DUPLICATE_NOTE, { name: matchingMaterial.name })}</span>

@@ -40,12 +40,14 @@ export const BED_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
     field: 'workAreaXMm',
     labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_X,
     iconComponent: <ColumnWidthOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_WIDTH,
     unitKey: DEFAULT.FIELD_UNIT_MM,
   },
   {
     field: 'workAreaYMm',
     labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_Y,
     iconComponent: <ColumnHeightOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_DEPTH,
     unitKey: DEFAULT.FIELD_UNIT_MM,
   },
 ];
