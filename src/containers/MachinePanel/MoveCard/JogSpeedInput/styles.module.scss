@@ -3,3 +3,24 @@
 .jogSpeedInput {
   width: 100%;
 }
+
+// The step handles keep their room at all times and only fade in on hover or focus, so neither the number, the unit
+// nor the step sizes above move when the pointer passes over the field.
+.jogSpeedInput :global(.ant-input-number-actions) {
+  width: var(--jog-speed-handles-width);
+  transition: opacity 0.2s;
+  opacity: 0;
+}
+
+.jogSpeedInput:is(:hover, :focus-within) :global(.ant-input-number-actions) {
+  opacity: 1;
+}
+
+.jogSpeedInput {
+  --jog-speed-handles-width: 1.5625rem;
+}
+
+// antd moves the unit aside only while the handles show; it stays aside at all times instead.
+.jogSpeedInput.jogSpeedInput :global(.ant-input-number-suffix) {
+  margin-inline-end: var(--jog-speed-handles-width);
+}
