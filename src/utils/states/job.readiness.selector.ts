@@ -1,6 +1,6 @@
 /**
  * The four things a job needs, in the order to set them, each read live from existing state. It adds no rule: Start job
- * keeps its own guards, and a job can start without a material.
+ * keeps its own guards, and a job can start without a material: Material is a recommended step, never the next step.
  *
  * @author michael.morosov
  *
@@ -31,6 +31,12 @@ const JOB_READINESS_STEPS_IN_ORDER: readonly JobReadinessStep[] = [
   JOB_READINESS_STEP.CONNECT,
 ];
 
+// Start job does not need these, so they never become the next step and never read as a blocking to-do.
+const OPTIONAL_JOB_READINESS_STEPS: readonly JobReadinessStep[] = [JOB_READINESS_STEP.MATERIAL];
+
+export const isJobReadinessStepOptional = (step: JobReadinessStep): boolean =>
+  OPTIONAL_JOB_READINESS_STEPS.includes(step);
+
 export const selectIsJobReadinessStepMet = (step: JobReadinessStep) => (state: AppRootState): boolean => {
   switch (step) {
   case JOB_READINESS_STEP.PROFILE:
@@ -45,4 +51,6 @@ export const selectIsJobReadinessStepMet = (step: JobReadinessStep) => (state: A
 };
 
 export const selectFirstUnmetJobReadinessStep = (state: AppRootState): JobReadinessStep | undefined =>
-  JOB_READINESS_STEPS_IN_ORDER.find((step: JobReadinessStep): boolean => !selectIsJobReadinessStepMet(step)(state));
+  JOB_READINESS_STEPS_IN_ORDER.find(
+    (step: JobReadinessStep): boolean => !isJobReadinessStepOptional(step) && !selectIsJobReadinessStepMet(step)(state),
+  );

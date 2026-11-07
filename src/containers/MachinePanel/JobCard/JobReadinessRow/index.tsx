@@ -1,6 +1,7 @@
 /**
  * The readiness stepper of the Job card: Profile, Design, Material and Connect joined by a line that leads to Start.
- * Each step goes to where it is set, a done step shows a large check, and the first one still open is outlined as next.
+ * Each step goes to where it is set, a done step shows a large check, and the first required one still open is outlined
+ * as next. An optional step (Material) that is still open shows a dashed marker: Start does not wait for it.
  * The steps are one tab stop: the arrow keys, Home and End move between them (a roving tab index).
  *
  * @author michael.morosov
@@ -29,6 +30,7 @@ import {
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
 import {
+  isJobReadinessStepOptional,
   JOB_READINESS_STEP,
   selectFirstUnmetJobReadinessStep,
   selectIsJobReadinessStepMet,
@@ -74,6 +76,8 @@ interface JobReadinessLook {
   iconComponent: ReactNode;
   captionKey: string;
   hintKey: string;
+  /** The tooltip while an optional step is open, which says Start does not need it. */
+  optionalHintKey?: string;
   /** The tooltip once the step is done, where the hint would ask for what has been done already. */
   metHintKey?: string;
   /** The label of the one action button while this is the current step. */
@@ -104,6 +108,7 @@ const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
     iconComponent: <MaterialSheetIcon aria-hidden />,
     captionKey: DEFAULT.JOB_READINESS_MATERIAL,
     hintKey: DEFAULT.JOB_READINESS_MATERIAL_HINT,
+    optionalHintKey: DEFAULT.JOB_READINESS_MATERIAL_OPTIONAL_HINT,
     actionKey: DEFAULT.JOB_READINESS_MATERIAL_ACTION,
   },
   {
@@ -123,26 +128,31 @@ interface JobReadinessButtonProps extends JobReadinessLook {
 }
 
 const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
-  const { step, iconComponent, captionKey, hintKey, metHintKey, isTabStop, onGoToStep, onFocusStep } = props;
+  const { step, iconComponent, captionKey, hintKey, optionalHintKey, metHintKey, isTabStop, onGoToStep, onFocusStep } =
+    props;
   const { t } = useTranslation();
   const isMet: boolean = useSelector(selectIsJobReadinessStepMet(step));
   const isNextStep: boolean = useSelector(selectFirstUnmetJobReadinessStep) === step;
+  const isOptionalOpen: boolean = !isMet && isJobReadinessStepOptional(step);
   const captionText: string = t(captionKey);
+  const openHintKey: string = isOptionalOpen && optionalHintKey ? optionalHintKey : hintKey;
+  const openLabelKey: string = isOptionalOpen ? DEFAULT.JOB_READINESS_STEP_OPTIONAL : DEFAULT.JOB_READINESS_STEP_OPEN;
 
   const cellClassName: string = [
     styles.stepCell,
     isMet ? styles.metStep : undefined,
     isNextStep ? styles.nextStep : undefined,
+    isOptionalOpen ? styles.optionalStep : undefined,
   ].join(' ');
 
   return (
     <li className={cellClassName}>
-      <DismissibleTooltip title={isNextStep ? undefined : t(isMet && metHintKey ? metHintKey : hintKey)}>
+      <DismissibleTooltip title={isNextStep ? undefined : t(isMet && metHintKey ? metHintKey : openHintKey)}>
         <Button
           className={styles.step}
           type={ANTD_BUTTON_TYPE_TEXT}
           aria-label={t(
-            isMet ? DEFAULT.JOB_READINESS_STEP_MET : DEFAULT.JOB_READINESS_STEP_OPEN,
+            isMet ? DEFAULT.JOB_READINESS_STEP_MET : openLabelKey,
             { step: captionText },
           )}
           aria-current={isNextStep ? ARIA_CURRENT_STEP : undefined}

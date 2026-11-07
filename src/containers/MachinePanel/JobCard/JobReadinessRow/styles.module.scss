@@ -66,6 +66,11 @@
   font-size: 1.25rem;
 }
 
+// Recommended, not required: a dashed ring so it never reads as a blocking to-do.
+.optionalStep .marker {
+  border-style: dashed;
+}
+
 .nextStep .marker {
   border-color: var(--color-accent);
   color: var(--color-text);
@@ -88,7 +93,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nextStep .marker {
+  // Recommended, not required: a dashed ring so it never reads as a blocking to-do.
+.optionalStep .marker {
+  border-style: dashed;
+}
+
+.nextStep .marker {
     animation: none;
   }
 }

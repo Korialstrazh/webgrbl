@@ -290,11 +290,13 @@ JOB_READINESS_LABEL;Ready to cut?
 JOB_READINESS_MATERIAL;Material
 JOB_READINESS_MATERIAL_ACTION;Choose material
 JOB_READINESS_MATERIAL_HINT;Choose the material
+JOB_READINESS_MATERIAL_OPTIONAL_HINT;Recommended: a material fills in its tested presets. Start does not need it.
 JOB_READINESS_PROFILE;Profile
 JOB_READINESS_PROFILE_ACTION;Set up laser
 JOB_READINESS_PROFILE_HINT;Set up a laser profile
 JOB_READINESS_STEP_MET;{{step}}: done
 JOB_READINESS_STEP_OPEN;{{step}}: to do
+JOB_READINESS_STEP_OPTIONAL;{{step}}: optional
 JOB_RESUME;Resume
 JOB_RESUME_WAITING;Wait until the laser has stopped and any door is closed.
 JOB_RUN_PROGRESS_DETAIL;{{answered}} of {{total}} lines answered, {{elapsed}} elapsed

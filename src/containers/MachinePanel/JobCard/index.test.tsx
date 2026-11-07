@@ -280,10 +280,18 @@ describe(JobCard.name, () => {
   });
 
   it('writes a short plain reason under Start and under Frame while they wait for a connection', async () => {
-    renderJobCard(await newGcodeExportTestStore());
+    // With no artwork, Design is the next step, so the connection reason is not already on the next-step button.
+    renderJobCard(await newGcodeExportTestStore({ objects: [] }));
 
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toHaveTextContent(LOCK_REASON_CONNECT);
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toHaveTextContent(LOCK_REASON_CONNECT);
+  });
+
+  it('makes Connect the next step without a material, as Start does not need one', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    expect(screen.getAllByText(CONNECT_ACTION_TEXT)).toHaveLength(1);
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toBeInTheDocument();
   });
 

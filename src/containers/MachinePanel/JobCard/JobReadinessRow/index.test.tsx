@@ -22,7 +22,7 @@ const CURRENT_STEP_SELECTOR = '[aria-current="step"]';
 const PROFILE_OPEN = 'Profile: to do';
 const CONNECT_OPEN = 'Connect: to do';
 const CONNECT_MET = 'Connect: done';
-const MATERIAL_OPEN = 'Material: to do';
+const MATERIAL_OPEN = 'Material: optional';
 
 const CONNECT_ACTION = 'Connect laser';
 const FILE_INPUT_SELECTOR = 'input[type="file"]';
