@@ -57,7 +57,7 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
   const viewRef = useRef<HTMLDivElement>(null);
   const screenSize: BedScreenSize = useBedScreenSize(viewRef);
   const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
-  // A wide window fits the bed while a drawer is open: in the strip it pushes aside, or under it in a narrower region.
+  // A wide window fits the bed while a drawer is open, into the strip the drawer pushes it aside to.
   const isPushedAside: boolean = useIsBedRegionDrawerOpen() && isWide;
   const { viewport, zoomBedBy, panBedBy, fitBedToView }: BedViewportControls =
     useBedViewportControls(dimensions, screenSize, keptViewportRef, isPushedAside);

@@ -14,8 +14,11 @@ import type { LayerNumberFieldConfig } from './interfaces/LayerNumberFieldConfig
 /** Prefix of the id the drawer registers in the overlay registry while open. */
 export const LAYER_SETTINGS_DRAWER_OVERLAY_ID = 'layer-settings-drawer';
 
-/** At most 23.75rem, and never wider than the bed region, so a narrow window shows it at full width, not clipped. */
-export const LAYER_SETTINGS_DRAWER_WIDTH = 'min(23.75rem, 100%)';
+/**
+ * 23.75rem in a wide bed region, down to 21rem (336 px) in a narrower one, so the bed still fits in the strip beside
+ * it; never wider than the bed region, so a narrow window shows it at full width, not clipped.
+ */
+export const LAYER_SETTINGS_DRAWER_WIDTH = 'min(clamp(21rem, 100% - 36rem, 23.75rem), 100%)';
 
 /** Joins the layer key and the field name into the key of a field, so a field starts fresh when another layer opens. */
 export const LAYER_FIELD_KEY_SEPARATOR = ':';
