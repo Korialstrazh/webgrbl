@@ -20,6 +20,7 @@ import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
+import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
 import { BURN_PART_STATUS } from '../../utils/burn.model/burn.model.constants';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../utils/burn.model/interfaces/BurnPart';
@@ -34,10 +35,12 @@ import {
   selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
+import { BedViewModeChanged } from '../../utils/states/bed.view.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { selectProjectLayers } from '../../utils/states/project.document.state';
 import { IconActionButton } from '../../views/IconActionButton';
+import { CubeIcon } from '../../views/CubeIcon';
 import { Panel } from '../../views/Panel';
 import { BurnPartRowLift } from './BurnPartRowLift';
 import { CutCheckWarningCountTag } from './CutCheckWarningCountTag';
@@ -115,11 +118,20 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
       <Panel
         iconComponent={<CheckSquareOutlined />}
         title={t(DEFAULT.CUT_CHECK_TITLE)}
-        headerActionComponent={model && (
-          <CutCheckWarningCountTag count={getCutCheckWarningGroups(model.cutCheck.warnings).length} />
+        headerActionComponent={(
+          <>
+            {model && <CutCheckWarningCountTag count={getCutCheckWarningGroups(model.cutCheck.warnings).length} />}
+            {/* An action, not a label: the cube opens the 3D view, where the check runs. */}
+            <IconActionButton
+              size={ANTD_BUTTON_SIZE_SMALL}
+              labelText={t(DEFAULT.CUT_CHECK_OPEN_3D_LABEL)}
+              captionText={t(DEFAULT.CUT_CHECK_3D_ONLY_CAPTION)}
+              iconComponent={<CubeIcon aria-hidden />}
+              onClick={() => dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }))}
+            />
+          </>
         )}
         noteText={t(DEFAULT.CUT_CHECK_3D_ONLY_NOTE)}
-        noteCaptionText={t(DEFAULT.CUT_CHECK_3D_ONLY_CAPTION)}
       />
     );
   }

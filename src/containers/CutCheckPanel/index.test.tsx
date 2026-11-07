@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { CutCheckPanel } from '.';
+import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
 import { BURN_PART_STATUS, CUT_CHECK_WARNING_KIND } from '../../utils/burn.model/burn.model.constants';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../utils/burn.model/interfaces/BurnPart';
@@ -21,6 +22,7 @@ import {
   selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
+import { selectBedViewMode } from '../../utils/states/bed.view.state';
 import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
@@ -121,6 +123,19 @@ describe(CutCheckPanel.name, () => {
     expect(screen.getByRole('heading', { name: 'Cut check' })).toBeInTheDocument();
     expect(screen.getByRole('note', { name: 'The cut check runs in the 3D view.' })).toHaveAttribute('tabindex', '0');
     expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
+  });
+
+  it('outside the 3D view offers a cube button that opens the 3D view', () => {
+    const store: AppStore = newReadyStore();
+
+    render(
+      <Provider store={store}>
+        <CutCheckPanel isActive={false} />
+      </Provider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect in 3D' }));
+
+    expect(selectBedViewMode(store.getState())).toBe(BED_VIEW_MODE.THREE_D);
   });
 
   it('keeps the warning count of a current model on the muted heading outside the 3D view', () => {
