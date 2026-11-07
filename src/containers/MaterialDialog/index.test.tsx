@@ -21,6 +21,7 @@ const SAVE_LABEL = 'Save';
 const CANCEL_LABEL = 'Cancel';
 const THICKNESS_ERROR = 'Enter a thickness from 0.1 to 100 mm.';
 const NAME_ERROR = 'Enter a name of 1 to 100 characters.';
+const SAVE_HINT = 'Name needed';
 const ENTERED_NAME = '  Birch 4 mm ';
 const STORED_NAME = 'Birch 4 mm';
 const ENTERED_THICKNESS_MM = 4;
@@ -143,14 +144,20 @@ describe(MaterialDialog.name, () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('shows the name error once the name was changed, not before', () => {
+  it('shows the name error and the save hint once the name field is left, not while typing', () => {
     renderDialog(newStore());
 
     expect(screen.queryByText(NAME_ERROR)).not.toBeInTheDocument();
+    expect(screen.queryByText(SAVE_HINT)).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: ' ' } });
 
+    expect(screen.queryByText(NAME_ERROR)).not.toBeInTheDocument();
+
+    fireEvent.blur(screen.getByLabelText(NAME_LABEL));
+
     expect(screen.getByText(NAME_ERROR)).toBeInTheDocument();
+    expect(screen.getByText(SAVE_HINT)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
   });
 

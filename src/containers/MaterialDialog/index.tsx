@@ -62,14 +62,15 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
   const dispatch: AppDispatch = useDispatch();
   const formId: string = useId();
   const [materialName, setMaterialName] = useState<string>('');
-  const [isNameChanged, setIsNameChanged] = useState<boolean>(false);
+  // The name is checked once the user leaves the field, never while it is still empty and untouched.
+  const [isNameTouched, setIsNameTouched] = useState<boolean>(false);
   const [thicknessMm, setThicknessMm] = useState<number>(DEFAULT_MATERIAL_THICKNESS_MM);
   const materials: Material[] = useSelector(selectMaterials);
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const nameInputRef: RefObject<InputRef | null> = useRef<InputRef>(null);
   const fieldErrors: MaterialFieldErrors = getMaterialFieldErrors(materialName, thicknessMm);
   const isSaveAllowed: boolean = !hasMaterialFieldError(fieldErrors);
-  const nameErrorKey: string | undefined = isNameChanged ? fieldErrors.nameErrorKey : undefined;
+  const nameErrorKey: string | undefined = isNameTouched ? fieldErrors.nameErrorKey : undefined;
   const matchingMaterial: Material | undefined = isSaveAllowed
     ? getMatchingMaterial(materials, { name: materialName, thicknessMm })
     : undefined;
@@ -134,8 +135,8 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
             value={materialName}
             onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => {
               setMaterialName(changeEvent.target.value);
-              setIsNameChanged(true);
             }}
+            onBlur={() => setIsNameTouched(true)}
           />
         </Form.Item>
         <Form.Item
@@ -158,7 +159,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
       </Form>
       {/* The room stays reserved, so the text going away does not move the buttons. */}
       <p className={styles.saveHint} role="note">
-        {isSaveAllowed ? undefined : (
+        {isSaveAllowed || !isNameTouched ? undefined : (
           <>
             <ExclamationCircleOutlined aria-hidden />
             <span>{t(DEFAULT.MATERIAL_DIALOG_SAVE_HINT)}</span>
