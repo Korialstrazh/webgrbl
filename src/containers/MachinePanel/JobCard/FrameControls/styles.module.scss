@@ -62,16 +62,46 @@
   gap: var(--space-1);
 }
 
-// Frame and its gear read as one split button, as wide as Export beside it.
+// Frame and its gear are one split button: the wrapper draws the single outline, fill and radius in every state, and a
+// single divider separates the two halves, so a locked Frame and an enabled gear never show two different borders.
 .frameSplit {
+  --frame-split-border: var(--color-text-muted);
+  --frame-split-fill: var(--color-surface-3);
+
   display: flex;
   min-width: 0;
+  border: 1px solid var(--frame-split-border);
+  border-radius: var(--radius-md);
+  background-color: var(--frame-split-fill);
+
+  &:has([aria-disabled='true'], :disabled) {
+    --frame-split-border: var(--color-disabled-border-locked);
+    --frame-split-fill: var(--color-disabled-bg);
+  }
+
+  &:hover:not(:has([aria-disabled='true'], :disabled)) {
+    --frame-split-border: var(--color-control-border);
+  }
+
+  // Each half drops its own outline and fill; the keyboard focus ring is drawn inside it, so it is never cut off.
+  // Repeated classes outweigh the locked and hover outlines of the buttons' own styles.
+  &.frameSplit :global(.ant-btn.ant-btn.ant-btn.ant-btn),
+  &.frameSplit :global(.ant-btn.ant-btn.ant-btn.ant-btn):is(:hover, :active, :focus, :disabled, [aria-disabled='true']) {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  :global(.ant-btn):focus-visible {
+    outline-offset: -3px;
+  }
 
   > span:first-child {
     flex: 1 1 0;
     min-width: 0;
 
     :global(.ant-btn) {
+      height: calc(3.25rem - 2px);
       border-start-end-radius: 0;
       border-end-end-radius: 0;
     }
@@ -79,15 +109,16 @@
 
   > span:last-child {
     flex: none;
-    margin-inline-start: -1px;
   }
 }
 
-// A full-size icon button, so the gear reads as a control of its own and not as a sliver of Frame.
-.frameGear:global(.ant-btn) {
+// A full-size icon button, so the gear reads as a control of its own and not as a sliver of Frame; its start edge is
+// the one divider of the split button.
+.frameSplit.frameSplit .frameGear.frameGear:global(.ant-btn.ant-btn.ant-btn.ant-btn) {
   width: 2.75rem;
-  height: 3.25rem;
+  height: calc(3.25rem - 2px);
   padding: 0;
+  border-inline-start-color: var(--frame-split-border);
   border-start-start-radius: 0;
   border-end-start-radius: 0;
 }
