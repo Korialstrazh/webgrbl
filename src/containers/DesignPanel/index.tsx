@@ -85,7 +85,10 @@ export const DesignPanel = (): ReactNode => {
       >
         <ObjectsSection />
       </Panel>
-      <CutCheckPanel isActive={isThreeDView} />
+      {/* Docked to the bottom of the scrolling panel, so Cut check stays in reach however long the layer list grows. */}
+      <div className={styles.cutCheckDock}>
+        <CutCheckPanel isActive={isThreeDView} />
+      </div>
       <PaletteDialog isOpen={isPaletteDialogOpen} onClose={() => setIsPaletteDialogOpen(false)} />
     </Layout.Sider>
   );

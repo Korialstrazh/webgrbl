@@ -27,6 +27,8 @@ interface PanelProps {
   noteText?: string;
   /** A word or two beside the note icon that says at a glance why the section is muted, such as "Design only". */
   noteCaptionText?: string;
+  /** Tighter header and body padding, for a dense read-out card in a crowded column. */
+  isCompact?: boolean;
 }
 
 export const Panel = ({
@@ -36,10 +38,15 @@ export const Panel = ({
   headerActionComponent,
   noteText,
   noteCaptionText,
+  isCompact = false,
 }: PanelProps): ReactNode => {
   const headingId: string = useId();
   const bodyComponent: ReactNode = noteText ? undefined : children;
-  const panelClassName: string = [styles.panel, noteText ? styles.mutedPanel : undefined].join(' ');
+  const panelClassName: string = [
+    styles.panel,
+    noteText ? styles.mutedPanel : undefined,
+    isCompact ? styles.compactPanel : undefined,
+  ].join(' ');
 
   return (
     <section className={panelClassName} aria-labelledby={headingId}>

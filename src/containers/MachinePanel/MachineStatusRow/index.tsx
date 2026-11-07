@@ -1,6 +1,6 @@
 /**
- * The one line of the Status card: feed and power, each an icon over a short caption beside its value, then Reset and
- * Unlock. The state itself sits in the card header.
+ * The read-out in the Status card header: feed and power, each an icon and a short caption beside its value, then the
+ * state badge, so the card body holds only Reset and Unlock.
  *
  * @author michael.morosov
  *
@@ -17,7 +17,7 @@ import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblReso
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { selectMachineStatus } from '../../../utils/states/machine.status.state';
-import { MachineResetUnlock } from '../MachineResetUnlock';
+import { MachineStateReadout } from '../MachineStateReadout';
 import styles from './styles.module.scss';
 
 const getNumberText = (value: number | undefined): string =>
@@ -41,7 +41,7 @@ export const MachineStatusRow = (): ReactNode => {
         </dt>
         <dd>{getNumberText(status?.spindleSpeed)}</dd>
       </dl>
-      <MachineResetUnlock />
+      <MachineStateReadout />
     </div>
   );
 };

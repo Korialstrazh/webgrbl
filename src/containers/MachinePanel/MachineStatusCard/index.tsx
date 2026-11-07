@@ -1,6 +1,6 @@
 /**
- * The compact Status card of the machine panel, right above Position: the state in its header, then one line with feed
- * and power under short captions, and Reset and Unlock. The positions sit in the Position card. While no laser is
+ * The compact Status card of the machine panel, right above Position: feed and power with short captions and the state
+ * in its header line, and one row below with Reset and Unlock. The positions sit in the Position card. While no laser is
  * connected it is not shown: the top-bar pill alone tells the connection state.
  *
  * @author michael.morosov
@@ -17,7 +17,7 @@ import { useSelector } from 'react-redux';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
 import { Panel } from '../../../views/Panel';
-import { MachineStateReadout } from '../MachineStateReadout';
+import { MachineResetUnlock } from '../MachineResetUnlock';
 import { MachineStatusRow } from '../MachineStatusRow';
 
 export const MachineStatusCard = (): ReactNode => {
@@ -32,9 +32,10 @@ export const MachineStatusCard = (): ReactNode => {
     <Panel
       iconComponent={<DashboardOutlined />}
       title={t(DEFAULT.MACHINE_STATUS_TITLE)}
-      headerActionComponent={<MachineStateReadout />}
+      headerActionComponent={<MachineStatusRow />}
+      isCompact
     >
-      <MachineStatusRow />
+      <MachineResetUnlock />
     </Panel>
   );
 };

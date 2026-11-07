@@ -85,7 +85,7 @@ export const PositionCard = (): ReactNode => {
   }
 
   return (
-    <Panel iconComponent={<CompassOutlined />} title={t(DEFAULT.MACHINE_POSITION_TITLE)}>
+    <Panel iconComponent={<CompassOutlined />} title={t(DEFAULT.MACHINE_POSITION_TITLE)} isCompact>
       <table className={styles.positionTable}>
         <thead>
           <tr>

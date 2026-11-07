@@ -32,3 +32,13 @@
 .layersActions :global(.ant-btn .anticon) {
   font-size: 1.125rem;
 }
+
+// Cut check sticks to the bottom edge of the panel while the cards above scroll under it; its own surface hides them.
+.cutCheckDock {
+  position: sticky;
+  bottom: calc(-1 * var(--space-3));
+  z-index: 1;
+  margin: 0 calc(-1 * var(--space-3)) calc(-1 * var(--space-3));
+  padding: 0 var(--space-3) var(--space-3);
+  background-color: var(--color-surface-1);
+}

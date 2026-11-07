@@ -13,6 +13,7 @@ import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_BUTTON_SIZE_SMALL } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
 import {
@@ -33,6 +34,7 @@ export const MachineResetUnlock = (): ReactNode => {
   return (
     <div className={styles.machineResetUnlock}>
       <Button
+        size={ANTD_BUTTON_SIZE_SMALL}
         icon={<ReloadOutlined />}
         aria-label={t(DEFAULT.MACHINE_CONTROL_RESET)}
         disabled={!isConnected}
@@ -41,6 +43,7 @@ export const MachineResetUnlock = (): ReactNode => {
         {t(DEFAULT.MACHINE_CONTROL_RESET)}
       </Button>
       <Button
+        size={ANTD_BUTTON_SIZE_SMALL}
         icon={<UnlockOutlined />}
         aria-label={t(DEFAULT.MACHINE_CONTROL_UNLOCK)}
         disabled={!canUnlock}

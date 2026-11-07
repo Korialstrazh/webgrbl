@@ -20,6 +20,12 @@ describe(Panel.name, () => {
     expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
   });
 
+  it('takes the tighter padding only when compact', () => {
+    render(<Panel title={PANEL_TITLE} isCompact><p>{BODY_TEXT}</p></Panel>);
+
+    expect(screen.getByRole('region', { name: PANEL_TITLE }).className).toContain('compactPanel');
+  });
+
   it('stays at its heading line without content', () => {
     render(<Panel title={PANEL_TITLE} headerActionComponent={<button type="button">{ACTION_LABEL}</button>} />);
 
