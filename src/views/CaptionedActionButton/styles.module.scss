@@ -46,6 +46,12 @@
   color: var(--color-text-muted);
 }
 
+// A filled action (Start once it is the next step) keeps the fill's own text colour, the dark ink on the accent
+// (about 8:1), never the muted grey, which read as off at about 1.6:1.
+.captionedActionButton:global(.ant-btn-variant-solid):not(:disabled, [aria-disabled='true']) .caption {
+  color: inherit;
+}
+
 .captionedActionButton:global(.ant-btn):disabled,
 .captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'] {
   .icon > :global(.anticon):first-child {
