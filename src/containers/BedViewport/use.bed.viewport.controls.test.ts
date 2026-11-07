@@ -6,6 +6,7 @@ import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
+import { newTopFitBedViewport } from '../../utils/bed/new.top.fit.bed.viewport';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
@@ -52,7 +53,7 @@ interface CoverFitProps {
 describe(`${useBedViewportControls.name} with a drawer`, () => {
   const STRIP_SIZE: BedScreenSize = { widthPx: 300, heightPx: 700 };
 
-  it('fits the whole bed into the strip while a drawer is open and gives the earlier zoom back once it closes', () => {
+  it('fits the bed to the top of the strip while a drawer is open and gives the zoom back once it closes', () => {
     const initialProps: CoverFitProps = { isStripFitWanted: false };
     const hook: RenderHookResult<BedViewportControls, CoverFitProps> = renderHook(
       ({ isStripFitWanted }: CoverFitProps): BedViewportControls =>
@@ -67,7 +68,7 @@ describe(`${useBedViewportControls.name} with a drawer`, () => {
 
     hook.rerender({ isStripFitWanted: true });
 
-    expect(hook.result.current.viewport).toEqual(newFitBedViewport(DIMENSIONS));
+    expect(hook.result.current.viewport).toEqual(newTopFitBedViewport(DIMENSIONS, STRIP_SIZE));
 
     hook.rerender({ isStripFitWanted: false });
 

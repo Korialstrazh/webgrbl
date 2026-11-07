@@ -17,3 +17,6 @@ export const ARIA_ORIENTATION = {
 
 /** The role of a short note kept behind an icon, read with its text as the name. */
 export const ARIA_ROLE_NOTE = 'note';
+
+/** The role of a small badge that stands for a word, read with that word as its name. */
+export const ARIA_ROLE_IMG = 'img';

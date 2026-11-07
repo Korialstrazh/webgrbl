@@ -23,6 +23,7 @@ import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
 import type { BedViewportFrame } from '../../utils/bed/interfaces/BedViewportFrame';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
+import { newTopFitBedViewport } from '../../utils/bed/new.top.fit.bed.viewport';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
 import type { KeptBedViewportRef } from './interfaces/KeptBedViewportRef';
@@ -125,7 +126,7 @@ export const useBedViewportControls = (
     isStripFitRef.current = false;
     setIsStripFit(false);
 
-    return newFitBedViewport(dimensions);
+    return newTopFitBedViewport(dimensions, screenSizeRef.current);
   }, [dimensions]);
 
   const zoomBedBy = useCallback((zoomFactor: number, anchorPoint?: BedScreenPoint): void => {
@@ -158,8 +159,9 @@ export const useBedViewportControls = (
   }, [dimensions]);
 
   const shownViewport: BedViewport = useMemo(
-    () => (isStripFit ? newFitBedViewport(dimensions) : viewport),
-    [isStripFit, dimensions, viewport],
+    // Held at the top of the strip, right under the ruler, never floating in the middle of a tall strip.
+    () => (isStripFit ? newTopFitBedViewport(dimensions, screenSize) : viewport),
+    [isStripFit, dimensions, screenSize, viewport],
   );
 
   return { viewport: shownViewport, zoomBedBy, panBedBy, fitBedToView };

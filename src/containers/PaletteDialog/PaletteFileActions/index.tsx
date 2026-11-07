@@ -42,6 +42,8 @@ export const PaletteFileActions = ({ onReset }: PaletteFileActionsProps): ReactN
             trigger={ANTD_POPOVER_TRIGGER_CLICK}
             content={(
               <div className={styles.help}>
+                {/* Both lists can be reordered, so the help says this order is not the cut order. */}
+                <p className={styles.hint}>{t(DEFAULT.PALETTE_LIST_ORDER_HINT)}</p>
                 <p className={styles.hint}>{t(DEFAULT.PALETTE_INKSCAPE_HINT)}</p>
                 <ul className={styles.paths}>
                   <li>{t(DEFAULT.PALETTE_INKSCAPE_PATH_LINUX)}</li>

@@ -121,10 +121,13 @@ describe(PaletteDialog.name, () => {
     expect(screen.getByRole('button', { name: labelText })).toHaveTextContent(captionText);
   });
 
-  it('says the palette order is not the cut order, which the layers set', () => {
+  it('says in its Help, not in a standing line, that the palette order is not the cut order', async () => {
     renderDialog(newStore());
 
-    expect(screen.getByText(ORDER_HINT_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText(ORDER_HINT_TEXT)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: INKSCAPE_HELP_LABEL }));
+
+    expect(await screen.findByText(ORDER_HINT_TEXT)).toBeInTheDocument();
   });
 
   it('registers an overlay while it is open', () => {
@@ -285,8 +288,8 @@ describe(PaletteDialog.name, () => {
     expect(within(getRow(SHADING_NAME_PATTERN)).queryByRole('button', { name: DELETE_NAME_PATTERN }))
       .not.toBeInTheDocument();
     expect(within(getRow(SHADING_NAME_PATTERN)).getByRole('note', { name: SHADING_LOCKED_TEXT })).toBeInTheDocument();
-    // A single tag on the page, and it sits in the shading row.
-    expect(screen.getByText('Built-in').closest('li')).toHaveTextContent(SHADING_NAME_PATTERN);
+    // A single badge on the page, named for screen readers, and it sits in the shading row.
+    expect(screen.getByRole('img', { name: 'Built-in' }).closest('li')).toHaveTextContent(SHADING_NAME_PATTERN);
     expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
     expect(within(getRow(CUT_NAME_PATTERN)).queryByRole('note')).not.toBeInTheDocument();
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).not.toBeInTheDocument();

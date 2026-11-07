@@ -15,11 +15,13 @@ import {
   CloseOutlined,
   HolderOutlined,
   LockOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
-import { Button, Popconfirm } from 'antd';
+import { Button, Popconfirm, Tooltip } from 'antd';
 import type { DragEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
+import { ARIA_ROLE_IMG } from '../../../../utils/aria.constants';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { SHADING_ENTRY_ID } from '../../../../utils/palette/palette.constants';
 import { LayerSwatch } from '../../../../views/LayerSwatch';
@@ -71,7 +73,18 @@ export const PaletteEntryRow = ({
         </span>
         <span className={styles.nameCell}>
           <span className={styles.name} title={entryName}>{entryName}</span>
-          {isShading && <span className={styles.builtInTag}>{t(DEFAULT.PALETTE_SHADING_BUILT_IN)}</span>}
+          {isShading && (
+            // A badge, not a word: its name is read out and shows on a hover; the lock note says why it stays.
+            <Tooltip title={t(DEFAULT.PALETTE_SHADING_BUILT_IN)}>
+              <span
+                className={styles.builtInBadge}
+                role={ARIA_ROLE_IMG}
+                aria-label={t(DEFAULT.PALETTE_SHADING_BUILT_IN)}
+              >
+                <SafetyCertificateOutlined aria-hidden />
+              </span>
+            </Tooltip>
+          )}
         </span>
         <span className={styles.modeIcon} aria-hidden><LayerModeIcon mode={entry.mode} /></span>
         <LayerValueCells className={styles.summary} settings={entry} />
