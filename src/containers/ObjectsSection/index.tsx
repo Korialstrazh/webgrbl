@@ -53,6 +53,7 @@ export const ObjectsSection = (): ReactNode => {
 
     isFocusAfterDeleteWantedRef.current = false;
     const objectId: string | undefined = focusedObjectIdAfterDeleteRef.current;
+
     if (objectId) {
       sectionRef.current?.querySelector<HTMLElement>(`[data-object-id="${CSS.escape(objectId)}"]`)?.focus();
 

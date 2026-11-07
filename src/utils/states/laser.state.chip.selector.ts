@@ -62,6 +62,7 @@ export const selectLaserChipState = (state: AppRootState): LaserChipState => {
 export const selectLaserChipPowerPercent = (state: AppRootState): number | undefined => {
   const spindleSpeed: number | undefined = selectMachineStatus(state)?.spindleSpeed;
 
+  // eslint-disable-next-line no-restricted-syntax -- a reported 0 is a real power (off), distinct from no report
   if (spindleSpeed === undefined) {
     return undefined;
   }
