@@ -35,7 +35,6 @@ import {
 } from '../../../../utils/states/job.readiness.selector';
 import type { JobReadinessStep } from '../../../../utils/states/job.readiness.selector';
 import type { AppDispatch } from '../../../../utils/states/new.store';
-import { selectProjectObjects } from '../../../../utils/states/project.document.state';
 import { ConnectionPopoverOpenChanged } from '../../../../utils/states/ui.overlay.state';
 import { MachineProfilesDialogOpenChanged, NarrowRegionChanged } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
@@ -43,7 +42,6 @@ import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../..
 import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
 import { LaserMachineIcon } from '../../../../views/LaserMachineIcon';
 import { MaterialSheetIcon } from '../../../../views/MaterialSheetIcon';
-import { BED_EMPTY_IMPORT_BUTTON_ID } from '../../../BedEmptyCard/bed.empty.card.constants';
 import { PROJECT_MATERIAL_SELECT_ID } from '../../../ProjectMaterialSelect/project.material.select.constants';
 import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
 import styles from './styles.module.scss';
@@ -164,7 +162,6 @@ export const JobReadinessRow = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
   const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
-  const hasObjects: boolean = useSelector(selectProjectObjects).length > 0;
   const nextLook: JobReadinessLook | undefined =
     JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
   const listRef: RefObject<HTMLOListElement | null> = useRef<HTMLOListElement>(null);
@@ -199,30 +196,14 @@ export const JobReadinessRow = (): ReactNode => {
     });
   };
 
-  // The empty-bed card already offers Import SVG, so the Design step leads there instead of a third import button;
-  // with objects on the bed the card is gone and the step opens the file picker for another SVG.
-  const goToDesignStep = (): void => {
-    if (hasObjects) {
-      openSvgFilePicker();
-
-      return;
-    }
-
-    dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }));
-    dispatch(new NarrowRegionChanged({ narrowRegion: WORKBENCH_REGION.BED }));
-    // The card only renders in the Design view, so its button may appear with the next paint.
-    requestAnimationFrame(() => {
-      document.getElementById(BED_EMPTY_IMPORT_BUTTON_ID)?.focus();
-    });
-  };
-
   const goToStep = (step: JobReadinessStep): void => {
     switch (step) {
     case JOB_READINESS_STEP.PROFILE:
       dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen: true }));
       break;
     case JOB_READINESS_STEP.DESIGN:
-      goToDesignStep();
+      // The same file picker as Import SVG in the top bar, so the next step adds artwork in one click.
+      openSvgFilePicker();
       break;
     case JOB_READINESS_STEP.MATERIAL:
       goToMaterialSelect();

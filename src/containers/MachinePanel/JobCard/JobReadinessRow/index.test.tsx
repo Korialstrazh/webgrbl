@@ -1,9 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { JobReadinessRow } from '.';
-import { BedEmptyCard } from '../../../BedEmptyCard';
-import { BED_VIEW_MODE } from '../../../../utils/bed/bed.view.constants';
-import { BedViewModeChanged, selectBedViewMode } from '../../../../utils/states/bed.view.state';
 import { GRBL_CONNECTION_STATUS } from '../../../../utils/grbl/grbl.constants';
 import type { Material } from '../../../../utils/materials/interfaces/Material';
 import { newMaterial } from '../../../../utils/materials/new.material';
@@ -28,7 +25,7 @@ const CONNECT_MET = 'Connect: done';
 const MATERIAL_OPEN = 'Material: to do';
 
 const CONNECT_ACTION = 'Connect laser';
-const DESIGN_ACTION = 'Show drop zone';
+const FILE_INPUT_SELECTOR = 'input[type="file"]';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PRIMARY_BUTTON_SELECTOR = '.ant-btn-primary';
 const MATERIAL_THICKNESS_MM = 3;
@@ -142,30 +139,23 @@ describe(JobReadinessRow.name, () => {
     expect(selectNarrowRegion(store.getState())).toBe(WORKBENCH_REGION.DESIGN);
   });
 
-  it('leads the Design action to the empty-bed card instead of a third import button', async () => {
+  it('opens the Import SVG file picker from the next-step button on an empty bed', () => {
     const store: AppStore = newStore();
     const profile: MachineProfile = newMachineProfile();
 
     store.dispatch(new MachineProfileSaved({ profile }));
     store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
-    store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.TOOLPATH }));
-    render(
-      <Provider store={store}>
-        <AntdTestProvider><JobReadinessRow /><BedEmptyCard /></AntdTestProvider>
-      </Provider>,
+    const { container } = render(
+      <Provider store={store}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>,
     );
+    const fileInput: HTMLInputElement | null = container.querySelector(FILE_INPUT_SELECTOR);
+    const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => undefined);
 
-    expect(screen.getAllByRole('button', { name: IMPORT_SVG_LABEL })).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: IMPORT_SVG_LABEL }));
 
-    fireEvent.click(screen.getByRole('button', { name: DESIGN_ACTION }));
-    await act(async () => {
-      await new Promise<void>((resolve: () => void) => {
-        requestAnimationFrame(() => resolve());
-      });
-    });
-
-    expect(selectBedViewMode(store.getState())).toBe(BED_VIEW_MODE.DESIGN);
-    expect(selectNarrowRegion(store.getState())).toBe(WORKBENCH_REGION.BED);
-    expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toHaveFocus();
+    expect(fileInput).toBeInTheDocument();
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(clickSpy.mock.contexts[0]).toBe(fileInput);
+    clickSpy.mockRestore();
   });
 });
