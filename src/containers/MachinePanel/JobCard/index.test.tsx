@@ -45,8 +45,9 @@ import { FakeToolpathWorkerClient } from '../../../utils/toolpath/test.support/f
 import { newToolpath } from '../../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpath.move';
 
-const LOCK_REASON_CONNECT = 'Connect laser';
-const LOCK_REASON_ARTWORK = 'Add artwork';
+const LOCK_REASON_CONNECT = 'Offline';
+const CONNECT_ACTION_TEXT = 'Connect laser';
+const LOCK_REASON_ARTWORK = 'No artwork';
 const FRAME_LABEL = 'Frame job';
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
@@ -298,12 +299,13 @@ describe(JobCard.name, () => {
     store.dispatch(new ProjectMaterialSelected({ materialId: material.id }));
     renderJobCard(store);
 
-    expect(screen.getAllByText(LOCK_REASON_CONNECT)).toHaveLength(1);
+    expect(screen.getAllByText(CONNECT_ACTION_TEXT)).toHaveLength(1);
+    expect(screen.queryByText(LOCK_REASON_CONNECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
   });
 
-  it('gives Export its own artwork reason in an empty project, not Connect laser', async () => {
+  it('gives Export its own artwork reason in an empty project, not Offline', async () => {
     renderJobCard(await newGcodeExportTestStore({ objects: [] }));
 
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).toHaveTextContent(LOCK_REASON_ARTWORK);

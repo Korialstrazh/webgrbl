@@ -134,7 +134,7 @@ describe(LayersSection.name, () => {
     loadColours(store, [CUT_COLOUR]);
     renderSection(store);
 
-    expect(screen.getByText('This job, in burn order')).toBeInTheDocument();
+    expect(screen.getByText('Burn order')).toBeInTheDocument();
   });
 
   it('shows the note for a palette id the palette no longer has', () => {
