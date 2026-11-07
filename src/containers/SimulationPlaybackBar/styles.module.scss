@@ -51,10 +51,11 @@
   margin-block: 0;
 }
 
-// Fixed-width digits, so the clock does not shift while it counts.
+// Tabular digits in the bar's one font, so the clock does not shift while it counts.
 .clock {
   color: var(--color-text-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   white-space: nowrap;
 }
@@ -70,7 +71,8 @@
 
 .jobSize {
   color: var(--color-text-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   white-space: nowrap;
 }
