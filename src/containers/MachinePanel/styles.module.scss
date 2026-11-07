@@ -46,8 +46,14 @@
 }
 
 // Stacked in a narrow window the panel grows with its cards and the page region scrolls; STOP is in the sticky bar.
-// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+// Its background fills the whole region even when the cards are short, and the side border goes, since the region
+// spans the window. 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
 @media (width < 80rem) {
+  .region {
+    min-height: 100%;
+    border-left: none;
+  }
+
   .region .machinePanel {
     height: auto;
   }

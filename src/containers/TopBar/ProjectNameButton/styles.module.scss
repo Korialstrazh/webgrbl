@@ -33,7 +33,7 @@
 // colour, still on one line: a long name is cut with an ellipsis and its tooltip shows it whole.
 @media (width < 62.5rem) {
   .nameButton {
-    max-width: min(10rem, 100%);
+    max-width: min(13rem, 100%);
     font-size: 0.875rem;
     color: var(--color-text);
   }
