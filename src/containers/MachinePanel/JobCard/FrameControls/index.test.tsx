@@ -4,6 +4,7 @@ import type { MockInstance } from 'vitest';
 import { FrameControls } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE, GRBL_SETTING_LASER_MODE, GRBL_SETTING_ON_VALUE } from '../../../../utils/grbl/grbl.constants';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
+import { MACHINE_JOG_FEED_RATE_MAX, MACHINE_JOG_FEED_RATE_MIN } from '../../../../utils/profiles/machine.profile.constants';
 import { newMachineProfile } from '../../../../utils/profiles/new.machine.profile';
 import { ConnectionEstablished, ConnectionStatusChanged } from '../../../../utils/states/grbl.connection.state';
 import { JOB_RUN_KIND } from '../../../../utils/states/job.run.kind.constants';
@@ -47,8 +48,6 @@ const SELECT_OPTION_SELECTOR = '.ant-select-item-option';
 const FRAME_TIME_TEXT = '3 s';
 // The same perimeter at 3000 mm/min takes 6 s.
 const SLOWER_FRAME_TIME_TEXT = '6 s';
-const SPEED_ERROR_TEXT = 'Frame speed must be between 100 and 10000 mm/min';
-const MARGIN_ERROR_TEXT = 'Frame margin must not be negative';
 const ALARM_TEXT_PATTERN = /reported an alarm, possibly a limit/;
 const SELECT_OPTION_TITLE_ATTRIBUTE = 'title';
 
@@ -207,18 +206,34 @@ describe(FrameControls.name, () => {
     expect(getActiveProfile(store).frameMarginMm).toBe(SAVED_MARGIN_MM);
   });
 
-  it('shows the profile error of an invalid margin and does not save it', () => {
+  it('raises a negative margin to 0 on blur', () => {
     const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
 
     renderFrameControls(store);
     fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: String(INVALID_MARGIN_MM) } });
     fireEvent.blur(screen.getByLabelText(MARGIN_LABEL));
 
-    expect(screen.getByRole('alert')).toHaveTextContent(MARGIN_ERROR_TEXT);
-    expect(getActiveProfile(store).frameMarginMm).toBeUndefined();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(getActiveProfile(store).frameMarginMm).toBe(0);
   });
 
-  it('drops an unsaved margin and its error when another profile becomes active', () => {
+  it('keeps a cleared margin empty while typing and gives the saved one back on blur', () => {
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
+
+    renderFrameControls(store);
+    fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: String(SAVED_MARGIN_MM) } });
+    fireEvent.blur(screen.getByLabelText(MARGIN_LABEL));
+    fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: '' } });
+
+    expect(screen.getByLabelText(MARGIN_LABEL)).toHaveValue('');
+
+    fireEvent.blur(screen.getByLabelText(MARGIN_LABEL));
+
+    expect(screen.getByLabelText(MARGIN_LABEL)).toHaveValue(String(SAVED_MARGIN_MM));
+    expect(getActiveProfile(store).frameMarginMm).toBe(SAVED_MARGIN_MM);
+  });
+
+  it('drops an unsaved margin when another profile becomes active', () => {
     const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
     const otherProfile: MachineProfile = newMachineProfile({
       name: OTHER_PROFILE_NAME,
@@ -227,15 +242,12 @@ describe(FrameControls.name, () => {
 
     renderFrameControls(store);
     fireEvent.change(screen.getByLabelText(MARGIN_LABEL), { target: { value: String(INVALID_MARGIN_MM) } });
-    fireEvent.blur(screen.getByLabelText(MARGIN_LABEL));
-    expect(screen.getByRole('alert')).toHaveTextContent(MARGIN_ERROR_TEXT);
 
     act(() => {
       store.dispatch(new MachineProfileSaved({ profile: otherProfile }));
       store.dispatch(new ActiveMachineProfileSelected({ profileId: otherProfile.id }));
     });
 
-    expect(screen.queryByText(MARGIN_ERROR_TEXT)).not.toBeInTheDocument();
     expect(screen.getByLabelText(MARGIN_LABEL)).toHaveValue(String(SAVED_MARGIN_MM));
   });
 
@@ -252,19 +264,22 @@ describe(FrameControls.name, () => {
     expect(screen.getByText(SLOWER_FRAME_TIME_TEXT)).toBeInTheDocument();
   });
 
-  it.each([[TOO_SLOW_SPEED_MM_PER_MIN], [OUT_OF_RANGE_SPEED_MM_PER_MIN]])(
-    'shows the profile error of the speed %d and does not save it',
-    (invalidSpeed: number) => {
-      const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
+  it.each([
+    [TOO_SLOW_SPEED_MM_PER_MIN, MACHINE_JOG_FEED_RATE_MIN],
+    [OUT_OF_RANGE_SPEED_MM_PER_MIN, MACHINE_JOG_FEED_RATE_MAX],
+  ])('holds the speed %d inside the limits on blur, at %d', (typedSpeed: number, savedSpeed: number) => {
+    const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
 
-      renderFrameControls(store);
-      fireEvent.change(screen.getByLabelText(SPEED_LABEL), { target: { value: String(invalidSpeed) } });
-      fireEvent.blur(screen.getByLabelText(SPEED_LABEL));
+    renderFrameControls(store);
+    fireEvent.change(screen.getByLabelText(SPEED_LABEL), { target: { value: String(typedSpeed) } });
 
-      expect(screen.getByRole('alert')).toHaveTextContent(SPEED_ERROR_TEXT);
-      expect(getActiveProfile(store).frameFeedMmPerMin).toBeUndefined();
-    },
-  );
+    expect(screen.getByLabelText(SPEED_LABEL)).toHaveValue(String(typedSpeed));
+
+    fireEvent.blur(screen.getByLabelText(SPEED_LABEL));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(getActiveProfile(store).frameFeedMmPerMin).toBe(savedSpeed);
+  });
 
   it('shows the default speed and its time for a stored speed that is out of range', () => {
     const store: AppStore = newFrameStore(OUTLINE_END_X_MM);
@@ -284,15 +299,12 @@ describe(FrameControls.name, () => {
 
     renderFrameControls(store);
     fireEvent.change(screen.getByLabelText(SPEED_LABEL), { target: { value: String(TOO_SLOW_SPEED_MM_PER_MIN) } });
-    fireEvent.blur(screen.getByLabelText(SPEED_LABEL));
-    expect(screen.getByRole('alert')).toHaveTextContent(SPEED_ERROR_TEXT);
 
     act(() => {
       store.dispatch(new MachineProfileSaved({ profile: otherProfile }));
       store.dispatch(new ActiveMachineProfileSelected({ profileId: otherProfile.id }));
     });
 
-    expect(screen.queryByText(SPEED_ERROR_TEXT)).not.toBeInTheDocument();
     expect(screen.getByLabelText(SPEED_LABEL)).toHaveValue(DEFAULT_SPEED_TEXT);
   });
 

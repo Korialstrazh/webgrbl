@@ -8,6 +8,7 @@ import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblReso
 import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
+import { MACHINE_JOG_FEED_RATE_MAX } from '../../../utils/profiles/machine.profile.constants';
 import { ConnectRequested, ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
 import { LaserPointerFiringStarted, LaserPointerFiringStopped } from '../../../utils/states/laser.pointer.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
@@ -30,6 +31,7 @@ const NEW_JOG_FEED_RATE = 2400;
 const NEW_JOG_FEED_RATE_TEXT = String(NEW_JOG_FEED_RATE);
 const DEFAULT_JOG_FEED_RATE_TEXT = '1500';
 const EMPTY_INPUT_TEXT = '';
+const TOO_FAST_JOG_FEED_RATE_TEXT = '99999';
 const COLLAPSED_HINT_TEXT = 'Connect to move';
 const SHOW_CONTROLS_LABEL = 'Show the move controls';
 const HIDE_CONTROLS_LABEL = 'Hide the move controls';
@@ -334,6 +336,27 @@ describe(MoveCard.name, () => {
 
     expect(jogSpeedInput).toHaveValue(NEW_JOG_FEED_RATE_TEXT);
     expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('holds a jog speed above the limit at the limit on blur', () => {
+    const store: AppStore = newStore();
+
+    renderMoveCard(store);
+    showControlsWhileDisconnected();
+
+    const profile: MachineProfile = activateProfile(store);
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const jogSpeedInput: HTMLElement = screen.getByRole('spinbutton', { name: JOG_SPEED_LABEL });
+
+    fireEvent.change(jogSpeedInput, { target: { value: TOO_FAST_JOG_FEED_RATE_TEXT } });
+
+    expect(jogSpeedInput).toHaveValue(TOO_FAST_JOG_FEED_RATE_TEXT);
+
+    fireEvent.blur(jogSpeedInput);
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { profile: { ...profile, jogFeedRate: MACHINE_JOG_FEED_RATE_MAX } } }),
+    );
   });
 
   it('jogs with the saved jog speed of the active profile', () => {

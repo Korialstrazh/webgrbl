@@ -14,9 +14,13 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_INPUT_NUMBER_STATUS_ERROR } from '../../../../../utils/antd.constants';
+import { getCommittedNumber } from '../../../../../utils/get.committed.number';
+import { useNumberFieldDraft } from '../../../../../utils/hooks/use.number.field.draft';
+import type { NumberFieldDraftControls } from '../../../../../utils/hooks/use.number.field.draft';
 import { getMachineProfileErrors } from '../../../../../utils/profiles/get.machine.profile.errors';
 import type { MachineProfile } from '../../../../../utils/profiles/interfaces/MachineProfile';
 import type { MachineProfileFieldError } from '../../../../../utils/profiles/interfaces/MachineProfileFieldError';
+import { MACHINE_JOG_FEED_RATE_MAX, MACHINE_JOG_FEED_RATE_MIN } from '../../../../../utils/profiles/machine.profile.constants';
 import { MachineProfileSaved, selectActiveMachineProfile } from '../../../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../../../utils/states/new.store';
 import { IconNumberField } from '../../../../../views/IconNumberField';
@@ -42,6 +46,12 @@ interface FrameNumberInputProps {
   isDisabled: boolean;
 }
 
+// The limits a typed number is held inside on blur: a margin only grows the frame, and the speed has the jog range.
+const FRAME_FIELD_LIMITS: Record<FrameNumberField, [number, number]> = {
+  frameMarginMm: [0, Number.POSITIVE_INFINITY],
+  frameFeedMmPerMin: [MACHINE_JOG_FEED_RATE_MIN, MACHINE_JOG_FEED_RATE_MAX],
+};
+
 export const FrameNumberInput = ({
   field,
   inputId,
@@ -55,13 +65,18 @@ export const FrameNumberInput = ({
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const [draftValue, setDraftValue] = useState<number | undefined>(undefined);
+  const { fieldValue, typedValue, changeDraft, clearDraft }: NumberFieldDraftControls = useNumberFieldDraft(savedValue);
   const [fieldError, setFieldError] = useState<MachineProfileFieldError | undefined>(undefined);
   const errorId: string = `${inputId}-error`;
 
   const saveDraftValue = (): void => {
-    // eslint-disable-next-line no-restricted-syntax -- a draft of 0 is a real value, distinct from no draft
+    // Only blur and Enter correct the field: an empty draft gives the saved value back, a number outside the limits is
+    // held inside them, and nothing empty is ever saved.
+    const draftValue: number | undefined = getCommittedNumber(typedValue, ...FRAME_FIELD_LIMITS[field]);
+
+    // eslint-disable-next-line no-restricted-syntax -- a value of 0 is real, distinct from no value
     if (!activeProfile || draftValue === undefined) {
+      clearDraft();
       setFieldError(undefined);
 
       return;
@@ -78,7 +93,7 @@ export const FrameNumberInput = ({
       return;
     }
 
-    setDraftValue(undefined);
+    clearDraft();
     dispatch(new MachineProfileSaved({ profile }));
   };
 
@@ -93,8 +108,9 @@ export const FrameNumberInput = ({
         status={fieldError ? ANTD_INPUT_NUMBER_STATUS_ERROR : undefined}
         aria-describedby={fieldError ? errorId : undefined}
         disabled={!activeProfile || isDisabled}
-        value={draftValue ?? savedValue}
-        onChange={(typedValue: number | null): void => setDraftValue(typedValue ?? undefined)}
+        value={fieldValue}
+        changeOnBlur={false}
+        onChange={changeDraft}
         onBlur={saveDraftValue}
         onPressEnter={saveDraftValue}
       />
