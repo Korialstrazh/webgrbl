@@ -525,7 +525,7 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('offers the import and the test sample on the card of an empty bed, not in the 3D view', () => {
+  it('offers the test sample on the card of an empty bed, not in the 3D view', () => {
     renderPanel(newHeldToolpathStore());
 
     expect(screen.getByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).toBeInTheDocument();

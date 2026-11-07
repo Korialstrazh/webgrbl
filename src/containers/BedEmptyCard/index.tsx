@@ -1,5 +1,6 @@
 /**
- * The card on an empty bed: drop an SVG, import one, or start with the test sample. It leaves with the first object.
+ * The card on an empty bed: drop an SVG or start with the test sample (Import SVG sits in the top bar and the Job card).
+ * It leaves with the first object.
  *
  * @author michael.morosov
  *
@@ -8,14 +9,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
+import { CloudUploadOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ANTD_BUTTON_TYPE_DEFAULT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { AddTestSampleButton } from '../AddTestSampleButton';
-import { SvgImportButton } from '../SvgImportButton';
-import { BED_EMPTY_IMPORT_BUTTON_ID } from './bed.empty.card.constants';
 import styles from './styles.module.scss';
 
 export const BedEmptyCard = (): ReactNode => {
@@ -28,11 +26,6 @@ export const BedEmptyCard = (): ReactNode => {
         <CloudUploadOutlined className={styles.icon} aria-hidden />
         <p className={styles.hint}>{t(DEFAULT.BED_EMPTY_DROP_HINT)}</p>
         <div className={styles.actions}>
-          <SvgImportButton
-            buttonId={BED_EMPTY_IMPORT_BUTTON_ID}
-            buttonType={ANTD_BUTTON_TYPE_DEFAULT}
-            iconComponent={<ImportOutlined aria-hidden />}
-          />
           <AddTestSampleButton />
         </div>
       </div>

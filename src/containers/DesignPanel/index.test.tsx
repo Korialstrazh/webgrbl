@@ -3,7 +3,9 @@ import { Provider } from 'react-redux';
 import { DesignPanel } from '.';
 import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
 import type { BedViewMode } from '../../utils/bed/bed.view.constants';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import { BedViewModeChanged } from '../../utils/states/bed.view.state';
+import { ProjectObjectsAdded } from '../../utils/states/project.document.state';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
@@ -73,8 +75,17 @@ describe(DesignPanel.name, () => {
     expect(screen.queryByRole('note', { name: CUT_CHECK_NOTE })).not.toBeInTheDocument();
   });
 
-  it('puts Add test sample in the Layers panel', () => {
+  it('leaves Add test sample to the bed card while the bed is empty', () => {
     renderDesignPanel(newStore());
+
+    expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
+  });
+
+  it('puts Add test sample in the Layers panel once the bed has objects', () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    renderDesignPanel(store);
 
     const layersPanel: HTMLElement = screen.getByRole('region', { name: LAYERS_TITLE });
 
