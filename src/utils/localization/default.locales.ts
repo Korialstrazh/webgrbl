@@ -1519,7 +1519,7 @@ registerLocales({
       [DEFAULT.TOOLPATH_WARNINGS_TITLE]: "Toolpath warnings",
       [DEFAULT.TOP_BAR_AUTOSAVE_SAVED]: "Saved",
       [DEFAULT.TOP_BAR_AUTOSAVE_SAVING]: "Saving…",
-      [DEFAULT.TOP_BAR_AUTOSAVE_UNSAVED]: "Not saved",
+      [DEFAULT.TOP_BAR_AUTOSAVE_UNSAVED]: "Waiting to save",
       [DEFAULT.TOP_BAR_MENU_IMPORT_SVG]: "Import SVG",
       [DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES]: "Laser profiles",
       [DEFAULT.TOP_BAR_MENU_PROJECT]: "Project",

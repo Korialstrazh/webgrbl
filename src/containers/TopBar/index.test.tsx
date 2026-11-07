@@ -72,7 +72,9 @@ const OPEN_PROJECT_DIALOG_LABEL = 'Open project';
 const PROJECT_FILE_INPUT_LABEL = 'Open a project file';
 const PROJECT_FILE_NAME = 'coasters.webgrbl.json';
 const SAVING_TEXT = 'Saving\u2026';
-const NOT_SAVED_TEXT = 'Not saved';
+const NOT_SAVED_TEXT = 'Waiting to save';
+const CLOCK_ICON_SELECTOR = '.anticon-clock-circle';
+const ALERT_ICON_SELECTOR = '.anticon-exclamation-circle';
 const UNTITLED_PROJECT_NAME = 'Untitled project';
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const ARIA_DISABLED_TRUE = 'true';
@@ -497,6 +499,20 @@ describe(TopBar.name, () => {
       });
 
       expect(screen.getByRole('status')).toHaveTextContent(expectedText);
+    });
+
+    it('shows a pending change as a calm clock, not an alert mark', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.UNSAVED }));
+      });
+
+      const readout: HTMLElement = screen.getByRole('status');
+
+      expect(readout.querySelector(CLOCK_ICON_SELECTOR)).not.toBeNull();
+      expect(readout.querySelector(ALERT_ICON_SELECTOR)).toBeNull();
     });
 
     it('names the save state on the readout itself, so the icon alone still has a meaning', () => {

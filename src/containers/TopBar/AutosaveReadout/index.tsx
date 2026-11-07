@@ -1,5 +1,5 @@
 /**
- * The autosave readout of the top bar: an icon and the state of the open project, Saved, Saving or Not saved. When the
+ * The autosave readout of the top bar: an icon and the state of the open project, Saved, Saving or Waiting to save. Waiting is a calm grey clock, not an error: autosave stores the change shortly. When the
  * bar is narrow only the icon stays; its tooltip and accessible name still give the state.
  *
  * @author michael.morosov
@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckCircleFilled, ExclamationCircleFilled, SyncOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, ClockCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +31,7 @@ const getSaveStatusIconComponent = (saveStatus: ProjectSaveStatus): ReactNode =>
     return <SyncOutlined spin />;
   }
 
-  return saveStatus === PROJECT_SAVE_STATUS.SAVED ? <CheckCircleFilled /> : <ExclamationCircleFilled />;
+  return saveStatus === PROJECT_SAVE_STATUS.SAVED ? <CheckCircleFilled /> : <ClockCircleOutlined />;
 };
 
 export const AutosaveReadout = (): ReactNode => {
