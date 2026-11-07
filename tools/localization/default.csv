@@ -703,7 +703,7 @@ STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
 STATUS_STRIP_TITLE;Status
 STOP_SETTINGS_DOUBLE_CLICK_HINT;Only when connected and idle. The laser stays off, and STOP cancels the move.
-STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER;Double-click the bed to move the laser there
+STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER;Double-click bed moves laser
 STOP_SETTINGS_ESC_HINT;One Esc closes the panel and stops.
 STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN;Esc stops over panels too
 STOP_SETTINGS_TITLE;Stop settings

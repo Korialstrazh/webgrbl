@@ -11,7 +11,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const SETTINGS_LABEL = 'Stop settings';
 const PREFERENCE_LABEL = 'Esc stops over panels too';
-const DOUBLE_CLICK_LABEL = 'Double-click the bed to move the laser there';
+const DOUBLE_CLICK_LABEL = 'Double-click bed moves laser';
 const DIALOG_OVERLAY_ID = 'test-dialog';
 const PREFERENCE_HINT = 'One Esc closes the panel and stops.';
 
@@ -35,7 +35,7 @@ describe(StopSettingsButton.name, () => {
 
     expect(selectIsEscStoppingWithOverlayOpen(store.getState())).toBe(true);
     expect(screen.getByRole('checkbox', { name: PREFERENCE_LABEL })).toBeChecked();
-    expect(screen.getByText(PREFERENCE_HINT)).toBeInTheDocument();
+    expect(screen.getByRole('note', { name: PREFERENCE_HINT })).toBeInTheDocument();
   });
 
   it('turns the bed double-click move on from its own checkbox, which is off by default', () => {

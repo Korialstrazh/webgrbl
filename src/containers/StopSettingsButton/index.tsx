@@ -29,6 +29,7 @@ import {
 } from '../../utils/states/app.preferences.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { IconActionButton } from '../../views/IconActionButton';
+import { TooltipNoteIcon } from '../../views/TooltipNoteIcon';
 import { STOP_SETTINGS_POPOVER_OVERLAY_ID } from './stop.settings.button.constants';
 import styles from './styles.module.scss';
 
@@ -62,20 +63,25 @@ export const StopSettingsButton = (): ReactNode => {
       rootClassName={styles.stopSettingsPopoverRoot}
       content={(
         <div className={styles.content}>
-          <Checkbox className={styles.preference} checked={isEscStopping} onChange={handlePreferenceChange}>
-            {t(DEFAULT.STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN)}
-          </Checkbox>
-          <p className={styles.hint}>
-            <SafetyOutlined aria-hidden />
-            <span>{t(DEFAULT.STOP_SETTINGS_ESC_HINT)}</span>
-          </p>
-          <Checkbox className={styles.preference} checked={isDoubleClickMoving} onChange={handleDoubleClickMoveChange}>
-            {t(DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER)}
-          </Checkbox>
-          <p className={styles.hint}>
-            <AimOutlined aria-hidden />
-            <span>{t(DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_HINT)}</span>
-          </p>
+          {/* One short line per option; the detail sits behind the info icon at its end. */}
+          <div className={styles.preferenceRow}>
+            <Checkbox className={styles.preference} checked={isEscStopping} onChange={handlePreferenceChange}>
+              <span className={styles.preferenceLabel}>
+                <SafetyOutlined aria-hidden />
+                {t(DEFAULT.STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN)}
+              </span>
+            </Checkbox>
+            <TooltipNoteIcon noteText={t(DEFAULT.STOP_SETTINGS_ESC_HINT)} />
+          </div>
+          <div className={styles.preferenceRow}>
+            <Checkbox className={styles.preference} checked={isDoubleClickMoving} onChange={handleDoubleClickMoveChange}>
+              <span className={styles.preferenceLabel}>
+                <AimOutlined aria-hidden />
+                {t(DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER)}
+              </span>
+            </Checkbox>
+            <TooltipNoteIcon noteText={t(DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_HINT)} />
+          </div>
         </div>
       )}
     >

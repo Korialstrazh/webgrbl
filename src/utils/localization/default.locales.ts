@@ -1526,7 +1526,7 @@ registerLocales({
       [DEFAULT.STATUS_STRIP_OFFLINE_HINT]: "No network connection. webgrbl keeps working, and the laser connection does not need the network.",
       [DEFAULT.STATUS_STRIP_TITLE]: "Status",
       [DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_HINT]: "Only when connected and idle. The laser stays off, and STOP cancels the move.",
-      [DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER]: "Double-click the bed to move the laser there",
+      [DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER]: "Double-click bed moves laser",
       [DEFAULT.STOP_SETTINGS_ESC_HINT]: "One Esc closes the panel and stops.",
       [DEFAULT.STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN]: "Esc stops over panels too",
       [DEFAULT.STOP_SETTINGS_TITLE]: "Stop settings",
