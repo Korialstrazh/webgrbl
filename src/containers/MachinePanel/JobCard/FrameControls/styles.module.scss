@@ -45,6 +45,12 @@
   :global(.ant-btn) :global(.anticon) {
     font-size: 1.25rem;
   }
+
+  // Locked, Start steps back: regular weight in the muted grey, so the orange next-step button above leads.
+  :global(.ant-btn)[aria-disabled='true'],
+  :global(.ant-btn):disabled {
+    font-weight: 400;
+  }
 }
 
 .exportAction,

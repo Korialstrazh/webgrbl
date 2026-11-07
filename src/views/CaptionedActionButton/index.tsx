@@ -37,6 +37,8 @@ interface CaptionedActionButtonProps extends Omit<ButtonProps, 'icon' | 'childre
   isLabelTooltipShown?: boolean;
   /** True on a secondary action beside a main one: a faint border, so it never draws the eye first. */
   isQuiet?: boolean;
+  /** True where the icon alone tells the action: while off, the lock takes the icon's place instead of joining it. */
+  isLockInPlaceOfIcon?: boolean;
 }
 
 export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactNode => {
@@ -48,6 +50,7 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
     isDisabled = false,
     isLabelTooltipShown = true,
     isQuiet = false,
+    isLockInPlaceOfIcon = false,
     className,
     onClick,
     ...buttonProps
@@ -55,6 +58,10 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
   const tooltipText: string | undefined = blockedReasonText ?? (isLabelTooltipShown ? labelText : undefined);
   const isBlocked: boolean = Boolean(blockedReasonText);
   const isButtonDisabled: boolean = isDisabled || isBlocked;
+  const lockComponent: ReactNode = (
+    <LockFilled className={styles.lockBadge} data-testid={CAPTIONED_ACTION_LOCK_TEST_ID} aria-hidden />
+  );
+  const isLockOnIcon: boolean = isButtonDisabled && isLockInPlaceOfIcon;
 
   // A blocked action stays in the tab order, so keyboard and screen reader users reach its reason; a click, Enter or
   // Space on it does nothing and never reaches a wrapper such as a confirmation.
@@ -79,7 +86,12 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
     >
       <Button
         {...buttonProps}
-        className={[styles.captionedActionButton, isQuiet ? styles.quiet : undefined, className].join(' ')}
+        className={[
+          styles.captionedActionButton,
+          isQuiet ? styles.quiet : undefined,
+          isLockOnIcon ? styles.lockedInPlace : undefined,
+          className,
+        ].join(' ')}
         aria-label={labelText}
         aria-description={blockedReasonText}
         aria-disabled={isBlocked || undefined}
@@ -87,12 +99,10 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
         onClick={handleClick}
       >
         <span className={styles.icon} aria-hidden>
-          {iconComponent}
+          {isLockOnIcon ? lockComponent : iconComponent}
         </span>
         <span className={styles.caption}>
-          {isButtonDisabled && (
-            <LockFilled className={styles.lockBadge} data-testid={CAPTIONED_ACTION_LOCK_TEST_ID} aria-hidden />
-          )}
+          {isButtonDisabled && !isLockOnIcon && lockComponent}
           <span>{captionText}</span>
         </span>
       </Button>

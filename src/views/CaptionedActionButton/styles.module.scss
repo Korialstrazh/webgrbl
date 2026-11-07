@@ -109,3 +109,13 @@
   font-size: 0.8125rem;
   line-height: 1.2;
 }
+
+// The lock alone in the icon's place: one signal, in the muted grey, so a locked action never outshines the next step.
+.lockedInPlace .icon .lockBadge.lockBadge:global(.anticon) {
+  position: static;
+  transform: none;
+  padding: 0;
+  background-color: transparent;
+  color: var(--color-text-muted);
+  font-size: inherit;
+}
