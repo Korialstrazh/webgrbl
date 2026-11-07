@@ -15,6 +15,7 @@ import { useContext } from 'react';
 import type { ReactNode } from 'react';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
+import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
 import type { BedRegionModalProps } from './interfaces/BedRegionModalProps';
 import styles from './styles.module.scss';
 
@@ -24,7 +25,7 @@ export const BedRegionModal = (props: BedRegionModalProps): ReactNode => {
   // Without the bed region the dialog would fall back to the whole window, over STOP, so it waits for the region.
   const isShown: boolean = isOpen && Boolean(bedRegionHost);
 
-  useOverlayRegistration(overlayIdPrefix, isShown);
+  useOverlayRegistration(overlayIdPrefix, isShown, OVERLAY_KIND.DIALOG);
 
   if (!bedRegionHost) {
     return null;

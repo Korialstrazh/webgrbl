@@ -14,6 +14,7 @@ import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { ConnectionPopoverOpenPayload } from './interfaces/ConnectionPopoverOpenPayload';
 import type { OverlayRegistryPayload } from './interfaces/OverlayRegistryPayload';
+import { OVERLAY_KIND } from './overlay.kind.constants';
 
 // #region State
 export interface UiOverlayState {
@@ -21,6 +22,8 @@ export interface UiOverlayState {
   openOverlayIds: string[];
   /** Whether the connection popover under the top-bar pill is open; the pill and the Status card both open it. */
   isConnectionPopoverOpen: boolean;
+  /** How many times a dialog or drawer has opened; each rise closes the open popovers. */
+  dialogOpenCount: number;
 }
 // #endregion
 
@@ -50,14 +53,25 @@ export class ConnectionPopoverOpenChanged extends Action<ConnectionPopoverOpenPa
 const INITIAL_UI_OVERLAY_STATE: UiOverlayState = {
   openOverlayIds: [],
   isConnectionPopoverOpen: false,
+  dialogOpenCount: 0,
 };
 // #endregion
 
 // #region Reducer
-const getStateWithOverlay = (state: UiOverlayState, overlayId: string): UiOverlayState =>
-  state.openOverlayIds.includes(overlayId)
-    ? state
-    : { ...state, openOverlayIds: [...state.openOverlayIds, overlayId] };
+const getStateWithOverlay = (
+  state: UiOverlayState,
+  { overlayId, overlayKind }: OverlayRegistryPayload,
+): UiOverlayState => {
+  if (state.openOverlayIds.includes(overlayId)) {
+    return state;
+  }
+
+  const stateWithOverlay: UiOverlayState = { ...state, openOverlayIds: [...state.openOverlayIds, overlayId] };
+
+  return overlayKind === OVERLAY_KIND.DIALOG
+    ? { ...stateWithOverlay, isConnectionPopoverOpen: false, dialogOpenCount: state.dialogOpenCount + 1 }
+    : stateWithOverlay;
+};
 
 const getStateWithoutOverlay = (state: UiOverlayState, overlayId: string): UiOverlayState =>
   state.openOverlayIds.includes(overlayId)
@@ -70,7 +84,7 @@ export const uiOverlayReducer = (
 ): UiOverlayState => {
   switch (action.type) {
   case OverlayOpened.type:
-    return getStateWithOverlay(state, (action as OverlayOpened).payload.overlayId);
+    return getStateWithOverlay(state, (action as OverlayOpened).payload);
   case OverlayClosed.type:
     return getStateWithoutOverlay(state, (action as OverlayClosed).payload.overlayId);
   case ConnectionPopoverOpenChanged.type:
@@ -92,4 +106,6 @@ export const selectIsAnyOverlayOpen = (state: RootState): boolean =>
 
 export const selectIsConnectionPopoverOpen = (state: RootState): boolean =>
   state[UI_OVERLAY_STATE_NAME].isConnectionPopoverOpen;
+
+export const selectDialogOpenCount = (state: RootState): number => state[UI_OVERLAY_STATE_NAME].dialogOpenCount;
 // #endregion

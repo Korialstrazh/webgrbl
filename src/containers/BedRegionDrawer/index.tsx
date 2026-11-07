@@ -21,6 +21,7 @@ import { BED_REGION_DRAWER_STORE } from '../../utils/bed/bed.region.drawer.store
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
 import { getBedRegionDrawerInset } from '../../utils/bed/get.bed.region.drawer.inset';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
+import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
 import type { BedRegionDrawerProps } from './interfaces/BedRegionDrawerProps';
 import styles from './styles.module.scss';
 
@@ -32,7 +33,7 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
 
   const insetValue: string | undefined = getBedRegionDrawerInset(drawerProps.placement, drawerProps.size);
 
-  useOverlayRegistration(overlayIdPrefix, isShown);
+  useOverlayRegistration(overlayIdPrefix, isShown, OVERLAY_KIND.DIALOG);
 
   useEffect(() => {
     if (!bedRegionHost || !isShown || !insetValue) {

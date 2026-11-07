@@ -18,6 +18,7 @@ import { useDispatch } from 'react-redux';
 import { ANTD_BUTTON_TYPE_TEXT, ANTD_DROPDOWN_TRIGGER_CLICK } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
+import { usePopoverCloseOnDialogOpen } from '../../../utils/hooks/use.popover.close.on.dialog.open';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import {
@@ -39,9 +40,14 @@ export const ProjectMenu = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const fileInputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
   const [isOpenDialogShown, setIsOpenDialogShown] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const gcodeExport: GcodeExportAvailability = useGcodeExportAvailability();
 
+  usePopoverCloseOnDialogOpen(isMenuOpen, () => setIsMenuOpen(false));
+
   const handleMenuClick = ({ key }: ProjectMenuClickInfo): void => {
+    setIsMenuOpen(false);
+
     switch (key) {
     case PROJECT_MENU_KEY.NEW:
       dispatch(new NewProjectRequested());
@@ -71,6 +77,8 @@ export const ProjectMenu = (): ReactNode => {
       <DismissibleTooltip title={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>
         <Dropdown
           trigger={ANTD_DROPDOWN_TRIGGER_CLICK}
+          open={isMenuOpen}
+          onOpenChange={setIsMenuOpen}
           menu={{ items: getProjectMenuItems(t, gcodeExport), onClick: handleMenuClick }}
         >
           <Button type={ANTD_BUTTON_TYPE_TEXT} aria-label={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>

@@ -12,11 +12,17 @@
 import { useEffect, useId } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../states/new.store';
+import { OVERLAY_KIND } from '../states/overlay.kind.constants';
+import type { OverlayKind } from '../states/overlay.kind.constants';
 import { OverlayClosed, OverlayOpened } from '../states/ui.overlay.state';
 
 const OVERLAY_ID_SEPARATOR = ':';
 
-export const useOverlayRegistration = (overlayIdPrefix: string, isOpen: boolean): void => {
+export const useOverlayRegistration = (
+  overlayIdPrefix: string,
+  isOpen: boolean,
+  overlayKind: OverlayKind = OVERLAY_KIND.POPOVER,
+): void => {
   const dispatch: AppDispatch = useDispatch<AppDispatch>();
   const uniqueSuffix: string = useId();
   const overlayId: string = [overlayIdPrefix, uniqueSuffix].join(OVERLAY_ID_SEPARATOR);
@@ -26,10 +32,10 @@ export const useOverlayRegistration = (overlayIdPrefix: string, isOpen: boolean)
       return undefined;
     }
 
-    dispatch(new OverlayOpened({ overlayId }));
+    dispatch(new OverlayOpened({ overlayId, overlayKind }));
 
     return () => {
       dispatch(new OverlayClosed({ overlayId }));
     };
-  }, [dispatch, overlayId, isOpen]);
+  }, [dispatch, overlayId, isOpen, overlayKind]);
 };

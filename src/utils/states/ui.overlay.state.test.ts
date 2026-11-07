@@ -14,16 +14,22 @@ import {
   ConnectionPopoverOpenChanged,
   OverlayClosed,
   OverlayOpened,
+  selectDialogOpenCount,
   selectIsAnyOverlayOpen,
   selectIsConnectionPopoverOpen,
   uiOverlayReducer,
 } from './ui.overlay.state';
 import type { UiOverlayState } from './ui.overlay.state';
+import { OVERLAY_KIND } from './overlay.kind.constants';
 
 const UNKNOWN_ACTION_TYPE = 'unknown action';
 const FIRST_OVERLAY_ID = 'dialog-a';
 const SECOND_OVERLAY_ID = 'drawer-b';
-const NO_OVERLAYS_STATE: UiOverlayState = { openOverlayIds: [], isConnectionPopoverOpen: false };
+const NO_OVERLAYS_STATE: UiOverlayState = {
+  openOverlayIds: [],
+  isConnectionPopoverOpen: false,
+  dialogOpenCount: 0,
+};
 
 class UnknownAction extends Action {
   public static readonly type: string = UNKNOWN_ACTION_TYPE;
@@ -69,5 +75,30 @@ describe(uiOverlayReducer.name, () => {
     state = uiOverlayReducer(state, new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: false }));
 
     expect(selectIsConnectionPopoverOpen({ uiOverlay: state })).toBe(false);
+  });
+
+  it('closes the connection popover and counts the opening when a dialog opens', () => {
+    let state: UiOverlayState = uiOverlayReducer(
+      NO_OVERLAYS_STATE,
+      new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }),
+    );
+    state = uiOverlayReducer(
+      state,
+      new OverlayOpened({ overlayId: FIRST_OVERLAY_ID, overlayKind: OVERLAY_KIND.DIALOG }),
+    );
+
+    expect(selectIsConnectionPopoverOpen({ uiOverlay: state })).toBe(false);
+    expect(selectDialogOpenCount({ uiOverlay: state })).toBe(1);
+  });
+
+  it('keeps the connection popover open when another popover opens', () => {
+    let state: UiOverlayState = uiOverlayReducer(
+      NO_OVERLAYS_STATE,
+      new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }),
+    );
+    state = uiOverlayReducer(state, new OverlayOpened({ overlayId: SECOND_OVERLAY_ID }));
+
+    expect(selectIsConnectionPopoverOpen({ uiOverlay: state })).toBe(true);
+    expect(selectDialogOpenCount({ uiOverlay: state })).toBe(0);
   });
 });

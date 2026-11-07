@@ -42,6 +42,7 @@ import { getFrameDurationSeconds } from '../../../../utils/frame/get.frame.durat
 import type { FrameBedOverrun } from '../../../../utils/frame/interfaces/FrameBedOverrun';
 import type { FrameRectangle } from '../../../../utils/frame/interfaces/FrameRectangle';
 import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.registration';
+import { usePopoverCloseOnDialogOpen } from '../../../../utils/hooks/use.popover.close.on.dialog.open';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../../utils/missing.value.constants';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
@@ -128,6 +129,8 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
   const changeSettingsOpen = (isFrameSettingsOpen: boolean): void => {
     dispatch(new FrameSettingsOpenChanged({ isFrameSettingsOpen }));
   };
+
+  usePopoverCloseOnDialogOpen(isSettingsOpen, () => changeSettingsOpen(false));
 
   const settingsComponent: ReactNode = (
     <div id={settingsId} className={styles.settings}>
