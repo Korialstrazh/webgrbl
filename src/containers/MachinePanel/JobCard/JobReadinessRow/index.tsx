@@ -44,6 +44,7 @@ import { LaserMachineIcon } from '../../../../views/LaserMachineIcon';
 import { MaterialSheetIcon } from '../../../../views/MaterialSheetIcon';
 import { PROJECT_MATERIAL_SELECT_ID } from '../../../ProjectMaterialSelect/project.material.select.constants';
 import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
+import { POPOVER_KEEP_CLEAR_ATTRIBUTE } from '../../../../utils/layout.constants';
 import styles from './styles.module.scss';
 
 const ARIA_CURRENT_STEP = 'step';
@@ -157,6 +158,9 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
   );
 };
 
+// The steps and the next-step button stay in sight: the connection and frame popovers open clear of them.
+const POPOVER_KEEP_CLEAR_PROPS: Record<string, string> = { [POPOVER_KEEP_CLEAR_ATTRIBUTE]: '' };
+
 export const JobReadinessRow = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
@@ -218,6 +222,7 @@ export const JobReadinessRow = (): ReactNode => {
       <ol
         ref={listRef}
         className={styles.jobReadinessRow}
+        {...POPOVER_KEEP_CLEAR_PROPS}
         aria-label={t(DEFAULT.JOB_READINESS_LABEL)}
         onKeyDown={handleRowKeyDown}
       >
@@ -235,6 +240,7 @@ export const JobReadinessRow = (): ReactNode => {
         <Button
           type={ANTD_BUTTON_TYPE_PRIMARY}
           block
+          {...POPOVER_KEEP_CLEAR_PROPS}
           icon={nextLook.actionIconComponent ?? nextLook.iconComponent}
           onClick={() => goToStep(nextLook.step)}
         >

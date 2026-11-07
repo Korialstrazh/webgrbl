@@ -87,3 +87,9 @@ export const CONSOLE_PANEL_DEFAULT_SIZE_PERCENT = 30;
  * another tab upgrades the database; after this time the workbench opens with the default sizes instead.
  */
 export const PANEL_SIZES_READ_TIMEOUT_MS = 1_500;
+
+/** Marks what a popover must never cover, such as the Job steps and the next-step button. */
+export const POPOVER_KEEP_CLEAR_ATTRIBUTE = 'data-popover-keep-clear';
+
+/** Finds every element marked with POPOVER_KEEP_CLEAR_ATTRIBUTE. */
+export const POPOVER_KEEP_CLEAR_SELECTOR = `[${POPOVER_KEEP_CLEAR_ATTRIBUTE}]`;

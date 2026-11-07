@@ -225,6 +225,19 @@ describe(ConnectionPill.name, () => {
     expect(pillButton).toHaveFocus();
   });
 
+  it('opened with a pointer, focuses the popover itself, so the Port field never opens ringed', async () => {
+    renderConnectionPill();
+
+    const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    fireEvent.pointerDown(pillButton);
+    fireEvent.click(pillButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toHaveFocus();
+    });
+  });
+
   it('shows the name of the active machine profile', () => {
     const store: AppStore = renderConnectionPill();
     const profile: MachineProfile = newMachineProfile({ name: PROFILE_NAME });
