@@ -124,12 +124,12 @@ describe(TopBar.name, () => {
     expect(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL })).toHaveTextContent(ACTIVE_PROFILE_NAME);
   });
 
-  it('carries a short Laser caption on the profile button for a narrow bar, outside its name', () => {
+  it('keeps the profile name as the only text of the profile button, with no generic caption beside it', () => {
     renderWorkbenchTopBar(newStore());
 
     const profileButton: HTMLElement = screen.getByRole('button', { name: MACHINE_PROFILES_LABEL });
 
-    expect(within(profileButton).getByText('Laser')).toHaveAttribute('aria-hidden', 'true');
+    expect(within(profileButton).queryByText('Laser')).not.toBeInTheDocument();
   });
 
   it('shows the app name, the autosave readout and the connection pill', () => {

@@ -96,20 +96,12 @@
   white-space: nowrap;
 }
 
-.profileCaption {
-  display: none;
-}
-
-// The save word and the profile name give up room first (the laser icon and its tooltip still name the profile), so
-// the project name stays readable, Import SVG keeps its label and the connection pill stays whole at 50rem; Import SVG
-// drops its label at 46rem.
+// The save word goes and the profile name shortens (the connection pill drops its own copy of the name), so the
+// project name stays readable, Import SVG keeps its label and the connection pill stays whole at 50rem; Import SVG
+// drops its label and the name goes at 46rem (the laser icon and its tooltip still name the profile).
 @media (width < 62.5rem) {
   .profileName {
-    @include accessibility.visually-hidden;
-  }
-
-  .profileCaption {
-    display: inline;
+    max-width: 6rem;
     font-size: 0.8125rem;
   }
 
@@ -123,8 +115,8 @@
     @include accessibility.visually-hidden;
   }
 
-  .profileCaption {
-    display: none;
+  .profileName {
+    @include accessibility.visually-hidden;
   }
 }
 
