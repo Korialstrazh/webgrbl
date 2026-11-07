@@ -15,6 +15,7 @@ import { ANTD_BUTTON_TYPE_DEFAULT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { AddTestSampleButton } from '../AddTestSampleButton';
 import { SvgImportButton } from '../SvgImportButton';
+import { BED_EMPTY_IMPORT_BUTTON_ID } from './bed.empty.card.constants';
 import styles from './styles.module.scss';
 
 export const BedEmptyCard = (): ReactNode => {
@@ -28,6 +29,7 @@ export const BedEmptyCard = (): ReactNode => {
         <p className={styles.hint}>{t(DEFAULT.BED_EMPTY_DROP_HINT)}</p>
         <div className={styles.actions}>
           <SvgImportButton
+            buttonId={BED_EMPTY_IMPORT_BUTTON_ID}
             buttonType={ANTD_BUTTON_TYPE_DEFAULT}
             iconComponent={<ImportOutlined aria-hidden />}
           />

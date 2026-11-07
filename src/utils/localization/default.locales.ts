@@ -1060,7 +1060,7 @@ registerLocales({
       [DEFAULT.JOB_READINESS_CONNECT_ACTION]: "Connect laser",
       [DEFAULT.JOB_READINESS_CONNECT_HINT]: "Connect the laser",
       [DEFAULT.JOB_READINESS_DESIGN]: "Artwork",
-      [DEFAULT.JOB_READINESS_DESIGN_ACTION]: "Import SVG",
+      [DEFAULT.JOB_READINESS_DESIGN_ACTION]: "Show drop zone",
       [DEFAULT.JOB_READINESS_DESIGN_HINT]: "Import an SVG",
       [DEFAULT.JOB_READINESS_DESIGN_MET_HINT]: "Import another SVG",
       [DEFAULT.JOB_READINESS_LABEL]: "Ready to cut?",
