@@ -164,7 +164,7 @@ describe.each([
 
 // Palette, Laser profiles, Open project and Add material all open through AppModal, whose scrim covers the window.
 describe('AppRoute with a full-window dialog open', () => {
-  it.each([true, false])('keeps STOP outside the dialog and its scrim, and clickable (wide: %s)', async (isWide: boolean) => {
+  it.each([true, false])('keeps STOP outside the dialog scrim, clickable (wide: %s)', async (isWide: boolean) => {
     setMatchMediaMatches(isWide);
 
     const closeSpy = vi.fn();
