@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { describe, expect, it } from 'vitest';
 import { StopSettingsButton } from '.';
-import { selectIsEscStoppingWithOverlayOpen } from '../../utils/states/app.preferences.state';
+import { selectIsBedDoubleClickMovingLaser, selectIsEscStoppingWithOverlayOpen } from '../../utils/states/app.preferences.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
@@ -11,6 +11,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const SETTINGS_LABEL = 'Stop settings';
 const PREFERENCE_LABEL = 'Esc stops over panels too';
+const DOUBLE_CLICK_LABEL = 'Double-click the bed to move the laser there';
 const DIALOG_OVERLAY_ID = 'test-dialog';
 const PREFERENCE_HINT = 'One Esc closes the panel and stops.';
 
@@ -35,6 +36,26 @@ describe(StopSettingsButton.name, () => {
     expect(selectIsEscStoppingWithOverlayOpen(store.getState())).toBe(true);
     expect(screen.getByRole('checkbox', { name: PREFERENCE_LABEL })).toBeChecked();
     expect(screen.getByText(PREFERENCE_HINT)).toBeInTheDocument();
+  });
+
+  it('turns the bed double-click move on from its own checkbox, which is off by default', () => {
+    const store: AppStore = newStore();
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <StopSettingsButton />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: SETTINGS_LABEL }));
+
+    expect(screen.getByRole('checkbox', { name: DOUBLE_CLICK_LABEL })).not.toBeChecked();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: DOUBLE_CLICK_LABEL }));
+
+    expect(selectIsBedDoubleClickMovingLaser(store.getState())).toBe(true);
+    expect(selectIsEscStoppingWithOverlayOpen(store.getState())).toBe(false);
   });
 
   it('closes when a dialog opens', () => {

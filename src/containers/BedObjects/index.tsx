@@ -1,6 +1,7 @@
 /**
  * The project objects on the bed and the pointer and key editing of them. A click selects, Shift-click adds or
- * removes, a click on empty bed clears, and a drag moves the selection. The one selected object gets
+ * removes, a click on empty bed clears, and a drag moves the selection. When the user switched it on, a double-click on
+ * empty bed moves the laser there; a double-click on an object never does. The one selected object gets
  * handles that scale and turn it. Every drag and handle gesture is held locally while the pointer is down and becomes
  * one transform action, so one undo step, when it comes up. The layer takes keyboard focus for the nudge and delete
  * keys.
@@ -13,7 +14,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { useCallback, useMemo, useRef } from 'react';
-import type { PointerEvent, ReactNode, RefObject } from 'react';
+import type { MouseEvent, PointerEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDesignLayerLooks } from '../../utils/bed/get.design.layer.looks';
@@ -40,6 +41,7 @@ import type { BedObjectsKeyDownHandler } from './interfaces/BedObjectsKeyDownHan
 import type { BedObjectsProps } from './interfaces/BedObjectsProps';
 import type { SelectToolPointerDownOutcome } from './interfaces/SelectToolPointerDownOutcome';
 import styles from './styles.module.scss';
+import { useBedDoubleClickMove } from './use.bed.double.click.move';
 import { useBedGestureActivity } from './use.bed.gesture.activity';
 import { useBedHandleGesture } from './use.bed.handle.gesture';
 import { useBedObjectDrag } from './use.bed.object.drag';
@@ -62,6 +64,8 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
   const gestureControls: BedHandleGestureControls = useBedHandleGesture(layerRef, dimensions.heightMm);
   const handleKeyDown: BedObjectsKeyDownHandler = useBedObjectsKeys();
   const pixelsPerMm: number | undefined = useBedPixelsPerMm(layerRef, dimensions);
+  const handleSurfaceDoubleClick: (mouseEvent: MouseEvent<SVGElement>) => void =
+    useBedDoubleClickMove(layerRef, dimensions.heightMm);
   const handleSizes: BedHandleSizes = useMemo(() => getBedHandleSizes(pixelsPerMm), [pixelsPerMm]);
   const { startObjectDrag, drag } = dragControls;
   const { startHandleGesture, handleGesture } = gestureControls;
@@ -161,6 +165,7 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
         width={dimensions.widthMm}
         height={dimensions.heightMm}
         onPointerDown={handleSurfacePointerDown}
+        onDoubleClick={handleSurfaceDoubleClick}
       />
       {projectObjects.map((projectObject: ProjectObject) => {
         const drawnObject: ProjectObject = getObjectWithDragOffset(

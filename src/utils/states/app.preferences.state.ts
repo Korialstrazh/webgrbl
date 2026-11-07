@@ -1,6 +1,7 @@
 /**
- * App-wide preferences that are not about the bed: whether Escape also stops the laser while a drawer, dialog or
- * popover is open. It starts off and is replaced by the stored choice once that has been read.
+ * App-wide preferences: whether Escape also stops the laser while a drawer, dialog or popover is open, and whether a
+ * double-click on empty bed moves the laser there. Both start off and are replaced by the stored choices once those
+ * have been read.
  *
  * @author michael.morosov
  *
@@ -12,12 +13,15 @@
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
+import type { BedDoubleClickMovePreferencePayload } from './interfaces/BedDoubleClickMovePreferencePayload';
 import type { EscStopPreferencePayload } from './interfaces/EscStopPreferencePayload';
 
 // #region State
 export interface AppPreferencesState {
   /** True when Escape also stops the laser while an overlay is open; off by default. */
   isEscStoppingWithOverlayOpen: boolean;
+  /** True when a double-click on empty bed moves the laser there; off by default. */
+  isBedDoubleClickMovingLaser: boolean;
 }
 // #endregion
 
@@ -37,13 +41,23 @@ export class EscStopPreferenceLoaded extends Action<EscStopPreferencePayload> {
 export class EscStopPreferenceChanged extends Action<EscStopPreferencePayload> {
   public static readonly type: string = actionType('esc stop preference changed');
 }
+
+export class BedDoubleClickMovePreferenceLoaded extends Action<BedDoubleClickMovePreferencePayload> {
+  public static readonly type: string = actionType('bed double click move preference loaded');
+}
+
+export class BedDoubleClickMovePreferenceChanged extends Action<BedDoubleClickMovePreferencePayload> {
+  public static readonly type: string = actionType('bed double click move preference changed');
+}
 // #endregion
 
 // #region Initial state
 export const DEFAULT_ESC_STOPS_WITH_OVERLAY_OPEN = false;
+export const DEFAULT_BED_DOUBLE_CLICK_MOVES_LASER = false;
 
 const INITIAL_APP_PREFERENCES_STATE: AppPreferencesState = {
   isEscStoppingWithOverlayOpen: DEFAULT_ESC_STOPS_WITH_OVERLAY_OPEN,
+  isBedDoubleClickMovingLaser: DEFAULT_BED_DOUBLE_CLICK_MOVES_LASER,
 };
 // #endregion
 
@@ -59,6 +73,12 @@ export const appPreferencesReducer = (
       ...state,
       isEscStoppingWithOverlayOpen: (action as EscStopPreferenceChanged).payload.isEscStoppingWithOverlayOpen,
     };
+  case BedDoubleClickMovePreferenceLoaded.type:
+  case BedDoubleClickMovePreferenceChanged.type:
+    return {
+      ...state,
+      isBedDoubleClickMovingLaser: (action as BedDoubleClickMovePreferenceChanged).payload.isBedDoubleClickMovingLaser,
+    };
   default:
     return state;
   }
@@ -70,4 +90,7 @@ type RootState = { [APP_PREFERENCES_STATE_NAME]: AppPreferencesState };
 
 export const selectIsEscStoppingWithOverlayOpen = (state: RootState): boolean =>
   state[APP_PREFERENCES_STATE_NAME].isEscStoppingWithOverlayOpen;
+
+export const selectIsBedDoubleClickMovingLaser = (state: RootState): boolean =>
+  state[APP_PREFERENCES_STATE_NAME].isBedDoubleClickMovingLaser;
 // #endregion

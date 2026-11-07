@@ -59,6 +59,8 @@ export const APP_STATE_KEY = {
   BED_COLOUR: 'bedColour',
   /** Whether Escape also stops the laser while a panel is open, app-wide, as a JSON boolean. */
   ESC_STOPS_WITH_OVERLAY_OPEN: 'escStopsWithOverlayOpen',
+  /** Whether a double-click on empty bed moves the laser there, app-wide, as a JSON boolean. */
+  BED_DOUBLE_CLICK_MOVES_LASER: 'bedDoubleClickMovesLaser',
 } as const;
 
 export type AppStateKey = (typeof APP_STATE_KEY)[keyof typeof APP_STATE_KEY];

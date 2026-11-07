@@ -1,6 +1,7 @@
 /**
- * The gear beside STOP: opens a small popover with the app-wide choice whether Escape also stops the laser while a
- * drawer, dialog or popover is open. The choice is off by default and is stored app-wide.
+ * The gear beside STOP: opens a small popover with the app-wide choices whether Escape also stops the laser while a
+ * drawer, dialog or popover is open, and whether a double-click on empty bed moves the laser there. Both are off by
+ * default and are stored app-wide.
  *
  * @author michael.morosov
  *
@@ -9,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { SafetyOutlined, SettingOutlined } from '@ant-design/icons';
+import { AimOutlined, SafetyOutlined, SettingOutlined } from '@ant-design/icons';
 import { Checkbox, Popover } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { useState } from 'react';
@@ -20,7 +21,12 @@ import { ANTD_BUTTON_SIZE_LARGE, ANTD_POPOVER_PLACEMENT_TOP_RIGHT, ANTD_POPOVER_
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
 import { usePopoverCloseOnDialogOpen } from '../../utils/hooks/use.popover.close.on.dialog.open';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { EscStopPreferenceChanged, selectIsEscStoppingWithOverlayOpen } from '../../utils/states/app.preferences.state';
+import {
+  BedDoubleClickMovePreferenceChanged,
+  EscStopPreferenceChanged,
+  selectIsBedDoubleClickMovingLaser,
+  selectIsEscStoppingWithOverlayOpen,
+} from '../../utils/states/app.preferences.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { IconActionButton } from '../../views/IconActionButton';
 import { STOP_SETTINGS_POPOVER_OVERLAY_ID } from './stop.settings.button.constants';
@@ -30,6 +36,7 @@ export const StopSettingsButton = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const isEscStopping: boolean = useSelector(selectIsEscStoppingWithOverlayOpen);
+  const isDoubleClickMoving: boolean = useSelector(selectIsBedDoubleClickMovingLaser);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useOverlayRegistration(STOP_SETTINGS_POPOVER_OVERLAY_ID, isOpen);
@@ -37,6 +44,10 @@ export const StopSettingsButton = (): ReactNode => {
 
   const handlePreferenceChange = (event: CheckboxChangeEvent): void => {
     dispatch(new EscStopPreferenceChanged({ isEscStoppingWithOverlayOpen: event.target.checked }));
+  };
+
+  const handleDoubleClickMoveChange = (event: CheckboxChangeEvent): void => {
+    dispatch(new BedDoubleClickMovePreferenceChanged({ isBedDoubleClickMovingLaser: event.target.checked }));
   };
 
   return (
@@ -57,6 +68,13 @@ export const StopSettingsButton = (): ReactNode => {
           <p className={styles.hint}>
             <SafetyOutlined aria-hidden />
             <span>{t(DEFAULT.STOP_SETTINGS_ESC_HINT)}</span>
+          </p>
+          <Checkbox className={styles.preference} checked={isDoubleClickMoving} onChange={handleDoubleClickMoveChange}>
+            {t(DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER)}
+          </Checkbox>
+          <p className={styles.hint}>
+            <AimOutlined aria-hidden />
+            <span>{t(DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_HINT)}</span>
           </p>
         </div>
       )}
