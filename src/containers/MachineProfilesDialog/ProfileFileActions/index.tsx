@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { DownloadOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
@@ -115,11 +115,11 @@ export const ProfileFileActions = (): ReactNode => {
         aria-label={t(DEFAULT.MACHINE_PROFILES_IMPORT_FILE)}
         onChange={handleFileInputChange}
       />
-      {/* Not built yet: one muted row with a Soon tag, as elsewhere in the app, never a button or a form. */}
+      {/* Not built yet: a quiet dashed note with a clock and a Soon tag, never a button, a link or a form. */}
       <section className={styles.comingSoonRow} aria-label={t(DEFAULT.COMING_SOON_LIST)}>
         <Tooltip title={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}>
           <span className={styles.comingSoonItem}>
-            <SettingOutlined aria-hidden />
+            <ClockCircleOutlined aria-hidden />
             {t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}
           </span>
         </Tooltip>

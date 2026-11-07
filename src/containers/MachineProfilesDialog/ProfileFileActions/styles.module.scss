@@ -9,11 +9,15 @@
   gap: var(--space-2);
 }
 
-// A feature that is not built yet: one muted row with a Soon tag, so it reads as a note, not as an action or a form.
+// A feature that is not built yet: a dashed muted note with a Soon tag, so it reads as a note, not as a link or a form.
 .comingSoonRow {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
 }
 
 .comingSoonItem {
@@ -21,6 +25,5 @@
   align-items: center;
   gap: var(--space-2);
   color: var(--color-text-muted);
-  font-size: 0.875rem;
-  cursor: not-allowed;
+  font-size: 0.8125rem;
 }

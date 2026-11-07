@@ -220,6 +220,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
         </section>
         {/* Rendered while collapsed, so an error on a field inside can open it with the field already in place. */}
         <Collapse
+          className={styles.advanced}
           ghost
           size={ANTD_COLLAPSE_SIZE_SMALL}
           activeKey={openAdvancedKeys}

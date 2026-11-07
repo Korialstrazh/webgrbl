@@ -1,8 +1,13 @@
+// The edited colour sits on its own card as tall as the list beside it, Save at its foot, so the pane has no void.
 .paletteEntryForm {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface-2);
 
   // The gap spaces the fields; antd's own bottom margin would double it.
   :global(.ant-form-item) {
@@ -42,6 +47,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
+  margin-top: auto;
   gap: var(--space-2);
 }
 

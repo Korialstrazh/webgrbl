@@ -57,6 +57,20 @@
   gap: var(--space-2);
 }
 
+// Advanced lines up with the field column and reads like the group titles above it, its chevron in the icon slot.
+.advanced:global(.ant-collapse) {
+  :global(.ant-collapse-header) {
+    padding-inline: 0;
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  :global(.ant-collapse-content-box) {
+    padding-inline: 0;
+  }
+}
+
 // Takes the hover for the tooltip that says why the disabled button cannot read yet.
 .readButtonWrapper {
   display: inline-flex;
