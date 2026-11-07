@@ -31,6 +31,8 @@ export const LayerValueLegend = ({ className }: LayerValueLegendProps): ReactNod
       <span className={[styles.entry, styles.speed].join(' ')}>
         <DashboardOutlined />
         {t(DEFAULT.LAYERS_LEGEND_SPEED)}
+        {/* The rows show bare speeds; the key names their unit once, at a readable size. */}
+        <span className={styles.unit}>{t(DEFAULT.FIELD_UNIT_MM_PER_MIN)}</span>
       </span>
       <span className={[styles.entry, styles.passes].join(' ')}>
         <SyncOutlined />

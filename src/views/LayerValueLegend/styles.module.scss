@@ -26,3 +26,8 @@
 .passes :global(.anticon) {
   color: var(--color-success);
 }
+
+.unit {
+  margin-inline-start: 0.125rem;
+  color: var(--color-text-muted);
+}
