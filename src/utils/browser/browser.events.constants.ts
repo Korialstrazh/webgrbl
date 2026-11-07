@@ -72,3 +72,9 @@ export const UNDO_KEY = 'z';
 export const REDO_KEY = 'y';
 /** The `key` value of the S key, lowercased: Ctrl or Cmd plus S saves the project. */
 export const SAVE_KEY = 's';
+/** Fired on window when its size changes. */
+export const RESIZE_EVENT_NAME = 'resize';
+/** Fired on an element when the pointer leaves it or one of its children; React builds its mouse leave from it. */
+export const MOUSE_OUT_EVENT_NAME = 'mouseout';
+/** Matches every element under the pointer, from the root down to the innermost one. */
+export const HOVERED_ELEMENT_SELECTOR = ':hover';

@@ -40,3 +40,4 @@ The design tokens, the antd components and the antd theme that gives them our lo
 - `src/utils/states/ui.overlay.state.ts`, `src/utils/states/interfaces/OverlayRegistryPayload.ts`
 - `src/utils/hooks/use.overlay.registration.ts`
 - `src/utils/test.support/antd.test.provider.tsx`, `src/utils/test.support/resize.observer.mock.ts`, `vitest.setup.ts`
+- **Tooltip dismissal.** `TooltipDismissal` (mounted in `AppRoute`) calls `dismissHoverTooltips` on a window resize, a window blur and a bed view change: it sends a `mouseout` with no related target to the innermost `:hover` element, so React fires every hovered trigger's mouse leave and no hover tooltip stays floating where a moved control used to be. A main `CaptionedActionButton` (no label tooltip, such as Start) opens its blocked reason to the left, so it never covers the Frame and Export buttons below it.

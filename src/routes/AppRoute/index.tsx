@@ -31,6 +31,7 @@ import { SaveHotkey } from '../../containers/SaveHotkey';
 import { StatusStrip } from '../../containers/StatusStrip';
 import { StickyStopBar } from '../../containers/StickyStopBar';
 import { StopHotkey } from '../../containers/StopHotkey';
+import { TooltipDismissal } from '../../containers/TooltipDismissal';
 import { TopBar } from '../../containers/TopBar';
 import { NarrowRegionBar } from '../../containers/NarrowRegionBar';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
@@ -95,6 +96,7 @@ export const AppRoute = (): ReactNode => {
         <StopHotkey />
         <HistoryHotkeys />
         <SaveHotkey />
+        <TooltipDismissal />
         <GcodeExportConfirmDialog />
       </Layout>
     </BedRegionHostContext>

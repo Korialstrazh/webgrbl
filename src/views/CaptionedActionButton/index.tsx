@@ -15,7 +15,11 @@ import { LockFilled } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ButtonProps } from 'antd';
 import type { MouseEvent, ReactNode } from 'react';
-import { ANTD_TOOLTIP_PLACEMENT_BOTTOM, ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
+import {
+  ANTD_TOOLTIP_PLACEMENT_BOTTOM,
+  ANTD_TOOLTIP_PLACEMENT_LEFT,
+  ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS,
+} from '../../utils/antd.constants';
 import { DismissibleTooltip } from '../DismissibleTooltip';
 import { CAPTIONED_ACTION_LOCK_TEST_ID } from './captioned.action.constants';
 import styles from './styles.module.scss';
@@ -68,7 +72,8 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
     // The tooltip opens on keyboard focus too, so the reason a locked action is off shows without a pointer.
     <DismissibleTooltip
       title={tooltipText}
-      placement={ANTD_TOOLTIP_PLACEMENT_BOTTOM}
+      // A main action's reason opens to its side, so it never covers the smaller actions laid out below it.
+      placement={isLabelTooltipShown ? ANTD_TOOLTIP_PLACEMENT_BOTTOM : ANTD_TOOLTIP_PLACEMENT_LEFT}
       trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
     >
       <Button
