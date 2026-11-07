@@ -14,12 +14,14 @@
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface-2);
 
-  gap: var(--space-2);
+  // A wide gap between Start and STOP, so a thumb aimed at one never lands on the other.
+  gap: var(--space-4);
 
-  // STOP is the widest control in the bar, twice the width of Start, so it reads first; the gear keeps its own size.
+  // STOP dominates the bar: three times the width of Start and taller, so it reads first; Start is a smaller, secondary
+  // action here (its home is the Job card); the gear keeps its own size.
   > .start {
     flex: 1;
-    max-width: 15rem;
+    max-width: 9rem;
   }
 
   // Only a wrapper that makes the gear inert while a dialog is open; the gear keeps its place in the row.
@@ -27,9 +29,11 @@
     display: contents;
   }
 
-  > :global(.ant-btn-dangerous) {
-    flex: 2;
+  // STOP, live (red) or not yet connected: the only button that is a direct child of the bar.
+  > :global(.ant-btn) {
+    flex: 3;
     max-width: 30rem;
+    min-height: 3rem;
   }
 }
 
@@ -42,20 +46,26 @@
   color: var(--color-disabled-text);
 }
 
-// Start beside Stop, both as tall as the bar allows: one row, so the caption sits beside its icon here.
+// Start beside the taller Stop: one row, so the caption sits beside its icon, and a touch target still.
 .start :global(.ant-btn) {
   flex-direction: row;
-  gap: var(--space-2);
+  gap: var(--space-1);
+  width: 100%;
   height: var(--target-min);
 }
 
-// Start sits beside the large Stop, so its word and icon are a size up and read at a glance, locked or not.
-.start :global(.ant-btn) > span {
-  font-size: 0.9375rem;
+// Ready, Start is an outlined secondary action here, so the filled red STOP stays the one solid button of the bar.
+.start :global(.ant-btn-primary:not(:disabled)) {
+  border-color: var(--color-accent);
+  background-color: transparent;
+  box-shadow: none;
+  color: var(--color-accent);
 }
 
-.start :global(.ant-btn) > span:first-child {
-  font-size: 1.25rem;
+.start :global(.ant-btn-primary:not(:disabled):hover) {
+  border-color: var(--color-accent-hover);
+  background-color: var(--color-accent-tint);
+  color: var(--color-accent-hover);
 }
 
 // A phone has no Esc key, so the hint gives its room to the Not connected cue and the bar fits a 390 px screen.
