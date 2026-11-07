@@ -59,7 +59,9 @@ export const ObjectsSection = (): ReactNode => {
   }, [projectObjects]);
 
   const deleteObject = (objectId: string): void => {
-    const objectIndex: number = projectObjects.findIndex((projectObject: ProjectObject) => projectObject.id === objectId);
+    const objectIndex: number = projectObjects.findIndex(
+      (projectObject: ProjectObject) => projectObject.id === objectId,
+    );
     const remainingObjects: ProjectObject[] = projectObjects.filter(
       (projectObject: ProjectObject) => projectObject.id !== objectId,
     );

@@ -41,7 +41,7 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
       return undefined;
     }
 
-        bedRegionHost.style.setProperty(BED_REGION_DRAWER_INSET_PROPERTY, insetValue);
+    bedRegionHost.style.setProperty(BED_REGION_DRAWER_INSET_PROPERTY, insetValue);
 
     const closeStoredDrawer: () => void = BED_REGION_DRAWER_STORE.openBedRegionDrawer(
       getBedRegionDrawerInsetPixels(bedRegionHost),

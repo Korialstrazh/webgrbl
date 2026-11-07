@@ -68,7 +68,10 @@ describe(uiOverlayReducer.name, () => {
 
     expect(selectIsAnyDialogOpen({ uiOverlay: state })).toBe(false);
 
-    state = uiOverlayReducer(state, new OverlayOpened({ overlayId: FIRST_OVERLAY_ID, overlayKind: OVERLAY_KIND.DIALOG }));
+    state = uiOverlayReducer(
+      state,
+      new OverlayOpened({ overlayId: FIRST_OVERLAY_ID, overlayKind: OVERLAY_KIND.DIALOG }),
+    );
 
     expect(selectIsAnyDialogOpen({ uiOverlay: state })).toBe(true);
 

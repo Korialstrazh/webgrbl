@@ -22,7 +22,7 @@ const isDraftValueCommittable = (
   storedValue: number,
   minValue: number | undefined,
 ): draftValue is number =>
-  isFiniteNumber(draftValue) && draftValue !== storedValue && (minValue === undefined || draftValue >= minValue);
+  isFiniteNumber(draftValue) && draftValue !== storedValue && (!isFiniteNumber(minValue) || draftValue >= minValue);
 
 export const LayerNumberField = (props: LayerNumberFieldProps): ReactNode => {
   const { label, iconComponent, captionText, unitText, value, decimals, minValue, hintText, onCommit } = props;

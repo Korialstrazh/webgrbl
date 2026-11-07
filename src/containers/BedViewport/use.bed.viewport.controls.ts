@@ -91,7 +91,11 @@ export const useBedViewportControls = (
   useEffect(() => {
     if (overlayInsetPx > 0) {
       const viewportBeforeOverlay: BedViewport = viewportRef.current;
-      const frame: BedViewportFrame = { viewport: viewportBeforeOverlay, screenSize: screenSizeRef.current, dimensions };
+      const frame: BedViewportFrame = {
+        viewport: viewportBeforeOverlay,
+        screenSize: screenSizeRef.current,
+        dimensions,
+      };
       const shiftPx: number = getBedOverlayShiftPx(frame, overlayInsetPx, selectedObjectsRef.current);
 
       viewportBeforeOverlayRef.current = viewportBeforeOverlay;
