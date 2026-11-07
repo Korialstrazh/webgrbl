@@ -62,6 +62,7 @@ export const TopBar = (): ReactNode => {
         <AutosaveReadout />
         <DismissibleTooltip title={profilesLabel}>
           <Button
+            className={styles.profileButton}
             type={ANTD_BUTTON_TYPE_TEXT}
             size={ANTD_BUTTON_SIZE_LARGE}
             icon={<LaserMachineIcon />}

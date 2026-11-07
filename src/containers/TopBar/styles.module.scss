@@ -71,6 +71,22 @@
   }
 }
 
+// A thin divider sets the laser profile apart from the project's file and save icons, so the icons never read as one
+// cluster when the labels are gone.
+.profileButton:global(.ant-btn) {
+  position: relative;
+  margin-inline-start: var(--space-2);
+
+  &::before {
+    position: absolute;
+    inset-block: 25%;
+    inset-inline-start: calc(-1 * var(--space-1) - 1px);
+    width: 1px;
+    background-color: var(--color-border);
+    content: '';
+  }
+}
+
 .profileName {
   display: inline-block;
   max-width: 9rem;
