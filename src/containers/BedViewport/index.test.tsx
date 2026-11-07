@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { BedViewport } from '.';
 import { BED_PLACEHOLDER_KIND } from '../../utils/bed/bed.constants';
@@ -6,7 +7,14 @@ import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { MIDDLE_POINTER_BUTTON, PRIMARY_POINTER_BUTTON, SPACE_KEY } from '../../utils/browser/browser.events.constants';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { newProjectObject } from '../../utils/project/new.project.object';
+import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
+import { selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { OverlayOpened } from '../../utils/states/ui.overlay.state';
+import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
+import { BedObjects } from '../BedObjects';
+import { BED_OBJECTS_SURFACE_TEST_ID } from '../BedObjects/bed.objects.constants';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const DIMENSIONS: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
@@ -62,7 +70,10 @@ const getViewElement = (): HTMLElement => {
   return viewElement;
 };
 
-const renderBedViewport = (store: AppStore = newStore(), isWide: boolean = true): void => {
+const OBJECT_TEST_ID = 'drawn-object';
+const SHORT_MOVE_CLIENT_X = 101;
+
+const renderBedViewport = (store: AppStore = newStore(), isWide: boolean = true, children?: ReactNode): void => {
   const controlsHost: HTMLDivElement = document.createElement('div');
 
   document.body.append(controlsHost);
@@ -75,7 +86,9 @@ const renderBedViewport = (store: AppStore = newStore(), isWide: boolean = true)
           controlsHost={controlsHost}
           headPosition={undefined}
           workOriginPosition={undefined}
-        />
+        >
+          {children}
+        </BedViewport>
       </AntdTestProvider>
     </Provider>,
   );
@@ -241,30 +254,100 @@ describe(BedViewport.name, () => {
     expectViewBox(PANNED_VIEW_BOX);
   });
 
-  it('pans with a left drag only while Space is held over the bed', () => {
+  it('pans with a left drag on empty bed once it passes the drag distance', () => {
     renderBedViewport();
     fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
 
     const viewElement: HTMLElement = getViewElement();
-    const dragLeft = (): void => {
-      fireEvent.pointerDown(viewElement, {
+
+    fireEvent.pointerDown(viewElement, {
+      pointerId: POINTER_ID,
+      button: PRIMARY_POINTER_BUTTON,
+      clientX: 100,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(viewElement, { pointerId: POINTER_ID, clientX: SHORT_MOVE_CLIENT_X, clientY: 100 });
+
+    expectViewBox(ZOOMED_IN_VIEW_BOX);
+    expect(viewElement.className).not.toMatch(/panning/);
+
+    fireEvent.pointerMove(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+
+    expect(viewElement.className).toMatch(/panning/);
+
+    fireEvent.pointerUp(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+
+    expectViewBox(PANNED_VIEW_BOX);
+    expect(viewElement.className).not.toMatch(/panning/);
+  });
+
+  it('never pans for a left drag on an object unless Space is held', () => {
+    renderBedViewport(newStore(), true, <rect data-testid={OBJECT_TEST_ID} data-bed-object />);
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
+
+    const viewElement: HTMLElement = getViewElement();
+    const objectElement: HTMLElement = screen.getByTestId(OBJECT_TEST_ID);
+    const dragObject = (): void => {
+      fireEvent.pointerDown(objectElement, {
         pointerId: POINTER_ID,
         button: PRIMARY_POINTER_BUTTON,
         clientX: 100,
         clientY: 100,
       });
-      fireEvent.pointerMove(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
-      fireEvent.pointerUp(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+      fireEvent.pointerMove(objectElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+      fireEvent.pointerUp(objectElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
     };
 
-    dragLeft();
+    dragObject();
 
     expectViewBox(ZOOMED_IN_VIEW_BOX);
 
     fireEvent.pointerEnter(viewElement);
     fireEvent.keyDown(window, { key: SPACE_KEY });
-    dragLeft();
+    dragObject();
     fireEvent.keyUp(window, { key: SPACE_KEY });
+
+    expectViewBox(PANNED_VIEW_BOX);
+  });
+
+  it('pans when dragging empty bed with nothing selected, and moves an object dragged on it', () => {
+    const store: AppStore = newStore();
+    const starObject: ProjectObject = newProjectObject({ name: 'Star', xMm: 10, yMm: 10, widthMm: 20, heightMm: 20 });
+
+    mockSvgScreenMatrix(IDENTITY_SVG_MATRIX, IDENTITY_SVG_MATRIX);
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [starObject], layers: [] } }));
+    renderBedViewport(store, true, <BedObjects dimensions={DIMENSIONS} />);
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
+
+    const viewElement: HTMLElement = getViewElement();
+    const surfaceElement: HTMLElement = screen.getByTestId(BED_OBJECTS_SURFACE_TEST_ID);
+    const objectElement: HTMLElement = screen.getByRole('img', { name: 'Star' });
+    const restingTransform: string | null = objectElement.getAttribute('transform');
+
+    fireEvent.pointerDown(objectElement, {
+      pointerId: POINTER_ID,
+      button: PRIMARY_POINTER_BUTTON,
+      clientX: 20,
+      clientY: 280,
+    });
+    fireEvent.pointerMove(objectElement, { pointerId: POINTER_ID, clientX: 60, clientY: 280 });
+    fireEvent.pointerUp(objectElement, { pointerId: POINTER_ID, clientX: 60, clientY: 280 });
+
+    expectViewBox(ZOOMED_IN_VIEW_BOX);
+    expect(selectSelectedObjectIds(store.getState())).toEqual([starObject.id]);
+    expect(screen.getByRole('img', { name: 'Star' }).getAttribute('transform')).not.toBe(restingTransform);
+
+    fireEvent.pointerDown(surfaceElement, {
+      pointerId: POINTER_ID,
+      button: PRIMARY_POINTER_BUTTON,
+      clientX: 100,
+      clientY: 100,
+    });
+
+    expect(selectSelectedObjectIds(store.getState())).toEqual([]);
+
+    fireEvent.pointerMove(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+    fireEvent.pointerUp(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
 
     expectViewBox(PANNED_VIEW_BOX);
   });

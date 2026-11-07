@@ -125,6 +125,7 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
       className={styles.bedObject}
       role="img"
       aria-label={objectName}
+      data-bed-object
       data-selected={isSelected}
       data-outside-bed={isOutsideBed}
       transform={getObjectSvgTransform(projectObject, bedHeightMm)}

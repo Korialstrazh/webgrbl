@@ -1,11 +1,12 @@
 /**
  * The bed view: the bed drawing, its rulers in bands along the top and left, and the zoom cluster, with zoom and pan.
- * The mouse wheel zooms around the pointer, a middle drag or Space plus a drag pans, and the buttons and the plus,
- * minus and zero keys zoom in, zoom out and fit the bed. The bed point under the pointer goes to the status strip
- * through the bed cursor store. The view lives for the session and starts fitted; the bed panel keeps it while the 3D
- * view is shown. While a drawer is open the whole bed fits the space it leaves; the zoom comes back after. The
- * zoom is the drawing's view box, so the objects layer and the Toolpath layer read pointer positions through the SVG's
- * screen matrix as before; every position is read in the drawing area, which starts where the ruler bands end.
+ * The mouse wheel zooms around the pointer, a middle drag, Space plus a drag or a drag on empty bed pans, and the
+ * buttons and the plus, minus and zero keys zoom in, zoom out and fit the bed. The bed point under the pointer goes to
+ * the status strip through the bed cursor store. The view lives for the session and starts fitted; the bed panel keeps
+ * it while the 3D view is shown. While a drawer is open the whole bed fits the space it leaves; the zoom comes back
+ * after. The zoom is the drawing's view box, so the objects layer and the Toolpath layer read pointer positions
+ * through the SVG's screen matrix as before; every position is read in the drawing area, which starts where the ruler
+ * bands end.
  *
  * @author michael.morosov
  *

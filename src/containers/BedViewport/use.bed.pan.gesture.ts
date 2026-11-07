@@ -1,6 +1,9 @@
 /**
- * Pans the bed by dragging with the middle mouse button, or with the left button while Space is held over the bed. The
- * press is caught before it reaches the objects layer, so selecting and dragging keep their left drag.
+ * Pans the bed by dragging with the middle mouse button, with the left button while Space is held over the bed, or
+ * with the left button on empty bed. The middle and Space presses are caught before they reach the objects layer; a
+ * left press on empty bed still reaches it (a click clears the selection, a double-click may move the laser) and only
+ * pans once it has moved past the drag distance. A press on an object never pans, so selecting and dragging keep their
+ * left drag. See getBedPressPanStart.
  * Space only counts while the pointer is over the bed and no text field, overlay or IME composition owns the keyboard;
  * it is then kept from scrolling the page or pressing a focused button.
  *
@@ -13,12 +16,12 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, RefObject } from 'react';
+import { BED_OBJECT_SELECTOR } from '../../utils/bed/bed.constants';
 import {
   BLUR_EVENT_NAME,
   KEYDOWN_EVENT_NAME,
   KEYUP_EVENT_NAME,
   MIDDLE_POINTER_BUTTON,
-  PRIMARY_POINTER_BUTTON,
   SPACE_KEY,
 } from '../../utils/browser/browser.events.constants';
 import { canShortcutAct } from '../../utils/browser/can.shortcut.act';
@@ -26,11 +29,16 @@ import type { BedScreenPoint } from '../../utils/bed/interfaces/BedScreenPoint';
 import type { AppStore } from '../../utils/states/new.store';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { useAppStore } from '../../utils/states/use.app.store';
+import { hasPointerPassedDragStartDistance } from '../BedObjects/has.pointer.passed.drag.start.distance';
+import type { PointerPressOrigin } from '../BedObjects/interfaces/PointerPressOrigin';
+import { BED_PRESS_PAN_START } from './bed.press.pan.start.constants';
+import type { BedPressPanStart } from './bed.press.pan.start.constants';
+import { getBedPressPanStart } from './get.bed.press.pan.start';
 import type { BedPanGesture } from './interfaces/BedPanGesture';
 import type { BedPanStep } from './interfaces/BedPanStep';
 
-const isPanPress = (button: number, isSpaceHeld: boolean): boolean =>
-  button === MIDDLE_POINTER_BUTTON || (button === PRIMARY_POINTER_BUTTON && isSpaceHeld);
+const isPressOnBedObject = (pointerEvent: PointerEvent<HTMLElement>): boolean =>
+  pointerEvent.target instanceof Element && Boolean(pointerEvent.target.closest(BED_OBJECT_SELECTOR));
 
 // A Space press that readies the pan: over the bed, and not already taken by a focused control such as the playback
 // bar, which handles Space itself.
@@ -77,22 +85,43 @@ const useSpaceHeldOverBed = (isPointerOverBedRef: RefObject<boolean>): boolean =
 export const useBedPanGesture = (panBedBy: BedPanStep): BedPanGesture => {
   const isPointerOverBedRef = useRef<boolean>(false);
   const lastPointerRef = useRef<BedScreenPoint | undefined>(undefined);
+  // A left press on empty bed that has not moved far enough to be a pan yet.
+  const pendingPressRef = useRef<PointerPressOrigin | undefined>(undefined);
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const isSpaceHeld: boolean = useSpaceHeldOverBed(isPointerOverBedRef);
 
-  const onPointerDownCapture = (pointerEvent: PointerEvent<HTMLElement>): void => {
-    if (!isPanPress(pointerEvent.button, isSpaceHeld)) {
-      return;
-    }
-
-    pointerEvent.preventDefault();
-    pointerEvent.stopPropagation();
+  const startPan = (pointerEvent: PointerEvent<HTMLElement>, startPoint: BedScreenPoint): void => {
     pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
-    lastPointerRef.current = { xPx: pointerEvent.clientX, yPx: pointerEvent.clientY };
+    lastPointerRef.current = startPoint;
     setIsPanning(true);
   };
 
+  const onPointerDownCapture = (pointerEvent: PointerEvent<HTMLElement>): void => {
+    const panStart: BedPressPanStart = getBedPressPanStart({
+      button: pointerEvent.button,
+      isSpaceHeld,
+      isOnObject: isPressOnBedObject(pointerEvent),
+    });
+
+    if (panStart === BED_PRESS_PAN_START.AFTER_DRAG) {
+      pendingPressRef.current = { startClientX: pointerEvent.clientX, startClientY: pointerEvent.clientY };
+    }
+
+    if (panStart === BED_PRESS_PAN_START.IMMEDIATE) {
+      pointerEvent.preventDefault();
+      pointerEvent.stopPropagation();
+      startPan(pointerEvent, { xPx: pointerEvent.clientX, yPx: pointerEvent.clientY });
+    }
+  };
+
   const onPointerMove = (pointerEvent: PointerEvent<HTMLElement>): void => {
+    const pendingPress: PointerPressOrigin | undefined = pendingPressRef.current;
+
+    if (pendingPress && hasPointerPassedDragStartDistance(pendingPress, pointerEvent.clientX, pointerEvent.clientY)) {
+      pendingPressRef.current = undefined;
+      startPan(pointerEvent, { xPx: pendingPress.startClientX, yPx: pendingPress.startClientY });
+    }
+
     const lastPointer: BedScreenPoint | undefined = lastPointerRef.current;
 
     if (!lastPointer) {
@@ -104,6 +133,8 @@ export const useBedPanGesture = (panBedBy: BedPanStep): BedPanGesture => {
   };
 
   const onPointerUp = (pointerEvent: PointerEvent<HTMLElement>): void => {
+    pendingPressRef.current = undefined;
+
     if (lastPointerRef.current) {
       lastPointerRef.current = undefined;
       setIsPanning(false);
