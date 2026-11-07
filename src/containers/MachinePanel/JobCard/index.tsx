@@ -31,6 +31,8 @@ import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { JOB_PAUSED_CONTROLS } from '../../../utils/states/job.pause.control.constants';
 import type { JobPauseControl } from '../../../utils/states/job.pause.control.constants';
 import { selectJobPauseControl } from '../../../utils/states/job.pause.control.selector';
+import { selectFirstUnmetJobReadinessStep } from '../../../utils/states/job.readiness.selector';
+import type { JobReadinessStep } from '../../../utils/states/job.readiness.selector';
 import type { JobRunKind } from '../../../utils/states/job.run.kind.constants';
 import {
   selectIsJobRunActive,
@@ -57,6 +59,7 @@ import { getJobActionBlockedReasonKeys } from './get.job.action.blocked.reason.k
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobLockShortReasonKey } from './get.job.lock.short.reason.key';
 import { getJobRunStatusKey } from './get.job.run.status.key';
+import { isJobLockReasonOnNextStep } from './is.job.lock.reason.on.next.step';
 import { JOB_LOCK_REASON_TEST_ID } from './job.card.constants';
 import styles from './styles.module.scss';
 
@@ -89,6 +92,11 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
     frameStartBlockedReasonKey,
     gcodeExportBlockedReasonKey,
   ]);
+  const nextReadinessStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
+  // The next-step button already asks for what this line would, so it is said once.
+  const shownLockReasonKey: string | undefined = isJobLockReasonOnNextStep(lockShortReasonKey, nextReadinessStep)
+    ? undefined
+    : lockShortReasonKey;
   const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
   const jobRunKind: JobRunKind = useSelector(selectJobRunKind);
@@ -150,11 +158,11 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
             />
           )}
         />
-        {lockShortReasonKey && (
+        {shownLockReasonKey && (
           // Always on screen, so a touch screen without hover still shows why the buttons above are locked.
           <p className={styles.lockReason} data-testid={JOB_LOCK_REASON_TEST_ID}>
             <LockFilled aria-hidden />
-            <span>{t(lockShortReasonKey)}</span>
+            <span>{t(shownLockReasonKey)}</span>
           </p>
         )}
       </div>

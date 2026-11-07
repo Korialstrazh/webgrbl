@@ -65,7 +65,8 @@
   border-radius: 50%;
   background-color: var(--color-surface-1);
   color: var(--color-warning);
-  font-size: 0.8125rem;
+  // About 13 px of visible lock glyph: read at a glance, still smaller than the icon it marks.
+  font-size: 0.9375rem;
   line-height: 1;
 }
 

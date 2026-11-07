@@ -11,7 +11,10 @@ import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblReso
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
+import type { Material } from '../../../utils/materials/interfaces/Material';
+import { newMaterial } from '../../../utils/materials/new.material';
 import { newProjectObject } from '../../../utils/project/new.project.object';
+import { MaterialSaved } from '../../../utils/states/material.state';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
 import { JOB_RUN_KIND } from '../../../utils/states/job.run.kind.constants';
 import { JobRunStarted, JobStartRequested } from '../../../utils/states/job.run.state';
@@ -21,6 +24,8 @@ import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
 import { newStore } from '../../../utils/states/new.store';
 import {
   LayerToggled,
+  ProjectMaterialSelected,
+  ProjectObjectsAdded,
   selectProjectDocument,
   selectProjectLayers,
 } from '../../../utils/states/project.document.state';
@@ -275,6 +280,22 @@ describe(JobCard.name, () => {
     renderJobCard(await newGcodeExportTestStore());
 
     expect(screen.getByTestId(JOB_LOCK_REASON_TEST_ID)).toHaveTextContent(LOCK_REASON_CONNECT);
+  });
+
+  it('says Connect laser once, on the next-step button, while Connect is the next step', () => {
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+    const profile: MachineProfile = newMachineProfile();
+    const material: Material = newMaterial();
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    store.dispatch(new MaterialSaved({ material }));
+    store.dispatch(new ProjectMaterialSelected({ materialId: material.id }));
+    renderJobCard(store);
+
+    expect(screen.getAllByText(LOCK_REASON_CONNECT)).toHaveLength(1);
+    expect(screen.queryByTestId(JOB_LOCK_REASON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('stops asking for the connection once the laser is connected', () => {
