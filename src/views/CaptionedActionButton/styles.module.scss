@@ -59,6 +59,32 @@
   line-height: 1;
 }
 
+// Doubled class: a caller that sizes every icon in its button must not enlarge the badge. The lock sits inline before
+// the word, 4 px from it, so it can never cover the icon or the caption.
+.caption .lockBadge.lockBadge:global(.anticon) {
+  flex: none;
+  color: var(--color-warning);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.caption {
+  color: var(--color-text-muted);
+}
+
+.captionedActionButton:global(.ant-btn):disabled,
+.captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'] {
+  .icon > :global(.anticon):first-child {
+    opacity: 0.75;
+  }
+}
+
+.icon {
+  position: relative;
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
 // Doubled class: a caller that sizes every icon in its button must not enlarge the badge.
 .icon .lockBadge.lockBadge:global(.anticon) {
   position: absolute;
@@ -75,7 +101,11 @@
   line-height: 1;
 }
 
-.caption {
+// Stronger than a caller's rule for every span in its buttons, which would drop the gap to the lock.
+.captionedActionButton .caption.caption {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
   font-size: 0.8125rem;
   line-height: 1.2;
 }

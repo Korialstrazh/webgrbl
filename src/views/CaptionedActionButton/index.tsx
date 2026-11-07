@@ -1,8 +1,9 @@
 /**
  * An action as an icon over one word, so it explains itself without a hover. The longer name stays the accessible name
  * and, with the reason it is off, the tooltip (on hover and on focus), which opens below the row and away from the
- * actions above it. An off action has no fill, a dashed outline and a small lock on its icon, so it never looks like
- * one that can be used; when it is blocked for a reason it stays focusable (aria-disabled) and ignores activation.
+ * actions above it. An off action has no fill, a solid muted outline and a small lock inline before its word, so it
+ * never looks like one that can be used; when it is blocked for a reason it stays focusable (aria-disabled) and ignores
+ * activation.
  *
  * @author michael.morosov
  *
@@ -87,9 +88,13 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
       >
         <span className={styles.icon} aria-hidden>
           {iconComponent}
-          {isButtonDisabled && <LockFilled className={styles.lockBadge} data-testid={CAPTIONED_ACTION_LOCK_TEST_ID} />}
         </span>
-        <span className={styles.caption}>{captionText}</span>
+        <span className={styles.caption}>
+          {isButtonDisabled && (
+            <LockFilled className={styles.lockBadge} data-testid={CAPTIONED_ACTION_LOCK_TEST_ID} aria-hidden />
+          )}
+          <span>{captionText}</span>
+        </span>
       </Button>
     </DismissibleTooltip>
   );
