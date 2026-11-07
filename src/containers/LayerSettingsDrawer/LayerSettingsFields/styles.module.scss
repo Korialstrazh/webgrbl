@@ -11,10 +11,16 @@
   gap: var(--space-2);
 }
 
-.grid {
+.grid,
+.speedGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
+}
+
+// Speed spans the row, so its caption, a five-digit value and mm/min all stay in view in the narrow drawer.
+.speedGrid > :first-child {
+  grid-column: 1 / -1;
 }
 
 // One icon row: the material preset pair, then the palette pair after a divider.

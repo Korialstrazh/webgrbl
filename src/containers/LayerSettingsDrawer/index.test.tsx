@@ -44,6 +44,8 @@ const SPEED_LABEL = 'Speed (mm/min)';
 const MAX_POWER_LABEL = 'Max power (%)';
 const MIN_POWER_LABEL = 'Min power (%)';
 const PASSES_LABEL = 'Passes';
+const SPEED_CAPTION = 'Speed';
+const PASSES_CAPTION = 'Passes';
 const AIR_ASSIST_LABEL = 'Air assist';
 const LINE_INTERVAL_LABEL = 'Line interval (mm)';
 const SAVE_TO_PALETTE_LABEL = 'Save to palette';
@@ -145,6 +147,17 @@ const getActionCount = (dispatchSpy: MockInstance<AppDispatch>, actionType: stri
   ).length;
 
 describe(LayerSettingsDrawer.name, () => {
+  it('captions speed and passes as the Palette dialog does', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    renderDrawer(store, CUT_COLOUR);
+
+    const dialog: HTMLElement = screen.getByRole('dialog');
+
+    expect(within(dialog).getByText(SPEED_CAPTION)).toBeInTheDocument();
+    expect(within(dialog).getAllByText(PASSES_CAPTION).length).toBeGreaterThan(0);
+  });
+
   it('slides in from the left inside the bed region, next to the design panel', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR]);

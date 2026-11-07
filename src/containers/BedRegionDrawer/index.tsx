@@ -1,6 +1,7 @@
 /**
- * An antd Drawer rendered into the bed region, with a clear mask over the bed only, so the machine panel and STOP stay
- * visible and clickable and the bed stays in view; a click on the bed still closes the drawer. It registers as an open
+ * An antd Drawer rendered into the bed region, with a clear mask over the bed only (dimmed in a narrow layout, where it
+ * covers the one region on screen), so the machine panel and STOP stay visible and clickable and the bed stays in view;
+ * a click on the bed still closes the drawer. It registers as an open
  * overlay while shown, so Escape closes it instead of stopping the machine. While a left drawer is open it sets its
  * width on the host, so on a wide window the bed moves aside instead of being covered, and tells the bed view so it
  * fits the whole bed into the strip left. Features open drawers only through this wrapper, never through a raw antd

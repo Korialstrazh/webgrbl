@@ -48,6 +48,7 @@ export const LAYER_MIN_POWER_FIELD: LayerNumberFieldConfig = {
 export const LAYER_SPEED_FIELD: LayerNumberFieldConfig = {
   field: 'speedMmPerMin',
   labelKey: DEFAULT.LAYER_SETTINGS_SPEED,
+  captionKey: DEFAULT.FIELD_CAPTION_SPEED,
   unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
   decimals: LAYER_SPEED_DECIMALS,
   minValue: LAYER_MIN_SPEED_MM_PER_MIN,
@@ -55,6 +56,7 @@ export const LAYER_SPEED_FIELD: LayerNumberFieldConfig = {
 export const LAYER_PASSES_FIELD: LayerNumberFieldConfig = {
   field: 'passes',
   labelKey: DEFAULT.LAYER_SETTINGS_PASSES,
+  captionKey: DEFAULT.FIELD_CAPTION_PASSES,
   unitKey: DEFAULT.FIELD_UNIT_TIMES,
   decimals: LAYER_PASSES_DECIMALS,
   minValue: LAYER_MIN_PASSES,

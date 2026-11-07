@@ -11,6 +11,14 @@
   backdrop-filter: none;
 }
 
+// Below the wide breakpoint (80rem must match WIDE_LAYOUT_MEDIA_QUERY) the drawer covers the one region on screen, not
+// the bed, so a dim scrim, as dark as the dialog mask, shows that the cards behind it are out of reach until it closes.
+@media (width < 80rem) {
+  .transparentMask:global(.ant-drawer-mask) {
+    background-color: rgb(0 0 0 / 65%);
+  }
+}
+
 // A neutral surface edge: the drawer edge continues the panel border it opens from, and a soft shadow lifts it off the
 // bed. Orange stays for the selected layer row it belongs to.
 .drawerSection {

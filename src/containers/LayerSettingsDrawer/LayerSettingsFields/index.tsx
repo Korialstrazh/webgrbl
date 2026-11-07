@@ -146,6 +146,8 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
       <div className={styles.grid}>
         {renderNumberField(LAYER_MAX_POWER_FIELD, <ThunderboltOutlined />, getWattsHint(settings.maxPowerPercent))}
         {renderNumberField(LAYER_MIN_POWER_FIELD, <ThunderboltOutlined />, getWattsHint(settings.minPowerPercent))}
+      </div>
+      <div className={styles.speedGrid}>
         {renderNumberField(LAYER_SPEED_FIELD, <DashboardOutlined />, undefined)}
         {renderNumberField(LAYER_PASSES_FIELD, <SyncOutlined />, undefined)}
         {isFill && renderNumberField(LAYER_LINE_INTERVAL_FIELD, <ColumnHeightOutlined />, undefined)}
