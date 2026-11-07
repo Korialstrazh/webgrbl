@@ -22,6 +22,11 @@
     max-width: 15rem;
   }
 
+  // Only a wrapper that makes the gear inert while a dialog is open; the gear keeps its place in the row.
+  > .settings {
+    display: contents;
+  }
+
   > :global(.ant-btn-dangerous) {
     flex: 2;
     max-width: 30rem;

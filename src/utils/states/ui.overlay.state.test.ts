@@ -15,6 +15,7 @@ import {
   OverlayClosed,
   OverlayOpened,
   selectDialogOpenCount,
+  selectIsAnyDialogOpen,
   selectIsAnyOverlayOpen,
   selectIsConnectionPopoverOpen,
   uiOverlayReducer,
@@ -29,6 +30,7 @@ const NO_OVERLAYS_STATE: UiOverlayState = {
   openOverlayIds: [],
   isConnectionPopoverOpen: false,
   dialogOpenCount: 0,
+  openDialogIds: [],
 };
 
 class UnknownAction extends Action {
@@ -56,6 +58,23 @@ describe(uiOverlayReducer.name, () => {
 
     expect(state.openOverlayIds).toEqual([SECOND_OVERLAY_ID]);
     expect(selectIsAnyOverlayOpen({ uiOverlay: state })).toBe(true);
+  });
+
+  it('reports a dialog open only while a dialog, not a popover, is open', () => {
+    let state: UiOverlayState = uiOverlayReducer(
+      NO_OVERLAYS_STATE,
+      new OverlayOpened({ overlayId: SECOND_OVERLAY_ID, overlayKind: OVERLAY_KIND.POPOVER }),
+    );
+
+    expect(selectIsAnyDialogOpen({ uiOverlay: state })).toBe(false);
+
+    state = uiOverlayReducer(state, new OverlayOpened({ overlayId: FIRST_OVERLAY_ID, overlayKind: OVERLAY_KIND.DIALOG }));
+
+    expect(selectIsAnyDialogOpen({ uiOverlay: state })).toBe(true);
+
+    state = uiOverlayReducer(state, new OverlayClosed({ overlayId: FIRST_OVERLAY_ID }));
+
+    expect(selectIsAnyDialogOpen({ uiOverlay: state })).toBe(false);
   });
 
   it('ignores closing an overlay that is not open', () => {

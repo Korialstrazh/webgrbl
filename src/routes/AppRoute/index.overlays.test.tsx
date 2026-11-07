@@ -16,6 +16,8 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 
 const STOP_LABEL = 'Stop';
+const START_LABEL = /^Start/;
+const STOP_SETTINGS_LABEL = 'Stop settings';
 const MODAL_TITLE = 'Test modal';
 const APP_MODAL_TITLE = 'Test window dialog';
 const APP_MODAL_OVERLAY_ID = 'test-window-dialog';
@@ -100,6 +102,16 @@ const getOverlayRoot = (selector: string): HTMLElement => {
   return overlayRoot;
 };
 
+/** Asserts that Start and the gear of the narrow stop bar can be neither clicked nor focused, while STOP can. */
+const expectOnlyStopUsableInBar = (stopButton: HTMLElement): void => {
+  const startButton: HTMLElement = screen.getByRole('button', { name: START_LABEL, hidden: true });
+  const stopSettingsButton: HTMLElement = screen.getByRole('button', { name: STOP_SETTINGS_LABEL, hidden: true });
+
+  expect(startButton.closest('[inert]')).not.toBeNull();
+  expect(stopSettingsButton.closest('[inert]')).not.toBeNull();
+  expect(stopButton.closest('[inert]')).toBeNull();
+};
+
 const getNarrowRegionsHost = (): HTMLElement => {
   const narrowRegionsHost: HTMLElement | null = screen.getByRole('main').parentElement?.parentElement ?? null;
 
@@ -160,6 +172,19 @@ describe.each([
     expect(countStopRequests()).toBe(0);
     expect(closeSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('makes Start and the stop settings in the narrow bar inert while it is open, STOP stays active', async () => {
+    setMatchMediaMatches(false);
+
+    const { countStopRequests } = await renderWorkbench(newOverlayComponent(vi.fn()));
+    await screen.findByText(title);
+    const stopButton: HTMLElement = screen.getByRole('button', { name: STOP_LABEL });
+
+    expectOnlyStopUsableInBar(stopButton);
+    fireEvent.click(stopButton);
+
+    expect(countStopRequests()).toBe(1);
+  });
 });
 
 // Palette, Laser profiles, Open project and Add material all open through AppModal, whose scrim covers the window.
@@ -181,5 +206,23 @@ describe('AppRoute with a full-window dialog open', () => {
 
     expect(countStopRequests()).toBe(1);
     expect(closeSpy).not.toHaveBeenCalled();
+  });
+
+  it('makes Start and the stop settings in the narrow bar inert while it is open', async () => {
+    setMatchMediaMatches(false);
+
+    await renderWorkbench(newTestAppModal(vi.fn()));
+    await screen.findByText(APP_MODAL_TITLE);
+
+    expectOnlyStopUsableInBar(screen.getByRole('button', { name: STOP_LABEL }));
+  });
+
+  it('leaves Start and the stop settings in the narrow bar usable once no dialog is open', async () => {
+    setMatchMediaMatches(false);
+
+    await renderWorkbench(null);
+
+    expect(screen.getByRole('button', { name: START_LABEL }).closest('[inert]')).toBeNull();
+    expect(screen.getByRole('button', { name: STOP_SETTINGS_LABEL }).closest('[inert]')).toBeNull();
   });
 });

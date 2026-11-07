@@ -24,6 +24,8 @@ export interface UiOverlayState {
   isConnectionPopoverOpen: boolean;
   /** How many times a dialog or drawer has opened; each rise closes the open popovers. */
   dialogOpenCount: number;
+  /** Ids of the open dialogs and drawers; while any is open, only STOP of the narrow stop bar stays usable. */
+  openDialogIds: string[];
 }
 // #endregion
 
@@ -54,6 +56,7 @@ const INITIAL_UI_OVERLAY_STATE: UiOverlayState = {
   openOverlayIds: [],
   isConnectionPopoverOpen: false,
   dialogOpenCount: 0,
+  openDialogIds: [],
 };
 // #endregion
 
@@ -69,13 +72,22 @@ const getStateWithOverlay = (
   const stateWithOverlay: UiOverlayState = { ...state, openOverlayIds: [...state.openOverlayIds, overlayId] };
 
   return overlayKind === OVERLAY_KIND.DIALOG
-    ? { ...stateWithOverlay, isConnectionPopoverOpen: false, dialogOpenCount: state.dialogOpenCount + 1 }
+    ? {
+      ...stateWithOverlay,
+      isConnectionPopoverOpen: false,
+      dialogOpenCount: state.dialogOpenCount + 1,
+      openDialogIds: [...state.openDialogIds, overlayId],
+    }
     : stateWithOverlay;
 };
 
 const getStateWithoutOverlay = (state: UiOverlayState, overlayId: string): UiOverlayState =>
   state.openOverlayIds.includes(overlayId)
-    ? { ...state, openOverlayIds: state.openOverlayIds.filter((openOverlayId: string) => openOverlayId !== overlayId) }
+    ? {
+      ...state,
+      openOverlayIds: state.openOverlayIds.filter((openOverlayId: string) => openOverlayId !== overlayId),
+      openDialogIds: state.openDialogIds.filter((openDialogId: string) => openDialogId !== overlayId),
+    }
     : state;
 
 export const uiOverlayReducer = (
@@ -106,6 +118,9 @@ export const selectIsAnyOverlayOpen = (state: RootState): boolean =>
 
 export const selectIsConnectionPopoverOpen = (state: RootState): boolean =>
   state[UI_OVERLAY_STATE_NAME].isConnectionPopoverOpen;
+
+export const selectIsAnyDialogOpen = (state: RootState): boolean =>
+  !!state[UI_OVERLAY_STATE_NAME].openDialogIds.length;
 
 export const selectDialogOpenCount = (state: RootState): number => state[UI_OVERLAY_STATE_NAME].dialogOpenCount;
 // #endregion
