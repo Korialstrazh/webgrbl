@@ -1,6 +1,6 @@
 /**
- * Counts the left drawers that are open in the bed region and push the bed aside, so the bed view can fill the strip
- * that is left and go back to its previous zoom once the last one closes.
+ * Counts the left drawers that are open in the bed region and push the bed aside, so the bed view can fit the whole
+ * bed into the strip that is left and go back to its previous zoom once the last one closes.
  *
  * @author michael.morosov
  *

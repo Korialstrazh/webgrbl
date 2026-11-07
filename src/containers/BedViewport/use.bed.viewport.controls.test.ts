@@ -5,7 +5,6 @@ import { BED_ZOOM_STEP_FACTOR } from '../../utils/bed/bed.zoom.constants';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
-import { newCoverBedViewport } from '../../utils/bed/new.cover.bed.viewport';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
 import type { KeptBedViewportRef } from './interfaces/KeptBedViewportRef';
@@ -45,17 +44,17 @@ describe(useBedViewportControls.name, () => {
 });
 
 interface CoverFitProps {
-  isCoverFitWanted: boolean;
+  isStripFitWanted: boolean;
 }
 
 describe(`${useBedViewportControls.name} with a drawer`, () => {
   const STRIP_SIZE: BedScreenSize = { widthPx: 300, heightPx: 700 };
 
-  it('fills the strip while a drawer is open and gives the earlier zoom back once it closes', () => {
-    const initialProps: CoverFitProps = { isCoverFitWanted: false };
+  it('fits the whole bed into the strip while a drawer is open and gives the earlier zoom back once it closes', () => {
+    const initialProps: CoverFitProps = { isStripFitWanted: false };
     const hook: RenderHookResult<BedViewportControls, CoverFitProps> = renderHook(
-      ({ isCoverFitWanted }: CoverFitProps): BedViewportControls =>
-        useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, isCoverFitWanted),
+      ({ isStripFitWanted }: CoverFitProps): BedViewportControls =>
+        useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, isStripFitWanted),
       { initialProps },
     );
 
@@ -64,23 +63,23 @@ describe(`${useBedViewportControls.name} with a drawer`, () => {
     });
     const zoomedViewport: BedViewport = hook.result.current.viewport;
 
-    hook.rerender({ isCoverFitWanted: true });
+    hook.rerender({ isStripFitWanted: true });
 
-    expect(hook.result.current.viewport).toEqual(newCoverBedViewport(DIMENSIONS, STRIP_SIZE));
+    expect(hook.result.current.viewport).toEqual(newFitBedViewport(DIMENSIONS));
 
-    hook.rerender({ isCoverFitWanted: false });
+    hook.rerender({ isStripFitWanted: false });
 
     expect(hook.result.current.viewport).toEqual(zoomedViewport);
   });
 
-  it('starts the first zoom inside the drawer from the filled strip', () => {
+  it('starts the first zoom inside the drawer from the fitted bed', () => {
     const { result } = renderHook(() => useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, true));
-    const coverViewport: BedViewport = newCoverBedViewport(DIMENSIONS, STRIP_SIZE);
+    const fitViewport: BedViewport = newFitBedViewport(DIMENSIONS);
 
     act(() => {
       result.current.zoomBedBy(BED_ZOOM_STEP_FACTOR);
     });
 
-    expect(result.current.viewport.zoom).toBeCloseTo(coverViewport.zoom * BED_ZOOM_STEP_FACTOR);
+    expect(result.current.viewport.zoom).toBeCloseTo(fitViewport.zoom * BED_ZOOM_STEP_FACTOR);
   });
 });

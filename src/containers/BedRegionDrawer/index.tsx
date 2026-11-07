@@ -3,7 +3,7 @@
  * visible and clickable and the bed stays in view; a click on the bed still closes the drawer. It registers as an open
  * overlay while shown, so Escape closes it instead of stopping the machine. While a left drawer is open it sets its
  * width on the host, so on a wide window the bed moves aside instead of being covered, and tells the bed view so it
- * fills the strip that is left. Features open drawers only through this wrapper, never through a raw antd Drawer.
+ * fits the whole bed into the strip left. Features open drawers only through this wrapper, never through a raw antd Drawer.
  *
  * @author michael.morosov
  *
