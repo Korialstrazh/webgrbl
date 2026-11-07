@@ -2,8 +2,8 @@
  * The Toolpath view drawing on the bed, inside the bed's children: the real job at the simulation time.
  *
  * - Burn moves the head has passed are solid, coloured by power or by layer; the moves still to come are dashed in
- *   their layer colour. Each layer (or layer and power band) is drawn in chunks of 1 000 moves, and only the chunk the head is in
- *   changes per frame, so 100 000 moves still play smoothly.
+ *   their layer colour. Each layer (or layer and power band) is drawn in chunks of 1 000 moves, and only the chunk the
+ *   head is in changes per frame, so 100 000 moves still play smoothly.
  * - The moves that burn nothing are a thin travel path, drawn only when asked for.
  * - The head crosshair sits where the timeline puts the head; the work zero marker sits at the profile's origin
  *   corner.

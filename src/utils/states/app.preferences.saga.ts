@@ -1,9 +1,8 @@
 /**
- * Keeps the app preferences in step with storage: reads the Escape stop, the bed double-click move and the Job card fold
- * choices at start
- * and stores each whenever the user changes it. A read that fails, finds no valid value, or neither finishes nor fails
- * within the panel sizes read timeout keeps the default (off); a change the user makes before the read ends wins over
- * the stored value.
+ * Keeps the app preferences in step with storage: reads the Escape stop, the bed double-click move and the Job card
+ * fold choices at start and stores each whenever the user changes it. A read that fails, finds no valid value, or
+ * neither finishes nor fails within the panel sizes read timeout keeps the default (off, or open for the Job card); a
+ * change the user makes before the read ends wins over the stored value.
  *
  * @author michael.morosov
  *
