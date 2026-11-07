@@ -21,10 +21,14 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { useObjectArtworkFrame } from '../../../utils/hooks/use.object.artwork.frame';
 import { getObjectTransformWithField } from '../../../utils/project/get.object.transform.with.field';
 import type { ProjectObjectTransform } from '../../../utils/project/interfaces/ProjectObjectTransform';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { ProjectObjectsTransformed } from '../../../utils/states/project.document.state';
+import { getObjectArtworkPlacement } from '../../../utils/toolpath/get.object.artwork.placement';
+import { getObjectBoxFieldValue } from '../../../utils/toolpath/get.object.box.field.value';
+import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import type { ObjectTransformFieldConfig } from '../interfaces/ObjectTransformFieldConfig';
 import type { ObjectTransformFieldsProps } from '../interfaces/ObjectTransformFieldsProps';
 import { OBJECT_FIELD_KEY_SEPARATOR, OBJECT_TRANSFORM_FIELDS } from '../objects.section.constants';
@@ -43,11 +47,16 @@ export const ObjectTransformFields = ({ projectObject }: ObjectTransformFieldsPr
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const [isRatioLocked, setIsRatioLocked] = useState<boolean>(true);
+  const artworkFrame: ObjectArtworkFrame = useObjectArtworkFrame(projectObject);
+  // The fields speak of the drawn geometry, the size that burns; the stored placement stays the box's.
+  const artworkPlacement: ProjectObjectTransform = getObjectArtworkPlacement(projectObject, artworkFrame);
 
-  const commitField = (field: keyof ProjectObjectTransform, fieldValue: number): void => {
+  const commitField = (field: keyof ProjectObjectTransform, artworkValue: number): void => {
+    const boxValue: number = getObjectBoxFieldValue({ boxPlacement: projectObject, artworkFrame, field, artworkValue });
+
     dispatch(new ProjectObjectsTransformed({
       transforms: {
-        [projectObject.id]: getObjectTransformWithField(projectObject, field, fieldValue, isRatioLocked),
+        [projectObject.id]: getObjectTransformWithField(projectObject, field, boxValue, isRatioLocked),
       },
     }));
   };
@@ -60,7 +69,7 @@ export const ObjectTransformFields = ({ projectObject }: ObjectTransformFieldsPr
             key={[projectObject.id, config.field].join(OBJECT_FIELD_KEY_SEPARATOR)}
             label={t(config.labelKey)}
             prefixComponent={OBJECT_FIELD_ICONS[config.field] ?? t(config.labelKey)}
-            value={projectObject[config.field]}
+            value={artworkPlacement[config.field]}
             decimals={config.decimals}
             onCommit={(fieldValue: number) => commitField(config.field, fieldValue)}
           />

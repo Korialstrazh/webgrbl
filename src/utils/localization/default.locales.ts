@@ -1361,7 +1361,7 @@ registerLocales({
       [DEFAULT.OBJECTS_LOCK_RATIO]: "Lock aspect ratio",
       [DEFAULT.OBJECTS_OUTSIDE_BED]: "Outside the bed",
       [DEFAULT.OBJECTS_SIZE]: "{{widthMm}} × {{heightMm}} mm",
-      [DEFAULT.OBJECTS_SIZE_HINT]: "The size of the drawing's frame (its SVG page), empty margins included. The job size in the status strip is what actually burns.",
+      [DEFAULT.OBJECTS_SIZE_HINT]: "Size of the drawing itself: the size that burns.",
       [DEFAULT.OPEN_PROJECT_DELETE]: "Delete",
       [DEFAULT.OPEN_PROJECT_DELETE_CANCEL]: "Cancel",
       [DEFAULT.OPEN_PROJECT_DELETE_CONFIRM]: "Delete the project {{name}}?",

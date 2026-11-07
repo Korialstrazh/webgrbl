@@ -19,6 +19,8 @@ import {
   MAX_OBJECT_SIZE_MM,
   MIN_OBJECT_SIZE_MM,
 } from '../../utils/project/project.constants';
+import type { ObjectArtworkFrame } from '../../utils/toolpath/interfaces/ObjectArtworkFrame';
+import { FULL_OBJECT_ARTWORK_FRAME } from '../../utils/toolpath/object.artwork.frame.constants';
 import { SCALE_HANDLE_CORNER_SIGNS } from './bed.objects.constants';
 import type { BedMachinePoint } from './interfaces/BedMachinePoint';
 import type { ObjectScaleInput } from './interfaces/ObjectScaleInput';
@@ -44,22 +46,38 @@ const getKeptRatioSize = (startSize: ObjectBoxSize, freeSize: ObjectBoxSize): Ob
   return { widthMm: getClampedObjectSizeMm(widthMm * factor), heightMm: getClampedObjectSizeMm(heightMm * factor) };
 };
 
+/**
+ * Where the corner that stays put sits on one axis, as a fraction of the box size from the box centre: the handles sit
+ * on the drawn geometry, so the geometry's opposite corner is the one kept in place.
+ */
+const getKeptCornerFraction = (cornerSign: number, startFraction: number, extentFraction: number): number =>
+  startFraction - HALF_BOX_FACTOR + (cornerSign < 0 ? extentFraction : 0);
+
 export const getScaledObjectTransform = (input: ObjectScaleInput): ProjectObjectTransform => {
   const { startTransform, handle, pointerOffset, isAspectRatioFree } = input;
+  const artworkFrame: ObjectArtworkFrame = input.artworkFrame ?? FULL_OBJECT_ARTWORK_FRAME;
+  const bottomFraction: number = 1 - artworkFrame.topFraction - artworkFrame.heightFraction;
   const cornerSign: BedMachinePoint = SCALE_HANDLE_CORNER_SIGNS[handle];
   const angleRadians: number = startTransform.rotationDeg * Math.PI / HALF_TURN_DEG;
   const objectFrameOffset: BedMachinePoint = getTurnedVector(pointerOffset, -angleRadians);
   const freeSize: ObjectBoxSize = {
-    widthMm: getClampedObjectSizeMm(startTransform.widthMm + cornerSign.x * objectFrameOffset.x),
-    heightMm: getClampedObjectSizeMm(startTransform.heightMm + cornerSign.y * objectFrameOffset.y),
+    // The handle moves with the geometry, which is a fraction of the box, so the box changes by more.
+    widthMm: getClampedObjectSizeMm(
+      startTransform.widthMm + cornerSign.x * objectFrameOffset.x / artworkFrame.widthFraction,
+    ),
+    heightMm: getClampedObjectSizeMm(
+      startTransform.heightMm + cornerSign.y * objectFrameOffset.y / artworkFrame.heightFraction,
+    ),
   };
   const scaledSize: ObjectBoxSize = isAspectRatioFree ? freeSize : getKeptRatioSize(startTransform, freeSize);
   const { widthMm, heightMm }: ObjectBoxSize = scaledSize;
 
-  // The centre moves half the size change towards the dragged corner, which keeps the opposite corner in place.
+  // The centre moves so the geometry's opposite corner stays where it is.
   const centerShift: BedMachinePoint = getTurnedVector({
-    x: cornerSign.x * (widthMm - startTransform.widthMm) * HALF_BOX_FACTOR,
-    y: cornerSign.y * (heightMm - startTransform.heightMm) * HALF_BOX_FACTOR,
+    x: getKeptCornerFraction(cornerSign.x, artworkFrame.leftFraction, artworkFrame.widthFraction)
+      * (startTransform.widthMm - widthMm),
+    y: getKeptCornerFraction(cornerSign.y, bottomFraction, artworkFrame.heightFraction)
+      * (startTransform.heightMm - heightMm),
   }, angleRadians);
 
   return {

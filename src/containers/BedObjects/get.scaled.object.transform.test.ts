@@ -91,4 +91,22 @@ describe(getScaledObjectTransform.name, () => {
     expect(scaledObject.widthMm).toBe(MAX_OBJECT_SIZE_MM);
     expect(scaledObject.heightMm).toBe(MAX_OBJECT_SIZE_MM * HEIGHT_MM / WIDTH_MM);
   });
+
+  it('keeps the geometry corner opposite the handle in place when the page has margins', () => {
+    // A 120 x 80 page with 5 mm margins; the bottom-left corner of the 110 x 70 drawing sits at (5, 5).
+    const pageObject: ProjectObjectTransform = { xMm: 0, yMm: 0, widthMm: 120, heightMm: 80, rotationDeg: 0 };
+    const scaledObject: ProjectObjectTransform = getScaledObjectTransform({
+      startTransform: pageObject,
+      handle: BED_OBJECT_HANDLE.TOP_RIGHT,
+      pointerOffset: { x: 11, y: 7 },
+      isAspectRatioFree: true,
+      artworkFrame: { leftFraction: 5 / 120, topFraction: 5 / 80, widthFraction: 110 / 120, heightFraction: 70 / 80 },
+    });
+
+    // The drawing grows by the pointer offset: 121 x 77, so the page grows to 132 x 88.
+    expect(scaledObject.widthMm).toBeCloseTo(132);
+    expect(scaledObject.heightMm).toBeCloseTo(88);
+    expect(scaledObject.xMm + scaledObject.widthMm * 5 / 120).toBeCloseTo(5);
+    expect(scaledObject.yMm + scaledObject.heightMm * 5 / 80).toBeCloseTo(5);
+  });
 });

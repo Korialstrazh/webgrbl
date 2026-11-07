@@ -583,7 +583,7 @@ OBJECTS_LIST_LABEL;Project objects
 OBJECTS_LOCK_RATIO;Lock aspect ratio
 OBJECTS_OUTSIDE_BED;Outside the bed
 OBJECTS_SIZE;{{widthMm}} × {{heightMm}} mm
-OBJECTS_SIZE_HINT;The size of the drawing's frame (its SVG page), empty margins included. The job size in the status strip is what actually burns.
+OBJECTS_SIZE_HINT;Size of the drawing itself: the size that burns.
 OPEN_PROJECT_DELETE;Delete
 OPEN_PROJECT_DELETE_CANCEL;Cancel
 OPEN_PROJECT_DELETE_CONFIRM;Delete the project {{name}}?

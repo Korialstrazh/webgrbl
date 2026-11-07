@@ -54,6 +54,11 @@ const FRACTIONAL_X_MM = 12.3456;
 const TEXT_WARNING = 'Text is not converted to paths. In Inkscape use Path > Object to Path.';
 const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/><text x="1" y="5">Hi</text></svg>';
+const MARGIN_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="120mm" height="80mm" viewBox="0 0 120 80">'
+  + '<rect x="5" y="5" width="110" height="70" fill="none" stroke="#ff0000"/></svg>';
+const MARGIN_PAGE_WIDTH_MM = 120;
+const MARGIN_PAGE_HEIGHT_MM = 80;
+const MARGIN_ARTWORK_SIZE_TEXT = `110.0 ${MULTIPLICATION_SIGN} 70.0 mm`;
 const SECOND_X_MM = 80;
 const SECOND_X_TEXT = '80.0';
 const MOVED_X_MM = 40;
@@ -170,6 +175,35 @@ describe(ObjectsSection.name, () => {
     expect(within(list).getByText(FIRST_SIZE_TEXT)).toBeInTheDocument();
     expect(within(list).getByText(SECOND_SIZE_TEXT)).toBeInTheDocument();
     expect(screen.queryByLabelText(WIDTH_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('shows the size of the drawing, not of its page, and turns a typed width back into the page width', () => {
+    const store: AppStore = newStore();
+
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({
+        document: {
+          objects: [newProjectObject({
+            id: FIRST_ID,
+            name: FIRST_NAME,
+            svgText: MARGIN_SVG_TEXT,
+            intrinsicWidthMm: MARGIN_PAGE_WIDTH_MM,
+            intrinsicHeightMm: MARGIN_PAGE_HEIGHT_MM,
+            widthMm: MARGIN_PAGE_WIDTH_MM,
+            heightMm: MARGIN_PAGE_HEIGHT_MM,
+          })],
+          layers: [],
+        },
+      }));
+    });
+    selectFirst(store);
+    renderSection(store);
+
+    expect(screen.getByText(MARGIN_ARTWORK_SIZE_TEXT)).toBeInTheDocument();
+
+    commitField(WIDTH_LABEL, '55');
+
+    expect(getObjectById(store, FIRST_ID)?.widthMm).toBeCloseTo(MARGIN_PAGE_WIDTH_MM / 2);
   });
 
   it('selects an object on a row click and marks it pressed', () => {

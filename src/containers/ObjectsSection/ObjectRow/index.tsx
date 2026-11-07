@@ -17,6 +17,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
+import { useObjectArtworkFrame } from '../../../utils/hooks/use.object.artwork.frame';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { isSampleJobObject } from '../../../utils/materials/is.sample.job.object';
 import { selectToolpath, selectToolpathStatus } from '../../../utils/states/toolpath.state';
@@ -24,6 +25,7 @@ import { TOOLPATH_STATUS } from '../../../utils/states/toolpath.status.constants
 import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.constants';
 import type { ObjectWarning } from '../../../utils/toolpath/interfaces/ObjectWarning';
 import type { Toolpath } from '../../../utils/toolpath/interfaces/Toolpath';
+import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import { OBJECT_WARNING_TEXT_KEY } from '../../../utils/toolpath/object.warning.text.key';
 import type { ObjectRowProps } from '../interfaces/ObjectRowProps';
 import { OBJECT_KIND, OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
@@ -48,6 +50,7 @@ export const ObjectRow = ({
     [projectObject, readyToolpathWarnings],
   );
 
+  const artworkFrame: ObjectArtworkFrame = useObjectArtworkFrame(projectObject);
   const isSample: boolean = isSampleJobObject(projectObject);
   const kindText: string = t(isSample ? DEFAULT.OBJECTS_KIND_SAMPLE : DEFAULT.OBJECTS_KIND_SVG);
 
@@ -72,8 +75,8 @@ export const ObjectRow = ({
           <span className={styles.size} title={t(DEFAULT.OBJECTS_SIZE_HINT)}>
             <ColumnWidthOutlined className={styles.sizeIcon} aria-hidden />
             {t(DEFAULT.OBJECTS_SIZE, {
-              widthMm: projectObject.widthMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
-              heightMm: projectObject.heightMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
+              widthMm: (projectObject.widthMm * artworkFrame.widthFraction).toFixed(OBJECT_MILLIMETRE_DECIMALS),
+              heightMm: (projectObject.heightMm * artworkFrame.heightFraction).toFixed(OBJECT_MILLIMETRE_DECIMALS),
             })}
           </span>
           {isOutsideBed && <span className={styles.outsideNote}>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</span>}

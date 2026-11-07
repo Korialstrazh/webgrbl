@@ -18,9 +18,11 @@ import type { PointerEvent, ReactNode } from 'react';
 import { getObjectDesignDrawing } from '../../../utils/bed/get.object.design.drawing';
 import type { ObjectDesignDrawing } from '../../../utils/bed/interfaces/ObjectDesignDrawing';
 import { isDesignDrawnAsAuthored } from '../../../utils/bed/is.design.drawn.as.authored';
+import { useObjectArtworkFrame } from '../../../utils/hooks/use.object.artwork.frame';
 import { getSvgDataUrl } from '../../../utils/project/get.svg.data.url';
 import type { ProjectObject } from '../../../utils/project/interfaces/ProjectObject';
 import { HALF_BOX_FACTOR } from '../../../utils/project/project.constants';
+import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import {
   BED_OBJECT_HANDLE,
   BED_OBJECT_HANDLE_TEST_ID,
@@ -41,7 +43,7 @@ import styles from './styles.module.scss';
 
 type HandlePointerDownHandler = (pointerEvent: PointerEvent<SVGElement>, handle: BedObjectHandle) => void;
 
-/** The size of the dashed selection box around an object's box. */
+/** The size of the dashed selection box around an object's drawn geometry. */
 type SelectionBoxSize = Pick<ProjectObject, 'widthMm' | 'heightMm'>;
 
 const renderSelectionHandles = (
@@ -95,11 +97,17 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
     () => getObjectDesignDrawing({ svgText, intrinsicWidthMm, intrinsicHeightMm }),
     [svgText, intrinsicWidthMm, intrinsicHeightMm],
   );
+  const artworkFrame: ObjectArtworkFrame = useObjectArtworkFrame(projectObject);
   const left: number = -widthMm * HALF_BOX_FACTOR;
   const top: number = -heightMm * HALF_BOX_FACTOR;
+  // The selection hugs the drawn geometry, the size the Objects list and the job report, not the SVG page.
+  const artworkWidthMm: number = widthMm * artworkFrame.widthFraction;
+  const artworkHeightMm: number = heightMm * artworkFrame.heightFraction;
+  const artworkCenterX: number = left + widthMm * artworkFrame.leftFraction + artworkWidthMm * HALF_BOX_FACTOR;
+  const artworkCenterY: number = top + heightMm * artworkFrame.topFraction + artworkHeightMm * HALF_BOX_FACTOR;
   const selectionBox: SelectionBoxSize = {
-    widthMm: widthMm + SELECTION_BOX_PADDING_MM + SELECTION_BOX_PADDING_MM,
-    heightMm: heightMm + SELECTION_BOX_PADDING_MM + SELECTION_BOX_PADDING_MM,
+    widthMm: artworkWidthMm + SELECTION_BOX_PADDING_MM + SELECTION_BOX_PADDING_MM,
+    heightMm: artworkHeightMm + SELECTION_BOX_PADDING_MM + SELECTION_BOX_PADDING_MM,
   };
 
   const handlePointerDown = (pointerEvent: PointerEvent<SVGGElement>): void => {
@@ -156,16 +164,18 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
           height={heightMm}
         />
       )}
-      {isSelected && (
-        <rect
-          className={styles.selectionBox}
-          x={left - SELECTION_BOX_PADDING_MM}
-          y={top - SELECTION_BOX_PADDING_MM}
-          width={selectionBox.widthMm}
-          height={selectionBox.heightMm}
-        />
-      )}
-      {hasHandles && renderSelectionHandles(handleSizes, selectionBox, handleHandlePointerDown)}
+      <g transform={`translate(${artworkCenterX} ${artworkCenterY})`}>
+        {isSelected && (
+          <rect
+            className={styles.selectionBox}
+            x={-selectionBox.widthMm * HALF_BOX_FACTOR}
+            y={-selectionBox.heightMm * HALF_BOX_FACTOR}
+            width={selectionBox.widthMm}
+            height={selectionBox.heightMm}
+          />
+        )}
+        {hasHandles && renderSelectionHandles(handleSizes, selectionBox, handleHandlePointerDown)}
+      </g>
     </g>
   );
 };
