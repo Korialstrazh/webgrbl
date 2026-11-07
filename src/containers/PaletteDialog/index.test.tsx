@@ -285,16 +285,22 @@ describe(PaletteDialog.name, () => {
   it('gives the shading entry no delete button and a locked colour', () => {
     renderDialog(newStore());
 
-    expect(within(getRow(SHADING_NAME_PATTERN)).queryByRole('button', { name: DELETE_NAME_PATTERN }))
-      .not.toBeInTheDocument();
-    expect(within(getRow(SHADING_NAME_PATTERN)).getByRole('note', { name: SHADING_LOCKED_TEXT })).toBeInTheDocument();
+    // Each row is looked up once: role queries over the whole dialog are slow in jsdom.
+    const shadingRow: HTMLElement = getRow(SHADING_NAME_PATTERN);
+    const cutRow: HTMLElement = getRow(CUT_NAME_PATTERN);
+
+    expect(within(shadingRow).queryByRole('button', { name: DELETE_NAME_PATTERN })).not.toBeInTheDocument();
+    expect(within(shadingRow).getByRole('note', { name: SHADING_LOCKED_TEXT })).toBeInTheDocument();
     // A single badge on the page, named for screen readers, and it sits in the shading row.
-    expect(screen.getByRole('img', { name: 'Built-in' }).closest('li')).toHaveTextContent(SHADING_NAME_PATTERN);
-    expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
-    expect(within(getRow(CUT_NAME_PATTERN)).queryByRole('note')).not.toBeInTheDocument();
+    const badges: HTMLElement[] = screen.getAllByRole('img', { name: 'Built-in', hidden: true });
+
+    expect(badges).toHaveLength(1);
+    expect(shadingRow).toContainElement(badges[0]);
+    expect(within(cutRow).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
+    expect(within(cutRow).queryByRole('note')).not.toBeInTheDocument();
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: SHADING_NAME_PATTERN }));
+    fireEvent.click(within(shadingRow).getByRole('button', { name: SHADING_NAME_PATTERN }));
 
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).toBeInTheDocument();
     expect(screen.getByText(SHADING_NOTE_TEXT)).toBeInTheDocument();

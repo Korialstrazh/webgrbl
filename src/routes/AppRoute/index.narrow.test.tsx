@@ -10,6 +10,7 @@ import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock'
 const START_LABEL = 'Start job';
 const SHOW_FRAME_SETTINGS_LABEL = 'Show frame settings';
 const HIDE_FRAME_SETTINGS_LABEL = 'Hide frame settings';
+const HIDDEN_REGION_SELECTOR = '[class*="hiddenRegion"]';
 
 const renderWorkbench = async (store: AppStore): Promise<void> => {
   render(<Provider store={store}><AntdTestProvider><AppRoute /></AntdTestProvider></Provider>);
@@ -45,13 +46,20 @@ describe(`${AppRoute.name} in a narrow window`, () => {
 
     setMatchMediaMatches(true);
     await renderWorkbench(store);
-    fireEvent.click(await screen.findByRole('button', { name: SHOW_FRAME_SETTINGS_LABEL }));
+    // jsdom's getComputedStyle matches every antd rule (about a thousand) on each call, and a default role query or
+    // toBeVisible calls it for every ancestor of every candidate, which took seconds over the whole app. So the
+    // query skips that walk (`hidden: true`) and the test checks the app's own region hiding instead.
+    const showButton: HTMLElement = screen.getByRole('button', { name: SHOW_FRAME_SETTINGS_LABEL, hidden: true });
+
+    expect(showButton.closest(HIDDEN_REGION_SELECTOR)).toBeNull();
+    fireEvent.click(showButton);
 
     act(() => {
       setMatchMediaMatches(false);
     });
 
     expect(selectIsFrameSettingsOpen(store.getState())).toBe(true);
-    expect(await screen.findByRole('button', { name: HIDE_FRAME_SETTINGS_LABEL })).toBeInTheDocument();
+    // The Job region is hidden in the narrow layout; the open settings stay mounted there for when it is shown.
+    expect(screen.getByRole('button', { name: HIDE_FRAME_SETTINGS_LABEL, hidden: true })).toBeInTheDocument();
   });
 });
