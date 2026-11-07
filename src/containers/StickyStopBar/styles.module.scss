@@ -3,7 +3,8 @@
 .stickyStopBar {
   position: sticky;
   bottom: 0;
-  z-index: 20;
+  // Above every dialog's scrim, so STOP stays visible and clickable while one is open.
+  z-index: layout.$stop-above-dialog-z-index;
   display: flex;
   align-items: center;
   justify-content: center;

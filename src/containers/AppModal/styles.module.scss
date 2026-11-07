@@ -1,3 +1,5 @@
+@use '../../styles/layout' as layout;
+
 // The header stays in view and the body scrolls: the body takes the window height less the header, the dialog padding
 // and the gutters above and below the centred dialog. The extra class outranks antd's own selector.
 .appModal:global(.ant-modal-root) {
@@ -16,4 +18,15 @@
 // The title takes the focus where a dialog has no field; it is not a control, so it shows no ring.
 .appModal :global(.ant-modal-title):focus {
   outline: none;
+}
+
+// A narrow window pins STOP in a bar along its bottom, above the scrim; the dialog centres in the space above that bar.
+@media (width < 80rem) {
+  .appModal :global(.ant-modal-wrap) {
+    bottom: layout.$sticky-stop-bar-height;
+  }
+
+  .appModal:global(.ant-modal-root) :global(.ant-modal-body) {
+    max-height: calc(100dvh - 8rem - #{layout.$sticky-stop-bar-height});
+  }
 }

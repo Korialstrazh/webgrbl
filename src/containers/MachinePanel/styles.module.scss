@@ -1,3 +1,5 @@
+@use '../../styles/layout' as layout;
+
 // In a wide window the panel is a column of two parts: the cards scroll on their own, and STOP sits below them as a
 // footer that never covers a card.
 .region {
@@ -32,6 +34,9 @@
 }
 
 .stopFooter {
+  // Above every dialog's scrim, so STOP stays visible and clickable while one is open.
+  position: relative;
+  z-index: layout.$stop-above-dialog-z-index;
   display: flex;
   flex: none;
   padding: var(--space-3);

@@ -26,6 +26,9 @@ $status-strip-height: 3rem;
 $status-strip-readouts-width: 31rem;
 $status-strip-toggle-width: 2.5rem;
 
+// STOP stays above the scrim of every dialog: antd stacks its modal mask and dialog at 1000, so STOP sits one above.
+$stop-above-dialog-z-index: 1001;
+
 // The sticky STOP bar at the bottom of a narrow window; the pinned toast stack stops short of it.
 $sticky-stop-bar-height: 4.5rem;
 

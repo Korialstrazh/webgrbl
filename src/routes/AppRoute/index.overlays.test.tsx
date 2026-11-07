@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { AppRoute } from '.';
+import { AppModal } from '../../containers/AppModal';
 import { BedRegionDrawer } from '../../containers/BedRegionDrawer';
 import { BedRegionModal } from '../../containers/BedRegionModal';
 import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
@@ -16,6 +17,9 @@ import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock'
 
 const STOP_LABEL = 'Stop';
 const MODAL_TITLE = 'Test modal';
+const APP_MODAL_TITLE = 'Test window dialog';
+const APP_MODAL_OVERLAY_ID = 'test-window-dialog';
+const APP_MODAL_MAX_WIDTH = '56rem';
 const DRAWER_TITLE = 'Test drawer';
 const MODAL_OVERLAY_ID = 'test-modal';
 const DRAWER_OVERLAY_ID = 'test-drawer';
@@ -41,6 +45,19 @@ const newTestDrawer = (onClose: () => void): ReactNode => (
   <BedRegionDrawer isOpen overlayIdPrefix={DRAWER_OVERLAY_ID} title={DRAWER_TITLE} onClose={onClose}>
     <p>body</p>
   </BedRegionDrawer>
+);
+
+const newTestAppModal = (onClose: () => void): ReactNode => (
+  <AppModal
+    isOpen
+    overlayIdPrefix={APP_MODAL_OVERLAY_ID}
+    maxWidth={APP_MODAL_MAX_WIDTH}
+    title={APP_MODAL_TITLE}
+    footer={null}
+    onClose={onClose}
+  >
+    <p>body</p>
+  </AppModal>
 );
 
 interface RenderedWorkbench {
@@ -142,5 +159,27 @@ describe.each([
 
     expect(countStopRequests()).toBe(0);
     expect(closeSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+// Palette, Laser profiles, Open project and Add material all open through AppModal, whose scrim covers the window.
+describe('AppRoute with a full-window dialog open', () => {
+  it.each([true, false])('keeps STOP outside the dialog and its scrim, and clickable (wide: %s)', async (isWide: boolean) => {
+    setMatchMediaMatches(isWide);
+
+    const closeSpy = vi.fn();
+    const { countStopRequests } = await renderWorkbench(newTestAppModal(closeSpy));
+    await screen.findByText(APP_MODAL_TITLE);
+    const modalRoot: HTMLElement = getOverlayRoot(MODAL_ROOT_SELECTOR);
+    const stopButton: HTMLElement = screen.getByRole('button', { name: STOP_LABEL });
+
+    expect(modalRoot.querySelector(MODAL_MASK_SELECTOR)).toBeInTheDocument();
+    expect(modalRoot).not.toContainElement(stopButton);
+    expect(stopButton).toBeEnabled();
+
+    fireEvent.click(stopButton);
+
+    expect(countStopRequests()).toBe(1);
+    expect(closeSpy).not.toHaveBeenCalled();
   });
 });
