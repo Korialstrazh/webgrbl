@@ -1,6 +1,7 @@
 /**
- * The Status card of the machine panel. It shows the state, positions, feed and power with Reset and Unlock. While no
- * laser is connected it is not shown: the top-bar pill alone tells the connection state.
+ * The Status card of the machine panel. It shows the state, feed and power with Reset and Unlock; the positions sit in
+ * the Position card above Move. While no laser is connected it is not shown: the top-bar pill alone tells the
+ * connection state.
  *
  * @author michael.morosov
  *

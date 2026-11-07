@@ -1,5 +1,5 @@
 /**
- * The latest status of the laser: its state, where it is, how fast it moves and how hard the laser fires.
+ * The latest status of the laser: its state, how fast it moves and how hard the laser fires.
  *
  * @author michael.morosov
  *
@@ -14,15 +14,12 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
 import type { GrblMachineState } from '../../../utils/grbl/grbl.constants';
-import type { GrblAxisPosition } from '../../../utils/grbl/interfaces/GrblAxisPosition';
 import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { selectMachineStatus } from '../../../utils/states/machine.status.state';
 import styles from './styles.module.scss';
 
-const POSITION_DECIMALS = 3;
-const POSITION_SEPARATOR = ' / ';
 const STATE_SUBSTATE_SEPARATOR = ' ';
 
 const MACHINE_STATE_LABEL_KEY: Readonly<Record<GrblMachineState, string>> = {
@@ -36,13 +33,6 @@ const MACHINE_STATE_LABEL_KEY: Readonly<Record<GrblMachineState, string>> = {
   [GRBL_MACHINE_STATE.HOME]: DEFAULT.MACHINE_STATE_HOME,
   [GRBL_MACHINE_STATE.SLEEP]: DEFAULT.MACHINE_STATE_SLEEP,
 };
-
-const getPositionText = (position: GrblAxisPosition | undefined): string =>
-  position
-    ? [position.x, position.y, position.z]
-      .map((axisValue: number) => axisValue.toFixed(POSITION_DECIMALS))
-      .join(POSITION_SEPARATOR)
-    : MISSING_VALUE_TEXT;
 
 const getNumberText = (value: number | undefined): string =>
   value?.toString() ?? MISSING_VALUE_TEXT;
@@ -69,10 +59,6 @@ export const MachineStateReadout = (): ReactNode => {
     <div className={styles.machineStateReadout}>
       <div className={getStateClassName(status)}>{getStateText(status, t)}</div>
       <dl className={styles.values}>
-        <dt>{t(DEFAULT.MACHINE_STATUS_WORK_POSITION)}</dt>
-        <dd>{getPositionText(status?.workPosition)}</dd>
-        <dt>{t(DEFAULT.MACHINE_STATUS_MACHINE_POSITION)}</dt>
-        <dd>{getPositionText(status?.machinePosition)}</dd>
         <dt>{t(DEFAULT.MACHINE_STATUS_FEED)}</dt>
         <dd>{getNumberText(status?.feedRate)}</dd>
         <dt>{t(DEFAULT.MACHINE_STATUS_POWER)}</dt>

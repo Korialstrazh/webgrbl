@@ -23,6 +23,7 @@ import { JobCard } from './JobCard';
 import { LaserCard } from './LaserCard';
 import { MachineStatusCard } from './MachineStatusCard';
 import { MoveCard } from './MoveCard';
+import { PositionCard } from './PositionCard';
 import type { MachinePanelProps } from './interfaces/MachinePanelProps';
 import styles from './styles.module.scss';
 
@@ -41,6 +42,7 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
       <div ref={cardsRef} className={isCardsCutOff ? [styles.cards, styles.cardsCutOff].join(' ') : styles.cards}>
         <MachineStatusCard />
         <JobCard isStartShown={isWide} />
+        <PositionCard />
         <MoveCard />
         <LaserCard />
       </div>
