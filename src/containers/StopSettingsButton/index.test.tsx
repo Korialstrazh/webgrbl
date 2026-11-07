@@ -9,7 +9,7 @@ import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const SETTINGS_LABEL = 'Stop settings';
-const PREFERENCE_LABEL = 'Esc stops the laser even when a panel is open';
+const PREFERENCE_LABEL = 'Esc stops over panels too';
 
 describe(StopSettingsButton.name, () => {
   it('opens a popover whose checkbox is off by default and turns the preference on', () => {

@@ -478,7 +478,7 @@ MATERIAL_DIALOG_DUPLICATE_NOTE;You already have {{name}} at this thickness.
 MATERIAL_DIALOG_NAME;Name
 MATERIAL_DIALOG_NAME_INVALID;Enter a name of {{min}} to {{max}} characters.
 MATERIAL_DIALOG_SAVE;Save
-MATERIAL_DIALOG_SAVE_HINT;Enter a name to save.
+MATERIAL_DIALOG_SAVE_HINT;Name needed
 MATERIAL_DIALOG_THICKNESS;Thickness (mm)
 MATERIAL_DIALOG_THICKNESS_INVALID;Enter a thickness from {{min}} to {{max}} mm.
 MATERIAL_DIALOG_TITLE;Add material
@@ -504,13 +504,13 @@ MATERIAL_LIBRARY_DELETE_CANCEL;Cancel
 MATERIAL_LIBRARY_DELETE_CONFIRM;Delete this preset?
 MATERIAL_LIBRARY_DELETE_OK;Yes, delete
 MATERIAL_LIBRARY_DELETED;Preset deleted.
-MATERIAL_LIBRARY_EMPTY_MATERIAL_TEXT;Add one, or clear the filter.
+MATERIAL_LIBRARY_EMPTY_MATERIAL_TEXT;Add one or clear filter
 MATERIAL_LIBRARY_EMPTY_MATERIAL_TITLE;No presets yet for {{name}}, {{thickness}} mm
 MATERIAL_LIBRARY_EMPTY_NO_MACHINE_TITLE;No laser profile
 MATERIAL_LIBRARY_EMPTY_NO_MATERIALS_TITLE;No materials yet
 MATERIAL_LIBRARY_EMPTY_SEARCH_TEXT;Try fewer words, or clear the search.
 MATERIAL_LIBRARY_EMPTY_SEARCH_TITLE;Nothing matches "{{search}}"
-MATERIAL_LIBRARY_EMPTY_TEXT;Add one, or save it from a layer.
+MATERIAL_LIBRARY_EMPTY_TEXT;Add one or save a layer
 MATERIAL_LIBRARY_EMPTY_TITLE;No presets yet
 MATERIAL_LIBRARY_EXPORT;Export
 MATERIAL_LIBRARY_EXPORT_COUNT;Export ({{count}})
@@ -662,7 +662,7 @@ STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
 STATUS_STRIP_TITLE;Status
-STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN;Esc stops the laser even when a panel is open
+STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN;Esc stops over panels too
 STOP_SETTINGS_TITLE;Stop settings
 TEST_SAMPLE_DIALOG_CANCEL;Cancel
 TEST_SAMPLE_DIALOG_CUT_THROUGH;Cut through

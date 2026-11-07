@@ -38,7 +38,7 @@ Then log out and back in. Only one application or browser tab can hold a port at
 
 ## Stop, Reset, Unlock
 
-- Pressing **Escape** in the main view stops the machine like the STOP button, but only while connected and no popover, dialog or drawer is open (Escape then just closes it). To make Escape stop the laser even then, open the gear beside STOP and tick **Esc stops the laser even when a panel is open** (off by default, remembered on this device): Escape then closes the panel and stops in one press, still only while connected. See [workbench-shell.md](workbench-shell.md).
+- Pressing **Escape** in the main view stops the machine like the STOP button, but only while connected and no popover, dialog or drawer is open (Escape then just closes it). To make Escape stop the laser even then, open the gear beside STOP and tick **Esc stops over panels too** (off by default, remembered on this device): Escape then closes the panel and stops in one press, still only while connected. See [workbench-shell.md](workbench-shell.md).
 - **Stop** sends a feed hold (which also cancels a jog), waits until the machine has come to rest (at most 2 s), then soft-resets. The position is kept and no alarm is raised.
 - **Reset** soft-resets at once. Moving machines lose steps and raise `ALARM:3`, so home again afterwards.
 - **Unlock** sends `$X` to clear an Alarm lock.
