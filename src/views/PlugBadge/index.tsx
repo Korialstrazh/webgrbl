@@ -13,6 +13,8 @@
 import { ApiOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
+import { useAnchoredTooltipOpen } from '../../utils/hooks/use.anchored.tooltip.open';
+import type { AnchoredTooltipOpen } from '../../utils/hooks/interfaces/AnchoredTooltipOpen';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT, ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
 import { KEYBOARD_FOCUSABLE_TAB_INDEX } from '../../utils/tab.index.constants';
 import styles from './styles.module.scss';
@@ -26,21 +28,36 @@ interface PlugBadgeProps {
   onClick?: () => void;
 }
 
-export const PlugBadge = ({ reasonText, iconComponent = <ApiOutlined />, onClick }: PlugBadgeProps): ReactNode => (
-  <Tooltip title={reasonText} trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}>
-    {onClick ? (
-      <Button
-        className={styles.plugButton}
-        type={ANTD_BUTTON_TYPE_TEXT}
-        size={ANTD_BUTTON_SIZE_SMALL}
-        icon={iconComponent}
-        aria-label={reasonText}
-        onClick={onClick}
-      />
-    ) : (
-      <span className={styles.plugBadge} role="img" aria-label={reasonText} tabIndex={KEYBOARD_FOCUSABLE_TAB_INDEX}>
-        {iconComponent}
-      </span>
-    )}
-  </Tooltip>
-);
+export const PlugBadge = ({ reasonText, iconComponent = <ApiOutlined />, onClick }: PlugBadgeProps): ReactNode => {
+  // The click opens another view, so the tooltip closes with it instead of staying behind once the layout moves.
+  const tooltipOpen: AnchoredTooltipOpen = useAnchoredTooltipOpen();
+
+  const handleClick = (): void => {
+    tooltipOpen.close();
+    onClick?.();
+  };
+
+  return (
+    <Tooltip
+      title={reasonText}
+      trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
+      open={tooltipOpen.isOpen}
+      onOpenChange={tooltipOpen.setIsOpen}
+    >
+      {onClick ? (
+        <Button
+          className={styles.plugButton}
+          type={ANTD_BUTTON_TYPE_TEXT}
+          size={ANTD_BUTTON_SIZE_SMALL}
+          icon={iconComponent}
+          aria-label={reasonText}
+          onClick={handleClick}
+        />
+      ) : (
+        <span className={styles.plugBadge} role="img" aria-label={reasonText} tabIndex={KEYBOARD_FOCUSABLE_TAB_INDEX}>
+          {iconComponent}
+        </span>
+      )}
+    </Tooltip>
+  );
+};
