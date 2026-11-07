@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { NarrowRegionBar } from '.';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
+import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
 import { selectNarrowRegion } from '../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants';
 
@@ -17,5 +18,15 @@ describe(NarrowRegionBar.name, () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Job' }));
 
     expect(selectNarrowRegion(store.getState())).toBe(WORKBENCH_REGION.JOB);
+  });
+
+  it('puts the console sheet away when another region is chosen', () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new ConsoleOpenChanged({ isConsoleOpen: true }));
+    render(<Provider store={store}><NarrowRegionBar /></Provider>);
+    fireEvent.click(screen.getByRole('radio', { name: 'Job' }));
+
+    expect(selectIsConsoleOpen(store.getState())).toBe(false);
   });
 });

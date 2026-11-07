@@ -16,13 +16,18 @@
 import { Drawer } from 'antd';
 import { useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useDispatch } from 'react-redux';
 import { BED_REGION_DRAWER_INSET_PROPERTY } from '../../utils/bed/bed.region.drawer.constants';
 import { BED_REGION_DRAWER_STORE } from '../../utils/bed/bed.region.drawer.store';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
 import { getBedRegionDrawerInset } from '../../utils/bed/get.bed.region.drawer.inset';
 import { getBedRegionDrawerInsetPixels } from '../../utils/bed/get.bed.region.drawer.inset.pixels';
+import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
+import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
+import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
+import { useAppStore } from '../../utils/states/use.app.store';
 import type { BedRegionDrawerProps } from './interfaces/BedRegionDrawerProps';
 import styles from './styles.module.scss';
 import { useCloseOnUnrelatedDialog } from './use.close.on.unrelated.dialog';
@@ -30,6 +35,9 @@ import { useCloseOnUnrelatedDialog } from './use.close.on.unrelated.dialog';
 export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
   const { isOpen, overlayIdPrefix, onClose, ...drawerProps } = props;
   const bedRegionHost: HTMLElement | null = useContext(BedRegionHostContext);
+  const isWide: boolean = useIsWideLayout();
+  const store: AppStore = useAppStore();
+  const dispatch: AppDispatch = useDispatch();
   // Without the bed region the drawer would fall back to the whole window, over STOP, so it waits for the region.
   const isShown: boolean = isOpen && Boolean(bedRegionHost);
 
@@ -37,6 +45,14 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
 
   useOverlayRegistration(overlayIdPrefix, isShown, OVERLAY_KIND.DIALOG);
   useCloseOnUnrelatedDialog(isShown, styles.bedRegionDrawer, onClose);
+
+  // In the narrow layout the console is a sheet in the same box: a drawer that opens puts it away, so the two never
+  // stack. Only the opening does, so the console can still be opened again while the drawer is open.
+  useEffect(() => {
+    if (isShown && !isWide && selectIsConsoleOpen(store.getState())) {
+      dispatch(new ConsoleOpenChanged({ isConsoleOpen: false }));
+    }
+  }, [isShown, isWide, store, dispatch]);
 
   useEffect(() => {
     if (!bedRegionHost || !isShown || !insetValue) {

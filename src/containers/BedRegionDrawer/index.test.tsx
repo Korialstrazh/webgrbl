@@ -10,7 +10,9 @@ import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
+import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
 import { OverlayOpened } from '../../utils/states/ui.overlay.state';
+import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 
 const DRAWER_SIZE = 'min(23.75rem, 100%)';
 const HOST_TEST_ID = 'bed-region-host';
@@ -49,6 +51,21 @@ const renderHarness = (isOpen: boolean): ReturnType<typeof render> =>
   render(<Provider store={newStore()}><DrawerHarness isOpen={isOpen} /></Provider>);
 
 describe(BedRegionDrawer.name, () => {
+  it.each([
+    { layout: 'narrow', isWide: false, isConsoleOpenAfter: false },
+    { layout: 'wide', isWide: true, isConsoleOpenAfter: true },
+  ])('in a $layout window leaves the console open: $isConsoleOpenAfter', ({ isWide, isConsoleOpenAfter }) => {
+    const store: AppStore = newStore();
+
+    setMatchMediaMatches(isWide);
+    store.dispatch(new ConsoleOpenChanged({ isConsoleOpen: true }));
+    const { rerender } = render(<Provider store={store}><DrawerHarness isOpen={false} /></Provider>);
+
+    rerender(<Provider store={store}><DrawerHarness isOpen /></Provider>);
+
+    expect(selectIsConsoleOpen(store.getState())).toBe(isConsoleOpenAfter);
+  });
+
   it('sets its width on the bed region host while open, so a wide bed moves aside', () => {
     const { getByTestId } = renderHarness(true);
 

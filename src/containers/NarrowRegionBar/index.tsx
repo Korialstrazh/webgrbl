@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppDispatch } from '../../utils/states/new.store';
+import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
 import { NarrowRegionChanged, selectNarrowRegion } from '../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants';
 import type { WorkbenchRegion } from '../../utils/states/workbench.region.constants';
@@ -26,6 +27,17 @@ export const NarrowRegionBar = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const narrowRegion: WorkbenchRegion = useSelector(selectNarrowRegion);
+  const isConsoleOpen: boolean = useSelector(selectIsConsoleOpen);
+
+  // The console is a sheet over the region on screen, so a switch to another region puts it away instead of leaving
+  // it over the new one.
+  const changeRegion = (region: WorkbenchRegion): void => {
+    dispatch(new NarrowRegionChanged({ narrowRegion: region }));
+
+    if (isConsoleOpen) {
+      dispatch(new ConsoleOpenChanged({ isConsoleOpen: false }));
+    }
+  };
 
   return (
     <div className={styles.narrowRegionBar}>
@@ -47,7 +59,7 @@ export const NarrowRegionBar = (): ReactNode => {
           },
           { value: WORKBENCH_REGION.JOB, icon: <ProfileOutlined aria-hidden />, label: t(DEFAULT.NARROW_REGION_JOB) },
         ]}
-        onChange={(region: WorkbenchRegion) => dispatch(new NarrowRegionChanged({ narrowRegion: region }))}
+        onChange={changeRegion}
       />
     </div>
   );
