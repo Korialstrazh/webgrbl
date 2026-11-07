@@ -82,7 +82,7 @@ return (
 
 ## One STOP
 
-Exactly one STOP is rendered: `StopButton`, an antd `Button` with `type="primary"`, `danger` and `size="large"`. `AppRoute` calls `useIsWideLayout()` once and passes `isWide` to `MachinePanel`: wide shows `StopButton` in a footer below the panel's scrolling cards (never over them), narrow shows `StickyStopBar` (rendered by `AppRoute`). Disconnected, STOP has the disabled look with a dark red outline (`--color-danger-disabled-border`), a readable `--color-text-muted` label and an unplugged icon, with a visually hidden "Laser not connected" description (`aria-describedby`); it turns solid red only when it can act; it shows its Esc shortcut (`aria-keyshortcuts="Escape"`). Do not add further STOP buttons or call the hook elsewhere for this.
+Exactly one STOP is rendered: `StopButton`, an antd `Button` with `type="primary"`, `danger` and `size="large"`. `AppRoute` calls `useIsWideLayout()` once and passes `isWide` to `MachinePanel`: wide shows `StopButton` in a footer below the panel's scrolling cards (never over them), narrow shows `StickyStopBar` (rendered by `AppRoute`). Disconnected, STOP has the disabled look with a dark red outline (`--color-danger-disabled-border`), a readable `--color-text-muted` label and an unplugged icon with a short visible "Not connected" cue inside the button (hidden from its name), plus a visually hidden "Laser not connected" description (`aria-describedby`); it turns solid red only when it can act; it shows its Esc shortcut (`aria-keyshortcuts="Escape"`). Do not add further STOP buttons or call the hook elsewhere for this.
 
 ## Tokens and fonts
 

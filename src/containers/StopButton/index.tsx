@@ -1,7 +1,7 @@
 /**
  * The one STOP button, an antd solid danger button in the large size: sends the stop request and can be pressed
  * whenever the laser is connected. It shows its Esc shortcut. While disconnected it looks disabled, with a readable
- * label, a dark red outline and an unplugged cue, so it only looks armed when a press can stop the laser.
+ * label, a dark red outline and a short unplugged Not connected cue, so it only looks armed when a press can stop the laser.
  *
  * @author michael.morosov
  *
@@ -46,7 +46,13 @@ export const StopButton = (): ReactNode => {
         {t(DEFAULT.MACHINE_CONTROL_STOP)}
         {/* The shortcut is announced through aria-keyshortcuts, so the visible hint stays out of the button name. */}
         <kbd className={styles.shortcutHint} aria-hidden="true">{t(DEFAULT.MACHINE_CONTROL_STOP_SHORTCUT)}</kbd>
-        {isConnected ? undefined : <DisconnectOutlined className={styles.notConnectedCue} aria-hidden />}
+        {/* The reason reaches screen readers through aria-describedby, so the visible cue stays out of the name. */}
+        {isConnected ? undefined : (
+          <span className={styles.notConnectedCue} aria-hidden="true">
+            <DisconnectOutlined />
+            {t(DEFAULT.MACHINE_CONTROL_STOP_OFFLINE)}
+          </span>
+        )}
       </Button>
       {/* Outside the button, so the hint describes STOP without joining its name. */}
       {isConnected ? undefined : (

@@ -11,6 +11,7 @@ const STOP_LABEL = 'Stop';
 const SHORTCUT_HINT_TEXT = 'Esc';
 const ESCAPE_KEY_NAME = 'Escape';
 const NOT_CONNECTED_TEXT = 'Laser not connected';
+const OFFLINE_CUE_TEXT = 'Not connected';
 // antd's classes for a solid danger button in the large size: the most prominent button on the page.
 // After an antd upgrade, check these class names in the rendered button if this test fails.
 const PROMINENT_DANGER_CLASS_NAMES: readonly string[] = [
@@ -46,6 +47,13 @@ describe(StopButton.name, () => {
     expect(screen.getByRole('button', { name: STOP_LABEL })).toHaveAccessibleDescription(NOT_CONNECTED_TEXT);
   });
 
+  it('shows a visible Not connected cue beside the label while disconnected, outside the button name', () => {
+    renderStopButton(newStore());
+
+    expect(screen.getByText(OFFLINE_CUE_TEXT)).toBeVisible();
+    expect(screen.getByRole('button', { name: STOP_LABEL })).toHaveTextContent(OFFLINE_CUE_TEXT);
+  });
+
   it('is an enabled solid danger button without the not-connected cue while connected', () => {
     const store: AppStore = newStore();
 
@@ -60,6 +68,7 @@ describe(StopButton.name, () => {
     expect(stopButton).toHaveClass(...PROMINENT_DANGER_CLASS_NAMES);
     expect(stopButton).not.toHaveAttribute('aria-describedby');
     expect(screen.queryByText(NOT_CONNECTED_TEXT)).not.toBeInTheDocument();
+    expect(screen.queryByText(OFFLINE_CUE_TEXT)).not.toBeInTheDocument();
   });
 
   it('dispatches the stop request when clicked while connected', () => {

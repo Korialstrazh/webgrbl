@@ -19,14 +19,21 @@
     color: var(--color-danger-text);
   }
 
-  // The unplugged cue says why STOP is resting, in the label colour rather than red.
-  :global(.anticon).notConnectedCue {
+  // The unplugged cue says why STOP is resting, in the label colour rather than red (8.7:1 on the disabled fill).
+  .notConnectedCue :global(.anticon) {
     color: var(--color-text-muted);
   }
 }
 
 .notConnectedCue {
-  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-left: var(--space-2);
+  border-left: 1px solid var(--color-disabled-border-locked);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 400;
 }
 
 .notConnectedText {

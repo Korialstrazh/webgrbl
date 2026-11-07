@@ -23,6 +23,7 @@ const RUN_LABEL = 'Run';
 const RESET_LABEL = 'Reset';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
+const BUTTON_SELECTOR = 'button';
 const NOT_CONNECTED_TEXT = 'Not connected';
 const STATUS_CARD_TITLE = 'Status';
 const STATUS_CONNECT_LABEL = 'Connect';
@@ -72,7 +73,9 @@ describe(MachinePanel.name, () => {
     renderMachinePanel();
 
     expect(screen.queryByRole('region', { name: STATUS_CARD_TITLE })).not.toBeInTheDocument();
-    expect(screen.queryByText(NOT_CONNECTED_TEXT)).not.toBeInTheDocument();
+    // Only STOP keeps its own short Not connected cue.
+    expect(screen.queryAllByText(NOT_CONNECTED_TEXT)
+      .filter((element: HTMLElement): boolean => !element.closest(BUTTON_SELECTOR))).toHaveLength(0);
     expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
   });
