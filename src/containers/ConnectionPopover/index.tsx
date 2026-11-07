@@ -249,6 +249,12 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
       // A clear edge, shadow and arrow tie it to the pill, so it never reads as part of the Job card under it.
       rootClassName={styles.connectionPopoverRoot}
+      title={(
+        <span className={styles.title}>
+          <ApiOutlined aria-hidden />
+          {t(DEFAULT.CONNECTION_POPOVER_TITLE)}
+        </span>
+      )}
       content={contentComponent}
       destroyOnHidden
     >

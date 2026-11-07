@@ -5,6 +5,7 @@ const PANEL_TITLE = 'Laser';
 const BODY_TEXT = 'Body content';
 const ACTION_LABEL = 'Panel action';
 const NOTE_TEXT = 'Set in another view.';
+const NOTE_CAPTION = 'Design only';
 
 describe(Panel.name, () => {
   it('renders a heading with the title, the body and the header action', () => {
@@ -42,5 +43,15 @@ describe(Panel.name, () => {
     expect(screen.queryByText(BODY_TEXT)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
     expect(screen.getByRole('note', { name: NOTE_TEXT })).toHaveAttribute('tabindex', '0');
+  });
+
+  it('writes the short caption of a muted section beside its note icon, and only while muted', () => {
+    const { rerender } = render(<Panel title={PANEL_TITLE} noteText={NOTE_TEXT} noteCaptionText={NOTE_CAPTION} />);
+
+    expect(screen.getByText(NOTE_CAPTION)).toBeInTheDocument();
+
+    rerender(<Panel title={PANEL_TITLE} noteCaptionText={NOTE_CAPTION} />);
+
+    expect(screen.queryByText(NOTE_CAPTION)).not.toBeInTheDocument();
   });
 });

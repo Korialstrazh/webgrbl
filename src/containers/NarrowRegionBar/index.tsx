@@ -8,7 +8,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BlockOutlined, DashboardOutlined, ProfileOutlined } from '@ant-design/icons';
+import { BlockOutlined, BorderOuterOutlined, ProfileOutlined } from '@ant-design/icons';
 import { Segmented } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +40,11 @@ export const NarrowRegionBar = (): ReactNode => {
             icon: <BlockOutlined aria-hidden />,
             label: t(DEFAULT.NARROW_REGION_DESIGN),
           },
-          { value: WORKBENCH_REGION.BED, icon: <DashboardOutlined aria-hidden />, label: t(DEFAULT.NARROW_REGION_BED) },
+          {
+            value: WORKBENCH_REGION.BED,
+            icon: <BorderOuterOutlined aria-hidden />,
+            label: t(DEFAULT.NARROW_REGION_BED),
+          },
           { value: WORKBENCH_REGION.JOB, icon: <ProfileOutlined aria-hidden />, label: t(DEFAULT.NARROW_REGION_JOB) },
         ]}
         onChange={(region: WorkbenchRegion) => dispatch(new NarrowRegionChanged({ narrowRegion: region }))}

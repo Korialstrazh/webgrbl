@@ -83,7 +83,7 @@ CONNECTION_PILL_LABEL;Connection: {{details}}. Open the connection menu.
 CONNECTION_PILL_LOST;Connection lost
 CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED;No Web Serial
 CONNECTION_POPOVER_BAUD;Baud rate
-CONNECTION_POPOVER_CHOOSE_PORT;USB
+CONNECTION_POPOVER_CHOOSE_PORT;Add port
 CONNECTION_POPOVER_CHOOSE_PORT_LABEL;Choose a USB port
 CONNECTION_POPOVER_CONNECT;Connect
 CONNECTION_POPOVER_CONNECTING;Connecting...
@@ -92,6 +92,7 @@ CONNECTION_POPOVER_LABEL;Laser connection
 CONNECTION_POPOVER_PORT;Port
 CONNECTION_POPOVER_SERIAL_PORT;Serial port
 CONNECTION_POPOVER_SIMULATED_LASER;Simulated laser (no hardware)
+CONNECTION_POPOVER_TITLE;Connect laser
 CONNECTION_POPOVER_USB_PORT;USB {{vendorId}}:{{productId}}
 CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
 CONSOLE_CLOSE;Close the console
@@ -110,6 +111,7 @@ CONSOLE_REALTIME_STATUS_QUERY;Status query
 CONSOLE_SHOW_STATUS_REPORTS;Show status reports
 CONSOLE_TITLE;Console
 CONSOLE_TOGGLE;Console
+CUT_CHECK_3D_ONLY_CAPTION;3D only
 CUT_CHECK_3D_ONLY_NOTE;The cut check runs in the 3D view.
 CUT_CHECK_BADGE_ESTIMATE;Estimate
 CUT_CHECK_BADGE_GUESS;Guess
@@ -146,8 +148,10 @@ CUT_CHECK_WARNING_PARTS_ATTACHED;Layer {{layer}}: {{count}} parts stay attached 
 CUT_CHECK_WARNING_PARTS_MAY_STAY_ATTACHED;Layer {{layer}}: {{count}} parts may stay attached (predicted {{predicted}} mm, needed {{needed}} mm). Suggestion: add a run or lower the speed.
 CUT_CHECK_WARNINGS_LABEL;Cut check warnings
 DESIGN_LAYERS_TITLE;Layers
+DESIGN_MATERIAL_DESIGN_ONLY_CAPTION;Design only
 DESIGN_MATERIAL_DESIGN_ONLY_NOTE;The material is chosen in the Design view.
 DESIGN_MATERIAL_TITLE;Material
+DESIGN_OBJECTS_NOT_IN_3D_CAPTION;Not in 3D
 DESIGN_OBJECTS_NOT_IN_3D_NOTE;Objects are edited in the Design and Toolpath views.
 DESIGN_OBJECTS_TITLE;Objects
 DESIGN_PANEL_TITLE;Layers and objects

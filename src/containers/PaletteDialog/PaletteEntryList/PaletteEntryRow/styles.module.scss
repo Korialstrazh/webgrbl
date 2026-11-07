@@ -58,13 +58,14 @@
   min-width: 0;
 }
 
+// 12 px body text on a bordered chip, so it reads at a glance and well above 4.5:1.
 .builtInTag {
   flex: none;
   padding: 0 var(--space-1);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-control-border);
   border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
-  font-size: 0.625rem;
+  color: var(--color-text);
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -82,8 +83,8 @@
   white-space: nowrap;
 }
 
-// Out of sight until the row is hovered or holds the focus, and then only over the name line, so they never cover a
-// value. They stay in the tab order, and delete asks before it deletes.
+// Out of sight until the row is hovered, holds the focus or is the one being edited, and then only over the name line,
+// so they never cover a value. They stay in the tab order, and delete asks before it deletes.
 .rowActions {
   position: absolute;
   inset-block-start: 0;
@@ -102,21 +103,23 @@
 }
 
 .row:hover .rowActions,
-.row:focus-within .rowActions {
+.row:focus-within .rowActions,
+.editedRow .rowActions {
   opacity: 1;
   pointer-events: auto;
 }
 
-// A touch screen has no hover, so the buttons stay in view on a line of their own above the row content.
+// A touch screen has no hover: the buttons show on the row being edited (a tap selects it) or holding the focus, on a
+// line of their own above the row content, so the list does not repeat them on every row. They stay in the tab order.
 @media (hover: none) {
-  .row {
+  .editedRow,
+  .row:focus-within {
     flex-wrap: wrap;
   }
 
-  .rowActions {
+  .editedRow .rowActions,
+  .row:focus-within .rowActions {
     position: static;
-    opacity: 1;
-    pointer-events: auto;
   }
 }
 

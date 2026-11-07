@@ -25,6 +25,8 @@ interface PanelProps {
   headerActionComponent?: ReactNode;
   /** Why the section is empty in this view: it collapses to a muted heading line with this note behind an icon. */
   noteText?: string;
+  /** A word or two beside the note icon that says at a glance why the section is muted, such as "Design only". */
+  noteCaptionText?: string;
 }
 
 export const Panel = ({
@@ -33,6 +35,7 @@ export const Panel = ({
   children,
   headerActionComponent,
   noteText,
+  noteCaptionText,
 }: PanelProps): ReactNode => {
   const headingId: string = useId();
   const bodyComponent: ReactNode = noteText ? undefined : children;
@@ -48,6 +51,7 @@ export const Panel = ({
         {noteText ? (
           <span className={styles.headerActions}>
             {headerActionComponent}
+            {noteCaptionText && <span className={styles.noteCaption}>{noteCaptionText}</span>}
             <TooltipNoteIcon noteText={noteText} />
           </span>
         ) : headerActionComponent}

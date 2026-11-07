@@ -119,6 +119,7 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
           <CutCheckWarningCountTag count={getCutCheckWarningGroups(model.cutCheck.warnings).length} />
         )}
         noteText={t(DEFAULT.CUT_CHECK_3D_ONLY_NOTE)}
+        noteCaptionText={t(DEFAULT.CUT_CHECK_3D_ONLY_CAPTION)}
       />
     );
   }

@@ -116,3 +116,5 @@ The user picks the bed colour from the swatch button at the start of the zoom cl
 ## Icon notes
 
 A short note shown as an info (or other) icon in a tinted circle (`TooltipNoteIcon`) opens its text in a popover on hover, on a tap or click, and on Enter or Space, so no note depends on hover alone.
+
+Palette rows show their Move up, Move down and Delete buttons only on the row being edited, the hovered row or the row holding the focus; they stay in the tab order. The Shading row's Built-in tag is 12 px body text on a bordered chip. In a narrow window the Bed segment of the region bar uses the bed outline icon (`BorderOuterOutlined`), as the profile's Bed group does.

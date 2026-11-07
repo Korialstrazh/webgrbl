@@ -56,3 +56,10 @@
 .body {
   padding: var(--space-3);
 }
+
+// The short reason a muted section is quiet, readable muted text beside its note icon.
+.noteCaption {
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+}

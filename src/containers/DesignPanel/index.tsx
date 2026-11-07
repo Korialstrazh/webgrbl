@@ -70,6 +70,7 @@ export const DesignPanel = (): ReactNode => {
         iconComponent={<MaterialSheetIcon />}
         title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}
         noteText={isDesignView ? undefined : t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_NOTE)}
+        noteCaptionText={t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_CAPTION)}
       >
         <MaterialSection />
       </Panel>
@@ -77,6 +78,7 @@ export const DesignPanel = (): ReactNode => {
         iconComponent={<GroupOutlined />}
         title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}
         noteText={isThreeDView ? t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_NOTE) : undefined}
+        noteCaptionText={t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_CAPTION)}
       >
         <ObjectsSection />
       </Panel>

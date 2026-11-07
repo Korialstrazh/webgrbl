@@ -56,3 +56,10 @@
   font-size: 0.75rem;
   color: var(--color-warning);
 }
+
+// The heading names what the popover is for, with the plug icon of the Connect button.
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
