@@ -58,7 +58,10 @@ const pickSelectOption = (optionLabel: string): void => {
 };
 
 /** Renders the open popover; most tests choose the simulated laser first, since no port is chosen for the user. */
-const renderConnectionPopover = (isSimulatedLaserChosen: boolean = true): AppStore => {
+const renderConnectionPopover = (
+  isSimulatedLaserChosen: boolean = true,
+  onOpenChange: (isOpen: boolean) => void = vi.fn(),
+): AppStore => {
   const store: AppStore = newStore();
 
   if (isSimulatedLaserChosen) {
@@ -68,7 +71,7 @@ const renderConnectionPopover = (isSimulatedLaserChosen: boolean = true): AppSto
   render(
     <Provider store={store}>
       <AntdTestProvider>
-        <ConnectionPopover isOpen onOpenChange={vi.fn()} anchorRef={newAnchorRef()}>
+        <ConnectionPopover isOpen onOpenChange={onOpenChange} anchorRef={newAnchorRef()}>
           <button type="button">{ANCHOR_TEXT}</button>
         </ConnectionPopover>
       </AntdTestProvider>
@@ -100,6 +103,19 @@ describe(ConnectionPopover.name, () => {
     await settle();
 
     expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toBeEnabled();
+  });
+
+  it('closes after Disconnect, as the pill then shows the result', async () => {
+    const onOpenChange = vi.fn();
+
+    renderConnectionPopover(true, onOpenChange);
+    fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+    await settle();
+    onOpenChange.mockClear();
+
+    fireEvent.click(screen.getByRole('button', { name: DISCONNECT_LABEL }));
+
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('Choose port is disabled without Web Serial but the simulated laser still connects', async () => {

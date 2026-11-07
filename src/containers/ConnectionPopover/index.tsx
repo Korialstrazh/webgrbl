@@ -179,6 +179,11 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
 
   const toggleConnection = (): void => {
     dispatch(isConnected ? new DisconnectRequested() : new ConnectRequested());
+
+    // Disconnect is done in one click: the pill shows the result, so the popover closes and focus goes back to it.
+    if (isConnected) {
+      handleOpenChange(false);
+    }
   };
 
   const contentComponent: ReactNode = (

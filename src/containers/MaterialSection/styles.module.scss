@@ -25,6 +25,15 @@
   white-space: normal;
 }
 
+// No material yet: a quiet one-word entry, so it never reads as the next thing to press.
+.mutedPresetSummary:global(.ant-btn) {
+  color: var(--color-text-muted);
+
+  .presetSummaryIcon {
+    color: var(--color-text-muted);
+  }
+}
+
 .presetSummaryText {
   white-space: normal;
 }

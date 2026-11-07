@@ -25,6 +25,7 @@ import { selectActiveMachineProfile } from '../../utils/states/machine.profile.s
 import { selectActiveMaterial, selectActiveMaterialPresetCount } from '../../utils/states/material.selectors';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { MachineProfilesDialogOpenChanged } from '../../utils/states/ui.workbench.state';
+import { DismissibleTooltip } from '../../views/DismissibleTooltip';
 import { IconActionButton } from '../../views/IconActionButton';
 import { LaserMachineIcon } from '../../views/LaserMachineIcon';
 import { MaterialSheetIcon } from '../../views/MaterialSheetIcon';
@@ -42,13 +43,17 @@ export const MaterialSection = (): ReactNode => {
   // The material the library is filtered to when it opens: the project material from the link, none from the button.
   const [libraryMaterialId, setLibraryMaterialId] = useState<string | undefined>(undefined);
 
+  const isWaitingForMaterial: boolean = Boolean(activeProfile) && !activeMaterial;
+  const noMaterialText: string = t(DEFAULT.MATERIAL_SECTION_PRESETS_NO_MATERIAL);
+
   const getPresetSummaryText = (): string => {
     if (!activeProfile) {
       return t(DEFAULT.MATERIAL_SECTION_PRESETS_NO_MACHINE);
     }
 
+    // Until a material is chosen the entry is one word; why it lists nothing yet is in its tooltip and name.
     if (!activeMaterial) {
-      return t(DEFAULT.MATERIAL_SECTION_PRESETS_NO_MATERIAL);
+      return t(DEFAULT.MATERIAL_SECTION_PRESETS_NONE);
     }
 
     return t(
@@ -65,10 +70,6 @@ export const MaterialSection = (): ReactNode => {
   const getPresetSummaryIconComponent = (): ReactNode => {
     if (!activeProfile) {
       return <LaserMachineIcon />;
-    }
-
-    if (!activeMaterial) {
-      return <MaterialSheetIcon />;
     }
 
     // The button opens the library either way, so it shows the list, never an add sign.
@@ -89,14 +90,17 @@ export const MaterialSection = (): ReactNode => {
       <ProjectMaterialSelect />
       {/* The presets entry and the library sit on one row of small captioned buttons under the full-width select. */}
       <div className={styles.entryRow}>
-        <Button
-          className={styles.presetSummary}
-          size={ANTD_BUTTON_SIZE_SMALL}
-          icon={<span className={styles.presetSummaryIcon} aria-hidden>{getPresetSummaryIconComponent()}</span>}
-          onClick={activeProfile ? () => openLibrary(activeMaterial?.id) : openProfilesDialog}
-        >
-          <span className={styles.presetSummaryText}>{getPresetSummaryText()}</span>
-        </Button>
+        <DismissibleTooltip title={isWaitingForMaterial ? noMaterialText : undefined}>
+          <Button
+            className={[styles.presetSummary, isWaitingForMaterial ? styles.mutedPresetSummary : undefined].join(' ')}
+            aria-label={isWaitingForMaterial ? noMaterialText : undefined}
+            size={ANTD_BUTTON_SIZE_SMALL}
+            icon={<span className={styles.presetSummaryIcon} aria-hidden>{getPresetSummaryIconComponent()}</span>}
+            onClick={activeProfile ? () => openLibrary(activeMaterial?.id) : openProfilesDialog}
+          >
+            <span className={styles.presetSummaryText}>{getPresetSummaryText()}</span>
+          </Button>
+        </DismissibleTooltip>
         {/* Its tooltip goes on the click: left open it would cover the drawer and take the drawer's Escape. */}
         <IconActionButton
           size={ANTD_BUTTON_SIZE_SMALL}

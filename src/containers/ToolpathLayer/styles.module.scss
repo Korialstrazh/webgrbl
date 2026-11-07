@@ -23,10 +23,12 @@
   stroke-width: 1.5;
 }
 
+// In the layer colour, as wide as a burn but dashed: every layer, even a dark blue one, reads before the head reaches
+// it, and the solid burnt paths still stand apart.
 .remaining {
-  stroke-width: 1;
-  stroke-opacity: 0.6;
-  stroke-dasharray: 3 3;
+  stroke-width: 1.5;
+  stroke-opacity: 0.9;
+  stroke-dasharray: 4 3;
 }
 
 // Travel moves in the contrasting travel colour of the bed tone, wide and opaque enough to read on any bed colour.
