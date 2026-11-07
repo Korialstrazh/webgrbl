@@ -3,7 +3,7 @@
  * The mouse wheel zooms around the pointer, a middle drag or Space plus a drag pans, and the buttons and the plus,
  * minus and zero keys zoom in, zoom out and fit the bed. The bed point under the pointer goes to the status strip
  * through the bed cursor store. The view lives for the session and starts fitted; the bed panel keeps it while the 3D
- * view is shown. While a drawer pushes the bed aside the whole bed fits the strip left, and gets its zoom back after. The
+ * view is shown. While a drawer pushes the bed aside the whole bed fits the strip left; the zoom comes back after. The
  * zoom is the drawing's view box, so the objects layer and the Toolpath layer read pointer positions through the SVG's
  * screen matrix as before; every position is read in the drawing area, which starts where the ruler bands end.
  *
