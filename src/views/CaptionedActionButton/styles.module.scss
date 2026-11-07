@@ -15,12 +15,17 @@
   background-color: var(--color-surface-3);
 }
 
-// A secondary action has no fill but a solid, clearly visible outline and bright text, so it still reads as ready
-// beside an off action, while the filled main action stays the one that stands out.
+// A secondary action has no fill, an outline no brighter than a locked neighbour's and muted text, so it never
+// outshines Start, Frame or the next-step button; hover and focus bring the text up to full brightness.
 .captionedActionButton.quiet:global(.ant-btn-variant-outlined):not(:disabled, [aria-disabled='true']) {
-  border-color: var(--color-text-muted);
+  border-color: var(--color-disabled-border-locked);
   background-color: transparent;
-  color: var(--color-text);
+  color: var(--color-text-muted);
+
+  &:is(:hover, :focus-visible) {
+    border-color: var(--color-control-border);
+    color: var(--color-text);
+  }
 }
 
 // Locked: the dark disabled fill, a solid outline (at least 3:1) and a dimmed icon with a lock badge, so it reads as
