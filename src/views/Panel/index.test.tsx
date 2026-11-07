@@ -28,7 +28,7 @@ describe(Panel.name, () => {
     expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
   });
 
-  it('with a note hides its body and action and gives the note as a focusable icon', () => {
+  it('with a note hides its body, keeps its action and gives the note as a focusable icon', () => {
     render(
       <Panel
         title={PANEL_TITLE}
@@ -40,7 +40,7 @@ describe(Panel.name, () => {
     );
 
     expect(screen.queryByText(BODY_TEXT)).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: ACTION_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
     expect(screen.getByRole('note', { name: NOTE_TEXT })).toHaveAttribute('tabindex', '0');
   });
 });

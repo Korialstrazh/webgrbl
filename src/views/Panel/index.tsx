@@ -1,7 +1,8 @@
 /**
  * A titled section of the workbench with an optional action next to the heading. Without content it is the heading
  * line only, for a section collapsed to one line. With a note it is a muted heading line whose info icon tells why it
- * has no content in this view, by tooltip, keyboard focus and screen reader, so a stack of panels keeps its order.
+ * has no content in this view, by tooltip, keyboard focus and screen reader, so a stack of panels keeps its order. A
+ * muted line still shows its header action (such as a warning count) before the note icon.
  *
  * @author michael.morosov
  *
@@ -44,7 +45,12 @@ export const Panel = ({
           {iconComponent && <span className={styles.icon} aria-hidden>{iconComponent}</span>}
           {title}
         </h2>
-        {noteText ? <TooltipNoteIcon noteText={noteText} /> : headerActionComponent}
+        {noteText ? (
+          <span className={styles.headerActions}>
+            {headerActionComponent}
+            <TooltipNoteIcon noteText={noteText} />
+          </span>
+        ) : headerActionComponent}
       </header>
       {bodyComponent && <div className={styles.body}>{bodyComponent}</div>}
     </section>

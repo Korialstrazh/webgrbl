@@ -123,6 +123,27 @@ describe(CutCheckPanel.name, () => {
     expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
   });
 
+  it('keeps the warning count of a current model on the muted heading outside the 3D view', () => {
+    const warning: CutCheckWarning = {
+      kind: CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH,
+      layerKey: UNKNOWN_LAYER_KEY,
+      partId: undefined,
+      predictedDepthMm: 4,
+      neededDepthMm: 3,
+      isLessSure: false,
+      isDepthUpperBound: false,
+    };
+
+    render(
+      <Provider store={newReadyStore(newModel(newCutCheck({ warnings: [warning] })))}>
+        <CutCheckPanel isActive={false} />
+      </Provider>,
+    );
+
+    expect(screen.getByRole('img', { name: '1 warning' })).toHaveTextContent('1');
+    expect(screen.getByRole('note', { name: 'The cut check runs in the 3D view.' })).toBeInTheDocument();
+  });
+
   it('starts folded to its heading with a count of its warnings, and opens and folds again', () => {
     const warning: CutCheckWarning = {
       kind: CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH,

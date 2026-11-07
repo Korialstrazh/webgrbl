@@ -13,13 +13,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckSquareOutlined, DownOutlined, QuestionCircleOutlined, UpOutlined, WarningFilled } from '@ant-design/icons';
+import { CheckSquareOutlined, DownOutlined, QuestionCircleOutlined, UpOutlined } from '@ant-design/icons';
 import { Button, Tag, Tooltip } from 'antd';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT, ANTD_TAG_COLOR_WARNING } from '../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { BURN_PART_STATUS } from '../../utils/burn.model/burn.model.constants';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../utils/burn.model/interfaces/BurnPart';
@@ -40,6 +40,7 @@ import { selectProjectLayers } from '../../utils/states/project.document.state';
 import { IconActionButton } from '../../views/IconActionButton';
 import { Panel } from '../../views/Panel';
 import { BurnPartRowLift } from './BurnPartRowLift';
+import { CutCheckWarningCountTag } from './CutCheckWarningCountTag';
 import { CutCheckWarningRow } from './CutCheckWarningRow';
 import { PartStatusMark } from './PartStatusMark';
 import { getCutCheckSummaryCounts } from './get.cut.check.summary.counts';
@@ -107,11 +108,16 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
     }
   }, [selectedPartId]);
 
+  // Away from 3D the check is a muted line, but a current model's warning count stays on it, so the warnings are seen
+  // in the view where they get fixed.
   if (!isActive) {
     return (
       <Panel
         iconComponent={<CheckSquareOutlined />}
         title={t(DEFAULT.CUT_CHECK_TITLE)}
+        headerActionComponent={model && (
+          <CutCheckWarningCountTag count={getCutCheckWarningGroups(model.cutCheck.warnings).length} />
+        )}
         noteText={t(DEFAULT.CUT_CHECK_3D_ONLY_NOTE)}
       />
     );
@@ -133,20 +139,9 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
     ? model.parts.filter(({ id }: BurnPart): boolean => id === selectedPartId)
     : model.parts;
 
-  const warningCountText: string = t(DEFAULT.CUT_CHECK_WARNING_COUNT, { count: warningGroups.length });
   const headerActionComponent: ReactNode = (
     <span className={styles.headerActions}>
-      {warningGroups.length > 0 && (
-        <Tag
-          className={styles.warningCountTag}
-          color={ANTD_TAG_COLOR_WARNING}
-          icon={<WarningFilled aria-hidden />}
-          role="img"
-          aria-label={warningCountText}
-        >
-          {warningGroups.length}
-        </Tag>
-      )}
+      <CutCheckWarningCountTag count={warningGroups.length} />
       <IconActionButton
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
