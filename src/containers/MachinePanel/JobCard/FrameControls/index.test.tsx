@@ -28,6 +28,7 @@ import { newToolpathMove } from '../../../../utils/toolpath/test.support/new.too
 const FRAME_JOB_LABEL = 'Frame job';
 const NEEDS_PROFILE_TEXT = 'Set up a laser profile first.';
 const GRID_LABEL = 'Frame grid';
+const FRAME_SPLIT_SELECTOR = '[class*="frameSplit"]';
 const MARGIN_LABEL = 'Frame margin (mm)';
 const SPEED_LABEL = 'Frame speed (mm/min)';
 const PROFILE_NAME = 'Test laser';
@@ -95,6 +96,7 @@ const newFrameStore = (endX: number): AppStore => {
 };
 
 const SHOW_SETTINGS_LABEL = 'Show frame settings';
+const HIDE_SETTINGS_LABEL = 'Hide frame settings';
 
 const renderFrameControls = (store: AppStore): void => {
   render(
@@ -170,6 +172,17 @@ describe(FrameControls.name, () => {
 
     expect(screen.getByText(FRAME_TIME_TEXT)).toBeInTheDocument();
     expect(screen.getByText('\u2248 0.05 W')).toBeInTheDocument();
+  });
+
+  it('draws an enabled Frame and its gear inside one split button', () => {
+    renderFrameControls(newFrameStore(OUTLINE_END_X_MM));
+
+    const frameButton: HTMLElement = getFrameJobButton();
+    const splitButton: HTMLElement | null = frameButton.closest(FRAME_SPLIT_SELECTOR);
+
+    expect(frameButton).not.toHaveAttribute('aria-disabled');
+    expect(splitButton).not.toBeNull();
+    expect(splitButton).toContainElement(screen.getByRole('button', { name: HIDE_SETTINGS_LABEL }));
   });
 
   it('starts the frame at once, with no confirmation', () => {
