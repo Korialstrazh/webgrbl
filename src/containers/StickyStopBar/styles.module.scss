@@ -51,3 +51,10 @@
 .start :global(.ant-btn) > span:first-child {
   font-size: 1.25rem;
 }
+
+// A phone has no Esc key, so the hint gives its room to the Not connected cue and the bar fits a 390 px screen.
+@media (width < 30rem) {
+  .stickyStopBar kbd {
+    display: none;
+  }
+}
