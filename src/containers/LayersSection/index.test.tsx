@@ -129,6 +129,14 @@ describe(LayersSection.name, () => {
     expect(screen.getByRole('checkbox', { name: SEND_UNKNOWN_LABEL })).not.toBeChecked();
   });
 
+  it('names its role above the rows, so it reads apart from the palette', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    renderSection(store);
+
+    expect(screen.getByText('This job, in burn order')).toBeInTheDocument();
+  });
+
   it('shows the note for a palette id the palette no longer has', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR]);

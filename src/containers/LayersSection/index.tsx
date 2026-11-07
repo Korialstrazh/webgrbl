@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { InboxOutlined } from '@ant-design/icons';
+import { InboxOutlined, OrderedListOutlined } from '@ant-design/icons';
 import type { DragEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -113,6 +113,8 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
   return (
     <>
       <div className={styles.layerList}>
+        {/* Sets this card apart from the palette, which holds colour defaults for every new import. */}
+        <p className={styles.purpose}><OrderedListOutlined aria-hidden />{t(DEFAULT.LAYERS_PURPOSE_CAPTION)}</p>
         <LayerValueLegend />
         <ul className={styles.list} aria-label={t(DEFAULT.LAYERS_LIST_LABEL)}>
           {layers.map((layer: ProjectLayer, layerIndex: number) => {

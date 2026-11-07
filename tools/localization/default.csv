@@ -359,6 +359,7 @@ LAYERS_MOVE_DOWN;Move {{name}} down
 LAYERS_MOVE_UP;Move {{name}} up
 LAYERS_NOT_IN_PALETTE;Not in the palette
 LAYERS_OPEN_PALETTE;Palette
+LAYERS_PURPOSE_CAPTION;This job, in burn order
 LAYERS_SUMMARY_PASSES;{{passes}}×
 LAYERS_SUMMARY_POWER;{{power}} %
 LAYERS_SUMMARY_SPEED;{{speed}} mm/min
@@ -633,7 +634,7 @@ PALETTE_INKSCAPE_HINT;To use the exported file in Inkscape, put it in its palett
 PALETTE_INKSCAPE_PATH_LINUX;Linux: ~/.config/inkscape/palettes/
 PALETTE_INKSCAPE_PATH_WINDOWS;Windows: %APPDATA%\inkscape\palettes\
 PALETTE_LIST;Palette colours
-PALETTE_LIST_ORDER_HINT;Layers set the cut order.
+PALETTE_LIST_ORDER_HINT;Import defaults. Layers set the cut order.
 PALETTE_MOVE_DOWN;Move {{name}} down
 PALETTE_MOVE_UP;Move {{name}} up
 PALETTE_NEW;New colour
@@ -745,8 +746,6 @@ TOOLPATH_LAYER_LABEL;Toolpath preview
 TOOLPATH_NOT_GENERATED;No toolpath yet
 TOOLPATH_OUT_OF_DATE;Out of date
 TOOLPATH_POWER_LEGEND;Power scale: lighter is less power, darker is full power
-TOOLPATH_POWER_LEGEND_HIGH;100 %
-TOOLPATH_POWER_LEGEND_LOW;0
 TOOLPATH_REGENERATE;Regenerate
 TOOLPATH_SHOW_TRAVEL;Show travel moves
 TOOLPATH_SHOW_TRAVEL_CAPTION;Travel

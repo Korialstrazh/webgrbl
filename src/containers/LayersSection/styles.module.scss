@@ -23,3 +23,13 @@
   font-size: 0.8125rem;
   color: var(--color-text-muted);
 }
+
+// One line that names the card's role: this project's layers, in the order the laser burns them.
+.purpose {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
