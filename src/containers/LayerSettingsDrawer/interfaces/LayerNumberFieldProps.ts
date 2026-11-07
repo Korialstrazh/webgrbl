@@ -19,6 +19,8 @@ export interface LayerNumberFieldProps {
   /** The value stored in the project. */
   value: number;
   decimals: number;
+  /** The smallest value the field commits; a lower one is dropped and the stored value shows again. */
+  minValue?: number;
   /** Text under the field, such as the watts a percent gives; undefined shows nothing. */
   hintText: string | undefined;
   /** Called with a changed value when the user leaves the field or presses Enter. */

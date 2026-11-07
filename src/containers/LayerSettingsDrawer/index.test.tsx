@@ -42,6 +42,8 @@ const NEW_SPEED_TEXT = '450';
 const NEW_SPEED_MM_PER_MIN = 450;
 const SPEED_LABEL = 'Speed (mm/min)';
 const MAX_POWER_LABEL = 'Max power (%)';
+const MIN_POWER_LABEL = 'Min power (%)';
+const PASSES_LABEL = 'Passes';
 const AIR_ASSIST_LABEL = 'Air assist';
 const LINE_INTERVAL_LABEL = 'Line interval (mm)';
 const SAVE_TO_PALETTE_LABEL = 'Save to palette';
@@ -222,6 +224,43 @@ describe(LayerSettingsDrawer.name, () => {
     renderDrawer(store, FILL_COLOUR);
 
     expect(screen.queryByText(/ W$/)).not.toBeInTheDocument();
+  });
+
+  it('shows the real power, speed and passes of the opened layer in every field', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    act(() => {
+      store.dispatch(new LayerSettingsChanged({
+        layerKey: CUT_COLOUR,
+        settings: { maxPowerPercent: SIXTY_PERCENT, minPowerPercent: 5, speedMmPerMin: 1500, passes: 3 },
+      }));
+    });
+    renderDrawer(store, CUT_COLOUR);
+
+    expect(screen.getByLabelText(MAX_POWER_LABEL)).toHaveValue('60.0');
+    expect(screen.getByLabelText(MIN_POWER_LABEL)).toHaveValue('5.0');
+    expect(screen.getByLabelText(SPEED_LABEL)).toHaveValue('1500');
+    expect(screen.getByLabelText(PASSES_LABEL)).toHaveValue('3');
+  });
+
+  it('never writes an empty or zero speed when another field is edited, or the speed is cleared', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    const speedBefore: number = getLayer(store, CUT_COLOUR).settings.speedMmPerMin;
+    renderDrawer(store, CUT_COLOUR);
+    const speedInput: HTMLElement = screen.getByLabelText(SPEED_LABEL);
+    const passesInput: HTMLElement = screen.getByLabelText(PASSES_LABEL);
+
+    fireEvent.change(passesInput, { target: { value: '2' } });
+    fireEvent.blur(passesInput);
+    fireEvent.change(speedInput, { target: { value: '' } });
+    fireEvent.blur(speedInput);
+    fireEvent.change(speedInput, { target: { value: '0' } });
+    fireEvent.blur(speedInput);
+
+    expect(getLayer(store, CUT_COLOUR).settings.speedMmPerMin).toBe(speedBefore);
+    expect(speedBefore).toBeGreaterThan(0);
+    expect(speedInput).toHaveValue(String(speedBefore));
   });
 
   it('commits a changed speed on blur as one change', () => {

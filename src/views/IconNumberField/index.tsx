@@ -39,7 +39,12 @@ export const IconNumberField = (props: IconNumberFieldProps): ReactNode => {
           id={inputId}
           className={[styles.input, className].join(' ')}
           controls={false}
-          prefix={<span className={styles.adornment} aria-hidden>{iconComponent}{captionText}</span>}
+          prefix={
+            <span className={styles.adornment} aria-hidden>
+              {iconComponent}
+              {captionText && <span className={styles.caption}>{captionText}</span>}
+            </span>
+          }
           suffix={unitText && <span className={styles.adornment} aria-hidden>{unitText}</span>}
         />
       </Tooltip>

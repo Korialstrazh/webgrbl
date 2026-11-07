@@ -27,6 +27,9 @@ export const LAYER_POWER_DECIMALS = 1;
 export const LAYER_SPEED_DECIMALS = 0;
 export const LAYER_PASSES_DECIMALS = 0;
 export const LAYER_LINE_INTERVAL_DECIMALS = 2;
+/** A layer always moves and always runs at least once: a zero speed or zero passes is never written. */
+export const LAYER_MIN_SPEED_MM_PER_MIN = 1;
+export const LAYER_MIN_PASSES = 1;
 
 export const LAYER_MAX_POWER_FIELD: LayerNumberFieldConfig = {
   field: 'maxPowerPercent',
@@ -45,16 +48,16 @@ export const LAYER_MIN_POWER_FIELD: LayerNumberFieldConfig = {
 export const LAYER_SPEED_FIELD: LayerNumberFieldConfig = {
   field: 'speedMmPerMin',
   labelKey: DEFAULT.LAYER_SETTINGS_SPEED,
-  captionKey: DEFAULT.FIELD_CAPTION_SPEED,
   unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
   decimals: LAYER_SPEED_DECIMALS,
+  minValue: LAYER_MIN_SPEED_MM_PER_MIN,
 };
 export const LAYER_PASSES_FIELD: LayerNumberFieldConfig = {
   field: 'passes',
   labelKey: DEFAULT.LAYER_SETTINGS_PASSES,
-  captionKey: DEFAULT.FIELD_CAPTION_PASSES,
   unitKey: DEFAULT.FIELD_UNIT_TIMES,
   decimals: LAYER_PASSES_DECIMALS,
+  minValue: LAYER_MIN_PASSES,
 };
 export const LAYER_LINE_INTERVAL_FIELD: LayerNumberFieldConfig = {
   field: 'lineIntervalMm',

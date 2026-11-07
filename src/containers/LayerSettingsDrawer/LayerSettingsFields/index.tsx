@@ -105,6 +105,7 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
       unitText={config.unitKey && t(config.unitKey)}
       value={settings[config.field]}
       decimals={config.decimals}
+      minValue={config.minValue}
       hintText={hintText}
       onCommit={(fieldValue: number) => changeSettings({ [config.field]: fieldValue })}
     />
