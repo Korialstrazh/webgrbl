@@ -52,40 +52,42 @@ export const DesignPanel = (): ReactNode => {
       width={DESIGN_PANEL_WIDTH}
       aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}
     >
-      <Panel
-        iconComponent={<BlockOutlined />}
-        title={t(DEFAULT.DESIGN_LAYERS_TITLE)}
-        headerActionComponent={
-          <span className={styles.layersActions}>
-            {isDesignView && hasObjects && <AddTestSampleButton isIconOnly />}
-            <IconActionButton
-              size={ANTD_BUTTON_SIZE_SMALL}
-              labelText={t(DEFAULT.LAYERS_OPEN_PALETTE)}
-              iconComponent={<PaletteIcon />}
-              onClick={() => setIsPaletteDialogOpen(true)}
-            />
-          </span>
-        }
-      >
-        <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
-      </Panel>
-      <Panel
-        iconComponent={<MaterialSheetIcon />}
-        title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}
-        noteText={isDesignView ? undefined : t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_NOTE)}
-        noteCaptionText={t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_CAPTION)}
-      >
-        <MaterialSection />
-      </Panel>
-      <Panel
-        iconComponent={<GroupOutlined />}
-        title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}
-        noteText={isThreeDView ? t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_NOTE) : undefined}
-        noteCaptionText={t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_CAPTION)}
-      >
-        <ObjectsSection />
-      </Panel>
-      {/* Docked to the bottom of the scrolling panel, so Cut check stays in reach however long the list grows. */}
+      <div className={styles.cards}>
+        <Panel
+          iconComponent={<BlockOutlined />}
+          title={t(DEFAULT.DESIGN_LAYERS_TITLE)}
+          headerActionComponent={
+            <span className={styles.layersActions}>
+              {isDesignView && hasObjects && <AddTestSampleButton isIconOnly />}
+              <IconActionButton
+                size={ANTD_BUTTON_SIZE_SMALL}
+                labelText={t(DEFAULT.LAYERS_OPEN_PALETTE)}
+                iconComponent={<PaletteIcon />}
+                onClick={() => setIsPaletteDialogOpen(true)}
+              />
+            </span>
+          }
+        >
+          <LayersSection onEditPalette={() => setIsPaletteDialogOpen(true)} />
+        </Panel>
+        <Panel
+          iconComponent={<MaterialSheetIcon />}
+          title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}
+          noteText={isDesignView ? undefined : t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_NOTE)}
+          noteCaptionText={t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_CAPTION)}
+        >
+          <MaterialSection />
+        </Panel>
+        <Panel
+          iconComponent={<GroupOutlined />}
+          title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}
+          noteText={isThreeDView ? t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_NOTE) : undefined}
+          noteCaptionText={t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_CAPTION)}
+        >
+          <ObjectsSection />
+        </Panel>
+      </div>
+      {/* A footer below the scrolling cards, so Cut check stays in reach and never covers the Objects fields. */}
       <div className={styles.cutCheckDock}>
         <CutCheckPanel isActive={isThreeDView} />
       </div>
