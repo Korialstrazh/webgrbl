@@ -206,6 +206,19 @@ describe(ObjectsSection.name, () => {
     expect(getObjectById(store, FIRST_ID)?.widthMm).toBeCloseTo(MARGIN_PAGE_WIDTH_MM / 2);
   });
 
+  it('puts the fields of the selected object above the list, so a long list never pushes them out of view', () => {
+    const store: AppStore = newStore();
+
+    loadObjects(store);
+    selectFirst(store);
+    renderSection(store);
+
+    const list: HTMLElement = screen.getByRole('list', { name: OBJECTS_LIST_NAME });
+    const xField: HTMLElement = screen.getByLabelText(X_LABEL);
+
+    expect(xField.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('selects an object on a row click and marks it pressed', () => {
     const store: AppStore = newStore();
 

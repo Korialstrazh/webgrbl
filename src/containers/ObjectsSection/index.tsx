@@ -1,6 +1,6 @@
 /**
  * The Objects section of the design panel: the list of project objects, and for a single selected object its
- * placement fields. With no objects it shows a short hint; the card on the bed offers the import.
+ * placement fields above the list. With no objects it shows a short hint; the card on the bed offers the import.
  *
  * @author michael.morosov
  *
@@ -81,6 +81,8 @@ export const ObjectsSection = (): ReactNode => {
 
   return (
     <div ref={sectionRef} className={styles.section}>
+      {/* The selection's fields lead the card, so they stay above the Cut check dock however long the list. */}
+      {singleSelectedObject && <ObjectTransformFields projectObject={singleSelectedObject} />}
       <ul className={styles.list} aria-label={t(DEFAULT.OBJECTS_LIST_LABEL)}>
         {projectObjects.map((projectObject: ProjectObject) => (
           <ObjectRow
@@ -93,7 +95,6 @@ export const ObjectsSection = (): ReactNode => {
           />
         ))}
       </ul>
-      {singleSelectedObject && <ObjectTransformFields projectObject={singleSelectedObject} />}
     </div>
   );
 };
