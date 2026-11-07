@@ -34,6 +34,11 @@ export const selectBurnPreviewEmptyState = (state: RootState): BurnPreviewEmptyS
     return BURN_PREVIEW_EMPTY_STATE.NO_MATERIAL;
   }
 
+  // A toolpath being generated is the first step of the build, so the view says it is building, not out of date.
+  if (selectToolpathStatus(state) === TOOLPATH_STATUS.GENERATING) {
+    return BURN_PREVIEW_EMPTY_STATE.BUILDING;
+  }
+
   if (modelStatus === BURN_MODEL_STATUS.STALE || selectToolpathStatus(state) !== TOOLPATH_STATUS.READY) {
     return BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE;
   }

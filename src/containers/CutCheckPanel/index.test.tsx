@@ -44,7 +44,7 @@ const EXPORT_LABEL = 'Export G-code';
 const ESTIMATE_NOTE = 'Estimate from your test.';
 const GUESS_NOTE = 'This is a guess: no test has been made with this material on this laser.';
 const TEST_SAMPLE_POINTER = 'Add the test sample in Design, burn it, then enter the result to get an estimate.';
-const BUILDING_TEXT = 'Building the 3D view';
+const BUILDING_TEXT = 'Building 3D…';
 const FAILED_TEXT = /^The 3D view could not be built/;
 const NOT_THROUGH_HINT = 'Part 3 stays attached: the cut does not reach through, so it cannot be lifted.';
 
@@ -86,12 +86,26 @@ const newReadyStore = (model: BurnModel = newModel()): AppStore => {
   return store;
 };
 
+const SHOW_DETAILS_LABEL = 'Show the cut check';
+const HIDE_DETAILS_LABEL = 'Hide the cut check';
+
+/** Opens the folded check; one already open (a part is selected) or with no model has no Show button. */
+const expandPanel = (): void => {
+  const showButton: HTMLElement | null = screen.queryByRole('button', { name: SHOW_DETAILS_LABEL });
+
+  if (showButton) {
+    fireEvent.click(showButton);
+  }
+};
+
+/** Renders the panel and opens it, since it starts folded to its heading. */
 const renderPanel = (store: AppStore): void => {
   render(
     <Provider store={store}>
       <CutCheckPanel isActive />
     </Provider>,
   );
+  expandPanel();
 };
 
 const getPartRow = (partId: number): HTMLElement => screen.getByRole('button', { name: new RegExp(`^Part ${partId}`) });
@@ -107,6 +121,60 @@ describe(CutCheckPanel.name, () => {
     expect(screen.getByRole('heading', { name: 'Cut check' })).toBeInTheDocument();
     expect(screen.getByRole('note', { name: 'The cut check runs in the 3D view.' })).toHaveAttribute('tabindex', '0');
     expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
+  });
+
+  it('starts folded to its heading with a count of its warnings, and opens and folds again', () => {
+    const warning: CutCheckWarning = {
+      kind: CUT_CHECK_WARNING_KIND.FILL_CUTS_THROUGH,
+      layerKey: UNKNOWN_LAYER_KEY,
+      partId: undefined,
+      predictedDepthMm: 4,
+      neededDepthMm: 3,
+      isLessSure: false,
+      isDepthUpperBound: false,
+    };
+
+    render(
+      <Provider store={newReadyStore(newModel(newCutCheck({ warnings: [warning] })))}>
+        <CutCheckPanel isActive />
+      </Provider>,
+    );
+
+    expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '1 warning' })).toHaveTextContent('1');
+
+    fireEvent.click(screen.getByRole('button', { name: SHOW_DETAILS_LABEL }));
+
+    expect(screen.getByText('3 parts')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: HIDE_DETAILS_LABEL }));
+
+    expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
+  });
+
+  it('shows no warning count when there is nothing to warn about', () => {
+    render(
+      <Provider store={newReadyStore()}>
+        <CutCheckPanel isActive />
+      </Provider>,
+    );
+
+    expect(screen.queryByRole('img', { name: /warning/ })).not.toBeInTheDocument();
+  });
+
+  it('opens when a part is selected in the scene, so its row is in view', () => {
+    const store: AppStore = newReadyStore();
+
+    render(
+      <Provider store={store}>
+        <CutCheckPanel isActive />
+      </Provider>,
+    );
+    act(() => {
+      store.dispatch(new BurnPartSelected({ partId: FREE_PART_ID }));
+    });
+
+    expect(getPartRow(FREE_PART_ID)).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('shows the part counts and the estimate note, without the guess note, when there is a test', () => {
@@ -160,6 +228,7 @@ describe(CutCheckPanel.name, () => {
         <BurnPartLiftControl />
       </Provider>,
     );
+    expandPanel();
     fireEvent.click(getPartRow(ATTACHED_PART_ID));
 
     expect(selectSelectedBurnPartId(store.getState())).toBe(ATTACHED_PART_ID);
@@ -330,6 +399,7 @@ describe(CutCheckPanel.name, () => {
         </AntdTestProvider>
       </Provider>,
     );
+    expandPanel();
 
     expect(screen.getByLabelText(/lower the power or raise the speed/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: EXPORT_LABEL })).toBeEnabled();

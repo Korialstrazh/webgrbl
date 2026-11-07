@@ -12,7 +12,7 @@ import { MaterialSaved } from './material.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
 import { ProjectMaterialSelected } from './project.document.state';
-import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from './toolpath.state';
+import { ToolpathCancelled, ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from './toolpath.state';
 
 const MATERIAL: Material = newMaterial();
 const MODEL: BurnModel = {
@@ -52,10 +52,19 @@ describe(selectBurnPreviewEmptyState.name, () => {
     expect(selectBurnPreviewEmptyState(newStore().getState())).toBe(BURN_PREVIEW_EMPTY_STATE.NO_MATERIAL);
   });
 
-  it('is out of date while the toolpath is not ready', () => {
+  it('is building while the toolpath is generated', () => {
     const store: AppStore = newMaterialStore();
 
     store.dispatch(new ToolpathRequested());
+
+    expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.BUILDING);
+  });
+
+  it('is out of date while the toolpath is stale and not being generated', () => {
+    const store: AppStore = newMaterialStore();
+
+    store.dispatch(new ToolpathRequested());
+    store.dispatch(new ToolpathCancelled());
 
     expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
   });
@@ -87,6 +96,7 @@ describe(selectBurnPreviewEmptyState.name, () => {
     expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.FAILED);
 
     store.dispatch(new ToolpathRequested());
+    store.dispatch(new ToolpathCancelled());
     expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
   });
 });

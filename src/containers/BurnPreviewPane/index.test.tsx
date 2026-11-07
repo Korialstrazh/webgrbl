@@ -42,7 +42,7 @@ import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.
 const FIT_LABEL = /^Fit/;
 const TOP_LABEL = /^Top/;
 const NO_WEBGL_TEXT = 'The 3D view could not start in this browser. The Cut check still works.';
-const LOADING_TEXT = 'Loading the 3D view';
+const LOADING_TEXT = 'Loading 3D…';
 const SCENE_CANVAS_SELECTOR = 'canvas';
 const WEBGL_CONTEXT_LOST_EVENT = 'webglcontextlost';
 const PART_ID = 1;
@@ -55,7 +55,7 @@ const DRAG_DISTANCE_PX = 40;
 const LAYER_KEY = '#ff0000';
 const OUT_OF_DATE_TEXT = /^Out of date: the design changed/;
 const NO_MATERIAL_TEXT = /^Add a material to see/;
-const BUILDING_TEXT = 'Building the 3D view';
+const BUILDING_TEXT = 'Building 3D…';
 const FAILED_TEXT = /^The 3D view could not be built/;
 const ADD_MATERIAL_LABEL = 'Add material\u2026';
 const SAVE_LABEL = 'Save';

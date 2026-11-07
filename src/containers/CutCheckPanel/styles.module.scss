@@ -75,3 +75,15 @@
   margin-inline-start: auto;
   cursor: help;
 }
+
+// The heading keeps a warning count beside the fold toggle, so the check reads at a glance while folded.
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.warningCountTag:global(.ant-tag) {
+  margin-inline-end: 0;
+  font-variant-numeric: tabular-nums;
+}
