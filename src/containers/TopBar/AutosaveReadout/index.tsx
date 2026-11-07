@@ -1,6 +1,7 @@
 /**
- * The autosave readout of the top bar: an icon and the state of the open project, Saved, Saving or Waiting to save. Waiting is a calm grey clock, not an error: autosave stores the change shortly. When the
- * bar is narrow only the icon stays; its tooltip and accessible name still give the state.
+ * The autosave readout of the top bar: an icon and the state of the open project, Saved, Saving or Waiting to save.
+ * Waiting is a calm grey clock, not an error: autosave stores the change shortly. When the bar is narrow only the icon
+ * stays; its tooltip and accessible name still give the state.
  *
  * @author michael.morosov
  *

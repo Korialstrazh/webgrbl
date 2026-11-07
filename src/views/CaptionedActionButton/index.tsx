@@ -1,8 +1,8 @@
 /**
  * An action as an icon over one word, so it explains itself without a hover. The longer name stays the accessible name
- * and, with the reason it is off, the tooltip (on hover and on focus), which opens below the row and away from the actions above it. An off
- * action has no fill, a dashed outline and a small lock on its icon, so it never looks like one that can be used; when
- * it is blocked for a reason it stays focusable (aria-disabled) and ignores activation.
+ * and, with the reason it is off, the tooltip (on hover and on focus), which opens below the row and away from the
+ * actions above it. An off action has no fill, a dashed outline and a small lock on its icon, so it never looks like
+ * one that can be used; when it is blocked for a reason it stays focusable (aria-disabled) and ignores activation.
  *
  * @author michael.morosov
  *
