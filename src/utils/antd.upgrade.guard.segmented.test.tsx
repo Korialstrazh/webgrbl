@@ -59,4 +59,10 @@ describe('antd upgrade guard: Segmented keyboard behaviour', () => {
 
     expect(screen.getByRole(RADIO_ROLE, { name: INCH_LABEL })).toBeChecked();
   });
+
+  it('takes a tabIndex on its group box, so only the checked option stays a tab stop', () => {
+    render(<Segmented aria-label={GROUP_LABEL} options={OPTIONS} value={PIXEL_VALUE} tabIndex={-1} />);
+
+    expect(screen.getByRole('radiogroup', { name: GROUP_LABEL })).toHaveAttribute('tabindex', '-1');
+  });
 });

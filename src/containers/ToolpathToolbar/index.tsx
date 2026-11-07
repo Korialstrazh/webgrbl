@@ -23,6 +23,7 @@ import type { ToolpathDisplayModeOption } from './interfaces/ToolpathDisplayMode
 import type { ToolpathToolbarProps } from './interfaces/ToolpathToolbarProps';
 import styles from './styles.module.scss';
 import { TOOLPATH_DISPLAY_MODE_OPTIONS } from './toolpath.toolbar.constants';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
 
 export const ToolpathToolbar = ({
   displayMode,
@@ -35,6 +36,8 @@ export const ToolpathToolbar = ({
   return (
     <div className={styles.toolpathToolbar}>
       <Segmented<ToolpathDisplayMode>
+        // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+        tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
         aria-label={t(DEFAULT.TOOLPATH_DISPLAY_LABEL)}
         className={styles.modeSwitch}
         options={TOOLPATH_DISPLAY_MODE_OPTIONS.map(

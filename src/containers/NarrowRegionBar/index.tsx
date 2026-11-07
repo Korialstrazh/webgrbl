@@ -20,6 +20,7 @@ import { NarrowRegionChanged, selectNarrowRegion } from '../../utils/states/ui.w
 import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants';
 import type { WorkbenchRegion } from '../../utils/states/workbench.region.constants';
 import styles from './styles.module.scss';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
 
 const NARROW_REGION_SWITCH_NAME = 'narrow-region';
 
@@ -42,6 +43,8 @@ export const NarrowRegionBar = (): ReactNode => {
   return (
     <div className={styles.narrowRegionBar}>
       <Segmented<WorkbenchRegion>
+        // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+        tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
         block
         name={NARROW_REGION_SWITCH_NAME}
         aria-label={t(DEFAULT.NARROW_REGION_BAR_LABEL)}

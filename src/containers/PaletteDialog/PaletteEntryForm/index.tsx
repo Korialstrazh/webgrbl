@@ -49,6 +49,7 @@ import { IconNumberField } from '../../../views/IconNumberField';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { InputCaption } from '../../../views/InputCaption';
 import styles from './styles.module.scss';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../utils/tab.index.constants';
 
 const FIELD_ID_SEPARATOR = '-';
 
@@ -175,6 +176,8 @@ export const PaletteEntryForm = ({ entry, otherEntries }: PaletteEntryFormProps)
         {isShading && <p className={styles.shadingNote}>{t(DEFAULT.PALETTE_SHADING_COLOUR_NOTE)}</p>}
         <Form.Item htmlFor={getFieldId(MODE_FIELD)}>
           <Segmented<LayerMode>
+            // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+            tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
             id={getFieldId(MODE_FIELD)}
             aria-label={t(DEFAULT.LAYER_SETTINGS_MODE)}
             value={draft.mode}

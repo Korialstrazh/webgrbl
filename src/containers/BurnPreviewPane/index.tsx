@@ -22,6 +22,7 @@ import { selectCurrentBurnModel } from '../../utils/states/burn.model.state';
 import { BURN_PREVIEW_EMPTY_STATE } from '../../utils/states/burn.preview.empty.state.constants';
 import { selectBurnPreviewEmptyState } from '../../utils/states/burn.preview.selectors';
 import { BurnSceneViewControls } from '../../views/BurnSceneViewControls';
+import { BurnShadingLegend } from '../../views/BurnShadingLegend';
 import { BurnPartLiftControl } from './BurnPartLiftControl';
 import { BurnPreviewStateMessage } from './BurnPreviewStateMessage';
 import { BURN_SCENE_RUNTIME_LOAD_STATUS } from './burn.preview.pane.constants';
@@ -61,6 +62,13 @@ export const BurnPreviewPane = (): ReactNode => {
           <BurnSceneViewControls
             onFit={() => renderer.fitBurnSceneView()}
             onTop={() => renderer.showBurnSceneFromTop()}
+          />
+        )}
+        {renderer && model && (
+          <BurnShadingLegend
+            labelText={t(DEFAULT.BURN_PREVIEW_LEGEND_LABEL)}
+            cleanText={t(DEFAULT.BURN_PREVIEW_LEGEND_CLEAN)}
+            burntText={t(DEFAULT.BURN_PREVIEW_LEGEND_BURNT)}
           />
         )}
         <BurnPreviewStateMessage isSceneUnavailable={isSceneUnavailable} />

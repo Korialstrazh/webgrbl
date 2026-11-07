@@ -18,12 +18,15 @@ import { BED_VIEW_MODE_OPTION_KEYS, BED_VIEW_MODE_SWITCH_NAME } from '../bed.too
 import type { BedViewModeControls } from '../interfaces/BedViewModeControls';
 import type { BedViewModeOptionKey } from '../interfaces/BedViewModeOptionKey';
 import styles from './styles.module.scss';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../utils/tab.index.constants';
 
 export const BedViewModeSwitch = ({ viewMode, changeBedViewMode }: BedViewModeControls): ReactNode => {
   const { t } = useTranslation();
 
   return (
     <Segmented<BedViewMode>
+      // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+      tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
       className={styles.viewSwitch}
       name={BED_VIEW_MODE_SWITCH_NAME}
       aria-label={t(DEFAULT.BED_VIEW_MODE_LABEL)}

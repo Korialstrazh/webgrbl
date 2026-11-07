@@ -1,4 +1,3 @@
-@use '../../../../styles/layout' as layout;
 
 // One column, centred in the card, so the controls stay together at any panel width instead of hugging the left edge.
 .moveControls {
@@ -8,26 +7,25 @@
   gap: var(--space-3);
 }
 
-// The jog speed takes the room Home and Set zero leave; they move below it only in a narrow card.
+// The jog speed takes the room Home and Set zero leave, in one row as wide as the step sizes above.
 .speedRow {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--space-2);
   width: 100%;
-  max-width: layout.$machine-control-max-width;
 
   > :first-child {
-    flex: 1 1 7rem;
+    flex: 1 1 0;
+    min-width: 0;
   }
 }
 
-// As wide as the step sizes need; the jog speed field takes the same width below them.
+// As wide as the card; the step sizes sit centred and the speed row below takes the full width.
 .stepAndSpeed {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  width: fit-content;
-  max-width: 100%;
+  align-items: center;
+  width: 100%;
 }
 
 // Fixed-size cells, so the arrows keep their places around Origin at any panel width instead of stretching apart.

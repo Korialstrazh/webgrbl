@@ -31,6 +31,7 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
 import { DismissibleTooltip } from '../../views/DismissibleTooltip';
+import { LayerSwatch } from '../../views/LayerSwatch';
 import { BedRegionDrawer } from '../BedRegionDrawer';
 import type { LayerSettingsDrawerProps } from './interfaces/LayerSettingsDrawerProps';
 import { LayerSettingsFields } from './LayerSettingsFields';
@@ -45,9 +46,11 @@ export const LayerSettingsDrawer = (props: LayerSettingsDrawerProps): ReactNode 
   const { t } = useTranslation();
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
   const layerName: string = layer ? getLayerDisplayName(layer, getLayerPaletteEntry(layer, paletteEntries)) : '';
-  // A small overline above the layer name, so a long name keeps one line and is cut short instead of wrapping.
+  // The layer's colour chip and name, like the other drawers' plain titles; "Layer settings" stays for screen readers.
+  // A long name keeps one line and is cut short instead of wrapping.
   const titleComponent: ReactNode = layer && (
     <span className={styles.title}>
+      <span className={styles.swatch}><LayerSwatch colour={layer.colour} isShading={layer.isShading} /></span>
       <span className={styles.overline}>{t(DEFAULT.LAYER_SETTINGS_OVERLINE)}</span>
       <span className={styles.layerName} title={layerName}>{layerName}</span>
     </span>

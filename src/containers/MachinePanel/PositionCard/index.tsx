@@ -1,8 +1,8 @@
 /**
  * The Position card, right above Move: the work and laser positions on X, Y and Z, so a user who jogs sees where the
  * laser is right next to the pad. It only reads the status reports the machine already sends. While no laser is
- * connected it keeps its heading with a plug badge and shows no numbers. Once connected its header also shows the state,
- * and one line below the numbers holds feed, power, Reset and Unlock, so Move stays on a 900 px high screen.
+ * connected it keeps its heading with a plug badge and shows no numbers. Once connected its header also shows the
+ * state, and one line below the numbers holds feed, power, Reset and Unlock, so Move sits higher on a short screen.
  *
  * @author michael.morosov
  *

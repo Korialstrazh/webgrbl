@@ -52,6 +52,7 @@ import { SimulationReadout } from './SimulationReadout';
 import styles from './styles.module.scss';
 import { useSimulationPlayback } from './use.simulation.playback';
 import { useSimulationTransport } from './use.simulation.transport';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
 
 /** Whether the simulation stands at the end of a job, so Play starts it again from the beginning. */
 const isSimulationAtEnd = (isPlaying: boolean, currentTimeS: number, totalTimeS: number): boolean =>
@@ -155,6 +156,8 @@ export const SimulationPlaybackBar = (): ReactNode => {
         })}
       </span>
       <Segmented<SimulationSpeed>
+        // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+        tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
         className={styles.speedSwitch}
         aria-label={t(DEFAULT.SIMULATION_SPEED_LABEL)}
         size={ANTD_SEGMENTED_SIZE_SMALL}

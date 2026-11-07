@@ -123,3 +123,6 @@ Palette rows show their Move up, Move down and Delete buttons only on the row be
 
 A left drag on empty bed pans the view, with or without a selection; a press on an object or handle still selects and moves it. `getBedPressPanStart` (`src/containers/BedViewport/`) decides: middle press or Space plus left press pan at once, a left press outside `[data-bed-object]` (`BED_OBJECT_SELECTOR`) pans after `DRAG_START_DISTANCE_PX`, anything else never pans. Mark any new draggable bed element with `data-bed-object`, or a drag on it will pan the bed. The empty-bed press is not stopped, so `BedObjects` still clears the selection on it and gets its double-click.
 
+
+
+Every antd `Segmented` (view switch, narrow region bar, step sizes, toolpath and playback modes, layer mode) passes `tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}`: antd makes the group box focusable as well as the checked option, so without it each switch took two tab stops. `antd.upgrade.guard.segmented.test.tsx` guards that antd keeps taking the prop.

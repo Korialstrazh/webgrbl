@@ -59,6 +59,7 @@ import {
 } from '../layer.settings.drawer.constants';
 import { ShadingPowerBar } from '../ShadingPowerBar';
 import styles from './styles.module.scss';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../utils/tab.index.constants';
 
 const MODE_OPTION_VALUES: readonly LayerMode[] = [LAYER_MODE.LINE, LAYER_MODE.FILL];
 
@@ -123,6 +124,8 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         />
       </div>
       <Segmented<LayerMode>
+        // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+        tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
         block
         aria-label={t(DEFAULT.LAYER_SETTINGS_MODE)}
         value={settings.mode}

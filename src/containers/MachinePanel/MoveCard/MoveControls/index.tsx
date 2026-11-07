@@ -38,6 +38,7 @@ import type { MoveControlsProps } from '../interfaces/MoveControlsProps';
 import { JogSpeedInput } from '../JogSpeedInput';
 import { JOG_PAD_CELLS } from '../jog.pad.constants';
 import styles from './styles.module.scss';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
 
 // eslint-disable-next-line no-restricted-syntax -- 0 degrees is a real turn, the up arrow
 const isJogArrowCell = (cell: JogPadCell): boolean => cell.arrowRotationDeg !== undefined;
@@ -89,6 +90,8 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
       </div>
       <div className={styles.stepAndSpeed}>
         <Segmented
+          // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+          tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
           aria-label={t(DEFAULT.MACHINE_MOVE_STEP_LABEL)}
           options={stepOptions}
           value={stepMm}

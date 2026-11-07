@@ -54,6 +54,9 @@ BURN_PREVIEW_BUILDING;Building 3D…
 BURN_PREVIEW_CHOOSE_MATERIAL_TITLE;Pick the material to see the cut
 BURN_PREVIEW_ENTER_TEST_RESULT;Enter test result
 BURN_PREVIEW_FAILED;The 3D view could not be built. Switch to another view and back to try again.
+BURN_PREVIEW_LEGEND_BURNT;Burnt
+BURN_PREVIEW_LEGEND_CLEAN;Clean
+BURN_PREVIEW_LEGEND_LABEL;Shading: the lighter, the less burnt, and near black is burnt deep
 BURN_PREVIEW_LOADING;Loading 3D…
 BURN_PREVIEW_MATERIAL_CURRENT;Material: {{name}}
 BURN_PREVIEW_MATERIAL_DETAIL_PRESETS_one;{{count}} preset
