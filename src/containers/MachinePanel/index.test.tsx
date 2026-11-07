@@ -30,7 +30,7 @@ const STATUS_CONNECT_LABEL = 'Connect';
 const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
 const JOB_CARD_TITLE = 'Job';
 const PROFILE_STEP_LABEL = 'Profile: to do';
-const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Position', 'Move', 'Laser pointer'];
+const CARD_TITLES_IN_ORDER: readonly string[] = ['Job', 'Position', 'Move', 'Laser pointer'];
 const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
 
 const NEW_STATUS: GrblResolvedStatus = {
@@ -113,7 +113,7 @@ describe(MachinePanel.name, () => {
     expect(screen.queryByText(IDLE_LABEL)).not.toBeInTheDocument();
   });
 
-  it('puts the main task first: status, job, move, then the laser pointer', () => {
+  it('puts the main task first: job, position, move, then the laser pointer', () => {
     connect(renderMachinePanel());
 
     const cardTitles: (string | null)[] = screen.getAllByRole('heading')
@@ -122,7 +122,7 @@ describe(MachinePanel.name, () => {
     expect(cardTitles).toEqual(CARD_TITLES_IN_ORDER);
   });
 
-  it('shows the state, feed and power in Status and the positions in the Position card above Move', () => {
+  it('shows the state in the Position header and feed, power, Reset and Unlock in one line below the positions', () => {
     const store: AppStore = renderMachinePanel();
 
     connect(store);
@@ -130,15 +130,28 @@ describe(MachinePanel.name, () => {
       store.dispatch(new MachineStatusReceived({ status: NEW_STATUS }));
     });
 
-    expect(screen.getByText(RUN_LABEL)).toBeInTheDocument();
-    const statusCard: HTMLElement = screen.getByRole('region', { name: 'Status' });
     const positionCard: HTMLElement = screen.getByRole('region', { name: 'Position' });
 
-    expect(within(statusCard).queryByText(WORK_POSITION_TEXT)).not.toBeInTheDocument();
+    expect(within(positionCard).getByText(RUN_LABEL)).toBeInTheDocument();
     expect(within(positionCard).getByText(WORK_POSITION_TEXT)).toBeInTheDocument();
     expect(within(positionCard).getByText(MACHINE_POSITION_TEXT)).toBeInTheDocument();
-    expect(screen.getByText(String(FEED_RATE))).toBeInTheDocument();
-    expect(screen.getByText(String(SPINDLE_SPEED))).toBeInTheDocument();
+    expect(within(positionCard).getByText(String(FEED_RATE))).toBeInTheDocument();
+    expect(within(positionCard).getByText(String(SPINDLE_SPEED))).toBeInTheDocument();
+    // The words stay for screen readers while the icons name the values on screen.
+    expect(within(positionCard).getByText('Feed')).toBeInTheDocument();
+    expect(within(positionCard).getByText('Power')).toBeInTheDocument();
+    expect(within(positionCard).getByRole('button', { name: RESET_LABEL })).toBeInTheDocument();
+    expect(within(positionCard).getByRole('button', { name: UNLOCK_LABEL })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Status' })).not.toBeInTheDocument();
+  });
+
+  it('gives Reset, Unlock, Set zero and Hold to fire an icon beside their short word', () => {
+    connect(renderMachinePanel());
+
+    expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-reload')).not.toBeNull();
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL }).querySelector('.anticon-unlock')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Set zero' }).querySelector('.anticon-aim')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Hold to fire' }).querySelector('.anticon-bulb')).not.toBeNull();
   });
 
   it('enables reset when connected, and unlock only in alarm', () => {

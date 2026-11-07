@@ -295,7 +295,7 @@ describe(PaletteDialog.name, () => {
     const badges: HTMLElement[] = screen.getAllByRole('img', { name: 'Built-in', hidden: true });
 
     expect(badges).toHaveLength(1);
-    expect(shadingRow).toContainElement(badges[0]);
+    expect(shadingRow).toContainElement(badges.at(0) ?? null);
     expect(within(cutRow).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
     expect(within(cutRow).queryByRole('note')).not.toBeInTheDocument();
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).not.toBeInTheDocument();

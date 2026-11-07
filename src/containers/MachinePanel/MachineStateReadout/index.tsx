@@ -1,5 +1,5 @@
 /**
- * The latest status of the laser: its state, how fast it moves and how hard the laser fires.
+ * The state of the laser as a coloured dot and word, shown in the Position card header.
  *
  * @author michael.morosov
  *
@@ -34,9 +34,6 @@ const MACHINE_STATE_LABEL_KEY: Readonly<Record<GrblMachineState, string>> = {
   [GRBL_MACHINE_STATE.SLEEP]: DEFAULT.MACHINE_STATE_SLEEP,
 };
 
-const getNumberText = (value: number | undefined): string =>
-  value?.toString() ?? MISSING_VALUE_TEXT;
-
 const getStateText = (status: GrblResolvedStatus | undefined, t: TFunction): string => {
   if (!status) {
     return MISSING_VALUE_TEXT;
@@ -55,15 +52,5 @@ export const MachineStateReadout = (): ReactNode => {
   const { t } = useTranslation();
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
 
-  return (
-    <div className={styles.machineStateReadout}>
-      <div className={getStateClassName(status)}>{getStateText(status, t)}</div>
-      <dl className={styles.values}>
-        <dt>{t(DEFAULT.MACHINE_STATUS_FEED)}</dt>
-        <dd>{getNumberText(status?.feedRate)}</dd>
-        <dt>{t(DEFAULT.MACHINE_STATUS_POWER)}</dt>
-        <dd>{getNumberText(status?.spindleSpeed)}</dd>
-      </dl>
-    </div>
-  );
+  return <span className={getStateClassName(status)}>{getStateText(status, t)}</span>;
 };

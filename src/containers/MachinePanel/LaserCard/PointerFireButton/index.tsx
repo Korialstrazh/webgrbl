@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { BulbFilled, BulbOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useEffect } from 'react';
 import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
@@ -82,8 +83,12 @@ export const PointerFireButton = (): ReactNode => {
     dispatch(new LaserPointerReleaseRequested());
   }, [dispatch]);
 
+  const labelText: string = t(isFiring ? DEFAULT.MACHINE_LASER_ON : DEFAULT.MACHINE_LASER_FIRE);
+
   return (
     <Button
+      icon={isFiring ? <BulbFilled /> : <BulbOutlined />}
+      aria-label={labelText}
       className={isFiring ? styles.firing : undefined}
       size={ANTD_BUTTON_SIZE_LARGE}
       disabled={!isButtonUsable}
@@ -95,7 +100,7 @@ export const PointerFireButton = (): ReactNode => {
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
     >
-      {t(isFiring ? DEFAULT.MACHINE_LASER_ON : DEFAULT.MACHINE_LASER_FIRE)}
+      {labelText}
     </Button>
   );
 };

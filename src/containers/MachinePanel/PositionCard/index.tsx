@@ -1,7 +1,8 @@
 /**
  * The Position card, right above Move: the work and laser positions on X, Y and Z, so a user who jogs sees where the
  * laser is right next to the pad. It only reads the status reports the machine already sends. While no laser is
- * connected it keeps its heading with a plug badge and shows no numbers.
+ * connected it keeps its heading with a plug badge and shows no numbers. Once connected its header also shows the state,
+ * and one line below the numbers holds feed, power, Reset and Unlock, so Move stays on a 900 px high screen.
  *
  * @author michael.morosov
  *
@@ -23,6 +24,8 @@ import { selectMachineStatus } from '../../../utils/states/machine.status.state'
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { ConnectionPopoverOpenChanged } from '../../../utils/states/ui.overlay.state';
 import { Panel } from '../../../views/Panel';
+import { MachineStateReadout } from '../MachineStateReadout';
+import { MachineStatusRow } from '../MachineStatusRow';
 import { PlugBadge } from '../../../views/PlugBadge';
 import styles from './styles.module.scss';
 
@@ -84,7 +87,11 @@ export const PositionCard = (): ReactNode => {
   }
 
   return (
-    <Panel iconComponent={<CompassOutlined />} title={t(DEFAULT.MACHINE_POSITION_TITLE)}>
+    <Panel
+      iconComponent={<CompassOutlined />}
+      title={t(DEFAULT.MACHINE_POSITION_TITLE)}
+      headerActionComponent={<MachineStateReadout />}
+    >
       <table className={styles.positionTable}>
         <thead>
           <tr>
@@ -108,6 +115,7 @@ export const PositionCard = (): ReactNode => {
           ))}
         </tbody>
       </table>
+      <MachineStatusRow />
     </Panel>
   );
 };

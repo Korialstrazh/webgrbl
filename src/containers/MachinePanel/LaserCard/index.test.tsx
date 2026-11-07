@@ -42,6 +42,7 @@ const WATTS_PATTERN = /0\.30 W/;
 const ANY_WATTS_PATTERN = / W$/;
 const FIRMWARE_NOTE_TEXT = 'Some firmwares keep the laser off while the head stands still. It switches off when you '
   + 'let go, when the window loses focus, after 10 seconds, or on any stop or alarm.';
+const FIRMWARE_SHORT_TEXT = 'Off on release, after 10 s';
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -380,10 +381,13 @@ describe(LaserCard.name, () => {
     expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeEnabled();
   });
 
-  it('shows the firmware note with the maximum hold time', () => {
+  it('shows a few words with the maximum hold time and keeps the full firmware note behind its note icon', () => {
     renderLaserCard(newStore());
     showLaserControls();
 
-    expect(screen.getByText(FIRMWARE_NOTE_TEXT)).toBeInTheDocument();
+    expect(screen.getByText(FIRMWARE_SHORT_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText(FIRMWARE_NOTE_TEXT)).not.toBeInTheDocument();
+    // The note opens on hover, tap or keyboard focus, and its icon is named for screen readers.
+    expect(screen.getByRole('note', { name: FIRMWARE_NOTE_TEXT })).toHaveAttribute('tabindex', '0');
   });
 });

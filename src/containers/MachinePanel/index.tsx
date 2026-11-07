@@ -21,7 +21,6 @@ import { StopButton } from '../StopButton';
 import { StopSettingsButton } from '../StopSettingsButton';
 import { JobCard } from './JobCard';
 import { LaserCard } from './LaserCard';
-import { MachineStatusCard } from './MachineStatusCard';
 import { MoveCard } from './MoveCard';
 import { PositionCard } from './PositionCard';
 import type { MachinePanelProps } from './interfaces/MachinePanelProps';
@@ -40,7 +39,6 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
       aria-label={t(DEFAULT.MACHINE_PANEL_TITLE)}
     >
       <div ref={cardsRef} className={isCardsCutOff ? [styles.cards, styles.cardsCutOff].join(' ') : styles.cards}>
-        <MachineStatusCard />
         <JobCard isStartShown={isWide} />
         <PositionCard />
         <MoveCard />

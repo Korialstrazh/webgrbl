@@ -1,0 +1,38 @@
+@use '../../../styles/accessibility' as accessibility;
+
+// Feed and power on the left, Reset and Unlock on the right; they wrap below only in a narrow card.
+.machineStatusRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.values {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+
+  dt {
+    display: inline-flex;
+    color: var(--color-text-muted);
+  }
+
+  dd {
+    margin: 0 var(--space-2) 0 0;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.valueName {
+  @include accessibility.visually-hidden;
+}

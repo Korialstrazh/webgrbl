@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ArrowUpOutlined, HomeOutlined } from '@ant-design/icons';
+import { AimOutlined, ArrowUpOutlined, HomeOutlined } from '@ant-design/icons';
 import { Button, Segmented, Tooltip } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -74,20 +74,6 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
 
   return (
     <div id={id} className={styles.moveControls}>
-      <div className={styles.homeRow}>
-        {activeProfile?.hasHomingSwitches && (
-          <Button size={ANTD_BUTTON_SIZE_LARGE} disabled={!canHome} onClick={() => requestLine(MACHINE_COMMAND.HOME)}>
-            {t(DEFAULT.MACHINE_MOVE_HOME)}
-          </Button>
-        )}
-        <Button
-          size={ANTD_BUTTON_SIZE_LARGE}
-          disabled={!canSetZero}
-          onClick={() => requestLine(MACHINE_COMMAND.SET_WORK_ZERO)}
-        >
-          {t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
-        </Button>
-      </div>
       <div className={styles.jogPad}>
         {JOG_PAD_CELLS.map((cell: JogPadCell) => (
           <Tooltip key={cell.labelKey} title={isJogArrowCell(cell) ? undefined : t(cell.labelKey)}>
@@ -108,7 +94,30 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
           value={stepMm}
           onChange={setStepMm}
         />
-        <JogSpeedInput />
+        {/* Beside the jog speed, so the whole Move card fits on a 900 px high screen. */}
+        <div className={styles.speedRow}>
+          <JogSpeedInput />
+          {activeProfile?.hasHomingSwitches && (
+            <Button
+              size={ANTD_BUTTON_SIZE_LARGE}
+              icon={<HomeOutlined />}
+              aria-label={t(DEFAULT.MACHINE_MOVE_HOME)}
+              disabled={!canHome}
+              onClick={() => requestLine(MACHINE_COMMAND.HOME)}
+            >
+              {t(DEFAULT.MACHINE_MOVE_HOME)}
+            </Button>
+          )}
+          <Button
+            size={ANTD_BUTTON_SIZE_LARGE}
+            icon={<AimOutlined />}
+            aria-label={t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
+            disabled={!canSetZero}
+            onClick={() => requestLine(MACHINE_COMMAND.SET_WORK_ZERO)}
+          >
+            {t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
+          </Button>
+        </div>
       </div>
     </div>
   );
