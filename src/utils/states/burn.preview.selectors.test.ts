@@ -7,10 +7,11 @@ import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath
 import { BedViewModeChanged } from './bed.view.state';
 import { BURN_PREVIEW_EMPTY_STATE } from './burn.preview.empty.state.constants';
 import { selectBurnPreviewEmptyState } from './burn.preview.selectors';
-import { BurnModelFailed, BurnModelReady, BurnModelRequested } from './burn.model.state';
+import { BURN_MODEL_STATE_NAME, BurnModelFailed, BurnModelReady, BurnModelRequested } from './burn.model.state';
+import { BURN_MODEL_STATUS } from './burn.model.status.constants';
 import { MaterialSaved } from './material.state';
 import { newStore } from './new.store';
-import type { AppStore } from './new.store';
+import type { AppRootState, AppStore } from './new.store';
 import { ProjectMaterialSelected } from './project.document.state';
 import { ToolpathCancelled, ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from './toolpath.state';
 
@@ -23,7 +24,7 @@ const MODEL: BurnModel = {
   thicknessMm: 3,
 };
 
-/** A store held in the Toolpath view, so nothing builds by itself, with a material and a ready toolpath. */
+/** A store in the Toolpath view with a material and a ready toolpath. */
 const newMaterialStore = (): AppStore => {
   const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
 
@@ -74,9 +75,15 @@ describe(selectBurnPreviewEmptyState.name, () => {
 
     store.dispatch(new BurnModelRequested({ materialId: MATERIAL.id }));
     store.dispatch(new BurnModelReady({ model: MODEL }));
-    store.dispatch(new MaterialSaved({ material: MATERIAL }));
 
-    expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
+    // The saga rebuilds a stale model at once, so the stale moment before it does is set by hand.
+    const readyState: AppRootState = store.getState();
+    const staleState: AppRootState = {
+      ...readyState,
+      [BURN_MODEL_STATE_NAME]: { ...readyState[BURN_MODEL_STATE_NAME], status: BURN_MODEL_STATUS.STALE },
+    };
+
+    expect(selectBurnPreviewEmptyState(staleState)).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
   });
 
   it('is building while a build runs, and when one is about to start', () => {
