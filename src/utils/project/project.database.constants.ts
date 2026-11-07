@@ -61,6 +61,8 @@ export const APP_STATE_KEY = {
   ESC_STOPS_WITH_OVERLAY_OPEN: 'escStopsWithOverlayOpen',
   /** Whether a double-click on empty bed moves the laser there, app-wide, as a JSON boolean. */
   BED_DOUBLE_CLICK_MOVES_LASER: 'bedDoubleClickMovesLaser',
+  /** Whether the viewer folded the Job card to its one-line summary, as a JSON boolean. */
+  JOB_CARD_COLLAPSED: 'jobCardCollapsed',
 } as const;
 
 export type AppStateKey = (typeof APP_STATE_KEY)[keyof typeof APP_STATE_KEY];

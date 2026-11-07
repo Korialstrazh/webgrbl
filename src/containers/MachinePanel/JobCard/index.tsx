@@ -4,7 +4,8 @@
  * A readiness row says what is still open, and why Start job and Frame job are off sits behind a warning icon in the
  * heading;
  * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
- * gear, traces the outline of the job.
+ * gear, traces the outline of the job. A chevron in the heading folds the card to one line, its facts and Start, so the
+ * cards below come into view; the fold is remembered per viewer.
  *
  * @author michael.morosov
  *
@@ -17,11 +18,15 @@ import {
   BlockOutlined,
   ClockCircleOutlined,
   DownloadOutlined,
+  DownOutlined,
   ProfileOutlined,
+  UpOutlined,
 } from '@ant-design/icons';
+import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
@@ -39,6 +44,7 @@ import {
   selectJobRunStatus,
 } from '../../../utils/states/job.run.state';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
+import { JobCardCollapsePreferenceChanged, selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.state';
 import { selectFrameStartBlockedReasonKey } from '../../../utils/states/frame.start.blocked.reason.selector';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
 import type { AppDispatch } from '../../../utils/states/new.store';
@@ -47,6 +53,7 @@ import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
 import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.timeline.selectors';
 import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
 import { CaptionedActionButton } from '../../../views/CaptionedActionButton';
+import { IconActionButton } from '../../../views/IconActionButton';
 import { Panel } from '../../../views/Panel';
 import { TooltipNoteIcon } from '../../../views/TooltipNoteIcon';
 import { JobStartButton } from '../../JobStartButton';
@@ -110,64 +117,95 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
     JOB_PAUSED_CONTROLS.includes(pauseControl),
   );
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
+  const isCollapsed: boolean = useSelector(selectIsJobCardCollapsed);
+  const bodyId: string = useId();
+
+  const factsComponent: ReactNode = (
+    <dl className={styles.facts}>
+      <div className={styles.fact}>
+        <dt>
+          <BlockOutlined aria-hidden />
+          <span className={styles.factLabel}>{t(DEFAULT.MACHINE_JOB_LAYERS_LABEL)}</span>
+        </dt>
+        <dd>{getJobLayerCountText(t, enabledLayers.length, layers.length - enabledLayers.length)}</dd>
+      </div>
+      <div className={styles.fact}>
+        <dt>
+          <ClockCircleOutlined aria-hidden />
+          <span className={styles.factLabel}>{t(DEFAULT.MACHINE_JOB_ESTIMATE_LABEL)}</span>
+        </dt>
+        {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
+        <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
+      </div>
+      {jobRunStatusKey && (
+        <div className={styles.fact}>
+          <dt><span className={styles.factLabel}>{t(DEFAULT.JOB_RUN_STATUS_LABEL)}</span></dt>
+          <dd role="status">{t(jobRunStatusKey)}</dd>
+        </div>
+      )}
+    </dl>
+  );
 
   return (
     <Panel
       iconComponent={<ProfileOutlined />}
       title={t(DEFAULT.MACHINE_START_JOB_TITLE)}
-      headerActionComponent={actionBlockedReasonText && (
-        // Disabled buttons take no focus, so their reasons sit behind one icon that keyboard, pointer and screen
-        // reader all reach, instead of a standing sentence.
-        <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning />
+      headerActionComponent={(
+        <span className={styles.headerActions}>
+          {actionBlockedReasonText && (
+            // Disabled buttons take no focus, so their reasons sit behind one icon that keyboard, pointer and screen
+            // reader all reach, instead of a standing sentence.
+            <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning />
+          )}
+          <IconActionButton
+            type={ANTD_BUTTON_TYPE_TEXT}
+            size={ANTD_BUTTON_SIZE_SMALL}
+            labelText={t(isCollapsed ? DEFAULT.MACHINE_JOB_EXPAND : DEFAULT.MACHINE_JOB_COLLAPSE)}
+            iconComponent={isCollapsed ? <DownOutlined /> : <UpOutlined />}
+            aria-expanded={!isCollapsed}
+            aria-controls={bodyId}
+            onClick={() => dispatch(new JobCardCollapsePreferenceChanged({ isJobCardCollapsed: !isCollapsed }))}
+          />
+        </span>
       )}
     >
-      <div className={styles.jobCard}>
-        <dl className={styles.facts}>
-          <div className={styles.fact}>
-            <dt>
-              <BlockOutlined aria-hidden />
-              <span className={styles.factLabel}>{t(DEFAULT.MACHINE_JOB_LAYERS_LABEL)}</span>
-            </dt>
-            <dd>{getJobLayerCountText(t, enabledLayers.length, layers.length - enabledLayers.length)}</dd>
+      {isCollapsed ? (
+        // Folded: the facts and Start on one line, with Pause and the progress while a job runs.
+        <div id={bodyId} className={styles.jobCard}>
+          <div className={styles.collapsedSummary}>
+            {factsComponent}
+            {isStartShown && <span className={styles.collapsedStart}><JobStartButton /></span>}
           </div>
-          <div className={styles.fact}>
-            <dt>
-              <ClockCircleOutlined aria-hidden />
-              <span className={styles.factLabel}>{t(DEFAULT.MACHINE_JOB_ESTIMATE_LABEL)}</span>
-            </dt>
-            {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
-            <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
-          </div>
-          {jobRunStatusKey && (
-            <div className={styles.fact}>
-              <dt><span className={styles.factLabel}>{t(DEFAULT.JOB_RUN_STATUS_LABEL)}</span></dt>
-              <dd role="status">{t(jobRunStatusKey)}</dd>
-            </div>
-          )}
-        </dl>
-        {!isJobRunActive && <JobReadinessRow />}
-        {isJobRunActive && <JobRunProgress />}
-        <JobPauseButton />
-        <FrameControls
-          startActionComponent={isStartShown ? <JobStartButton /> : undefined}
-          lockNoteTexts={{
-            [JOB_LOCK_ACTION.START]: getLockNoteText(JOB_LOCK_ACTION.START),
-            [JOB_LOCK_ACTION.FRAME]: getLockNoteText(JOB_LOCK_ACTION.FRAME),
-            [JOB_LOCK_ACTION.EXPORT]: getLockNoteText(JOB_LOCK_ACTION.EXPORT),
-          }}
-          exportActionComponent={(
-            <CaptionedActionButton
-              labelText={t(DEFAULT.MACHINE_JOB_EXPORT_GCODE)}
-              captionText={t(DEFAULT.MACHINE_JOB_EXPORT_CAPTION)}
-              iconComponent={<DownloadOutlined />}
-              blockedReasonText={gcodeExportBlockedReasonKey && t(gcodeExportBlockedReasonKey)}
-              isQuiet
-              isDisabled={!isGcodeExportEnabled}
-              onClick={() => dispatch(new GcodeExportRequested({ isWarningConfirmed: false }))}
-            />
-          )}
-        />
-      </div>
+          {isJobRunActive && <JobRunProgress />}
+          <JobPauseButton />
+        </div>
+      ) : (
+        <div id={bodyId} className={styles.jobCard}>
+          {factsComponent}
+          {!isJobRunActive && <JobReadinessRow />}
+          {isJobRunActive && <JobRunProgress />}
+          <JobPauseButton />
+          <FrameControls
+            startActionComponent={isStartShown ? <JobStartButton /> : undefined}
+            lockNoteTexts={{
+              [JOB_LOCK_ACTION.START]: getLockNoteText(JOB_LOCK_ACTION.START),
+              [JOB_LOCK_ACTION.FRAME]: getLockNoteText(JOB_LOCK_ACTION.FRAME),
+              [JOB_LOCK_ACTION.EXPORT]: getLockNoteText(JOB_LOCK_ACTION.EXPORT),
+            }}
+            exportActionComponent={(
+              <CaptionedActionButton
+                labelText={t(DEFAULT.MACHINE_JOB_EXPORT_GCODE)}
+                captionText={t(DEFAULT.MACHINE_JOB_EXPORT_CAPTION)}
+                iconComponent={<DownloadOutlined />}
+                blockedReasonText={gcodeExportBlockedReasonKey && t(gcodeExportBlockedReasonKey)}
+                isQuiet
+                isDisabled={!isGcodeExportEnabled}
+                onClick={() => dispatch(new GcodeExportRequested({ isWarningConfirmed: false }))}
+              />
+            )}
+          />
+        </div>
+      )}
     </Panel>
   );
 };

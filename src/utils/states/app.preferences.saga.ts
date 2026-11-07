@@ -1,5 +1,6 @@
 /**
- * Keeps the app preferences in step with storage: reads the Escape stop and the bed double-click move choices at start
+ * Keeps the app preferences in step with storage: reads the Escape stop, the bed double-click move and the Job card fold
+ * choices at start
  * and stores each whenever the user changes it. A read that fails, finds no valid value, or neither finishes nor fails
  * within the panel sizes read timeout keeps the default (off); a change the user makes before the read ends wins over
  * the stored value.
@@ -15,16 +16,21 @@ import { all, call, delay, put, race, take, takeLatest } from 'redux-saga/effect
 import { PANEL_SIZES_READ_TIMEOUT_MS } from '../layout.constants';
 import { BED_DOUBLE_CLICK_MOVE_PREFERENCE_REPOSITORY } from '../project/bed.double.click.move.preference.repository';
 import { ESC_STOP_PREFERENCE_REPOSITORY } from '../project/esc.stop.preference.repository';
+import { JOB_CARD_COLLAPSE_PREFERENCE_REPOSITORY } from '../project/job.card.collapse.preference.repository';
 import {
   BedDoubleClickMovePreferenceChanged,
   BedDoubleClickMovePreferenceLoaded,
   DEFAULT_BED_DOUBLE_CLICK_MOVES_LASER,
   DEFAULT_ESC_STOPS_WITH_OVERLAY_OPEN,
+  DEFAULT_JOB_CARD_COLLAPSED,
   EscStopPreferenceChanged,
   EscStopPreferenceLoaded,
+  JobCardCollapsePreferenceChanged,
+  JobCardCollapsePreferenceLoaded,
 } from './app.preferences.state';
 import type { BedDoubleClickMovePreferenceReadRace } from './interfaces/BedDoubleClickMovePreferenceReadRace';
 import type { EscStopPreferenceReadRace } from './interfaces/EscStopPreferenceReadRace';
+import type { JobCardCollapsePreferenceReadRace } from './interfaces/JobCardCollapsePreferenceReadRace';
 
 const APP_PREFERENCES_STORAGE_ERROR_LOG_MESSAGE = 'Reading or storing the app preferences failed';
 
@@ -105,8 +111,47 @@ function* storeBedDoubleClickMovePreference(action: BedDoubleClickMovePreference
   }
 }
 
+function* loadJobCardCollapsePreference(): Generator {
+  try {
+    const readRace: JobCardCollapsePreferenceReadRace = yield race({
+      storedPreference: call([
+        JOB_CARD_COLLAPSE_PREFERENCE_REPOSITORY,
+        JOB_CARD_COLLAPSE_PREFERENCE_REPOSITORY.getJobCardCollapsed,
+      ]),
+      timeout: delay(PANEL_SIZES_READ_TIMEOUT_MS, true),
+      changedByUser: take(JobCardCollapsePreferenceChanged.type),
+    });
+
+    if (readRace.changedByUser) {
+      return;
+    }
+
+    yield put(new JobCardCollapsePreferenceLoaded({
+      isJobCardCollapsed: readRace.storedPreference ?? DEFAULT_JOB_CARD_COLLAPSED,
+    }));
+  } catch (error: unknown) {
+    logAppPreferencesStorageError(error);
+  }
+}
+
+function* storeJobCardCollapsePreference(action: JobCardCollapsePreferenceChanged): Generator {
+  try {
+    yield call(
+      [JOB_CARD_COLLAPSE_PREFERENCE_REPOSITORY, JOB_CARD_COLLAPSE_PREFERENCE_REPOSITORY.setJobCardCollapsed],
+      action.payload.isJobCardCollapsed,
+    );
+  } catch (error: unknown) {
+    logAppPreferencesStorageError(error);
+  }
+}
+
 export function* watchAppPreferences(): Generator {
   yield takeLatest(EscStopPreferenceChanged.type, storeEscStopPreference);
   yield takeLatest(BedDoubleClickMovePreferenceChanged.type, storeBedDoubleClickMovePreference);
-  yield all([call(loadEscStopPreference), call(loadBedDoubleClickMovePreference)]);
+  yield takeLatest(JobCardCollapsePreferenceChanged.type, storeJobCardCollapsePreference);
+  yield all([
+    call(loadEscStopPreference),
+    call(loadBedDoubleClickMovePreference),
+    call(loadJobCardCollapsePreference),
+  ]);
 }

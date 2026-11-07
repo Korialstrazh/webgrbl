@@ -6,6 +6,28 @@
   gap: var(--space-3);
 }
 
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+// The folded card: its facts on the left, Start filling the rest of the line.
+.collapsedSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.collapsedStart {
+  flex: 1 1 0;
+  min-width: 0;
+
+  :global(.ant-btn) {
+    width: 100%;
+  }
+}
+
 // Icon and value side by side; the term stays for screen readers.
 .facts {
   display: flex;

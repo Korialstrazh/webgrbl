@@ -29,6 +29,7 @@ import {
   selectProjectDocument,
   selectProjectLayers,
 } from '../../../utils/states/project.document.state';
+import { selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.state';
 import { selectToolpathMachineArea } from '../../../utils/states/toolpath.machine.area.selector';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../../utils/states/toolpath.state';
 import { selectIsAnyOverlayOpen } from '../../../utils/states/ui.overlay.state';
@@ -133,6 +134,9 @@ const NOT_CONNECTED_REASON = 'Connect the laser to start a job.';
 const CONNECT_STEP_OPEN_LABEL = 'Connect: to do';
 const ACTIONS_NOT_CONNECTED_REASON = 'Connect the laser to start or frame.';
 const QUIET_BUTTON_CLASS = 'quiet';
+const JOB_FOLD_LABEL = 'Fold the Job card to Start';
+const JOB_UNFOLD_LABEL = 'Show the whole Job card';
+const READINESS_LABEL = 'Ready to cut?';
 
 describe(JobCard.name, () => {
   afterEach(() => {
@@ -397,5 +401,26 @@ describe(JobCard.name, () => {
     expect(await screen.findByText(NEEDS_LAYER_TOOLTIP)).toBeInTheDocument();
     expect(drawableSet.drawables.length).toBeGreaterThan(0);
     expect(gcodeText).not.toMatch(BURN_LINE_PATTERN);
+  });
+
+  it('folds to its facts and Start, remembers the fold, and unfolds again', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+
+    renderJobCard(store);
+    fireEvent.click(screen.getByRole('button', { name: JOB_FOLD_LABEL }));
+
+    const unfoldButton: HTMLElement = screen.getByRole('button', { name: JOB_UNFOLD_LABEL });
+
+    expect(selectIsJobCardCollapsed(store.getState())).toBe(true);
+    expect(unfoldButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('button', { name: START_JOB_LABEL })).toBeInTheDocument();
+    expect(screen.getByText(ESTIMATE_LABEL)).toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: READINESS_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: FRAME_LABEL })).not.toBeInTheDocument();
+
+    fireEvent.click(unfoldButton);
+
+    expect(selectIsJobCardCollapsed(store.getState())).toBe(false);
+    expect(screen.getByRole('list', { name: READINESS_LABEL })).toBeInTheDocument();
   });
 });
