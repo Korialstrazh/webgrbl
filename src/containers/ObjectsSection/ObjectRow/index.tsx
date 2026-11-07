@@ -59,6 +59,7 @@ export const ObjectRow = ({
       <Button
         className={styles.selectButton}
         type={ANTD_BUTTON_TYPE_TEXT}
+        data-object-id={projectObject.id}
         aria-pressed={isSelected}
         onClick={() => onSelect(projectObject.id)}
       >

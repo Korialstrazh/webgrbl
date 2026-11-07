@@ -12,7 +12,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 const SETTINGS_LABEL = 'Stop settings';
 const PREFERENCE_LABEL = 'Esc stops over panels too';
 const DIALOG_OVERLAY_ID = 'test-dialog';
-const PREFERENCE_HINT = 'Ticked: one Esc closes a panel and stops the laser.';
+const PREFERENCE_HINT = 'One Esc closes the panel and stops.';
 
 describe(StopSettingsButton.name, () => {
   it('opens a popover whose checkbox is off by default and turns the preference on', () => {

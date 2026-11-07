@@ -231,6 +231,20 @@ describe(ObjectsSection.name, () => {
     expect(remainingIds).toEqual([SECOND_ID]);
   });
 
+  it('moves focus to the next row after a delete, and to the empty hint after the last one', () => {
+    const store: AppStore = newStore();
+    loadObjects(store);
+    renderSection(store);
+
+    fireEvent.click(screen.getByRole('button', { name: `Delete ${FIRST_NAME}` }));
+
+    expect(screen.getByRole('button', { name: SECOND_ROW_NAME_PATTERN })).toHaveFocus();
+
+    fireEvent.click(screen.getByRole('button', { name: `Delete ${SECOND_NAME}` }));
+
+    expect(screen.getByText(EMPTY_HINT_PATTERN).parentElement).toHaveFocus();
+  });
+
   it('shows the outside note only for an object outside the bed', () => {
     const store: AppStore = newStore();
 

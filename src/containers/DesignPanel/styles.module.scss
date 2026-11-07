@@ -1,3 +1,5 @@
+@use '../../styles/layout' as layout;
+
 // The sider scrolls on its own; its body grows with the content instead of keeping antd's fixed full height.
 .region {
   overflow: auto;
@@ -7,6 +9,8 @@
   scrollbar-width: thin;
   border-right: 1px solid var(--color-border);
   background-color: var(--color-surface-1);
+
+  @include layout.more-below-fade(var(--color-surface-1));
 
   .designPanel {
     display: flex;

@@ -1496,7 +1496,7 @@ registerLocales({
       [DEFAULT.STATUS_STRIP_OFFLINE]: "Offline",
       [DEFAULT.STATUS_STRIP_OFFLINE_HINT]: "No network connection. webgrbl keeps working, and the laser connection does not need the network.",
       [DEFAULT.STATUS_STRIP_TITLE]: "Status",
-      [DEFAULT.STOP_SETTINGS_ESC_HINT]: "Ticked: one Esc closes a panel and stops the laser.",
+      [DEFAULT.STOP_SETTINGS_ESC_HINT]: "One Esc closes the panel and stops.",
       [DEFAULT.STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN]: "Esc stops over panels too",
       [DEFAULT.STOP_SETTINGS_TITLE]: "Stop settings",
       [DEFAULT.TEST_SAMPLE_DIALOG_CANCEL]: "Cancel",
