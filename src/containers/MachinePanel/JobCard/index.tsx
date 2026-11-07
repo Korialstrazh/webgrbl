@@ -37,7 +37,7 @@ import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { JOB_PAUSED_CONTROLS } from '../../../utils/states/job.pause.control.constants';
 import type { JobPauseControl } from '../../../utils/states/job.pause.control.constants';
 import { selectJobPauseControl } from '../../../utils/states/job.pause.control.selector';
-import { selectFirstUnmetJobReadinessStep } from '../../../utils/states/job.readiness.selector';
+import { JOB_READINESS_STEP, selectIsJobReadinessStepMet } from '../../../utils/states/job.readiness.selector';
 import type { JobReadinessStep } from '../../../utils/states/job.readiness.selector';
 import type { JobRunKind } from '../../../utils/states/job.run.kind.constants';
 import {
@@ -72,7 +72,7 @@ import { getJobActionBlockedReasonKeys } from './get.job.action.blocked.reason.k
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobLockShortReasonKeys } from './get.job.lock.short.reason.keys';
 import { getJobRunStatusKey } from './get.job.run.status.key';
-import { isJobLockReasonOnNextStep } from './is.job.lock.reason.on.next.step';
+import { isJobLockReasonOnReadinessRow } from './is.job.lock.reason.on.readiness.row';
 import { JOB_LOCK_ACTION } from './job.lock.action.constants';
 import type { JobLockAction } from './job.lock.action.constants';
 import styles from './styles.module.scss';
@@ -101,8 +101,16 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const actionBlockedReasonText: string = actionBlockedReasonKeys
     .map((reasonKey: string): string => t(reasonKey))
     .join(REASON_SEPARATOR);
-  const nextReadinessStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
-  // Each locked action names its own reason under its button; one the next-step button asks for is said there only.
+  const isProfileMet: boolean = useSelector(selectIsJobReadinessStepMet(JOB_READINESS_STEP.PROFILE));
+  const isDesignMet: boolean = useSelector(selectIsJobReadinessStepMet(JOB_READINESS_STEP.DESIGN));
+  const isConnectMet: boolean = useSelector(selectIsJobReadinessStepMet(JOB_READINESS_STEP.CONNECT));
+  const unmetReadinessSteps: JobReadinessStep[] = [
+    ...(isProfileMet ? [] : [JOB_READINESS_STEP.PROFILE]),
+    ...(isDesignMet ? [] : [JOB_READINESS_STEP.DESIGN]),
+    ...(isConnectMet ? [] : [JOB_READINESS_STEP.CONNECT]),
+  ];
+  // Each locked action names its own reason under its button; one a to-do step of the readiness row already says is
+  // said there only, so the button keeps just its padlock.
   const lockShortReasonKeys: Partial<Record<JobLockAction, string>> = getJobLockShortReasonKeys([
     { action: JOB_LOCK_ACTION.START, blockedReasonKey: isStartShown ? jobStartBlockedReasonKey : undefined },
     { action: JOB_LOCK_ACTION.FRAME, blockedReasonKey: frameStartBlockedReasonKey },
@@ -111,7 +119,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const getLockNoteText = (action: JobLockAction): string | undefined => {
     const shortReasonKey: string | undefined = lockShortReasonKeys[action];
 
-    return shortReasonKey && !isJobLockReasonOnNextStep(shortReasonKey, nextReadinessStep)
+    return shortReasonKey && !isJobLockReasonOnReadinessRow(shortReasonKey, unmetReadinessSteps)
       ? t(shortReasonKey)
       : undefined;
   };

@@ -13,7 +13,7 @@ import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_SMALL } from '../../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_DEFAULT, ANTD_BUTTON_TYPE_PRIMARY } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
 import {
@@ -44,6 +44,8 @@ export const MachineResetUnlock = (): ReactNode => {
       </Button>
       <Button
         size={ANTD_BUTTON_SIZE_SMALL}
+        // Only in alarm can Unlock be pressed, and then it is the way out, so it stands out as the primary action.
+        type={canUnlock ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT}
         icon={<UnlockOutlined />}
         aria-label={t(DEFAULT.MACHINE_CONTROL_UNLOCK)}
         disabled={!canUnlock}

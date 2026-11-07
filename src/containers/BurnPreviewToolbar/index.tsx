@@ -1,6 +1,7 @@
 /**
  * The header of the 3D view: the material of the project as read-only text, since it is chosen in Design, and the entry
- * of the test result of that material.
+ * of the test result of that material. While materials exist but none is chosen, the centre card of the view asks for
+ * one, so the header does not ask again.
  *
  * @author michael.morosov
  *
@@ -26,18 +27,18 @@ export const BurnPreviewToolbar = (): ReactNode => {
   const { t } = useTranslation();
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const hasMaterials: boolean = Boolean(useSelector(selectMaterials).length);
-  const noMaterialKey: string = hasMaterials
-    ? DEFAULT.BURN_PREVIEW_MATERIAL_PLACEHOLDER
-    : DEFAULT.BURN_PREVIEW_MATERIAL_NONE;
   const [isTestSampleDialogOpen, setIsTestSampleDialogOpen] = useState<boolean>(false);
 
   return (
     <>
-      <span className={styles.materialText}>
-        {activeMaterial
-          ? t(DEFAULT.BURN_PREVIEW_MATERIAL_CURRENT, { name: activeMaterial.name })
-          : t(noMaterialKey)}
-      </span>
+      {activeMaterial && (
+        <span className={styles.materialText}>
+          {t(DEFAULT.BURN_PREVIEW_MATERIAL_CURRENT, { name: activeMaterial.name })}
+        </span>
+      )}
+      {!activeMaterial && !hasMaterials && (
+        <span className={styles.materialText}>{t(DEFAULT.BURN_PREVIEW_MATERIAL_NONE)}</span>
+      )}
       <Button
         icon={<TestSampleIcon aria-hidden />}
         disabled={!activeMaterial}

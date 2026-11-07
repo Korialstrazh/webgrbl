@@ -16,6 +16,8 @@ const WORK_POSITION_TEXT = '8.000';
 const MACHINE_POSITION_TEXT = '10.500';
 const FEED_RATE = 1200;
 const SPINDLE_SPEED = 750;
+// 750 of the default profile's S max of 1000.
+const POWER_PERCENT_TEXT = '75';
 // The one empty-readout mark, an em dash.
 const MISSING_VALUE_TEXT = '\u2014';
 const IDLE_LABEL = 'Idle';
@@ -135,7 +137,9 @@ describe(MachinePanel.name, () => {
 
     expect(within(statusCard).getByText(RUN_LABEL)).toBeInTheDocument();
     expect(within(statusCard).getByText(String(FEED_RATE))).toBeInTheDocument();
-    expect(within(statusCard).getByText(String(SPINDLE_SPEED))).toBeInTheDocument();
+    expect(within(statusCard).getByText(POWER_PERCENT_TEXT)).toBeInTheDocument();
+    expect(within(statusCard).getByText('mm/min')).toBeVisible();
+    expect(within(statusCard).getByText('%')).toBeVisible();
     expect(within(statusCard).getByText('Feed')).toBeVisible();
     expect(within(statusCard).getByText('Power')).toBeVisible();
     expect(within(statusCard).getByRole('button', { name: RESET_LABEL })).toBeInTheDocument();
@@ -162,7 +166,7 @@ describe(MachinePanel.name, () => {
     expect(screen.getByRole('button', { name: 'Hold to fire' }).querySelector('.anticon-bulb')).not.toBeNull();
   });
 
-  it('enables reset when connected, and unlock only in alarm', () => {
+  it('enables reset when connected, and unlock only in alarm, where it is the primary action', () => {
     const store: AppStore = renderMachinePanel();
 
     connect(store);
@@ -170,10 +174,12 @@ describe(MachinePanel.name, () => {
 
     expect(screen.getByRole('button', { name: RESET_LABEL })).toBeEnabled();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).not.toHaveClass('ant-btn-primary');
 
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
 
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeEnabled();
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveClass('ant-btn-primary');
   });
 
   it('dispatches the reset and unlock requests when their buttons are clicked', () => {

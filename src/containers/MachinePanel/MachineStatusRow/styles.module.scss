@@ -24,8 +24,12 @@
     font-size: 0.75rem;
   }
 
+  // The value in full text colour and a size up, so a 0 reads at a glance; its unit follows it, muted.
   dd {
     margin: 0 var(--space-2) 0 0;
+    color: var(--color-text);
+    font-size: 0.9375rem;
+    font-weight: 600;
 
     &:last-of-type {
       margin-right: 0;
@@ -37,4 +41,12 @@
 
 .valueName {
   color: var(--color-text-muted);
+}
+
+.unit {
+  margin-left: 0.125rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 400;
 }

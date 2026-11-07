@@ -1,6 +1,7 @@
 /**
- * Tells whether the short lock reason under the job actions would only repeat the readiness row's next-step button,
- * as "Connect laser" does while Connect is the next step; the button then says it once.
+ * Tells whether the short lock reason under the job actions would only repeat a to-do step of the readiness row, as
+ * "Offline" does while Connect is still to do or "No artwork" while Artwork is: the padlock stays on the button, the
+ * step (and its next-step button) says why once, so the empty and the populated card read the same way.
  *
  * @author michael.morosov
  *
@@ -13,12 +14,17 @@ import { DEFAULT } from '../../../utils/localization/default.locales';
 import { JOB_READINESS_STEP } from '../../../utils/states/job.readiness.selector';
 import type { JobReadinessStep } from '../../../utils/states/job.readiness.selector';
 
-const NEXT_STEP_LOCK_SHORT_REASON_KEYS: Readonly<Partial<Record<JobReadinessStep, string>>> = {
+const READINESS_STEP_LOCK_SHORT_REASON_KEYS: Readonly<Partial<Record<JobReadinessStep, string>>> = {
   [JOB_READINESS_STEP.CONNECT]: DEFAULT.JOB_LOCK_SHORT_CONNECT,
   [JOB_READINESS_STEP.PROFILE]: DEFAULT.JOB_LOCK_SHORT_PROFILE,
+  [JOB_READINESS_STEP.DESIGN]: DEFAULT.JOB_LOCK_SHORT_ARTWORK,
 };
 
-export const isJobLockReasonOnNextStep = (
+export const isJobLockReasonOnReadinessRow = (
   lockShortReasonKey: string | undefined,
-  nextStep: JobReadinessStep | undefined,
-): boolean => !!nextStep && !!lockShortReasonKey && NEXT_STEP_LOCK_SHORT_REASON_KEYS[nextStep] === lockShortReasonKey;
+  unmetSteps: readonly JobReadinessStep[],
+): boolean =>
+  !!lockShortReasonKey &&
+  unmetSteps.some(
+    (step: JobReadinessStep): boolean => READINESS_STEP_LOCK_SHORT_REASON_KEYS[step] === lockShortReasonKey,
+  );

@@ -57,6 +57,7 @@ import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpa
 
 const LOCK_REASON_CONNECT = 'Offline';
 const CONNECT_ACTION_TEXT = 'Connect laser';
+const LOCK_REASON_LAYER = 'No layer on';
 const LOCK_REASON_ARTWORK = 'No artwork';
 const FRAME_LABEL = 'Frame job';
 const EXPORT_LABEL = 'Export G-code';
@@ -292,12 +293,14 @@ describe(JobCard.name, () => {
     expect(screen.queryByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).not.toBeInTheDocument();
   });
 
-  it('writes a short plain reason under Start and under Frame while they wait for a connection', async () => {
-    // With no artwork, Design is the next step, so the connection reason is not already on the next-step button.
+  it('keeps only the padlock on Start, Frame and Export in an empty project, as the to-do steps say why', async () => {
     renderJobCard(await newGcodeExportTestStore({ objects: [] }));
 
-    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toHaveTextContent(LOCK_REASON_CONNECT);
-    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toHaveTextContent(LOCK_REASON_CONNECT);
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toBeInTheDocument();
+    expect(screen.queryByText(LOCK_REASON_CONNECT)).not.toBeInTheDocument();
+    expect(screen.queryByText(LOCK_REASON_ARTWORK)).not.toBeInTheDocument();
   });
 
   it('makes Connect the next step without a material, as Start does not need one', async () => {
@@ -326,23 +329,14 @@ describe(JobCard.name, () => {
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
   });
 
-  it('gives Export its own artwork reason in an empty project, not Offline', async () => {
-    renderJobCard(await newGcodeExportTestStore({ objects: [] }));
+  it('puts a reason no step says right under its own button, in plain text without icons', async () => {
+    renderJobCard(await newGcodeExportTestStore({ areLayersEnabled: false }));
 
-    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).toHaveTextContent(LOCK_REASON_ARTWORK);
-    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toHaveTextContent(LOCK_REASON_CONNECT);
-  });
-
-  it('puts each reason right under its own button, in plain text without icons', async () => {
-    renderJobCard(await newGcodeExportTestStore({ objects: [] }));
-
-    const frameNote: HTMLElement = screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME);
     const exportNote: HTMLElement = screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT);
 
-    expect(frameNote.parentElement).toContainElement(screen.getByRole('button', { name: FRAME_LABEL }));
+    expect(exportNote).toHaveTextContent(LOCK_REASON_LAYER);
     expect(exportNote.parentElement).toContainElement(getExportButton());
     expect(exportNote.parentElement).not.toContainElement(screen.getByRole('button', { name: FRAME_LABEL }));
-    expect(frameNote.querySelector('svg')).toBeNull();
     expect(exportNote.querySelector('svg')).toBeNull();
   });
 

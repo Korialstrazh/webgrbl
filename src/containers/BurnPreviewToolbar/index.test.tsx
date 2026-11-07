@@ -49,13 +49,13 @@ describe(BurnPreviewToolbar.name, () => {
     expect(screen.getByRole('dialog', { name: `Test result: ${BIRCH.name}` })).toBeInTheDocument();
   });
 
-  it('asks to choose a material when materials exist but none is chosen', () => {
+  it('leaves the choice to the centre card when materials exist but none is chosen', () => {
     const store: AppStore = newStore();
 
     store.dispatch(new MaterialSaved({ material: BIRCH }));
     renderToolbar(store);
 
-    expect(screen.getByText('Choose a material')).toBeInTheDocument();
+    expect(screen.queryByText('Choose a material')).not.toBeInTheDocument();
     expect(screen.queryByText('Material: none')).not.toBeInTheDocument();
   });
 

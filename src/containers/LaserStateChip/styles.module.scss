@@ -13,6 +13,10 @@
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
+
+  :global(.anticon) {
+    font-size: 1rem;
+  }
 }
 
 .neutral {
@@ -39,8 +43,17 @@
   color: var(--color-text);
 }
 
-// In a narrow top bar the chip keeps its icon and colour; the pill beside it needs the room.
+// Below 62.5rem the connection pill is compact, so the chip keeps its short word beside the icon and the laser state
+// reads at a glance on a tablet. Between 62.5rem and 80rem the pill still spells out its port, and on a phone the bar
+// has no room, so there the chip keeps its icon and colour. 62.5rem must match the TopBar and ConnectionPill styles.
 @media (width < 80rem) {
+  .chip {
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+  }
+}
+
+@media (62.5rem <= width < 80rem), (width < 30rem) {
   .label {
     @include accessibility.visually-hidden;
   }
