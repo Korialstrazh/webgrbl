@@ -34,3 +34,19 @@
 .factLabel {
   @include accessibility.visually-hidden;
 }
+
+// One short reason under the locked actions: the lock in the warning colour and a few words in readable text.
+.lockReason {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: calc(-1 * var(--space-1)) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+
+  > :global(.anticon) {
+    color: var(--color-warning);
+    font-size: 0.875rem;
+  }
+}

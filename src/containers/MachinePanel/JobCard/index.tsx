@@ -17,6 +17,7 @@ import {
   BlockOutlined,
   ClockCircleOutlined,
   DownloadOutlined,
+  LockFilled,
   ProfileOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
@@ -54,7 +55,9 @@ import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
 import { getJobActionBlockedReasonKeys } from './get.job.action.blocked.reason.keys';
 import { getJobLayerCountText } from './get.job.layer.count.text';
+import { getJobLockShortReasonKey } from './get.job.lock.short.reason.key';
 import { getJobRunStatusKey } from './get.job.run.status.key';
+import { JOB_LOCK_REASON_TEST_ID } from './job.card.constants';
 import styles from './styles.module.scss';
 
 const REASON_SEPARATOR = ' ';
@@ -81,6 +84,11 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const actionBlockedReasonText: string = actionBlockedReasonKeys
     .map((reasonKey: string): string => t(reasonKey))
     .join(REASON_SEPARATOR);
+  const lockShortReasonKey: string | undefined = getJobLockShortReasonKey([
+    isStartShown ? jobStartBlockedReasonKey : undefined,
+    frameStartBlockedReasonKey,
+    gcodeExportBlockedReasonKey,
+  ]);
   const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
   const jobRunKind: JobRunKind = useSelector(selectJobRunKind);
@@ -142,6 +150,13 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
             />
           )}
         />
+        {lockShortReasonKey && (
+          // Always on screen, so a touch screen without hover still shows why the buttons above are locked.
+          <p className={styles.lockReason} data-testid={JOB_LOCK_REASON_TEST_ID}>
+            <LockFilled aria-hidden />
+            <span>{t(lockShortReasonKey)}</span>
+          </p>
+        )}
       </div>
     </Panel>
   );

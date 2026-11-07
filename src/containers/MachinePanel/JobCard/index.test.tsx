@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { JobCard } from '.';
+import { JOB_LOCK_REASON_TEST_ID } from './job.card.constants';
 import * as downloadModule from '../../../utils/browser/download.text.file';
 import { EM_DASH, MIDDLE_DOT } from '../../../utils/characters.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
@@ -39,6 +40,7 @@ import { FakeToolpathWorkerClient } from '../../../utils/toolpath/test.support/f
 import { newToolpath } from '../../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpath.move';
 
+const LOCK_REASON_CONNECT = 'Connect laser';
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
 const START_CONFIRM_OK_LABEL = 'Start and fire';
@@ -267,6 +269,18 @@ describe(JobCard.name, () => {
     renderJobCard(newStartableJobStore());
 
     expect(screen.queryByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).not.toBeInTheDocument();
+  });
+
+  it('writes a short visible lock reason under the actions while they wait for a connection', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    expect(screen.getByTestId(JOB_LOCK_REASON_TEST_ID)).toHaveTextContent(LOCK_REASON_CONNECT);
+  });
+
+  it('stops asking for the connection once the laser is connected', () => {
+    renderJobCard(newStartableJobStore());
+
+    expect(screen.queryByText(LOCK_REASON_CONNECT)).not.toBeInTheDocument();
   });
 
   it('shows Export G-code as the quiet secondary action', async () => {

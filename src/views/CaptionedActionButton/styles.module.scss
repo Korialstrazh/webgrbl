@@ -34,7 +34,15 @@
   // The caption keeps the readable disabled grey (at least 4.5:1 on every surface), never antd's dimmer default.
   color: var(--color-disabled-text);
   cursor: not-allowed;
+}
 
+// Locked, not merely off: the caption stays in the muted text grey (about 8:1), as it is the name of a step to come.
+.captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'] .caption {
+  color: var(--color-text-muted);
+}
+
+.captionedActionButton:global(.ant-btn):disabled,
+.captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'] {
   .icon > :global(.anticon):first-child {
     opacity: 0.75;
   }
@@ -49,15 +57,15 @@
 // Doubled class: a caller that sizes every icon in its button must not enlarge the badge.
 .icon .lockBadge.lockBadge:global(.anticon) {
   position: absolute;
-  // Centred on the icon's lower corner, so it marks the icon without covering its middle.
-  inset-block-end: 0;
+  // Centred on the icon's upper corner, so it marks the icon without covering its middle or the caption below.
+  inset-block-start: 0;
   inset-inline-end: 0;
-  transform: translate(60%, 45%);
-  padding: 0.0625rem;
+  transform: translate(65%, -45%);
+  padding: 0.125rem;
   border-radius: 50%;
   background-color: var(--color-surface-1);
   color: var(--color-warning);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   line-height: 1;
 }
 

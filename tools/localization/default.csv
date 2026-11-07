@@ -250,6 +250,16 @@ GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
 JOB_ACTIONS_BLOCKED_NOT_CONNECTED;Connect the laser to start or frame.
+JOB_LOCK_SHORT_BUSY;Laser busy
+JOB_LOCK_SHORT_CONNECT;Connect laser
+JOB_LOCK_SHORT_LASER_MODE;Confirm laser mode
+JOB_LOCK_SHORT_LAYER;Turn on a layer
+JOB_LOCK_SHORT_NO_POSITION;Waiting for position
+JOB_LOCK_SHORT_NOTHING_TO_FRAME;Nothing to frame
+JOB_LOCK_SHORT_OFF_BED;Frame leaves the bed
+JOB_LOCK_SHORT_PROFILE;Add a profile
+JOB_LOCK_SHORT_TOOLPATH;Toolpath not ready
+JOB_LOCK_SHORT_WARNINGS;Fix warnings
 JOB_PAUSE;Pause
 JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.
 JOB_READINESS_CONNECT;Connect
@@ -622,6 +632,7 @@ PALETTE_INKSCAPE_HINT;To use the exported file in Inkscape, put it in its palett
 PALETTE_INKSCAPE_PATH_LINUX;Linux: ~/.config/inkscape/palettes/
 PALETTE_INKSCAPE_PATH_WINDOWS;Windows: %APPDATA%\inkscape\palettes\
 PALETTE_LIST;Palette colours
+PALETTE_LIST_ORDER_HINT;Swatch list only. Layers set the cut order.
 PALETTE_MOVE_DOWN;Move {{name}} down
 PALETTE_MOVE_UP;Move {{name}} up
 PALETTE_NEW;New colour
@@ -662,6 +673,7 @@ STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
 STATUS_STRIP_TITLE;Status
+STOP_SETTINGS_ESC_HINT;Ticked: one Esc closes a panel and stops the laser.
 STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN;Esc stops over panels too
 STOP_SETTINGS_TITLE;Stop settings
 TEST_SAMPLE_DIALOG_CANCEL;Cancel
@@ -731,6 +743,9 @@ TOOLPATH_GENERATING;Generating… {{percent}} %
 TOOLPATH_LAYER_LABEL;Toolpath preview
 TOOLPATH_NOT_GENERATED;No toolpath yet
 TOOLPATH_OUT_OF_DATE;Out of date
+TOOLPATH_POWER_LEGEND;Power scale: lighter is less power, darker is full power
+TOOLPATH_POWER_LEGEND_HIGH;100 %
+TOOLPATH_POWER_LEGEND_LOW;0
 TOOLPATH_REGENERATE;Regenerate
 TOOLPATH_SHOW_TRAVEL;Show travel moves
 TOOLPATH_SHOW_TRAVEL_CAPTION;Travel
