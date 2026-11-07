@@ -27,8 +27,9 @@ import {
   END_KEY,
   HOME_KEY,
 } from '../../../../utils/browser/browser.events.constants';
+import { useIsWideLayout } from '../../../../utils/hooks/use.is.wide.layout';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
-import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
+import { BedViewModeChanged, selectBedViewMode } from '../../../../utils/states/bed.view.state';
 import {
   isJobReadinessStepOptional,
   JOB_READINESS_STEP,
@@ -37,6 +38,7 @@ import {
 } from '../../../../utils/states/job.readiness.selector';
 import type { JobReadinessStep } from '../../../../utils/states/job.readiness.selector';
 import type { AppDispatch } from '../../../../utils/states/new.store';
+import { selectProjectObjects } from '../../../../utils/states/project.document.state';
 import { ConnectionPopoverOpenChanged } from '../../../../utils/states/ui.overlay.state';
 import { MachineProfilesDialogOpenChanged, NarrowRegionChanged } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
@@ -176,8 +178,15 @@ export const JobReadinessRow = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
   const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
-  const nextLook: JobReadinessLook | undefined =
-    JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
+  const isWideLayout: boolean = useIsWideLayout();
+  const isDesignView: boolean = useSelector(selectBedViewMode) === BED_VIEW_MODE.DESIGN;
+  const hasNoObjects: boolean = !useSelector(selectProjectObjects).length;
+  // The empty bed card beside this card offers Import SVG then, so the import is never on screen three times.
+  const isImportOnBedCard: boolean = isWideLayout && isDesignView && hasNoObjects;
+  const isImportNextOnBedCard: boolean = isImportOnBedCard && nextStep === JOB_READINESS_STEP.DESIGN;
+  const nextLook: JobReadinessLook | undefined = isImportNextOnBedCard
+    ? undefined
+    : JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
   const listRef: RefObject<HTMLOListElement | null> = useRef<HTMLOListElement>(null);
   // The step last focused keeps the tab stop; until then it is the next step, or the first when all are done.
   const [focusedStep, setFocusedStep] = useState<JobReadinessStep | undefined>(undefined);

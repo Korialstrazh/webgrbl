@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { act } from 'react';
-import { Provider } from 'react-redux';
+import type { ReactNode } from 'react';
+import { Provider, useSelector } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { ObjectsSection } from '.';
 import { ENTER_KEY } from '../../utils/browser/browser.events.constants';
@@ -20,6 +21,7 @@ import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/st
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { newToolpathMachineArea } from '../../utils/toolpath/test.support/new.toolpath.machine.area';
 import { OBJECT_KIND } from './objects.section.constants';
+import { BedEmptyCard } from '../BedEmptyCard';
 
 const FIRST_ID = 'first';
 const SECOND_ID = 'second';
@@ -133,6 +135,18 @@ const getObjectById = (store: AppStore, objectId: string): ProjectObject | undef
     (projectObject: ProjectObject): boolean => projectObject.id === objectId,
   );
 
+/** The section beside the empty bed card, as the workbench shows them in the Design view. */
+const SectionWithEmptyBedCard = (): ReactNode => {
+  const hasNoObjects: boolean = !useSelector(selectProjectObjects).length;
+
+  return (
+    <>
+      <ObjectsSection />
+      {hasNoObjects && <BedEmptyCard />}
+    </>
+  );
+};
+
 describe(ObjectsSection.name, () => {
   it('shows a hint and no import button when there are no objects', () => {
     renderSection(newStore());
@@ -244,7 +258,28 @@ describe(ObjectsSection.name, () => {
     expect(remainingIds).toEqual([SECOND_ID]);
   });
 
-  it('moves focus to the next row after a delete, and to the empty hint after the last one', () => {
+  it('moves focus to Import SVG on the empty bed card after the last object is deleted', () => {
+    const store: AppStore = newStore();
+
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({
+        document: { objects: [newProjectObject({ id: FIRST_ID, name: FIRST_NAME })], layers: [] },
+      }));
+    });
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <SectionWithEmptyBedCard />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: `Delete ${FIRST_NAME}` }));
+
+    expect(screen.getByRole('button', { name: IMPORT_LABEL })).toHaveFocus();
+  });
+
+  it('moves focus to the next row after a delete, and to the empty hint without an empty bed card', () => {
     const store: AppStore = newStore();
     loadObjects(store);
     renderSection(store);

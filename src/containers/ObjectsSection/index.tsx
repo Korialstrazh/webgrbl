@@ -27,6 +27,7 @@ import {
   selectSelectedObjects,
 } from '../../utils/states/project.selection.state';
 import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
+import { BED_EMPTY_IMPORT_BUTTON_ID } from '../BedEmptyCard/bed.empty.card.constants';
 import { ObjectRow } from './ObjectRow';
 import { ObjectTransformFields } from './ObjectTransformFields';
 import styles from './styles.module.scss';
@@ -40,7 +41,8 @@ export const ObjectsSection = (): ReactNode => {
   const bed: BedDimensions = useBedDimensions();
   const singleSelectedObject: ProjectObject | undefined = selectedObjects.length === 1 ? selectedObjects[0] : undefined;
   const sectionRef = useRef<HTMLDivElement>(null);
-  // Set by a delete, so focus moves on to the next row, or to the empty hint, instead of falling back to the page.
+  // Set by a delete, so focus moves on to the next row, or after the last one to Import SVG on the empty bed card (the
+  // empty hint when that card is not on screen), instead of falling back to the page.
   const isFocusAfterDeleteWantedRef = useRef<boolean>(false);
   const focusedObjectIdAfterDeleteRef = useRef<string | undefined>(undefined);
 
@@ -51,11 +53,20 @@ export const ObjectsSection = (): ReactNode => {
 
     isFocusAfterDeleteWantedRef.current = false;
     const objectId: string | undefined = focusedObjectIdAfterDeleteRef.current;
-    const nextFocusElement: HTMLElement | null | undefined = objectId
-      ? sectionRef.current?.querySelector<HTMLElement>(`[data-object-id="${CSS.escape(objectId)}"]`)
-      : sectionRef.current;
+    if (objectId) {
+      sectionRef.current?.querySelector<HTMLElement>(`[data-object-id="${CSS.escape(objectId)}"]`)?.focus();
 
-    nextFocusElement?.focus();
+      return;
+    }
+
+    const importButton: HTMLElement | null = document.getElementById(BED_EMPTY_IMPORT_BUTTON_ID);
+
+    importButton?.focus();
+
+    // A hidden bed region (a narrow layout showing another region) takes no focus.
+    if (document.activeElement !== importButton) {
+      sectionRef.current?.focus();
+    }
   }, [projectObjects]);
 
   const deleteObject = (objectId: string): void => {

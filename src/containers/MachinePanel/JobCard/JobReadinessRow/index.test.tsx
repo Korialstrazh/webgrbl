@@ -17,6 +17,11 @@ import { selectIsConnectionPopoverOpen } from '../../../../utils/states/ui.overl
 import { selectIsMachineProfilesDialogOpen, selectNarrowRegion } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
 import { AntdTestProvider } from '../../../../utils/test.support/antd.test.provider';
+import {
+  installMatchMediaMock,
+  resetMatchMediaMock,
+  setMatchMediaMatches,
+} from '../../../../utils/test.support/match.media.mock';
 
 const CURRENT_STEP_SELECTOR = '[aria-current="step"]';
 const PROFILE_OPEN = 'Profile: to do';
@@ -139,7 +144,7 @@ describe(JobReadinessRow.name, () => {
     expect(selectNarrowRegion(store.getState())).toBe(WORKBENCH_REGION.DESIGN);
   });
 
-  it('opens the Import SVG file picker from the next-step button on an empty bed', () => {
+  it('opens the Import SVG file picker from the next-step button on an empty bed in a narrow layout', () => {
     const store: AppStore = newStore();
     const profile: MachineProfile = newMachineProfile();
 
@@ -157,5 +162,19 @@ describe(JobReadinessRow.name, () => {
     expect(clickSpy).toHaveBeenCalledTimes(1);
     expect(clickSpy.mock.contexts[0]).toBe(fileInput);
     clickSpy.mockRestore();
+  });
+
+  it('leaves Import SVG to the empty bed card beside it in a wide layout', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile();
+
+    installMatchMediaMock();
+    setMatchMediaMatches(true);
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    render(<Provider store={store}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>);
+
+    expect(screen.queryByRole('button', { name: IMPORT_SVG_LABEL })).not.toBeInTheDocument();
+    resetMatchMediaMock();
   });
 });
