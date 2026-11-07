@@ -24,6 +24,9 @@
 .segment {
   flex: none;
   height: 100%;
+  // Muted layer colours: a red Cut layer on the track must read as a layer, never as an error.
+  filter: saturate(0.4);
+  opacity: 0.7;
 }
 
 // The shading layer is black, which the dark bed would hide; it is drawn in a mid grey instead.

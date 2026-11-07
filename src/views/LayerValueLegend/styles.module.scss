@@ -1,11 +1,11 @@
-// A quiet key line: small muted names, each after the icon in the colour the rows use for it.
+// A quiet key line: 12 px muted names, each after the icon in the colour the rows use for it.
 .legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0 var(--space-3);
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
 }
 
 .entry {
