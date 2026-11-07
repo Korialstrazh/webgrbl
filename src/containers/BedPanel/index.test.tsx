@@ -220,6 +220,15 @@ describe(BedPanel.name, () => {
     expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).toBeChecked();
   });
 
+  it('moves the checked state of the view mode selector to the chosen view', () => {
+    renderPanel(newStore());
+
+    openToolpathView();
+
+    expect(screen.getByRole('radio', { name: TOOLPATH_VIEW_LABEL, hidden: true })).toBeChecked();
+    expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).not.toBeChecked();
+  });
+
   it('shows the zoom, Fit and bed colour controls in the header, never over the bed drawing', () => {
     renderPanel(newStore());
 
