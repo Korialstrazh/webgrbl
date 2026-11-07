@@ -25,6 +25,7 @@ import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registrati
 import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
 import type { BedRegionDrawerProps } from './interfaces/BedRegionDrawerProps';
 import styles from './styles.module.scss';
+import { useCloseOnUnrelatedDialog } from './use.close.on.unrelated.dialog';
 
 export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
   const { isOpen, overlayIdPrefix, onClose, ...drawerProps } = props;
@@ -35,6 +36,7 @@ export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
   const insetValue: string | undefined = getBedRegionDrawerInset(drawerProps.placement, drawerProps.size);
 
   useOverlayRegistration(overlayIdPrefix, isShown, OVERLAY_KIND.DIALOG);
+  useCloseOnUnrelatedDialog(isShown, styles.bedRegionDrawer, onClose);
 
   useEffect(() => {
     if (!bedRegionHost || !isShown || !insetValue) {
