@@ -65,7 +65,7 @@ export const StopSettingsButton = (): ReactNode => {
         <div className={styles.content}>
           {/* One short line per option; the detail sits behind the info icon at its end. */}
           <div className={styles.preferenceRow}>
-            <Checkbox className={styles.preference} checked={isEscStopping} onChange={handlePreferenceChange}>
+            <Checkbox checked={isEscStopping} onChange={handlePreferenceChange}>
               <span className={styles.preferenceLabel}>
                 <SafetyOutlined aria-hidden />
                 {t(DEFAULT.STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN)}
@@ -74,7 +74,7 @@ export const StopSettingsButton = (): ReactNode => {
             <TooltipNoteIcon noteText={t(DEFAULT.STOP_SETTINGS_ESC_HINT)} />
           </div>
           <div className={styles.preferenceRow}>
-            <Checkbox className={styles.preference} checked={isDoubleClickMoving} onChange={handleDoubleClickMoveChange}>
+            <Checkbox checked={isDoubleClickMoving} onChange={handleDoubleClickMoveChange}>
               <span className={styles.preferenceLabel}>
                 <AimOutlined aria-hidden />
                 {t(DEFAULT.STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER)}

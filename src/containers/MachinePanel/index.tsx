@@ -1,7 +1,7 @@
 /**
- * The right region, the main task first: the job, the compact machine status (only while connected), the positions, moving the head
- * and the laser pointer, and, in a wide window, STOP at the bottom. When the cards are cut off above STOP, their
- * bottom edge fades out, so it reads as a list that scrolls.
+ * The right region, the main task first: the job, the compact machine status (only while connected), the positions,
+ * moving the head and the laser pointer, and, in a wide window, STOP at the bottom. When the cards are cut off above
+ * STOP, their bottom edge fades out, so it reads as a list that scrolls.
  *
  * @author michael.morosov
  *

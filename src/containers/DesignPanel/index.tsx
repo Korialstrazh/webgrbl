@@ -85,7 +85,7 @@ export const DesignPanel = (): ReactNode => {
       >
         <ObjectsSection />
       </Panel>
-      {/* Docked to the bottom of the scrolling panel, so Cut check stays in reach however long the layer list grows. */}
+      {/* Docked to the bottom of the scrolling panel, so Cut check stays in reach however long the list grows. */}
       <div className={styles.cutCheckDock}>
         <CutCheckPanel isActive={isThreeDView} />
       </div>

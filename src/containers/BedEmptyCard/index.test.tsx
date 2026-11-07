@@ -4,7 +4,7 @@ import { BedEmptyCard } from '.';
 import { newStore } from '../../utils/states/new.store';
 
 describe(BedEmptyCard.name, () => {
-  it('offers the drop hint and the sample, without a third Import SVG, and leaves the accent to the readiness row', () => {
+  it('offers the drop hint and the sample, no third Import SVG, and leaves the accent to the readiness row', () => {
     render(<Provider store={newStore()}><BedEmptyCard /></Provider>);
 
     expect(screen.getByText('Drop an SVG here')).toBeInTheDocument();

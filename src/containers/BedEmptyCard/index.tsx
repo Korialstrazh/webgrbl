@@ -1,6 +1,6 @@
 /**
- * The card on an empty bed: drop an SVG or start with the test sample (Import SVG sits in the top bar and the Job card).
- * It leaves with the first object.
+ * The card on an empty bed: drop an SVG or start with the test sample (Import SVG sits in the top bar and the Job
+ * card). It leaves with the first object.
  *
  * @author michael.morosov
  *

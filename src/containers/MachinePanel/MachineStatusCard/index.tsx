@@ -1,7 +1,7 @@
 /**
  * The compact Status card of the machine panel, right above Position: feed and power with short captions and the state
- * in its header line, and one row below with Reset and Unlock. The positions sit in the Position card. While no laser is
- * connected it is not shown: the top-bar pill alone tells the connection state.
+ * in its header line, and one row below with Reset and Unlock. The positions sit in the Position card. While no laser
+ * is connected it is not shown: the top-bar pill alone tells the connection state.
  *
  * @author michael.morosov
  *
