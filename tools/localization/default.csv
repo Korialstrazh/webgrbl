@@ -317,18 +317,18 @@ JOB_START_CONFIRM_CANCEL;Cancel
 JOB_START_CONFIRM_DESCRIPTION;Check the material, focus and work zero. Keep protective glasses on and stay with the laser.
 JOB_START_CONFIRM_OK;Start and fire
 JOB_START_CONFIRM_TITLE;Start the job? The laser will fire.
-LASER_STATE_FIRING;Power on
-LASER_STATE_FIRING_HINT;The laser reports power above zero. It may be firing.
+LASER_STATE_FIRING;Firing {{powerPercent}} %
+LASER_STATE_FIRING_HINT;The last report from the laser shows power above zero, so it may be firing.
 LASER_STATE_JOB_RUNNING;Job running
 LASER_STATE_JOB_RUNNING_HINT;A job is running. The laser can fire at any moment.
 LASER_STATE_NOT_CONNECTED;No link
 LASER_STATE_NOT_CONNECTED_HINT;No laser is connected, so its state is unknown.
+LASER_STATE_OFF;Laser off
+LASER_STATE_OFF_HINT;The last report from the laser shows zero power, so it is not firing.
 LASER_STATE_POINTER_ON;Pointer on
 LASER_STATE_POINTER_ON_HINT;The laser pointer is firing at low power.
 LASER_STATE_POWER_UNKNOWN;Power unknown
 LASER_STATE_POWER_UNKNOWN_HINT;The laser has not reported its power.
-LASER_STATE_ZERO_POWER;0 power
-LASER_STATE_ZERO_POWER_HINT;The last report from the laser shows zero power.
 LAYER_MODE_FILL;Fill
 LAYER_MODE_LINE;Line
 LAYER_POWER_PERCENT;{{percent}} %

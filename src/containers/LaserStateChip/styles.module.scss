@@ -27,6 +27,12 @@
   color: var(--color-warning);
 }
 
+// Amber while the laser reports power: a live state to watch, kept apart from the red of Stop.
+.firing {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
 .danger {
   border-color: var(--color-danger-button);
   background-color: var(--color-danger-button);

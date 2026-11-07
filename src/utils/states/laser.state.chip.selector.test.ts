@@ -4,13 +4,17 @@ import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
 import { ConnectionStatusChanged } from './grbl.connection.state';
 import { JOB_RUN_STATE_NAME } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
-import { LASER_CHIP_STATE, selectLaserChipState } from './laser.state.chip.selector';
+import { LASER_CHIP_STATE, selectLaserChipPowerPercent, selectLaserChipState } from './laser.state.chip.selector';
 import { LaserPointerFiringStarted } from './laser.pointer.state';
 import { MachineStatusReceived } from './machine.status.state';
 import { newStore } from './new.store';
 import type { AppRootState, AppStore } from './new.store';
 
 const SOME_POWER = 250;
+/** SOME_POWER as a percent of the default S max of 1000. */
+const SOME_POWER_PERCENT = 25;
+const ABOVE_S_MAX_POWER = 1500;
+const FULL_PERCENT = 100;
 
 const newStatus = (spindleSpeed: number | undefined): GrblResolvedStatus => ({
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -55,12 +59,12 @@ describe(selectLaserChipState.name, () => {
     expect(selectLaserChipState(store.getState())).toBe(LASER_CHIP_STATE.POWER_UNKNOWN);
   });
 
-  it('reports zero power as reported, not as off', () => {
+  it('reads a reported zero power as off', () => {
     const store: AppStore = newConnectedStore();
 
     store.dispatch(new MachineStatusReceived({ status: newStatus(0) }));
 
-    expect(selectLaserChipState(store.getState())).toBe(LASER_CHIP_STATE.ZERO_POWER_REPORTED);
+    expect(selectLaserChipState(store.getState())).toBe(LASER_CHIP_STATE.OFF);
   });
 
   it('shows power above zero as firing', () => {
@@ -102,5 +106,29 @@ describe(selectLaserChipState.name, () => {
     store.dispatch(new MachineStatusReceived({ status: newStatus(SOME_POWER) }));
 
     expect(selectLaserChipState(getStateWithRunningJob(store))).toBe(LASER_CHIP_STATE.NOT_CONNECTED);
+  });
+});
+
+describe(selectLaserChipPowerPercent.name, () => {
+  it('has no percent before the laser reports a power', () => {
+    expect(selectLaserChipPowerPercent(newConnectedStore().getState())).toBeUndefined();
+  });
+
+  it('gives the reported power as a percent of S max, 0 for off', () => {
+    const store: AppStore = newConnectedStore();
+
+    store.dispatch(new MachineStatusReceived({ status: newStatus(0) }));
+    expect(selectLaserChipPowerPercent(store.getState())).toBe(0);
+
+    store.dispatch(new MachineStatusReceived({ status: newStatus(SOME_POWER) }));
+    expect(selectLaserChipPowerPercent(store.getState())).toBe(SOME_POWER_PERCENT);
+  });
+
+  it('never shows more than 100 % for a power above S max', () => {
+    const store: AppStore = newConnectedStore();
+
+    store.dispatch(new MachineStatusReceived({ status: newStatus(ABOVE_S_MAX_POWER) }));
+
+    expect(selectLaserChipPowerPercent(store.getState())).toBe(FULL_PERCENT);
   });
 });

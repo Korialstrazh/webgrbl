@@ -13,7 +13,6 @@ import {
   AimOutlined,
   DisconnectOutlined,
   FireFilled,
-  MinusCircleOutlined,
   PlayCircleOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
@@ -23,9 +22,14 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { LASER_CHIP_STATE, selectLaserChipState } from '../../utils/states/laser.state.chip.selector';
+import {
+  LASER_CHIP_STATE,
+  selectLaserChipPowerPercent,
+  selectLaserChipState,
+} from '../../utils/states/laser.state.chip.selector';
 import type { LaserChipState } from '../../utils/states/laser.state.chip.selector';
 import { KEYBOARD_FOCUSABLE_TAB_INDEX } from '../../utils/tab.index.constants';
+import { LaserMachineIcon } from '../../views/LaserMachineIcon';
 import styles from './styles.module.scss';
 
 interface LaserChipLook {
@@ -52,7 +56,7 @@ const LASER_CHIP_LOOK: Record<LaserChipState, LaserChipLook> = {
     iconComponent: <FireFilled aria-hidden />,
     labelKey: DEFAULT.LASER_STATE_FIRING,
     hintKey: DEFAULT.LASER_STATE_FIRING_HINT,
-    className: styles.danger,
+    className: styles.firing,
   },
   [LASER_CHIP_STATE.JOB_RUNNING]: {
     iconComponent: <PlayCircleOutlined aria-hidden />,
@@ -60,10 +64,10 @@ const LASER_CHIP_LOOK: Record<LaserChipState, LaserChipLook> = {
     hintKey: DEFAULT.LASER_STATE_JOB_RUNNING_HINT,
     className: styles.warning,
   },
-  [LASER_CHIP_STATE.ZERO_POWER_REPORTED]: {
-    iconComponent: <MinusCircleOutlined aria-hidden />,
-    labelKey: DEFAULT.LASER_STATE_ZERO_POWER,
-    hintKey: DEFAULT.LASER_STATE_ZERO_POWER_HINT,
+  [LASER_CHIP_STATE.OFF]: {
+    iconComponent: <LaserMachineIcon aria-hidden />,
+    labelKey: DEFAULT.LASER_STATE_OFF,
+    hintKey: DEFAULT.LASER_STATE_OFF_HINT,
     className: styles.calm,
   },
   [LASER_CHIP_STATE.POWER_UNKNOWN]: {
@@ -77,6 +81,7 @@ const LASER_CHIP_LOOK: Record<LaserChipState, LaserChipLook> = {
 export const LaserStateChip = (): ReactNode => {
   const { t } = useTranslation();
   const laserChipState: LaserChipState = useSelector(selectLaserChipState);
+  const powerPercent: number | undefined = useSelector(selectLaserChipPowerPercent);
   const { iconComponent, labelKey, hintKey, className }: LaserChipLook = LASER_CHIP_LOOK[laserChipState];
 
   // The connection pill beside it already says there is no link.
@@ -89,7 +94,7 @@ export const LaserStateChip = (): ReactNode => {
       {/* Focusable, so a keyboard user can read the sentence; it is a readout, not a control. */}
       <span className={[styles.chip, className].join(' ')} aria-live="polite" tabIndex={KEYBOARD_FOCUSABLE_TAB_INDEX}>
         {iconComponent}
-        <span className={styles.label}>{t(labelKey)}</span>
+        <span className={styles.label}>{t(labelKey, { powerPercent })}</span>
       </span>
     </Tooltip>
   );
