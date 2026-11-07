@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 import { Provider } from 'react-redux';
 import { ConnectionPill } from '.';
 import { ESCAPE_KEY, OFFLINE_EVENT_NAME } from '../../utils/browser/browser.events.constants';
@@ -83,6 +84,14 @@ describe(ConnectionPill.name, () => {
     act(() => {
       store.dispatch(new NarrowRegionChanged({ narrowRegion: region }));
     });
+
+    expect(within(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).getByText(CONNECT_VERB_TEXT))
+      .toBeInTheDocument();
+  });
+
+  it('keeps the Connect verb in a wide window too, so the idle pill always reads as the place to connect', () => {
+    setMatchMediaMatches(true);
+    renderConnectionPill();
 
     expect(within(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).getByText(CONNECT_VERB_TEXT))
       .toBeInTheDocument();

@@ -20,7 +20,6 @@ import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
-import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectIsWebSerialSupported } from '../../utils/states/browser.environment.state';
@@ -58,10 +57,6 @@ export const ConnectionPill = (): ReactNode => {
   const selectedPortId: string = useSelector(selectSelectedPortId);
   const firmwareIdentity: GrblFirmwareIdentity | undefined = useSelector(selectFirmwareIdentity);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const isWide: boolean = useIsWideLayout();
-  // Side by side the Job card always offers Connect beside the pill. In the narrow layout the pill keeps the Connect
-  // verb on every tab, so its content never changes from one tab to the next.
-  const isJobCardShown: boolean = isWide;
   const statusText: string = t(CONNECTION_PILL_STATUS_LABEL_KEY[connectionStatus]);
   const firmwareText: string | undefined = isConnected && firmwareIdentity
     ? t(DEFAULT.CONNECTION_PILL_FIRMWARE, {
@@ -98,7 +93,7 @@ export const ConnectionPill = (): ReactNode => {
         {!isWebSerialSupported && (
           <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
         )}
-        {isConnectOffered(connectionStatus) && !isJobCardShown && (
+        {isConnectOffered(connectionStatus) && (
           <span className={styles.connectVerb}>
             <ApiOutlined aria-hidden="true" />
             {` ${t(DEFAULT.CONNECTION_CONNECT_MENU)}`}

@@ -273,6 +273,13 @@ describe(MaterialLibraryDrawer.name, () => {
     expect(screen.queryByText(/^Filter: /)).not.toBeInTheDocument();
   });
 
+  it('shows an empty list without column headers', async () => {
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE)], { initialMaterialId: ACRYLIC.id });
+
+    expect(await screen.findByText(`No presets yet for ${ACRYLIC_NAME}, 3 mm`)).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader')).not.toBeInTheDocument();
+  });
+
   it('says the filtered material has no presets yet and starts a new preset with it', async () => {
     renderDrawer([newPresetFixture(PLYWOOD, PROFILE)], { initialMaterialId: ACRYLIC.id });
 
