@@ -1,7 +1,7 @@
 /**
  * The one STOP button, an antd solid danger button in the large size: sends the stop request and can be pressed
- * whenever the laser is connected. It shows its Esc shortcut. While disconnected it looks disabled, with a readable
- * label, a dark red outline and a short unplugged Not connected cue, so it only looks armed when a press can stop the
+ * whenever the laser is connected. It shows its Esc shortcut. While disconnected it is a neutral disabled button, no
+ * red at all, with a readable label and a short unplugged Not connected cue, so red always means a press stops the
  * laser.
  *
  * @author michael.morosov
@@ -17,7 +17,7 @@ import { useId } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_DEFAULT, ANTD_BUTTON_TYPE_PRIMARY } from '../../utils/antd.constants';
 import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsConnected } from '../../utils/states/grbl.connection.state';
@@ -35,9 +35,9 @@ export const StopButton = (): ReactNode => {
     <>
       <Button
         className={styles.stopButton}
-        type={ANTD_BUTTON_TYPE_PRIMARY}
+        type={isConnected ? ANTD_BUTTON_TYPE_PRIMARY : ANTD_BUTTON_TYPE_DEFAULT}
         size={ANTD_BUTTON_SIZE_LARGE}
-        danger
+        danger={isConnected}
         icon={<StopFilled aria-hidden />}
         disabled={!isConnected}
         aria-keyshortcuts={ESCAPE_KEY}

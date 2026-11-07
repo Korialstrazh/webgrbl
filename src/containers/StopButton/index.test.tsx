@@ -35,10 +35,14 @@ describe(StopButton.name, () => {
     expect(screen.getByRole('button', { name: STOP_LABEL })).toBeDisabled();
   });
 
-  it('is drawn as a large solid danger button', () => {
+  it('is a neutral large button without any danger colour while disconnected', () => {
     renderStopButton(newStore());
 
-    expect(screen.getByRole('button', { name: STOP_LABEL })).toHaveClass(...PROMINENT_DANGER_CLASS_NAMES);
+    const stopButton: HTMLElement = screen.getByRole('button', { name: STOP_LABEL });
+
+    expect(stopButton).toHaveClass('ant-btn-lg');
+    expect(stopButton).not.toHaveClass('ant-btn-color-dangerous');
+    expect(stopButton).not.toHaveClass('ant-btn-dangerous');
   });
 
   it('says it is not connected while disconnected', () => {
