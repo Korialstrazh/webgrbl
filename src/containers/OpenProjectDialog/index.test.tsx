@@ -89,8 +89,21 @@ describe(OpenProjectDialog.name, () => {
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
     expect(getDispatchedActionCalls(dispatchSpy, ProjectSummariesRequested)).toHaveLength(1);
     expect(screen.getByRole('note', { name: FOOTER_PATTERN })).toBeInTheDocument();
-    expect(screen.getByText(STORED_CAPTION)).toBeInTheDocument();
     expect(await screen.findByText(NEWEST_NAME)).toBeInTheDocument();
+  });
+
+  it('heads the list with In this browser, in one row with Open file, above the list', async () => {
+    renderDialog(newStore());
+
+    const heading: HTMLElement = screen.getByRole('heading', { name: STORED_CAPTION });
+
+    await screen.findByText(NEWEST_NAME);
+
+    const list: HTMLElement = screen.getByRole('list');
+
+    expect(heading.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(heading.parentElement?.parentElement)
+      .toContainElement(screen.getByRole('button', { name: OPEN_FILE_LABEL }));
   });
 
   it('lists the projects newest first with their change time and object count, and marks the open one', async () => {

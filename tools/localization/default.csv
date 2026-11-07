@@ -568,7 +568,7 @@ MATERIAL_SECTION_LIBRARY;Library
 MATERIAL_SECTION_OPEN_LIBRARY;Open the material library
 MATERIAL_SECTION_PRESETS_NO_MACHINE;Laser profile
 MATERIAL_SECTION_PRESETS_NO_MATERIAL;Choose a material to see its presets
-MATERIAL_SECTION_PRESETS_NONE;Add preset
+MATERIAL_SECTION_PRESETS_NONE;Presets
 MATERIAL_SECTION_PRESETS_one;{{count}} preset
 MATERIAL_SECTION_PRESETS_other;{{count}} presets
 NARROW_REGION_BAR_LABEL;Workbench region
@@ -633,7 +633,7 @@ PALETTE_INKSCAPE_HINT;To use the exported file in Inkscape, put it in its palett
 PALETTE_INKSCAPE_PATH_LINUX;Linux: ~/.config/inkscape/palettes/
 PALETTE_INKSCAPE_PATH_WINDOWS;Windows: %APPDATA%\inkscape\palettes\
 PALETTE_LIST;Palette colours
-PALETTE_LIST_ORDER_HINT;Swatch list only. Layers set the cut order.
+PALETTE_LIST_ORDER_HINT;Layers set the cut order.
 PALETTE_MOVE_DOWN;Move {{name}} down
 PALETTE_MOVE_UP;Move {{name}} up
 PALETTE_NEW;New colour

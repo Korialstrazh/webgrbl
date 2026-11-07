@@ -10,16 +10,13 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { HddOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { TooltipNoteIcon } from '../../views/TooltipNoteIcon';
 import { AppModal } from '../AppModal';
 import type { OpenProjectDialogProps } from './interfaces/OpenProjectDialogProps';
 import { OPEN_PROJECT_DIALOG_OVERLAY_ID, OPEN_PROJECT_DIALOG_WIDTH } from './open.project.dialog.constants';
 import { ProjectList } from './ProjectList';
-import styles from './styles.module.scss';
 
 export const OpenProjectDialog = ({ isOpen, onClose }: OpenProjectDialogProps): ReactNode => {
   const { t } = useTranslation();
@@ -29,12 +26,7 @@ export const OpenProjectDialog = ({ isOpen, onClose }: OpenProjectDialogProps): 
       isOpen={isOpen}
       overlayIdPrefix={OPEN_PROJECT_DIALOG_OVERLAY_ID}
       title={t(DEFAULT.OPEN_PROJECT_TITLE)}
-      footer={(
-        <span className={styles.footerNote}>
-          <TooltipNoteIcon noteText={t(DEFAULT.OPEN_PROJECT_FOOTER)} iconComponent={<HddOutlined />} />
-          <span className={styles.footerCaption} aria-hidden>{t(DEFAULT.OPEN_PROJECT_STORED_CAPTION)}</span>
-        </span>
-      )}
+      footer={null}
       maxWidth={OPEN_PROJECT_DIALOG_WIDTH}
       destroyOnHidden
       onClose={onClose}

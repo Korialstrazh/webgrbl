@@ -82,10 +82,11 @@ describe(MaterialSection.name, () => {
     expect(screen.getByRole('button', { name: '2 presets' })).toBeInTheDocument();
   });
 
-  it('says there are no presets yet', () => {
+  it('names the library it opens, not an add form, while there are no presets yet', () => {
     renderSection(newStoreWithMaterial(0));
 
-    expect(screen.getByRole('button', { name: 'Add preset' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Presets' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add preset' })).not.toBeInTheDocument();
   });
 
   it('asks for a material when none is chosen, and for a machine when none is active', () => {

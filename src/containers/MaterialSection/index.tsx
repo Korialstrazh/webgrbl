@@ -11,7 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { PlusOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { UnorderedListOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -71,7 +71,8 @@ export const MaterialSection = (): ReactNode => {
       return <MaterialSheetIcon />;
     }
 
-    return activePresetCount ? <UnorderedListOutlined /> : <PlusOutlined />;
+    // The button opens the library either way, so it shows the list, never an add sign.
+    return <UnorderedListOutlined />;
   };
 
   const openLibrary = (materialId: string | undefined): void => {
