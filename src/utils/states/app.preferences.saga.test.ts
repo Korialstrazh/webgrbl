@@ -11,7 +11,7 @@ import {
   JobCardCollapsePreferenceChanged,
   selectIsBedDoubleClickMovingLaser,
   selectIsEscStoppingWithOverlayOpen,
-  selectIsJobCardCollapsed,
+  selectJobCardCollapsedChoice,
 } from './app.preferences.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
@@ -93,8 +93,8 @@ describe(watchAppPreferences.name, () => {
     expect(selectIsBedDoubleClickMovingLaser(store.getState())).toBe(true);
   });
 
-  it('starts with the Job card open', () => {
-    expect(selectIsJobCardCollapsed(newStore().getState())).toBe(false);
+  it('starts with no Job card fold choice, so the card follows its default', () => {
+    expect(selectJobCardCollapsedChoice(newStore().getState())).toBeUndefined();
   });
 
   it('restores the stored Job card fold at start', async () => {
@@ -102,7 +102,7 @@ describe(watchAppPreferences.name, () => {
     const store: AppStore = newStore();
 
     await vi.waitFor((): void => {
-      expect(selectIsJobCardCollapsed(store.getState())).toBe(true);
+      expect(selectJobCardCollapsedChoice(store.getState())).toBe(true);
     });
   });
 
@@ -122,6 +122,6 @@ describe(watchAppPreferences.name, () => {
     await vi.waitFor((): void => {
       expect(writeSpy).toHaveBeenCalledWith(true);
     });
-    expect(selectIsJobCardCollapsed(store.getState())).toBe(true);
+    expect(selectJobCardCollapsedChoice(store.getState())).toBe(true);
   });
 });

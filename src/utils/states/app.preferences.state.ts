@@ -15,6 +15,7 @@ import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { BedDoubleClickMovePreferencePayload } from './interfaces/BedDoubleClickMovePreferencePayload';
 import type { EscStopPreferencePayload } from './interfaces/EscStopPreferencePayload';
+import type { JobCardCollapsePreferenceLoadedPayload } from './interfaces/JobCardCollapsePreferenceLoadedPayload';
 import type { JobCardCollapsePreferencePayload } from './interfaces/JobCardCollapsePreferencePayload';
 
 // #region State
@@ -23,8 +24,11 @@ export interface AppPreferencesState {
   isEscStoppingWithOverlayOpen: boolean;
   /** True when a double-click on empty bed moves the laser there; off by default. */
   isBedDoubleClickMovingLaser: boolean;
-  /** True when the Job card shows only its one-line summary with Start; open by default. */
-  isJobCardCollapsed: boolean;
+  /**
+   * The viewer's own choice whether the Job card shows only its one-line summary with Start, or undefined while the
+   * viewer has made none, so the card follows its default for the connection and the screen height.
+   */
+  jobCardCollapsedChoice: boolean | undefined;
 }
 // #endregion
 
@@ -53,7 +57,7 @@ export class BedDoubleClickMovePreferenceChanged extends Action<BedDoubleClickMo
   public static readonly type: string = actionType('bed double click move preference changed');
 }
 
-export class JobCardCollapsePreferenceLoaded extends Action<JobCardCollapsePreferencePayload> {
+export class JobCardCollapsePreferenceLoaded extends Action<JobCardCollapsePreferenceLoadedPayload> {
   public static readonly type: string = actionType('job card collapse preference loaded');
 }
 
@@ -65,12 +69,11 @@ export class JobCardCollapsePreferenceChanged extends Action<JobCardCollapsePref
 // #region Initial state
 export const DEFAULT_ESC_STOPS_WITH_OVERLAY_OPEN = false;
 export const DEFAULT_BED_DOUBLE_CLICK_MOVES_LASER = false;
-export const DEFAULT_JOB_CARD_COLLAPSED = false;
 
 const INITIAL_APP_PREFERENCES_STATE: AppPreferencesState = {
   isEscStoppingWithOverlayOpen: DEFAULT_ESC_STOPS_WITH_OVERLAY_OPEN,
   isBedDoubleClickMovingLaser: DEFAULT_BED_DOUBLE_CLICK_MOVES_LASER,
-  isJobCardCollapsed: DEFAULT_JOB_CARD_COLLAPSED,
+  jobCardCollapsedChoice: undefined,
 };
 // #endregion
 
@@ -96,7 +99,7 @@ export const appPreferencesReducer = (
   case JobCardCollapsePreferenceChanged.type:
     return {
       ...state,
-      isJobCardCollapsed: (action as JobCardCollapsePreferenceChanged).payload.isJobCardCollapsed,
+      jobCardCollapsedChoice: (action as JobCardCollapsePreferenceLoaded).payload.isJobCardCollapsed,
     };
   default:
     return state;
@@ -113,6 +116,6 @@ export const selectIsEscStoppingWithOverlayOpen = (state: RootState): boolean =>
 export const selectIsBedDoubleClickMovingLaser = (state: RootState): boolean =>
   state[APP_PREFERENCES_STATE_NAME].isBedDoubleClickMovingLaser;
 
-export const selectIsJobCardCollapsed = (state: RootState): boolean =>
-  state[APP_PREFERENCES_STATE_NAME].isJobCardCollapsed;
+export const selectJobCardCollapsedChoice = (state: RootState): boolean | undefined =>
+  state[APP_PREFERENCES_STATE_NAME].jobCardCollapsedChoice;
 // #endregion
