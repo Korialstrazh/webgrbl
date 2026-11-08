@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { JobReadinessRow } from '.';
+import { BED_OBJECTS_LAYER_ID } from '../../../BedObjects/bed.objects.constants';
 import { GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../../../utils/grbl/test.support/grbl.answer.settle';
 import type { Material } from '../../../../utils/materials/interfaces/Material';
@@ -210,5 +211,48 @@ describe(JobReadinessRow.name, () => {
 
     expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toHaveClass('ant-btn-primary');
     resetMatchMediaMock();
+  });
+
+  it('moves the focus from the next-step button to the bed objects once the import adds artwork', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile();
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <div id={BED_OBJECTS_LAYER_ID} tabIndex={-1} data-testid={BED_OBJECTS_LAYER_ID} />
+          <JobReadinessRow />
+        </AntdTestProvider>
+      </Provider>,
+    );
+    act(() => screen.getByRole('button', { name: IMPORT_SVG_LABEL }).focus());
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+
+    expect(screen.getByTestId(BED_OBJECTS_LAYER_ID)).toHaveFocus();
+  });
+
+  it('leaves the focus alone when artwork arrives while the next-step button does not hold it', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile();
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <div id={BED_OBJECTS_LAYER_ID} tabIndex={-1} data-testid={BED_OBJECTS_LAYER_ID} />
+          <JobReadinessRow />
+        </AntdTestProvider>
+      </Provider>,
+    );
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+
+    expect(screen.getByTestId(BED_OBJECTS_LAYER_ID)).not.toHaveFocus();
   });
 });

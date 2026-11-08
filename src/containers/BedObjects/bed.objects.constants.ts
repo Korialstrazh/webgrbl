@@ -70,3 +70,6 @@ export const DELETE_SELECTION_KEYS: readonly string[] = [DELETE_KEY, BACKSPACE_K
 export const DRAG_START_DISTANCE_PX = 3;
 /** Stretches an object's artwork to its box, so a free scale shows as it will be cut. */
 export const SVG_PRESERVE_ASPECT_RATIO_NONE = 'none';
+
+/** The id of the focusable group of bed objects, where focus lands after an import from the Job card. */
+export const BED_OBJECTS_LAYER_ID = 'bed-objects';

@@ -14,7 +14,7 @@
  */
 import { ApiOutlined, CheckOutlined, CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -45,6 +45,7 @@ import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../..
 import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
 import { LaserMachineIcon } from '../../../../views/LaserMachineIcon';
 import { MaterialSheetIcon } from '../../../../views/MaterialSheetIcon';
+import { BED_OBJECTS_LAYER_ID } from '../../../BedObjects/bed.objects.constants';
 import { PROJECT_MATERIAL_SELECT_ID } from '../../../ProjectMaterialSelect/project.material.select.constants';
 import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
 import { POPOVER_KEEP_CLEAR_ATTRIBUTE } from '../../../../utils/layout.constants';
@@ -190,6 +191,22 @@ export const JobReadinessRow = (): ReactNode => {
   // The step last focused keeps the tab stop; until then it is the next step, or the first when all are done.
   const [focusedStep, setFocusedStep] = useState<JobReadinessStep | undefined>(undefined);
   const tabStopStep: JobReadinessStep | undefined = focusedStep ?? nextStep ?? JOB_READINESS_LOOKS[0]?.step;
+
+  const previousNextStepRef: RefObject<JobReadinessStep | undefined> = useRef<JobReadinessStep | undefined>(nextStep);
+
+  // After an import from the next-step button the button turns into the following step; focus moves on to the new
+  // artwork on the bed, so the button does not hold the focus as if it were already chosen. A hidden bed (a narrow
+  // layout showing the Job region) takes no focus, and the focus then stays where it was.
+  useEffect(() => {
+    const hasArtworkJustArrived: boolean =
+      previousNextStepRef.current === JOB_READINESS_STEP.DESIGN && nextStep !== JOB_READINESS_STEP.DESIGN;
+
+    previousNextStepRef.current = nextStep;
+
+    if (hasArtworkJustArrived && document.activeElement?.id === JOB_NEXT_STEP_BUTTON_ID) {
+      document.getElementById(BED_OBJECTS_LAYER_ID)?.focus({ preventScroll: true });
+    }
+  }, [nextStep]);
 
   const handleRowKeyDown = (keyEvent: KeyboardEvent<HTMLOListElement>): void => {
     const stepButtons: HTMLButtonElement[] = [

@@ -27,7 +27,7 @@ import { isObjectOutsideBed } from '../../utils/project/is.object.outside.bed';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectProjectLayers, selectProjectObjects } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
-import { BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
+import { BED_OBJECTS_LAYER_ID, BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
 import type { BedObjectHandle } from './bed.objects.constants';
 import { BedObjectGraphic } from './BedObjectGraphic';
 import { getBedHandleSizes } from './get.bed.handle.sizes';
@@ -147,6 +147,7 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
   return (
     <g
       ref={layerRef}
+      id={BED_OBJECTS_LAYER_ID}
       className={styles.bedObjects}
       role="group"
       aria-label={t(DEFAULT.BED_OBJECTS_LABEL)}
