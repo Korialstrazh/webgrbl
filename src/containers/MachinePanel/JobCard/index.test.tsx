@@ -9,7 +9,6 @@ import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/
 import type { GrblMachineState } from '../../../utils/grbl/grbl.constants';
 import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
-import { SHORT_VIEWPORT_MEDIA_QUERY } from '../../../utils/layout.constants';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
 import type { Material } from '../../../utils/materials/interfaces/Material';
@@ -30,19 +29,11 @@ import {
   selectProjectDocument,
   selectProjectLayers,
 } from '../../../utils/states/project.document.state';
-import {
-  JobCardCollapsePreferenceChanged,
-  selectJobCardCollapsedChoice,
-} from '../../../utils/states/app.preferences.state';
+import { selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.state';
 import { selectToolpathMachineArea } from '../../../utils/states/toolpath.machine.area.selector';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../../utils/states/toolpath.state';
 import { selectIsAnyOverlayOpen } from '../../../utils/states/ui.overlay.state';
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
-import {
-  installMatchMediaMock,
-  resetMatchMediaMock,
-  setMatchMediaMatches,
-} from '../../../utils/test.support/match.media.mock';
 import { BedRegionTestHost } from '../../../utils/test.support/bed.region.test.host';
 import { newGcodeExportTestStore } from '../../../utils/test.support/new.gcode.export.test.store';
 import { GCODE_BURN_WORD } from '../../../utils/toolpath/gcode.constants';
@@ -414,7 +405,7 @@ describe(JobCard.name, () => {
 
     const unfoldButton: HTMLElement = screen.getByRole('button', { name: JOB_UNFOLD_LABEL });
 
-    expect(selectJobCardCollapsedChoice(store.getState())).toBe(true);
+    expect(selectIsJobCardCollapsed(store.getState())).toBe(true);
     expect(unfoldButton).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByRole('button', { name: START_JOB_LABEL })).toBeInTheDocument();
     expect(screen.getByText(ESTIMATE_LABEL)).toBeInTheDocument();
@@ -423,33 +414,7 @@ describe(JobCard.name, () => {
 
     fireEvent.click(unfoldButton);
 
-    expect(selectJobCardCollapsedChoice(store.getState())).toBe(false);
+    expect(selectIsJobCardCollapsed(store.getState())).toBe(false);
     expect(screen.getByRole('list', { name: READINESS_LABEL })).toBeInTheDocument();
-  });
-  describe('on a screen below 1000 px tall', () => {
-    beforeEach(() => {
-      installMatchMediaMock();
-      setMatchMediaMatches(true, SHORT_VIEWPORT_MEDIA_QUERY);
-    });
-
-    afterEach(() => {
-      resetMatchMediaMock();
-    });
-
-    it('starts folded while connected, so the Move pad stays above the Stop bar', () => {
-      renderJobCard(newStartableJobStore());
-
-      expect(screen.getByRole('button', { name: JOB_UNFOLD_LABEL })).toHaveAttribute('aria-expanded', 'false');
-      expect(screen.getByRole('button', { name: START_JOB_LABEL })).toBeInTheDocument();
-    });
-
-    it('stays open while connected once the viewer opened it', () => {
-      const store: AppStore = newStartableJobStore();
-
-      store.dispatch(new JobCardCollapsePreferenceChanged({ isJobCardCollapsed: false }));
-      renderJobCard(store);
-
-      expect(screen.getByRole('button', { name: JOB_FOLD_LABEL })).toHaveAttribute('aria-expanded', 'true');
-    });
   });
 });

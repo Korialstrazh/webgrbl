@@ -14,8 +14,8 @@
   }
 }
 
-// A thin scrollbar with a fixed gutter: the cards keep their width when the scrollbar appears, and the bar takes
-// little of a narrow panel.
+// A normal, visible scrollbar with a fixed gutter: the cards keep their width when it appears, and it shows at a
+// glance that Move and the cards below it scroll into view.
 .cards {
   display: flex;
   flex: 1 1 auto;
@@ -24,13 +24,19 @@
   min-height: 0;
   overflow: auto;
   padding: var(--space-3);
+  scrollbar-color: var(--color-control-border) transparent;
   scrollbar-gutter: stable;
-  scrollbar-width: thin;
+  scrollbar-width: auto;
 }
 
 // Cards cut off above STOP fade out over the last stretch, so the list reads as one that scrolls on.
 .cardsCutOff {
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 2rem), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+}
+
+// While cards wait below, STOP's footer casts a shadow up over them, so the edge reads as content going on underneath.
+.stopFooterRaised {
+  box-shadow: 0 -0.5rem 1rem -0.25rem rgb(0 0 0 / 45%);
 }
 
 .stopFooter {

@@ -29,9 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
-import { useMediaQueryMatches } from '../../../utils/hooks/use.media.query.matches';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
-import { SHORT_VIEWPORT_MEDIA_QUERY } from '../../../utils/layout.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { JOB_PAUSED_CONTROLS } from '../../../utils/states/job.pause.control.constants';
@@ -46,13 +44,9 @@ import {
   selectJobRunStatus,
 } from '../../../utils/states/job.run.state';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
-import {
-  JobCardCollapsePreferenceChanged,
-  selectJobCardCollapsedChoice,
-} from '../../../utils/states/app.preferences.state';
+import { JobCardCollapsePreferenceChanged, selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.state';
 import { selectFrameStartBlockedReasonKey } from '../../../utils/states/frame.start.blocked.reason.selector';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
-import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/states/project.document.state';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
@@ -64,7 +58,6 @@ import { Panel } from '../../../views/Panel';
 import { TooltipNoteIcon } from '../../../views/TooltipNoteIcon';
 import { JobStartButton } from '../../JobStartButton';
 import { FrameControls } from './FrameControls';
-import { getIsJobCardCollapsed } from './get.is.job.card.collapsed';
 import { JobPauseButton } from './JobPauseButton';
 import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
@@ -132,10 +125,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
     JOB_PAUSED_CONTROLS.includes(pauseControl),
   );
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
-  const isConnected: boolean = useSelector(selectIsConnected);
-  const collapsedChoice: boolean | undefined = useSelector(selectJobCardCollapsedChoice);
-  const isShortViewport: boolean = useMediaQueryMatches(SHORT_VIEWPORT_MEDIA_QUERY);
-  const isCollapsed: boolean = getIsJobCardCollapsed(collapsedChoice, isConnected, isShortViewport);
+  const isCollapsed: boolean = useSelector(selectIsJobCardCollapsed);
   const bodyId: string = useId();
 
   const factsComponent: ReactNode = (

@@ -19,12 +19,6 @@ export const WIDE_LAYOUT_MEDIA_QUERY = '(min-width: 80rem)';
  */
 export const BED_DRAWER_PUSH_MEDIA_QUERY = '(min-width: 100rem)';
 
-/**
- * The window is below 1000 px tall, where the open Job card, Status and Position push the Move pad behind the docked
- * Stop bar once a laser is connected.
- */
-export const SHORT_VIEWPORT_MEDIA_QUERY = '(max-height: 62.4375rem)';
-
 /** Width of the design panel; the custom property is set from layout.scss by the workbench styles. */
 export const DESIGN_PANEL_WIDTH = 'var(--design-panel-width)';
 

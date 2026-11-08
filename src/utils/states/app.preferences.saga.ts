@@ -21,6 +21,7 @@ import {
   BedDoubleClickMovePreferenceLoaded,
   DEFAULT_BED_DOUBLE_CLICK_MOVES_LASER,
   DEFAULT_ESC_STOPS_WITH_OVERLAY_OPEN,
+  DEFAULT_JOB_CARD_COLLAPSED,
   EscStopPreferenceChanged,
   EscStopPreferenceLoaded,
   JobCardCollapsePreferenceChanged,
@@ -125,7 +126,7 @@ function* loadJobCardCollapsePreference(): Generator {
     }
 
     yield put(new JobCardCollapsePreferenceLoaded({
-      isJobCardCollapsed: readRace.storedPreference,
+      isJobCardCollapsed: readRace.storedPreference ?? DEFAULT_JOB_CARD_COLLAPSED,
     }));
   } catch (error: unknown) {
     logAppPreferencesStorageError(error);

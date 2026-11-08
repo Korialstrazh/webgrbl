@@ -1,7 +1,8 @@
 /**
  * The right region, the main task first: the job, the compact machine status (only while connected), the positions,
  * moving the head and the laser pointer, and, in a wide window, STOP at the bottom. When the cards are cut off above
- * STOP, their bottom edge fades out, so it reads as a list that scrolls.
+ * STOP, their bottom edge fades out over a shadow from the STOP footer, beside a normal scrollbar, so it reads as a
+ * list that scrolls.
  *
  * @author michael.morosov
  *
@@ -47,7 +48,7 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
         <LaserCard />
       </div>
       {isWide && (
-        <div className={styles.stopFooter}>
+        <div className={isCardsCutOff ? [styles.stopFooter, styles.stopFooterRaised].join(' ') : styles.stopFooter}>
           <StopButton />
           <StopSettingsButton />
         </div>
