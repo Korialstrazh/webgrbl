@@ -65,6 +65,8 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
     label: t(DEFAULT.MACHINE_MOVE_STEP_OPTION, { distance }),
   }));
 
+  const stepText: string = t(DEFAULT.MACHINE_MOVE_STEP_OPTION, { distance: stepMm });
+
   const requestLine = (line: string): void => {
     dispatch(new MachineLineRequested({ line }));
   };
@@ -84,7 +86,12 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
               icon={isJogArrowCell(cell) ? <ArrowUpOutlined rotate={cell.arrowRotationDeg} /> : <HomeOutlined />}
               aria-label={t(cell.labelKey)}
               onClick={() => requestJogPadLine(cell)}
-            />
+            >
+              {/* The active step, in the middle of the arrows it applies to; shown only, never a control. */}
+              {!isJogArrowCell(cell) && (
+                <span className={styles.stepReadout} aria-hidden="true">{stepText}</span>
+              )}
+            </Button>
           </Tooltip>
         ))}
       </div>

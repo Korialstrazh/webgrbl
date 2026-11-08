@@ -40,4 +40,17 @@
     width: 100%;
     padding-inline: 0;
   }
+
+  // The centre cell stacks its origin icon over the active step.
+  > :global(.ant-btn):has(.stepReadout) {
+    flex-direction: column;
+    gap: 0;
+    line-height: 1;
+  }
+}
+
+.stepReadout {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
 }

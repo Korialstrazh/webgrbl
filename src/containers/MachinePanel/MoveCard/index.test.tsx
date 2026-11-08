@@ -23,6 +23,7 @@ const JOG_ORIGIN_LABEL = 'Origin';
 const HOME_LABEL = 'Home';
 const SET_ZERO_LABEL = 'Set zero';
 const STEP_ONE_LABEL = '1 mm';
+const DEFAULT_STEP_LABEL = '10 mm';
 const JOG_SPEED_LABEL = 'Jog speed';
 const JOG_NORTH_EAST_STEP_ONE_LINE = '$J=G91 G21 X1 Y1 F1500';
 const GO_TO_ZERO_LINE = '$J=G90 G21 X0 Y0 F1500';
@@ -174,6 +175,23 @@ describe(MoveCard.name, () => {
     fireEvent.click(screen.getByRole('button', { name: JOG_ORIGIN_LABEL }));
 
     expect(getRequestedLines(dispatchSpy)).toEqual([DEFAULT_JOG_NORTH_EAST_LINE, GO_TO_ZERO_LINE]);
+  });
+
+  it('shows the active step size in the centre of the jog pad', () => {
+    const store: AppStore = newStore();
+
+    renderMoveCard(store);
+    connect(store);
+    receiveState(store, GRBL_MACHINE_STATE.IDLE);
+
+    const originButton: HTMLElement = screen.getByRole('button', { name: JOG_ORIGIN_LABEL });
+
+    expect(originButton).toHaveTextContent(DEFAULT_STEP_LABEL);
+
+    fireEvent.click(screen.getByText(STEP_ONE_LABEL));
+
+    expect(originButton).toHaveTextContent(STEP_ONE_LABEL);
+    expect(originButton).toHaveAccessibleName(JOG_ORIGIN_LABEL);
   });
 
   it('shows Origin as a home icon with its name in the aria-label and tooltip, and keeps the Home text', async () => {
