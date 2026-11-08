@@ -13,7 +13,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -73,8 +73,13 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
 
   useBedGestureActivity(Boolean(drag ?? handleGesture));
 
+  // Chrome counts a script focus on an SVG group as keyboard focus, so a press marks it: the bed edge ring is for the
+  // keyboard only, and a selection shows on the object alone.
+  const [isPointerFocused, setIsPointerFocused] = useState<boolean>(false);
+
   // A press on the bed gives it keyboard focus, so the arrow and Delete keys reach it next.
   const focusLayer = useCallback((): void => {
+    setIsPointerFocused(true);
     layerRef.current?.focus({ preventScroll: true });
   }, []);
 
@@ -148,11 +153,12 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
     <g
       ref={layerRef}
       id={BED_OBJECTS_LAYER_ID}
-      className={styles.bedObjects}
+      className={[styles.bedObjects, isPointerFocused ? styles.pointerFocused : undefined].join(' ')}
       role="group"
       aria-label={t(DEFAULT.BED_OBJECTS_LABEL)}
       tabIndex={LAYER_TAB_INDEX}
       onKeyDown={handleKeyDown}
+      onBlur={() => setIsPointerFocused(false)}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}

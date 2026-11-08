@@ -62,6 +62,7 @@ const TWO_PIXELS_PER_MM_MATRIX: SvgScreenMatrixMock = { a: 2, b: 0, c: 0, d: 2, 
 const HALF_MM_PER_PIXEL_MATRIX: SvgScreenMatrixMock = { a: 0.5, b: 0, c: 0, d: 0.5, e: 0, f: 0 };
 const HANDLE_SIZE_PX = 10;
 const OBJECTS_LAYER_NAME = 'Design objects: arrow keys move the selection, Delete removes it';
+const POINTER_FOCUSED_CLASS_PATTERN = /pointerFocused/;
 const WIDTH_ATTRIBUTE = 'width';
 const HANDLE_ATTRIBUTE = 'data-handle';
 const RESTING_TRANSFORM = 'translate(20 280) rotate(0)';
@@ -291,6 +292,20 @@ describe(BedObjects.name, () => {
     clickElement(getObjectElement(SECOND_NAME), SECOND_GRAB_X, SECOND_GRAB_Y);
 
     expect(selectSelectedObjectIds(store.getState())).toEqual([secondObject.id]);
+  });
+
+  it('marks a press focus, so the bed edge ring is for keyboard focus and a selection shows on the object', () => {
+    renderObjects([firstObject]);
+    const layer: HTMLElement = getObjectsLayer();
+
+    clickElement(getObjectElement(FIRST_NAME), FIRST_GRAB_X, FIRST_GRAB_Y);
+
+    expect(layer).toHaveFocus();
+    expect(layer.getAttribute('class')).toMatch(POINTER_FOCUSED_CLASS_PATTERN);
+
+    fireEvent.blur(layer);
+
+    expect(layer.getAttribute('class')).not.toMatch(POINTER_FOCUSED_CLASS_PATTERN);
   });
 
   it('clears the selection on a click on empty bed', () => {
