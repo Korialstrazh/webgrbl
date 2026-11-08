@@ -566,7 +566,7 @@ describe(BedPanel.name, () => {
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it('shows the job size in the playback bar in Toolpath view', () => {
+  it('leaves the job size out of the playback bar in Toolpath view, as the status strip shows it', () => {
     const store: AppStore = newHeldToolpathStore();
 
     act(() => {
@@ -575,8 +575,8 @@ describe(BedPanel.name, () => {
     renderPanel(store);
     openToolpathView();
 
-    expect(within(screen.getByRole('group', { name: PLAYBACK_BAR_LABEL })).getByText(JOB_SIZE_TEXT))
-      .toBeInTheDocument();
+    expect(within(screen.getByRole('group', { name: PLAYBACK_BAR_LABEL })).queryByText(JOB_SIZE_TEXT))
+      .not.toBeInTheDocument();
   });
 
   it('hides the editing tools in Toolpath view, where they do nothing', () => {
