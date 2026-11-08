@@ -18,7 +18,7 @@ import { useDispatch } from 'react-redux';
 import { ANTD_BUTTON_TYPE_TEXT, ANTD_DROPDOWN_TRIGGER_CLICK } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
-import { usePopoverCloseOnDialogOpen } from '../../../utils/hooks/use.popover.close.on.dialog.open';
+import { usePopoverAutoClose } from '../../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import {
@@ -43,7 +43,7 @@ export const ProjectMenu = (): ReactNode => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const gcodeExport: GcodeExportAvailability = useGcodeExportAvailability();
 
-  usePopoverCloseOnDialogOpen(isMenuOpen, () => setIsMenuOpen(false));
+  usePopoverAutoClose(isMenuOpen, () => setIsMenuOpen(false));
 
   const handleMenuClick = ({ key }: ProjectMenuClickInfo): void => {
     setIsMenuOpen(false);

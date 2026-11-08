@@ -22,6 +22,7 @@ import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
 import { useConnectLaser } from '../../utils/hooks/use.connect.laser';
+import { usePopoverAutoClose } from '../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectIsWebSerialSupported } from '../../utils/states/browser.environment.state';
@@ -78,6 +79,8 @@ export const ConnectionPill = (): ReactNode => {
   const changePopoverOpen = (isOpen: boolean): void => {
     dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: isOpen }));
   };
+
+  usePopoverAutoClose(isPopoverOpen, () => changePopoverOpen(false));
 
   const connectVerbContent: ReactNode = (
     <>

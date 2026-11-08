@@ -6,7 +6,9 @@ import { newStore } from '../states/new.store';
 import type { AppStore } from '../states/new.store';
 import { OVERLAY_KIND } from '../states/overlay.kind.constants';
 import { OverlayOpened } from '../states/ui.overlay.state';
-import { usePopoverCloseOnDialogOpen } from './use.popover.close.on.dialog.open';
+import { NarrowRegionChanged } from '../states/ui.workbench.state';
+import { WORKBENCH_REGION } from '../states/workbench.region.constants';
+import { usePopoverAutoClose } from './use.popover.auto.close';
 
 const DIALOG_OVERLAY_ID = 'test-dialog';
 const POPOVER_OVERLAY_ID = 'test-popover';
@@ -17,7 +19,7 @@ interface ClosingPopoverProps {
 }
 
 const ClosingPopover = ({ isPopoverOpen, closePopover }: ClosingPopoverProps): ReactNode => {
-  usePopoverCloseOnDialogOpen(isPopoverOpen, closePopover);
+  usePopoverAutoClose(isPopoverOpen, closePopover);
 
   return null;
 };
@@ -30,7 +32,7 @@ const renderClosingPopover = (store: AppStore, isPopoverOpen: boolean, closePopo
   );
 };
 
-describe(usePopoverCloseOnDialogOpen.name, () => {
+describe(usePopoverAutoClose.name, () => {
   it('closes an open popover when a dialog or drawer opens', () => {
     const store: AppStore = newStore();
     const closePopover = vi.fn();
@@ -38,6 +40,18 @@ describe(usePopoverCloseOnDialogOpen.name, () => {
     renderClosingPopover(store, true, closePopover);
     act(() => {
       store.dispatch(new OverlayOpened({ overlayId: DIALOG_OVERLAY_ID, overlayKind: OVERLAY_KIND.DIALOG }));
+    });
+
+    expect(closePopover).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes an open popover when the narrow layout switches region', () => {
+    const store: AppStore = newStore();
+    const closePopover = vi.fn();
+
+    renderClosingPopover(store, true, closePopover);
+    act(() => {
+      store.dispatch(new NarrowRegionChanged({ narrowRegion: WORKBENCH_REGION.JOB }));
     });
 
     expect(closePopover).toHaveBeenCalledTimes(1);

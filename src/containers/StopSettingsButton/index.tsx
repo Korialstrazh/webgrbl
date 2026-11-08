@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_LARGE, ANTD_POPOVER_PLACEMENT_TOP_RIGHT, ANTD_POPOVER_TRIGGER_CLICK } from '../../utils/antd.constants';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
-import { usePopoverCloseOnDialogOpen } from '../../utils/hooks/use.popover.close.on.dialog.open';
+import { usePopoverAutoClose } from '../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import {
   BedDoubleClickMovePreferenceChanged,
@@ -41,7 +41,7 @@ export const StopSettingsButton = (): ReactNode => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useOverlayRegistration(STOP_SETTINGS_POPOVER_OVERLAY_ID, isOpen);
-  usePopoverCloseOnDialogOpen(isOpen, () => setIsOpen(false));
+  usePopoverAutoClose(isOpen, () => setIsOpen(false));
 
   const handlePreferenceChange = (event: CheckboxChangeEvent): void => {
     dispatch(new EscStopPreferenceChanged({ isEscStoppingWithOverlayOpen: event.target.checked }));
