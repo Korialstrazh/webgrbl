@@ -28,6 +28,7 @@ import {
   END_KEY,
   HOME_KEY,
 } from '../../../../utils/browser/browser.events.constants';
+import { useConnectLaser } from '../../../../utils/hooks/use.connect.laser';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
 import {
@@ -38,7 +39,6 @@ import {
 } from '../../../../utils/states/job.readiness.selector';
 import type { JobReadinessStep } from '../../../../utils/states/job.readiness.selector';
 import type { AppDispatch } from '../../../../utils/states/new.store';
-import { ConnectionPopoverOpenChanged } from '../../../../utils/states/ui.overlay.state';
 import { MachineProfilesDialogOpenChanged, NarrowRegionChanged } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
 import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
@@ -181,6 +181,7 @@ export const JobReadinessRow = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
+  const connectLaser: () => void = useConnectLaser();
   const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
   // Every open step gets its accent next-step button, Import SVG on an empty project included.
   const nextLook: JobReadinessLook | undefined =
@@ -230,7 +231,8 @@ export const JobReadinessRow = (): ReactNode => {
       goToMaterialSelect();
       break;
     default:
-      dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+      // With a port already chosen this connects at once; with none it opens the connection popover.
+      connectLaser();
     }
   };
 

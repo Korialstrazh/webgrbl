@@ -1,13 +1,14 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { JobReadinessRow } from '.';
-import { GRBL_CONNECTION_STATUS } from '../../../../utils/grbl/grbl.constants';
+import { GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../../../utils/grbl/grbl.constants';
+import { ANSWER_SETTLE_MS } from '../../../../utils/grbl/test.support/grbl.answer.settle';
 import type { Material } from '../../../../utils/materials/interfaces/Material';
 import { newMaterial } from '../../../../utils/materials/new.material';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../../../utils/project/new.project.object';
-import { ConnectionStatusChanged, selectConnectionStatus } from '../../../../utils/states/grbl.connection.state';
+import { ConnectionStatusChanged, selectConnectionStatus, SerialPortSelected } from '../../../../utils/states/grbl.connection.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../../utils/states/machine.profile.state';
 import { MaterialSaved } from '../../../../utils/states/material.state';
 import { newStore } from '../../../../utils/states/new.store';
@@ -113,7 +114,27 @@ describe(JobReadinessRow.name, () => {
     expect(selectIsMachineProfilesDialogOpen(store.getState())).toBe(true);
   });
 
-  it('only opens the connection popover from the Connect action, with no connection started', () => {
+  it('connects in one click from the Connect action once a port is chosen, with no popover', async () => {
+    vi.useFakeTimers();
+    const store: AppStore = newSetUpStore();
+
+    store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+    render(<Provider store={store}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>);
+    fireEvent.click(screen.getByRole('button', { name: CONNECT_ACTION }));
+
+    expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
+    expect(selectConnectionStatus(store.getState())).toBe(GRBL_CONNECTION_STATUS.CONNECTING);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    });
+
+    expect(selectConnectionStatus(store.getState())).toBe(GRBL_CONNECTION_STATUS.CONNECTED);
+    expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it('only opens the connection popover from the Connect action without a chosen port, starting nothing', () => {
     const store: AppStore = newSetUpStore();
 
     render(<Provider store={store}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>);

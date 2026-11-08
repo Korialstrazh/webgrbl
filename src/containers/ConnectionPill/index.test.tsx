@@ -57,6 +57,10 @@ const renderConnectionPill = (): AppStore => {
   return store;
 };
 
+/** The Connect button inside the open popover; a chosen port adds a one-click Connect beside the pill too. */
+const getPopoverConnectButton = (): HTMLElement =>
+  within(screen.getByRole('dialog', { name: POPOVER_LABEL })).getByRole('button', { name: CONNECT_LABEL });
+
 const settle = async (): Promise<void> => {
   await act(async () => {
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -123,13 +127,35 @@ describe(ConnectionPill.name, () => {
         store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
       });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
-      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      fireEvent.click(getPopoverConnectButton());
       await settle();
 
       const pillButton: HTMLElement = screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN });
 
       expect(screen.getByText(FIRMWARE_TEXT)).toBeInTheDocument();
       expect(within(pillButton).queryByText(CONNECT_VERB_TEXT)).not.toBeInTheDocument();
+    });
+
+    it('connects in one click from the Connect button beside the pill once a port is chosen', async () => {
+      const store: AppStore = renderConnectionPill();
+
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      });
+
+      const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+      expect(within(pillButton).queryByText(CONNECT_VERB_TEXT)).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
+
+      await settle();
+
+      expect(screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: CONNECT_LABEL })).not.toBeInTheDocument();
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
     });
 
     it('closes the popover by itself after the laser connects, with focus back on the pill', async () => {
@@ -140,7 +166,7 @@ describe(ConnectionPill.name, () => {
       });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
 
-      const connectButton: HTMLElement = screen.getByRole('button', { name: CONNECT_LABEL });
+      const connectButton: HTMLElement = getPopoverConnectButton();
 
       connectButton.focus();
       fireEvent.click(connectButton);
@@ -160,7 +186,7 @@ describe(ConnectionPill.name, () => {
         store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
       });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
-      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      fireEvent.click(getPopoverConnectButton());
       await settle();
       fireEvent.click(screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN }));
       await settle();
@@ -176,7 +202,7 @@ describe(ConnectionPill.name, () => {
         store.dispatch(new SerialPortSelected({ portId: UNGRANTED_PORT_ID }));
       });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
-      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      fireEvent.click(getPopoverConnectButton());
       await settle();
 
       expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
@@ -185,7 +211,7 @@ describe(ConnectionPill.name, () => {
       act(() => {
         store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
       });
-      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      fireEvent.click(getPopoverConnectButton());
 
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 

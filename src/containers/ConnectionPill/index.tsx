@@ -1,7 +1,8 @@
 /**
  * The laser connection in the top bar: the connection state, the firmware, the active machine profile, the port and,
- * when the browser has no Web Serial, a note. While no laser is connected it ends in a Connect verb. Clicking it opens
- * and closes the connection popover, which the Status card can open as well. The browser's network state is not shown
+ * when the browser has no Web Serial, a note. While no laser is connected it ends in a Connect verb: with a port already
+ * chosen that verb is its own button joined to the pill and connects in one click; with none it is part of the pill.
+ * Clicking the pill opens and closes the connection popover, which the Status card can open as well. The browser's network state is not shown
  * here: it is not the laser's state (the status strip shows it while offline).
  *
  * @author michael.morosov
@@ -20,6 +21,7 @@ import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
+import { useConnectLaser } from '../../utils/hooks/use.connect.laser';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectIsWebSerialSupported } from '../../utils/states/browser.environment.state';
@@ -57,6 +59,10 @@ export const ConnectionPill = (): ReactNode => {
   const selectedPortId: string = useSelector(selectSelectedPortId);
   const firmwareIdentity: GrblFirmwareIdentity | undefined = useSelector(selectFirmwareIdentity);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
+  const connectLaser: () => void = useConnectLaser();
+  const isConnectVerbShown: boolean = isConnectOffered(connectionStatus);
+  // A chosen port lets the verb connect at once, so it leaves the pill for a button of its own.
+  const isOneClickConnect: boolean = isConnectVerbShown && Boolean(selectedPortId);
   const statusText: string = t(CONNECTION_PILL_STATUS_LABEL_KEY[connectionStatus]);
   const firmwareText: string | undefined = isConnected && firmwareIdentity
     ? t(DEFAULT.CONNECTION_PILL_FIRMWARE, {
@@ -73,34 +79,50 @@ export const ConnectionPill = (): ReactNode => {
     dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: isOpen }));
   };
 
+  const connectVerbContent: ReactNode = (
+    <>
+      <ApiOutlined aria-hidden="true" />
+      {` ${t(DEFAULT.CONNECTION_CONNECT_MENU)}`}
+    </>
+  );
+  const pillClassName: string = [
+    styles.pill,
+    isConnectVerbShown ? styles.connectOffered : undefined,
+    isOneClickConnect ? styles.joined : undefined,
+  ].filter(Boolean).join(' ');
+
   return (
-    <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
-      {/* A raw button: the pill is a custom status chip and antd Button would restyle its inner parts. */}
-      <button
-        ref={pillRef}
-        type="button"
-        className={styles.pill}
-        aria-haspopup={POPUP_KIND_DIALOG}
-        aria-expanded={isPopoverOpen}
-        aria-label={t(DEFAULT.CONNECTION_PILL_LABEL, { details: ariaLabelDetails })}
-      >
-        <span className={[styles.dot, styles[connectionStatus]].join(' ')} aria-hidden="true" />
-        <span className={styles.status}>{statusText}</span>
-        {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
-        {activeProfile && <span className={styles.profile}>{activeProfile.name}</span>}
-        {/* "No port chosen" beside "Not connected" says nothing new, so only a chosen port is shown. */}
-        {selectedPortId && <span className={styles.port}>{portText}</span>}
-        {!isWebSerialSupported && (
-          <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
-        )}
-        {isConnectOffered(connectionStatus) && (
-          <span className={styles.connectVerb}>
-            <ApiOutlined aria-hidden="true" />
-            {` ${t(DEFAULT.CONNECTION_CONNECT_MENU)}`}
-          </span>
-        )}
-        <DownOutlined className={styles.caret} aria-hidden="true" />
-      </button>
-    </ConnectionPopover>
+    <span className={styles.pillGroup}>
+      <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
+        {/* A raw button: the pill is a custom status chip and antd Button would restyle its inner parts. */}
+        <button
+          ref={pillRef}
+          type="button"
+          className={pillClassName}
+          aria-haspopup={POPUP_KIND_DIALOG}
+          aria-expanded={isPopoverOpen}
+          aria-label={t(DEFAULT.CONNECTION_PILL_LABEL, { details: ariaLabelDetails })}
+        >
+          <span className={[styles.dot, styles[connectionStatus]].join(' ')} aria-hidden="true" />
+          <span className={styles.status}>{statusText}</span>
+          {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
+          {activeProfile && <span className={styles.profile}>{activeProfile.name}</span>}
+          {/* "No port chosen" beside "Not connected" says nothing new, so only a chosen port is shown. */}
+          {selectedPortId && <span className={styles.port}>{portText}</span>}
+          {!isWebSerialSupported && (
+            <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
+          )}
+          {isConnectVerbShown && !isOneClickConnect && (
+            <span className={styles.connectVerb}>{connectVerbContent}</span>
+          )}
+          <DownOutlined className={styles.caret} aria-hidden="true" />
+        </button>
+      </ConnectionPopover>
+      {isOneClickConnect && (
+        <button type="button" className={styles.connectButton} onClick={connectLaser}>
+          {connectVerbContent}
+        </button>
+      )}
+    </span>
   );
 };
