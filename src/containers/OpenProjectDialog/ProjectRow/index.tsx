@@ -1,6 +1,7 @@
 /**
- * One stored project in the Open dialog: its name, when it changed and how many objects it holds, with Open, an in-
- * place Rename and Delete after a confirmation. The project open now is marked and has no Open button.
+ * One stored project in the Open dialog: its name, then how many objects it holds and how long ago it changed (the
+ * exact time in a tooltip), with Open, an in-place Rename and Delete after a confirmation. The project open now is
+ * marked and has no Open button.
  *
  * @author michael.morosov
  *
@@ -17,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { getProjectChangedRelativeTimeText } from '../../../utils/project/get.project.changed.relative.time.text';
 import { getProjectChangedTimeText } from '../../../utils/project/get.project.changed.time.text';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import {
@@ -62,9 +64,9 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
             {isOpenProject && <Tag className={styles.openNow}>{t(DEFAULT.OPEN_PROJECT_NOW)}</Tag>}
           </span>
         )}
-        <span className={styles.meta}>
+        <span className={styles.meta} title={getProjectChangedTimeText(updatedAt, i18n.language)}>
           {t(DEFAULT.OPEN_PROJECT_META, {
-            time: getProjectChangedTimeText(updatedAt, i18n.language),
+            time: getProjectChangedRelativeTimeText(updatedAt, Date.now(), i18n.language),
             count: objectCount,
           })}
         </span>

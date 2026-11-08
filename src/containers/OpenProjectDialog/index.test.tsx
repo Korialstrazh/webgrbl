@@ -35,6 +35,11 @@ const NEWEST_UPDATED_AT = '2026-03-05T09:00:00.000Z';
 const OLDEST_UPDATED_AT = '2026-03-01T09:00:00.000Z';
 const NEWEST_OBJECT_COUNT = 3;
 const OLDEST_OBJECT_COUNT = 12;
+const NOW_MS: number = Date.parse('2026-03-05T09:05:00.000Z');
+const NEWEST_META_COUNT_TEXT = `${NEWEST_OBJECT_COUNT} objects`;
+const NEWEST_META_TIME_TEXT = '5 minutes ago';
+const OLDEST_META_COUNT_TEXT = `${OLDEST_OBJECT_COUNT} objects`;
+const OLDEST_META_TIME_TEXT = '4 days ago';
 const OPEN_NOW_TEXT = 'open now';
 const OPEN_LABEL = 'Open';
 const RENAME_LABEL = 'Rename';
@@ -106,8 +111,10 @@ describe(OpenProjectDialog.name, () => {
       .toContainElement(screen.getByRole('button', { name: OPEN_FILE_LABEL }));
   });
 
-  it('lists the projects newest first with their change time and object count, and marks the open one', async () => {
+  it('lists the projects newest first with object count and relative change time, marks the open one', async () => {
     const store: AppStore = newStore();
+
+    const nowSpy: MockInstance<typeof Date.now> = vi.spyOn(Date, 'now').mockReturnValue(NOW_MS);
 
     renderDialog(store);
 
@@ -123,8 +130,15 @@ describe(OpenProjectDialog.name, () => {
     expect(rows[1]).toHaveTextContent(OLDEST_NAME);
     expect(rows[0]).toHaveTextContent(OPEN_NOW_TEXT);
     expect(rows[1]).not.toHaveTextContent(OPEN_NOW_TEXT);
-    expect(rows[0]).toHaveTextContent(`Objects: ${NEWEST_OBJECT_COUNT}`);
-    expect(rows[0]).toHaveTextContent(/2026/);
+    expect(rows[0]).toHaveTextContent(NEWEST_META_COUNT_TEXT);
+    expect(rows[0]).toHaveTextContent(NEWEST_META_TIME_TEXT);
+    expect(within(getRow(NEWEST_NAME)).getByText(new RegExp(NEWEST_META_TIME_TEXT))).toHaveAttribute(
+      'title',
+      expect.stringMatching(/2026/),
+    );
+    expect(rows[1]).toHaveTextContent(OLDEST_META_COUNT_TEXT);
+    expect(rows[1]).toHaveTextContent(OLDEST_META_TIME_TEXT);
+    nowSpy.mockRestore();
     expect(within(getRow(NEWEST_NAME)).queryByRole('button', { name: OPEN_LABEL })).not.toBeInTheDocument();
     expect(within(getRow(OLDEST_NAME)).getByRole('button', { name: OPEN_LABEL })).toBeInTheDocument();
   });

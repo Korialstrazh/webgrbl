@@ -636,7 +636,8 @@ OPEN_PROJECT_DELETE_OK;Yes, delete
 OPEN_PROJECT_EMPTY;No stored projects yet.
 OPEN_PROJECT_FOOTER;Projects are stored in this browser. Save as file to keep a copy or move it to another computer.
 OPEN_PROJECT_LIST;Stored projects
-OPEN_PROJECT_META;Changed {{time}} · Objects: {{count}}
+OPEN_PROJECT_META_one;{{count}} object · {{time}}
+OPEN_PROJECT_META_other;{{count}} objects · {{time}}
 OPEN_PROJECT_NOW;open now
 OPEN_PROJECT_OPEN;Open
 OPEN_PROJECT_OPEN_FILE;Open file…
