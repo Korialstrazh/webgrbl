@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_SEGMENTED_SIZE_SMALL } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { PERCENT_DIVISOR, PERCENT_MIN } from '../../utils/percent.constants';
 import { selectClampedSimulationTimeS } from '../../utils/states/simulation.clamped.time.selector';
 import { SIMULATION_SPEEDS } from '../../utils/states/simulation.speed.constants';
 import type { SimulationSpeed } from '../../utils/states/simulation.speed.constants';
@@ -39,7 +40,6 @@ import {
   selectReadyToolpathTotalTimeS,
   selectToolpathMotionTimeline,
 } from '../../utils/states/toolpath.timeline.selectors';
-import { getJobSizeText } from '../../utils/toolpath/get.job.size.text';
 import { getSimulationClockText } from '../../utils/toolpath/get.simulation.clock.text';
 import { getTimelinePosition } from '../../utils/toolpath/get.timeline.position';
 import type { MotionTimeline } from '../../utils/toolpath/interfaces/MotionTimeline';
@@ -98,6 +98,7 @@ export const SimulationPlaybackBar = (): ReactNode => {
     })),
     [t],
   );
+  const playedPercent: number = totalTimeS ? (currentTimeS / totalTimeS) * PERCENT_DIVISOR : PERCENT_MIN;
   const isAtEnd: boolean = isSimulationAtEnd(isPlaying, currentTimeS, totalTimeS);
   const playLabel: string = t(getPlayLabelKey(isPlaying, isAtEnd));
 
@@ -136,7 +137,7 @@ export const SimulationPlaybackBar = (): ReactNode => {
         />
       </div>
       <div className={styles.timeline}>
-        <SimulationLayerBar />
+        <SimulationLayerBar playedPercent={playedPercent} />
         <Slider
           className={styles.slider}
           min={0}
@@ -167,7 +168,6 @@ export const SimulationPlaybackBar = (): ReactNode => {
         onChange={transport.setSimulationSpeed}
       />
       <div className={styles.details}>
-        {isPlayable && <span className={styles.jobSize}>{getJobSizeText(t, toolpath?.bounds)}</span>}
         <SimulationReadout position={position} />
       </div>
     </div>

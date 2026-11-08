@@ -683,7 +683,6 @@ PALETTE_TITLE;Palette
 PROJECT_FILE_INPUT;Open a project file
 SIMULATION_BACK_TO_START;Back to start
 SIMULATION_ELAPSED_OF_TOTAL;{{elapsed}} / {{total}}
-SIMULATION_JOB_SIZE;Job {{width}} × {{height}} mm
 SIMULATION_LAYER_BAR_LABEL;Burn time per layer
 SIMULATION_PAUSE;Pause
 SIMULATION_PLAY;Play
