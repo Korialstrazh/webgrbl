@@ -110,6 +110,15 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
     { value: SIMULATED_LASER_PORT_ID, label: t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER) },
     ...availablePorts.map((port: SerialPortDescriptor) => ({ value: port.portId, label: getPortOptionLabel(port, t) })),
   ];
+  const connectedPort: SerialPortDescriptor | undefined = availablePorts.find(
+    ({ portId }: SerialPortDescriptor): boolean => portId === selectedPortId,
+  );
+  const connectedPortLabel: string = connectedPort
+    ? getPortOptionLabel(connectedPort, t)
+    : t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER);
+  const titleText: string = isConnected
+    ? t(DEFAULT.CONNECTION_POPOVER_TITLE_CONNECTED, { port: connectedPortLabel })
+    : t(DEFAULT.CONNECTION_POPOVER_TITLE);
   const baudOptions: SelectProps<number>['options'] = GRBL_BAUD_RATES.map((rate: number) => ({
     value: rate,
     label: String(rate),
@@ -244,6 +253,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       </div>
       <Button
         type={isConnected ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
+        danger={isConnected}
         icon={isConnected ? <DisconnectOutlined aria-hidden /> : <ApiOutlined aria-hidden />}
         disabled={isConnecting || !canToggleConnection(isConnected, selectedPortId)}
         onClick={toggleConnection}
@@ -270,7 +280,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       title={(
         <span className={styles.title}>
           <ApiOutlined aria-hidden />
-          {t(DEFAULT.CONNECTION_POPOVER_TITLE)}
+          {titleText}
         </span>
       )}
       content={contentComponent}

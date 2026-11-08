@@ -18,6 +18,8 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const CONNECT_LABEL = 'Connect';
 const DISCONNECT_LABEL = 'Disconnect';
+const DISCONNECTED_TITLE = 'Connect laser';
+const CONNECTED_TITLE = 'Connected \u00B7 Simulated laser (no hardware)';
 const CHOOSE_PORT_LABEL = 'Choose a USB port';
 const PORT_LABEL = 'Port';
 const BAUD_LABEL = 'Baud rate';
@@ -103,6 +105,18 @@ describe(ConnectionPopover.name, () => {
     await settle();
 
     expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toBeEnabled();
+  });
+
+  it('names the connected port in its title and styles Disconnect as a danger action', async () => {
+    renderConnectionPopover();
+
+    expect(screen.getByText(DISCONNECTED_TITLE)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+    await settle();
+
+    expect(screen.getByText(CONNECTED_TITLE)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toHaveClass('ant-btn-dangerous');
   });
 
   it('closes after Disconnect, as the pill then shows the result', async () => {
