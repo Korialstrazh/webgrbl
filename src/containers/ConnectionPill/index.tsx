@@ -1,9 +1,9 @@
 /**
  * The laser connection in the top bar: the connection state, the firmware, the active machine profile, the port and,
- * when the browser has no Web Serial, a note. While no laser is connected it ends in a Connect verb: with a port already
- * chosen that verb is its own button joined to the pill and connects in one click; with none it is part of the pill.
- * Clicking the pill opens and closes the connection popover, which the Status card can open as well. The browser's network state is not shown
- * here: it is not the laser's state (the status strip shows it while offline).
+ * when the browser has no Web Serial, a note. While no laser is connected it ends in a Connect verb: with a port
+ * already chosen that verb is its own button joined to the pill and connects in one click; with none it is part of the
+ * pill. Clicking the pill opens and closes the connection popover, which the Status card can open as well. The
+ * browser's network state is not shown here: it is not the laser's state (the status strip shows it while offline).
  *
  * @author michael.morosov
  *
