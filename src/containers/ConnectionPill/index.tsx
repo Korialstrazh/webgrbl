@@ -37,7 +37,7 @@ import { selectActiveMachineProfile } from '../../utils/states/machine.profile.s
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ConnectionPopoverOpenChanged, selectIsConnectionPopoverOpen } from '../../utils/states/ui.overlay.state';
 import { ConnectionPopover } from '../ConnectionPopover';
-import { CONNECTION_PILL_STATUS_LABEL_KEY } from './connection.pill.constants';
+import { CONNECTION_PILL_SHORT_STATUS_LABEL_KEY, CONNECTION_PILL_STATUS_LABEL_KEY } from './connection.pill.constants';
 import { getSelectedPortLabel } from './get.selected.port.label';
 import styles from './styles.module.scss';
 
@@ -108,6 +108,12 @@ export const ConnectionPill = (): ReactNode => {
         >
           <span className={[styles.dot, styles[connectionStatus]].join(' ')} aria-hidden="true" />
           <span className={styles.status}>{statusText}</span>
+          {/* The button's label already names the state; this is its one-word look for a narrow window. */}
+          {isConnectVerbShown && (
+            <span className={styles.shortStatus} aria-hidden="true">
+              {t(CONNECTION_PILL_SHORT_STATUS_LABEL_KEY[connectionStatus])}
+            </span>
+          )}
           {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
           {activeProfile && <span className={styles.profile}>{activeProfile.name}</span>}
           {/* "No port chosen" beside "Not connected" says nothing new, so only a chosen port is shown. */}

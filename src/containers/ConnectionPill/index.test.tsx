@@ -23,6 +23,7 @@ import type { WorkbenchRegion } from '../../utils/states/workbench.region.consta
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const ONLINE_OR_OFFLINE_PATTERN = /Online|Offline/;
+const SHORT_DISCONNECTED_TEXT = 'Off';
 const DISCONNECTED_PATTERN = /^Connection: Not connected.*Open the connection menu\.$/;
 const CONNECT_VERB_TEXT = 'Connect';
 const CONNECT_LABEL = 'Connect';
@@ -80,6 +81,25 @@ describe(ConnectionPill.name, () => {
     fireEvent.click(pillButton);
 
     expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toBeInTheDocument();
+  });
+
+  it('pairs the dot with a one-word state for a narrow window, hidden from screen readers', () => {
+    renderConnectionPill();
+
+    const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    expect(within(pillButton).getByText(SHORT_DISCONNECTED_TEXT)).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('closes the connection popover when the narrow layout switches region', () => {
+    const store: AppStore = renderConnectionPill();
+
+    fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+    act(() => {
+      store.dispatch(new NarrowRegionChanged({ narrowRegion: WORKBENCH_REGION.JOB }));
+    });
+
+    expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
   });
 
   it.each(Object.values(WORKBENCH_REGION))('keeps the Connect verb on the narrow %s tab', (region: WorkbenchRegion) => {

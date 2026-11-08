@@ -20,7 +20,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 
 const LIBRARY_BUTTON_LABEL = 'Open the material library';
-const LIBRARY_TITLE = 'Material library';
+const LIBRARY_TITLE = 'Materials';
 // The drawer is found by its title text: a role query over the whole antd drawer is slow in jsdom.
 const DRAWER_ROOT_SELECTOR = '.ant-drawer';
 const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
