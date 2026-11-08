@@ -30,6 +30,7 @@ import {
   BED_HEAD_TEST_ID,
   BED_WORK_ORIGIN_TEST_ID,
   CROSSHAIR_ARM_MM,
+  HEAD_RING_RADIUS_MM,
   WORK_ORIGIN_MARKER_RADIUS_MM,
 } from './bed.view.constants';
 import type { BedViewProps } from './interfaces/BedViewProps';
@@ -83,6 +84,8 @@ export const BedView = (props: BedViewProps): ReactNode => {
   const minorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, false), [widthMm, heightMm]);
   const majorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, true), [widthMm, heightMm]);
   const headMarker: BedMarker | undefined = headPosition && getBedMarker(headPosition, dimensions);
+  const headCrosshairPath: string =
+    `M${-CROSSHAIR_ARM_MM} 0H${CROSSHAIR_ARM_MM}M0 ${-CROSSHAIR_ARM_MM}V${CROSSHAIR_ARM_MM}`;
   const workOriginMarker: BedMarker | undefined = workOriginPosition && getBedMarker(workOriginPosition, dimensions);
 
   return (
@@ -114,7 +117,11 @@ export const BedView = (props: BedViewProps): ReactNode => {
           data-outside-bed={headMarker.isOutsideBed}
           transform={getScreenTransform(headMarker.xMm, headMarker.yMm, heightMm, markerScale)}
         >
-          <path d={`M${-CROSSHAIR_ARM_MM} 0H${CROSSHAIR_ARM_MM}M0 ${-CROSSHAIR_ARM_MM}V${CROSSHAIR_ARM_MM}`} />
+          {/* A dark halo under the red marks keeps the head visible over the artwork's glow. */}
+          <path className={styles.headHalo} d={headCrosshairPath} />
+          <circle className={styles.headHalo} r={HEAD_RING_RADIUS_MM} />
+          <path d={headCrosshairPath} />
+          <circle className={styles.headRing} r={HEAD_RING_RADIUS_MM} />
         </g>
       )}
     </svg>

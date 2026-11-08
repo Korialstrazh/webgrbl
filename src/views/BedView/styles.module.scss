@@ -42,9 +42,20 @@
   vector-effect: non-scaling-stroke;
 }
 
-.head path {
+.head path,
+.headRing {
+  fill: none;
   stroke: var(--color-bed-laser-head);
-  stroke-width: 2;
+  stroke-width: 2.5;
+}
+
+// Drawn first, wide and in the bed's own ink of the opposite tone, so the red marks keep an edge on any artwork.
+.head .headHalo {
+  fill: none;
+  stroke: var(--color-bed);
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.85;
 }
 
 .outsideBed path,

@@ -878,7 +878,7 @@ registerLocales({
       [DEFAULT.BURN_PART_LIFT_PUT_ALL_BACK]: "Put all back",
       [DEFAULT.BURN_PREVIEW_ADD_MATERIAL]: "Add material…",
       [DEFAULT.BURN_PREVIEW_BUILDING]: "Building 3D…",
-      [DEFAULT.BURN_PREVIEW_CHOOSE_MATERIAL_TITLE]: "Pick the material here or in the Material card to see the cut",
+      [DEFAULT.BURN_PREVIEW_CHOOSE_MATERIAL_TITLE]: "Pick a material",
       [DEFAULT.BURN_PREVIEW_ENTER_TEST_RESULT]: "Enter test result",
       [DEFAULT.BURN_PREVIEW_FAILED]: "The 3D view could not be built. Switch to another view and back to try again.",
       [DEFAULT.BURN_PREVIEW_LEGEND_BURNT]: "Burnt",
