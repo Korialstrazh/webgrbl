@@ -15,7 +15,12 @@ import { Button, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useAnchoredTooltipOpen } from '../../utils/hooks/use.anchored.tooltip.open';
 import type { AnchoredTooltipOpen } from '../../utils/hooks/interfaces/AnchoredTooltipOpen';
-import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT, ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
+import {
+  ANTD_BUTTON_SIZE_SMALL,
+  ANTD_BUTTON_TYPE_TEXT,
+  ANTD_TOOLTIP_PLACEMENT_TOP_RIGHT,
+  ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS,
+} from '../../utils/antd.constants';
 import { KEYBOARD_FOCUSABLE_TAB_INDEX } from '../../utils/tab.index.constants';
 import styles from './styles.module.scss';
 
@@ -40,6 +45,8 @@ export const PlugBadge = ({ reasonText, iconComponent = <ApiOutlined />, onClick
   return (
     <Tooltip
       title={reasonText}
+      // The badges sit at the right end of their card headings, so the tooltip grows leftwards, clear of the edge.
+      placement={ANTD_TOOLTIP_PLACEMENT_TOP_RIGHT}
       trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
       open={tooltipOpen.isOpen}
       onOpenChange={tooltipOpen.setIsOpen}

@@ -18,6 +18,7 @@ const COLOR_TOKEN_SOURCES = [
   ['colorTextTertiary', '--color-text-muted'],
   ['colorTextDescription', '--color-text-muted'],
   ['colorTextPlaceholder', '--color-text-muted'],
+  ['colorTextQuaternary', '--color-disabled-text'],
   ['colorPrimaryHover', '--color-accent-hover'],
   ['colorPrimaryActive', '--color-accent-active'],
   ['colorError', '--color-danger-button'],

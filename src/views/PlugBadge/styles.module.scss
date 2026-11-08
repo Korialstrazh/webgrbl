@@ -3,12 +3,13 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: var(--radius-pill);
   background-color: var(--color-surface-2);
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  // A 16 px status icon, readable at a glance (8:1 on the card).
+  font-size: 1rem;
   cursor: help;
 
   &:hover {
@@ -18,8 +19,9 @@
 
 // The clickable plug: a round target, and the accent on hover says it leads to Connect.
 .plugButton:global(.ant-btn) {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 1rem;
   border-radius: var(--radius-pill);
   background-color: var(--color-surface-2);
   color: var(--color-text-muted);

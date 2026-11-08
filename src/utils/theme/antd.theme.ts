@@ -85,6 +85,8 @@ export const ANTD_THEME: ThemeConfig = {
     colorTextTertiary: COLOR_TEXT_MUTED,
     colorTextDescription: COLOR_TEXT_MUTED,
     colorTextPlaceholder: COLOR_TEXT_MUTED,
+    // The Select arrow and clear icons: 2.3:1 from antd, raised to the disabled grey (6.7:1) as non-text indicators.
+    colorTextQuaternary: COLOR_DISABLED_TEXT,
     colorError: COLOR_DANGER_BUTTON,
     colorErrorHover: COLOR_DANGER_BUTTON_HOVER,
     colorErrorActive: COLOR_DANGER_BUTTON_ACTIVE,

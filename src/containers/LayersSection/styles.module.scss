@@ -37,4 +37,9 @@
   margin: 0;
   color: var(--color-text-muted);
   font-size: 0.8125rem;
+
+  // The leading icon at 14 px, the size of every status icon.
+  > :global(.anticon) {
+    font-size: 0.875rem;
+  }
 }

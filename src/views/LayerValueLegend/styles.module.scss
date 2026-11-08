@@ -13,6 +13,11 @@
   align-items: center;
   gap: 0.25rem;
   white-space: nowrap;
+
+  // The key icons at 14 px, the size of the icons in the rows they explain.
+  :global(.anticon) {
+    font-size: 0.875rem;
+  }
 }
 
 .power :global(.anticon) {

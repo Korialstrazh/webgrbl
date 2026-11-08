@@ -22,6 +22,11 @@
     align-items: center;
     color: var(--color-text-muted);
     font-size: 0.75rem;
+
+    // The feed and power icons at 14 px, the size of every status icon.
+    :global(.anticon) {
+      font-size: 0.875rem;
+    }
   }
 
   // The value in full text colour and a size up, so a 0 reads at a glance; its unit follows it, muted.

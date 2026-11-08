@@ -70,7 +70,8 @@
 .caption .lockBadge.lockBadge:global(.anticon) {
   flex: none;
   color: var(--color-warning);
-  font-size: 0.75rem;
+  // A status icon: 14 px, so the lock reads at a glance.
+  font-size: 0.875rem;
   line-height: 1;
 }
 
