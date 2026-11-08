@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { JobReadinessRow } from '.';
 import { GRBL_CONNECTION_STATUS } from '../../../../utils/grbl/grbl.constants';
@@ -28,6 +28,7 @@ const PROFILE_OPEN = 'Profile: to do';
 const CONNECT_OPEN = 'Connect: to do';
 const CONNECT_MET = 'Connect: done';
 const MATERIAL_OPEN = 'Material: optional';
+const OPTIONAL_CAPTION = 'optional';
 
 const CONNECT_ACTION = 'Connect laser';
 const FILE_INPUT_SELECTOR = 'input[type="file"]';
@@ -130,6 +131,18 @@ describe(JobReadinessRow.name, () => {
 
     expect(screen.queryByRole('button', { name: CONNECT_ACTION })).not.toBeInTheDocument();
     expect(document.querySelector(PRIMARY_BUTTON_SELECTOR)).toBeNull();
+  });
+
+  it('captions the open Material step as optional on screen', () => {
+    renderRow();
+
+    expect(within(screen.getByRole('button', { name: MATERIAL_OPEN })).getByText(OPTIONAL_CAPTION)).toBeInTheDocument();
+  });
+
+  it('shows no optional caption once the material is chosen', () => {
+    render(<Provider store={newSetUpStore()}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>);
+
+    expect(screen.queryByText(OPTIONAL_CAPTION)).not.toBeInTheDocument();
   });
 
   it('goes to where each step is set', () => {

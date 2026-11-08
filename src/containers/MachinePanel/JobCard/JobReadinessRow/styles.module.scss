@@ -66,9 +66,12 @@
   font-size: 1.25rem;
 }
 
-// Recommended, not required: a dashed ring so it never reads as a blocking to-do.
+// Recommended, not required: a dashed ring in the readable text colour, live rather than greyed out, so it never reads
+// as a blocking or disabled to-do.
 .optionalStep .marker {
   border-style: dashed;
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 .nextStep .marker {
@@ -93,12 +96,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  // Recommended, not required: a dashed ring so it never reads as a blocking to-do.
-.optionalStep .marker {
-  border-style: dashed;
-}
-
-.nextStep .marker {
+  .nextStep .marker {
     animation: none;
   }
 }
@@ -107,4 +105,11 @@
 .caption {
   font-size: 0.8125rem;
   font-weight: 500;
+}
+
+// The small word under an optional step's name, in italic so it reads as a note, not as a second step name.
+.optionalCaption {
+  margin-top: calc(-1 * var(--space-1));
+  font-size: 0.6875rem;
+  font-style: italic;
 }

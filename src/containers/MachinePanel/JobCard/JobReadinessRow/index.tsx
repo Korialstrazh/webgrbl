@@ -1,7 +1,8 @@
 /**
  * The readiness stepper of the Job card: Profile, Design, Material and Connect joined by a line that leads to Start.
  * Each step goes to where it is set, a done step shows a large check, and the first required one still open is outlined
- * as next. An optional step (Material) that is still open shows a dashed marker: Start does not wait for it.
+ * as next. An optional step (Material) that is still open shows a dashed marker and a small "optional"
+ * caption under its name: Start does not wait for it.
  * The steps are one tab stop: the arrow keys, Home and End move between them (a roving tab index).
  *
  * @author michael.morosov
@@ -164,6 +165,10 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
         >
           <span className={styles.marker}>{isMet ? <CheckOutlined aria-hidden /> : iconComponent}</span>
           <span className={styles.caption}>{captionText}</span>
+          {/* Said on screen, not only to a screen reader, so the open step never reads as a blocker. */}
+          {isOptionalOpen && (
+            <span className={styles.optionalCaption} aria-hidden>{t(DEFAULT.JOB_READINESS_STEP_OPTIONAL_CAPTION)}</span>
+          )}
         </Button>
       </DismissibleTooltip>
     </li>
