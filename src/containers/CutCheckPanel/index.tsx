@@ -38,7 +38,7 @@ import {
 import { BedViewModeChanged } from '../../utils/states/bed.view.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
-import { selectProjectLayers } from '../../utils/states/project.document.state';
+import { selectProjectLayers, selectProjectObjects } from '../../utils/states/project.document.state';
 import { IconActionButton } from '../../views/IconActionButton';
 import { CubeIcon } from '../../views/CubeIcon';
 import { Panel } from '../../views/Panel';
@@ -92,6 +92,7 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
   const detailsId: string = useId();
   const projectLayers: ProjectLayer[] = useSelector(selectProjectLayers);
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
+  const hasObjects: boolean = Boolean(useSelector(selectProjectObjects).length);
 
   useEffect(() => {
     // Only the panel moves: stacked, that panel does not scroll, so the scene stays with a user who clicked in it.
@@ -121,10 +122,11 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
         headerActionComponent={(
           <>
             {model && <CutCheckWarningCountTag count={getCutCheckWarningGroups(model.cutCheck.warnings).length} />}
-            {/* An action, not a label: the cube opens the 3D view, where the check runs. */}
+            {/* An action, not a label: the cube opens the 3D view, where the check runs; off with nothing to check. */}
             <IconActionButton
               size={ANTD_BUTTON_SIZE_SMALL}
               labelText={t(DEFAULT.CUT_CHECK_OPEN_3D_LABEL)}
+              blockedReasonText={hasObjects ? undefined : t(DEFAULT.CUT_CHECK_NOTHING_TO_CHECK)}
               captionText={t(DEFAULT.CUT_CHECK_3D_ONLY_CAPTION)}
               iconComponent={<CubeIcon aria-hidden />}
               onClick={() => dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }))}

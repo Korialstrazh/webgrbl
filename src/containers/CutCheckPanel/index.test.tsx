@@ -13,6 +13,7 @@ import { getLayerPaletteEntry } from '../../utils/layers/get.layer.palette.entry
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import type { Material } from '../../utils/materials/interfaces/Material';
 import { newMaterial } from '../../utils/materials/new.material';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import {
   BurnModelFailed,
   BurnModelReady,
@@ -27,7 +28,12 @@ import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
-import { LayerToggled, ProjectMaterialSelected, selectProjectLayers } from '../../utils/states/project.document.state';
+import {
+  LayerToggled,
+  ProjectMaterialSelected,
+  ProjectObjectsAdded,
+  selectProjectLayers,
+} from '../../utils/states/project.document.state';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../utils/states/toolpath.state';
 import { selectOpenLayerSettingsKey } from '../../utils/states/ui.workbench.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
@@ -128,6 +134,7 @@ describe(CutCheckPanel.name, () => {
   it('outside the 3D view offers a cube button that opens the 3D view', () => {
     const store: AppStore = newReadyStore();
 
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
     render(
       <Provider store={store}>
         <CutCheckPanel isActive={false} />
@@ -136,6 +143,19 @@ describe(CutCheckPanel.name, () => {
     fireEvent.click(screen.getByRole('button', { name: 'Inspect in 3D' }));
 
     expect(selectBedViewMode(store.getState())).toBe(BED_VIEW_MODE.THREE_D);
+  });
+
+  it('turns the cube button off with a reason while the project has nothing to check', () => {
+    render(
+      <Provider store={newReadyStore()}>
+        <CutCheckPanel isActive={false} />
+      </Provider>,
+    );
+
+    const cubeButton: HTMLElement = screen.getByRole('button', { name: 'Inspect in 3D' });
+
+    expect(cubeButton).toBeDisabled();
+    expect(cubeButton).toHaveAccessibleDescription('Add artwork first, then check its cuts in 3D.');
   });
 
   it('keeps the warning count of a current model on the muted heading outside the 3D view', () => {
