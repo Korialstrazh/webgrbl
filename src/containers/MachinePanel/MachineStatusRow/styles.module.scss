@@ -36,7 +36,7 @@
     margin: 0 0.125rem 0 0;
     white-space: nowrap;
     color: var(--color-text);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
 
@@ -60,6 +60,7 @@
   margin-left: 0.125rem;
   color: var(--color-text-muted);
   font-family: var(--font-ui);
-  font-size: 0.6875rem;
+  // 12 px, the smallest readable size for a unit beside its value.
+  font-size: 0.75rem;
   font-weight: 400;
 }
