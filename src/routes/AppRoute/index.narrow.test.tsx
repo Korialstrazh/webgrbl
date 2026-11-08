@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { AppRoute } from '.';
 import { newStore } from '../../utils/states/new.store';
 import type { AppStore } from '../../utils/states/new.store';
+import { ConsoleOpenChanged } from '../../utils/states/panel.layout.state';
 import { selectIsFrameSettingsOpen } from '../../utils/states/ui.workbench.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
@@ -39,6 +40,29 @@ describe(`${AppRoute.name} in a narrow window`, () => {
 
     expect(bedRegion?.className).toContain('hiddenRegion');
     expect(screen.getByRole('main')).toBeInTheDocument();
+  });
+
+  it('ends the regions above the console sheet while it is open, so the bed re-fits to the space left', async () => {
+    const store: AppStore = newStore();
+
+    setMatchMediaMatches(false);
+    await renderWorkbench(store);
+
+    const regionsBox: HTMLElement | null | undefined = screen.getByRole('main').parentElement?.parentElement;
+
+    expect(regionsBox?.className).not.toContain('narrowRegionsWithSheet');
+
+    act(() => {
+      store.dispatch(new ConsoleOpenChanged({ isConsoleOpen: true }));
+    });
+
+    expect(regionsBox?.className).toContain('narrowRegionsWithSheet');
+
+    act(() => {
+      store.dispatch(new ConsoleOpenChanged({ isConsoleOpen: false }));
+    });
+
+    expect(regionsBox?.className).not.toContain('narrowRegionsWithSheet');
   });
 
   it('keeps open frame settings when the window crosses the breakpoint', async () => {

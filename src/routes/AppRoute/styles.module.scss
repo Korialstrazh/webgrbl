@@ -43,6 +43,12 @@
   @include layout.more-below-fade(var(--color-bg));
 }
 
+// With the console sheet open, the region on screen ends where the sheet begins, so the bed re-fits to the space left
+// and no artwork or card sits under the sheet; it grows back when the sheet closes.
+.narrowRegionsWithSheet .narrowRegion {
+  height: calc(100% - #{layout.$console-sheet-height});
+}
+
 .hiddenRegion {
   display: none;
 }

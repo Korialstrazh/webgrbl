@@ -1,3 +1,5 @@
+@use '../../../styles/layout' as layout;
+
 // Fills the splitter panel in a wide window; in a narrow window it is a bottom sheet over the region on screen.
 .consoleDock {
   display: flex;
@@ -17,7 +19,7 @@
     bottom: 0;
     z-index: 10;
     // Short by default, so most of the bed stays in view under the sheet.
-    height: min(12rem, 45%);
+    height: layout.$console-sheet-height;
     padding-top: var(--space-4);
     border-top-left-radius: var(--radius-xl);
     border-top-right-radius: var(--radius-xl);

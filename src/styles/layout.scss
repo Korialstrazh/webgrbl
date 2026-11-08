@@ -30,6 +30,9 @@ $status-strip-toggle-width: 2.5rem;
 // (a dialog opened from a drawer sits at 1200), up to 2000, so STOP sits one above that ceiling.
 $stop-above-dialog-z-index: 2001;
 
+// The height of the console bottom sheet in a narrow window, short so most of the region stays in view above it.
+$console-sheet-height: min(12rem, 45%);
+
 // The sticky STOP bar at the bottom of a narrow window; the pinned toast stack stops short of it.
 $sticky-stop-bar-height: 4.5rem;
 

@@ -54,6 +54,11 @@ export const AppRoute = (): ReactNode => {
   const isPanelLayoutLoaded: boolean = useSelector(selectIsPanelLayoutLoaded);
   const isConsoleOpen: boolean = useSelector(selectIsConsoleOpen);
   const narrowRegion: WorkbenchRegion = useSelector(selectNarrowRegion);
+  // With the console sheet open the regions end above it, so the bed re-fits to the space left.
+  const narrowRegionsClassName: string = [
+    styles.narrowRegions,
+    isConsoleOpen ? styles.narrowRegionsWithSheet : undefined,
+  ].join(' ');
   const designPanelComponent: ReactNode = <DesignPanel />;
   const bedPanelComponent: ReactNode = <BedPanel hostRef={isWide ? setBedRegionHost : undefined} isWide={isWide} />;
   const machinePanelComponent: ReactNode = <MachinePanel isWide={isWide} />;
@@ -76,7 +81,7 @@ export const AppRoute = (): ReactNode => {
         ) : (
           // All regions stay mounted, so a hidden one keeps its state. Dialogs and drawers open in this box, not in the
           // bed region, so they show over whichever region is on screen and take its full height.
-          <div ref={setBedRegionHost} className={styles.narrowRegions}>
+          <div ref={setBedRegionHost} className={narrowRegionsClassName}>
             <div className={getNarrowRegionClassName(narrowRegion, WORKBENCH_REGION.BED)}>
               {bedPanelComponent}
             </div>
