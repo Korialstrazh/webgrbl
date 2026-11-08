@@ -26,6 +26,9 @@ vi.mock('virtual:pwa-register/react', () => ({
 installMatchMediaMock();
 beforeEach(resetMatchMediaMock);
 
+// jsdom has no scrollIntoView, so elements get one that does nothing; a test spies on it to see what was revealed.
+Element.prototype.scrollIntoView = (): void => undefined;
+
 // jsdom has no ResizeObserver, and antd needs one to place popovers.
 installResizeObserverMock();
 

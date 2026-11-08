@@ -1,6 +1,7 @@
 /**
  * The Objects section of the design panel: the list of project objects, and for a single selected object its
- * placement fields above the list. With no objects it shows a short hint; the card on the bed offers the import.
+ * placement fields above the list. A new single selection scrolls its fields and its row into view, so the object being
+ * edited is never out of sight. With no objects it shows a short hint; the card on the bed offers the import.
  *
  * @author michael.morosov
  *
@@ -41,6 +42,8 @@ export const ObjectsSection = (): ReactNode => {
   const bed: BedDimensions = useBedDimensions();
   const singleSelectedObject: ProjectObject | undefined = selectedObjects.length === 1 ? selectedObjects[0] : undefined;
   const sectionRef = useRef<HTMLDivElement>(null);
+  const transformFieldsRef = useRef<HTMLDivElement>(null);
+  const singleSelectedObjectId: string | undefined = singleSelectedObject?.id;
   // Set by a delete, so focus moves on to the next row, or after the last one to Import SVG on the empty bed card (the
   // empty hint when that card is not on screen), instead of falling back to the page.
   const isFocusAfterDeleteWantedRef = useRef<boolean>(false);
@@ -70,6 +73,18 @@ export const ObjectsSection = (): ReactNode => {
     }
   }, [projectObjects]);
 
+  useEffect(() => {
+    if (!singleSelectedObjectId) {
+      return;
+    }
+
+    // The fields first, then the row, so a long list still shows the selected row and as much of its fields as fits.
+    transformFieldsRef.current?.scrollIntoView({ block: 'nearest' });
+    sectionRef.current
+      ?.querySelector<HTMLElement>(`[data-object-id="${CSS.escape(singleSelectedObjectId)}"]`)
+      ?.scrollIntoView({ block: 'nearest' });
+  }, [singleSelectedObjectId]);
+
   const deleteObject = (objectId: string): void => {
     const objectIndex: number = projectObjects.findIndex(
       (projectObject: ProjectObject) => projectObject.id === objectId,
@@ -93,8 +108,11 @@ export const ObjectsSection = (): ReactNode => {
 
   return (
     <div ref={sectionRef} className={styles.section}>
-      {/* The selection's fields lead the card, so they stay above the Cut check dock however long the list. */}
-      {singleSelectedObject && <ObjectTransformFields projectObject={singleSelectedObject} />}
+      {singleSelectedObject && (
+        <div ref={transformFieldsRef} className={styles.transformFields}>
+          <ObjectTransformFields projectObject={singleSelectedObject} />
+        </div>
+      )}
       <ul className={styles.list} aria-label={t(DEFAULT.OBJECTS_LIST_LABEL)}>
         {projectObjects.map((projectObject: ProjectObject) => (
           <ObjectRow

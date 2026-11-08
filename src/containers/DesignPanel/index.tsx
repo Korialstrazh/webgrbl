@@ -89,9 +89,7 @@ export const DesignPanel = (): ReactNode => {
         >
           <ObjectsSection />
         </Panel>
-      </div>
-      {/* A footer below the scrolling cards, so Cut check stays in reach and never covers the Objects fields. */}
-      <div className={styles.cutCheckDock}>
+        {/* An ordinary card after Objects, so it never covers an object row or its fields. */}
         <CutCheckPanel isActive={isThreeDView} />
       </div>
       <PaletteDialog isOpen={isPaletteDialogOpen} onClose={() => setIsPaletteDialogOpen(false)} />

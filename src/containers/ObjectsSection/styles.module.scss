@@ -32,3 +32,9 @@
   padding: 0;
   list-style: none;
 }
+
+// Scrolled into view clear of the panel's bottom fade, so the selected row and its fields are read in full.
+.transformFields,
+.list [data-object-id] {
+  scroll-margin-block: 2.5rem;
+}

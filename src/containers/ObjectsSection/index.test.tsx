@@ -233,6 +233,25 @@ describe(ObjectsSection.name, () => {
     expect(xField.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it('scrolls the fields and the row of a new selection into view', () => {
+    const store: AppStore = newStore();
+    const scrollSpy: MockInstance<Element['scrollIntoView']> = vi.spyOn(Element.prototype, 'scrollIntoView');
+
+    loadObjects(store);
+    renderSection(store);
+    fireEvent.click(screen.getByRole('button', { name: SECOND_ROW_NAME_PATTERN }));
+
+    const revealedElements: unknown[] = scrollSpy.mock.contexts;
+    const secondRow: Element | null = screen.getByRole('button', { name: SECOND_ROW_NAME_PATTERN })
+      .closest('[data-object-id]');
+    const xField: HTMLElement = screen.getByLabelText(X_LABEL);
+
+    expect(revealedElements).toContain(secondRow);
+    expect(revealedElements.some((element: unknown) => element instanceof Element && element.contains(xField)))
+      .toBe(true);
+    scrollSpy.mockRestore();
+  });
+
   it('selects an object on a row click and marks it pressed', () => {
     const store: AppStore = newStore();
 
