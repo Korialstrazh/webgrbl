@@ -66,12 +66,29 @@
   font-size: 1.25rem;
 }
 
-// Recommended, not required: a dashed ring in the readable text colour, live rather than greyed out, so it never reads
-// as a blocking or disabled to-do.
+// Recommended, not required: a hollow, thin dotted ring with no fill and a small skip mark (a dash in a dot) on its
+// corner, so it never reads as the solid ring of a to-do step or as a disabled one.
 .optionalStep .marker {
-  border-style: dashed;
+  position: relative;
+  border-width: 0.0625rem;
+  border-style: dotted;
   border-color: var(--color-text-muted);
-  color: var(--color-text);
+  background-color: transparent;
+  color: var(--color-text-muted);
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: -0.25rem;
+    bottom: -0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 0.0625rem solid var(--color-text-muted);
+    border-radius: 50%;
+    background:
+      linear-gradient(var(--color-text-muted), var(--color-text-muted)) center / 0.375rem 0.0625rem no-repeat,
+      var(--color-surface-2);
+  }
 }
 
 .nextStep .marker {
