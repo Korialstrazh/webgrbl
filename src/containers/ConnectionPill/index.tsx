@@ -111,6 +111,8 @@ export const ConnectionPill = (): ReactNode => {
           {/* The button's label already names the state; this is its one-word look for a narrow window. */}
           {isConnectVerbShown && (
             <span className={styles.shortStatus} aria-hidden="true">
+              {/* A plug, so the narrow word never reads like the Laser off chip beside it. */}
+              <ApiOutlined />
               {t(CONNECTION_PILL_SHORT_STATUS_LABEL_KEY[connectionStatus])}
             </span>
           )}

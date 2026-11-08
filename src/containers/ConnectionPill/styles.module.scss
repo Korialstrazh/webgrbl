@@ -124,7 +124,7 @@
   display: none;
 }
 
-// In a narrow window the pill keeps the dot, a one-word state ("Off", "Lost") and the Connect verb, or the state and the chevron once connected; the
+// In a narrow window the pill keeps the dot, a one-word state ("Offline", "Lost") after a plug and the Connect verb, or the state and the chevron once connected; the
 // port, the firmware and the machine name (also on the top bar's laser button) move to its popover and its tooltip.
 // 62.5rem must match the TopBar styles.
 @media (width < 62.5rem) {
@@ -164,4 +164,9 @@
   .connectButton {
     padding: 0 var(--space-2);
   }
+}
+
+// The plug before the narrow word, a little apart from it.
+.shortStatus :global(.anticon) {
+  margin-right: 0.25rem;
 }

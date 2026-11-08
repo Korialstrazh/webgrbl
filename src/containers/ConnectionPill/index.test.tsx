@@ -22,8 +22,8 @@ import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants'
 import type { WorkbenchRegion } from '../../utils/states/workbench.region.constants';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
-const ONLINE_OR_OFFLINE_PATTERN = /Online|Offline/;
-const SHORT_DISCONNECTED_TEXT = 'Off';
+const ONLINE_PATTERN = /Online/;
+const SHORT_DISCONNECTED_TEXT = 'Offline';
 const DISCONNECTED_PATTERN = /^Connection: Not connected.*Open the connection menu\.$/;
 const CONNECT_VERB_TEXT = 'Connect';
 const CONNECT_LABEL = 'Connect';
@@ -300,12 +300,15 @@ describe(ConnectionPill.name, () => {
 
   it('leaves the browser network state out of the pill, also while offline', () => {
     renderConnectionPill();
+    const pill: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+    const onlinePillText: string | null = pill.textContent;
 
     act(() => {
       window.dispatchEvent(new Event(OFFLINE_EVENT_NAME));
     });
 
-    expect(screen.queryByText(ONLINE_OR_OFFLINE_PATTERN)).not.toBeInTheDocument();
+    expect(screen.queryByText(ONLINE_PATTERN)).not.toBeInTheDocument();
+    expect(pill.textContent).toBe(onlinePillText);
   });
 
   it('opens its popover when another control asks for it, such as the Status card', () => {

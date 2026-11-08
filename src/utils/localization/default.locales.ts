@@ -909,7 +909,7 @@ registerLocales({
       [DEFAULT.CONNECTION_PILL_CONNECTED]: "Connected",
       [DEFAULT.CONNECTION_PILL_CONNECTING]: "Connecting",
       [DEFAULT.CONNECTION_PILL_DISCONNECTED]: "Not connected",
-      [DEFAULT.CONNECTION_PILL_DISCONNECTED_SHORT]: "Off",
+      [DEFAULT.CONNECTION_PILL_DISCONNECTED_SHORT]: "Offline",
       [DEFAULT.CONNECTION_PILL_FIRMWARE]: "{{firmwareName}} {{version}}",
       [DEFAULT.CONNECTION_PILL_LABEL]: "Connection: {{details}}. Open the connection menu.",
       [DEFAULT.CONNECTION_PILL_LOST]: "Connection lost",
