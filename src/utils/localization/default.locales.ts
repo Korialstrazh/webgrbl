@@ -989,7 +989,7 @@ registerLocales({
       [DEFAULT.DESIGN_OBJECTS_TITLE]: "Objects",
       [DEFAULT.DESIGN_PANEL_TITLE]: "Layers and objects",
       [DEFAULT.FIELD_CAPTION_DEPTH]: "Depth",
-      [DEFAULT.FIELD_CAPTION_INTERVAL]: "Interval",
+      [DEFAULT.FIELD_CAPTION_INTERVAL]: "Gap",
       [DEFAULT.FIELD_CAPTION_MAX]: "Max",
       [DEFAULT.FIELD_CAPTION_MIN]: "Min",
       [DEFAULT.FIELD_CAPTION_NAME]: "Name",

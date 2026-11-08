@@ -99,7 +99,7 @@ describe(MaterialDialog.name, () => {
     expect(document.querySelector(MODAL_MASK_SELECTOR)).toBeInTheDocument();
   });
 
-  it('registers an overlay, starts with an empty name in focus and keeps Save off', async () => {
+  it('registers an overlay, starts with an empty name in focus and Save as the live primary', async () => {
     const store: AppStore = newStore();
 
     renderDialog(store);
@@ -107,7 +107,8 @@ describe(MaterialDialog.name, () => {
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
     expect(screen.getByLabelText(NAME_LABEL)).toHaveValue('');
     await waitFor(() => expect(screen.getByLabelText(NAME_LABEL)).toHaveFocus());
-    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeEnabled();
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toHaveClass('ant-btn-primary');
     expect(screen.getByLabelText(THICKNESS_LABEL)).toHaveValue(String(DEFAULT_MATERIAL_THICKNESS_MM));
   });
 
@@ -179,7 +180,19 @@ describe(MaterialDialog.name, () => {
 
     expect(screen.getByText(NAME_ERROR)).toBeInTheDocument();
     expect(screen.getByText(SAVE_HINT)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
+  });
+
+  it('on Save with no name shows the name error and the hint, saves nothing and stays open', () => {
+    const store: AppStore = newStore();
+    const onClose = vi.fn();
+
+    renderDialog(store, onClose);
+    clickSave();
+
+    expect(screen.getByText(NAME_ERROR)).toBeInTheDocument();
+    expect(screen.getByText(SAVE_HINT)).toBeInTheDocument();
+    expect(selectMaterials(store.getState())).toEqual([]);
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   describe('a name and thickness that match a saved material', () => {

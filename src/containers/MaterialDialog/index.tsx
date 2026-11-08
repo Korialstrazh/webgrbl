@@ -89,6 +89,14 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
   };
 
   const saveMaterial = (): void => {
+    // Save stays the orange primary like in every dialog; with a field still wrong it shows why and goes to the name.
+    if (!isSaveAllowed) {
+      setIsNameTouched(true);
+      nameInputRef.current?.focus();
+
+      return;
+    }
+
     const material: Material = newMaterial({ name: materialName.trim(), thicknessMm });
 
     dispatch(new MaterialSaved({ material }));
@@ -110,7 +118,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
       title={t(DEFAULT.MATERIAL_DIALOG_TITLE)}
       okText={t(DEFAULT.MATERIAL_DIALOG_SAVE)}
       cancelText={t(DEFAULT.MATERIAL_DIALOG_CANCEL)}
-      okButtonProps={{ disabled: !isSaveAllowed, icon: <CheckOutlined aria-hidden /> }}
+      okButtonProps={{ icon: <CheckOutlined aria-hidden /> }}
       onOk={saveMaterial}
       // The dialog takes the focus for itself when it opens, so the field asks for it back after that.
       afterOpenChange={(isDialogOpen: boolean) => {
