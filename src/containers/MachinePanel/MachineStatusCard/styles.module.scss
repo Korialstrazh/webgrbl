@@ -1,0 +1,11 @@
+// The read-out on the left and Reset and Unlock on the right, in one line across the card; a long feed figure moves the
+// buttons to a second line instead of covering the read-out.
+.statusLine {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}

@@ -20,7 +20,8 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: var(--space-3);
+  // A tighter gap than the design panel, so the jog pad fits above STOP while connected at 900 px tall.
+  gap: var(--space-2);
   min-height: 0;
   overflow: auto;
   padding: var(--space-3);
@@ -29,9 +30,10 @@
   scrollbar-width: auto;
 }
 
-// Cards cut off above STOP fade out over the last stretch, so the list reads as one that scrolls on.
+// Cards cut off above STOP fade out over a short last stretch, so the list reads as one that scrolls on while the jog
+// pad above the fade stays crisp.
 .cardsCutOff {
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1rem), transparent);
 }
 
 // While cards wait below, STOP's footer casts a shadow up over them, so the edge reads as content going on underneath.

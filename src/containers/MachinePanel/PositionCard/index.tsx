@@ -1,6 +1,7 @@
 /**
- * The Position card, right above Move: the work and laser positions on X, Y and Z, so a user who jogs sees where the
- * laser is right next to the pad. It only reads the status reports the machine already sends. While no laser is
+ * The Position card, right above Move: the work position on X, Y and Z in one row beside the heading, so a user who
+ * jogs sees where the laser is right next to the pad, and the card stays one line tall. The laser (machine) position
+ * is in the row's tooltip. It only reads the status reports the machine already sends. While no laser is
  * connected it keeps its heading with a plug badge and shows no numbers. The state, feed, power, Reset and Unlock sit
  * in the compact Status card above it.
  *
@@ -11,7 +12,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { AimOutlined, CompassOutlined, HomeOutlined } from '@ant-design/icons';
+import { CompassOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -35,15 +36,6 @@ const AXIS_LABEL_KEYS: Readonly<Record<keyof GrblAxisPosition, string>> = {
   z: DEFAULT.MACHINE_POSITION_AXIS_Z,
 };
 
-interface PositionRow {
-  key: string;
-  iconComponent: ReactNode;
-  captionKey: string;
-  /** The full name: the row's accessible name and its tooltip. */
-  labelKey: string;
-  position: GrblAxisPosition | undefined;
-}
-
 const getAxisText = (position: GrblAxisPosition | undefined, axis: keyof GrblAxisPosition): string =>
   position ? position[axis].toFixed(POSITION_DECIMALS) : MISSING_VALUE_TEXT;
 
@@ -52,22 +44,6 @@ export const PositionCard = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const isConnected: boolean = useSelector(selectIsConnected);
   const status: GrblResolvedStatus | undefined = useSelector(selectMachineStatus);
-  const rows: PositionRow[] = [
-    {
-      key: 'work',
-      iconComponent: <AimOutlined />,
-      captionKey: DEFAULT.MACHINE_POSITION_WORK_CAPTION,
-      labelKey: DEFAULT.MACHINE_STATUS_WORK_POSITION,
-      position: status?.workPosition,
-    },
-    {
-      key: 'laser',
-      iconComponent: <HomeOutlined />,
-      captionKey: DEFAULT.MACHINE_POSITION_LASER_CAPTION,
-      labelKey: DEFAULT.MACHINE_STATUS_MACHINE_POSITION,
-      position: status?.machinePosition,
-    },
-  ];
 
   if (!isConnected) {
     return (
@@ -84,31 +60,31 @@ export const PositionCard = (): ReactNode => {
     );
   }
 
+  const laserPositionText: string = t(DEFAULT.MACHINE_POSITION_LASER_TOOLTIP, {
+    x: getAxisText(status?.machinePosition, 'x'),
+    y: getAxisText(status?.machinePosition, 'y'),
+    z: getAxisText(status?.machinePosition, 'z'),
+  });
+
   return (
-    <Panel iconComponent={<CompassOutlined />} title={t(DEFAULT.MACHINE_POSITION_TITLE)} isCompact>
-      <table className={styles.positionTable}>
-        <thead>
-          <tr>
-            <td />
-            {AXIS_KEYS.map((axis: keyof GrblAxisPosition) => (
-              <th key={axis} scope="col">{t(AXIS_LABEL_KEYS[axis])}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row: PositionRow) => (
-            <tr key={row.key}>
-              <th scope="row" title={t(row.labelKey)} aria-label={t(row.labelKey)}>
-                <span className={styles.rowIcon} aria-hidden>{row.iconComponent}</span>
-                <span aria-hidden>{t(row.captionKey)}</span>
-              </th>
-              {AXIS_KEYS.map((axis: keyof GrblAxisPosition) => (
-                <td key={axis}>{getAxisText(row.position, axis)}</td>
-              ))}
-            </tr>
+    <Panel
+      iconComponent={<CompassOutlined />}
+      title={t(DEFAULT.MACHINE_POSITION_TITLE)}
+      headerActionComponent={(
+        <dl
+          className={styles.positionRow}
+          aria-label={t(DEFAULT.MACHINE_STATUS_WORK_POSITION)}
+          title={laserPositionText}
+        >
+          {AXIS_KEYS.map((axis: keyof GrblAxisPosition) => (
+            <div key={axis} className={styles.axis}>
+              <dt>{t(AXIS_LABEL_KEYS[axis])}</dt>
+              <dd>{getAxisText(status?.workPosition, axis)}</dd>
+            </div>
           ))}
-        </tbody>
-      </table>
-    </Panel>
+        </dl>
+      )}
+      isCompact
+    />
   );
 };

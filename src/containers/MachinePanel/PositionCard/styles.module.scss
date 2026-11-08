@@ -1,38 +1,28 @@
-// One row per position, one column per axis; tabular figures keep the numbers still while the laser moves.
-.positionTable {
-  width: 100%;
-  border-collapse: collapse;
-  color: var(--color-text);
+// The work position in one row, one axis after another; tabular figures keep the numbers still while the laser moves.
+.positionRow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  margin: 0;
   font-family: var(--font-ui);
   font-size: 0.875rem;
-
-  th {
-    color: var(--color-text-muted);
-    font-weight: 600;
-    text-align: right;
-  }
-
-  th[scope='row'] {
-    display: flex;
-    gap: var(--space-1);
-    align-items: center;
-    text-align: left;
-    white-space: nowrap;
-  }
-
-  th,
-  td {
-    padding: 0.125rem 0;
-  }
-
-  td {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-  }
 }
 
-.rowIcon {
+.axis {
   display: inline-flex;
-  color: var(--color-text-muted);
+  gap: var(--space-1);
+  align-items: baseline;
+
+  dt {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
 }

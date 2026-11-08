@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { Panel } from '.';
 
 const PANEL_TITLE = 'Laser';
@@ -24,6 +25,15 @@ describe(Panel.name, () => {
     render(<Panel title={PANEL_TITLE} isCompact><p>{BODY_TEXT}</p></Panel>);
 
     expect(screen.getByRole('region', { name: PANEL_TITLE }).className).toContain('compactPanel');
+  });
+
+  it('keeps a visually hidden title as the heading and region name', () => {
+    const actionComponent: ReactNode = <button type="button">{ACTION_LABEL}</button>;
+
+    render(<Panel title={PANEL_TITLE} headerActionComponent={actionComponent} isTitleVisuallyHidden />);
+
+    expect(screen.getByRole('heading', { level: 2, name: PANEL_TITLE }).className).toContain('hiddenTitle');
+    expect(screen.getByRole('region', { name: PANEL_TITLE })).toBeInTheDocument();
   });
 
   it('stays at its heading line without content', () => {

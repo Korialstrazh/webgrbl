@@ -1,6 +1,6 @@
 /**
- * The read-out in the Status card header: feed and power, each an icon and a short caption beside its value, then the
- * state badge, so the card body holds only Reset and Unlock.
+ * The read-out in the one-line Status card: the state badge, then feed and power, each an icon beside its value and
+ * unit. Their names are read by screen readers and shown as tooltips, so the line stays short.
  *
  * @author michael.morosov
  *
@@ -32,8 +32,9 @@ export const MachineStatusRow = (): ReactNode => {
 
   return (
     <div className={styles.machineStatusRow}>
+      <MachineStateReadout />
       <dl className={styles.values}>
-        <dt>
+        <dt title={t(DEFAULT.MACHINE_STATUS_FEED)}>
           <DashboardOutlined aria-hidden />
           <span className={styles.valueName}>{t(DEFAULT.MACHINE_STATUS_FEED)}</span>
         </dt>
@@ -41,7 +42,7 @@ export const MachineStatusRow = (): ReactNode => {
           {getNumberText(status?.feedRate)}
           <span className={styles.unit}>{t(DEFAULT.FIELD_UNIT_MM_PER_MIN)}</span>
         </dd>
-        <dt>
+        <dt title={t(DEFAULT.MACHINE_STATUS_POWER)}>
           <ThunderboltOutlined aria-hidden />
           <span className={styles.valueName}>{t(DEFAULT.MACHINE_STATUS_POWER)}</span>
         </dt>
@@ -50,7 +51,6 @@ export const MachineStatusRow = (): ReactNode => {
           <span className={styles.unit}>{t(DEFAULT.FIELD_UNIT_PERCENT)}</span>
         </dd>
       </dl>
-      <MachineStateReadout />
     </div>
   );
 };

@@ -124,7 +124,7 @@ describe(MachinePanel.name, () => {
     expect(cardTitles).toEqual(CARD_TITLES_IN_ORDER);
   });
 
-  it('shows state, captioned feed and power, Reset and Unlock in a Status card and only positions in Position', () => {
+  it('shows state, feed and power with units, Reset and Unlock in a one-line Status card', () => {
     const store: AppStore = renderMachinePanel();
 
     connect(store);
@@ -140,13 +140,14 @@ describe(MachinePanel.name, () => {
     expect(within(statusCard).getByText(POWER_PERCENT_TEXT)).toBeInTheDocument();
     expect(within(statusCard).getByText('mm/min')).toBeVisible();
     expect(within(statusCard).getByText('%')).toBeVisible();
-    expect(within(statusCard).getByText('Feed')).toBeVisible();
-    expect(within(statusCard).getByText('Power')).toBeVisible();
+    expect(within(statusCard).getByTitle('Feed')).toBeInTheDocument();
+    expect(within(statusCard).getByTitle('Power')).toBeInTheDocument();
+    expect(within(statusCard).getByRole('heading', { name: STATUS_CARD_TITLE }).className).toContain('hiddenTitle');
     expect(within(statusCard).getByRole('button', { name: RESET_LABEL })).toBeInTheDocument();
     expect(within(statusCard).getByRole('button', { name: UNLOCK_LABEL })).toBeInTheDocument();
     expect(within(statusCard).queryByText(WORK_POSITION_TEXT)).not.toBeInTheDocument();
     expect(within(positionCard).getByText(WORK_POSITION_TEXT)).toBeInTheDocument();
-    expect(within(positionCard).getByText(MACHINE_POSITION_TEXT)).toBeInTheDocument();
+    expect(within(positionCard).getByTitle(new RegExp(MACHINE_POSITION_TEXT))).toBeInTheDocument();
     expect(within(positionCard).queryByText(RUN_LABEL)).not.toBeInTheDocument();
     expect(within(positionCard).queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
   });
@@ -180,6 +181,19 @@ describe(MachinePanel.name, () => {
 
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeEnabled();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveClass('ant-btn-primary');
+  });
+
+  it('shows the Unlock word only in alarm, the lock icon alone otherwise', () => {
+    const store: AppStore = renderMachinePanel();
+
+    connect(store);
+    receiveState(store, GRBL_MACHINE_STATE.IDLE);
+
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).not.toHaveTextContent(UNLOCK_LABEL);
+
+    receiveState(store, GRBL_MACHINE_STATE.ALARM);
+
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveTextContent(UNLOCK_LABEL);
   });
 
   it('dispatches the reset and unlock requests when their buttons are clicked', () => {

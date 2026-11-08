@@ -29,6 +29,8 @@ interface PanelProps {
   noteCaptionText?: string;
   /** Tighter header and body padding, for a dense read-out card in a crowded column. */
   isCompact?: boolean;
+  /** The heading stays for screen readers but is hidden on screen, for a one-line card whose content names itself. */
+  isTitleVisuallyHidden?: boolean;
 }
 
 export const Panel = ({
@@ -39,6 +41,7 @@ export const Panel = ({
   noteText,
   noteCaptionText,
   isCompact = false,
+  isTitleVisuallyHidden = false,
 }: PanelProps): ReactNode => {
   const headingId: string = useId();
   const bodyComponent: ReactNode = noteText ? undefined : children;
@@ -51,7 +54,7 @@ export const Panel = ({
   return (
     <section className={panelClassName} aria-labelledby={headingId}>
       <header className={bodyComponent ? [styles.header, styles.headerAboveBody].join(' ') : styles.header}>
-        <h2 id={headingId} className={styles.title}>
+        <h2 id={headingId} className={isTitleVisuallyHidden ? styles.hiddenTitle : styles.title}>
           {iconComponent && <span className={styles.icon} aria-hidden>{iconComponent}</span>}
           {title}
         </h2>

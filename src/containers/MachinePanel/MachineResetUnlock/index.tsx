@@ -1,5 +1,7 @@
 /**
- * Reset and unlock buttons for the connected laser; unlock is only available during an alarm.
+ * Reset and unlock buttons for the connected laser; unlock is only available during an alarm. While it cannot be
+ * pressed Unlock is its lock icon alone, and it gains its word in an alarm, where it is the way out, so the one-line
+ * Status card keeps room for a four-digit feed.
  *
  * @author michael.morosov
  *
@@ -51,7 +53,7 @@ export const MachineResetUnlock = (): ReactNode => {
         disabled={!canUnlock}
         onClick={() => dispatch(new MachineUnlockRequested())}
       >
-        {t(DEFAULT.MACHINE_CONTROL_UNLOCK)}
+        {canUnlock && t(DEFAULT.MACHINE_CONTROL_UNLOCK)}
       </Button>
     </div>
   );

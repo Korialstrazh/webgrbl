@@ -50,6 +50,7 @@ export const MoveCard = (): ReactNode => {
       iconComponent={<DragOutlined />}
       title={t(DEFAULT.MACHINE_MOVE_TITLE)}
       headerActionComponent={collapseToggleComponent}
+      isCompact
     >
       {isCollapsed ? undefined : <MoveControls id={controlsId} />}
     </Panel>

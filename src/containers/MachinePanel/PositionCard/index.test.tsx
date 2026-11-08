@@ -13,7 +13,6 @@ import { selectIsConnectionPopoverOpen } from '../../../utils/states/ui.overlay.
 
 const DISCONNECTED_TEXT = 'Connect to see the position';
 const WORK_ROW_NAME = 'Work position';
-const LASER_ROW_NAME = 'Laser position';
 
 const newStatus = (workPosition: GrblAxisPosition, machinePosition: GrblAxisPosition): GrblResolvedStatus => ({
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -48,11 +47,10 @@ const receive = (store: AppStore, status: GrblResolvedStatus): void => {
   });
 };
 
-const getRowTexts = (rowName: string): string[] => {
-  const row: HTMLElement | null = screen.getByRole('rowheader', { name: rowName }).closest('tr');
+const getWorkRow = (): HTMLElement => screen.getByLabelText(WORK_ROW_NAME);
 
-  return row ? within(row).getAllByRole('cell').map((cell: HTMLElement): string => cell.textContent ?? '') : [];
-};
+const getWorkRowTexts = (): string[] =>
+  within(getWorkRow()).getAllByRole('definition').map((value: HTMLElement): string => value.textContent ?? '');
 
 describe(PositionCard.name, () => {
   it('while disconnected shows its heading with a plug badge and no numbers', () => {
@@ -74,22 +72,24 @@ describe(PositionCard.name, () => {
     expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
   });
 
-  it('while connected shows the work and laser positions per axis and follows each status report', () => {
+  it('while connected shows the work position in one row, the laser position in its tooltip, per report', () => {
     const store: AppStore = newStore();
 
     renderCard(store);
     connect(store);
 
-    expect(getRowTexts(WORK_ROW_NAME)).toEqual([MISSING_VALUE_TEXT, MISSING_VALUE_TEXT, MISSING_VALUE_TEXT]);
+    expect(getWorkRowTexts()).toEqual([MISSING_VALUE_TEXT, MISSING_VALUE_TEXT, MISSING_VALUE_TEXT]);
 
     receive(store, newStatus({ x: 8, y: 1.25, z: 0 }, { x: 10.5, y: 0, z: -1 }));
 
-    expect(getRowTexts(WORK_ROW_NAME)).toEqual(['8.000', '1.250', '0.000']);
-    expect(getRowTexts(LASER_ROW_NAME)).toEqual(['10.500', '0.000', '-1.000']);
+    expect(getWorkRowTexts()).toEqual(['8.000', '1.250', '0.000']);
+    expect(within(getWorkRow()).getAllByRole('term').map((axis: HTMLElement): string => axis.textContent ?? ''))
+      .toEqual(['X', 'Y', 'Z']);
+    expect(getWorkRow()).toHaveAttribute('title', 'Laser position: X 10.500, Y 0.000, Z -1.000');
 
     receive(store, newStatus({ x: 18, y: 1.25, z: 0 }, { x: 20.5, y: 0, z: -1 }));
 
-    expect(getRowTexts(WORK_ROW_NAME)).toEqual(['18.000', '1.250', '0.000']);
+    expect(getWorkRowTexts()).toEqual(['18.000', '1.250', '0.000']);
     expect(screen.queryByRole('button', { name: DISCONNECTED_TEXT })).not.toBeInTheDocument();
   });
 });

@@ -1,6 +1,14 @@
 .machineResetUnlock {
   display: flex;
-  gap: var(--space-2);
+  flex: none;
+  gap: var(--space-1);
+}
+
+// Short labels in a small type, so both buttons fit in the one-line Status card.
+.machineResetUnlock :global(.ant-btn) {
+  gap: 0.125rem;
+  padding-inline: var(--space-1);
+  font-size: 0.75rem;
 }
 
 // A control that cannot be pressed now wears the locked look (solid outline, dark fill, grey text), clearly apart from
