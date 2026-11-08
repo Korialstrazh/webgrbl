@@ -157,7 +157,7 @@ describe(JobReadinessRow.name, () => {
     expect(selectNarrowRegion(store.getState())).toBe(WORKBENCH_REGION.DESIGN);
   });
 
-  it('opens the Import SVG file picker from the next-step button on an empty bed in a narrow layout', () => {
+  it('opens the Import SVG file picker from the next-step button on an empty bed', () => {
     const store: AppStore = newStore();
     const profile: MachineProfile = newMachineProfile();
 
@@ -177,7 +177,7 @@ describe(JobReadinessRow.name, () => {
     clickSpy.mockRestore();
   });
 
-  it('leaves Import SVG to the empty bed card beside it in a wide layout', () => {
+  it('shows Import SVG as the accent next step on an empty project in a wide layout too', () => {
     const store: AppStore = newStore();
     const profile: MachineProfile = newMachineProfile();
 
@@ -187,7 +187,7 @@ describe(JobReadinessRow.name, () => {
     store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
     render(<Provider store={store}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>);
 
-    expect(screen.queryByRole('button', { name: IMPORT_SVG_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toHaveClass('ant-btn-primary');
     resetMatchMediaMock();
   });
 });

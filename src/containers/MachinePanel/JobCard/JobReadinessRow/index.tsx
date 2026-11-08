@@ -28,9 +28,8 @@ import {
   END_KEY,
   HOME_KEY,
 } from '../../../../utils/browser/browser.events.constants';
-import { useIsWideLayout } from '../../../../utils/hooks/use.is.wide.layout';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
-import { BedViewModeChanged, selectBedViewMode } from '../../../../utils/states/bed.view.state';
+import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
 import {
   isJobReadinessStepOptional,
   JOB_READINESS_STEP,
@@ -39,7 +38,6 @@ import {
 } from '../../../../utils/states/job.readiness.selector';
 import type { JobReadinessStep } from '../../../../utils/states/job.readiness.selector';
 import type { AppDispatch } from '../../../../utils/states/new.store';
-import { selectProjectObjects } from '../../../../utils/states/project.document.state';
 import { ConnectionPopoverOpenChanged } from '../../../../utils/states/ui.overlay.state';
 import { MachineProfilesDialogOpenChanged, NarrowRegionChanged } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
@@ -50,6 +48,7 @@ import { MaterialSheetIcon } from '../../../../views/MaterialSheetIcon';
 import { PROJECT_MATERIAL_SELECT_ID } from '../../../ProjectMaterialSelect/project.material.select.constants';
 import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
 import { POPOVER_KEEP_CLEAR_ATTRIBUTE } from '../../../../utils/layout.constants';
+import { JOB_NEXT_STEP_BUTTON_ID } from './job.readiness.row.constants';
 import styles from './styles.module.scss';
 
 const ARIA_CURRENT_STEP = 'step';
@@ -183,15 +182,9 @@ export const JobReadinessRow = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
   const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
-  const isWideLayout: boolean = useIsWideLayout();
-  const isDesignView: boolean = useSelector(selectBedViewMode) === BED_VIEW_MODE.DESIGN;
-  const hasNoObjects: boolean = !useSelector(selectProjectObjects).length;
-  // The empty bed card beside this card offers Import SVG then, so the import is never on screen three times.
-  const isImportOnBedCard: boolean = isWideLayout && isDesignView && hasNoObjects;
-  const isImportNextOnBedCard: boolean = isImportOnBedCard && nextStep === JOB_READINESS_STEP.DESIGN;
-  const nextLook: JobReadinessLook | undefined = isImportNextOnBedCard
-    ? undefined
-    : JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
+  // Every open step gets its accent next-step button, Import SVG on an empty project included.
+  const nextLook: JobReadinessLook | undefined =
+    JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
   const listRef: RefObject<HTMLOListElement | null> = useRef<HTMLOListElement>(null);
   // The step last focused keeps the tab stop; until then it is the next step, or the first when all are done.
   const [focusedStep, setFocusedStep] = useState<JobReadinessStep | undefined>(undefined);
@@ -264,6 +257,7 @@ export const JobReadinessRow = (): ReactNode => {
         <Button
           type={ANTD_BUTTON_TYPE_PRIMARY}
           block
+          id={JOB_NEXT_STEP_BUTTON_ID}
           {...POPOVER_KEEP_CLEAR_PROPS}
           icon={nextLook.actionIconComponent ?? nextLook.iconComponent}
           onClick={() => goToStep(nextLook.step)}

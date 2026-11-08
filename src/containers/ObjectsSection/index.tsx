@@ -29,6 +29,7 @@ import {
 } from '../../utils/states/project.selection.state';
 import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
 import { BED_EMPTY_IMPORT_BUTTON_ID } from '../BedEmptyCard/bed.empty.card.constants';
+import { JOB_NEXT_STEP_BUTTON_ID } from '../MachinePanel/JobCard/JobReadinessRow/job.readiness.row.constants';
 import { ObjectRow } from './ObjectRow';
 import { ObjectTransformFields } from './ObjectTransformFields';
 import styles from './styles.module.scss';
@@ -63,7 +64,9 @@ export const ObjectsSection = (): ReactNode => {
       return;
     }
 
-    const importButton: HTMLElement | null = document.getElementById(BED_EMPTY_IMPORT_BUTTON_ID);
+    // The bed card's Import SVG in a narrow layout, the Job card's Import SVG next step in a wide one.
+    const importButton: HTMLElement | null = document.getElementById(BED_EMPTY_IMPORT_BUTTON_ID)
+      ?? document.getElementById(JOB_NEXT_STEP_BUTTON_ID);
 
     importButton?.focus();
 

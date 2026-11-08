@@ -22,6 +22,15 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { newToolpathMachineArea } from '../../utils/toolpath/test.support/new.toolpath.machine.area';
 import { OBJECT_KIND } from './objects.section.constants';
 import { BedEmptyCard } from '../BedEmptyCard';
+import { JobReadinessRow } from '../MachinePanel/JobCard/JobReadinessRow';
+import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
+import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
+import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
+import {
+  installMatchMediaMock,
+  resetMatchMediaMock,
+  setMatchMediaMatches,
+} from '../../utils/test.support/match.media.mock';
 
 const FIRST_ID = 'first';
 const SECOND_ID = 'second';
@@ -296,6 +305,35 @@ describe(ObjectsSection.name, () => {
     fireEvent.click(screen.getByRole('button', { name: `Delete ${FIRST_NAME}` }));
 
     expect(screen.getByRole('button', { name: IMPORT_LABEL })).toHaveFocus();
+  });
+
+  it('moves focus to the Job card Import SVG next step after the last delete in a wide layout', () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile();
+
+    installMatchMediaMock();
+    setMatchMediaMatches(true);
+    act(() => {
+      store.dispatch(new MachineProfileSaved({ profile }));
+      store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+      store.dispatch(new ProjectDocumentLoaded({
+        document: { objects: [newProjectObject({ id: FIRST_ID, name: FIRST_NAME })], layers: [] },
+      }));
+    });
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <SectionWithEmptyBedCard />
+          <JobReadinessRow />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: `Delete ${FIRST_NAME}` }));
+
+    expect(screen.getAllByRole('button', { name: IMPORT_LABEL })).toHaveLength(1);
+    expect(screen.getByRole('button', { name: IMPORT_LABEL })).toHaveFocus();
+    resetMatchMediaMock();
   });
 
   it('moves focus to the next row after a delete, and to the empty hint without an empty bed card', () => {
