@@ -29,6 +29,7 @@ import type { SvgExpandedDocument } from './interfaces/SvgExpandedDocument';
 import type { SvgMatrix } from './interfaces/SvgMatrix';
 import { isSvgZeroLength } from './is.svg.zero.length';
 import { getSvgTransformMatrix } from './parse.svg.transform';
+import { removeSvgDisabledElements } from '../tree/remove.svg.disabled.elements';
 import { SVG_NOT_RENDERED_ANCESTOR_SELECTOR } from './svg.geometry.constants';
 import {
   SVG_GROUP_ELEMENT_NAME,
@@ -246,5 +247,10 @@ export const getSvgExpandedDocument = (svgText: string): SvgExpandedDocument | u
     return undefined;
   }
 
-  return { svgDocument, isUseLimitReached: expandSvgUseElements(svgDocument) };
+  const isUseLimitReached: boolean = expandSvgUseElements(svgDocument);
+
+  // Turned-off content is still in the text, so it can be turned back on, but nothing that reads geometry sees it.
+  removeSvgDisabledElements(svgDocument);
+
+  return { svgDocument, isUseLimitReached };
 };

@@ -19,7 +19,7 @@ import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
-import { isObjectOutsideBed } from '../../utils/project/is.object.outside.bed';
+import { isObjectArtworkOutsideBed } from '../../utils/project/is.object.artwork.outside.bed';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectObjectsDeleted, selectProjectObjects } from '../../utils/states/project.document.state';
 import {
@@ -122,7 +122,7 @@ export const ObjectsSection = (): ReactNode => {
             key={projectObject.id}
             projectObject={projectObject}
             isSelected={selectedObjectIds.includes(projectObject.id)}
-            isOutsideBed={isObjectOutsideBed(projectObject, bed)}
+            isOutsideBed={isObjectArtworkOutsideBed(projectObject, bed)}
             onSelect={(objectId: string) => dispatch(new ProjectSelectionChanged({ objectIds: [objectId] }))}
             onDelete={deleteObject}
           />

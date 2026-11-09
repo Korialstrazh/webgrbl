@@ -1,10 +1,15 @@
 .row {
   display: flex;
-  align-items: stretch;
-  gap: var(--space-1);
+  flex-direction: column;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-2);
+}
+
+.rowMain {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
 }
 
 .selectedRow {

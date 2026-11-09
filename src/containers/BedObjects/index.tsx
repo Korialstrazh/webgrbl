@@ -23,7 +23,7 @@ import { PRIMARY_POINTER_BUTTON } from '../../utils/browser/browser.events.const
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
-import { isObjectOutsideBed } from '../../utils/project/is.object.outside.bed';
+import { isObjectArtworkOutsideBed } from '../../utils/project/is.object.artwork.outside.bed';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectProjectLayers, selectProjectObjects } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
@@ -189,7 +189,7 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
             bedHeightMm={dimensions.heightMm}
             isSelected={isSelected}
             hasHandles={isSelected && hasSingleSelection}
-            isOutsideBed={isObjectOutsideBed(drawnObject, dimensions)}
+            isOutsideBed={isObjectArtworkOutsideBed(drawnObject, dimensions)}
             layerLooks={layerLooks}
             handleSizes={handleSizes}
             onPointerDown={handleObjectPointerDown}

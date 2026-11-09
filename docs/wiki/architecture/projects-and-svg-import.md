@@ -32,6 +32,8 @@ A project is the design on the bed: a list of SVG objects with a size, position 
 - **Tests.** Sagas run against fake-indexeddb; `LIVE_STORE_TASK_REGISTRY` (`live.store.tasks.ts`) keeps every `newStore()` root task so teardown cancels them and no store writes to storage during the next test.
 - **Test style.** The import saga tests run `newStore()` with real `File` objects and wait with `vi.waitFor` for the expected objects or toast; the sanitiser tests parse in jsdom. Work bounds (the `<use>` budget, wide nodes) are tested with `countDomWalkSteps` (`src/utils/test.support/`), which counts the `firstChild`/`nextSibling` steps of a run instead of timing it, so a loaded machine never fails them.
 
+- **Element tree.** `ObjectElementTree` (opened from an Objects row) lists Inkscape layers, groups and shapes from `getSvgElementTree`. Skip, recolour and delete edit the SVG text (`src/utils/svg/tree/`): skip sets `data-webgrbl-disabled`, which `getSvgExpandedDocument` strips, so every geometry reader (toolpath, layers via `getObjectPaints`, artwork frame, warnings) ignores the content; the bed shows it dimmed. Edits go through `ProjectObjectSvgTextChangeRequested` (command queue, layers derived) and `ProjectObjectSvgTextChanged` (one undo step, autosaved). Off-bed checks use the drawn geometry (`isObjectArtworkOutsideBed`). Inkscape labels survive import as `data-webgrbl-label`.
+
 ## Source
 
 - `src/utils/project/` (`project.constants.ts`, `new.project.object.ts`, `get.object.corners.ts`, `is.object.outside.bed.ts`, `interfaces/`)
@@ -43,6 +45,7 @@ A project is the design on the bed: a list of SVG objects with a size, position 
 - `src/utils/states/root.saga.ts`, `src/utils/states/root.reducer.ts`
 - `src/utils/bed/get.bed.dimensions.ts`, `src/utils/hooks/use.bed.dimensions.ts`
 - `src/utils/project/` (`get.normalized.rotation.deg.ts`, `get.clamped.object.size.mm.ts`, `get.object.transform.with.field.ts`)
+- `src/utils/svg/tree/`, `src/utils/states/project.object.svg.text.saga.ts`, `src/utils/project/is.object.artwork.outside.bed.ts`, `src/utils/project/get.objects.with.svg.text.ts`
 - `src/containers/BedObjects/`, `src/containers/ObjectsSection/`, `src/containers/SvgImportButton/`, `src/containers/HistoryHotkeys/`, `src/containers/SaveHotkey/`, `src/containers/OpenProjectDialog/`, `src/containers/ProjectFileInput/`, `src/containers/ProjectRenameInput/`, `src/containers/BedPanel/use.svg.file.drop.ts`
 - `src/containers/TopBar/`, `src/containers/DesignPanel/`, `src/routes/AppRoute/index.tsx`
 - `src/utils/browser/browser.events.constants.ts` (`UNDO_KEY`, `REDO_KEY`, `SAVE_KEY`, arrow keys), `can.shortcut.act.ts`, `has.command.modifier.ts` (Ctrl or Cmd without Alt: undo, redo, save), `has.ctrl.meta.or.alt.modifier.ts` (any of Ctrl, Cmd, Alt: the bed keys leave such presses alone)

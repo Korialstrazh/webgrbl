@@ -28,10 +28,15 @@ import { ProjectNotFoundError } from '../project/project.not.found.error';
 import { PROJECT_REPOSITORY } from '../project/project.repository';
 import type { Action } from './action';
 import { watchProjectAutosave } from './project.autosave.saga';
-import { SampleJobAddRequested, SvgFilesImportRequested } from './project.document.state';
+import {
+  ProjectObjectSvgTextChangeRequested,
+  SampleJobAddRequested,
+  SvgFilesImportRequested,
+} from './project.document.state';
 import { showProjectErrorToast } from './project.error.toast.saga';
 import { exportProjectFile } from './project.file.export.saga';
 import { importProjectFile } from './project.file.import.saga';
+import { changeProjectObjectSvgText } from './project.object.svg.text.saga';
 import { openLoadedProject } from './project.open.saga';
 import { openStoredOrNewProject } from './project.open.stored.or.new.saga';
 import { saveOpenProjectDocument } from './project.save.saga';
@@ -72,6 +77,7 @@ const PROJECT_COMMAND_ACTION_TYPES: string[] = [
   // one sent while the first project opens waits for it.
   SvgFilesImportRequested.type,
   SampleJobAddRequested.type,
+  ProjectObjectSvgTextChangeRequested.type,
 ];
 
 /**
@@ -210,6 +216,8 @@ function* handleProjectCommand(action: Action<unknown>): Generator {
     return yield call(importSvgFiles, action as SvgFilesImportRequested);
   case SampleJobAddRequested.type:
     return yield call(addSampleJob);
+  case ProjectObjectSvgTextChangeRequested.type:
+    return yield call(changeProjectObjectSvgText, action as ProjectObjectSvgTextChangeRequested);
   default:
     return undefined;
   }

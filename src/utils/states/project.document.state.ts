@@ -23,6 +23,7 @@ import { getLayersWithPaletteEntryLink } from '../layers/get.layers.with.palette
 import { getLayersWithSettings } from '../layers/get.layers.with.settings';
 import { getUsedLayerKeys } from '../layers/get.used.layer.keys';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { getObjectsWithSvgText } from '../project/get.objects.with.svg.text';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import type { ProjectObjectTransform } from '../project/interfaces/ProjectObjectTransform';
@@ -37,6 +38,8 @@ import type { LayerToggledPayload } from './interfaces/LayerToggledPayload';
 import type { ProjectDocumentPayload } from './interfaces/ProjectDocumentPayload';
 import type { ProjectMaterialSelectedPayload } from './interfaces/ProjectMaterialSelectedPayload';
 import type { ProjectObjectIdsPayload } from './interfaces/ProjectObjectIdsPayload';
+import type { ProjectObjectSvgTextChangedPayload } from './interfaces/ProjectObjectSvgTextChangedPayload';
+import type { ProjectObjectSvgTextPayload } from './interfaces/ProjectObjectSvgTextPayload';
 import type { ProjectObjectTransformsPayload } from './interfaces/ProjectObjectTransformsPayload';
 import type { ProjectObjectsPayload } from './interfaces/ProjectObjectsPayload';
 import type { SvgFilesPayload } from './interfaces/SvgFilesPayload';
@@ -76,6 +79,15 @@ export class ProjectObjectsTransformed extends Action<ProjectObjectTransformsPay
 
 export class ProjectObjectsDeleted extends Action<ProjectObjectIdsPayload> {
   public static readonly type: string = actionType('project objects deleted');
+}
+
+/** An element tree edit: turning content off or on, deleting it, or giving it another colour. */
+export class ProjectObjectSvgTextChangeRequested extends Action<ProjectObjectSvgTextPayload> {
+  public static readonly type: string = actionType('project object svg text change requested');
+}
+
+export class ProjectObjectSvgTextChanged extends Action<ProjectObjectSvgTextChangedPayload> {
+  public static readonly type: string = actionType('project object svg text changed');
 }
 
 export class ProjectUndoRequested extends Action {
@@ -213,6 +225,21 @@ const getStateWithoutObjects = (state: ProjectDocumentState, objectIds: string[]
     : getStateWithChange(state, { ...state.document, objects: remainingObjects });
 };
 
+const getStateWithObjectSvgText = (
+  state: ProjectDocumentState,
+  { objectId, svgText, layers: derivedLayers }: ProjectObjectSvgTextChangedPayload,
+): ProjectDocumentState => {
+  const changedObjects: ProjectObject[] | undefined = getObjectsWithSvgText(state.document.objects, objectId, svgText);
+
+  return changedObjects
+    ? getStateWithChange(state, {
+      ...state.document,
+      objects: changedObjects,
+      layers: getLayersWithNewLayers(state.document.layers, derivedLayers),
+    })
+    : state;
+};
+
 const getStateAfterUndo = (state: ProjectDocumentState): ProjectDocumentState => {
   const previousDocument: ProjectDocument | undefined = state.past[state.past.length - 1];
 
@@ -271,6 +298,8 @@ export const projectDocumentReducer = (
     return getStateWithTransforms(state, (action as ProjectObjectsTransformed).payload.transforms);
   case ProjectObjectsDeleted.type:
     return getStateWithoutObjects(state, (action as ProjectObjectsDeleted).payload.objectIds);
+  case ProjectObjectSvgTextChanged.type:
+    return getStateWithObjectSvgText(state, (action as ProjectObjectSvgTextChanged).payload);
   case ProjectMaterialSelected.type:
     return getStateWithMaterial(state, (action as ProjectMaterialSelected).payload.materialId);
   case ProjectUndoRequested.type:

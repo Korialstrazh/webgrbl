@@ -93,6 +93,20 @@ Layers in a file: a version 2 or 3 file carries `layers`; each one is type-check
 - `LayerSettingsChanged {layerKey, settings}` (settings clamped to the palette ranges, a non-finite value ignored), `LayerToggled {layerKey, enabled}` and `LayersReordered {layerKeys}` (the visible keys in the new order; hidden layers keep their relative order after them) are each one undo step; a change that changes nothing makes no step. All three trigger the autosave.
 - Paints of an object are read once per SVG text (`getObjectPaints`, a cache of the 200 most recently used texts).
 
+## Element tree of an object
+
+The tree button (`ApartmentOutlined`) on an Objects row opens `ObjectElementTree`: the object's Inkscape layers, groups and shapes, named by Inkscape label, then id, then element name. On import, `copyInkscapeTreeAttributes` keeps `inkscape:label` as `data-webgrbl-label` and a layer `inkscape:groupmode` as `data-webgrbl-layer`, since the sanitiser drops Inkscape attributes. Projects imported before this have no labels, so their nodes show the id or element name.
+
+Each node has three icon buttons, all one undo step through `ProjectObjectSvgTextChangeRequested` (the project command saga derives layers for new colours, then puts `ProjectObjectSvgTextChanged`):
+
+- **Eye**: `getSvgTextWithElementDisabled` sets or removes `data-webgrbl-disabled`. `getSvgExpandedDocument` removes those elements after parsing, so the toolpath, G-code, layers, warnings, the artwork frame (object size and selection box) and `isObjectArtworkOutsideBed` all ignore them. The bed draws them dimmed (`getSvgTextOfDisabledElements`, or the `getSvgDisplayText` style rule when the object is drawn as an image).
+- **Colour**: `getSvgTextWithElementColour` writes the palette colour as inline `fill`/`stroke` on every painted shape under the node (a paint of none stays none), so the content joins that colour's layer.
+- **Trash**: `getSvgTextWithoutElement` removes the element.
+
+Nodes are addressed by child-index paths (`1.0.2`) from the root. The state lives in the SVG text, so it is saved, exported and undone with the object, and old projects need no migration.
+
+The off-bed note on the Objects row and the red outline on the bed now use the drawn geometry (`isObjectArtworkOutsideBed`), not the SVG page box.
+
 ## Use it from code
 
 Feature code never touches Dexie; it goes through `PROJECT_REPOSITORY` (`src/utils/project/project.repository.ts`) or dispatches an action the sagas handle.

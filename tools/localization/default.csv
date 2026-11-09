@@ -632,6 +632,18 @@ OBJECTS_LOCK_RATIO;Lock aspect ratio
 OBJECTS_OUTSIDE_BED;Outside the bed
 OBJECTS_SIZE;{{widthMm}} × {{heightMm}} mm
 OBJECTS_SIZE_HINT;Size of the drawing itself: the size that burns.
+OBJECTS_TREE_DELETE;Delete {{name}}
+OBJECTS_TREE_EMPTY;No layers or shapes to list.
+OBJECTS_TREE_HIDE;Hide the layers and shapes of {{name}}
+OBJECTS_TREE_KIND_GROUP;Group
+OBJECTS_TREE_KIND_LAYER;Layer
+OBJECTS_TREE_KIND_SHAPE;Shape
+OBJECTS_TREE_LABEL;Layers and shapes of {{name}}
+OBJECTS_TREE_RECOLOUR;Colour of {{name}}: pick a palette colour to burn it with
+OBJECTS_TREE_RECOLOUR_TO;Burn with {{entry}}
+OBJECTS_TREE_SHOW;Show the layers and shapes of {{name}}
+OBJECTS_TREE_TURN_OFF;Skip {{name}}: it is not burned
+OBJECTS_TREE_TURN_ON;Burn {{name}} again
 OPEN_PROJECT_DELETE;Delete
 OPEN_PROJECT_DELETE_CANCEL;Cancel
 OPEN_PROJECT_DELETE_CONFIRM;Delete the project {{name}}?

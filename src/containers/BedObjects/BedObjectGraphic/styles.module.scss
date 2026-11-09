@@ -69,3 +69,9 @@
 .selectionHandle[data-handle='rotate'] {
   cursor: grab;
 }
+
+// Content turned off in the element tree: still shown, so it can be found and turned back on, but faint.
+.disabledArtwork {
+  opacity: 0.25;
+  pointer-events: none;
+}

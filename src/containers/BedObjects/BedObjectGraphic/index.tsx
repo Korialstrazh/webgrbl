@@ -22,6 +22,8 @@ import { useObjectArtworkFrame } from '../../../utils/hooks/use.object.artwork.f
 import { getSvgDataUrl } from '../../../utils/project/get.svg.data.url';
 import type { ProjectObject } from '../../../utils/project/interfaces/ProjectObject';
 import { HALF_BOX_FACTOR } from '../../../utils/project/project.constants';
+import { getSvgDisplayText } from '../../../utils/svg/tree/get.svg.display.text';
+import { getSvgTextOfDisabledElements } from '../../../utils/svg/tree/get.svg.text.of.disabled.elements';
 import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import {
   BED_OBJECT_HANDLE,
@@ -97,6 +99,15 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
     () => getObjectDesignDrawing({ svgText, intrinsicWidthMm, intrinsicHeightMm }),
     [svgText, intrinsicWidthMm, intrinsicHeightMm],
   );
+  // Turned-off content is left out of the drawing above and drawn again, dimmed, from its own text.
+  const disabledDrawing: ObjectDesignDrawing | undefined = useMemo(() => {
+    const disabledSvgText: string | undefined = getSvgTextOfDisabledElements(svgText);
+
+    return disabledSvgText
+      ? getObjectDesignDrawing({ svgText: disabledSvgText, intrinsicWidthMm, intrinsicHeightMm })
+      : undefined;
+  }, [svgText, intrinsicWidthMm, intrinsicHeightMm]);
+  const displaySvgText: string = useMemo(() => getSvgDisplayText(svgText), [svgText]);
   const artworkFrame: ObjectArtworkFrame = useObjectArtworkFrame(projectObject);
   const left: number = -widthMm * HALF_BOX_FACTOR;
   const top: number = -heightMm * HALF_BOX_FACTOR;
@@ -133,7 +144,7 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
     >
       {isDesignDrawnAsAuthored(designDrawing, layerLooks) ? (
         <image
-          href={getSvgDataUrl(svgText)}
+          href={getSvgDataUrl(displaySvgText)}
           x={left}
           y={top}
           width={widthMm}
@@ -152,6 +163,11 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
           />
           <g transform={getObjectArtworkSvgTransform(projectObject)}>
             <ObjectDesignArtwork designDrawing={designDrawing} layerLooks={layerLooks} />
+            {disabledDrawing && (
+              <g className={styles.disabledArtwork} data-disabled-artwork>
+                <ObjectDesignArtwork designDrawing={disabledDrawing} layerLooks={layerLooks} />
+              </g>
+            )}
           </g>
         </>
       )}

@@ -11,6 +11,7 @@
 import { hasRemoteStyleReference } from './has.remote.style.reference';
 import { isEditorDataAttribute } from './is.editor.data.attribute';
 import { isSafeSvgHref } from './is.safe.svg.href';
+import { copyInkscapeTreeAttributes } from './tree/copy.inkscape.tree.attributes';
 import {
   SVG_ANCHOR_ELEMENT_NAME,
   SVG_ANIMATION_VALUE_ATTRIBUTE_NAMES,
@@ -59,6 +60,8 @@ const isAttributeRemoved = (attribute: Attr): boolean =>
 
 export const sanitizeSvgAttributes = (element: Element): SvgRemovedContentKind[] => {
   const removedKinds: SvgRemovedContentKind[] = [];
+
+  copyInkscapeTreeAttributes(element);
 
   for (const attribute of Array.from(element.attributes)) {
     if (!isAttributeRemoved(attribute)) {
