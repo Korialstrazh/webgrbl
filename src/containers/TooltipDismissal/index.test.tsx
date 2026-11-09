@@ -27,6 +27,19 @@ describe(TooltipDismissal.name, () => {
     expect(dismissHoverTooltips).toHaveBeenCalledTimes(1);
   });
 
+  it('closes the hover tooltips when a card scrolls, telling the element last entered on a touch screen', () => {
+    const cardElement: HTMLDivElement = document.createElement('div');
+
+    document.body.append(cardElement);
+    renderDismissal(newStore());
+
+    fireEvent.mouseOver(cardElement);
+    fireEvent.scroll(cardElement);
+
+    expect(dismissHoverTooltips).toHaveBeenCalledWith(cardElement);
+    cardElement.remove();
+  });
+
   it('closes the hover tooltips when the bed view changes', () => {
     const store: AppStore = newStore();
 

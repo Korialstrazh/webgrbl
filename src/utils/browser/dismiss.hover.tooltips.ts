@@ -12,9 +12,12 @@
  */
 import { HOVERED_ELEMENT_SELECTOR, MOUSE_OUT_EVENT_NAME } from './browser.events.constants';
 
-export const dismissHoverTooltips = (): void => {
+// Without hover (a touch screen) nothing matches :hover, so the element last entered, if still on the page, stands in.
+export const dismissHoverTooltips = (lastEnteredElement?: Element): void => {
   const hoveredElements: NodeListOf<Element> = document.querySelectorAll(HOVERED_ELEMENT_SELECTOR);
-  const innermostHoveredElement: Element | undefined = hoveredElements[hoveredElements.length - 1];
+  const connectedEnteredElement: Element | undefined = lastEnteredElement?.isConnected ? lastEnteredElement : undefined;
+  const innermostHoveredElement: Element | undefined =
+    hoveredElements[hoveredElements.length - 1] ?? connectedEnteredElement;
 
   // With no related target the pointer counts as gone from the page, so every hovered ancestor gets its leave too.
   innermostHoveredElement?.dispatchEvent(new MouseEvent(MOUSE_OUT_EVENT_NAME, { bubbles: true, relatedTarget: null }));
