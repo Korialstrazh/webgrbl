@@ -12,7 +12,7 @@ A project is the design on the bed: SVG objects with a size, position and rotati
 
 ## Coordinates
 
-Objects live in the machine frame in millimetres, X to the right and Y up, with the origin at the front-left of the bed. `xMm` / `yMm` are the front-left corner of the box before rotation, and `rotationDeg` turns counter-clockwise around the box centre. `getObjectCorners` gives the rotated corners; `isObjectOutsideBed` uses them, so a rotated object that pokes out of the bed is flagged ("Outside the bed" in the list, a dashed outline on the bed). Placing an object outside the bed is allowed; nothing is clipped.
+Objects live in the machine frame in millimetres, X to the right and Y up, with the origin at the front-left of the bed. `xMm` / `yMm` are the front-left corner of the box before rotation, and `rotationDeg` turns counter-clockwise around the box centre. `getObjectCorners` gives the rotated corners; `isObjectOutsideBed` uses them, so a rotated object that pokes out of the bed is flagged (a warning chip in the list, a dashed outline on the bed, and drawn muted without the halo). Placing an object outside the bed is allowed; nothing is clipped.
 
 ## Size of an imported SVG
 
