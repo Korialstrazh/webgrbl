@@ -66,8 +66,9 @@
 }
 
 // A layer that stays home steps back, so the rows that will burn stand out; the eye keeps full strength to be found.
+// Dimmed just enough to keep its muted stats above 4.5:1 on every surface.
 .row:has(.sendToggle input:not(:checked)) .openButton {
-  opacity: 0.45;
+  opacity: 0.75;
 }
 
 // Drag it with the pointer, or focus it and use the up and down arrow keys.

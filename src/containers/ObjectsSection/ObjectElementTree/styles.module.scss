@@ -16,10 +16,10 @@
   min-width: 0;
 }
 
-// A skipped node and everything under it: faint, like on the bed, but its buttons stay readable.
+// A skipped node and everything under it: dimmed and struck through, like on the bed, yet still above 4.5:1.
 .skippedNode .name,
 .skippedNode .kindIcon {
-  opacity: 0.45;
+  opacity: 0.75;
   text-decoration: line-through;
 }
 
