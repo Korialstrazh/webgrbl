@@ -53,7 +53,7 @@ const X_LABEL = 'X';
 const LOCK_LABEL = 'Lock aspect ratio';
 const OUTSIDE_NOTE = 'Outside the bed';
 const WARNING_CHIP_NAME = /^Problems with /;
-const FIRST_SIZE_TEXT = `100.0 ${MULTIPLICATION_SIGN} 50.0 mm`;
+const FIRST_SIZE_TEXT = `100 ${MULTIPLICATION_SIGN} 50.0 mm`;
 const SECOND_SIZE_TEXT = `20.0 ${MULTIPLICATION_SIGN} 20.0 mm`;
 const SECOND_SIZE_MM = 20;
 const OBJECTS_LIST_NAME = 'Project objects';
@@ -70,7 +70,7 @@ const MARGIN_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="120mm" h
   + '<rect x="5" y="5" width="110" height="70" fill="none" stroke="#ff0000"/></svg>';
 const MARGIN_PAGE_WIDTH_MM = 120;
 const MARGIN_PAGE_HEIGHT_MM = 80;
-const MARGIN_ARTWORK_SIZE_TEXT = `110.0 ${MULTIPLICATION_SIGN} 70.0 mm`;
+const MARGIN_ARTWORK_SIZE_TEXT = `110 ${MULTIPLICATION_SIGN} 70.0 mm`;
 const SECOND_X_MM = 80;
 const SECOND_X_TEXT = '80.0';
 const MOVED_X_MM = 40;

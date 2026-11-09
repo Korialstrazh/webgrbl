@@ -67,10 +67,9 @@
   white-space: nowrap;
 }
 
+// The numbers never end in an ellipsis: a size too long for the row wraps after the icon instead.
 .size {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
   font-family: var(--font-ui);
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;

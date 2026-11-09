@@ -25,11 +25,12 @@ import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.c
 import type { ObjectWarning } from '../../../utils/toolpath/interfaces/ObjectWarning';
 import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import type { ObjectRowProps } from '../interfaces/ObjectRowProps';
-import { OBJECT_KIND, OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
+import { OBJECT_KIND } from '../objects.section.constants';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { TestSampleIcon } from '../../../views/TestSampleIcon';
 import { ObjectElementTree } from '../ObjectElementTree';
 import { ObjectWarningChip } from '../ObjectWarningChip';
+import { getCompactMillimetreText } from './get.compact.millimetre.text';
 import { getObjectWarningKinds } from './get.object.warning.kinds';
 import styles from './styles.module.scss';
 
@@ -55,6 +56,8 @@ export const ObjectRow = ({
   const kindText: string = t(isSample ? DEFAULT.OBJECTS_KIND_SAMPLE : DEFAULT.OBJECTS_KIND_SVG);
   const [isTreeOpen, setIsTreeOpen] = useState<boolean>(false);
   const treeToggleTextKey: string = isTreeOpen ? DEFAULT.OBJECTS_TREE_HIDE : DEFAULT.OBJECTS_TREE_SHOW;
+  const sizeWidthMm: number = projectObject.widthMm * artworkFrame.widthFraction;
+  const sizeHeightMm: number = projectObject.heightMm * artworkFrame.heightFraction;
   const rowRef: RefObject<HTMLLIElement | null> = useRef<HTMLLIElement>(null);
 
   // An opened tree can fall below the fold of the panel: the panel scrolls just enough to show it.
@@ -87,8 +90,8 @@ export const ObjectRow = ({
             <span className={styles.size} title={t(DEFAULT.OBJECTS_SIZE_HINT)}>
               <ColumnWidthOutlined className={styles.sizeIcon} aria-hidden />
               {t(DEFAULT.OBJECTS_SIZE, {
-                widthMm: (projectObject.widthMm * artworkFrame.widthFraction).toFixed(OBJECT_MILLIMETRE_DECIMALS),
-                heightMm: (projectObject.heightMm * artworkFrame.heightFraction).toFixed(OBJECT_MILLIMETRE_DECIMALS),
+                widthMm: getCompactMillimetreText(sizeWidthMm),
+                heightMm: getCompactMillimetreText(sizeHeightMm),
               })}
             </span>
           </span>
