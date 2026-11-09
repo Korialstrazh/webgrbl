@@ -243,6 +243,22 @@ describe(ObjectsSection.name, () => {
     expect(xField.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it('scrolls an opened element tree into view, just as far as needed', () => {
+    const store: AppStore = newStore();
+    const scrollSpy: MockInstance<Element['scrollIntoView']> = vi.spyOn(Element.prototype, 'scrollIntoView');
+
+    loadObjects(store);
+    renderSection(store);
+    scrollSpy.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: `Show the layers and shapes of ${FIRST_NAME}` }));
+
+    const hideTreeName: string = `Hide the layers and shapes of ${FIRST_NAME}`;
+    const openedRow: Element | null = screen.getByRole('button', { name: hideTreeName }).closest('li');
+
+    expect(scrollSpy.mock.contexts).toContain(openedRow);
+    expect(scrollSpy).toHaveBeenCalledWith({ block: 'nearest' });
+  });
+
   it('scrolls the fields and the row of a new selection into view', () => {
     const store: AppStore = newStore();
     const scrollSpy: MockInstance<Element['scrollIntoView']> = vi.spyOn(Element.prototype, 'scrollIntoView');

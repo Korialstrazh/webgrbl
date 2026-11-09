@@ -12,8 +12,8 @@
  */
 import { ApartmentOutlined, CloseOutlined, ColumnWidthOutlined, FileImageOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
@@ -32,6 +32,8 @@ import { ObjectElementTree } from '../ObjectElementTree';
 import { ObjectWarningChip } from '../ObjectWarningChip';
 import { getObjectWarningKinds } from './get.object.warning.kinds';
 import styles from './styles.module.scss';
+
+const TREE_SCROLL_INTO_VIEW_OPTIONS: ScrollIntoViewOptions = { block: 'nearest' };
 
 export const ObjectRow = ({
   projectObject,
@@ -53,9 +55,17 @@ export const ObjectRow = ({
   const kindText: string = t(isSample ? DEFAULT.OBJECTS_KIND_SAMPLE : DEFAULT.OBJECTS_KIND_SVG);
   const [isTreeOpen, setIsTreeOpen] = useState<boolean>(false);
   const treeToggleTextKey: string = isTreeOpen ? DEFAULT.OBJECTS_TREE_HIDE : DEFAULT.OBJECTS_TREE_SHOW;
+  const rowRef: RefObject<HTMLLIElement | null> = useRef<HTMLLIElement>(null);
+
+  // An opened tree can fall below the fold of the panel: the panel scrolls just enough to show it.
+  useEffect(() => {
+    if (isTreeOpen) {
+      rowRef.current?.scrollIntoView(TREE_SCROLL_INTO_VIEW_OPTIONS);
+    }
+  }, [isTreeOpen]);
 
   return (
-    <li className={rowClassName}>
+    <li ref={rowRef} className={rowClassName}>
       <div className={styles.rowMain}>
         <Button
           className={styles.selectButton}
