@@ -1,39 +1,28 @@
 @use '../../styles/layout' as layout;
 
-// Wide, the stack sits in the free right part of the status strip: right of the job size, estimate and cursor
-// readouts (layout.$status-strip-readouts-width), left of the console toggle, and clear of the bed drawing and STOP.
-// z-index 40 keeps it above the console overlay (z-index 30). Extra toasts grow upward and scroll inside the stack;
-// every toast stretches to the widest one, so a stack reads as one aligned column.
+// The stack is pinned top-centre, just below the top bar, and stacked above STOP (layout.$toast-above-stop-z-index)
+// so no toast ever hides behind it. Extra toasts grow downward and scroll inside the stack; every toast stretches to
+// the widest one, so a stack reads as one aligned column.
 .toastStack {
   position: fixed;
-  right: calc(var(--space-4) + #{layout.$status-strip-toggle-width} + var(--space-2));
-  bottom: calc((#{layout.$status-strip-height} - 2.5rem) / 2);
-  z-index: 40;
+  top: calc(#{layout.$top-bar-height} + var(--space-2));
+  left: 50%;
+  z-index: layout.$toast-above-stop-z-index;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-2);
   width: max-content;
-  // Wide enough that a usual message fits on one line and the toast stays within the strip height.
-  max-width: min(
-    40rem,
-    calc(100vw - #{layout.$status-strip-readouts-width} - #{layout.$status-strip-toggle-width} - 2 * var(--space-4))
-  );
-  max-height: calc(100dvh - #{layout.$top-bar-height} - #{layout.$status-strip-height} - 2 * var(--space-4));
+  max-width: min(40rem, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100dvh - #{layout.$top-bar-height} - 2 * var(--space-4));
   overflow-y: auto;
+  transform: translateX(-50%);
   pointer-events: none;
 }
 
-// Narrow, the strip has no free room, so the stack sits just above it and the sticky STOP bar, at the right edge where
-// a drawing placed from the bed origin (bottom left) is least likely to be. It never covers the readouts or STOP.
-.aboveStopBar {
-  right: var(--space-4);
-  bottom: calc(#{layout.$sticky-stop-bar-height} + #{layout.$status-strip-height} + var(--space-2));
+// Narrow, the stack keeps a shorter line so it covers less of the region below it.
+.narrow {
   max-width: min(24rem, calc(100vw - 2 * var(--space-4)));
-  max-height: calc(
-    100dvh - #{layout.$top-bar-height} - #{layout.$status-strip-height} - #{layout.$sticky-stop-bar-height}
-      - 2 * var(--space-4)
-  );
 }
 
 .toast {

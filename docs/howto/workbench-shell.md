@@ -126,3 +126,7 @@ A left drag on empty bed pans the view, with or without a selection; a press on 
 
 
 The view switch marks the current view with a bold white caption on the accent tint, an accent icon and an accent bar along its bottom edge; the other views have muted captions. Every antd `Segmented` (view switch, narrow region bar, step sizes, toolpath and playback modes, layer mode) passes `tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}`: antd makes the group box focusable as well as the checked option, so without it each switch took two tab stops. `antd.upgrade.guard.segmented.test.tsx` guards that antd keeps taking the prop.
+
+## Toasts
+
+Messages appear at the top centre of the window, above everything including STOP. Each one closes itself after 5 seconds, and its close button (x) removes it sooner.

@@ -22,7 +22,7 @@ const ANTD_BUTTON_CLASS_NAME = 'ant-btn';
 const ANTD_SMALL_BUTTON_CLASS_NAME = 'ant-btn-sm';
 const TWICE_LABEL = '\u00D72';
 
-const ABOVE_STOP_BAR_CLASS_NAME = 'aboveStopBar';
+const NARROW_CLASS_NAME = 'narrow';
 
 const renderToastStack = (isWide: boolean = true): AppStore => {
   const store: AppStore = newStore();
@@ -117,16 +117,16 @@ describe(ToastStack.name, () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('lifts the stack above the sticky STOP bar in a narrow window', () => {
+  it('keeps a shorter stack in a narrow window', () => {
     renderToastStack(false);
 
-    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).toContain(ABOVE_STOP_BAR_CLASS_NAME);
+    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).toContain(NARROW_CLASS_NAME);
   });
 
-  it('keeps the stack on the status strip in a wide window, with no stop bar to clear', () => {
+  it('uses the full stack width in a wide window', () => {
     renderToastStack(true);
 
-    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).not.toContain(ABOVE_STOP_BAR_CLASS_NAME);
+    expect(screen.getByTestId(TOAST_STACK_TEST_ID).className).not.toContain(NARROW_CLASS_NAME);
   });
 });
 

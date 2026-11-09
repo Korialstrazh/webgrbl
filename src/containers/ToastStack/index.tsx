@@ -1,7 +1,7 @@
 /**
- * The toasts on screen, newest last. Each one can be dismissed; warnings and errors are announced as alerts. The
- * stack is pinned bottom-centre over the status strip, clear of the bed drawing and the region switcher; in a narrow
- * window it is lifted above the sticky STOP bar, and extra toasts scroll inside it.
+ * The toasts on screen, newest last. Each one can be dismissed and every one dismisses itself after a few seconds;
+ * warnings and errors are announced as alerts. The stack is pinned top-centre above STOP, and extra toasts scroll
+ * inside it.
  *
  * @author michael.morosov
  *
@@ -45,7 +45,7 @@ const getToastRole = (toast: AppToast): string =>
   toast.severity === TOAST_SEVERITY.INFO ? ROLE_STATUS : ROLE_ALERT;
 
 const getToastStackClassName = (isWide: boolean): string =>
-  (isWide ? [styles.toastStack] : [styles.toastStack, styles.aboveStopBar]).join(' ');
+  (isWide ? [styles.toastStack] : [styles.toastStack, styles.narrow]).join(' ');
 
 const getToastClassName = (toast: AppToast): string => [styles.toast, styles[toast.severity]].join(' ');
 

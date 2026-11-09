@@ -6,6 +6,7 @@ import { getScssTokenValue } from '../utils/test.support/get.scss.token.value';
 
 const LAYOUT_PATH = resolve(__dirname, 'layout.scss');
 const STOP_Z_INDEX_NAME = '\\$stop-above-dialog-z-index';
+const TOAST_Z_INDEX_NAME = '\\$toast-above-stop-z-index';
 // antd adds 100 for each container a dialog opens from (a dialog from a drawer), up to ten: 1000 above the base.
 const ANTD_NESTED_CONTAINER_MAX_OFFSET = 1000;
 
@@ -15,5 +16,13 @@ describe('layout stacking', () => {
     const { zIndexPopupBase } = theme.getDesignToken();
 
     expect(stopZIndex).toBeGreaterThan(zIndexPopupBase + ANTD_NESTED_CONTAINER_MAX_OFFSET);
+  });
+
+  it('stacks the toasts above STOP', () => {
+    const layoutSource: string = readFileSync(LAYOUT_PATH, 'utf8');
+    const stopZIndex: number = Number(getScssTokenValue(layoutSource, STOP_Z_INDEX_NAME));
+    const toastZIndex: number = Number(getScssTokenValue(layoutSource, TOAST_Z_INDEX_NAME));
+
+    expect(toastZIndex).toBeGreaterThan(stopZIndex);
   });
 });

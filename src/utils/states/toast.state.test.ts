@@ -13,7 +13,7 @@ import { Action } from './action';
 import type { AppToast } from './interfaces/AppToast';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
-import { TOAST_INFO_LIFETIME_MS, TOAST_SEVERITY } from './toast.constants';
+import { TOAST_LIFETIME_MS, TOAST_SEVERITY } from './toast.constants';
 import {
   ToastDismissed,
   ToastShown,
@@ -24,7 +24,7 @@ import {
 import type { ToastState } from './toast.state';
 
 const UNKNOWN_ACTION_TYPE = 'unknown action';
-const JUST_BEFORE_EXPIRY_MS = TOAST_INFO_LIFETIME_MS - 1;
+const JUST_BEFORE_EXPIRY_MS = TOAST_LIFETIME_MS - 1;
 const MESSAGE_KEY = 'TOAST_GRBL_ERROR';
 const OTHER_MESSAGE_KEY = 'TOAST_CONNECTED';
 const FIRST_PARAMETERS = { code: 20, description: 'first' };
@@ -37,7 +37,6 @@ const NO_TOASTS_COUNT = 0;
 const FIRST_TOAST_ID = 0;
 const SECOND_TOAST_ID = 1;
 const UNKNOWN_TOAST_ID = 99;
-const LONG_WAIT_FACTOR = 2;
 
 class UnknownAction extends Action {
   public static readonly type: string = UNKNOWN_ACTION_TYPE;
@@ -154,12 +153,14 @@ describe(watchInfoToastExpiry.name, () => {
     expect(selectToasts(store.getState())).toHaveLength(NO_TOASTS_COUNT);
   });
 
-  it.each([TOAST_SEVERITY.WARNING, TOAST_SEVERITY.ERROR])('keeps a %s toast until dismissed', async (severity) => {
+  it.each([TOAST_SEVERITY.WARNING, TOAST_SEVERITY.ERROR])('dismisses a %s toast after the same lifetime', async (severity) => {
     store.dispatch(new ToastShown({ severity, messageKey: MESSAGE_KEY, messageParameters: NO_PARAMETERS }));
 
-    await vi.advanceTimersByTimeAsync(TOAST_INFO_LIFETIME_MS * LONG_WAIT_FACTOR);
-
+    await vi.advanceTimersByTimeAsync(JUST_BEFORE_EXPIRY_MS);
     expect(selectToasts(store.getState())).toHaveLength(SINGLE_TOAST_COUNT);
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(selectToasts(store.getState())).toHaveLength(NO_TOASTS_COUNT);
   });
 
   it('does nothing harmful when an info toast was dismissed before it expired', async () => {
@@ -175,7 +176,7 @@ describe(watchInfoToastExpiry.name, () => {
       messageParameters: NO_PARAMETERS,
     }));
 
-    await vi.advanceTimersByTimeAsync(TOAST_INFO_LIFETIME_MS);
+    await vi.advanceTimersByTimeAsync(JUST_BEFORE_EXPIRY_MS);
 
     expect(getToastIds(selectToasts(store.getState()))).toEqual([SECOND_TOAST_ID]);
   });
