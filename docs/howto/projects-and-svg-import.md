@@ -105,7 +105,7 @@ Each node has three icon buttons, all one undo step through `ProjectObjectSvgTex
 
 Nodes are addressed by child-index paths (`1.0.2`) from the root. The state lives in the SVG text, so it is saved, exported and undone with the object, and old projects need no migration.
 
-The off-bed note on the Objects row and the red outline on the bed now use the drawn geometry (`isObjectArtworkOutsideBed`), not the SVG page box.
+The off-bed note on the Objects row and the red outline on the bed now use the drawn geometry (`isObjectArtworkOutsideBed`), not the SVG page box. An object outside the bed also gets red arrows on each bed edge it crosses (`BedOffBedArrows`, level with the artwork centre held on the bed, two handles long at every zoom), so an object that is mostly off the bed still shows which way it went, and its problems popover offers **Move onto bed** (off when it is larger than the bed) and **Fit to bed** (shrinks it only when needed and centres it), each one undo step.
 
 ## Use it from code
 
