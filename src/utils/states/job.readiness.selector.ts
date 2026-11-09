@@ -1,8 +1,8 @@
 /**
- * The things a job needs, in the order to set them, each read live from existing state. Check is met once there is a toolpath
- * (some artwork) and it has no warnings, since Start job stays locked by them: an empty project never shows Check done
- * ahead of the Design step it depends on. It adds no rule: Start job
- * keeps its own guards, and a job can start without a material: Material is a recommended step, never the next step.
+ * The things a job needs, in the order to set them, each read live from existing state. Check is met once there is
+ * artwork to check and the toolpath has no warnings, since Start job stays locked by them: an empty project never
+ * shows Check done ahead of the Design step it depends on. It adds no rule: Start job keeps its own guards, and a job
+ * can start without a material: Material is a recommended step, never the next step.
  *
  * @author michael.morosov
  *
