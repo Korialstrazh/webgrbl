@@ -14,6 +14,19 @@
     drop-shadow(0 0 0.3125rem rgb(255 255 255 / 75%));
 }
 
+// An object that runs off the bed is drawn muted and without the halo: a huge guide shape far off the bed would
+// otherwise glow across the whole canvas and read as a glitch (the last group is the selection, left as it is). The red dashed outline still marks it, and the drawing
+// area clips it at the rulers.
+.bedObject[data-outside-bed='true'] > image,
+.bedObject[data-outside-bed='true'] > g:not(:last-child) {
+  opacity: 0.55;
+}
+
+:global([data-bed-tone='on-dark']) .bedObject[data-outside-bed='true'] > image,
+:global([data-bed-tone='on-dark']) .bedObject[data-outside-bed='true'] > g:not(:last-child) {
+  filter: none;
+}
+
 // The whole box takes the presses of an object drawn as outlines, as the artwork image does for a filled one.
 .hitArea {
   fill: transparent;
