@@ -217,8 +217,12 @@ FRAME_SPEED_LABEL;Frame speed (mm/min)
 FRAME_START_BLOCKED_BED_OVERRUN;The frame would leave the bed.
 FRAME_START_BLOCKED_LASER_MODE;Laser mode ($32=1) must be confirmed on to frame a job.
 FRAME_START_BLOCKED_NO_BURN_MOVES;The toolpath has no burn moves to frame.
+FRAME_START_BLOCKED_NO_PROFILE;Add a laser profile to trace the frame.
+FRAME_START_BLOCKED_NO_TOOLPATH;Wait for an up-to-date toolpath to trace the frame.
 FRAME_START_BLOCKED_NO_WORK_POSITION;The laser has not reported its position yet.
 FRAME_START_BLOCKED_NOT_CONNECTED;Connect the laser to trace the frame.
+FRAME_START_BLOCKED_NOT_IDLE;The laser must be idle to trace the frame.
+FRAME_START_BLOCKED_WARNINGS;Fix the toolpath warnings to trace the frame.
 FRAME_TIME_LABEL;Frame time
 GCODE_EXPORT_NEEDS_ARTWORK;Add artwork to export G-code.
 GCODE_EXPORT_NEEDS_LAYER;Switch on a layer to export G-code.

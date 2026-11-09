@@ -92,12 +92,12 @@ describe(selectFrameStartBlockedReasonKey.name, () => {
     expect(selectFrameStartBlockedReasonKey(newReadyStore([newInsideMove()]).getState())).toBeUndefined();
   });
 
-  it('gives the reason of the job first', () => {
+  it('gives the reason of the job first, worded for the frame', () => {
     const store: AppStore = newReadyStore([newInsideMove()]);
 
     store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }));
 
-    expect(selectFrameStartBlockedReasonKey(store.getState())).toBe(DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED);
+    expect(selectFrameStartBlockedReasonKey(store.getState())).toBe(DEFAULT.FRAME_START_BLOCKED_NOT_CONNECTED);
   });
 
   it('blocks once the console may have changed laser mode', () => {
