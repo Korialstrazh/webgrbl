@@ -7,6 +7,7 @@ import type { MaterialPreset } from '../../utils/materials/interfaces/MaterialPr
 import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset.constants';
 import { newMaterial } from '../../utils/materials/new.material';
 import { newMaterialPreset } from '../../utils/materials/new.material.preset';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
@@ -15,7 +16,7 @@ import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
 import { selectIsMachineProfilesDialogOpen } from '../../utils/states/ui.workbench.state';
 import type { AppStore } from '../../utils/states/new.store';
-import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
+import { ProjectMaterialSelected, ProjectObjectsAdded } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 
@@ -75,7 +76,25 @@ const newStoreWithMaterial = (presetCount: number): AppStore => {
   return store;
 };
 
+const IDLE_ATTRIBUTE = 'data-idle';
+const IDLE_SECTION_SELECTOR = `[${IDLE_ATTRIBUTE}]`;
+
 describe(MaterialSection.name, () => {
+  it('is muted while the bed is empty and plain once an object is on it', () => {
+    const store: AppStore = newStore();
+    renderSection(store);
+
+    const section: Element | null = document.querySelector(IDLE_SECTION_SELECTOR);
+
+    expect(section).toHaveAttribute(IDLE_ATTRIBUTE, 'true');
+
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+
+    expect(section).toHaveAttribute(IDLE_ATTRIBUTE, 'false');
+  });
+
   it('counts the presets of the project material on the active machine', () => {
     renderSection(newStoreWithMaterial(2));
 

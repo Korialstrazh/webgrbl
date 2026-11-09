@@ -34,6 +34,29 @@
   }
 }
 
+// Nothing on the bed yet: the controls drop their fill and border and take the muted text, so the card reads as
+// quiet as the one-line placeholders of Layers and Objects. Hover and focus bring the normal look back.
+.idleMaterialSection {
+  :global(.ant-select-selector),
+  :global(.ant-btn) {
+    border-color: transparent !important;
+    background-color: transparent !important;
+    color: var(--color-text-muted) !important;
+  }
+
+  .presetSummaryIcon {
+    color: var(--color-text-muted);
+  }
+
+  :global(.ant-select:hover .ant-select-selector),
+  :global(.ant-select-focused .ant-select-selector),
+  :global(.ant-btn:hover),
+  :global(.ant-btn:focus-visible) {
+    border-color: var(--color-control-border) !important;
+    color: var(--color-text) !important;
+  }
+}
+
 .presetSummaryText {
   white-space: normal;
 }

@@ -24,6 +24,7 @@ import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProf
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import { selectActiveMaterial, selectActiveMaterialPresetCount } from '../../utils/states/material.selectors';
 import type { AppDispatch } from '../../utils/states/new.store';
+import { selectProjectObjects } from '../../utils/states/project.document.state';
 import { MachineProfilesDialogOpenChanged } from '../../utils/states/ui.workbench.state';
 import { DismissibleTooltip } from '../../views/DismissibleTooltip';
 import { IconActionButton } from '../../views/IconActionButton';
@@ -38,6 +39,7 @@ export const MaterialSection = (): ReactNode => {
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const activePresetCount: number = useSelector(selectActiveMaterialPresetCount);
+  const hasProjectObjects: boolean = Boolean(useSelector(selectProjectObjects).length);
   const [isLibraryOpen, setIsLibraryOpen] = useState<boolean>(false);
   // The material the library is filtered to when it opens: the project material from the link, none from the button.
   const [libraryMaterialId, setLibraryMaterialId] = useState<string | undefined>(undefined);
@@ -85,7 +87,11 @@ export const MaterialSection = (): ReactNode => {
   };
 
   return (
-    <div className={styles.materialSection}>
+    // Muted while the bed is empty, like the Layers and Objects placeholders around it; it still works as usual.
+    <div
+      className={[styles.materialSection, hasProjectObjects ? undefined : styles.idleMaterialSection].join(' ')}
+      data-idle={!hasProjectObjects}
+    >
       <ProjectMaterialSelect />
       {/* The presets entry and the library sit on one row of small captioned buttons under the full-width select. */}
       <div className={styles.entryRow}>
