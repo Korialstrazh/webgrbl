@@ -27,6 +27,7 @@ import { GcodeExportConfirmDialog } from '../../containers/GcodeExportConfirmDia
 import { HistoryHotkeys } from '../../containers/HistoryHotkeys';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
 import { MachinePanel } from '../../containers/MachinePanel';
+import { PointerHotkey } from '../../containers/PointerHotkey';
 import { SaveHotkey } from '../../containers/SaveHotkey';
 import { StatusStrip } from '../../containers/StatusStrip';
 import { StickyStopBar } from '../../containers/StickyStopBar';
@@ -99,6 +100,7 @@ export const AppRoute = (): ReactNode => {
         {!isWide && <StickyStopBar />}
         <LeavePageGuard />
         <StopHotkey />
+        <PointerHotkey />
         <HistoryHotkeys />
         <SaveHotkey />
         <TooltipDismissal />

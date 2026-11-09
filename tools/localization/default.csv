@@ -422,6 +422,7 @@ MACHINE_JOG_UP_RIGHT;Jog up and right
 MACHINE_LASER_AIR_ASSIST;Air assist
 MACHINE_LASER_COLLAPSED_HINT;Connect to use
 MACHINE_LASER_FIRE;Hold to fire
+MACHINE_LASER_FIRE_TOOLTIP;Hold to fire the pointer. Shortcut: P switches it on and off.
 MACHINE_LASER_FIRMWARE_NOTE;Some firmwares keep the laser off while the head stands still. It switches off when you let go, when the window loses focus, after {{seconds}} seconds, or on any stop or alarm.
 MACHINE_LASER_FIRMWARE_SHORT;Off on release, after {{seconds}} s
 MACHINE_LASER_HIDE_CONTROLS_LABEL;Hide the laser pointer controls

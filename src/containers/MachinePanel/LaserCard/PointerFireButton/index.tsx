@@ -10,7 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { BulbFilled, BulbOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { useEffect } from 'react';
 import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -86,21 +86,23 @@ export const PointerFireButton = (): ReactNode => {
   const labelText: string = t(isFiring ? DEFAULT.MACHINE_LASER_ON : DEFAULT.MACHINE_LASER_FIRE);
 
   return (
-    <Button
-      icon={isFiring ? <BulbFilled /> : <BulbOutlined />}
-      aria-label={labelText}
-      className={isFiring ? styles.firing : undefined}
-      size={ANTD_BUTTON_SIZE_LARGE}
-      disabled={!isButtonUsable}
-      onPointerDown={handlePointerDown}
-      onPointerUp={requestRelease}
-      onPointerLeave={requestRelease}
-      onPointerCancel={requestRelease}
-      onBlur={requestRelease}
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-    >
-      {labelText}
-    </Button>
+    <Tooltip title={t(DEFAULT.MACHINE_LASER_FIRE_TOOLTIP)}>
+      <Button
+        icon={isFiring ? <BulbFilled /> : <BulbOutlined />}
+        aria-label={labelText}
+        className={isFiring ? styles.firing : undefined}
+        size={ANTD_BUTTON_SIZE_LARGE}
+        disabled={!isButtonUsable}
+        onPointerDown={handlePointerDown}
+        onPointerUp={requestRelease}
+        onPointerLeave={requestRelease}
+        onPointerCancel={requestRelease}
+        onBlur={requestRelease}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
+      >
+        {labelText}
+      </Button>
+    </Tooltip>
   );
 };
