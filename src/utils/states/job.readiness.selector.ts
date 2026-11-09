@@ -1,5 +1,6 @@
 /**
- * The four things a job needs, in the order to set them, each read live from existing state. It adds no rule: Start job
+ * The things a job needs, in the order to set them, each read live from existing state. Check is met while the toolpath
+ * has no warnings, since Start job stays locked by them. It adds no rule: Start job
  * keeps its own guards, and a job can start without a material: Material is a recommended step, never the next step.
  *
  * @author michael.morosov
@@ -14,11 +15,13 @@ import { selectActiveMachineProfile } from './machine.profile.state';
 import { selectActiveMaterial } from './material.selectors';
 import type { AppRootState } from './new.store';
 import { selectProjectObjects } from './project.document.state';
+import { selectToolpath } from './toolpath.state';
 
 export const JOB_READINESS_STEP = {
   PROFILE: 'profile',
   DESIGN: 'design',
   MATERIAL: 'material',
+  WARNINGS: 'warnings',
   CONNECT: 'connect',
 } as const;
 
@@ -28,6 +31,7 @@ const JOB_READINESS_STEPS_IN_ORDER: readonly JobReadinessStep[] = [
   JOB_READINESS_STEP.PROFILE,
   JOB_READINESS_STEP.DESIGN,
   JOB_READINESS_STEP.MATERIAL,
+  JOB_READINESS_STEP.WARNINGS,
   JOB_READINESS_STEP.CONNECT,
 ];
 
@@ -37,6 +41,10 @@ const OPTIONAL_JOB_READINESS_STEPS: readonly JobReadinessStep[] = [JOB_READINESS
 export const isJobReadinessStepOptional = (step: JobReadinessStep): boolean =>
   OPTIONAL_JOB_READINESS_STEPS.includes(step);
 
+/** The number of toolpath warnings that keep Start job locked. */
+export const selectJobReadinessWarningCount = (state: AppRootState): number =>
+  selectToolpath(state)?.warnings.length ?? 0;
+
 export const selectIsJobReadinessStepMet = (step: JobReadinessStep) => (state: AppRootState): boolean => {
   switch (step) {
   case JOB_READINESS_STEP.PROFILE:
@@ -45,6 +53,8 @@ export const selectIsJobReadinessStepMet = (step: JobReadinessStep) => (state: A
     return Boolean(selectProjectObjects(state).length);
   case JOB_READINESS_STEP.MATERIAL:
     return Boolean(selectActiveMaterial(state));
+  case JOB_READINESS_STEP.WARNINGS:
+    return !selectJobReadinessWarningCount(state);
   default:
     return selectIsConnected(state);
   }

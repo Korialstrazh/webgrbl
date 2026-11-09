@@ -1,7 +1,9 @@
+@use '../../../../styles/accessibility' as accessibility;
+
 // A stepper: round markers joined by a line, which turns green behind each step that is done.
 .jobReadinessRow {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
@@ -47,6 +49,7 @@
 }
 
 .marker {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,6 +60,23 @@
   background-color: var(--color-surface-1);
   font-size: 1.125rem;
   line-height: 1;
+}
+
+// The number of warnings left, a small filled dot on the marker's corner.
+.countBadge {
+  position: absolute;
+  top: -0.375rem;
+  right: -0.5rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.25rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-warning);
+  color: var(--color-surface-1);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .metStep .marker {
@@ -129,4 +149,61 @@
   margin-top: calc(-1 * var(--space-1));
   font-size: 0.6875rem;
   font-style: italic;
+}
+
+// The steps and the next-step button, spaced like the cards' other rows.
+.readiness {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+// Connected: small markers with no names on one line, the next-step button filling the rest of it.
+.compactReadiness {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+
+  .jobReadinessRow {
+    flex: none;
+    grid-template-columns: repeat(5, 1.75rem);
+  }
+
+  .stepCell:not(:last-child)::after {
+    top: 50%;
+  }
+
+  .step:global(.ant-btn) {
+    padding: 0;
+  }
+
+  .marker {
+    width: 1.375rem;
+    height: 1.375rem;
+    border-width: 0.0625rem;
+    font-size: 0.75rem;
+  }
+
+  .metStep .marker {
+    font-size: 0.75rem;
+  }
+
+  .caption,
+  .optionalCaption {
+    @include accessibility.visually-hidden;
+  }
+
+  .countBadge {
+    top: -0.5rem;
+    right: -0.5rem;
+    min-width: 0.875rem;
+    height: 0.875rem;
+    font-size: 0.625rem;
+    line-height: 0.875rem;
+  }
+
+  > :global(.ant-btn) {
+    flex: 1;
+    min-width: 0;
+  }
 }

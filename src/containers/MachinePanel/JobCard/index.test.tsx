@@ -49,7 +49,6 @@ import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpa
 const LOCK_REASON_CONNECT = 'Not connected';
 const CONNECT_ACTION_TEXT = 'Connect laser';
 const LOCK_REASON_LAYER = 'No layer on';
-const LOCK_REASON_ARTWORK = 'No artwork';
 const FRAME_LABEL = 'Frame job';
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
@@ -285,21 +284,19 @@ describe(JobCard.name, () => {
     expect(screen.queryByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).not.toBeInTheDocument();
   });
 
-  it('keeps only the padlock on Start, Frame and Export in an empty project, as the to-do steps say why', async () => {
+  it('shows the lock dot on Start, Frame and Export in an empty project, offline included', async () => {
     renderJobCard(await newGcodeExportTestStore({ objects: [] }));
 
-    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toBeInTheDocument();
-    expect(screen.queryByText(LOCK_REASON_CONNECT)).not.toBeInTheDocument();
-    expect(screen.queryByText(LOCK_REASON_ARTWORK)).not.toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).toBeInTheDocument();
   });
 
   it('makes Connect the next step without a material, as Start does not need one', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
     expect(screen.getAllByText(CONNECT_ACTION_TEXT)).toHaveLength(1);
-    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toBeInTheDocument();
   });
 
@@ -316,9 +313,8 @@ describe(JobCard.name, () => {
     renderJobCard(store);
 
     expect(screen.getAllByText(CONNECT_ACTION_TEXT)).toHaveLength(1);
-    expect(screen.queryByText(LOCK_REASON_CONNECT)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
   });
 
   it('puts a reason no step says on its own button as a dot without a tab stop, the button describing it', async () => {

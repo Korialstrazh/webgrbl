@@ -1,5 +1,9 @@
 /**
- * The readiness stepper of the Job card: Profile, Design, Material and Connect joined by a line that leads to Start.
+ * The readiness stepper of the Job card: Profile, Design, Material, Check and Connect joined by a line that leads to
+ * Start. Check stays open while toolpath warnings lock Start job: its marker carries the warning count and its
+ * next-step button opens the Toolpath view's warnings chip, so a connected card never reads ready while Start is off.
+ * Once the laser is connected the steps shrink to small markers on one line beside the next-step button (their names
+ * stay in the tooltips and labels), so the status and Move cards keep their room above Stop.
  * Each step goes to where it is set, a done step shows a large check, and the first required one still open is outlined
  * as next. An optional step (Material) that is still open shows a dashed marker and a small "optional"
  * caption under its name: Start does not wait for it.
@@ -12,7 +16,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ApiOutlined, CheckOutlined, CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
+import { CheckOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode, RefObject } from 'react';
@@ -36,6 +40,7 @@ import {
   JOB_READINESS_STEP,
   selectFirstUnmetJobReadinessStep,
   selectIsJobReadinessStepMet,
+  selectJobReadinessWarningCount,
 } from '../../../../utils/states/job.readiness.selector';
 import type { JobReadinessStep } from '../../../../utils/states/job.readiness.selector';
 import type { AppDispatch } from '../../../../utils/states/new.store';
@@ -43,12 +48,13 @@ import { MachineProfilesDialogOpenChanged, NarrowRegionChanged } from '../../../
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
 import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
 import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
-import { LaserMachineIcon } from '../../../../views/LaserMachineIcon';
-import { MaterialSheetIcon } from '../../../../views/MaterialSheetIcon';
 import { BED_OBJECTS_LAYER_ID } from '../../../BedObjects/bed.objects.constants';
 import { PROJECT_MATERIAL_SELECT_ID } from '../../../ProjectMaterialSelect/project.material.select.constants';
 import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
+import { TOOLPATH_WARNINGS_CHIP_ID } from '../../../ToolpathWarningsPanel/toolpath.warnings.panel.constants';
 import { POPOVER_KEEP_CLEAR_ATTRIBUTE } from '../../../../utils/layout.constants';
+import type { JobReadinessLook } from './interfaces/JobReadinessLook';
+import { JOB_READINESS_LOOKS } from './job.readiness.looks';
 import { JOB_NEXT_STEP_BUTTON_ID } from './job.readiness.row.constants';
 import styles from './styles.module.scss';
 
@@ -74,55 +80,6 @@ const getMovedStepIndex = (key: string, index: number, count: number): number | 
   return key === END_KEY ? count - 1 : undefined;
 };
 
-interface JobReadinessLook {
-  step: JobReadinessStep;
-  iconComponent: ReactNode;
-  captionKey: string;
-  hintKey: string;
-  /** The tooltip while an optional step is open, which says Start does not need it. */
-  optionalHintKey?: string;
-  /** The tooltip once the step is done, where the hint would ask for what has been done already. */
-  metHintKey?: string;
-  /** The label of the one action button while this is the current step. */
-  actionKey: string;
-  /** The icon of the action button, when it differs from the step icon. */
-  actionIconComponent?: ReactNode;
-}
-
-const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
-  {
-    step: JOB_READINESS_STEP.PROFILE,
-    iconComponent: <LaserMachineIcon aria-hidden />,
-    captionKey: DEFAULT.JOB_READINESS_PROFILE,
-    hintKey: DEFAULT.JOB_READINESS_PROFILE_HINT,
-    actionKey: DEFAULT.JOB_READINESS_PROFILE_ACTION,
-  },
-  {
-    step: JOB_READINESS_STEP.DESIGN,
-    iconComponent: <ImportOutlined aria-hidden />,
-    captionKey: DEFAULT.JOB_READINESS_DESIGN,
-    hintKey: DEFAULT.JOB_READINESS_DESIGN_HINT,
-    metHintKey: DEFAULT.JOB_READINESS_DESIGN_MET_HINT,
-    actionKey: DEFAULT.JOB_READINESS_DESIGN_ACTION,
-    actionIconComponent: <CloudUploadOutlined aria-hidden />,
-  },
-  {
-    step: JOB_READINESS_STEP.MATERIAL,
-    iconComponent: <MaterialSheetIcon aria-hidden />,
-    captionKey: DEFAULT.JOB_READINESS_MATERIAL,
-    hintKey: DEFAULT.JOB_READINESS_MATERIAL_HINT,
-    optionalHintKey: DEFAULT.JOB_READINESS_MATERIAL_OPTIONAL_HINT,
-    actionKey: DEFAULT.JOB_READINESS_MATERIAL_ACTION,
-  },
-  {
-    step: JOB_READINESS_STEP.CONNECT,
-    iconComponent: <ApiOutlined aria-hidden />,
-    captionKey: DEFAULT.JOB_READINESS_CONNECT,
-    hintKey: DEFAULT.JOB_READINESS_CONNECT_HINT,
-    actionKey: DEFAULT.JOB_READINESS_CONNECT_ACTION,
-  },
-];
-
 interface JobReadinessButtonProps extends JobReadinessLook {
   /** Whether this step holds the one tab stop of the row. */
   isTabStop: boolean;
@@ -137,6 +94,9 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
   const isMet: boolean = useSelector(selectIsJobReadinessStepMet(step));
   const isNextStep: boolean = useSelector(selectFirstUnmetJobReadinessStep) === step;
   const isOptionalOpen: boolean = !isMet && isJobReadinessStepOptional(step);
+  const warningCount: number = useSelector(selectJobReadinessWarningCount);
+  // Only the Check step counts something: its open marker carries the number of warnings left to fix.
+  const openCount: number = !isMet && step === JOB_READINESS_STEP.WARNINGS ? warningCount : 0;
   const captionText: string = t(captionKey);
   const openHintKey: string = isOptionalOpen && optionalHintKey ? optionalHintKey : hintKey;
   const openLabelKey: string = isOptionalOpen ? DEFAULT.JOB_READINESS_STEP_OPTIONAL : DEFAULT.JOB_READINESS_STEP_OPEN;
@@ -150,20 +110,25 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
 
   return (
     <li className={cellClassName}>
-      <DismissibleTooltip title={isNextStep ? undefined : t(isMet && metHintKey ? metHintKey : openHintKey)}>
+      <DismissibleTooltip
+        title={isNextStep ? undefined : t(isMet && metHintKey ? metHintKey : openHintKey, { count: warningCount })}
+      >
         <Button
           className={styles.step}
           type={ANTD_BUTTON_TYPE_TEXT}
           aria-label={t(
             isMet ? DEFAULT.JOB_READINESS_STEP_MET : openLabelKey,
-            { step: captionText },
+            { step: captionText, count: openCount },
           )}
           aria-current={isNextStep ? ARIA_CURRENT_STEP : undefined}
           tabIndex={isTabStop ? KEYBOARD_FOCUSABLE_TAB_INDEX : SCRIPT_FOCUS_ONLY_TAB_INDEX}
           onFocus={() => onFocusStep(step)}
           onClick={() => onGoToStep(step)}
         >
-          <span className={styles.marker}>{isMet ? <CheckOutlined aria-hidden /> : iconComponent}</span>
+          <span className={styles.marker}>
+            {isMet ? <CheckOutlined aria-hidden /> : iconComponent}
+            {!!openCount && <span className={styles.countBadge} aria-hidden>{openCount}</span>}
+          </span>
           <span className={styles.caption}>{captionText}</span>
           {/* Said on screen, not only to a screen reader, so the open step never reads as a blocker. */}
           {isOptionalOpen && (
@@ -184,6 +149,9 @@ export const JobReadinessRow = (): ReactNode => {
   const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
   const connectLaser: () => void = useConnectLaser();
   const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
+  const warningCount: number = useSelector(selectJobReadinessWarningCount);
+  // Connected, the status and move cards need the room: the steps shrink to small markers beside the next-step button.
+  const isCompact: boolean = useSelector(selectIsJobReadinessStepMet(JOB_READINESS_STEP.CONNECT));
   // Every open step gets its accent next-step button, Import SVG on an empty project included.
   const nextLook: JobReadinessLook | undefined =
     JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
@@ -235,6 +203,18 @@ export const JobReadinessRow = (): ReactNode => {
     });
   };
 
+  const goToWarnings = (): void => {
+    dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.TOOLPATH }));
+    dispatch(new NarrowRegionChanged({ narrowRegion: WORKBENCH_REGION.BED }));
+    // The chip only renders in the Toolpath view, so it may appear with the next paint; a click opens its list.
+    requestAnimationFrame(() => {
+      const warningsChip: HTMLElement | null = document.getElementById(TOOLPATH_WARNINGS_CHIP_ID);
+
+      warningsChip?.focus();
+      warningsChip?.click();
+    });
+  };
+
   const goToStep = (step: JobReadinessStep): void => {
     switch (step) {
     case JOB_READINESS_STEP.PROFILE:
@@ -247,6 +227,9 @@ export const JobReadinessRow = (): ReactNode => {
     case JOB_READINESS_STEP.MATERIAL:
       goToMaterialSelect();
       break;
+    case JOB_READINESS_STEP.WARNINGS:
+      goToWarnings();
+      break;
     default:
       // With a port already chosen this connects at once; with none it opens the connection popover.
       connectLaser();
@@ -254,7 +237,7 @@ export const JobReadinessRow = (): ReactNode => {
   };
 
   return (
-    <>
+    <div className={isCompact ? [styles.readiness, styles.compactReadiness].join(' ') : styles.readiness}>
       <ol
         ref={listRef}
         className={styles.jobReadinessRow}
@@ -281,10 +264,10 @@ export const JobReadinessRow = (): ReactNode => {
           icon={nextLook.actionIconComponent ?? nextLook.iconComponent}
           onClick={() => goToStep(nextLook.step)}
         >
-          {t(nextLook.actionKey)}
+          {t(nextLook.actionKey, { count: warningCount })}
         </Button>
       )}
       {fileInputComponent}
-    </>
+    </div>
   );
 };

@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { JobReadinessRow } from '.';
 import { BED_OBJECTS_LAYER_ID } from '../../../BedObjects/bed.objects.constants';
+import { BED_VIEW_MODE } from '../../../../utils/bed/bed.view.constants';
 import { GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../../../utils/grbl/grbl.constants';
 import { ANSWER_SETTLE_MS } from '../../../../utils/grbl/test.support/grbl.answer.settle';
 import type { Material } from '../../../../utils/materials/interfaces/Material';
@@ -9,16 +10,21 @@ import { newMaterial } from '../../../../utils/materials/new.material';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../../utils/profiles/new.machine.profile';
 import { newProjectObject } from '../../../../utils/project/new.project.object';
+import { selectBedViewMode } from '../../../../utils/states/bed.view.state';
 import { ConnectionStatusChanged, selectConnectionStatus, SerialPortSelected } from '../../../../utils/states/grbl.connection.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../../utils/states/machine.profile.state';
 import { MaterialSaved } from '../../../../utils/states/material.state';
 import { newStore } from '../../../../utils/states/new.store';
 import type { AppStore } from '../../../../utils/states/new.store';
 import { ProjectMaterialSelected, ProjectObjectsAdded } from '../../../../utils/states/project.document.state';
+import { selectToolpathDocumentVersion, ToolpathReady } from '../../../../utils/states/toolpath.state';
 import { selectIsConnectionPopoverOpen } from '../../../../utils/states/ui.overlay.state';
 import { selectIsMachineProfilesDialogOpen, selectNarrowRegion } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
+import { SVG_UNSUPPORTED_KIND } from '../../../../utils/svg/geometry/svg.shape.constants';
 import { AntdTestProvider } from '../../../../utils/test.support/antd.test.provider';
+import type { ObjectWarning } from '../../../../utils/toolpath/interfaces/ObjectWarning';
+import { newToolpath } from '../../../../utils/toolpath/test.support/new.toolpath';
 import {
   installMatchMediaMock,
   resetMatchMediaMock,
@@ -31,6 +37,11 @@ const CONNECT_OPEN = 'Connect: to do';
 const CONNECT_MET = 'Connect: done';
 const MATERIAL_OPEN = 'Material: optional';
 const OPTIONAL_CAPTION = 'optional';
+
+const CHECK_OPEN = 'Check: to do';
+const FIX_WARNINGS_ACTION = 'Fix warnings (2)';
+const TEXT_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.TEXT };
+const OFF_PAGE_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
 
 const CONNECT_ACTION = 'Connect laser';
 const FILE_INPUT_SELECTOR = 'input[type="file"]';
@@ -153,6 +164,23 @@ describe(JobReadinessRow.name, () => {
 
     expect(screen.queryByRole('button', { name: CONNECT_ACTION })).not.toBeInTheDocument();
     expect(document.querySelector(PRIMARY_BUTTON_SELECTOR)).toBeNull();
+  });
+
+  it('keeps Check open and offers Fix warnings, which opens the Toolpath view, while warnings lock Start', () => {
+    const store: AppStore = newSetUpStore();
+
+    store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
+    store.dispatch(new ToolpathReady({
+      toolpath: newToolpath({ warnings: [TEXT_WARNING, OFF_PAGE_WARNING] }),
+      documentVersion: selectToolpathDocumentVersion(store.getState()),
+    }));
+    render(<Provider store={store}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>);
+
+    expect(screen.getByRole('button', { name: CHECK_OPEN })).toHaveAttribute('aria-current', 'step');
+    fireEvent.click(screen.getByRole('button', { name: FIX_WARNINGS_ACTION }));
+
+    expect(selectBedViewMode(store.getState())).toBe(BED_VIEW_MODE.TOOLPATH);
+    expect(selectNarrowRegion(store.getState())).toBe(WORKBENCH_REGION.BED);
   });
 
   it('captions the open Material step as optional on screen', () => {
