@@ -51,9 +51,35 @@ const RENAME_INPUT_LABEL = `New name for ${OLDEST_NAME}`;
 const RENAMED_NAME = 'Plates';
 const FOOTER_PATTERN = /stored in this browser/;
 const PROJECT_FILE_NAME = 'plates.webgrbl.json';
+const CREATED_AT = '2026-02-20T09:00:00.000Z';
+const UNTITLED_NAME = 'Untitled project';
+const FIRST_OBJECT_NAME = 'coaster-ring';
+const FALLBACK_NAME = `${FIRST_OBJECT_NAME} \u00b7 Feb 20, 2026`;
+const OBJECT_BOX: ProjectSummary['objectBoxes'][number] = {
+  xMm: 10,
+  yMm: 20,
+  widthMm: 40,
+  heightMm: 30,
+  rotationDeg: 0,
+};
+const NEWEST_SUMMARY: ProjectSummary = {
+  id: NEWEST_ID,
+  name: NEWEST_NAME,
+  createdAt: CREATED_AT,
+  updatedAt: NEWEST_UPDATED_AT,
+  objectCount: NEWEST_OBJECT_COUNT,
+  objectBoxes: [OBJECT_BOX],
+};
 const SUMMARIES: ProjectSummary[] = [
-  { id: NEWEST_ID, name: NEWEST_NAME, updatedAt: NEWEST_UPDATED_AT, objectCount: NEWEST_OBJECT_COUNT },
-  { id: OLDEST_ID, name: OLDEST_NAME, updatedAt: OLDEST_UPDATED_AT, objectCount: OLDEST_OBJECT_COUNT },
+  NEWEST_SUMMARY,
+  {
+    id: OLDEST_ID,
+    name: OLDEST_NAME,
+    createdAt: CREATED_AT,
+    updatedAt: OLDEST_UPDATED_AT,
+    objectCount: OLDEST_OBJECT_COUNT,
+    objectBoxes: [],
+  },
 ];
 
 const renderDialog = (store: AppStore, onClose: () => void = vi.fn()): void => {
@@ -141,6 +167,27 @@ describe(OpenProjectDialog.name, () => {
     nowSpy.mockRestore();
     expect(within(getRow(NEWEST_NAME)).queryByRole('button', { name: OPEN_LABEL })).not.toBeInTheDocument();
     expect(within(getRow(OLDEST_NAME)).getByRole('button', { name: OPEN_LABEL })).toBeInTheDocument();
+  });
+
+  it('draws a thumbnail of the object boxes in each row', async () => {
+    renderDialog(newStore());
+
+    await screen.findByText(NEWEST_NAME);
+
+    const row: HTMLElement = getRow(NEWEST_NAME);
+
+    expect(row.querySelectorAll('svg rect')).toHaveLength(1);
+  });
+
+  it('names a project that still has the default name after its first object and the day it was made', async () => {
+    vi.spyOn(PROJECT_REPOSITORY, 'listProjects').mockResolvedValue([
+      { ...NEWEST_SUMMARY, name: UNTITLED_NAME, firstObjectName: FIRST_OBJECT_NAME },
+    ]);
+
+    renderDialog(newStore());
+
+    expect(await screen.findByText(FALLBACK_NAME)).toBeInTheDocument();
+    expect(screen.queryByText(UNTITLED_NAME)).not.toBeInTheDocument();
   });
 
   it('opens a project and closes the dialog', async () => {

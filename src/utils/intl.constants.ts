@@ -16,6 +16,11 @@ export const INTL_MEDIUM_DATE_SHORT_TIME_FORMAT: Intl.DateTimeFormatOptions = {
   timeStyle: 'short',
 };
 
+/** A medium date alone, such as "Mar 4, 2026": the day a project was made. */
+export const INTL_MEDIUM_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  dateStyle: 'medium',
+};
+
 /** Relative times in words, with "yesterday" or "now" where the language has them: how long ago a project changed. */
 export const INTL_RELATIVE_TIME_AUTO_FORMAT: Intl.RelativeTimeFormatOptions = {
   numeric: 'auto',

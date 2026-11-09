@@ -1,7 +1,8 @@
 /**
- * One stored project in the Open dialog: its name, then how many objects it holds and how long ago it changed (the
- * exact time in a tooltip), with Open, an in-place Rename and Delete after a confirmation. The project open now is
- * marked and has no Open button.
+ * One stored project in the Open dialog: a thumbnail of where its objects sit, its name (the first object's name and
+ * the day it was made while it still has the default name), then how many objects it holds and how long ago it
+ * changed (the exact time in a tooltip), with Open, an in-place Rename and Delete after a confirmation. The project
+ * open now is marked and has no Open button.
  *
  * @author michael.morosov
  *
@@ -27,6 +28,8 @@ import {
   ProjectRenameRequested,
 } from '../../../utils/states/project.state';
 import { ProjectRenameInput } from '../../ProjectRenameInput';
+import { ProjectThumbnail } from '../ProjectThumbnail';
+import { getProjectRowName } from './get.project.row.name';
 import type { ProjectRowProps } from './interfaces/ProjectRowProps';
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { IconActionButton } from '../../../views/IconActionButton';
@@ -36,7 +39,8 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
   const { t, i18n } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
-  const { id: projectId, name: projectName, updatedAt, objectCount } = summary;
+  const { id: projectId, name: projectName, updatedAt, objectCount, objectBoxes } = summary;
+  const shownName: string = getProjectRowName(t, summary, i18n.language);
 
   const openProject = (): void => {
     dispatch(new ProjectOpenRequested({ projectId }));
@@ -50,6 +54,7 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
 
   return (
     <li className={styles.row}>
+      <ProjectThumbnail objectBoxes={objectBoxes} />
       <div className={styles.details}>
         {isRenaming ? (
           <ProjectRenameInput
@@ -60,7 +65,7 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
           />
         ) : (
           <span className={styles.name}>
-            {projectName}
+            {shownName}
             {isOpenProject && <Tag className={styles.openNow}>{t(DEFAULT.OPEN_PROJECT_NOW)}</Tag>}
           </span>
         )}

@@ -30,6 +30,7 @@ import type { AppStateEntry } from './interfaces/AppStateEntry';
 import type { LoadedProject } from './interfaces/LoadedProject';
 import type { ProjectDocument } from './interfaces/ProjectDocument';
 import type { ProjectObject } from './interfaces/ProjectObject';
+import type { ProjectObjectTransform } from './interfaces/ProjectObjectTransform';
 import type { ProjectSummary } from './interfaces/ProjectSummary';
 import type { StoredProject } from './interfaces/StoredProject';
 import type { StoredProjectObject } from './interfaces/StoredProjectObject';
@@ -62,11 +63,20 @@ const getStoredProjectObject = (projectObject: ProjectObject): StoredProjectObje
   return storedProjectObject;
 };
 
+const getProjectObjectBox = (storedObject: StoredProjectObject): ProjectObjectTransform => {
+  const { xMm, yMm, widthMm, heightMm, rotationDeg } = storedObject;
+
+  return { xMm, yMm, widthMm, heightMm, rotationDeg };
+};
+
 const getProjectSummary = (storedProject: StoredProject): ProjectSummary => ({
   id: storedProject.id,
   name: storedProject.name,
+  createdAt: storedProject.createdAt,
   updatedAt: storedProject.updatedAt,
   objectCount: storedProject.objects.length,
+  objectBoxes: storedProject.objects.map(getProjectObjectBox),
+  firstObjectName: storedProject.objects[0]?.name,
 });
 
 const getStoredProjectLayers = (storedProject: StoredProject): ProjectLayer[] =>
