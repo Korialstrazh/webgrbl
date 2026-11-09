@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { LayersSection } from '.';
-import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
+import { ARROW_DOWN_KEY, ARROW_UP_KEY, ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
 import { HORIZONTAL_ELLIPSIS, MIDDLE_DOT, MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
@@ -35,9 +35,8 @@ const LAYERS_LIST_NAME = 'Project layers';
 const EMPTY_HINT_PATTERN = /No layers yet/;
 const SEND_CUT_LABEL = 'Send Cut to the laser';
 const SEND_UNKNOWN_LABEL = `Send ${UNKNOWN_COLOUR_NAME} to the laser`;
-const MOVE_CUT_DOWN_LABEL = 'Move Cut down';
-const MOVE_CUT_UP_LABEL = 'Move Cut up';
-const MOVE_FILL_UP_LABEL = 'Move Fill up';
+const CUT_HANDLE_LABEL = 'Move Cut: drag, or press the up and down arrow keys';
+const FILL_HANDLE_LABEL = 'Move Fill: drag, or press the up and down arrow keys';
 const CUT_BUTTON_PATTERN = /^Cut/;
 const DRAWER_OVERLINE = 'Layer settings';
 const CLOSE_LABEL = 'Close';
@@ -208,18 +207,28 @@ describe(LayersSection.name, () => {
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it('reorders with the move buttons, and disables the ends', () => {
+  it('reorders with the arrow keys on the drag handle, and stays put at the ends', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
     renderSection(store);
 
-    expect(screen.getByRole('button', { name: MOVE_FILL_UP_LABEL })).toBeDisabled();
-    expect(screen.getByRole('button', { name: MOVE_CUT_DOWN_LABEL })).toBeDisabled();
+    fireEvent.keyDown(screen.getByRole('button', { name: FILL_HANDLE_LABEL }), { key: ARROW_UP_KEY });
+    fireEvent.keyDown(screen.getByRole('button', { name: CUT_HANDLE_LABEL }), { key: ARROW_DOWN_KEY });
 
-    fireEvent.click(screen.getByRole('button', { name: MOVE_CUT_UP_LABEL }));
+    expect(getLayerKeys(store)).toEqual([FILL_COLOUR, CUT_COLOUR]);
+
+    fireEvent.keyDown(screen.getByRole('button', { name: CUT_HANDLE_LABEL }), { key: ARROW_UP_KEY });
 
     expect(getLayerKeys(store)).toEqual([CUT_COLOUR, FILL_COLOUR]);
     expect(getRowTexts()[FILL_ROW_INDEX]).toContain(CUT_SUMMARY);
+  });
+
+  it('shows no move up or down buttons on a row', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+
+    expect(screen.queryByRole('button', { name: /^Move Cut (up|down)$/ })).not.toBeInTheDocument();
   });
 
   it('opens the settings drawer for the clicked layer and closes it again', () => {

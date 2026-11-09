@@ -1,7 +1,8 @@
 /**
  * A row of the layer list: a drag handle, an on/off checkbox drawn as an eye (the row dims while off) and a button
  * that opens the layer settings, showing the swatch, the name, a summary and an info icon when the colour is not in the
- * palette (the layer is then named after the plain colour it looks like). Move buttons reorder it without a pointer.
+ * palette (the layer is then named after the plain colour it looks like). The handle is a button too: focused, the up
+ * and down arrow keys move the layer one place, so the order changes without a pointer.
  *
  * @author michael.morosov
  *
@@ -11,8 +12,6 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import {
-  ArrowDownOutlined,
-  ArrowUpOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
   HolderOutlined,
@@ -20,14 +19,14 @@ import {
 } from '@ant-design/icons';
 import { Button, Checkbox, Tooltip } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
-import type { DragEvent, ReactNode } from 'react';
+import type { DragEvent, KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
+import { ARROW_DOWN_KEY, ARROW_UP_KEY } from '../../../utils/browser/browser.events.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
 import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getColourNameKey } from '../../../utils/palette/get.colour.name.key';
-import { IconActionButton } from '../../../views/IconActionButton';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { LayerSwatch } from '../../../views/LayerSwatch';
 import { LayerValueCells } from '../../../views/LayerValueCells';
@@ -60,6 +59,18 @@ export const LayerRow = ({
   const layerName: string = colourNameKey ? t(colourNameKey) : getLayerDisplayName(layer, layerEntry);
   const layerNameTitle: string = colourNameKey ? `${layerName} ${layer.colour}` : layerName;
   const { settings } = layer;
+  const handleLabelText: string = t(DEFAULT.LAYERS_REORDER_HANDLE, { name: layerName });
+
+  // The handle is the keyboard path of the drag: the up and down arrow keys move the layer one place.
+  const handleHandleKeyDown = (keyEvent: KeyboardEvent<HTMLButtonElement>): void => {
+    if (keyEvent.key === ARROW_UP_KEY && !isFirst) {
+      keyEvent.preventDefault();
+      onMoveUp();
+    } else if (keyEvent.key === ARROW_DOWN_KEY && !isLast) {
+      keyEvent.preventDefault();
+      onMoveDown();
+    }
+  };
 
   return (
     <li
@@ -71,7 +82,14 @@ export const LayerRow = ({
       onDrop={onDrop}
     >
       <Tooltip title={t(DEFAULT.LAYERS_DRAG_HINT)}>
-        <HolderOutlined className={styles.handle} aria-hidden="true" />
+        <Button
+          className={styles.handle}
+          type={ANTD_BUTTON_TYPE_TEXT}
+          size={ANTD_BUTTON_SIZE_SMALL}
+          icon={<HolderOutlined />}
+          aria-label={handleLabelText}
+          onKeyDown={handleHandleKeyDown}
+        />
       </Tooltip>
       <Tooltip title={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}>
         {/* Still a real checkbox for the keyboard and for screen readers; only its look is an eye, open while sent. */}
@@ -109,24 +127,6 @@ export const LayerRow = ({
         )}
         <LayerValueCells className={styles.summary} settings={settings} />
       </Button>
-      <div className={styles.moveButtons}>
-        <IconActionButton
-          type={ANTD_BUTTON_TYPE_TEXT}
-          size={ANTD_BUTTON_SIZE_SMALL}
-          iconComponent={<ArrowUpOutlined />}
-          isDisabled={isFirst}
-          labelText={t(DEFAULT.LAYERS_MOVE_UP, { name: layerName })}
-          onClick={onMoveUp}
-        />
-        <IconActionButton
-          type={ANTD_BUTTON_TYPE_TEXT}
-          size={ANTD_BUTTON_SIZE_SMALL}
-          iconComponent={<ArrowDownOutlined />}
-          isDisabled={isLast}
-          labelText={t(DEFAULT.LAYERS_MOVE_DOWN, { name: layerName })}
-          onClick={onMoveDown}
-        />
-      </div>
     </li>
   );
 };
