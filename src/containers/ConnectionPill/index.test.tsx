@@ -23,7 +23,7 @@ import type { WorkbenchRegion } from '../../utils/states/workbench.region.consta
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const ONLINE_PATTERN = /Online/;
-const SHORT_DISCONNECTED_TEXT = 'Offline';
+const SHORT_DISCONNECTED_TEXT = 'Not connected';
 const DISCONNECTED_PATTERN = /^Connection: Not connected.*Open the connection menu\.$/;
 const CONNECT_VERB_TEXT = 'Connect';
 const CONNECT_LABEL = 'Connect';
@@ -88,7 +88,9 @@ describe(ConnectionPill.name, () => {
 
     const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
 
-    expect(within(pillButton).getByText(SHORT_DISCONNECTED_TEXT)).toHaveAttribute('aria-hidden', 'true');
+    const shortStatus: HTMLElement | undefined = within(pillButton).getAllByText(SHORT_DISCONNECTED_TEXT).at(-1);
+
+    expect(shortStatus?.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('closes the connection popover when the narrow layout switches region', () => {
@@ -128,7 +130,7 @@ describe(ConnectionPill.name, () => {
       store.dispatch(new ConnectionStatusChanged({ connectionStatus: status }));
     });
 
-    expect(screen.getByText(STATUS_LABELS[status])).toBeInTheDocument();
+    expect(screen.getAllByText(STATUS_LABELS[status])[0]).toBeInTheDocument();
   });
 
   describe('with the simulated laser', () => {

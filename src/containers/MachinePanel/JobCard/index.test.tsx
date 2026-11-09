@@ -46,7 +46,7 @@ import { FakeToolpathWorkerClient } from '../../../utils/toolpath/test.support/f
 import { newToolpath } from '../../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpath.move';
 
-const LOCK_REASON_CONNECT = 'Offline';
+const LOCK_REASON_CONNECT = 'Not connected';
 const CONNECT_ACTION_TEXT = 'Connect laser';
 const LOCK_REASON_LAYER = 'No layer on';
 const LOCK_REASON_ARTWORK = 'No artwork';
