@@ -18,7 +18,7 @@
     inset-inline: 0;
     bottom: 0;
     z-index: 10;
-    // Short by default, so most of the bed stays in view under the sheet.
+    // Tall enough for a readable log, short enough that the bed stays in view above the sheet.
     height: layout.$console-sheet-height;
     padding-top: var(--space-4);
     border-top-left-radius: var(--radius-xl);

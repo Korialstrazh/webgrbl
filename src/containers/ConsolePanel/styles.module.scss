@@ -43,6 +43,8 @@
   color: var(--color-text);
   font-family: var(--font-mono);
   font-size: 0.8125rem;
+  // A line scrolled half out at the top fades into the edge instead of showing as a cut-off row.
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--space-2));
 }
 
 // The empty log says what will appear there; plain UI text, not a console line.

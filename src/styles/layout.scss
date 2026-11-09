@@ -33,8 +33,9 @@ $stop-above-dialog-z-index: 2001;
 // Toasts stay above STOP, so a message about a stop or an alarm is never hidden behind the button that caused it.
 $toast-above-stop-z-index: 2010;
 
-// The height of the console bottom sheet in a narrow window, short so most of the region stays in view above it.
-$console-sheet-height: min(12rem, 45%);
+// The height of the console bottom sheet in a narrow window: at least 40% of the window, so the log shows a useful
+// number of lines, but never more than 60% of the region, so the bed stays in view above it.
+$console-sheet-height: min(max(40vh, 16rem), 60%);
 
 // The sticky STOP bar at the bottom of a narrow window.
 $sticky-stop-bar-height: 4.5rem;
