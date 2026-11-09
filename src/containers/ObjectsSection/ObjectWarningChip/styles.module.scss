@@ -5,6 +5,8 @@
   gap: var(--space-1);
   align-items: center;
   align-self: center;
+  // Never flush against the size text before it.
+  margin-inline-start: var(--space-2);
   color: var(--color-warning);
   font-variant-numeric: tabular-nums;
 }
