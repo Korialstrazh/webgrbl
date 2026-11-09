@@ -4,11 +4,14 @@
   gap: var(--space-1);
 }
 
-// Short labels in a small type, so both buttons fit in the one-line Status card.
+// Short labels at a readable size on a 32 px target. The negative block margin lets the taller buttons reach into the
+// compact card's padding, so the Status card keeps its height and Move still fits above STOP.
 .machineResetUnlock :global(.ant-btn) {
-  gap: 0.125rem;
-  padding-inline: var(--space-1);
-  font-size: 0.75rem;
+  gap: var(--space-1);
+  height: 2rem;
+  margin-block: -0.125rem;
+  padding-inline: var(--space-2);
+  font-size: 0.8125rem;
 }
 
 // A control that cannot be pressed now wears the locked look (solid outline, dark fill, grey text), clearly apart from
