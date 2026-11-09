@@ -73,6 +73,10 @@ const SELECT_TOKEN_SOURCES = [
   ['activeBorderColor', '--color-accent'],
   ['optionSelectedBg', '--color-surface-3'],
 ] as const;
+const TEXT_FIELD_TOKEN_SOURCES = [
+  ['hoverBorderColor', '--color-control-border'],
+  ['activeBorderColor', '--color-accent'],
+] as const;
 const SEGMENTED_TOKEN_SOURCES = [
   ['trackBg', '--color-surface-1'],
   ['itemColor', '--color-text-muted'],
@@ -101,6 +105,8 @@ const checkboxTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Chec
 const switchTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Switch };
 const sliderTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Slider };
 const selectTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Select };
+const inputTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Input };
+const inputNumberTokens: Record<string, unknown> = { ...ANTD_THEME.components?.InputNumber };
 const splitterTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Splitter };
 const menuTokens: Record<string, unknown> = { ...ANTD_THEME.components?.Menu };
 
@@ -181,6 +187,11 @@ describe('ANTD_THEME', () => {
 
   it.each(SELECT_TOKEN_SOURCES)('paints the select %s from %s', (selectToken: string, scssToken: string) => {
     expect(selectTokens[selectToken]).toBe(requireScssToken(scssToken));
+  });
+
+  it.each(TEXT_FIELD_TOKEN_SOURCES)('paints the text field %s from %s', (fieldToken: string, scssToken: string) => {
+    expect(inputTokens[fieldToken]).toBe(requireScssToken(scssToken));
+    expect(inputNumberTokens[fieldToken]).toBe(requireScssToken(scssToken));
   });
 
   it.each(SPLITTER_TOKEN_SOURCES)('paints the splitter %s from %s', (splitterToken: string, scssToken: string) => {

@@ -157,6 +157,16 @@ export const ANTD_THEME: ThemeConfig = {
       railSize: SLIDER_RAIL_SIZE_PIXELS,
       controlSize: SLIDER_CONTROL_SIZE_PIXELS,
     },
+    // A hovered field gets a grey edge, so only the focused field shows the accent and two fields never both look
+    // active.
+    Input: {
+      hoverBorderColor: COLOR_CONTROL_BORDER,
+      activeBorderColor: COLOR_ACCENT,
+    },
+    InputNumber: {
+      hoverBorderColor: COLOR_CONTROL_BORDER,
+      activeBorderColor: COLOR_ACCENT,
+    },
     Select: {
       hoverBorderColor: COLOR_ACCENT_HOVER,
       activeBorderColor: COLOR_ACCENT,

@@ -164,6 +164,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
             iconComponent={<ColumnHeightOutlined />}
             captionText={t(DEFAULT.FIELD_CAPTION_THICKNESS)}
             unitText={t(DEFAULT.FIELD_UNIT_MM)}
+            hasTooltip={false}
             value={isFiniteNumber(thicknessMm) ? thicknessMm : null}
             onChange={(value: number | null) => setThicknessMm(value ?? Number.NaN)}
           />
