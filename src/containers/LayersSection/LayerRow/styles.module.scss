@@ -78,6 +78,8 @@
   color: var(--color-text-muted);
   font-size: 1rem;
   cursor: grab;
+  // A finger on the handle drags the layer instead of scrolling the panel.
+  touch-action: none;
 }
 
 // The swatch beside the name and, for a colour not in the palette, a small info icon after it; then the summary below

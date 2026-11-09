@@ -14,6 +14,8 @@ import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntr
 
 export interface LayerRowProps {
   layer: ProjectLayer;
+  /** The key of the layer, set on the row so a touch drag finds it. */
+  layerKey: string;
   /** The palette entry the layer comes from; undefined when the colour is not in the current palette. */
   layerEntry: PaletteEntry | undefined;
   /** Whether the layer burns first, so it cannot move up. */
@@ -31,4 +33,6 @@ export interface LayerRowProps {
   onDragStart: (dragEvent: DragEvent<HTMLLIElement>) => void;
   onDragEnd: () => void;
   onDrop: () => void;
+  /** Moves this layer to the place of the layer with the given key, while its handle is dragged by touch or pen. */
+  onPointerDragOver: (targetKey: string) => void;
 }

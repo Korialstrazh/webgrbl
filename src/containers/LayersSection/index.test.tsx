@@ -21,6 +21,7 @@ import {
 } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
+import { MOUSE_POINTER_TYPE } from './layers.section.constants';
 
 const CUT_COLOUR = DEFAULT_CUT_ENTRY.colour;
 const FILL_COLOUR = DEFAULT_FILL_ENTRY.colour;
@@ -35,6 +36,7 @@ const LAYERS_LIST_NAME = 'Project layers';
 const EMPTY_HINT_PATTERN = /No layers yet/;
 const SEND_CUT_LABEL = 'Send Cut to the laser';
 const SEND_UNKNOWN_LABEL = `Send ${UNKNOWN_COLOUR_NAME} to the laser`;
+const TOUCH_POINTER_TYPE = 'touch';
 const CUT_HANDLE_LABEL = 'Move Cut: drag, or press the up and down arrow keys';
 const FILL_HANDLE_LABEL = 'Move Fill: drag, or press the up and down arrow keys';
 const CUT_BUTTON_PATTERN = /^Cut/;
@@ -181,6 +183,48 @@ describe(LayersSection.name, () => {
 
     expect(dispatchSpy).toHaveBeenCalledWith(new LayersReordered({ layerKeys: [CUT_COLOUR, FILL_COLOUR] }));
     expect(getLayerKeys(store)).toEqual([CUT_COLOUR, FILL_COLOUR]);
+  });
+
+  it('moves a layer while its handle is dragged by touch, as touch has no native drag', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+    const cutHandle: HTMLElement = screen.getByRole('button', { name: CUT_HANDLE_LABEL });
+    const fillRow: HTMLElement = getRow(FILL_ROW_INDEX);
+    const originalElementFromPoint: typeof document.elementFromPoint = document.elementFromPoint;
+
+    // jsdom lays nothing out, so the finger is said to be over the Fill row.
+    document.elementFromPoint = (): Element => fillRow;
+
+    try {
+      fireEvent.pointerDown(cutHandle, { pointerId: 1, pointerType: TOUCH_POINTER_TYPE });
+      fireEvent.pointerMove(cutHandle, { pointerId: 1, pointerType: TOUCH_POINTER_TYPE });
+      fireEvent.pointerUp(cutHandle, { pointerId: 1, pointerType: TOUCH_POINTER_TYPE });
+    } finally {
+      document.elementFromPoint = originalElementFromPoint;
+    }
+
+    expect(getLayerKeys(store)).toEqual([CUT_COLOUR, FILL_COLOUR]);
+  });
+
+  it('leaves a mouse press on the handle to the native row drag', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+    const cutHandle: HTMLElement = screen.getByRole('button', { name: CUT_HANDLE_LABEL });
+    const fillRow: HTMLElement = getRow(FILL_ROW_INDEX);
+    const originalElementFromPoint: typeof document.elementFromPoint = document.elementFromPoint;
+
+    document.elementFromPoint = (): Element => fillRow;
+
+    try {
+      fireEvent.pointerDown(cutHandle, { pointerId: 1, pointerType: MOUSE_POINTER_TYPE });
+      fireEvent.pointerMove(cutHandle, { pointerId: 1, pointerType: MOUSE_POINTER_TYPE });
+    } finally {
+      document.elementFromPoint = originalElementFromPoint;
+    }
+
+    expect(getLayerKeys(store)).toEqual([FILL_COLOUR, CUT_COLOUR]);
   });
 
   it('ignores a drop after the drag ended without a drop', () => {

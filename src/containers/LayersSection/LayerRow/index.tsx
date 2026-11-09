@@ -2,7 +2,8 @@
  * A row of the layer list: a drag handle, an on/off checkbox drawn as an eye (the row dims while off) and a button
  * that opens the layer settings, showing the swatch, the name, a summary and an info icon when the colour is not in the
  * palette (the layer is then named after the plain colour it looks like). The handle is a button too: focused, the up
- * and down arrow keys move the layer one place, so the order changes without a pointer.
+ * and down arrow keys move the layer one place, so the order changes without a pointer, and touch or pen can drag
+ * it, as native drag and drop only works with a mouse.
  *
  * @author michael.morosov
  *
@@ -30,8 +31,11 @@ import { getColourNameKey } from '../../../utils/palette/get.colour.name.key';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { LayerSwatch } from '../../../views/LayerSwatch';
 import { LayerValueCells } from '../../../views/LayerValueCells';
+import type { LayerHandlePointerDragHandlers } from '../interfaces/LayerHandlePointerDragHandlers';
 import type { LayerRowProps } from '../interfaces/LayerRowProps';
+import { LAYER_ROW_KEY_ATTRIBUTE } from '../layers.section.constants';
 import styles from './styles.module.scss';
+import { useLayerHandlePointerDrag } from './use.layer.handle.pointer.drag';
 
 const allowDropOnRow = (dragEvent: DragEvent<HTMLLIElement>): void => {
   dragEvent.preventDefault();
@@ -39,6 +43,7 @@ const allowDropOnRow = (dragEvent: DragEvent<HTMLLIElement>): void => {
 
 export const LayerRow = ({
   layer,
+  layerKey,
   layerEntry,
   isFirst,
   isLast,
@@ -51,6 +56,7 @@ export const LayerRow = ({
   onDragStart,
   onDragEnd,
   onDrop,
+  onPointerDragOver,
 }: LayerRowProps): ReactNode => {
   const { t } = useTranslation();
   const hasNoPaletteEntry: boolean = !layerEntry;
@@ -60,6 +66,7 @@ export const LayerRow = ({
   const layerNameTitle: string = colourNameKey ? `${layerName} ${layer.colour}` : layerName;
   const { settings } = layer;
   const handleLabelText: string = t(DEFAULT.LAYERS_REORDER_HANDLE, { name: layerName });
+  const handlePointerDrag: LayerHandlePointerDragHandlers = useLayerHandlePointerDrag(layerKey, onPointerDragOver);
 
   // The handle is the keyboard path of the drag: the up and down arrow keys move the layer one place.
   const handleHandleKeyDown = (keyEvent: KeyboardEvent<HTMLButtonElement>): void => {
@@ -75,6 +82,7 @@ export const LayerRow = ({
   return (
     <li
       className={isOpen ? [styles.row, styles.openRow].join(' ') : styles.row}
+      {...{ [LAYER_ROW_KEY_ATTRIBUTE]: layerKey }}
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -89,6 +97,7 @@ export const LayerRow = ({
           icon={<HolderOutlined />}
           aria-label={handleLabelText}
           onKeyDown={handleHandleKeyDown}
+          {...handlePointerDrag}
         />
       </Tooltip>
       <Tooltip title={t(DEFAULT.LAYERS_TOGGLE, { name: layerName })}>

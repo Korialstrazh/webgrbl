@@ -124,6 +124,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
               <LayerRow
                 key={layerKey}
                 layer={layer}
+                layerKey={layerKey}
                 layerEntry={getLayerPaletteEntry(layer, paletteEntries)}
                 isFirst={layerIndex === 0}
                 isLast={layerIndex === layers.length - 1}
@@ -136,6 +137,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
                 onDragStart={(dragEvent: DragEvent<HTMLLIElement>) => startDrag(dragEvent, layerKey)}
                 onDragEnd={() => setDraggedLayerKey(undefined)}
                 onDrop={() => dropOnLayer(layerKey)}
+                onPointerDragOver={(targetKey: string) => moveLayer(layerKey, targetKey)}
               />
             );
           })}
