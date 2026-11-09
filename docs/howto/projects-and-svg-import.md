@@ -99,7 +99,7 @@ The tree button (`ApartmentOutlined`) on an Objects row opens `ObjectElementTree
 
 Each node has three icon buttons, all one undo step through `ProjectObjectSvgTextChangeRequested` (the project command saga derives layers for new colours, then puts `ProjectObjectSvgTextChanged`):
 
-- **Eye**: `getSvgTextWithElementDisabled` sets or removes `data-webgrbl-disabled`. `getSvgExpandedDocument` removes those elements after parsing, so the toolpath, G-code, layers, warnings, the artwork frame (object size and selection box) and `isObjectArtworkOutsideBed` all ignore them. The bed draws them dimmed (`getSvgTextOfDisabledElements`, or the `getSvgDisplayText` style rule when the object is drawn as an image).
+- **Eye**: `getSvgTextWithElementDisabled` sets or removes `data-webgrbl-disabled`. `getSvgExpandedDocument` removes those elements after parsing, so the toolpath, G-code, layers, warnings, the artwork frame (object size and selection box) and `isObjectArtworkOutsideBed` all ignore them. The bed draws them as a faint dashed outline in the travel colour, with no fill and no halo, clipped to the bed (`getSvgTextOfDisabledElements` drawn in its own `data-disabled-artwork` group with a `clipPath` from `getObjectBedClipSvgTransform`; when the object is drawn as an image, the `getSvgDisplayText` style rule hides them in the image so only that outline shows). Opening an object's tree scrolls its row into view (`block: 'nearest'`).
 - **Colour**: `getSvgTextWithElementColour` writes the palette colour as inline `fill`/`stroke` on every painted shape under the node (a paint of none stays none), so the content joins that colour's layer.
 - **Trash**: `getSvgTextWithoutElement` removes the element.
 
