@@ -29,6 +29,8 @@
   scrollbar-color: var(--color-control-border) transparent;
   scrollbar-gutter: stable;
   scrollbar-width: auto;
+  // Every card in the column gets the same tighter padding above and below its heading and content.
+  --panel-padding-block: var(--space-2);
 }
 
 // Cards cut off above STOP fade out over a short last stretch, so the list reads as one that scrolls on while the jog

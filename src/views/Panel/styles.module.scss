@@ -19,6 +19,7 @@
   }
 }
 
+// A column of cards may set tighter padding for all its cards at once through these two variables.
 .header {
   display: flex;
   // A header action that does not fit beside the title moves to a line of its own instead of being cut.
@@ -26,7 +27,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding: var(--space-3);
+  padding: var(--panel-padding-block, var(--space-3)) var(--panel-padding-inline, var(--space-3));
 }
 
 .headerAboveBody {
@@ -56,7 +57,7 @@
 }
 
 .body {
-  padding: var(--space-3);
+  padding: var(--panel-padding-block, var(--space-3)) var(--panel-padding-inline, var(--space-3));
 }
 
 // The short reason a muted section is quiet, readable muted text beside its note icon.

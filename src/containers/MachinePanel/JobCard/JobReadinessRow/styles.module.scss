@@ -15,7 +15,7 @@
   &:not(:last-child)::after {
     content: '';
     position: absolute;
-    top: 1.5rem;
+    top: 0.875rem;
     left: 50%;
     width: 100%;
     height: 0.125rem;
@@ -34,10 +34,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
+  gap: 0.125rem;
   width: 100%;
   height: auto;
-  padding: var(--space-1) 0;
+  // No padding above or below, so the labelled steps take little height and Move fits above STOP while connected.
+  padding: 0;
   color: var(--color-text-muted);
 }
 
@@ -51,8 +52,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border: 0.125rem solid var(--color-border);
   border-radius: 50%;
   background-color: var(--color-surface-1);
@@ -140,18 +141,20 @@
 .caption {
   font-size: 0.8125rem;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 // The small word under an optional step's name, in italic so it reads as a note, not as a second step name.
 .optionalCaption {
-  margin-top: calc(-1 * var(--space-1));
+  margin-top: -0.125rem;
   font-size: 0.6875rem;
   font-style: italic;
+  line-height: 1.1;
 }
 
 // The steps and the next-step button, spaced like the cards' other rows.
 .readiness {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
