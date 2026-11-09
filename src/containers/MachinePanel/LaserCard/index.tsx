@@ -29,7 +29,7 @@ import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
 import { selectIsJobRunActive } from '../../../utils/states/job.run.state';
-import { LaserPointerPowerChanged, selectLaserPointerPowerPercent } from '../../../utils/states/laser.pointer.state';
+import { LaserPointerPowerChanged } from '../../../utils/states/laser.pointer.state';
 import { selectActiveMachineProfile } from '../../../utils/states/machine.profile.state';
 import {
   MachineAirAssistChanged,
@@ -37,6 +37,7 @@ import {
   selectIsAirAssistOn,
 } from '../../../utils/states/machine.status.state';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { selectPointerPowerPercent } from '../../../utils/states/pointer.power.selector';
 import { ConnectionPopoverOpenChanged } from '../../../utils/states/ui.overlay.state';
 import { CollapsedCardToggle } from '../../../views/CollapsedCardToggle';
 import { IconFieldLabel } from '../../../views/IconFieldLabel';
@@ -50,7 +51,7 @@ export const LaserCard = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const powerLabelId: string = useId();
   const isConnected: boolean = useSelector(selectIsConnected);
-  const powerPercent: number = useSelector(selectLaserPointerPowerPercent);
+  const powerPercent: number = useSelector(selectPointerPowerPercent);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const isAirAssistOn: boolean = useSelector(selectIsAirAssistOn);
   const isDisconnected: boolean = !isConnected;

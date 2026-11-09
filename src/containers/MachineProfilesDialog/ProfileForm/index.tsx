@@ -30,6 +30,7 @@ import {
   ANTD_FORM_LAYOUT_VERTICAL,
 } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { getClampedPointerPowerPercent } from '../../../utils/machine/get.clamped.pointer.power.percent';
 import { getMachineProfileErrors } from '../../../utils/profiles/get.machine.profile.errors';
 import { getReportedProfileFields } from '../../../utils/profiles/get.reported.profile.fields';
 import { getValidlyReportedProfileValues } from '../../../utils/profiles/get.validly.reported.profile.values';
@@ -39,6 +40,7 @@ import type { ReportedMachineProfileValues } from '../../../utils/profiles/inter
 import { MACHINE_ORIGIN_CORNER } from '../../../utils/profiles/machine.profile.constants';
 import type { MachineOriginCorner } from '../../../utils/profiles/machine.profile.constants';
 import { selectGrblSettings, selectIsConnected } from '../../../utils/states/grbl.connection.state';
+import { selectLaserPointerPowerPercent } from '../../../utils/states/laser.pointer.state';
 import {
   ActiveMachineProfileSelected,
   MachineProfileSaved,
@@ -71,7 +73,16 @@ const NAME_FIELD: keyof MachineProfile = 'name';
 const ORIGIN_CORNER_FIELD: keyof MachineProfile = 'originCorner';
 
 /** An emptied number input holds NaN in the draft, which the profile checks reject; the input then shows nothing. */
-const getInputNumberValue = (value: number): number | null => isFiniteNumber(value) ? value : null;
+const getInputNumberValue = (value: number | undefined): number | null => isFiniteNumber(value) ? value : null;
+
+/** An emptied pointer power falls back to the session's; any other value is kept inside the pointer range. */
+const getProfileWithClampedPointerPower = (profile: MachineProfile): MachineProfile => {
+  const { pointerPowerPercent, ...otherFields } = profile;
+
+  return isFiniteNumber(pointerPowerPercent)
+    ? { ...otherFields, pointerPowerPercent: getClampedPointerPowerPercent(pointerPowerPercent) }
+    : otherFields;
+};
 
 export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
   const { t } = useTranslation();
@@ -80,7 +91,12 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
   const isConnected: boolean = useSelector(selectIsConnected);
   const grblSettings: Record<number, string> = useSelector(selectGrblSettings);
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const [draft, setDraft] = useState<MachineProfile>(profile);
+  const sessionPointerPowerPercent: number = useSelector(selectLaserPointerPowerPercent);
+  // A profile saved before it stored a pointer power starts from the power in use now, as the pointer does.
+  const [draft, setDraft] = useState<MachineProfile>({
+    ...profile,
+    pointerPowerPercent: profile.pointerPowerPercent ?? sessionPointerPowerPercent,
+  });
   const [fieldErrors, setFieldErrors] = useState<MachineProfileFieldError[]>([]);
   const [reportedLaserValues, setReportedLaserValues] = useState<ReportedMachineProfileValues | undefined>(undefined);
   const [openAdvancedKeys, setOpenAdvancedKeys] = useState<string[]>([]);
@@ -113,7 +129,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
       return;
     }
 
-    dispatch(new MachineProfileSaved({ profile: draft }));
+    dispatch(new MachineProfileSaved({ profile: getProfileWithClampedPointerPower(draft) }));
 
     // Only the first choice is made for the user: a save never replaces the laser they already picked.
     if (!activeProfile) {
@@ -131,7 +147,7 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
 
   const renderNumberFields = (definitions: readonly ProfileNumberFieldDefinition[]): ReactNode =>
     definitions.map((definition: ProfileNumberFieldDefinition) => {
-      const { field, labelKey, hintKey, iconComponent, unitKey, captionKey } = definition;
+      const { field, labelKey, hintKey, iconComponent, unitKey, captionKey, min, max, step } = definition;
 
       return (
         <Form.Item key={field} {...getFieldStatus(field)}>
@@ -142,6 +158,9 @@ export const ProfileForm = ({ profile }: ProfileFormProps): ReactNode => {
             iconComponent={iconComponent}
             captionText={captionKey && t(captionKey)}
             unitText={unitKey && t(unitKey)}
+            min={min}
+            max={max}
+            step={step}
             value={getInputNumberValue(draft[field])}
             onChange={(value: number | null) => changeDraft({ [field]: value ?? Number.NaN })}
           />

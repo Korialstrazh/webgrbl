@@ -17,7 +17,7 @@ import { watchOnlineStatus } from './browser.environment.state';
 import { watchBurnModel } from './burn.model.saga';
 import { watchGrblController } from './grbl.controller.saga';
 import type { GrblControllerSagaDependencies } from './interfaces/GrblControllerSagaDependencies';
-import { watchLaserPointer } from './laser.pointer.saga';
+import { watchLaserPointer, watchPointerPowerChanges } from './laser.pointer.saga';
 import { watchMachineProfiles } from './machine.profile.saga';
 import { watchMaterialPresets } from './material.preset.saga';
 import { watchMaterials } from './material.saga';
@@ -44,6 +44,7 @@ export function* rootSaga(
     fork(watchBedAppearance),
     fork(watchAppPreferences),
     fork(watchLaserPointer),
+    fork(watchPointerPowerChanges),
     fork(watchProjects),
     fork(watchGrblController, grblControllerSagaDependencies),
     fork(watchToolpath, toolpathWorkerClient),

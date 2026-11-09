@@ -13,7 +13,7 @@
  */
 import { eventChannel } from 'redux-saga';
 import type { EventChannel } from 'redux-saga';
-import { call, delay, put, race, select, take } from 'redux-saga/effects';
+import { call, delay, put, race, select, take, takeEvery } from 'redux-saga/effects';
 import {
   BLUR_EVENT_NAME,
   HIDDEN_VISIBILITY_STATE,
@@ -21,6 +21,7 @@ import {
 } from '../browser/browser.events.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../grbl/grbl.constants';
 import type { GrblResolvedStatus } from '../grbl/interfaces/GrblResolvedStatus';
+import { getClampedPointerPowerPercent } from '../machine/get.clamped.pointer.power.percent';
 import { getCanFireLaserPointer } from '../machine/get.can.fire.laser.pointer';
 import { getPointerOnCommands } from '../machine/get.pointer.on.commands';
 import { getPointerSValueMax } from '../machine/get.pointer.s.value.max';
@@ -33,16 +34,17 @@ import {
   LaserPointerFireRequested,
   LaserPointerFiringStarted,
   LaserPointerFiringStopped,
+  LaserPointerPowerChanged,
   LaserPointerReleaseRequested,
-  selectLaserPointerPowerPercent,
 } from './laser.pointer.state';
-import { selectActiveMachineProfile } from './machine.profile.state';
+import { MachineProfileSaved, selectActiveMachineProfile } from './machine.profile.state';
 import {
   MachineLineRequested,
   MachineStatusReceived,
   MachineStopRequested,
   selectMachineStatus,
 } from './machine.status.state';
+import { selectPointerPowerPercent } from './pointer.power.selector';
 
 /** Emits the name of the browser event after which the user may no longer see or hold the pointer button. */
 const newPointerFocusLossChannel = (): EventChannel<string> => eventChannel((emit: (eventName: string) => void) => {
@@ -84,7 +86,7 @@ function* waitForMachineAlarm(): Generator {
 
 /** Runs only while connected, so the settings are the connected laser's own. */
 function* sendPointerOnLines(): Generator {
-  const powerPercent: number = (yield select(selectLaserPointerPowerPercent)) as number;
+  const powerPercent: number = (yield select(selectPointerPowerPercent)) as number;
   const laserSettings: Record<number, string> = (yield select(selectGrblSettings)) as Record<number, string>;
   const activeProfile: MachineProfile | undefined =
     (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
@@ -139,4 +141,20 @@ export function* watchLaserPointer(): Generator {
     yield take(LaserPointerFireRequested.type);
     yield call(fireLaserPointer);
   }
+}
+
+/** A pointer power change is the active laser's own: it is saved into that laser profile, which stores it. */
+function* storePointerPowerInActiveProfile(action: LaserPointerPowerChanged): Generator {
+  const activeProfile: MachineProfile | undefined =
+    (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
+
+  if (activeProfile) {
+    const pointerPowerPercent: number = getClampedPointerPowerPercent(action.payload.percent);
+
+    yield put(new MachineProfileSaved({ profile: { ...activeProfile, pointerPowerPercent } }));
+  }
+}
+
+export function* watchPointerPowerChanges(): Generator {
+  yield takeEvery(LaserPointerPowerChanged.type, storePointerPowerInActiveProfile);
 }
