@@ -39,3 +39,27 @@
 .layersActions :global(.ant-btn .anticon) {
   font-size: 1.125rem;
 }
+
+// In a narrow window the region is one of the stacked views and scrolls on its own, like the machine panel: the panel
+// grows with its cards instead of scrolling inside itself, and the last card (Cut check) keeps room below it, so the
+// region's bottom fade never covers it. 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width < 80rem) {
+  .region {
+    min-height: 100%;
+    overflow: visible;
+    border-right: none;
+  }
+
+  .region .designPanel {
+    height: auto;
+  }
+
+  .cards {
+    overflow: visible;
+    padding-bottom: calc(var(--space-3) + 2rem);
+
+    &::after {
+      display: none;
+    }
+  }
+}
