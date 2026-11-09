@@ -1,11 +1,12 @@
 @use '../../styles/layout' as layout;
 
-// The stack is pinned top-centre, just below the top bar, and stacked above STOP (layout.$toast-above-stop-z-index)
+// The stack is pinned top-centre, below the top bar and the bed's row of view tools (so it never covers the bed colour
+// or the zoom), and stacked above STOP (layout.$toast-above-stop-z-index)
 // so no toast ever hides behind it. Extra toasts grow downward and scroll inside the stack; every toast stretches to
 // the widest one, so a stack reads as one aligned column.
 .toastStack {
   position: fixed;
-  top: calc(#{layout.$top-bar-height} + var(--space-2));
+  top: calc(#{layout.$top-bar-height} + #{layout.$bed-tools-height} + var(--space-2));
   left: 50%;
   z-index: layout.$toast-above-stop-z-index;
   display: flex;
@@ -14,7 +15,7 @@
   gap: var(--space-2);
   width: max-content;
   max-width: min(40rem, calc(100vw - 2 * var(--space-4)));
-  max-height: calc(100dvh - #{layout.$top-bar-height} - 2 * var(--space-4));
+  max-height: calc(100dvh - #{layout.$top-bar-height} - #{layout.$bed-tools-height} - 2 * var(--space-4));
   overflow-y: auto;
   transform: translateX(-50%);
   pointer-events: none;
@@ -22,6 +23,7 @@
 
 // Narrow, the stack keeps a shorter line so it covers less of the region below it.
 .narrow {
+  top: calc(#{layout.$top-bar-height} + #{layout.$bed-tools-height-narrow} + var(--space-2));
   max-width: min(24rem, calc(100vw - 2 * var(--space-4)));
 }
 

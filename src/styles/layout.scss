@@ -21,6 +21,11 @@ $machine-control-max-width: 14.5rem;
 $top-bar-height: 3.5rem;
 $status-strip-height: 3rem;
 
+// The bed panel's padding and its row of view tools (bed colour, zoom, view switch) under the top bar; toasts open
+// below it so they never cover those tools. Narrow, the tools wrap to a second row.
+$bed-tools-height: 3.5rem;
+$bed-tools-height-narrow: 6rem;
+
 // STOP stays above the scrim of every dialog: antd stacks a dialog at 1000 plus 100 for each container it opens from
 // (a dialog opened from a drawer sits at 1200), up to 2000, so STOP sits one above that ceiling.
 $stop-above-dialog-z-index: 2001;
