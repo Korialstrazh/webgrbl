@@ -88,6 +88,6 @@ describe(MessageHistoryButton.name, () => {
     fireEvent.click(screen.getByRole('button', { name: CLEAR_LABEL_PATTERN }));
 
     expect(selectMessageHistoryEntries(store.getState())).toEqual([]);
-    expect(screen.getByRole('button', { name: CLEAR_LABEL_PATTERN })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: CLEAR_LABEL_PATTERN })).not.toBeInTheDocument();
   });
 });

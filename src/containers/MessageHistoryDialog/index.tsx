@@ -51,15 +51,12 @@ export const MessageHistoryDialog = ({ isOpen, onClose }: MessageHistoryDialogPr
       overlayIdPrefix={MESSAGE_HISTORY_DIALOG_OVERLAY_ID}
       title={t(DEFAULT.MESSAGE_HISTORY_TITLE)}
       maxWidth={MESSAGE_HISTORY_DIALOG_WIDTH}
-      footer={(
-        <Button
-          icon={<DeleteOutlined />}
-          disabled={!entries.length}
-          onClick={() => dispatch(new MessageHistoryCleared())}
-        >
+      // An empty history offers nothing to clear: the bell empty state is the whole dialog.
+      footer={entries.length ? (
+        <Button icon={<DeleteOutlined />} onClick={() => dispatch(new MessageHistoryCleared())}>
           {t(DEFAULT.MESSAGE_HISTORY_CLEAR)}
         </Button>
-      )}
+      ) : null}
       onClose={onClose}
     >
       {newestFirstEntries.length ? (
