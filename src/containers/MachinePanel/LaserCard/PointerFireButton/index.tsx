@@ -15,7 +15,6 @@ import { useEffect } from 'react';
 import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_SIZE_LARGE } from '../../../../utils/antd.constants';
 import { ENTER_KEY, PRIMARY_POINTER_BUTTON, SPACE_KEY } from '../../../../utils/browser/browser.events.constants';
 import type { GrblResolvedStatus } from '../../../../utils/grbl/interfaces/GrblResolvedStatus';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
@@ -90,8 +89,7 @@ export const PointerFireButton = (): ReactNode => {
       <Button
         icon={isFiring ? <BulbFilled /> : <BulbOutlined />}
         aria-label={labelText}
-        className={isFiring ? styles.firing : undefined}
-        size={ANTD_BUTTON_SIZE_LARGE}
+        className={isFiring ? [styles.fireButton, styles.firing].join(' ') : styles.fireButton}
         disabled={!isButtonUsable}
         onPointerDown={handlePointerDown}
         onPointerUp={requestRelease}

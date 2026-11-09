@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { AimOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { AimOutlined } from '@ant-design/icons';
 import { Slider } from 'antd';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -65,7 +65,6 @@ export const LaserCard = (): ReactNode => {
       {isCollapsed ? undefined : (
         <div id={controlsId} className={styles.laserCard}>
           <PointerFireButton />
-          <ThunderboltOutlined className={styles.powerIcon} aria-hidden />
           <Slider
             className={styles.powerSlider}
             min={MIN_POINTER_POWER_PERCENT}

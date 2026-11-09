@@ -6,11 +6,6 @@
   min-width: 0;
 }
 
-.powerIcon {
-  flex: none;
-  color: var(--color-text-muted);
-}
-
 .powerSlider:global(.ant-slider) {
   flex: 1 1 auto;
   min-width: 3rem;
@@ -20,7 +15,7 @@
 // A fixed width, so the row never shifts as the figure changes.
 .powerValue {
   flex: none;
-  min-width: 2.75rem;
+  min-width: 2.5rem;
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
