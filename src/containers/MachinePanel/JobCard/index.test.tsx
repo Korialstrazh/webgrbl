@@ -320,15 +320,15 @@ describe(JobCard.name, () => {
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
   });
 
-  it('puts a reason no step says right under its own button, in plain text without icons', async () => {
+  it('puts a reason no step says on its own button as a dot whose name is the reason, with no standing text', async () => {
     renderJobCard(await newGcodeExportTestStore({ areLayersEnabled: false }));
 
     const exportNote: HTMLElement = screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT);
 
-    expect(exportNote).toHaveTextContent(LOCK_REASON_LAYER);
+    expect(exportNote).not.toHaveTextContent(LOCK_REASON_LAYER);
+    expect(exportNote.querySelector('[role="note"]')).toHaveAttribute('aria-label', LOCK_REASON_LAYER);
     expect(exportNote.parentElement).toContainElement(getExportButton());
     expect(exportNote.parentElement).not.toContainElement(screen.getByRole('button', { name: FRAME_LABEL }));
-    expect(exportNote.querySelector('svg')).toBeNull();
   });
 
   it('stops asking for the connection once the laser is connected', () => {

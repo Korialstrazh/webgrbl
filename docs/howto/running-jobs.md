@@ -31,3 +31,11 @@ Frame job is off (no fill, a solid grey outline and a small amber lock inline be
 For developers: `runGrblFrame` in `src/utils/states/frame.run.saga.ts` runs the frame from the program of `src/utils/frame/`. `runGrblJob` in `src/utils/states/job.run.saga.ts` runs the job, and `selectJobStartBlockedReasonKey` holds the start conditions. Design: [the spec](../superpowers/specs/2026-11-03_(03)_running-jobs.spec.md).
 
 If you send `$32=` or `$RST=` in the console after connecting, Pause stays off until you reconnect, because the app reads settings only when it connects. Other ways of changing the setting, such as the machine's own screen, are not seen.
+
+## Stable layout while the machine works
+
+Nothing in the Job card changes size when the machine turns busy, a run starts or ends, or an action locks:
+
+- A locked Start, Frame or Export shows why as a small amber dot on the top corner of its button (`ActionLockNote`); hover, tap or focus it for the reason (for example "Busy" while the laser moves). The dot floats over the button, so it never pushes the buttons down.
+- The run status (Running, Paused, Finished...) is a blue dot with the same tooltip, in a slot that is always reserved in the facts line; screen readers hear it from a hidden live region.
+- The header keeps a slot for the reasons icon, so the fold button never moves.

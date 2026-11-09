@@ -55,6 +55,7 @@
 
 .exportAction,
 .frameColumn {
+  position: relative;
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
@@ -63,6 +64,7 @@
 }
 
 .startAction {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);

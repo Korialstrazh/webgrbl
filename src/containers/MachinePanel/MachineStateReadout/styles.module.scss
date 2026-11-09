@@ -1,6 +1,8 @@
-// A text badge with a dot in the state colour, not a box, so it never reads as a button.
+// A text badge with a dot in the state colour, not a box, so it never reads as a button. Its width fits the longest
+// state word, so a change of state (Idle to Alarm, Jog) never shifts the feed, power and buttons after it.
 .state {
   display: inline-flex;
+  min-width: 4.5rem;
   align-self: flex-start;
   align-items: center;
   gap: var(--space-1);

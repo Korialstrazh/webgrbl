@@ -56,3 +56,19 @@
 .factLabel {
   @include accessibility.visually-hidden;
 }
+
+// Always as wide and tall as the note icon, whether a note shows or not.
+.runStatus,
+.reasonSlot {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.runStatusDot {
+  display: block;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-info);
+}

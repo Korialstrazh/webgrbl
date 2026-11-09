@@ -183,13 +183,13 @@ describe(MachinePanel.name, () => {
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveClass('ant-btn-primary');
   });
 
-  it('shows the Unlock word only in alarm, the lock icon alone otherwise', () => {
+  it('keeps the Unlock word in every state, so the button never changes width on an alarm', () => {
     const store: AppStore = renderMachinePanel();
 
     connect(store);
     receiveState(store, GRBL_MACHINE_STATE.IDLE);
 
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).not.toHaveTextContent(UNLOCK_LABEL);
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveTextContent(UNLOCK_LABEL);
 
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
 

@@ -53,7 +53,8 @@ export const MachineResetUnlock = (): ReactNode => {
         disabled={!canUnlock}
         onClick={() => dispatch(new MachineUnlockRequested())}
       >
-        {canUnlock && t(DEFAULT.MACHINE_CONTROL_UNLOCK)}
+        {/* The word stays in every state, so an alarm changes the colour of the button and never its width. */}
+        {t(DEFAULT.MACHINE_CONTROL_UNLOCK)}
       </Button>
     </div>
   );

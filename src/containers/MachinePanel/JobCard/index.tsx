@@ -145,12 +145,17 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
         {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
         <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
       </div>
-      {jobRunStatusKey && (
-        <div className={styles.fact}>
-          <dt><span className={styles.factLabel}>{t(DEFAULT.JOB_RUN_STATUS_LABEL)}</span></dt>
-          <dd role="status">{t(jobRunStatusKey)}</dd>
-        </div>
-      )}
+      {/* A fixed-size slot that is always there, so a run starting or ending never reflows the facts or the buttons
+          below: the status is a dot whose text opens on a hover or a tap, and is announced from a hidden live region. */}
+      <div className={styles.fact}>
+        <dt><span className={styles.factLabel}>{t(DEFAULT.JOB_RUN_STATUS_LABEL)}</span></dt>
+        <dd className={styles.runStatus}>
+          <span className={styles.factLabel} role="status">{jobRunStatusKey && t(jobRunStatusKey)}</span>
+          {jobRunStatusKey && (
+            <TooltipNoteIcon noteText={t(jobRunStatusKey)} iconComponent={<span className={styles.runStatusDot} />} />
+          )}
+        </dd>
+      </div>
     </dl>
   );
 
@@ -160,11 +165,12 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
       title={t(DEFAULT.MACHINE_START_JOB_TITLE)}
       headerActionComponent={(
         <span className={styles.headerActions}>
-          {actionBlockedReasonText && (
-            // Disabled buttons take no focus, so their reasons sit behind one icon that keyboard, pointer and screen
-            // reader all reach, instead of a standing sentence.
-            <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning />
-          )}
+          {/* Disabled buttons take no focus, so their reasons sit behind one icon that keyboard, pointer and screen
+              reader all reach, instead of a standing sentence. Its slot stays when it goes, so the fold button never
+              moves under the pointer. */}
+          <span className={styles.reasonSlot}>
+            {actionBlockedReasonText && <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning />}
+          </span>
           <IconActionButton
             type={ANTD_BUTTON_TYPE_TEXT}
             size={ANTD_BUTTON_SIZE_SMALL}

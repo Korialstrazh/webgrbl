@@ -1,7 +1,17 @@
-// Readable muted text, centred on the button above it.
+// Pinned to the top end corner of the action (its parent is positioned), so it takes no room in the layout.
 .actionLockNote {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
-  text-align: center;
+  position: absolute;
+  top: -0.625rem;
+  right: -0.625rem;
+  z-index: 1;
+  line-height: 0;
+}
+
+// A fixed-size dot in the warning colour, so its size never changes with the text behind it.
+.dot {
+  display: block;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--radius-pill);
+  background-color: currentcolor;
 }
