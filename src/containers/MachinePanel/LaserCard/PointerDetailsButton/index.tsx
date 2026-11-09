@@ -20,6 +20,7 @@ import {
   ANTD_POPOVER_PLACEMENT_TOP_RIGHT,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../../../utils/antd.constants';
+import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.registration';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { getPointerApproximateWatts } from '../../../../utils/machine/get.pointer.approximate.watts';
 import { MAX_POINTER_HOLD_MS, MILLISECONDS_PER_SECOND } from '../../../../utils/machine/machine.command.constants';
@@ -37,10 +38,16 @@ import type { AppDispatch } from '../../../../utils/states/new.store';
 import { selectPointerPowerPercent } from '../../../../utils/states/pointer.power.selector';
 import styles from './styles.module.scss';
 
+const POINTER_DETAILS_OVERLAY_ID = 'pointer-details';
+
 export const PointerDetailsButton = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  // Escape must only close this, not also stop the machine.
+  useOverlayRegistration(POINTER_DETAILS_OVERLAY_ID, isOpen);
+
   const isConnected: boolean = useSelector(selectIsConnected);
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const powerPercent: number = useSelector(selectPointerPowerPercent);

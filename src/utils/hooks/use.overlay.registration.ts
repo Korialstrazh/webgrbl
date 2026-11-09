@@ -1,6 +1,7 @@
 /**
  * Registers an overlay in the overlay registry while it is open, so the Escape-to-STOP hotkey knows the user is
- * not in the main view. Every registration gets its own id, so two overlays sharing a prefix never close each other.
+ * not in the main view. Every registration gets its own id, so two overlays sharing a prefix never close each other;
+ * the id is returned, so a surface can tell whether it is the top overlay.
  *
  * @author michael.morosov
  *
@@ -22,7 +23,7 @@ export const useOverlayRegistration = (
   overlayIdPrefix: string,
   isOpen: boolean,
   overlayKind: OverlayKind = OVERLAY_KIND.POPOVER,
-): void => {
+): string => {
   const dispatch: AppDispatch = useDispatch<AppDispatch>();
   const uniqueSuffix: string = useId();
   const overlayId: string = [overlayIdPrefix, uniqueSuffix].join(OVERLAY_ID_SEPARATOR);
@@ -38,4 +39,6 @@ export const useOverlayRegistration = (
       dispatch(new OverlayClosed({ overlayId }));
     };
   }, [dispatch, overlayId, isOpen, overlayKind]);
+
+  return overlayId;
 };

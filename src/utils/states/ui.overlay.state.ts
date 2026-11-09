@@ -116,6 +116,9 @@ type RootState = { [UI_OVERLAY_STATE_NAME]: UiOverlayState };
 export const selectIsAnyOverlayOpen = (state: RootState): boolean =>
   !!state[UI_OVERLAY_STATE_NAME].openOverlayIds.length;
 
+export const selectTopOverlayId = (state: RootState): string | undefined =>
+  state[UI_OVERLAY_STATE_NAME].openOverlayIds.at(-1);
+
 export const selectIsConnectionPopoverOpen = (state: RootState): boolean =>
   state[UI_OVERLAY_STATE_NAME].isConnectionPopoverOpen;
 

@@ -23,6 +23,7 @@ import {
   ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../utils/antd.constants';
+import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
 import { usePopoverAutoClose } from '../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
@@ -35,9 +36,15 @@ import type { GcodeWarningLine } from '../GcodeExportConfirmDialog/interfaces/Gc
 import { TOOLPATH_WARNINGS_CHIP_ID } from './toolpath.warnings.panel.constants';
 import styles from './styles.module.scss';
 
+const TOOLPATH_WARNINGS_OVERLAY_ID = 'toolpath-warnings';
+
 export const ToolpathWarningsPanel = (): ReactNode => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  // Escape must only close this, not also stop the machine.
+  useOverlayRegistration(TOOLPATH_WARNINGS_OVERLAY_ID, isOpen);
+
   const projectObjects: ProjectObject[] = useSelector(selectProjectObjects);
   const currentWarnings: ObjectWarning[] = useSelector(selectCurrentToolpathWarnings) ?? [];
   const warningLines: GcodeWarningLine[] = getGcodeWarningLines(currentWarnings, projectObjects);

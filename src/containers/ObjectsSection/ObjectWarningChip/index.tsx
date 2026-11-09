@@ -21,6 +21,7 @@ import {
   ANTD_POPOVER_PLACEMENT_RIGHT_TOP,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../../utils/antd.constants';
+import { useOverlayRegistration } from '../../../utils/hooks/use.overlay.registration';
 import { usePopoverAutoClose } from '../../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.constants';
@@ -29,9 +30,14 @@ import { ObjectWarningKindIcon } from '../../../views/ObjectWarningKindIcon';
 import type { ObjectWarningChipProps } from '../interfaces/ObjectWarningChipProps';
 import styles from './styles.module.scss';
 
+const OBJECT_WARNING_OVERLAY_ID = 'object-warning';
+
 export const ObjectWarningChip = ({ objectName, isOutsideBed, warningKinds }: ObjectWarningChipProps): ReactNode => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  // Escape must only close this, not also stop the machine.
+  useOverlayRegistration(OBJECT_WARNING_OVERLAY_ID, isOpen);
 
   usePopoverAutoClose(isOpen, () => setIsOpen(false));
 

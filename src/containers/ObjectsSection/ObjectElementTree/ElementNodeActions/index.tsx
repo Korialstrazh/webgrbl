@@ -10,6 +10,7 @@
  */
 import { BgColorsOutlined, DeleteOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { Button, Popover } from 'antd';
+import { useState } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -19,6 +20,7 @@ import {
   ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../../../utils/antd.constants';
+import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.registration';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../../../utils/palette/interfaces/PaletteEntry';
 import type { Palette } from '../../../../utils/palette/interfaces/Palette';
@@ -27,6 +29,8 @@ import { IconActionButton } from '../../../../views/IconActionButton';
 import { LayerSwatch } from '../../../../views/LayerSwatch';
 import type { ElementNodeActionsProps } from '../interfaces/ElementNodeActionsProps';
 import styles from '../styles.module.scss';
+
+const RECOLOUR_POPOVER_OVERLAY_ID = 'element-recolour';
 
 // The buttons sit inside a tree row: a press must not also select the row.
 const stopRowSelect = (mouseEvent: MouseEvent): void => {
@@ -38,6 +42,10 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
   const { t } = useTranslation();
   const palette: Palette = useSelector(selectPalette);
   const isSkipped: boolean = node.isDisabled;
+  const [isRecolourOpen, setIsRecolourOpen] = useState<boolean>(false);
+
+  // Escape must only close the colour list, not also stop the machine.
+  useOverlayRegistration(RECOLOUR_POPOVER_OVERLAY_ID, isRecolourOpen);
 
   const colourListComponent: ReactNode = (
     <div className={styles.colourList}>
@@ -70,6 +78,8 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
         content={colourListComponent}
         trigger={ANTD_POPOVER_TRIGGER_CLICK}
         placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+        open={isRecolourOpen}
+        onOpenChange={setIsRecolourOpen}
       >
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
