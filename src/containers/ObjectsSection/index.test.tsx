@@ -50,6 +50,7 @@ const WIDTH_LABEL = 'Width';
 const HEIGHT_LABEL = 'Height';
 const ROTATION_LABEL = 'Rotation';
 const X_LABEL = 'X';
+const Y_LABEL = 'Y';
 const LOCK_LABEL = 'Lock aspect ratio';
 const OUTSIDE_NOTE = 'Outside the bed';
 const MOVE_ONTO_BED_LABEL = 'Move onto bed';
@@ -230,6 +231,20 @@ describe(ObjectsSection.name, () => {
     commitField(WIDTH_LABEL, '55');
 
     expect(getObjectById(store, FIRST_ID)?.widthMm).toBeCloseTo(MARGIN_PAGE_WIDTH_MM / 2);
+  });
+
+  it('shows a short letter inside each size and position field', () => {
+    const store: AppStore = newStore();
+
+    loadObjects(store);
+    selectFirst(store);
+    renderSection(store);
+
+    const fieldPrefixTexts: (string | null)[] = [X_LABEL, Y_LABEL, WIDTH_LABEL, HEIGHT_LABEL].map(
+      (label: string) => screen.getByLabelText(label).closest('.ant-input-number')?.textContent ?? null,
+    );
+
+    expect(fieldPrefixTexts).toEqual(['X', 'Y', 'W', 'H']);
   });
 
   it('puts the fields of the selected object above the list, so a long list never pushes them out of view', () => {

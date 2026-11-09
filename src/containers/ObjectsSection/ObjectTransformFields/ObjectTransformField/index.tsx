@@ -13,6 +13,7 @@ import { InputNumber } from 'antd';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { isFiniteNumber } from '../../../../utils/type.guards/is.finite.number';
+import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
 import type { ObjectFieldDraft } from '../../interfaces/ObjectFieldDraft';
 import type { ObjectTransformFieldProps } from '../../interfaces/ObjectTransformFieldProps';
 import styles from './styles.module.scss';
@@ -21,7 +22,7 @@ const isDraftValueChanged = (draftValue: number | null | undefined, storedValue:
   isFiniteNumber(draftValue) && draftValue !== storedValue;
 
 export const ObjectTransformField = (props: ObjectTransformFieldProps): ReactNode => {
-  const { label, prefixComponent, value, decimals, onCommit } = props;
+  const { label, hintText, prefixComponent, value, decimals, onCommit } = props;
   const inputId: string = useId();
   // No draft means the user is not editing, so the stored value is shown. A cleared field is a draft with no value.
   const [draft, setDraft] = useState<ObjectFieldDraft | undefined>(undefined);
@@ -39,20 +40,22 @@ export const ObjectTransformField = (props: ObjectTransformFieldProps): ReactNod
   };
 
   return (
-    <div className={styles.field}>
-      <label className={styles.label} htmlFor={inputId}>{label}</label>
-      <InputNumber
-        id={inputId}
-        className={styles.input}
-        prefix={<span className={styles.prefix} aria-hidden>{prefixComponent}</span>}
-        value={draft ? draft.fieldValue : value}
-        precision={decimals}
-        controls={false}
-        changeOnBlur={false}
-        onChange={(fieldValue: number | null) => setDraft({ fieldValue })}
-        onBlur={commitDraft}
-        onPressEnter={commitDraft}
-      />
-    </div>
+    <DismissibleTooltip title={hintText}>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor={inputId}>{label}</label>
+        <InputNumber
+          id={inputId}
+          className={styles.input}
+          prefix={<span className={styles.prefix} aria-hidden>{prefixComponent}</span>}
+          value={draft ? draft.fieldValue : value}
+          precision={decimals}
+          controls={false}
+          changeOnBlur={false}
+          onChange={(fieldValue: number | null) => setDraft({ fieldValue })}
+          onBlur={commitDraft}
+          onPressEnter={commitDraft}
+        />
+      </div>
+    </DismissibleTooltip>
   );
 };

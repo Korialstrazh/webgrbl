@@ -12,6 +12,8 @@ import type { ReactNode } from 'react';
 
 export interface ObjectTransformFieldProps {
   label: string;
+  /** Tooltip naming the field and its unit. */
+  hintText: string;
   /** Icon or letter shown inside the input. */
   prefixComponent: ReactNode;
   /** The value stored in the project. */

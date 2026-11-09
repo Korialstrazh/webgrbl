@@ -654,10 +654,17 @@ OBJECT_WARNING_USE_LIMIT;The design repeats too many elements, so some repeated 
 OBJECTS_DELETE;Delete {{name}}
 OBJECTS_EMPTY_HINT;Nothing on the bed yet.
 OBJECTS_FIELD_HEIGHT;Height
+OBJECTS_FIELD_HEIGHT_HINT;Height of the drawing (mm)
+OBJECTS_FIELD_HEIGHT_SHORT;H
 OBJECTS_FIELD_ROTATION;Rotation
+OBJECTS_FIELD_ROTATION_HINT;Rotation (degrees, counter-clockwise)
 OBJECTS_FIELD_WIDTH;Width
+OBJECTS_FIELD_WIDTH_HINT;Width of the drawing (mm)
+OBJECTS_FIELD_WIDTH_SHORT;W
 OBJECTS_FIELD_X;X
+OBJECTS_FIELD_X_HINT;X position of the drawing (mm)
 OBJECTS_FIELD_Y;Y
+OBJECTS_FIELD_Y_HINT;Y position of the drawing (mm)
 OBJECTS_FIT_TO_BED;Fit to bed
 OBJECTS_KIND_SAMPLE;Test sample
 OBJECTS_KIND_SVG;Imported SVG drawing

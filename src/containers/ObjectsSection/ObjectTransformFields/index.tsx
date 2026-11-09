@@ -9,13 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import {
-  ColumnHeightOutlined,
-  ColumnWidthOutlined,
-  LockOutlined,
-  RotateRightOutlined,
-  UnlockOutlined,
-} from '@ant-design/icons';
+import { DisconnectOutlined, LinkOutlined, RotateLeftOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,12 +30,8 @@ import { IconActionButton } from '../../../views/IconActionButton';
 import { ObjectTransformField } from './ObjectTransformField';
 import styles from './styles.module.scss';
 
-// X and Y need no picture: their short label is the prefix.
-const OBJECT_FIELD_ICONS: Partial<Record<ObjectTransformFieldConfig['field'], ReactNode>> = {
-  widthMm: <ColumnWidthOutlined />,
-  heightMm: <ColumnHeightOutlined />,
-  rotationDeg: <RotateRightOutlined />,
-};
+// The rotation has no short letter that reads well, so its prefix is the turn icon (counter-clockwise, as it turns).
+const ROTATION_PREFIX_ICON: ReactNode = <RotateLeftOutlined />;
 
 export const ObjectTransformFields = ({ projectObject }: ObjectTransformFieldsProps): ReactNode => {
   const { t } = useTranslation();
@@ -68,7 +58,8 @@ export const ObjectTransformFields = ({ projectObject }: ObjectTransformFieldsPr
           <ObjectTransformField
             key={[projectObject.id, config.field].join(OBJECT_FIELD_KEY_SEPARATOR)}
             label={t(config.labelKey)}
-            prefixComponent={OBJECT_FIELD_ICONS[config.field] ?? t(config.labelKey)}
+            hintText={t(config.hintKey)}
+            prefixComponent={config.prefixKey ? t(config.prefixKey) : ROTATION_PREFIX_ICON}
             value={artworkPlacement[config.field]}
             decimals={config.decimals}
             onCommit={(fieldValue: number) => commitField(config.field, fieldValue)}
@@ -77,7 +68,8 @@ export const ObjectTransformFields = ({ projectObject }: ObjectTransformFieldsPr
         <IconActionButton
           className={isRatioLocked ? styles.lockOn : undefined}
           labelText={t(DEFAULT.OBJECTS_LOCK_RATIO)}
-          iconComponent={isRatioLocked ? <LockOutlined /> : <UnlockOutlined />}
+          // A chain link, as in drawing apps: joined while width and height scale together, broken while they do not.
+          iconComponent={isRatioLocked ? <LinkOutlined /> : <DisconnectOutlined />}
           aria-pressed={isRatioLocked}
           onClick={() => setIsRatioLocked(!isRatioLocked)}
         />
