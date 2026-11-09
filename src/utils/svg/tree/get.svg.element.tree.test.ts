@@ -40,7 +40,11 @@ describe(getSvgElementTree.name, () => {
       [SVG_TREE_NODE_KIND.SHAPE, PATH_ID, '1.0'],
       [SVG_TREE_NODE_KIND.GROUP, 'g', '1.1'],
     ]);
-    expect(tree[0]?.children[1]?.children[0]).toMatchObject({ kind: SVG_TREE_NODE_KIND.SHAPE, name: 'rect' });
+    expect(tree[0]?.children[1]?.children[0]).toMatchObject({
+      kind: SVG_TREE_NODE_KIND.SHAPE,
+      name: 'rect',
+      elementName: 'rect',
+    });
   });
 
   it('marks a turned-off node and everything under it', () => {

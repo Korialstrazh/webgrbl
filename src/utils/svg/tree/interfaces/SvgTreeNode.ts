@@ -17,6 +17,8 @@ export interface SvgTreeNode {
   name: string;
   /** Whether it is an Inkscape layer, another group, or a shape. */
   kind: SvgTreeNodeKind;
+  /** The SVG element name (rect, circle, path, ...), so a shape can show an icon of its own type. */
+  elementName: string;
   /** True when the element itself is turned off. */
   isDisabled: boolean;
   /** True when an ancestor is turned off, so the element is left out too. */

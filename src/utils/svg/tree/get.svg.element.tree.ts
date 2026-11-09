@@ -57,6 +57,7 @@ const getSvgTreeChildNodes = (parentElement: Element, parentPath: string, isPare
       path,
       name: getSvgTreeNodeName(childElement),
       kind,
+      elementName: childElement.localName,
       isDisabled,
       isInsideDisabled: isParentDisabled,
       children: kind === SVG_TREE_NODE_KIND.SHAPE

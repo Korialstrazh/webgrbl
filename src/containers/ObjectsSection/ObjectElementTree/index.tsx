@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BlockOutlined, BorderOutlined, FolderOutlined } from '@ant-design/icons';
+import { BlockOutlined, FolderOutlined } from '@ant-design/icons';
 import { Tree } from 'antd';
 import type { TreeDataNode } from 'antd';
 import { useMemo } from 'react';
@@ -26,14 +26,21 @@ import { getSvgTextWithoutElement } from '../../../utils/svg/tree/get.svg.text.w
 import type { SvgTreeNode } from '../../../utils/svg/tree/interfaces/SvgTreeNode';
 import { SVG_TREE_NODE_KIND } from '../../../utils/svg/tree/svg.tree.constants';
 import type { SvgTreeNodeKind } from '../../../utils/svg/tree/svg.tree.constants';
+import { SvgShapeIcon } from '../../../views/SvgShapeIcon';
 import { ElementNodeActions } from './ElementNodeActions';
 import type { ObjectElementTreeProps } from './interfaces/ObjectElementTreeProps';
 import styles from './styles.module.scss';
 
-const NODE_KIND_ICON: Readonly<Record<SvgTreeNodeKind, ReactNode>> = {
-  [SVG_TREE_NODE_KIND.LAYER]: <FolderOutlined />,
-  [SVG_TREE_NODE_KIND.GROUP]: <BlockOutlined />,
-  [SVG_TREE_NODE_KIND.SHAPE]: <BorderOutlined />,
+const getNodeKindIcon = (svgNode: SvgTreeNode): ReactNode => {
+  if (svgNode.kind === SVG_TREE_NODE_KIND.LAYER) {
+    return <FolderOutlined />;
+  }
+
+  if (svgNode.kind === SVG_TREE_NODE_KIND.GROUP) {
+    return <BlockOutlined />;
+  }
+
+  return <SvgShapeIcon elementName={svgNode.elementName} />;
 };
 
 const NODE_KIND_TEXT_KEY: Readonly<Record<SvgTreeNodeKind, string>> = {
@@ -77,7 +84,7 @@ export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): Re
     return (
       <span className={nodeClassName} data-tree-path={svgNode.path}>
         <span className={styles.kindIcon} title={t(NODE_KIND_TEXT_KEY[svgNode.kind])} aria-hidden>
-          {NODE_KIND_ICON[svgNode.kind]}
+          {getNodeKindIcon(svgNode)}
         </span>
         <span className={styles.name} title={svgNode.name}>{svgNode.name}</span>
         <ElementNodeActions
