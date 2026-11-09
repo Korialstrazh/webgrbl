@@ -4,10 +4,9 @@
 
 // On a dark bed, black fills and dark blue strokes would melt into the surface, so the drawing gets a light halo: a
 // crisp, solid inner rim and a softer outer glow. Only the design view draws it; colours, toolpath and G-code are untouched.
-// The selection (the last group) gets no halo: on a huge object its glowing edge would run across the whole canvas.
+// The selection gets no halo: on a huge object its glowing edge would run across the whole canvas.
 // Must match BED_OVERLAY_TONE.ON_DARK.
-:global([data-bed-tone='on-dark']) .bedObject > image,
-:global([data-bed-tone='on-dark']) .bedObject > g:not(:last-child, [data-disabled-artwork]) {
+:global([data-bed-tone='on-dark']) .bedObject > .artwork {
   filter:
     drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
     drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
@@ -16,20 +15,17 @@
 }
 
 // An object that runs off the bed is drawn a little muted and without the halo: a huge guide shape far off the bed
-// would otherwise glow across the whole canvas and read as a glitch (the last group is the selection, left as it is).
-// It stays clear enough to read as the object; the red dashed outline and the edge arrows mark it as off the bed, and
-// the drawing area clips it at the rulers.
-.bedObject[data-outside-bed='true'] > image,
-.bedObject[data-outside-bed='true'] > g:not(:last-child) {
+// would otherwise glow across the whole canvas and read as a glitch. It stays clear enough to read as the object; its
+// drawing stops at the bed edge, and the red dashed outline and the edge arrows mark it as off the bed.
+.bedObject[data-outside-bed='true'] > .artwork {
   opacity: 0.75;
 }
 
-:global([data-bed-tone='on-dark']) .bedObject[data-outside-bed='true'] > image,
-:global([data-bed-tone='on-dark']) .bedObject[data-outside-bed='true'] > g:not(:last-child) {
+:global([data-bed-tone='on-dark']) .bedObject[data-outside-bed='true'] > .artwork {
   filter: none;
 }
 
-// The whole box takes the presses of an object drawn as outlines, as the artwork image does for a filled one.
+// The whole box takes the presses, also where the drawing is cut off at the bed edge.
 .hitArea {
   fill: transparent;
   pointer-events: all;

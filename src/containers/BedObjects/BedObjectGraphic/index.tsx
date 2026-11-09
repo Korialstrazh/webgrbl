@@ -1,8 +1,8 @@
 /**
- * One object drawn on the bed: its artwork stretched to its box, drawn the way its layers burn it, a dashed danger
- * outline when it leaves the bed, and
- * the dashed selection box when it is selected. As the one selected object it also gets four corner handles that scale
- * it and a handle on an arm above the box that turns it. The group is turned around the box centre, so everything
+ * One object drawn on the bed: its artwork stretched to its box, drawn the way its layers burn it and stopped at the
+ * bed edge, a dashed danger outline when it leaves the bed, and the dashed selection box when it is selected. As the
+ * one selected object it also gets four corner handles that scale it and a handle on an arm above the box that turns
+ * it. The group is turned around the box centre, so everything
  * inside is drawn around the origin. It renders again only when its own props change, so a drag of one object does
  * not redraw the others.
  *
@@ -149,42 +149,44 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
       transform={getObjectSvgTransform(projectObject, bedHeightMm)}
       onPointerDown={handlePointerDown}
     >
-      {isDesignDrawnAsAuthored(designDrawing, layerLooks) ? (
-        <image
-          href={getSvgDataUrl(displaySvgText)}
-          x={left}
-          y={top}
-          width={widthMm}
-          height={heightMm}
-          preserveAspectRatio={SVG_PRESERVE_ASPECT_RATIO_NONE}
+      {/* The whole box takes the presses, even where the drawing is cut off at the bed edge. */}
+      <rect
+        className={styles.hitArea}
+        data-testid={BED_OBJECT_HIT_AREA_TEST_ID}
+        x={left}
+        y={top}
+        width={widthMm}
+        height={heightMm}
+      />
+      <clipPath id={bedClipId}>
+        <rect
+          x={0}
+          y={0}
+          width={bedWidthMm}
+          height={bedHeightMm}
+          transform={getObjectBedClipSvgTransform(projectObject, bedHeightMm)}
         />
-      ) : (
-        <>
-          <rect
-            className={styles.hitArea}
-            data-testid={BED_OBJECT_HIT_AREA_TEST_ID}
+      </clipPath>
+      {/* The drawing stops at the bed edge, so nothing of it reaches the margins or the rulers. */}
+      <g className={styles.artwork} data-artwork clipPath={`url(#${bedClipId})`}>
+        {isDesignDrawnAsAuthored(designDrawing, layerLooks) ? (
+          <image
+            href={getSvgDataUrl(displaySvgText)}
             x={left}
             y={top}
             width={widthMm}
             height={heightMm}
+            preserveAspectRatio={SVG_PRESERVE_ASPECT_RATIO_NONE}
           />
+        ) : (
           <g transform={getObjectArtworkSvgTransform(projectObject)}>
             <ObjectDesignArtwork designDrawing={designDrawing} layerLooks={layerLooks} />
           </g>
-        </>
-      )}
-      {/* Skipped content: faint, dashed, without the halo and stopped at the bed edge, so it never reads as a burn. */}
+        )}
+      </g>
+      {/* Skipped content: faint, dashed and without the halo, so it never reads as a burn. */}
       {disabledDrawing && (
         <g className={styles.disabledArtwork} data-disabled-artwork clipPath={`url(#${bedClipId})`}>
-          <clipPath id={bedClipId}>
-            <rect
-              x={0}
-              y={0}
-              width={bedWidthMm}
-              height={bedHeightMm}
-              transform={getObjectBedClipSvgTransform(projectObject, bedHeightMm)}
-            />
-          </clipPath>
           <g transform={getObjectArtworkSvgTransform(projectObject)}>
             <ObjectDesignArtwork designDrawing={disabledDrawing} layerLooks={layerLooks} />
           </g>
