@@ -166,7 +166,7 @@
 
   .jobReadinessRow {
     flex: none;
-    grid-template-columns: repeat(5, 1.75rem);
+    grid-template-columns: repeat(5, 2rem);
   }
 
   .stepCell:not(:last-child)::after {
@@ -177,9 +177,10 @@
     padding: 0;
   }
 
+  // 24 px markers: a comfortable hit target even without the names.
   .marker {
-    width: 1.375rem;
-    height: 1.375rem;
+    width: 1.5rem;
+    height: 1.5rem;
     border-width: 0.0625rem;
     font-size: 0.75rem;
   }
@@ -193,13 +194,15 @@
     @include accessibility.visually-hidden;
   }
 
+  // Sits on the ring's corner, outside the icon, with a card-coloured rim so the two never blend.
   .countBadge {
-    top: -0.5rem;
-    right: -0.5rem;
+    top: -0.625rem;
+    right: -0.75rem;
     min-width: 0.875rem;
     height: 0.875rem;
     font-size: 0.625rem;
     line-height: 0.875rem;
+    box-shadow: 0 0 0 0.125rem var(--color-surface-1);
   }
 
   > :global(.ant-btn) {
