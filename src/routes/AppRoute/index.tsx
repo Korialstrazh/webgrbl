@@ -23,6 +23,7 @@ import type { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { BedPanel } from '../../containers/BedPanel';
 import { DesignPanel } from '../../containers/DesignPanel';
+import { FocusRingModality } from '../../containers/FocusRingModality';
 import { GcodeExportConfirmDialog } from '../../containers/GcodeExportConfirmDialog';
 import { HistoryHotkeys } from '../../containers/HistoryHotkeys';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
@@ -104,6 +105,7 @@ export const AppRoute = (): ReactNode => {
         <HistoryHotkeys />
         <SaveHotkey />
         <TooltipDismissal />
+        <FocusRingModality />
         <GcodeExportConfirmDialog />
       </Layout>
     </BedRegionHostContext>

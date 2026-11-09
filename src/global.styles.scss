@@ -34,9 +34,15 @@ body {
   outline-offset: var(--focus-outline-offset);
 }
 
+// After a pointer press no control but a text field draws the ring, so focus that a closing popover, drawer or dialog
+// hands back never looks like a selection or an error. Must match POINTER_MODALITY_ATTRIBUTE.
+:root[data-pointer-modality] :focus-visible:not(input, textarea, [contenteditable='true']) {
+  outline: none;
+}
+
 // On a filled orange button the orange ring would vanish into the fill, so it gets a two-tone ring instead: a dark gap
 // in the background colour, then a light ring in the text colour, clear against both the fill and the surface.
-.ant-btn.ant-btn-variant-solid.ant-btn-color-primary:focus-visible {
+:root:not([data-pointer-modality]) .ant-btn.ant-btn-variant-solid.ant-btn-color-primary:focus-visible {
   outline-color: var(--color-text);
   box-shadow: 0 0 0 var(--focus-outline-offset) var(--color-bg);
 }
