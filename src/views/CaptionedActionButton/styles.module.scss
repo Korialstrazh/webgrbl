@@ -1,3 +1,5 @@
+@use '../../styles/accessibility' as accessibility;
+
 .captionedActionButton:global(.ant-btn) {
   display: flex;
   flex-direction: column;
@@ -89,4 +91,9 @@
   align-items: center;
   font-size: 0.8125rem;
   line-height: 1.2;
+}
+
+// The reason a locked action is off, read out as the button's description and never shown.
+.blockedReason.blockedReason {
+  @include accessibility.visually-hidden;
 }

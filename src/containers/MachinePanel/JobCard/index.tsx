@@ -2,7 +2,7 @@
  * The Job card: the layers that go to the laser, the time estimate and the job actions. Start job is the main
  * action, filled in the accent colour once it can run, and runs the job on the connected laser after a confirmation.
  * A readiness row says what is still open, and why Start job and Frame job are off sits behind a warning icon in the
- * heading;
+ * heading for the pointer and in each button's description;
  * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
  * gear, traces the outline of the job. A chevron in the heading folds the card to one line, its facts and Start, so the
  * cards below come into view; the fold is remembered per viewer.
@@ -148,14 +148,17 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
         <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
       </div>
       {/* A fixed-size slot that is always there, so a run starting or ending never reflows the facts or the
-          buttons below: the status is a dot whose text opens on a hover or a tap, announced from a hidden live
-          region. */}
+          buttons below: the status is a dot whose text opens on a hover, announced from a hidden live region. */}
       <div className={styles.fact}>
         <dt><span className={styles.factLabel}>{t(DEFAULT.JOB_RUN_STATUS_LABEL)}</span></dt>
         <dd className={styles.runStatus}>
           <span className={styles.factLabel} role="status">{jobRunStatusKey && t(jobRunStatusKey)}</span>
           {jobRunStatusKey && (
-            <TooltipNoteIcon noteText={t(jobRunStatusKey)} iconComponent={<span className={styles.runStatusDot} />} />
+            <TooltipNoteIcon
+              noteText={t(jobRunStatusKey)}
+              iconComponent={<span className={styles.runStatusDot} />}
+              isPointerOnly
+            />
           )}
         </dd>
       </div>
@@ -168,11 +171,11 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
       title={t(DEFAULT.MACHINE_START_JOB_TITLE)}
       headerActionComponent={(
         <span className={styles.headerActions}>
-          {/* Disabled buttons take no focus, so their reasons sit behind one icon that keyboard, pointer and screen
-              reader all reach, instead of a standing sentence. Its slot stays when it goes, so the fold button never
-              moves under the pointer. */}
+          {/* One icon sums up why Start and Frame are off for the pointer; keyboard and screen reader users get each
+              reason from the buttons themselves, so it takes no tab stop. Its slot stays when it goes, so the fold
+              button never moves under the pointer. */}
           <span className={styles.reasonSlot}>
-            {actionBlockedReasonText && <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning />}
+            {actionBlockedReasonText && <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning isPointerOnly />}
           </span>
           <IconActionButton
             type={ANTD_BUTTON_TYPE_TEXT}

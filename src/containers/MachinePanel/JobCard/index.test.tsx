@@ -269,12 +269,13 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
   });
 
-  it('gives one shared reason behind a focusable icon while Start and Frame wait for a connection', async () => {
+  it('sums up the reason behind one icon without a tab stop while Start and Frame wait for a connection', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
-    expect(screen.getByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).toHaveAttribute('tabindex', '0');
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    expect(document.querySelector('[tabindex="0"][aria-label="' + ACTIONS_NOT_CONNECTED_REASON + '"]')).toBeNull();
     expect(screen.queryByText(ACTIONS_NOT_CONNECTED_REASON)).not.toBeInTheDocument();
-    expect(screen.queryByText(NOT_CONNECTED_REASON)).not.toBeInTheDocument();
+    expect(screen.getByText(NOT_CONNECTED_REASON).closest('button')).toHaveAccessibleDescription(NOT_CONNECTED_REASON);
     expect(screen.getByRole('button', { name: CONNECT_STEP_OPEN_LABEL })).toBeInTheDocument();
   });
 
@@ -320,13 +321,14 @@ describe(JobCard.name, () => {
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
   });
 
-  it('puts a reason no step says on its own button as a dot named by the reason, with no standing text', async () => {
+  it('puts a reason no step says on its own button as a dot without a tab stop, the button describing it', async () => {
     renderJobCard(await newGcodeExportTestStore({ areLayersEnabled: false }));
 
     const exportNote: HTMLElement = screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT);
 
     expect(exportNote).not.toHaveTextContent(LOCK_REASON_LAYER);
-    expect(exportNote.querySelector('[role="note"]')).toHaveAttribute('aria-label', LOCK_REASON_LAYER);
+    expect(exportNote.querySelector('[tabindex]')).toBeNull();
+    expect(getExportButton()).toHaveAccessibleDescription();
     expect(exportNote.parentElement).toContainElement(getExportButton());
     expect(exportNote.parentElement).not.toContainElement(screen.getByRole('button', { name: FRAME_LABEL }));
   });

@@ -1,8 +1,9 @@
-// Pinned to the top end corner of the action (its parent is positioned), so it takes no room in the layout.
+// Inside the top end corner of the button (its parent is positioned), so it takes no room in the layout and never
+// sits on a border between two buttons.
 .actionLockNote {
   position: absolute;
-  top: -0.625rem;
-  right: -0.625rem;
+  top: 0.375rem;
+  right: 0.375rem;
   z-index: 1;
   line-height: 0;
 }

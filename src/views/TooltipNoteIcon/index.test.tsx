@@ -33,4 +33,19 @@ describe(TooltipNoteIcon.name, () => {
 
     expect(screen.getByTestId(ICON_TEST_ID)).toBeInTheDocument();
   });
+
+  it('takes no tab stop and stays hidden from screen readers when pointer-only', () => {
+    const { container } = render(<TooltipNoteIcon noteText={NOTE_TEXT} isPointerOnly />);
+
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    expect(container.querySelector('[tabindex]')).toBeNull();
+  });
+
+  it('keeps a pointer-only note closed on a click', () => {
+    const { container } = render(<TooltipNoteIcon noteText={NOTE_TEXT} isPointerOnly />);
+
+    fireEvent.click(container.firstElementChild ?? container);
+
+    expect(screen.queryByText(NOTE_TEXT)).not.toBeInTheDocument();
+  });
 });

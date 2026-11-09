@@ -1,8 +1,9 @@
 /**
- * Why a locked action is off, as one small warning dot pinned to the top corner of the action: the text opens on a
- * hover, a tap, a click, or Enter or Space, and is the dot's accessible name. The dot floats over the action instead of
- * taking a line under it, so a reason that comes and goes (the laser turning busy while it moves) never shifts the
- * buttons. It renders nothing without a text.
+ * Why a locked action is off, as one small warning dot drawn inside the top end corner of the action's button, so it
+ * clearly belongs to that button: the text opens on a pointer hover. The button itself carries the reason as its
+ * description and in its focus tooltip, so the dot takes no tab stop and is hidden from screen readers. The dot floats
+ * over the button instead of taking a line under it, so a reason that comes and goes never shifts the buttons. It
+ * renders nothing without a text.
  *
  * @author michael.morosov
  *
@@ -22,6 +23,6 @@ interface ActionLockNoteProps {
 
 export const ActionLockNote = ({ noteText, testId }: ActionLockNoteProps): ReactNode => noteText && (
   <span className={styles.actionLockNote} data-testid={testId}>
-    <TooltipNoteIcon noteText={noteText} iconComponent={<span className={styles.dot} />} isWarning />
+    <TooltipNoteIcon noteText={noteText} iconComponent={<span className={styles.dot} />} isWarning isPointerOnly />
   </span>
 );

@@ -14,6 +14,7 @@
  */
 import { Button } from 'antd';
 import type { ButtonProps } from 'antd';
+import { useId } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 import {
   ANTD_TOOLTIP_PLACEMENT_BOTTOM,
@@ -52,6 +53,7 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
   } = props;
   const tooltipText: string | undefined = blockedReasonText ?? (isLabelTooltipShown ? labelText : undefined);
   const isBlocked: boolean = Boolean(blockedReasonText);
+  const blockedReasonId: string = useId();
 
   // A blocked action stays in the tab order, so keyboard and screen reader users reach its reason; a click, Enter or
   // Space on it does nothing and never reaches a wrapper such as a confirmation.
@@ -82,7 +84,7 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
           className,
         ].join(' ')}
         aria-label={labelText}
-        aria-description={blockedReasonText}
+        aria-describedby={isBlocked ? blockedReasonId : undefined}
         aria-disabled={isBlocked || undefined}
         disabled={isDisabled && !isBlocked}
         onClick={handleClick}
@@ -92,6 +94,7 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
         <span className={styles.caption}>
           <span>{captionText}</span>
         </span>
+        {isBlocked && <span id={blockedReasonId} className={styles.blockedReason}>{blockedReasonText}</span>}
       </Button>
     </DismissibleTooltip>
   );

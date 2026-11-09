@@ -131,6 +131,11 @@
   border-end-start-radius: 0;
 }
 
+// The lock dot of Frame (the only span child of the column) sits in Frame's own corner, left of the gear, not on it.
+.frameColumn.frameColumn > span {
+  right: calc(2.75rem + 0.375rem);
+}
+
 .settings {
   display: flex;
   flex-direction: column;
