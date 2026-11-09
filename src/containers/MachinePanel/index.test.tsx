@@ -22,7 +22,7 @@ const POWER_PERCENT_TEXT = '75';
 const MISSING_VALUE_TEXT = '\u2014';
 const IDLE_LABEL = 'Idle';
 const RUN_LABEL = 'Run';
-const RESET_LABEL = 'Reset';
+const RESET_LABEL = 'Restart controller';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
 const BUTTON_SELECTOR = 'button';
@@ -124,7 +124,7 @@ describe(MachinePanel.name, () => {
     expect(cardTitles).toEqual(CARD_TITLES_IN_ORDER);
   });
 
-  it('shows state, feed and power with units, Reset and Unlock in a one-line Status card', () => {
+  it('shows state, feed and power with units, and Restart controller in a one-line Status card', () => {
     const store: AppStore = renderMachinePanel();
 
     connect(store);
@@ -144,7 +144,7 @@ describe(MachinePanel.name, () => {
     expect(within(statusCard).getByTitle('Power')).toBeInTheDocument();
     expect(within(statusCard).getByRole('heading', { name: STATUS_CARD_TITLE }).className).toContain('hiddenTitle');
     expect(within(statusCard).getByRole('button', { name: RESET_LABEL })).toBeInTheDocument();
-    expect(within(statusCard).getByRole('button', { name: UNLOCK_LABEL })).toBeInTheDocument();
+    expect(within(statusCard).queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
     expect(within(statusCard).queryByText(WORK_POSITION_TEXT)).not.toBeInTheDocument();
     expect(within(positionCard).getByText(WORK_POSITION_TEXT)).toBeInTheDocument();
     expect(within(positionCard).getByTitle(new RegExp(MACHINE_POSITION_TEXT))).toBeInTheDocument();
@@ -158,42 +158,33 @@ describe(MachinePanel.name, () => {
     expect(screen.queryByRole('region', { name: STATUS_CARD_TITLE })).not.toBeInTheDocument();
   });
 
-  it('gives Reset, Unlock, Set zero and Hold to fire an icon beside their short word', () => {
-    connect(renderMachinePanel());
+  it('gives Restart controller, Unlock, Set zero and Hold to fire an icon', () => {
+    const store: AppStore = renderMachinePanel();
 
-    expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-reload')).not.toBeNull();
+    connect(store);
+    receiveState(store, GRBL_MACHINE_STATE.ALARM);
+
+    expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-poweroff')).not.toBeNull();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL }).querySelector('.anticon-unlock')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Set zero' }).querySelector('.anticon-aim')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Hold to fire' }).querySelector('.anticon-bulb')).not.toBeNull();
   });
 
-  it('enables reset when connected, and unlock only in alarm, where it is the primary action', () => {
+  it('enables Restart controller when connected, and shows Unlock only in alarm, as the primary action', () => {
     const store: AppStore = renderMachinePanel();
 
     connect(store);
     receiveState(store, GRBL_MACHINE_STATE.IDLE);
 
     expect(screen.getByRole('button', { name: RESET_LABEL })).toBeEnabled();
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeDisabled();
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).not.toHaveClass('ant-btn-primary');
+    expect(screen.getByRole('button', { name: RESET_LABEL })).toHaveAccessibleDescription(/soft reset, Ctrl-X/);
+    expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
 
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
 
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeEnabled();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveClass('ant-btn-primary');
-  });
-
-  it('keeps the Unlock word in every state, so the button never changes width on an alarm', () => {
-    const store: AppStore = renderMachinePanel();
-
-    connect(store);
-    receiveState(store, GRBL_MACHINE_STATE.IDLE);
-
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveTextContent(UNLOCK_LABEL);
-
-    receiveState(store, GRBL_MACHINE_STATE.ALARM);
-
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveTextContent(UNLOCK_LABEL);
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveAccessibleDescription(/^Alarm:/);
   });
 
   it('dispatches the reset and unlock requests when their buttons are clicked', () => {
@@ -203,8 +194,8 @@ describe(MachinePanel.name, () => {
     renderMachinePanel(store);
     connect(store);
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
-    fireEvent.click(screen.getByRole('button', { name: RESET_LABEL }));
     fireEvent.click(screen.getByRole('button', { name: UNLOCK_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: RESET_LABEL }));
 
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(MachineResetRequested));
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(MachineUnlockRequested));

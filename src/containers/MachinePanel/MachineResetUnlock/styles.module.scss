@@ -1,11 +1,12 @@
 .machineResetUnlock {
   display: flex;
   flex: none;
+  align-items: center;
   gap: var(--space-1);
 }
 
 // Short labels at a readable size on a 32 px target. The negative block margin lets the taller buttons reach into the
-// compact card's padding, so the Status card keeps its height and Move still fits above STOP.
+// compact card's padding, so the Status card keeps its height whether Unlock shows or not.
 .machineResetUnlock :global(.ant-btn) {
   gap: var(--space-1);
   height: 2rem;
@@ -14,10 +15,9 @@
   font-size: 0.8125rem;
 }
 
-// A control that cannot be pressed now wears the locked look (solid outline, dark fill, grey text), clearly apart from
-// a live secondary button such as Reset.
-.machineResetUnlock :global(.ant-btn:disabled) {
-  border-color: var(--color-disabled-border-locked);
-  background-color: var(--color-disabled-bg);
-  color: var(--color-disabled-text);
+// A square icon button: the quiet secondary action beside the read-out.
+.machineResetUnlock .restartButton:global(.ant-btn) {
+  width: 2rem;
+  padding-inline: 0;
+  color: var(--color-text-muted);
 }

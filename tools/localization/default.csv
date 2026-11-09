@@ -411,7 +411,10 @@ LAYOUT_RESIZE_DESIGN_PANEL;Resize the design panel
 LAYOUT_RESIZE_MACHINE_PANEL;Resize the laser panel
 MACHINE_CARD_HIDE;Hide
 MACHINE_CARD_SHOW;Show
-MACHINE_CONTROL_RESET;Reset
+MACHINE_CONTROL_ALARM_NOTE;Alarm: GRBL has locked the laser for safety, for example after a limit switch, a stop or a restart. Check the head is clear, then press Unlock ($X) or home the laser.
+MACHINE_CONTROL_RESTART;Restart controller
+MACHINE_CONTROL_RESTART_NOTE;Stops all motion and the laser at once and resets GRBL (soft reset, Ctrl-X). It does not pause a job.
+MACHINE_CONTROL_RESTART_TOOLTIP;Restart controller: stops all motion and the laser at once and resets GRBL (soft reset, Ctrl-X)
 MACHINE_CONTROL_STOP;Stop
 MACHINE_CONTROL_STOP_NOT_CONNECTED;Laser not connected
 MACHINE_CONTROL_STOP_OFFLINE;Not connected
