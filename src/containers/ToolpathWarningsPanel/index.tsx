@@ -27,10 +27,8 @@ import { usePopoverAutoClose } from '../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { selectProjectObjects } from '../../utils/states/project.document.state';
-import { selectToolpath, selectToolpathStatus } from '../../utils/states/toolpath.state';
-import { TOOLPATH_STATUS } from '../../utils/states/toolpath.status.constants';
+import { selectCurrentToolpathWarnings } from '../../utils/states/toolpath.warnings.selector';
 import type { ObjectWarning } from '../../utils/toolpath/interfaces/ObjectWarning';
-import type { Toolpath } from '../../utils/toolpath/interfaces/Toolpath';
 import { ObjectWarningKindIcon } from '../../views/ObjectWarningKindIcon';
 import { getGcodeWarningLines } from '../GcodeExportConfirmDialog/get.gcode.warning.lines';
 import type { GcodeWarningLine } from '../GcodeExportConfirmDialog/interfaces/GcodeWarningLine';
@@ -40,10 +38,8 @@ import styles from './styles.module.scss';
 export const ToolpathWarningsPanel = (): ReactNode => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const isToolpathCurrent: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.READY;
-  const toolpath: Toolpath | undefined = useSelector(selectToolpath);
   const projectObjects: ProjectObject[] = useSelector(selectProjectObjects);
-  const currentWarnings: ObjectWarning[] = isToolpathCurrent && toolpath ? toolpath.warnings : [];
+  const currentWarnings: ObjectWarning[] = useSelector(selectCurrentToolpathWarnings) ?? [];
   const warningLines: GcodeWarningLine[] = getGcodeWarningLines(currentWarnings, projectObjects);
 
   usePopoverAutoClose(isOpen, () => setIsOpen(false));

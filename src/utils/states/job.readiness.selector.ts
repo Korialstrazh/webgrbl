@@ -15,7 +15,7 @@ import { selectActiveMachineProfile } from './machine.profile.state';
 import { selectActiveMaterial } from './material.selectors';
 import type { AppRootState } from './new.store';
 import { selectProjectObjects } from './project.document.state';
-import { selectToolpath } from './toolpath.state';
+import { selectToolpathWarningCount } from './toolpath.warnings.selector';
 
 export const JOB_READINESS_STEP = {
   PROFILE: 'profile',
@@ -41,9 +41,8 @@ const OPTIONAL_JOB_READINESS_STEPS: readonly JobReadinessStep[] = [JOB_READINESS
 export const isJobReadinessStepOptional = (step: JobReadinessStep): boolean =>
   OPTIONAL_JOB_READINESS_STEPS.includes(step);
 
-/** The number of toolpath warnings that keep Start job locked. */
-export const selectJobReadinessWarningCount = (state: AppRootState): number =>
-  selectToolpath(state)?.warnings.length ?? 0;
+/** The number of toolpath warnings that keep Start job locked, from the one shared warnings source. */
+export const selectJobReadinessWarningCount = (state: AppRootState): number => selectToolpathWarningCount(state);
 
 export const selectIsJobReadinessStepMet = (step: JobReadinessStep) => (state: AppRootState): boolean => {
   switch (step) {

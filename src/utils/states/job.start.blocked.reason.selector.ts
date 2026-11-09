@@ -19,6 +19,7 @@ import { selectMachineStatus } from './machine.status.state';
 import type { AppRootState } from './new.store';
 import { selectToolpath, selectToolpathStatus } from './toolpath.state';
 import { TOOLPATH_STATUS } from './toolpath.status.constants';
+import { selectToolpathWarningCount } from './toolpath.warnings.selector';
 
 const hasReadyToolpathMoves = (state: AppRootState): boolean =>
   selectToolpathStatus(state) === TOOLPATH_STATUS.READY && Boolean(selectToolpath(state)?.moves.length);
@@ -43,7 +44,7 @@ export const selectJobStartBlockedReasonKey = (state: AppRootState): string | un
     return DEFAULT.JOB_START_BLOCKED_NO_TOOLPATH;
   }
 
-  if (selectToolpath(state)?.warnings.length) {
+  if (selectToolpathWarningCount(state)) {
     return DEFAULT.JOB_START_BLOCKED_WARNINGS;
   }
 

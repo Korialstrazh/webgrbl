@@ -20,11 +20,9 @@ import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/an
 import { useObjectArtworkFrame } from '../../../utils/hooks/use.object.artwork.frame';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { isSampleJobObject } from '../../../utils/materials/is.sample.job.object';
-import { selectToolpath, selectToolpathStatus } from '../../../utils/states/toolpath.state';
-import { TOOLPATH_STATUS } from '../../../utils/states/toolpath.status.constants';
+import { selectCurrentToolpathWarnings } from '../../../utils/states/toolpath.warnings.selector';
 import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.constants';
 import type { ObjectWarning } from '../../../utils/toolpath/interfaces/ObjectWarning';
-import type { Toolpath } from '../../../utils/toolpath/interfaces/Toolpath';
 import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import type { ObjectRowProps } from '../interfaces/ObjectRowProps';
 import { OBJECT_KIND, OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
@@ -44,9 +42,7 @@ export const ObjectRow = ({
 }: ObjectRowProps): ReactNode => {
   const { t } = useTranslation();
   const rowClassName: string | undefined = isSelected ? [styles.row, styles.selectedRow].join(' ') : styles.row;
-  const isToolpathCurrent: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.READY;
-  const toolpath: Toolpath | undefined = useSelector(selectToolpath);
-  const readyToolpathWarnings: ObjectWarning[] | undefined = isToolpathCurrent ? toolpath?.warnings : undefined;
+  const readyToolpathWarnings: ObjectWarning[] | undefined = useSelector(selectCurrentToolpathWarnings);
   const warningKinds: SvgUnsupportedKind[] = useMemo(
     () => getObjectWarningKinds(projectObject, readyToolpathWarnings),
     [projectObject, readyToolpathWarnings],

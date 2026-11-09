@@ -175,7 +175,7 @@ describe(CutCheckPanel.name, () => {
       </Provider>,
     );
 
-    expect(screen.getByRole('img', { name: '1 warning' })).toHaveTextContent('1');
+    expect(screen.getByRole('img', { name: '1 cut risk (does not lock Start)' })).toHaveTextContent('1');
     expect(screen.getByRole('note', { name: 'The cut check runs in the 3D view.' })).toBeInTheDocument();
   });
 
@@ -197,7 +197,7 @@ describe(CutCheckPanel.name, () => {
     );
 
     expect(screen.queryByText('3 parts')).not.toBeInTheDocument();
-    expect(screen.getByRole('img', { name: '1 warning' })).toHaveTextContent('1');
+    expect(screen.getByRole('img', { name: '1 cut risk (does not lock Start)' })).toHaveTextContent('1');
 
     fireEvent.click(screen.getByRole('button', { name: SHOW_DETAILS_LABEL }));
 

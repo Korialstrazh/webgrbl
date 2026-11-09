@@ -1,6 +1,7 @@
 /**
- * The Cut check's warning count: a warning tag with the number of warnings, named in full for screen readers, and
- * nothing while there are none.
+ * The Cut check's risk count: a tag with scissors and the number of cut risks, named in full in its tooltip and for
+ * screen readers, and nothing while there are none. It is not a toolpath warning count: those lock Start and have their
+ * own warning icon, so the two numbers never read as one count that disagrees.
  *
  * @author michael.morosov
  *
@@ -9,8 +10,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { WarningFilled } from '@ant-design/icons';
-import { Tag } from 'antd';
+import { ScissorOutlined } from '@ant-design/icons';
+import { Tag, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ANTD_TAG_COLOR_WARNING } from '../../../utils/antd.constants';
@@ -18,7 +19,7 @@ import { DEFAULT } from '../../../utils/localization/default.locales';
 import styles from './styles.module.scss';
 
 interface CutCheckWarningCountTagProps {
-  /** How many warnings the check found. */
+  /** How many cut risks the check found. */
   count: number;
 }
 
@@ -29,15 +30,19 @@ export const CutCheckWarningCountTag = ({ count }: CutCheckWarningCountTagProps)
     return undefined;
   }
 
+  const labelText: string = t(DEFAULT.CUT_CHECK_WARNING_COUNT, { count });
+
   return (
-    <Tag
-      className={styles.warningCountTag}
-      color={ANTD_TAG_COLOR_WARNING}
-      icon={<WarningFilled aria-hidden />}
-      role="img"
-      aria-label={t(DEFAULT.CUT_CHECK_WARNING_COUNT, { count })}
-    >
-      {count}
-    </Tag>
+    <Tooltip title={labelText}>
+      <Tag
+        className={styles.warningCountTag}
+        color={ANTD_TAG_COLOR_WARNING}
+        icon={<ScissorOutlined aria-hidden />}
+        role="img"
+        aria-label={labelText}
+      >
+        {count}
+      </Tag>
+    </Tooltip>
   );
 };

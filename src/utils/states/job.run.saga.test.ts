@@ -14,6 +14,7 @@ import { ANSWER_SETTLE_MS } from '../grbl/test.support/grbl.answer.settle';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../profiles/new.machine.profile';
+import { newProjectObject } from '../project/new.project.object';
 import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
 import type { ObjectWarning } from '../toolpath/interfaces/ObjectWarning';
 import type { ToolpathMove } from '../toolpath/interfaces/ToolpathMove';
@@ -49,6 +50,7 @@ import {
 } from './machine.status.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
+import { ProjectObjectsAdded } from './project.document.state';
 import { ToolpathReady, selectToolpathDocumentVersion } from './toolpath.state';
 
 /** 100 mm at the test move's speed outlasts the time the running checks wait. */
@@ -64,7 +66,8 @@ const CONSOLE_LINE = 'G0X1';
 const MACHINE_LINE = 'G0X2';
 const RETURN_JOG_START = '$J=G90 G21 X0 Y0';
 const LASER_OFF_LINE = 'M5\n';
-const OFF_PAGE_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
+const WARNED_OBJECT_ID = 'object';
+const OFF_PAGE_WARNING: ObjectWarning = { objectId: WARNED_OBJECT_ID, kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
 
 const getSentText = (writeCalls: Uint8Array[][]): string =>
   writeCalls.map(([bytes]: Uint8Array[]): string => new TextDecoder().decode(bytes)).join('');
@@ -139,6 +142,12 @@ const prepareConnectedStore = async (
   store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
   store.dispatch(new ConnectRequested());
   await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+  // Warnings only count for objects in the project, as a new or emptied project shows none.
+  if (warnings.length) {
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject({ id: WARNED_OBJECT_ID })], layers: [] }));
+  }
+
   store.dispatch(new ToolpathReady({
     toolpath: newToolpath({
       moves: [newToolpathMove({ to: { x: LONG_MOVE_END_X_MM, y: 0 }, ...moveOverrides })],
