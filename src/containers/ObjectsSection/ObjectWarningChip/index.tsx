@@ -39,7 +39,7 @@ export const ObjectWarningChip = ({ objectName, isOutsideBed, warningKinds }: Ob
     return null;
   }
 
-  const chipClassName: string = isOutsideBed ? [styles.chip, styles.dangerChip].join(' ') : styles.chip;
+  const chipClassName: string | undefined = isOutsideBed ? [styles.chip, styles.dangerChip].join(' ') : styles.chip;
   const listComponent: ReactNode = (
     <ul className={styles.list}>
       {isOutsideBed && <li className={styles.dangerItem}>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</li>}

@@ -370,10 +370,8 @@ describe(ObjectsSection.name, () => {
     });
     renderSection(store);
 
-    const warningChips: HTMLElement[] = screen.getAllByRole('button', { name: WARNING_CHIP_NAME });
-
-    expect(warningChips).toHaveLength(1);
-    fireEvent.click(warningChips[0]);
+    expect(screen.getAllByRole('button', { name: WARNING_CHIP_NAME })).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: WARNING_CHIP_NAME }));
     expect(screen.getAllByText(OUTSIDE_NOTE)).toHaveLength(1);
   });
 
@@ -393,11 +391,10 @@ describe(ObjectsSection.name, () => {
     });
     renderSection(store);
 
-    const rows: HTMLElement[] = within(screen.getByRole('list', { name: OBJECTS_LIST_NAME })).getAllByRole('listitem');
+    const warningChip: HTMLElement = screen.getByRole('button', { name: WARNING_CHIP_NAME });
 
-    expect(within(rows[0]).getByRole('button', { name: WARNING_CHIP_NAME })).toBeInTheDocument();
-    expect(within(rows[1]).queryByRole('button', { name: WARNING_CHIP_NAME })).toBeNull();
-    fireEvent.click(within(rows[0]).getByRole('button', { name: WARNING_CHIP_NAME }));
+    expect(warningChip).toHaveAccessibleName(new RegExp(FIRST_NAME));
+    fireEvent.click(warningChip);
     expect(screen.getByText(TEXT_WARNING)).toBeInTheDocument();
   });
 
