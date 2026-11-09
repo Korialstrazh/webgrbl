@@ -186,6 +186,7 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
           <BedObjectGraphic
             key={projectObject.id}
             projectObject={drawnObject}
+            bedWidthMm={dimensions.widthMm}
             bedHeightMm={dimensions.heightMm}
             isSelected={isSelected}
             hasHandles={isSelected && hasSingleSelection}

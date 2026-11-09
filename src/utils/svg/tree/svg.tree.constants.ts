@@ -24,8 +24,11 @@ export const INKSCAPE_GROUP_MODE_ATTRIBUTE_NAME = 'groupmode';
 export const INKSCAPE_LAYER_GROUP_MODE = 'layer';
 /** Joins the child indexes of a node path, such as 0.3.1. */
 export const SVG_TREE_PATH_SEPARATOR = '.';
-/** Dims left-out elements where the SVG is drawn as an image. */
-export const SVG_TREE_DISABLED_DISPLAY_CSS = `${SVG_TREE_DISABLED_SELECTOR}{opacity:0.25}`;
+/**
+ * Hides left-out elements where the SVG is drawn as an image: the bed draws them again on their own, faint, dashed and
+ * without the halo, so the image's glow never makes them look like a burn.
+ */
+export const SVG_TREE_DISABLED_DISPLAY_CSS = `${SVG_TREE_DISABLED_SELECTOR}{display:none}`;
 export const SVG_STYLE_ELEMENT_NAME = 'style';
 export const SVG_STYLE_DECLARATION_SEPARATOR = ';';
 export const SVG_STYLE_PROPERTY_SEPARATOR = ':';

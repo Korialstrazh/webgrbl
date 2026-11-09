@@ -1,6 +1,6 @@
 /**
- * Gets SVG text for drawing an object as an image: turned-off content is dimmed by a style rule. Text with nothing
- * turned off comes back unchanged.
+ * Gets SVG text for drawing an object as an image: turned-off content is hidden by a style rule, as the bed draws it
+ * again on its own. Text with nothing turned off comes back unchanged.
  *
  * @author michael.morosov
  *

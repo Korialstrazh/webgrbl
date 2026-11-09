@@ -13,7 +13,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { memo, useMemo } from 'react';
+import { memo, useId, useMemo } from 'react';
 import type { PointerEvent, ReactNode } from 'react';
 import { getObjectDesignDrawing } from '../../../utils/bed/get.object.design.drawing';
 import type { ObjectDesignDrawing } from '../../../utils/bed/interfaces/ObjectDesignDrawing';
@@ -35,6 +35,7 @@ import {
 } from '../bed.objects.constants';
 import type { BedObjectHandle } from '../bed.objects.constants';
 import { getObjectArtworkSvgTransform } from '../get.object.artwork.svg.transform';
+import { getObjectBedClipSvgTransform } from '../get.object.bed.clip.svg.transform';
 import { getObjectSvgTransform } from '../get.object.svg.transform';
 import type { BedHandleSizes } from '../interfaces/BedHandleSizes';
 import { getSelectionHandleOrigins } from './get.selection.handle.origins';
@@ -42,6 +43,10 @@ import type { BedObjectGraphicProps } from './interfaces/BedObjectGraphicProps';
 import type { SelectionHandlePlacement } from './interfaces/SelectionHandlePlacement';
 import { ObjectDesignArtwork } from './ObjectDesignArtwork';
 import styles from './styles.module.scss';
+
+// React's ids may hold characters that a url(#id) reference would have to escape.
+const NON_ID_CHARACTERS_PATTERN = /[^a-zA-Z0-9]/g;
+const BED_CLIP_ID_PREFIX = 'bed-clip-';
 
 type HandlePointerDownHandler = (pointerEvent: PointerEvent<SVGElement>, handle: BedObjectHandle) => void;
 
@@ -90,7 +95,8 @@ const renderSelectionHandles = (
 };
 
 const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
-  const { projectObject, bedHeightMm, isSelected, hasHandles, isOutsideBed, handleSizes, layerLooks } = props;
+  const { projectObject, bedWidthMm, bedHeightMm, isSelected, hasHandles, isOutsideBed, handleSizes } = props;
+  const { layerLooks } = props;
   const { onPointerDown, onHandlePointerDown } = props;
   const { id, name: objectName, svgText, widthMm, heightMm }: ProjectObject = projectObject;
   const { intrinsicWidthMm, intrinsicHeightMm }: ProjectObject = projectObject;
@@ -108,6 +114,7 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
       : undefined;
   }, [svgText, intrinsicWidthMm, intrinsicHeightMm]);
   const displaySvgText: string = useMemo(() => getSvgDisplayText(svgText), [svgText]);
+  const bedClipId: string = BED_CLIP_ID_PREFIX + useId().replace(NON_ID_CHARACTERS_PATTERN, '');
   const artworkFrame: ObjectArtworkFrame = useObjectArtworkFrame(projectObject);
   const left: number = -widthMm * HALF_BOX_FACTOR;
   const top: number = -heightMm * HALF_BOX_FACTOR;
@@ -163,13 +170,25 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
           />
           <g transform={getObjectArtworkSvgTransform(projectObject)}>
             <ObjectDesignArtwork designDrawing={designDrawing} layerLooks={layerLooks} />
-            {disabledDrawing && (
-              <g className={styles.disabledArtwork} data-disabled-artwork>
-                <ObjectDesignArtwork designDrawing={disabledDrawing} layerLooks={layerLooks} />
-              </g>
-            )}
           </g>
         </>
+      )}
+      {/* Skipped content: faint, dashed, without the halo and stopped at the bed edge, so it never reads as a burn. */}
+      {disabledDrawing && (
+        <g className={styles.disabledArtwork} data-disabled-artwork clipPath={`url(#${bedClipId})`}>
+          <clipPath id={bedClipId}>
+            <rect
+              x={0}
+              y={0}
+              width={bedWidthMm}
+              height={bedHeightMm}
+              transform={getObjectBedClipSvgTransform(projectObject, bedHeightMm)}
+            />
+          </clipPath>
+          <g transform={getObjectArtworkSvgTransform(projectObject)}>
+            <ObjectDesignArtwork designDrawing={disabledDrawing} layerLooks={layerLooks} />
+          </g>
+        </g>
       )}
       {isOutsideBed && (
         <rect

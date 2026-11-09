@@ -17,6 +17,8 @@ import type { BedHandleSizes } from '../../interfaces/BedHandleSizes';
 export interface BedObjectGraphicProps {
   /** The object as drawn, already moved by a drag in progress. */
   projectObject: ProjectObject;
+  /** Width of the bed, where skipped content is clipped. */
+  bedWidthMm: number;
   /** Height of the bed, which turns machine Y into SVG Y. */
   bedHeightMm: number;
   isSelected: boolean;
