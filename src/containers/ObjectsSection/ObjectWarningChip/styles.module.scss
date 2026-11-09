@@ -15,13 +15,28 @@
 
 .list {
   display: grid;
-  gap: var(--space-1);
-  max-width: 18rem;
+  gap: var(--space-2);
+  max-width: 16rem;
   margin: 0;
-  padding-inline-start: 1rem;
+  padding: 0;
   font-size: 0.8125rem;
+  list-style: none;
 }
 
-.dangerItem {
+// The kind icon first, then the text, which wraps under itself rather than under the icon.
+.item {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+}
+
+.itemIcon {
+  padding-top: 0.125rem;
+  color: var(--color-warning);
+}
+
+.dangerItem,
+.dangerItem .itemIcon {
   color: var(--color-danger-text);
 }

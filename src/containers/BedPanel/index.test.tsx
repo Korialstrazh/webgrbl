@@ -86,6 +86,7 @@ const ADD_TEST_SAMPLE_LABEL = 'Add test sample';
 const CANCEL_LABEL = 'Cancel';
 const GENERATING_TEXT = `Generating${HORIZONTAL_ELLIPSIS} 40 %`;
 const GENERATION_PROGRESS = 0.4;
+const TOOLPATH_WARNINGS_CHIP_LABEL = 'Toolpath warnings (1): show them';
 const TEXT_WARNING = 'Text is not converted to paths. In Inkscape use Path > Object to Path.';
 const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/><text x="1" y="5">Hi</text></svg>';
@@ -653,13 +654,14 @@ describe(BedPanel.name, () => {
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ToolpathCancelled));
   });
 
-  it('lists the text warning of an object in the Toolpath view', async () => {
+  it('lists the text warning of an object behind the Toolpath view warnings chip', async () => {
     const store: AppStore = await newGcodeExportTestStore({
       objects: [newProjectObject({ name: OBJECT_NAME, svgText: TEXT_SVG_TEXT })],
     });
 
     renderPanel(store);
     openToolpathView();
+    fireEvent.click(await screen.findByRole('button', { name: TOOLPATH_WARNINGS_CHIP_LABEL }));
 
     expect(await screen.findByText(TEXT_WARNING)).toBeInTheDocument();
     expect(screen.getByText(OBJECT_NAME)).toBeInTheDocument();

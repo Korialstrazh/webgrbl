@@ -8,11 +8,15 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.constants';
+
 export interface GcodeWarningLine {
   /** Unique key of the line in the list. */
   lineKey: string;
   /** Display name of the affected object. */
   objectName: string;
+  /** Kind of the warning, for its icon. */
+  kind: SvgUnsupportedKind;
   /** Translation key of the warning text. */
   warningTextKey: string;
 }

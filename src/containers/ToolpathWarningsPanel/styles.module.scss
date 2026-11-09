@@ -1,54 +1,43 @@
-// A chip in the toolbar row above the bed, as tall as the other header controls; the open list drops below it over the bed, so the row never grows.
-.warningsPanel {
-  position: relative;
-  min-width: 0;
-  max-width: 100%;
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-}
-
-.title {
-  display: flex;
+// The same compact chip as an object's warning chip: warning icon and count, centred in the toolbar row.
+.chip {
+  display: inline-flex;
+  flex: none;
+  gap: var(--space-1);
   align-items: center;
-  min-height: var(--control-height);
-  padding: 0 var(--space-3);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background-color: var(--color-surface-2);
+  align-self: center;
   color: var(--color-warning);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
+  font-variant-numeric: tabular-nums;
 }
 
 .warningList {
-  position: absolute;
-  top: calc(100% + var(--space-1));
-  left: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--space-2);
-  width: max-content;
-  max-width: min(22rem, 80vw);
+  max-width: 18rem;
   max-height: 16rem;
   margin: 0;
   overflow: auto;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface-2);
-  box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 40%);
+  padding: 0;
+  font-size: 0.8125rem;
   list-style: none;
+}
 
-  li {
-    display: flex;
-    flex-direction: column;
-  }
+// The kind icon first, then the object name over the warning text.
+.item {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+}
+
+.itemIcon {
+  padding-top: 0.125rem;
+  color: var(--color-warning);
+}
+
+.itemText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .objectName {

@@ -22,5 +22,6 @@ export const getGcodeWarningLines = (warnings: ObjectWarning[], projectObjects: 
     lineKey: [warning.objectId, warning.kind].join(LINE_KEY_SEPARATOR),
     objectName: projectObjects.find((projectObject: ProjectObject): boolean => projectObject.id === warning.objectId)
       ?.name ?? DEFAULT_OBJECT_NAME,
+    kind: warning.kind,
     warningTextKey: OBJECT_WARNING_TEXT_KEY[warning.kind],
   }));

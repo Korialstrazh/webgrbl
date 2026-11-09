@@ -313,6 +313,10 @@ JOB_READINESS_STEP_MET;{{step}}: done
 JOB_READINESS_STEP_OPEN;{{step}}: to do
 JOB_READINESS_STEP_OPTIONAL;{{step}}: optional
 JOB_READINESS_STEP_OPTIONAL_CAPTION;optional
+JOB_READINESS_WARNINGS;Check
+JOB_READINESS_WARNINGS_ACTION;Fix warnings ({{count}})
+JOB_READINESS_WARNINGS_HINT;Fix the toolpath warnings ({{count}}) so the job can start
+JOB_READINESS_WARNINGS_MET_HINT;No toolpath warnings
 JOB_RESUME;Resume
 JOB_RESUME_WAITING;Wait until the laser has stopped and any door is closed.
 JOB_RUN_PROGRESS_DETAIL;{{answered}} of {{total}} lines answered, {{elapsed}} elapsed
@@ -390,11 +394,10 @@ LAYERS_LEGEND_PASSES;Passes
 LAYERS_LEGEND_POWER;Power
 LAYERS_LEGEND_SPEED;Speed
 LAYERS_LIST_LABEL;Project layers
-LAYERS_MOVE_DOWN;Move {{name}} down
-LAYERS_MOVE_UP;Move {{name}} up
 LAYERS_NOT_IN_PALETTE;Not in the palette yet: open the layer to save its colour
 LAYERS_OPEN_PALETTE;Palette
 LAYERS_PURPOSE_CAPTION;Burn order
+LAYERS_REORDER_HANDLE;Move {{name}}: drag, or press the up and down arrow keys
 LAYERS_SUMMARY_PASSES;{{passes}}×
 LAYERS_SUMMARY_POWER;{{power}} %
 LAYERS_SUMMARY_SPEED;{{speed}} mm/min
@@ -811,13 +814,7 @@ TOOLPATH_POWER_LEGEND;Power scale: lighter is less power, darker is full power
 TOOLPATH_REGENERATE;Regenerate
 TOOLPATH_SHOW_TRAVEL;Show travel moves
 TOOLPATH_SHOW_TRAVEL_CAPTION;Travel
-TOOLPATH_WARNINGS_KIND_CLIPPED;clipped parts burn in full ({{count}})
-TOOLPATH_WARNINGS_KIND_IMAGE;images left out ({{count}})
-TOOLPATH_WARNINGS_KIND_OFF_PAGE;parts off the page ({{count}})
-TOOLPATH_WARNINGS_KIND_TEXT;text left out ({{count}})
-TOOLPATH_WARNINGS_KIND_UNREADABLE;drawings that could not be read ({{count}})
-TOOLPATH_WARNINGS_KIND_USE_LIMIT;repeats left out ({{count}})
-TOOLPATH_WARNINGS_SUMMARY;Warnings: {{kinds}}
+TOOLPATH_WARNINGS_CHIP;Toolpath warnings ({{count}}): show them
 TOOLPATH_WARNINGS_TITLE;Toolpath warnings
 TOP_BAR_AUTOSAVE_SAVED;Saved
 TOP_BAR_AUTOSAVE_SAVING;Saving…
