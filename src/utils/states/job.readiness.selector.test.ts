@@ -82,7 +82,15 @@ describe('the Check step', () => {
     expect(selectFirstUnmetJobReadinessStep(store.getState())).toBe(JOB_READINESS_STEP.WARNINGS);
   });
 
-  it('is met while there is no toolpath warning', () => {
-    expect(selectIsJobReadinessStepMet(JOB_READINESS_STEP.WARNINGS)(newStore().getState())).toBe(true);
+  it('stays open while there is no artwork, so it never reads done ahead of Design', () => {
+    expect(selectIsJobReadinessStepMet(JOB_READINESS_STEP.WARNINGS)(newStore().getState())).toBe(false);
+  });
+
+  it('is met once there is artwork without a toolpath warning', () => {
+    const store: AppStore = newStore();
+
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+
+    expect(selectIsJobReadinessStepMet(JOB_READINESS_STEP.WARNINGS)(store.getState())).toBe(true);
   });
 });
