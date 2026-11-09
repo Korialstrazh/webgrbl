@@ -19,7 +19,9 @@
 
   // STOP dominates the bar: three times the width of Start and taller, so it reads first; Start is a smaller, secondary
   // action here (its home is the Job card); the gear keeps its own size.
+  // Positioned, so the lock dot sits in the top end corner of Start.
   > .start {
+    position: relative;
     flex: 1;
     max-width: 9rem;
   }
