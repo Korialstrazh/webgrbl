@@ -145,8 +145,9 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
         {/* eslint-disable-next-line no-restricted-syntax -- 0 s is a real estimate, distinct from no toolpath */}
         <dd>{totalTimeS === undefined ? MISSING_VALUE_TEXT : getJobEstimateText(t, totalTimeS)}</dd>
       </div>
-      {/* A fixed-size slot that is always there, so a run starting or ending never reflows the facts or the buttons
-          below: the status is a dot whose text opens on a hover or a tap, and is announced from a hidden live region. */}
+      {/* A fixed-size slot that is always there, so a run starting or ending never reflows the facts or the
+          buttons below: the status is a dot whose text opens on a hover or a tap, announced from a hidden live
+          region. */}
       <div className={styles.fact}>
         <dt><span className={styles.factLabel}>{t(DEFAULT.JOB_RUN_STATUS_LABEL)}</span></dt>
         <dd className={styles.runStatus}>

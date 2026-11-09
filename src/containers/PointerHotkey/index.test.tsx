@@ -100,7 +100,7 @@ describe(PointerHotkey.name, () => {
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it.each([
+  it.each<Record<string, boolean>>([
     { ctrlKey: true },
     { metaKey: true },
     { altKey: true },

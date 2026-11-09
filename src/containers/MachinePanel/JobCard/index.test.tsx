@@ -320,7 +320,7 @@ describe(JobCard.name, () => {
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).not.toBeInTheDocument();
   });
 
-  it('puts a reason no step says on its own button as a dot whose name is the reason, with no standing text', async () => {
+  it('puts a reason no step says on its own button as a dot named by the reason, with no standing text', async () => {
     renderJobCard(await newGcodeExportTestStore({ areLayersEnabled: false }));
 
     const exportNote: HTMLElement = screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT);

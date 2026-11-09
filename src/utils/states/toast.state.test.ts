@@ -153,7 +153,7 @@ describe(watchInfoToastExpiry.name, () => {
     expect(selectToasts(store.getState())).toHaveLength(NO_TOASTS_COUNT);
   });
 
-  it.each([TOAST_SEVERITY.WARNING, TOAST_SEVERITY.ERROR])('dismisses a %s toast after the same lifetime', async (severity) => {
+  it.each([TOAST_SEVERITY.WARNING, TOAST_SEVERITY.ERROR])('dismisses a %s toast after it too', async (severity) => {
     store.dispatch(new ToastShown({ severity, messageKey: MESSAGE_KEY, messageParameters: NO_PARAMETERS }));
 
     await vi.advanceTimersByTimeAsync(JUST_BEFORE_EXPIRY_MS);
