@@ -11,7 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { UnorderedListOutlined } from '@ant-design/icons';
+import { BookOutlined, SlidersOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -28,7 +28,6 @@ import { MachineProfilesDialogOpenChanged } from '../../utils/states/ui.workbenc
 import { DismissibleTooltip } from '../../views/DismissibleTooltip';
 import { IconActionButton } from '../../views/IconActionButton';
 import { LaserMachineIcon } from '../../views/LaserMachineIcon';
-import { MaterialSheetIcon } from '../../views/MaterialSheetIcon';
 import { MaterialLibraryDrawer } from '../MaterialLibraryDrawer';
 import { ProjectMaterialSelect } from '../ProjectMaterialSelect';
 import styles from './styles.module.scss';
@@ -72,8 +71,8 @@ export const MaterialSection = (): ReactNode => {
       return <LaserMachineIcon />;
     }
 
-    // The button opens the library either way, so it shows the list, never an add sign.
-    return <UnorderedListOutlined />;
+    // Sliders for the saved settings, so the entry never looks like the Library book beside it.
+    return <SlidersOutlined />;
   };
 
   const openLibrary = (materialId: string | undefined): void => {
@@ -90,7 +89,7 @@ export const MaterialSection = (): ReactNode => {
       <ProjectMaterialSelect />
       {/* The presets entry and the library sit on one row of small captioned buttons under the full-width select. */}
       <div className={styles.entryRow}>
-        <DismissibleTooltip title={isWaitingForMaterial ? noMaterialText : undefined}>
+        <DismissibleTooltip title={isWaitingForMaterial ? noMaterialText : t(DEFAULT.MATERIAL_SECTION_PRESETS_HINT)}>
           <Button
             className={[styles.presetSummary, isWaitingForMaterial ? styles.mutedPresetSummary : undefined].join(' ')}
             aria-label={isWaitingForMaterial ? noMaterialText : undefined}
@@ -105,7 +104,7 @@ export const MaterialSection = (): ReactNode => {
         <IconActionButton
           size={ANTD_BUTTON_SIZE_SMALL}
           labelText={t(DEFAULT.MATERIAL_SECTION_OPEN_LIBRARY)}
-          iconComponent={<MaterialSheetIcon />}
+          iconComponent={<BookOutlined />}
           captionText={t(DEFAULT.MATERIAL_SECTION_LIBRARY_CAPTION)}
           onClick={() => openLibrary(undefined)}
         />
