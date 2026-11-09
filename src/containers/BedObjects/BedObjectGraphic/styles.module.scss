@@ -4,9 +4,10 @@
 
 // On a dark bed, black fills and dark blue strokes would melt into the surface, so the drawing gets a light halo: a
 // crisp, solid inner rim and a softer outer glow. Only the design view draws it; colours, toolpath and G-code are untouched.
+// The selection (the last group) gets no halo: on a huge object its glowing edge would run across the whole canvas.
 // Must match BED_OVERLAY_TONE.ON_DARK.
 :global([data-bed-tone='on-dark']) .bedObject > image,
-:global([data-bed-tone='on-dark']) .bedObject > g {
+:global([data-bed-tone='on-dark']) .bedObject > g:not(:last-child) {
   filter:
     drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
     drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
