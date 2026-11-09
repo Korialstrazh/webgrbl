@@ -12,6 +12,7 @@ export const MACHINE_COMMAND = {
   HOME: '$H',
   SET_WORK_ZERO: 'G10 L20 P1 X0 Y0',
   POINTER_OFF: 'M5',
+  LASER_OFF: 'M5',
   AIR_ON: 'M8',
   AIR_OFF: 'M9',
 } as const;

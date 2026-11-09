@@ -39,3 +39,7 @@ Nothing in the Job card changes size when the machine turns busy, a run starts o
 - A locked Start, Frame or Export shows why as a small amber dot on the top corner of its button (`ActionLockNote`); hover, tap or focus it for the reason (for example "Busy" while the laser moves). The dot floats over the button, so it never pushes the buttons down.
 - The run status (Running, Paused, Finished...) is a blue dot with the same tooltip, in a slot that is always reserved in the facts line; screen readers hear it from a hidden live region.
 - The header keeps a slot for the reasons icon, so the fold button never moves.
+
+## Return to the start position
+
+When a job finishes normally, the laser goes back to where it was when you pressed Start: the beam is switched off (`M5`), then one absolute jog in work coordinates (`$J=G90 G21 X.. Y.. F<jog feed>`) takes the head there (`job.start.position.return.saga.ts`). After a stop, a reset, an alarm or an error the laser stays where it ended. Frame runs are not affected.

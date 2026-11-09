@@ -62,7 +62,12 @@ const LASER_MODE_OFF_LINE = '$32=0\n';
 const LASER_MODE_CHANGING_LINES: string[] = ['$32=0', '$32 = 1', '$rst=*'];
 const CONSOLE_LINE = 'G0X1';
 const MACHINE_LINE = 'G0X2';
+const RETURN_JOG_START = '$J=G90 G21 X0 Y0';
+const LASER_OFF_LINE = 'M5\n';
 const OFF_PAGE_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
+
+const getSentText = (writeCalls: Uint8Array[][]): string =>
+  writeCalls.map(([bytes]: Uint8Array[]): string => new TextDecoder().decode(bytes)).join('');
 
 /** A simulated laser with laser mode off; settings survive power cycles. */
 const newLaserModeOffSimulator = (): GrblSimulator => {
@@ -192,6 +197,38 @@ describe(runGrblJob.name, () => {
     await vi.advanceTimersByTimeAsync(JOB_END_MS);
 
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
+  });
+
+  it('takes the laser back to where the job started once the job has finished, with the beam off first', async () => {
+    const store: AppStore = await prepareConnectedStore();
+    const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
+
+    store.dispatch(new JobStartRequested());
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+
+    const sentText: string = getSentText(writeSpy.mock.calls);
+
+    expect(sentText).toContain(RETURN_JOG_START);
+    expect(sentText.lastIndexOf(LASER_OFF_LINE)).toBeLessThan(sentText.indexOf(RETURN_JOG_START));
+    expect(selectMachineStatus(store.getState())?.workPosition?.x).toBe(0);
+    writeSpy.mockRestore();
+  });
+
+  it('leaves the laser where it stopped after a stop, without moving it back', async () => {
+    const store: AppStore = await prepareConnectedStore();
+    const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
+
+    store.dispatch(new JobStartRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new MachineStopRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+
+    expect(getSentText(writeSpy.mock.calls)).not.toContain(RETURN_JOG_START);
+    writeSpy.mockRestore();
   });
 
   it('reports a stopped job as interrupted, not as finished', async () => {
