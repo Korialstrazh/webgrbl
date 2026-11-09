@@ -1,7 +1,7 @@
 /**
  * A row of the object list: a button that selects the object, with an icon for its kind (imported drawing or test
- * sample), its name, its size, a note when it is outside the
- * bed and the warnings for content the job leaves out (text, images, ...), and a button that deletes it.
+ * sample), its name and its size, a warning chip when it is outside
+ * the bed or has content the job leaves out (text, images, ...), and a button that deletes it.
  *
  * @author michael.morosov
  *
@@ -26,12 +26,12 @@ import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.c
 import type { ObjectWarning } from '../../../utils/toolpath/interfaces/ObjectWarning';
 import type { Toolpath } from '../../../utils/toolpath/interfaces/Toolpath';
 import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
-import { OBJECT_WARNING_TEXT_KEY } from '../../../utils/toolpath/object.warning.text.key';
 import type { ObjectRowProps } from '../interfaces/ObjectRowProps';
 import { OBJECT_KIND, OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { TestSampleIcon } from '../../../views/TestSampleIcon';
 import { ObjectElementTree } from '../ObjectElementTree';
+import { ObjectWarningChip } from '../ObjectWarningChip';
 import { getObjectWarningKinds } from './get.object.warning.kinds';
 import styles from './styles.module.scss';
 
@@ -85,12 +85,9 @@ export const ObjectRow = ({
                 heightMm: (projectObject.heightMm * artworkFrame.heightFraction).toFixed(OBJECT_MILLIMETRE_DECIMALS),
               })}
             </span>
-            {isOutsideBed && <span className={styles.outsideNote}>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</span>}
-            {warningKinds.map((warningKind: SvgUnsupportedKind) => (
-              <span key={warningKind} className={styles.warningNote}>{t(OBJECT_WARNING_TEXT_KEY[warningKind])}</span>
-            ))}
           </span>
         </Button>
+        <ObjectWarningChip objectName={projectObject.name} isOutsideBed={isOutsideBed} warningKinds={warningKinds} />
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}

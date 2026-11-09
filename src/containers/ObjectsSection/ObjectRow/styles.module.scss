@@ -76,15 +76,3 @@
   font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
 }
-
-.outsideNote {
-  font-size: 0.75rem;
-  color: var(--color-danger-text);
-}
-
-// Content the job leaves out; the text wraps, since it says what to do about it.
-.warningNote {
-  font-size: 0.75rem;
-  color: var(--color-warning);
-  white-space: normal;
-}

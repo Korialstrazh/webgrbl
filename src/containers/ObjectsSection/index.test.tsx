@@ -52,6 +52,7 @@ const ROTATION_LABEL = 'Rotation';
 const X_LABEL = 'X';
 const LOCK_LABEL = 'Lock aspect ratio';
 const OUTSIDE_NOTE = 'Outside the bed';
+const WARNING_CHIP_NAME = /^Problems with /;
 const FIRST_SIZE_TEXT = `100.0 ${MULTIPLICATION_SIGN} 50.0 mm`;
 const SECOND_SIZE_TEXT = `20.0 ${MULTIPLICATION_SIGN} 20.0 mm`;
 const SECOND_SIZE_MM = 20;
@@ -369,10 +370,14 @@ describe(ObjectsSection.name, () => {
     });
     renderSection(store);
 
+    const warningChips: HTMLElement[] = screen.getAllByRole('button', { name: WARNING_CHIP_NAME });
+
+    expect(warningChips).toHaveLength(1);
+    fireEvent.click(warningChips[0]);
     expect(screen.getAllByText(OUTSIDE_NOTE)).toHaveLength(1);
   });
 
-  it('shows the warning of an object whose SVG holds text under its name', () => {
+  it('shows a warning chip on an object whose SVG holds text, with the text in its popover', () => {
     const store: AppStore = newStore();
 
     act(() => {
@@ -390,8 +395,10 @@ describe(ObjectsSection.name, () => {
 
     const rows: HTMLElement[] = within(screen.getByRole('list', { name: OBJECTS_LIST_NAME })).getAllByRole('listitem');
 
-    expect(rows[0]).toHaveTextContent(TEXT_WARNING);
-    expect(rows[1]).not.toHaveTextContent(TEXT_WARNING);
+    expect(within(rows[0]).getByRole('button', { name: WARNING_CHIP_NAME })).toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: WARNING_CHIP_NAME })).toBeNull();
+    fireEvent.click(within(rows[0]).getByRole('button', { name: WARNING_CHIP_NAME }));
+    expect(screen.getByText(TEXT_WARNING)).toBeInTheDocument();
   });
 
   it('scales the height with the width while the ratio is locked, as one undo step', () => {

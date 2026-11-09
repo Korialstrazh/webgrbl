@@ -1,0 +1,27 @@
+// A compact chip: warning icon and count, coloured like the worst problem it holds.
+.chip {
+  display: inline-flex;
+  flex: none;
+  gap: var(--space-1);
+  align-items: center;
+  align-self: center;
+  color: var(--color-warning);
+  font-variant-numeric: tabular-nums;
+}
+
+.dangerChip {
+  color: var(--color-danger-text);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 18rem;
+  margin: 0;
+  padding-inline-start: 1rem;
+  font-size: 0.8125rem;
+}
+
+.dangerItem {
+  color: var(--color-danger-text);
+}
