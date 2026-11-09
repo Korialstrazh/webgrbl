@@ -40,4 +40,11 @@
     width: 100%;
     padding-inline: 0;
   }
+
+  // The accent ring is for keyboard focus only: a clicked arrow keeps mouse focus, and must not look pressed once the
+  // pointer has left it.
+  > :global(.ant-btn:not(:disabled):focus:not(:focus-visible, :hover, :active)) {
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
 }
