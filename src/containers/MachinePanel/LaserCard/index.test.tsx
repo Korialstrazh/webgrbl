@@ -42,7 +42,8 @@ const WATTS_PATTERN = /0\.30 W/;
 const ANY_WATTS_PATTERN = / W$/;
 const FIRMWARE_NOTE_TEXT = 'Some firmwares keep the laser off while the head stands still. It switches off when you '
   + 'let go, when the window loses focus, after 10 seconds, or on any stop or alarm.';
-const FIRMWARE_SHORT_TEXT = 'Off on release, after 10 s';
+const DETAILS_LABEL = 'Laser pointer details';
+const POWER_FIGURE_TEXT = '3 %';
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -59,6 +60,10 @@ const NEW_STATUS: GrblResolvedStatus = {
 
 const showLaserControls = (): void => {
   fireEvent.click(screen.getByRole('button', { name: SHOW_CONTROLS_LABEL }));
+};
+
+const openDetails = (): void => {
+  fireEvent.click(screen.getByRole('button', { name: DETAILS_LABEL }));
 };
 
 const renderLaserCard = (store: AppStore): void => {
@@ -279,6 +284,10 @@ describe(LaserCard.name, () => {
     });
 
     expect(selectLaserPointerPowerPercent(store.getState())).toBe(POWER_PERCENT);
+    expect(screen.getByText(POWER_FIGURE_TEXT)).toBeInTheDocument();
+
+    openDetails();
+
     expect(screen.getByText(WATTS_PATTERN)).toBeInTheDocument();
     expect(screen.getByRole('slider', { name: POWER_LABEL })).toHaveAttribute('aria-valuenow', String(POWER_PERCENT));
   });
@@ -299,6 +308,8 @@ describe(LaserCard.name, () => {
 
   it('hides the watts without an active profile', () => {
     renderLaserCard(newStore());
+    showLaserControls();
+    openDetails();
 
     expect(screen.queryByText(ANY_WATTS_PATTERN)).not.toBeInTheDocument();
   });
@@ -307,7 +318,9 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
 
     renderLaserCard(store);
+    showLaserControls();
     activateProfile(store, { hasAirAssist: false });
+    openDetails();
 
     expect(screen.queryByRole('switch', { name: AIR_ASSIST_LABEL })).not.toBeInTheDocument();
   });
@@ -319,6 +332,7 @@ describe(LaserCard.name, () => {
     renderLaserCard(store);
     showLaserControls();
     activateProfile(store, { hasAirAssist: true });
+    openDetails();
 
     expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).toBeDisabled();
 
@@ -349,6 +363,7 @@ describe(LaserCard.name, () => {
     renderLaserCard(store);
     activateProfile(store, { hasAirAssist: true });
     connectIdle(store);
+    openDetails();
     fireEvent.click(screen.getByRole('switch', { name: AIR_ASSIST_LABEL }));
 
     expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).toBeChecked();
@@ -381,13 +396,15 @@ describe(LaserCard.name, () => {
     expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeEnabled();
   });
 
-  it('shows a few words with the maximum hold time and keeps the full firmware note behind its note icon', () => {
+  it('keeps the one-row card to the controls and opens the switch-off note from the details button', () => {
     renderLaserCard(newStore());
     showLaserControls();
 
-    expect(screen.getByText(FIRMWARE_SHORT_TEXT)).toBeInTheDocument();
     expect(screen.queryByText(FIRMWARE_NOTE_TEXT)).not.toBeInTheDocument();
-    // The note opens on hover, tap or keyboard focus, and its icon is named for screen readers.
-    expect(screen.getByRole('note', { name: FIRMWARE_NOTE_TEXT })).toHaveAttribute('tabindex', '0');
+
+    openDetails();
+
+    expect(screen.getByText(FIRMWARE_NOTE_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: DETAILS_LABEL })).toHaveAttribute('aria-expanded', 'true');
   });
 });

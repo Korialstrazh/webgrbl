@@ -1,39 +1,29 @@
+// One row: hold to fire, the power slider and its figure, then the details button.
 .laserCard {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.powerField {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-2);
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
-}
-
-.switchField {
-  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  min-height: var(--target-min);
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  font-size: 0.875rem;
-  cursor: pointer;
+  min-width: 0;
 }
 
-.powerWatts,
-.firmwareNote {
-  margin: 0;
+.powerIcon {
+  flex: none;
   color: var(--color-text-muted);
+}
+
+.powerSlider:global(.ant-slider) {
+  flex: 1 1 auto;
+  min-width: 3rem;
+  margin-inline: var(--space-1);
+}
+
+// A fixed width, so the row never shifts as the figure changes.
+.powerValue {
+  flex: none;
+  min-width: 2.75rem;
+  color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
-}
-
-.firmwareNote {
-  display: inline-flex;
-  gap: var(--space-1);
-  align-items: center;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
 }
