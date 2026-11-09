@@ -27,7 +27,6 @@ import { ARROW_DOWN_KEY, ARROW_UP_KEY } from '../../../utils/browser/browser.eve
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
 import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
-import { getColourNameKey } from '../../../utils/palette/get.colour.name.key';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { LayerSwatch } from '../../../views/LayerSwatch';
 import { LayerValueCells } from '../../../views/LayerValueCells';
@@ -60,10 +59,9 @@ export const LayerRow = ({
 }: LayerRowProps): ReactNode => {
   const { t } = useTranslation();
   const hasNoPaletteEntry: boolean = !layerEntry;
-  const colourNameKey: string | undefined = hasNoPaletteEntry ? getColourNameKey(layer.colour) : undefined;
-  // A colour with no palette entry is named after the plain colour it looks like, not its hex code.
-  const layerName: string = colourNameKey ? t(colourNameKey) : getLayerDisplayName(layer, layerEntry);
-  const layerNameTitle: string = colourNameKey ? `${layerName} ${layer.colour}` : layerName;
+  const layerName: string = getLayerDisplayName(layer, layerEntry);
+  // A colour with no palette entry also shows its hex code on hover.
+  const layerNameTitle: string = hasNoPaletteEntry ? `${layerName} ${layer.colour}` : layerName;
   const { settings } = layer;
   const handleLabelText: string = t(DEFAULT.LAYERS_REORDER_HANDLE, { name: layerName });
   const handlePointerDrag: LayerHandlePointerDragHandlers = useLayerHandlePointerDrag(layerKey, onPointerDragOver);

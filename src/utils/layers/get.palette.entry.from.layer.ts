@@ -11,9 +11,10 @@
  */
 import type { PaletteEntry } from '../palette/interfaces/PaletteEntry';
 import { newPaletteEntry } from '../palette/new.palette.entry';
+import { getLayerDisplayName } from './get.layer.display.name';
 import type { ProjectLayer } from './interfaces/ProjectLayer';
 
 export const getPaletteEntryFromLayer = (layer: ProjectLayer, layerEntry: PaletteEntry | undefined): PaletteEntry =>
   layerEntry
     ? { ...layerEntry, ...layer.settings }
-    : newPaletteEntry({ name: layer.colour, colour: layer.colour, ...layer.settings });
+    : newPaletteEntry({ name: getLayerDisplayName(layer, undefined), colour: layer.colour, ...layer.settings });

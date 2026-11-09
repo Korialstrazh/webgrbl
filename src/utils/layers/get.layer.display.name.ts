@@ -1,6 +1,7 @@
 /**
- * Gets the name shown for a layer: the name of its palette entry, or the colour as hex when the colour is not in the
- * palette.
+ * Gets the name shown for a layer, the one name source for every place that names it: the name of its palette entry,
+ * or, when the colour is not in the palette, the plain colour it looks like ("Green"), which is also the name the
+ * colour gets when it is added to the palette. A colour with no plain name keeps its hex code.
  *
  * @author michael.morosov
  *
@@ -9,8 +10,16 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { i18n } from '../localization/localization';
+import { getColourNameKey } from '../palette/get.colour.name.key';
 import type { PaletteEntry } from '../palette/interfaces/PaletteEntry';
 import type { ProjectLayer } from './interfaces/ProjectLayer';
 
+const getUnlistedColourName = (colour: string): string => {
+  const colourNameKey: string | undefined = getColourNameKey(colour);
+
+  return colourNameKey ? i18n.t(colourNameKey) : colour;
+};
+
 export const getLayerDisplayName = (layer: ProjectLayer, layerEntry: PaletteEntry | undefined): string =>
-  layerEntry ? layerEntry.name : layer.colour;
+  layerEntry ? layerEntry.name : getUnlistedColourName(layer.colour);

@@ -4,6 +4,7 @@ import { Provider, useSelector } from 'react-redux';
 import type { Mock, MockInstance } from 'vitest';
 import { LayerSettingsDrawer } from '.';
 import { ENTER_KEY } from '../../utils/browser/browser.events.constants';
+import { getLayerDisplayName } from '../../utils/layers/get.layer.display.name';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
@@ -441,10 +442,12 @@ describe(LayerSettingsDrawer.name, () => {
     expect(getActionCount(dispatchSpy, LayerPaletteEntryLinked.type)).toBe(0);
   });
 
-  it('creates a palette entry for an unknown colour and links the layer to it', () => {
+  it('creates a palette entry for an unknown colour, named as the layer is, and links the layer to it', () => {
     const store: AppStore = newStore();
     loadColours(store, [UNKNOWN_COLOUR]);
     renderDrawer(store, UNKNOWN_COLOUR);
+
+    const layerName: string = getLayerDisplayName(getLayer(store, UNKNOWN_COLOUR), undefined);
 
     fireEvent.click(screen.getByRole('button', { name: SAVE_TO_PALETTE_LABEL }));
 
@@ -452,7 +455,8 @@ describe(LayerSettingsDrawer.name, () => {
       (entry: PaletteEntry): boolean => entry.colour === UNKNOWN_COLOUR,
     );
 
-    expect(createdEntry?.name).toBe(UNKNOWN_COLOUR);
+    expect(createdEntry?.name).toBe(layerName);
+    expect(layerName).not.toBe(UNKNOWN_COLOUR);
     expect(getLayer(store, UNKNOWN_COLOUR).paletteEntryId).toBe(createdEntry?.id);
   });
 
