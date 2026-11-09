@@ -150,8 +150,6 @@ export const JobReadinessRow = (): ReactNode => {
   const connectLaser: () => void = useConnectLaser();
   const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
   const warningCount: number = useSelector(selectJobReadinessWarningCount);
-  // Connected, the status and move cards need the room: the steps shrink to small markers beside the next-step button.
-  const isCompact: boolean = useSelector(selectIsJobReadinessStepMet(JOB_READINESS_STEP.CONNECT));
   // Every open step gets its accent next-step button, Import SVG on an empty project included.
   const nextLook: JobReadinessLook | undefined =
     JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
@@ -237,7 +235,7 @@ export const JobReadinessRow = (): ReactNode => {
   };
 
   return (
-    <div className={isCompact ? [styles.readiness, styles.compactReadiness].join(' ') : styles.readiness}>
+    <div className={styles.readiness}>
       <ol
         ref={listRef}
         className={styles.jobReadinessRow}
