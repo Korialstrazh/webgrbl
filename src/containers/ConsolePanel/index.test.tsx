@@ -121,6 +121,13 @@ describe(ConsolePanel.name, () => {
     expect(within(screen.getByRole('log', { name: LOG_DIALOG_TITLE })).getByText(RAW_ERROR_DETAIL)).toBeInTheDocument();
   });
 
+  it('gives the large dialog the same command input as the console', () => {
+    renderConsolePanel();
+    fireEvent.click(screen.getByRole('button', { name: EXPAND_LABEL }));
+
+    expect(within(screen.getByRole('dialog')).getByRole('textbox')).toBeInTheDocument();
+  });
+
   it('closes itself from the close button in its header', () => {
     const store: AppStore = renderConsolePanel();
 

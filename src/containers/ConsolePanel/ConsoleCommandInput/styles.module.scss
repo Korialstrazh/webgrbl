@@ -1,0 +1,4 @@
+// antd Input brings its own border, focus ring and disabled look; the console keeps its monospace commands.
+.commandInput {
+  font-family: var(--font-mono);
+}

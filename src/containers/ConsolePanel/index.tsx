@@ -10,19 +10,15 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { CloseOutlined, CodeOutlined, ExpandOutlined } from '@ant-design/icons';
-import { Checkbox, Input } from 'antd';
-import type { ChangeEvent, KeyboardEvent, ReactNode, RefObject } from 'react';
+import { Checkbox } from 'antd';
+import type { ReactNode, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
-import { ARROW_DOWN_KEY, ARROW_UP_KEY, ENTER_KEY } from '../../utils/browser/browser.events.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
-import { selectIsConnected } from '../../utils/states/grbl.connection.state';
 import {
-  ConsoleCommandSubmitted,
   StatusReportVisibilityToggled,
-  selectCommandHistory,
   selectConsoleEntries,
   selectIsStatusReportVisible,
 } from '../../utils/states/grbl.console.state';
@@ -31,37 +27,17 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { ConsoleOpenChanged } from '../../utils/states/panel.layout.state';
 import { ConsoleEntryList } from '../../views/ConsoleEntryList';
 import { IconActionButton } from '../../views/IconActionButton';
+import { ConsoleCommandInput } from './ConsoleCommandInput';
 import { ConsoleLogDialog } from './ConsoleLogDialog';
-import { EMPTY_INPUT_TEXT, NO_HISTORY_OFFSET } from './console.history.constants';
-import { getConsoleHistoryRecall } from './get.console.history.recall';
-import type { ConsoleHistoryRecall } from './interfaces/ConsoleHistoryRecall';
 import { isConsoleScrolledToBottom } from './is.console.scrolled.to.bottom';
 import styles from './styles.module.scss';
-
-const OLDER_COMMAND_STEP = 1;
-const NEWER_COMMAND_STEP = -1;
-
-const getHistoryStep = (key: string): number | undefined => {
-  switch (key) {
-  case ARROW_UP_KEY:
-    return OLDER_COMMAND_STEP;
-  case ARROW_DOWN_KEY:
-    return NEWER_COMMAND_STEP;
-  default:
-    return undefined;
-  }
-};
 
 export const ConsolePanel = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const entries: GrblConsoleViewEntry[] = useSelector(selectConsoleEntries);
   const isStatusReportVisible: boolean = useSelector(selectIsStatusReportVisible);
-  const isConnected: boolean = useSelector(selectIsConnected);
-  const commandHistory: string[] = useSelector(selectCommandHistory);
-  const [inputText, setInputText] = useState<string>(EMPTY_INPUT_TEXT);
   const [isLogDialogOpen, setIsLogDialogOpen] = useState<boolean>(false);
-  const [historyOffset, setHistoryOffset] = useState<number>(NO_HISTORY_OFFSET);
   const scrollElementRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const isFollowingNewLinesRef: RefObject<boolean> = useRef<boolean>(true);
 
@@ -72,42 +48,6 @@ export const ConsolePanel = (): ReactNode => {
       scrollElement.scrollTop = scrollElement.scrollHeight;
     }
   }, [entries]);
-
-  const submitCommand = (): void => {
-    const commandText: string = inputText.trim();
-
-    if (!commandText) {
-      return;
-    }
-
-    dispatch(new ConsoleCommandSubmitted({ commandText }));
-    setInputText(EMPTY_INPUT_TEXT);
-    setHistoryOffset(NO_HISTORY_OFFSET);
-  };
-
-  const recallHistory = (historyStep: number): void => {
-    const recall: ConsoleHistoryRecall = getConsoleHistoryRecall(commandHistory, historyOffset, historyStep);
-
-    setHistoryOffset(recall.historyOffset);
-    setInputText(recall.inputText);
-  };
-
-  /** Typing edits the input, so the next ArrowUp starts again from the newest command. */
-  const handleInputChange = (changeEvent: ChangeEvent<HTMLInputElement>): void => {
-    setInputText(changeEvent.target.value);
-    setHistoryOffset(NO_HISTORY_OFFSET);
-  };
-
-  const handleKeyDown = (keyboardEvent: KeyboardEvent<HTMLInputElement>): void => {
-    const historyStep: number | undefined = getHistoryStep(keyboardEvent.key);
-
-    if (keyboardEvent.key === ENTER_KEY) {
-      submitCommand();
-    } else if (historyStep) {
-      keyboardEvent.preventDefault();
-      recallHistory(historyStep);
-    }
-  };
 
   return (
     <section className={styles.consolePanel}>
@@ -151,15 +91,7 @@ export const ConsolePanel = (): ReactNode => {
           ? <ConsoleEntryList entries={entries} />
           : <p className={styles.emptyHint}>{t(DEFAULT.CONSOLE_EMPTY_HINT)}</p>}
       </div>
-      <Input
-        className={styles.commandInput}
-        value={inputText}
-        disabled={!isConnected}
-        aria-label={t(DEFAULT.CONSOLE_INPUT_LABEL)}
-        placeholder={t(DEFAULT.CONSOLE_INPUT_PLACEHOLDER)}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-      />
+      <ConsoleCommandInput />
       <ConsoleLogDialog isOpen={isLogDialogOpen} onClose={() => setIsLogDialogOpen(false)} />
     </section>
   );

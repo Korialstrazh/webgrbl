@@ -1,6 +1,7 @@
 /**
  * The console log in a large dialog, for reading long traffic without resizing the console dock. It shows the same
- * lines as the console, status reports only when the console shows them, and follows new lines from the bottom.
+ * lines as the console, status reports only when the console shows them, follows new lines from the bottom
+ * and has the same command input as the console, so a command needs no trip back to the dock.
  *
  * @author michael.morosov
  *
@@ -18,6 +19,7 @@ import { selectConsoleEntries } from '../../../utils/states/grbl.console.state';
 import type { GrblConsoleViewEntry } from '../../../utils/states/interfaces/GrblConsoleViewEntry';
 import { ConsoleEntryList } from '../../../views/ConsoleEntryList';
 import { AppModal } from '../../AppModal';
+import { ConsoleCommandInput } from '../ConsoleCommandInput';
 import type { ConsoleLogDialogProps } from './interfaces/ConsoleLogDialogProps';
 import styles from './styles.module.scss';
 
@@ -57,6 +59,9 @@ export const ConsoleLogDialog = ({ isOpen, onClose }: ConsoleLogDialogProps): Re
         {entries.length
           ? <ConsoleEntryList entries={entries} />
           : <p className={styles.emptyHint}>{t(DEFAULT.CONSOLE_EMPTY_HINT)}</p>}
+      </div>
+      <div className={styles.commandRow}>
+        <ConsoleCommandInput />
       </div>
     </AppModal>
   );
