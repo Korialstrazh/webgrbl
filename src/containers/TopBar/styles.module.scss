@@ -97,8 +97,8 @@
 }
 
 // The save word goes and the profile name shortens (the connection pill drops its own copy of the name), so the
-// project name stays readable, Import SVG keeps its label and the connection pill stays whole at 50rem; Import SVG
-// drops its label and the name goes at 46rem (the laser icon and its tooltip still name the profile).
+// project name stays readable and the connection pill stays whole at 50rem; Import SVG drops its label below 57rem
+// so the project name gets the room, and the profile name goes at 46rem (the laser icon and its tooltip still name it).
 @media (width < 62.5rem) {
   .profileName {
     max-width: 6rem;
@@ -110,11 +110,13 @@
   }
 }
 
-@media (width < 46rem) {
-  .compactHiddenLabel {
+@media (width < 57rem) {
+  .importLabel {
     @include accessibility.visually-hidden;
   }
+}
 
+@media (width < 46rem) {
   .profileName {
     @include accessibility.visually-hidden;
   }

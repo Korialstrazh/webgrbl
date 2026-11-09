@@ -72,7 +72,7 @@ export const TopBar = (): ReactNode => {
             <span className={styles.profileName}>{activeProfile?.name ?? profilesLabel}</span>
           </Button>
         </DismissibleTooltip>
-        <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.compactHiddenLabel} />
+        <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.importLabel} />
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <IconActionButton
