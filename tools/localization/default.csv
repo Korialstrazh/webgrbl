@@ -658,10 +658,13 @@ OBJECTS_FIELD_ROTATION;Rotation
 OBJECTS_FIELD_WIDTH;Width
 OBJECTS_FIELD_X;X
 OBJECTS_FIELD_Y;Y
+OBJECTS_FIT_TO_BED;Fit to bed
 OBJECTS_KIND_SAMPLE;Test sample
 OBJECTS_KIND_SVG;Imported SVG drawing
 OBJECTS_LIST_LABEL;Project objects
 OBJECTS_LOCK_RATIO;Lock aspect ratio
+OBJECTS_MOVE_ONTO_BED;Move onto bed
+OBJECTS_MOVE_ONTO_BED_TOO_LARGE;Larger than the bed: use Fit to bed
 OBJECTS_OUTSIDE_BED;Outside the bed
 OBJECTS_SIZE;{{widthMm}} × {{heightMm}} mm
 OBJECTS_SIZE_HINT;Size of the drawing itself: the size that burns.

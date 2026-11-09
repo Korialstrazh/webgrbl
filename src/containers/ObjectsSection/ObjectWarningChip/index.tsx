@@ -32,7 +32,8 @@ import styles from './styles.module.scss';
 
 const OBJECT_WARNING_OVERLAY_ID = 'object-warning';
 
-export const ObjectWarningChip = ({ objectName, isOutsideBed, warningKinds }: ObjectWarningChipProps): ReactNode => {
+export const ObjectWarningChip = (props: ObjectWarningChipProps): ReactNode => {
+  const { objectName, isOutsideBed, outsideBedActionsComponent, warningKinds } = props;
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -53,7 +54,10 @@ export const ObjectWarningChip = ({ objectName, isOutsideBed, warningKinds }: Ob
       {isOutsideBed && (
         <li className={[styles.item, styles.dangerItem].join(' ')}>
           <BorderOuterOutlined className={styles.itemIcon} aria-hidden />
-          <span>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</span>
+          <div>
+            <span>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</span>
+            {outsideBedActionsComponent}
+          </div>
         </li>
       )}
       {warningKinds.map((warningKind: SvgUnsupportedKind) => (

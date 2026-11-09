@@ -34,6 +34,7 @@ import {
   BED_OBJECT_HANDLE_TEST_ID,
   BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID,
   BED_OBJECTS_SURFACE_TEST_ID,
+  BED_OFF_BED_ARROW_TEST_ID,
   SELECTION_HANDLE_SIZE_MM,
 } from './bed.objects.constants';
 import type { BedObjectHandle } from './bed.objects.constants';
@@ -517,6 +518,7 @@ describe(BedObjects.name, () => {
     expect(getObjectElement(FIRST_NAME)).toHaveAttribute(OUTSIDE_ATTRIBUTE, TRUE_TEXT);
     expect(getObjectElement(SECOND_NAME)).toHaveAttribute(OUTSIDE_ATTRIBUTE, FALSE_TEXT);
     expect(screen.getAllByTestId(BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID)).toHaveLength(1);
+    expect(screen.getAllByTestId(BED_OFF_BED_ARROW_TEST_ID)).toHaveLength(1);
   });
 
   describe('handles', () => {

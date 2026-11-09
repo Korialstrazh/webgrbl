@@ -28,6 +28,7 @@ import type { ObjectRowProps } from '../interfaces/ObjectRowProps';
 import { OBJECT_KIND } from '../objects.section.constants';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { TestSampleIcon } from '../../../views/TestSampleIcon';
+import { ObjectBedPlacementActions } from '../ObjectBedPlacementActions';
 import { ObjectElementTree } from '../ObjectElementTree';
 import { ObjectWarningChip } from '../ObjectWarningChip';
 import { getCompactMillimetreText } from './get.compact.millimetre.text';
@@ -96,7 +97,12 @@ export const ObjectRow = ({
             </span>
           </span>
         </Button>
-        <ObjectWarningChip objectName={projectObject.name} isOutsideBed={isOutsideBed} warningKinds={warningKinds} />
+        <ObjectWarningChip
+          objectName={projectObject.name}
+          isOutsideBed={isOutsideBed}
+          outsideBedActionsComponent={<ObjectBedPlacementActions projectObject={projectObject} />}
+          warningKinds={warningKinds}
+        />
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}

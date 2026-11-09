@@ -9,6 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { ReactNode } from 'react';
 import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.constants';
 
 export interface ObjectWarningChipProps {
@@ -16,6 +17,8 @@ export interface ObjectWarningChipProps {
   objectName: string;
   /** Whether the object lies outside the bed. */
   isOutsideBed: boolean;
+  /** Fixes shown under the outside-the-bed line, such as Move onto bed and Fit to bed. */
+  outsideBedActionsComponent?: ReactNode;
   /** Kinds of content of the object that the job leaves out. */
   warningKinds: SvgUnsupportedKind[];
 }

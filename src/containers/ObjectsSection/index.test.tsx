@@ -52,6 +52,8 @@ const ROTATION_LABEL = 'Rotation';
 const X_LABEL = 'X';
 const LOCK_LABEL = 'Lock aspect ratio';
 const OUTSIDE_NOTE = 'Outside the bed';
+const MOVE_ONTO_BED_LABEL = 'Move onto bed';
+const FIT_TO_BED_LABEL = 'Fit to bed';
 const WARNING_CHIP_NAME = /^Problems with /;
 const FIRST_SIZE_TEXT = `100 ${MULTIPLICATION_SIGN} 50.0 mm`;
 const SECOND_SIZE_TEXT = `20.0 ${MULTIPLICATION_SIGN} 20.0 mm`;
@@ -389,6 +391,60 @@ describe(ObjectsSection.name, () => {
     expect(screen.getAllByRole('button', { name: WARNING_CHIP_NAME })).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: WARNING_CHIP_NAME }));
     expect(screen.getAllByText(OUTSIDE_NOTE)).toHaveLength(1);
+  });
+
+  it('moves an object outside the bed back onto it in one click, as one undo step', () => {
+    const store: AppStore = newStore();
+
+    loadObjects(store);
+    act(() => {
+      store.dispatch(new ProjectObjectsTransformed({
+        transforms: {
+          [SECOND_ID]: {
+            xMm: -SECOND_SIZE_MM,
+            yMm: 0,
+            widthMm: SECOND_SIZE_MM,
+            heightMm: SECOND_SIZE_MM,
+            rotationDeg: 0,
+          },
+        },
+      }));
+    });
+    renderSection(store);
+
+    fireEvent.click(screen.getByRole('button', { name: WARNING_CHIP_NAME }));
+    fireEvent.click(screen.getByRole('button', { name: MOVE_ONTO_BED_LABEL }));
+
+    expect(selectProjectObjects(store.getState()).at(1)).toMatchObject({ xMm: 0, widthMm: SECOND_SIZE_MM });
+
+    act(() => {
+      store.dispatch(new ProjectUndoRequested());
+    });
+
+    expect(selectProjectObjects(store.getState()).at(1)).toMatchObject({ xMm: -SECOND_SIZE_MM });
+  });
+
+  it('turns Move onto bed off for an object larger than the bed and fits it with Fit to bed', () => {
+    const store: AppStore = newStore();
+
+    loadObjects(store);
+    act(() => {
+      store.dispatch(new ProjectObjectsTransformed({
+        transforms: {
+          [SECOND_ID]: { xMm: 0, yMm: 0, widthMm: BED_OVERFLOW_X_MM, heightMm: BED_OVERFLOW_X_MM, rotationDeg: 0 },
+        },
+      }));
+    });
+    renderSection(store);
+
+    fireEvent.click(screen.getByRole('button', { name: WARNING_CHIP_NAME }));
+
+    expect(screen.getByRole('button', { name: MOVE_ONTO_BED_LABEL })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: FIT_TO_BED_LABEL }));
+
+    expect(selectProjectObjects(store.getState()).at(1)?.widthMm).toBeLessThan(BED_OVERFLOW_X_MM);
+    expect(screen.queryByRole('button', { name: WARNING_CHIP_NAME })).not.toBeInTheDocument();
   });
 
   it('shows a warning chip on an object whose SVG holds text, with the text in its popover', () => {

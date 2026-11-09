@@ -1,0 +1,11 @@
+// Solid danger triangles with a bed-coloured rim, so they read on a light and a dark bed and never take a press.
+.offBedArrows {
+  pointer-events: none;
+}
+
+.arrow {
+  fill: var(--color-bed-danger);
+  stroke: var(--color-bed-surface);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}

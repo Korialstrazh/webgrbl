@@ -13,7 +13,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -30,6 +30,7 @@ import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/st
 import { BED_OBJECTS_LAYER_ID, BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
 import type { BedObjectHandle } from './bed.objects.constants';
 import { BedObjectGraphic } from './BedObjectGraphic';
+import { BedOffBedArrows } from './BedOffBedArrows';
 import { getBedHandleSizes } from './get.bed.handle.sizes';
 import { getObjectWithDragOffset } from './get.object.with.drag.offset';
 import { getObjectWithHandleGesture } from './get.object.with.handle.gesture';
@@ -49,6 +50,8 @@ import { useBedObjectsKeys } from './use.bed.objects.keys';
 import { useBedPixelsPerMm } from './use.bed.pixels.per.mm';
 
 const LAYER_TAB_INDEX = 0;
+/** An off-bed arrow is this many selection handles long, so it is easy to spot at every zoom. */
+const OFF_BED_ARROW_HANDLE_FACTOR = 2;
 
 const isPrimaryPress = (pointerEvent: PointerEvent): boolean => pointerEvent.button === PRIMARY_POINTER_BUTTON;
 
@@ -181,21 +184,30 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
           dragControls.drag,
         );
         const isSelected: boolean = selectedObjectIds.includes(projectObject.id);
+        const isOutsideBed: boolean = isObjectArtworkOutsideBed(drawnObject, dimensions);
 
         return (
-          <BedObjectGraphic
-            key={projectObject.id}
-            projectObject={drawnObject}
-            bedWidthMm={dimensions.widthMm}
-            bedHeightMm={dimensions.heightMm}
-            isSelected={isSelected}
-            hasHandles={isSelected && hasSingleSelection}
-            isOutsideBed={isObjectArtworkOutsideBed(drawnObject, dimensions)}
-            layerLooks={layerLooks}
-            handleSizes={handleSizes}
-            onPointerDown={handleObjectPointerDown}
-            onHandlePointerDown={handleHandlePointerDown}
-          />
+          <Fragment key={projectObject.id}>
+            <BedObjectGraphic
+              projectObject={drawnObject}
+              bedWidthMm={dimensions.widthMm}
+              bedHeightMm={dimensions.heightMm}
+              isSelected={isSelected}
+              hasHandles={isSelected && hasSingleSelection}
+              isOutsideBed={isOutsideBed}
+              layerLooks={layerLooks}
+              handleSizes={handleSizes}
+              onPointerDown={handleObjectPointerDown}
+              onHandlePointerDown={handleHandlePointerDown}
+            />
+            {isOutsideBed && (
+              <BedOffBedArrows
+                projectObject={drawnObject}
+                bed={dimensions}
+                arrowSize={handleSizes.handleSizeMm * OFF_BED_ARROW_HANDLE_FACTOR}
+              />
+            )}
+          </Fragment>
         );
       })}
     </g>
