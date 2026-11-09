@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CloseOutlined, CodeOutlined } from '@ant-design/icons';
+import { CloseOutlined, CodeOutlined, ExpandOutlined } from '@ant-design/icons';
 import { Checkbox, Input } from 'antd';
 import type { ChangeEvent, KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -31,6 +31,7 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { ConsoleOpenChanged } from '../../utils/states/panel.layout.state';
 import { ConsoleEntryList } from '../../views/ConsoleEntryList';
 import { IconActionButton } from '../../views/IconActionButton';
+import { ConsoleLogDialog } from './ConsoleLogDialog';
 import { EMPTY_INPUT_TEXT, NO_HISTORY_OFFSET } from './console.history.constants';
 import { getConsoleHistoryRecall } from './get.console.history.recall';
 import type { ConsoleHistoryRecall } from './interfaces/ConsoleHistoryRecall';
@@ -59,6 +60,7 @@ export const ConsolePanel = (): ReactNode => {
   const isConnected: boolean = useSelector(selectIsConnected);
   const commandHistory: string[] = useSelector(selectCommandHistory);
   const [inputText, setInputText] = useState<string>(EMPTY_INPUT_TEXT);
+  const [isLogDialogOpen, setIsLogDialogOpen] = useState<boolean>(false);
   const [historyOffset, setHistoryOffset] = useState<number>(NO_HISTORY_OFFSET);
   const scrollElementRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const isFollowingNewLinesRef: RefObject<boolean> = useRef<boolean>(true);
@@ -123,6 +125,12 @@ export const ConsolePanel = (): ReactNode => {
         </Checkbox>
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
+          labelText={t(DEFAULT.CONSOLE_EXPAND)}
+          iconComponent={<ExpandOutlined aria-hidden />}
+          onClick={() => setIsLogDialogOpen(true)}
+        />
+        <IconActionButton
+          type={ANTD_BUTTON_TYPE_TEXT}
           labelText={t(DEFAULT.CONSOLE_CLOSE)}
           iconComponent={<CloseOutlined aria-hidden />}
           onClick={() => dispatch(new ConsoleOpenChanged({ isConsoleOpen: false }))}
@@ -152,6 +160,7 @@ export const ConsolePanel = (): ReactNode => {
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
       />
+      <ConsoleLogDialog isOpen={isLogDialogOpen} onClose={() => setIsLogDialogOpen(false)} />
     </section>
   );
 };

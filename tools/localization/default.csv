@@ -114,9 +114,11 @@ CONNECTION_POPOVER_USB_PORT;USB {{vendorId}}:{{productId}}
 CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
 CONSOLE_CLOSE;Close the console
 CONSOLE_EMPTY_HINT;No messages yet. Connect a laser to see what it sends.
+CONSOLE_EXPAND;Open the console log in a large view
 CONSOLE_INPUT_LABEL;Console command
 CONSOLE_INPUT_PLACEHOLDER;Type a command, for example $$
 CONSOLE_JOB_RUNNING;The console is locked while a job runs.
+CONSOLE_LOG_DIALOG_TITLE;Console log
 CONSOLE_LOG_LABEL;Console output
 CONSOLE_NON_ASCII_REJECTED;Not sent: the command contains characters the controller cannot receive. Use plain ASCII letters, digits and symbols only.
 CONSOLE_RAW_ERROR;{{detail}}
@@ -632,6 +634,12 @@ MATERIAL_SECTION_PRESETS_NO_MATERIAL;Choose a material to see its presets
 MATERIAL_SECTION_PRESETS_NONE;Presets
 MATERIAL_SECTION_PRESETS_one;{{count}} preset
 MATERIAL_SECTION_PRESETS_other;{{count}} presets
+MESSAGE_HISTORY_CLEAR;Clear all
+MESSAGE_HISTORY_EMPTY;No messages yet
+MESSAGE_HISTORY_OPEN;Messages
+MESSAGE_HISTORY_OPEN_UNREAD_one;Messages: {{count}} new
+MESSAGE_HISTORY_OPEN_UNREAD_other;Messages: {{count}} new
+MESSAGE_HISTORY_TITLE;Messages
 NARROW_REGION_BAR_LABEL;Workbench region
 NARROW_REGION_BED;Bed
 NARROW_REGION_DESIGN;Layers

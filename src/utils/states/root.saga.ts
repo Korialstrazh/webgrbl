@@ -21,6 +21,7 @@ import { watchLaserPointer, watchPointerPowerChanges } from './laser.pointer.sag
 import { watchMachineProfiles } from './machine.profile.saga';
 import { watchMaterialPresets } from './material.preset.saga';
 import { watchMaterials } from './material.saga';
+import { watchShownToasts } from './message.history.state';
 import { watchPalette } from './palette.saga';
 import { watchPanelLayout } from './panel.layout.saga';
 import { watchProjects } from './project.saga';
@@ -36,6 +37,7 @@ export function* rootSaga(
   yield all([
     fork(watchOnlineStatus),
     fork(watchInfoToastExpiry),
+    fork(watchShownToasts),
     fork(watchMachineProfiles),
     fork(watchMaterials),
     fork(watchMaterialPresets),

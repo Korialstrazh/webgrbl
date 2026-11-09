@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { ConsolePanel } from '.';
 import {
@@ -34,6 +34,8 @@ const ANTD_INPUT_CLASS_NAME = 'ant-input';
 const ANTD_CHECKBOX_CLASS_NAME = 'ant-checkbox-input';
 const EMPTY_HINT_TEXT = 'No messages yet. Connect a laser to see what it sends.';
 const CLOSE_LABEL = 'Close the console';
+const EXPAND_LABEL = 'Open the console log in a large view';
+const LOG_DIALOG_TITLE = 'Console log';
 
 const renderConsolePanel = (): AppStore => {
   const store: AppStore = newStore();
@@ -101,6 +103,22 @@ describe(ConsolePanel.name, () => {
     });
 
     expect(screen.queryByText(EMPTY_HINT_TEXT)).not.toBeInTheDocument();
+  });
+
+  it('opens the log in a large dialog with the same lines', () => {
+    const store: AppStore = renderConsolePanel();
+
+    act(() => {
+      store.dispatch(new ConsoleInfoAdded({
+        messageKey: DEFAULT.CONSOLE_RAW_ERROR,
+        isError: true,
+        timestamp: ENTRY_TIMESTAMP,
+        messageParameters: { detail: RAW_ERROR_DETAIL },
+      }));
+    });
+    fireEvent.click(screen.getByRole('button', { name: EXPAND_LABEL }));
+
+    expect(within(screen.getByRole('log', { name: LOG_DIALOG_TITLE })).getByText(RAW_ERROR_DETAIL)).toBeInTheDocument();
   });
 
   it('closes itself from the close button in its header', () => {

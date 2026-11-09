@@ -28,6 +28,7 @@ import { selectReadyToolpathBounds, selectReadyToolpathTotalTimeS } from '../../
 import type { ToolpathBounds } from '../../utils/toolpath/interfaces/ToolpathBounds';
 import { getJobEstimateText } from '../../utils/toolpath/get.job.estimate.text';
 import { IconActionButton } from '../../views/IconActionButton';
+import { MessageHistoryButton } from '../MessageHistoryButton';
 import { BedCursorReadout } from './BedCursorReadout';
 import { getJobSizeReadoutText } from './get.job.size.readout.text';
 import styles from './styles.module.scss';
@@ -86,6 +87,7 @@ export const StatusStrip = (): ReactNode => {
           </span>
         </Tooltip>
       )}
+      <MessageHistoryButton />
       {/* A panel toggle, not a setting: quiet until pressed. */}
       <IconActionButton
         className={[styles.consoleToggle, isConsoleOpen ? styles.consoleToggleOn : undefined].join(' ')}
