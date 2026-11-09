@@ -49,8 +49,8 @@ describe(selectBurnPreviewEmptyState.name, () => {
     expect(selectBurnPreviewEmptyState(store.getState())).toBeUndefined();
   });
 
-  it('asks for a material when there is none', () => {
-    expect(selectBurnPreviewEmptyState(newStore().getState())).toBe(BURN_PREVIEW_EMPTY_STATE.NO_MATERIAL);
+  it('does not wait for a material: the model is built with a neutral one', () => {
+    expect(selectBurnPreviewEmptyState(newStore().getState())).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
   });
 
   it('is building while the toolpath is generated', () => {

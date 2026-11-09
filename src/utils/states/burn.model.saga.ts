@@ -29,6 +29,7 @@ import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
 import type { Material } from '../materials/interfaces/Material';
 import type { MaterialTestResult } from '../materials/interfaces/MaterialTestResult';
+import { NEUTRAL_PREVIEW_MATERIAL } from '../materials/neutral.preview.material';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { Action } from './action';
 import { BURN_MODEL_STATUS } from './burn.model.status.constants';
@@ -118,19 +119,21 @@ const isMaterialActionIgnored = (
   case ProjectMaterialSelected.type:
     return isBurnModelCurrentOrComing(modelStatus)
       && (action as ProjectMaterialSelected).payload.materialId === builtMaterialId;
+  // A model built with the neutral stand-in, before the materials arrived, is rebuilt with the real one.
   case MaterialsLoaded.type:
-    return isBurnModelCurrentOrComing(modelStatus);
+    return isBurnModelCurrentOrComing(modelStatus) && builtMaterialId === activeMaterialId;
   default:
     return false;
   }
 };
 
 function* runBurnModelAction(client: BurnModelWorkerClient): Generator {
-  const material: Material | undefined = (yield select(selectActiveMaterial)) as Material | undefined;
+  const activeMaterial: Material | undefined = (yield select(selectActiveMaterial)) as Material | undefined;
+  const material: Material = activeMaterial ?? NEUTRAL_PREVIEW_MATERIAL;
   const toolpathStatus: ToolpathStatus = (yield select(selectToolpathStatus)) as ToolpathStatus;
   const toolpath: Toolpath | undefined = (yield select(selectToolpath)) as Toolpath | undefined;
 
-  if (toolpathStatus === TOOLPATH_STATUS.READY && material && toolpath) {
+  if (toolpathStatus === TOOLPATH_STATUS.READY && toolpath) {
     yield call(buildBurnModel, client, toolpath, material);
   }
 }

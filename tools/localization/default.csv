@@ -51,7 +51,6 @@ BURN_PART_LIFT_NOT_LIFTED;Not lifted
 BURN_PART_LIFT_PUT_ALL_BACK;Put all back
 BURN_PREVIEW_ADD_MATERIAL;Add material…
 BURN_PREVIEW_BUILDING;Building 3D…
-BURN_PREVIEW_CHOOSE_MATERIAL_TITLE;Pick a material
 BURN_PREVIEW_ENTER_TEST_RESULT;Enter test result
 BURN_PREVIEW_FAILED;The 3D view could not be built. Switch to another view and back to try again.
 BURN_PREVIEW_LEGEND_BURNT;Burnt
@@ -67,7 +66,7 @@ BURN_PREVIEW_MATERIAL_LABEL;Material
 BURN_PREVIEW_MATERIAL_NONE;Material: none
 BURN_PREVIEW_MATERIAL_OPTION;{{name}}, {{thickness}} mm
 BURN_PREVIEW_MATERIAL_PLACEHOLDER;Choose a material
-BURN_PREVIEW_NO_MATERIAL;Add a material to see the cut
+BURN_PREVIEW_NO_MATERIAL;Shown with a neutral material. Pick yours for a true cut.
 BURN_PREVIEW_NO_WEBGL;The 3D view could not start in this browser. The Cut check still works.
 BURN_PREVIEW_OUT_OF_DATE;Out of date: the design changed. The 3D view comes back when the toolpath is generated again.
 BURN_SCENE_CANVAS_LABEL;3D view of the sheet. Drag to orbit, scroll to zoom, click a part to select it.

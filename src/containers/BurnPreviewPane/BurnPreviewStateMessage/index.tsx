@@ -10,7 +10,6 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { Alert, Skeleton, Spin } from 'antd';
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -22,11 +21,9 @@ import {
 } from '../../../utils/states/burn.preview.empty.state.constants';
 import type { BurnPreviewEmptyState } from '../../../utils/states/burn.preview.empty.state.constants';
 import { selectBurnPreviewEmptyState } from '../../../utils/states/burn.preview.selectors';
-import { selectMaterials } from '../../../utils/states/material.state';
+import { selectActiveMaterial } from '../../../utils/states/material.selectors';
 import { CubeIcon } from '../../../views/CubeIcon';
-import { EmptyState } from '../../../views/EmptyState';
 import { MaterialSheetIcon } from '../../../views/MaterialSheetIcon';
-import { MaterialDialog } from '../../MaterialDialog';
 import { ProjectMaterialSelect } from '../../ProjectMaterialSelect';
 import type { BurnPreviewStateMessageProps } from './interfaces/BurnPreviewStateMessageProps';
 import styles from './styles.module.scss';
@@ -34,10 +31,8 @@ import styles from './styles.module.scss';
 export const BurnPreviewStateMessage = ({ isSceneUnavailable }: BurnPreviewStateMessageProps): ReactNode => {
   const { t } = useTranslation();
   const emptyState: BurnPreviewEmptyState | undefined = useSelector(selectBurnPreviewEmptyState);
-  const [isMaterialDialogOpen, setIsMaterialDialogOpen] = useState<boolean>(false);
-  const hasMaterials: boolean = Boolean(useSelector(selectMaterials).length);
-  const isMaterialMissing: boolean = emptyState === BURN_PREVIEW_EMPTY_STATE.NO_MATERIAL;
-  const isMessageShown: boolean = !!emptyState && (isMaterialMissing || !isSceneUnavailable);
+  const hasActiveMaterial: boolean = Boolean(useSelector(selectActiveMaterial));
+  const isMessageShown: boolean = !!emptyState && !isSceneUnavailable;
 
   const messageComponent: ReactNode = getMessageComponent();
 
@@ -60,27 +55,6 @@ export const BurnPreviewStateMessage = ({ isSceneUnavailable }: BurnPreviewState
       );
     }
 
-    if (isMaterialMissing) {
-      return (
-        <div className={styles.materialCard}>
-          {hasMaterials ? (
-            <EmptyState
-              iconComponent={<MaterialSheetIcon />}
-              titleText={t(DEFAULT.BURN_PREVIEW_CHOOSE_MATERIAL_TITLE)}
-              actionComponent={<span className={styles.materialSelect}><ProjectMaterialSelect /></span>}
-            />
-          ) : (
-            <EmptyState
-              iconComponent={<MaterialSheetIcon />}
-              titleText={t(BURN_PREVIEW_EMPTY_STATE_TEXT_KEYS[emptyState])}
-              actionLabel={t(DEFAULT.BURN_PREVIEW_ADD_MATERIAL)}
-              onAction={() => setIsMaterialDialogOpen(true)}
-            />
-          )}
-        </div>
-      );
-    }
-
     return (
       <Alert
         className={styles.message}
@@ -90,11 +64,16 @@ export const BurnPreviewStateMessage = ({ isSceneUnavailable }: BurnPreviewState
     );
   }
 
-  // The dialog stays mounted whatever the state, so it cannot vanish and come back while the flag is still set.
+  // Without a material the model is built with a neutral one; this small chip offers the real pick without covering it.
   return (
     <>
       {messageComponent}
-      <MaterialDialog isOpen={isMaterialDialogOpen} onClose={() => setIsMaterialDialogOpen(false)} />
+      {!hasActiveMaterial && (
+        <div className={styles.materialChip} title={t(DEFAULT.BURN_PREVIEW_NO_MATERIAL)}>
+          <MaterialSheetIcon className={styles.materialChipIcon} aria-hidden />
+          <span className={styles.materialSelect}><ProjectMaterialSelect /></span>
+        </div>
+      )}
     </>
   );
 };

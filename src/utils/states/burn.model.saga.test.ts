@@ -4,6 +4,7 @@ import { FakeBurnModelWorkerClient } from '../burn.model/test.support/fake.burn.
 import { DEFAULT } from '../localization/default.locales';
 import type { Material } from '../materials/interfaces/Material';
 import { newMaterial } from '../materials/new.material';
+import { NEUTRAL_PREVIEW_MATERIAL } from '../materials/neutral.preview.material';
 import { newTestResultFixture } from '../materials/new.test.result.fixture';
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../toolpath/test.support/new.toolpath';
@@ -123,7 +124,7 @@ describe(watchBurnModel.name, () => {
     expect(selectBurnModel(store.getState())?.thicknessMm).toBe(THICKNESS_MM);
   });
 
-  it('does not build in 3D without a material', async () => {
+  it('builds in 3D with a neutral material when the project has none', async () => {
     const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
     const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true), client);
 
@@ -132,9 +133,10 @@ describe(watchBurnModel.name, () => {
     });
     putReadyToolpath(store);
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
-    await flushSagas();
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
 
-    expect(client.generationInputs).toEqual([]);
+    expect(client.generationInputs).toHaveLength(1);
+    expect(client.generationInputs[0]?.thicknessMm).toBe(NEUTRAL_PREVIEW_MATERIAL.thicknessMm);
   });
 
   it('does not build while the toolpath is not ready, then builds when it is', async () => {
@@ -259,14 +261,15 @@ describe(watchBurnModel.name, () => {
     store.dispatch(new ProjectMaterialSelected({ materialId: TEST_MATERIAL.id }));
     putReadyToolpath(store);
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
-    await flushSagas();
-    expect(client.generationInputs).toEqual([]);
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+    expect(client.generationInputs).toHaveLength(1);
 
     store.dispatch(new MaterialsLoaded({ materials: [TEST_MATERIAL] }));
-    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+    await vi.waitFor((): void => {
+      expect(client.generationInputs).toHaveLength(2);
+    });
 
-    expect(client.generationInputs).toHaveLength(1);
-    expect(client.generationInputs[0]?.thicknessMm).toBe(THICKNESS_MM);
+    expect(client.generationInputs[1]?.thicknessMm).toBe(THICKNESS_MM);
   });
 
   it('rebuilds on selecting another material', async () => {
