@@ -45,6 +45,10 @@ export const TopBar = (): ReactNode => {
 
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const profilesLabel: string = t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES);
+  // In a narrow window the button shrinks to its laser icon, so the tooltip names the active profile.
+  const profileTooltipText: string = activeProfile
+    ? t(DEFAULT.TOP_BAR_PROFILE_TOOLTIP, { name: activeProfile.name })
+    : profilesLabel;
 
   const changeProfilesDialogOpen = (isMachineProfilesDialogOpen: boolean): void => {
     dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen }));
@@ -60,7 +64,7 @@ export const TopBar = (): ReactNode => {
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <ProjectMenu />
         <AutosaveReadout />
-        <DismissibleTooltip title={profilesLabel}>
+        <DismissibleTooltip title={profileTooltipText}>
           <Button
             className={styles.profileButton}
             type={ANTD_BUTTON_TYPE_TEXT}
