@@ -73,6 +73,18 @@ BURN_SCENE_CANVAS_LABEL;3D view of the sheet. Drag to orbit, scroll to zoom, cli
 BURN_SCENE_VIEW_FIT_HINT;Fit: back to the first view of the whole sheet
 BURN_SCENE_VIEW_LABEL;3D view
 BURN_SCENE_VIEW_TOP_HINT;Top: look straight down at the sheet
+COLOUR_NAME_BLACK;Black
+COLOUR_NAME_BLUE;Blue
+COLOUR_NAME_BROWN;Brown
+COLOUR_NAME_CYAN;Cyan
+COLOUR_NAME_GREEN;Green
+COLOUR_NAME_GREY;Grey
+COLOUR_NAME_ORANGE;Orange
+COLOUR_NAME_PINK;Pink
+COLOUR_NAME_PURPLE;Purple
+COLOUR_NAME_RED;Red
+COLOUR_NAME_WHITE;White
+COLOUR_NAME_YELLOW;Yellow
 COMING_SOON;Soon
 COMING_SOON_LIST;Coming soon
 CONNECTION_CONNECT_MENU;Connect
@@ -380,7 +392,7 @@ LAYERS_LEGEND_SPEED;Speed
 LAYERS_LIST_LABEL;Project layers
 LAYERS_MOVE_DOWN;Move {{name}} down
 LAYERS_MOVE_UP;Move {{name}} up
-LAYERS_NOT_IN_PALETTE;Not in the palette
+LAYERS_NOT_IN_PALETTE;Not in the palette yet: open the layer to save its colour
 LAYERS_OPEN_PALETTE;Palette
 LAYERS_PURPOSE_CAPTION;Burn order
 LAYERS_SUMMARY_PASSES;{{passes}}×

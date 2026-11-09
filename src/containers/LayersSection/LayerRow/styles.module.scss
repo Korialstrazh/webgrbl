@@ -78,12 +78,13 @@
   cursor: grab;
 }
 
-// The swatch beside the name, then the summary and the palette note below across the full width of the button. The
+// The swatch beside the name and, for a colour not in the palette, a small info icon after it; then the summary below
+// across the full width of the button. The
 // name and the summary each wrap to a second line in a narrow panel instead of being cut short, and the button grows
 // with them, so they stay inside it. antd centres a button's content on one line, so the button is laid out as a start-aligned grid.
 .openButton {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   gap: 0 var(--space-2);
   align-items: center;
   justify-content: stretch;
@@ -101,13 +102,11 @@
 }
 
 .name,
-.summary,
-.note {
+.summary {
   min-width: 0;
 }
 
-.summary,
-.note {
+.summary {
   grid-column: 1 / -1;
 }
 
@@ -122,20 +121,12 @@
   margin-top: 0.125rem;
 }
 
+// A neutral hint, not an error: the colour burns fine, it just has no palette entry yet.
 .note {
-  grid-column: 2;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.note {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8125rem;
-  color: var(--color-danger-text);
+  grid-row: 1;
+  grid-column: 4;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
 }
 
 // Out of sight until the row is hovered or holds the focus, and then only over the name line, so they never cover a

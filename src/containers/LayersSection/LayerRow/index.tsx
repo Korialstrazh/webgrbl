@@ -1,7 +1,7 @@
 /**
  * A row of the layer list: a drag handle, an on/off checkbox drawn as an eye (the row dims while off) and a button
- * that opens the layer settings, showing the swatch, the name, a summary and a note when the colour is not in the
- * palette. Move buttons reorder it without a pointer.
+ * that opens the layer settings, showing the swatch, the name, a summary and an info icon when the colour is not in the
+ * palette (the layer is then named after the plain colour it looks like). Move buttons reorder it without a pointer.
  *
  * @author michael.morosov
  *
@@ -16,6 +16,7 @@ import {
   EyeInvisibleOutlined,
   EyeOutlined,
   HolderOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import { Button, Checkbox, Tooltip } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
@@ -25,6 +26,7 @@ import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/an
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
 import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { getColourNameKey } from '../../../utils/palette/get.colour.name.key';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { LayerModeIcon } from '../../../views/LayerModeIcon';
 import { LayerSwatch } from '../../../views/LayerSwatch';
@@ -52,9 +54,12 @@ export const LayerRow = ({
   onDrop,
 }: LayerRowProps): ReactNode => {
   const { t } = useTranslation();
-  const layerName: string = getLayerDisplayName(layer, layerEntry);
-  const { settings } = layer;
   const hasNoPaletteEntry: boolean = !layerEntry;
+  const colourNameKey: string | undefined = hasNoPaletteEntry ? getColourNameKey(layer.colour) : undefined;
+  // A colour with no palette entry is named after the plain colour it looks like, not its hex code.
+  const layerName: string = colourNameKey ? t(colourNameKey) : getLayerDisplayName(layer, layerEntry);
+  const layerNameTitle: string = colourNameKey ? `${layerName} ${layer.colour}` : layerName;
+  const { settings } = layer;
 
   return (
     <li
@@ -96,9 +101,13 @@ export const LayerRow = ({
         <Tooltip title={t(LAYER_MODE_LABEL_KEY[settings.mode])}>
           <span className={styles.modeIcon} aria-hidden><LayerModeIcon mode={settings.mode} /></span>
         </Tooltip>
-        <span className={styles.name} title={layerName}>{layerName}</span>
+        <span className={styles.name} title={layerNameTitle}>{layerName}</span>
+        {hasNoPaletteEntry && (
+          <Tooltip title={t(DEFAULT.LAYERS_NOT_IN_PALETTE)}>
+            <InfoCircleOutlined className={styles.note} aria-label={t(DEFAULT.LAYERS_NOT_IN_PALETTE)} />
+          </Tooltip>
+        )}
         <LayerValueCells className={styles.summary} settings={settings} />
-        {hasNoPaletteEntry && <span className={styles.note}>{t(DEFAULT.LAYERS_NOT_IN_PALETTE)}</span>}
       </Button>
       <div className={styles.moveButtons}>
         <IconActionButton

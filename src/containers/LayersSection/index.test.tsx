@@ -28,11 +28,13 @@ const UNKNOWN_COLOUR = '#123456';
 const DANGLING_ENTRY_ID = 'removed-entry';
 const CUT_SUMMARY = `Line ${MIDDLE_DOT} 100 % ${MIDDLE_DOT} 300 mm/min ${MIDDLE_DOT} 3${MULTIPLICATION_SIGN}`;
 const FILL_SUMMARY = `Fill ${MIDDLE_DOT} 50 % ${MIDDLE_DOT} 2000 mm/min ${MIDDLE_DOT} 1${MULTIPLICATION_SIGN}`;
-const NOT_IN_PALETTE_NOTE = 'Not in the palette';
+const NOT_IN_PALETTE_NOTE = 'Not in the palette yet: open the layer to save its colour';
+const UNKNOWN_COLOUR_NAME = 'Black';
+const CUT_COLOUR_NAME = 'Red';
 const LAYERS_LIST_NAME = 'Project layers';
 const EMPTY_HINT_PATTERN = /No layers yet/;
 const SEND_CUT_LABEL = 'Send Cut to the laser';
-const SEND_UNKNOWN_LABEL = `Send ${UNKNOWN_COLOUR} to the laser`;
+const SEND_UNKNOWN_LABEL = `Send ${UNKNOWN_COLOUR_NAME} to the laser`;
 const MOVE_CUT_DOWN_LABEL = 'Move Cut down';
 const MOVE_CUT_UP_LABEL = 'Move Cut up';
 const MOVE_FILL_UP_LABEL = 'Move Fill up';
@@ -113,7 +115,7 @@ describe(LayersSection.name, () => {
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
 
-  it('lists the layers with their summaries; an unknown colour shows the note and is unchecked', () => {
+  it('lists the layers with their summaries; an unknown colour gets a colour name and an info icon, unchecked', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR, FILL_COLOUR, UNKNOWN_COLOUR]);
     renderSection(store);
@@ -122,9 +124,9 @@ describe(LayersSection.name, () => {
 
     expect(fillRowText).toContain(FILL_SUMMARY);
     expect(cutRowText).toContain(CUT_SUMMARY);
-    expect(unknownRowText).toContain(UNKNOWN_COLOUR);
-    expect(unknownRowText).toContain(NOT_IN_PALETTE_NOTE);
-    expect(screen.getAllByText(NOT_IN_PALETTE_NOTE)).toHaveLength(1);
+    expect(unknownRowText).toContain(UNKNOWN_COLOUR_NAME);
+    expect(unknownRowText).not.toContain(UNKNOWN_COLOUR);
+    expect(screen.getAllByLabelText(NOT_IN_PALETTE_NOTE)).toHaveLength(1);
     expect(screen.getByRole('checkbox', { name: SEND_CUT_LABEL })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: SEND_UNKNOWN_LABEL })).not.toBeChecked();
   });
@@ -151,8 +153,8 @@ describe(LayersSection.name, () => {
     });
     renderSection(store);
 
-    expect(screen.getByText(NOT_IN_PALETTE_NOTE)).toBeInTheDocument();
-    expect(screen.getByText(CUT_COLOUR)).toBeInTheDocument();
+    expect(screen.getByLabelText(NOT_IN_PALETTE_NOTE)).toBeInTheDocument();
+    expect(screen.getByText(CUT_COLOUR_NAME)).toBeInTheDocument();
   });
 
   it('dispatches LayerToggled false when a layer is unchecked', () => {
