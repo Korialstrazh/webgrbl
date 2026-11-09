@@ -73,3 +73,5 @@ export const SVG_PRESERVE_ASPECT_RATIO_NONE = 'none';
 
 /** The id of the focusable group of bed objects, where focus lands after an import from the Job card. */
 export const BED_OBJECTS_LAYER_ID = 'bed-objects';
+/** Matches a resize or rotate handle of the selected object, which carries the handle it stands for. */
+export const BED_HANDLE_SELECTOR = '[data-handle]';

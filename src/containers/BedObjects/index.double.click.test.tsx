@@ -18,11 +18,12 @@ import { MachineLineRequested, MachineStatusReceived } from '../../utils/states/
 import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
+import { ProjectSelectionChanged } from '../../utils/states/project.selection.state';
 import type { ToolpathMachineArea } from '../../utils/toolpath/interfaces/ToolpathMachineArea';
 import { selectToolpathMachineArea } from '../../utils/states/toolpath.machine.area.selector';
 import { OverlayOpened } from '../../utils/states/ui.overlay.state';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
-import { BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
+import { BED_HANDLE_SELECTOR, BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
 
 const BED: BedDimensions = { widthMm: 400, heightMm: 300, placeholderKind: BED_PLACEHOLDER_KIND.NONE };
 const OBJECT_NAME = 'Star';
@@ -34,6 +35,8 @@ const OUTSIDE_BED_X_PX = 900;
 const OUTSIDE_BED_Y_PX = -500;
 const OBJECT_X_PX = 15;
 const OBJECT_Y_PX = 280;
+// SVG (15, 280) is the bed point x 15, y 20, inside the object.
+const OBJECT_JOG_LINE = `$J=G90 G21 X15 Y20 F${DEFAULT_MACHINE_JOG_FEED_RATE}`;
 const OVERLAY_ID = 'test-overlay';
 const STARTED_AT_MS = 1;
 
@@ -189,7 +192,7 @@ describe(`${BedObjects.name} double-click move`, () => {
     expect(getRequestedLines(dispatchSpy)).toEqual([]);
   });
 
-  it('never moves the laser for a double-click on an object', () => {
+  it('moves the laser to the double-clicked point of an object, as on the empty bed', () => {
     const store: AppStore = renderObjects();
 
     setMoveReady(store);
@@ -199,6 +202,35 @@ describe(`${BedObjects.name} double-click move`, () => {
       clientX: OBJECT_X_PX,
       clientY: OBJECT_Y_PX,
     });
+
+    expect(getRequestedLines(dispatchSpy)).toEqual([OBJECT_JOG_LINE]);
+  });
+
+  it('keeps the guards for a double-click on an object', () => {
+    const store: AppStore = renderObjects();
+
+    setMoveReady(store, GRBL_MACHINE_STATE.ALARM);
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    fireEvent.doubleClick(screen.getByRole('img', { name: OBJECT_NAME }), {
+      clientX: OBJECT_X_PX,
+      clientY: OBJECT_Y_PX,
+    });
+
+    expect(getRequestedLines(dispatchSpy)).toEqual([]);
+  });
+
+  it('never moves the laser for a double-click on a resize handle', () => {
+    const store: AppStore = renderObjects();
+
+    setMoveReady(store);
+    act(() => {
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [starObject.id] }));
+    });
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+    const handle: Element = document.querySelector(BED_HANDLE_SELECTOR) as Element;
+
+    fireEvent.doubleClick(handle, { clientX: OBJECT_X_PX, clientY: OBJECT_Y_PX });
 
     expect(getRequestedLines(dispatchSpy)).toEqual([]);
   });

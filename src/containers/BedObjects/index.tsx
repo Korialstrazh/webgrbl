@@ -64,7 +64,7 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
   const gestureControls: BedHandleGestureControls = useBedHandleGesture(layerRef, dimensions.heightMm);
   const handleKeyDown: BedObjectsKeyDownHandler = useBedObjectsKeys();
   const pixelsPerMm: number | undefined = useBedPixelsPerMm(layerRef, dimensions);
-  const handleSurfaceDoubleClick: (mouseEvent: MouseEvent<SVGElement>) => void =
+  const handleBedDoubleClick: (mouseEvent: MouseEvent<SVGElement>) => void =
     useBedDoubleClickMove(layerRef, dimensions.heightMm);
   const handleSizes: BedHandleSizes = useMemo(() => getBedHandleSizes(pixelsPerMm), [pixelsPerMm]);
   const { startObjectDrag, drag } = dragControls;
@@ -163,6 +163,8 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
       onLostPointerCapture={handlePointerCancel}
+      // On the whole layer, so a double-click on an object moves the laser there just as one on the empty bed does.
+      onDoubleClick={handleBedDoubleClick}
     >
       <rect
         className={styles.surface}
@@ -172,7 +174,6 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
         width={dimensions.widthMm}
         height={dimensions.heightMm}
         onPointerDown={handleSurfacePointerDown}
-        onDoubleClick={handleSurfaceDoubleClick}
       />
       {projectObjects.map((projectObject: ProjectObject) => {
         const drawnObject: ProjectObject = getObjectWithDragOffset(

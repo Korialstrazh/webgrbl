@@ -1,5 +1,6 @@
 /**
- * The double-click on empty bed that moves the laser there, when the user switched it on. The state is read at the
+ * The double-click on the bed, empty or on an object, that moves the laser there, when the user switched it on. A
+ * double-click on a resize or rotate handle never moves it. The state is read at the
  * moment of the double-click, so a job, frame or overlay that started since the last render still blocks it; a
  * blocked double-click does nothing.
  *
@@ -27,6 +28,7 @@ import type { AppRootState, AppStore } from '../../utils/states/new.store';
 import { selectToolpathMachineArea } from '../../utils/states/toolpath.machine.area.selector';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { useAppStore } from '../../utils/states/use.app.store';
+import { BED_HANDLE_SELECTOR } from './bed.objects.constants';
 
 const getBedDoubleClickLine = (state: AppRootState, svgPoint: BedSvgPoint, bedHeightMm: number): string | undefined =>
   getBedDoubleClickJogCommand({
@@ -41,6 +43,9 @@ const getBedDoubleClickLine = (state: AppRootState, svgPoint: BedSvgPoint, bedHe
     feedRate: selectActiveMachineProfile(state)?.jogFeedRate ?? DEFAULT_MACHINE_JOG_FEED_RATE,
   });
 
+const isBedHandleTarget = (target: EventTarget): boolean =>
+  target instanceof Element && Boolean(target.closest(BED_HANDLE_SELECTOR));
+
 export const useBedDoubleClickMove = (
   layerRef: RefObject<SVGGElement | null>,
   bedHeightMm: number,
@@ -48,6 +53,11 @@ export const useBedDoubleClickMove = (
   const store: AppStore = useAppStore();
 
   return useCallback((mouseEvent: MouseEvent<SVGElement>): void => {
+    // A handle resizes or turns the selected object; a double-click there is a missed drag, not a move request.
+    if (isBedHandleTarget(mouseEvent.target)) {
+      return;
+    }
+
     const svgElement: SVGSVGElement | null | undefined = layerRef.current?.ownerSVGElement;
     const svgPoint: BedSvgPoint | undefined =
       svgElement ? getBedSvgPoint(svgElement, mouseEvent.clientX, mouseEvent.clientY) : undefined;
