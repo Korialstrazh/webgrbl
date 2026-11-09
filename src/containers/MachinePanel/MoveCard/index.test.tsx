@@ -177,7 +177,7 @@ describe(MoveCard.name, () => {
     expect(getRequestedLines(dispatchSpy)).toEqual([DEFAULT_JOG_NORTH_EAST_LINE, GO_TO_ZERO_LINE]);
   });
 
-  it('shows the active step size in the centre of the jog pad', () => {
+  it('keeps the step size out of the origin button, so it never reads as a move by that step', () => {
     const store: AppStore = newStore();
 
     renderMoveCard(store);
@@ -186,11 +186,11 @@ describe(MoveCard.name, () => {
 
     const originButton: HTMLElement = screen.getByRole('button', { name: JOG_ORIGIN_LABEL });
 
-    expect(originButton).toHaveTextContent(DEFAULT_STEP_LABEL);
+    expect(originButton).not.toHaveTextContent(DEFAULT_STEP_LABEL);
 
     fireEvent.click(screen.getByText(STEP_ONE_LABEL));
 
-    expect(originButton).toHaveTextContent(STEP_ONE_LABEL);
+    expect(originButton).not.toHaveTextContent(STEP_ONE_LABEL);
     expect(originButton).toHaveAccessibleName(JOG_ORIGIN_LABEL);
   });
 
