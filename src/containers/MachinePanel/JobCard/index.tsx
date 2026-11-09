@@ -52,6 +52,7 @@ import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
 import { selectReadyToolpathTotalTimeS } from '../../../utils/states/toolpath.timeline.selectors';
 import { getJobEstimateText } from '../../../utils/toolpath/get.job.estimate.text';
+import { ActionLockNote } from '../../../views/ActionLockNote';
 import { CaptionedActionButton } from '../../../views/CaptionedActionButton';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { Panel } from '../../../views/Panel';
@@ -66,6 +67,7 @@ import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobLockShortReasonKeys } from './get.job.lock.short.reason.keys';
 import { getJobRunStatusKey } from './get.job.run.status.key';
 import { isJobLockReasonOnReadinessRow } from './is.job.lock.reason.on.readiness.row';
+import { JOB_LOCK_NOTE_TEST_IDS } from './job.card.constants';
 import { JOB_LOCK_ACTION } from './job.lock.action.constants';
 import type { JobLockAction } from './job.lock.action.constants';
 import styles from './styles.module.scss';
@@ -189,7 +191,15 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
         <div id={bodyId} className={styles.jobCard}>
           <div className={styles.collapsedSummary}>
             {factsComponent}
-            {isStartShown && <span className={styles.collapsedStart}><JobStartButton /></span>}
+            {isStartShown && (
+              <span className={styles.collapsedStart}>
+                <JobStartButton />
+                <ActionLockNote
+                  noteText={getLockNoteText(JOB_LOCK_ACTION.START)}
+                  testId={JOB_LOCK_NOTE_TEST_IDS.START}
+                />
+              </span>
+            )}
           </div>
           {isJobRunActive && <JobRunProgress />}
           <JobPauseButton />

@@ -12,7 +12,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { LockFilled } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ButtonProps } from 'antd';
 import type { MouseEvent, ReactNode } from 'react';
@@ -22,7 +21,6 @@ import {
   ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS,
 } from '../../utils/antd.constants';
 import { DismissibleTooltip } from '../DismissibleTooltip';
-import { CAPTIONED_ACTION_LOCK_TEST_ID } from './captioned.action.constants';
 import styles from './styles.module.scss';
 
 interface CaptionedActionButtonProps extends Omit<ButtonProps, 'icon' | 'children' | 'aria-label' | 'disabled'> {
@@ -37,8 +35,6 @@ interface CaptionedActionButtonProps extends Omit<ButtonProps, 'icon' | 'childre
   isLabelTooltipShown?: boolean;
   /** True on a secondary action beside a main one: a faint border, so it never draws the eye first. */
   isQuiet?: boolean;
-  /** True where the icon alone tells the action: while off, the lock takes the icon's place instead of joining it. */
-  isLockInPlaceOfIcon?: boolean;
 }
 
 export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactNode => {
@@ -50,18 +46,12 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
     isDisabled = false,
     isLabelTooltipShown = true,
     isQuiet = false,
-    isLockInPlaceOfIcon = false,
     className,
     onClick,
     ...buttonProps
   } = props;
   const tooltipText: string | undefined = blockedReasonText ?? (isLabelTooltipShown ? labelText : undefined);
   const isBlocked: boolean = Boolean(blockedReasonText);
-  const isButtonDisabled: boolean = isDisabled || isBlocked;
-  const lockComponent: ReactNode = (
-    <LockFilled className={styles.lockBadge} data-testid={CAPTIONED_ACTION_LOCK_TEST_ID} aria-hidden />
-  );
-  const isLockOnIcon: boolean = isButtonDisabled && isLockInPlaceOfIcon;
 
   // A blocked action stays in the tab order, so keyboard and screen reader users reach its reason; a click, Enter or
   // Space on it does nothing and never reaches a wrapper such as a confirmation.
@@ -89,7 +79,6 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
         className={[
           styles.captionedActionButton,
           isQuiet ? styles.quiet : undefined,
-          isLockOnIcon ? styles.lockedInPlace : undefined,
           className,
         ].join(' ')}
         aria-label={labelText}
@@ -98,11 +87,9 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
         disabled={isDisabled && !isBlocked}
         onClick={handleClick}
       >
-        <span className={styles.icon} aria-hidden>
-          {isLockOnIcon ? lockComponent : iconComponent}
-        </span>
+        {/* A lock shows as the corner dot of ActionLockNote beside the button, one pattern for every action. */}
+        <span className={styles.icon} aria-hidden>{iconComponent}</span>
         <span className={styles.caption}>
-          {isButtonDisabled && !isLockOnIcon && lockComponent}
           <span>{captionText}</span>
         </span>
       </Button>

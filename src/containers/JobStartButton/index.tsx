@@ -64,7 +64,6 @@ export const JobStartButton = (): ReactNode => {
           captionText={t(DEFAULT.MACHINE_START_JOB_CAPTION)}
           iconComponent={<PlayCircleFilled />}
           isLabelTooltipShown={false}
-          isLockInPlaceOfIcon
           blockedReasonText={jobStartBlockedReasonKey && t(jobStartBlockedReasonKey)}
         />
       </span>
