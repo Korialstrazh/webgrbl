@@ -77,6 +77,15 @@ import styles from './styles.module.scss';
 
 const REASON_SEPARATOR = ' ';
 
+// The lock reasons the Fix warnings button already sums up, so a dot would only repeat it.
+const FIX_WARNINGS_LOCK_REASON_KEYS: readonly string[] = [
+  DEFAULT.JOB_LOCK_SHORT_WARNINGS,
+  DEFAULT.JOB_LOCK_SHORT_OFF_BED,
+];
+
+const isFixWarningsLockReason = (shortReasonKey: string | undefined): boolean =>
+  shortReasonKey ? FIX_WARNINGS_LOCK_REASON_KEYS.includes(shortReasonKey) : false;
+
 interface JobCardProps {
   /** False where Start job is pinned elsewhere, as in the narrow layout. */
   isStartShown?: boolean;
@@ -106,12 +115,13 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
     { action: JOB_LOCK_ACTION.EXPORT, blockedReasonKey: gcodeExportBlockedReasonKey },
   ]);
   const getLockNoteText = (action: JobLockAction): string | undefined => {
-    // Fix warnings carries the count; Export keeps its dot, it is no part of the run.
-    if (isFixWarningsShown && action !== JOB_LOCK_ACTION.EXPORT) {
+    const shortReasonKey: string | undefined = lockShortReasonKeys[action];
+
+    // Fix warnings explains a lock only when the lock is the warnings; any other reason, such as no connection, keeps
+    // its dot. Export keeps its dot, it is no part of the run.
+    if (isFixWarningsShown && action !== JOB_LOCK_ACTION.EXPORT && isFixWarningsLockReason(shortReasonKey)) {
       return undefined;
     }
-
-    const shortReasonKey: string | undefined = lockShortReasonKeys[action];
 
     return shortReasonKey && t(shortReasonKey);
   };

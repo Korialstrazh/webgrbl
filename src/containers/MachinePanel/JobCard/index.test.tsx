@@ -33,6 +33,7 @@ import { selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.
 import { selectToolpathMachineArea } from '../../../utils/states/toolpath.machine.area.selector';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../../utils/states/toolpath.state';
 import { selectIsAnyOverlayOpen } from '../../../utils/states/ui.overlay.state';
+import { SVG_UNSUPPORTED_KIND } from '../../../utils/svg/geometry/svg.shape.constants';
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../../utils/test.support/bed.region.test.host';
 import { newGcodeExportTestStore } from '../../../utils/test.support/new.gcode.export.test.store';
@@ -42,6 +43,7 @@ import { getGcodeExportContext } from '../../../utils/toolpath/get.gcode.export.
 import { getGcodeText } from '../../../utils/toolpath/get.gcode.text';
 import { getToolpath } from '../../../utils/toolpath/get.toolpath';
 import type { BedDrawableSet } from '../../../utils/toolpath/interfaces/BedDrawableSet';
+import type { ObjectWarning } from '../../../utils/toolpath/interfaces/ObjectWarning';
 import { FakeToolpathWorkerClient } from '../../../utils/toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpath.move';
@@ -69,6 +71,7 @@ const THREE_COLOUR_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="30
   + '<rect fill="none" stroke="#0000ff" x="10" width="10" height="10"/>'
   + '<rect fill="none" stroke="#00a000" x="20" width="10" height="10"/></svg>';
 const CREATED_AT_ISO = '2026-11-01T10:00:00.000Z';
+const TEXT_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.TEXT };
 const BURN_LINE_PATTERN = new RegExp(`^${GCODE_BURN_WORD} `, 'm');
 
 const newMachineStatusReceived = (machineState: GrblMachineState): MachineStatusReceived => {
@@ -290,6 +293,43 @@ describe(JobCard.name, () => {
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).toBeInTheDocument();
+  });
+
+  it('keeps the Start dot offline while Fix warnings shows, since the warnings are not why Start is off', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }));
+    store.dispatch(new ToolpathReady({
+      toolpath: newToolpath({ moves: [newToolpathMove()], warnings: [TEXT_WARNING] }),
+      documentVersion: selectToolpathDocumentVersion(store.getState()),
+    }));
+    renderJobCard(store);
+
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
+  });
+
+  it('drops the Start dot while connected and only the warnings lock it, as Fix warnings says so', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    store.dispatch(new ToolpathReady({
+      toolpath: newToolpath({ moves: [newToolpathMove()], warnings: [TEXT_WARNING] }),
+      documentVersion: selectToolpathDocumentVersion(store.getState()),
+    }));
+    renderJobCard(store);
+
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
+  });
+
+  it('shows no lock dot on Start while a job runs', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.JOB }));
+    renderJobCard(store);
+
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
   });
 
   it('makes Connect the next step without a material, as Start does not need one', async () => {
