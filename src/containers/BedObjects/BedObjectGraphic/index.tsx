@@ -1,9 +1,8 @@
 /**
- * One object drawn on the bed: its artwork stretched to its box, drawn the way its layers burn it and stopped at the
- * bed edge, a dashed danger outline when it leaves the bed, and the dashed selection box when it is selected. As the
- * one selected object it also gets four corner handles that scale it and a handle on an arm above the box that turns
- * it. The group is turned around the box centre, so everything
- * inside is drawn around the origin. It renders again only when its own props change, so a drag of one object does
+ * One object drawn on the bed: its artwork stretched to its box, drawn the way its layers burn it in full on the bed
+ * and faint off it, a dashed danger outline when it leaves the bed, and the dashed selection box when it is selected.
+ * As the one selected object it also gets four corner handles that scale it and a handle on an arm above the box
+ * that turns it. The group is turned around the box centre, so everything inside is drawn around the origin. It renders again only when its own props change, so a drag of one object does
  * not redraw the others.
  *
  * @author michael.morosov
@@ -138,6 +137,21 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
     onHandlePointerDown(pointerEvent, id, handle);
   };
 
+  const artworkComponent: ReactNode = isDesignDrawnAsAuthored(designDrawing, layerLooks) ? (
+    <image
+      href={getSvgDataUrl(displaySvgText)}
+      x={left}
+      y={top}
+      width={widthMm}
+      height={heightMm}
+      preserveAspectRatio={SVG_PRESERVE_ASPECT_RATIO_NONE}
+    />
+  ) : (
+    <g transform={getObjectArtworkSvgTransform(projectObject)}>
+      <ObjectDesignArtwork designDrawing={designDrawing} layerLooks={layerLooks} />
+    </g>
+  );
+
   return (
     <g
       className={styles.bedObject}
@@ -167,22 +181,16 @@ const BedObjectGraphicContent = (props: BedObjectGraphicProps): ReactNode => {
           transform={getObjectBedClipSvgTransform(projectObject, bedHeightMm)}
         />
       </clipPath>
-      {/* The drawing stops at the bed edge, so nothing of it reaches the margins or the rulers. */}
+      {/* The part of an object off the bed is still drawn, faint and without the halo, so a huge or misplaced import
+          is visible where it lies; the viewport stops it under the rulers. */}
+      {isOutsideBed && (
+        <g className={styles.offBedArtwork} data-off-bed-artwork aria-hidden>
+          {artworkComponent}
+        </g>
+      )}
+      {/* The part on the bed is drawn in full, stopped at the bed edge. */}
       <g className={styles.artwork} data-artwork clipPath={`url(#${bedClipId})`}>
-        {isDesignDrawnAsAuthored(designDrawing, layerLooks) ? (
-          <image
-            href={getSvgDataUrl(displaySvgText)}
-            x={left}
-            y={top}
-            width={widthMm}
-            height={heightMm}
-            preserveAspectRatio={SVG_PRESERVE_ASPECT_RATIO_NONE}
-          />
-        ) : (
-          <g transform={getObjectArtworkSvgTransform(projectObject)}>
-            <ObjectDesignArtwork designDrawing={designDrawing} layerLooks={layerLooks} />
-          </g>
-        )}
+        {artworkComponent}
       </g>
       {/* Skipped content: faint, dashed and without the halo, so it never reads as a burn. */}
       {disabledDrawing && (

@@ -72,6 +72,8 @@ const TRANSFORM_ATTRIBUTE = 'transform';
 const TRUE_TEXT = 'true';
 const FALSE_TEXT = 'false';
 const OUTSIDE_ATTRIBUTE = 'data-outside-bed';
+const OFF_BED_ARTWORK_SELECTOR = '[data-off-bed-artwork]';
+const CLIP_PATH_ATTRIBUTE = 'clip-path';
 const WIDE_WIDTH_MM = 100;
 const WIDE_HEIGHT_MM = 50;
 const WIDE_X_MM = 50;
@@ -519,6 +521,16 @@ describe(BedObjects.name, () => {
     expect(getObjectElement(SECOND_NAME)).toHaveAttribute(OUTSIDE_ATTRIBUTE, FALSE_TEXT);
     expect(screen.getAllByTestId(BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID)).toHaveLength(1);
     expect(screen.getAllByTestId(BED_OFF_BED_ARROW_TEST_ID)).toHaveLength(1);
+  });
+
+  it('draws the off-bed part of an object faint and unclipped, and only for an object off the bed', () => {
+    renderObjects([{ ...firstObject, xMm: -OBJECT_SIZE_MM }, secondObject]);
+
+    const offBedArtwork: Element | null = getObjectElement(FIRST_NAME).querySelector(OFF_BED_ARTWORK_SELECTOR);
+
+    expect(offBedArtwork).not.toHaveAttribute(CLIP_PATH_ATTRIBUTE);
+    expect(offBedArtwork?.childElementCount).toBe(1);
+    expect(getObjectElement(SECOND_NAME).querySelector(OFF_BED_ARTWORK_SELECTOR)).toBeNull();
   });
 
   describe('handles', () => {

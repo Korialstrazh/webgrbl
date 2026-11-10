@@ -164,7 +164,8 @@ const replaceToolpathWithMoves = (store: AppStore, moveCount: number): void => {
   store.dispatch(new ToolpathReady({
     toolpath: newToolpath({
       moves: Array.from({ length: moveCount }, (_: unknown, moveIndex: number): ToolpathMove =>
-        newToolpathMove({ to: { x: LONG_MOVE_END_X_MM * (moveIndex + 1), y: 0 } })),
+        // Back and forth, so every move stays on the bed and Start is not held back.
+        newToolpathMove({ to: { x: moveIndex % 2 ? 0 : LONG_MOVE_END_X_MM, y: 0 } })),
       warnings: [],
     }),
     documentVersion: selectToolpathDocumentVersion(store.getState()),

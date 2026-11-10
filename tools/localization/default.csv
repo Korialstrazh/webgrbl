@@ -227,6 +227,7 @@ FRAME_START_BLOCKED_NO_TOOLPATH;Wait for an up-to-date toolpath to trace the fra
 FRAME_START_BLOCKED_NO_WORK_POSITION;The laser has not reported its position yet.
 FRAME_START_BLOCKED_NOT_CONNECTED;Connect the laser to trace the frame.
 FRAME_START_BLOCKED_NOT_IDLE;The laser must be idle to trace the frame.
+FRAME_START_BLOCKED_OFF_BED;Some artwork lies outside the bed: move it onto the bed, fit it or skip it to frame.
 FRAME_START_BLOCKED_WARNINGS;Fix the toolpath warnings to trace the frame.
 FRAME_TIME_LABEL;Frame time
 GCODE_EXPORT_NEEDS_ARTWORK;Add artwork to export G-code.
@@ -340,6 +341,7 @@ JOB_START_BLOCKED_NO_PROFILE;Add a laser profile to start a job.
 JOB_START_BLOCKED_NO_TOOLPATH;Wait for an up-to-date toolpath with something to burn.
 JOB_START_BLOCKED_NOT_CONNECTED;Connect the laser to start a job.
 JOB_START_BLOCKED_NOT_IDLE;The laser must be idle to start a job.
+JOB_START_BLOCKED_OFF_BED;Some artwork lies outside the bed: move it onto the bed, fit it or skip it to start a job.
 JOB_START_BLOCKED_RUNNING;A job is running.
 JOB_START_BLOCKED_WARNINGS;Fix the toolpath warnings to start a job.
 JOB_START_CONFIRM_CANCEL;Cancel

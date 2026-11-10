@@ -96,3 +96,11 @@
   stroke-dasharray: 4 3;
   vector-effect: non-scaling-stroke;
 }
+
+// The part of an object that lies off the bed: faint, with no halo and no presses of its own, so a huge or misplaced
+// import shows where it is without reading as something that burns.
+.offBedArtwork {
+  opacity: 0.3;
+  pointer-events: none;
+  filter: none;
+}
