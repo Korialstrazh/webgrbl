@@ -124,14 +124,15 @@
   }
 }
 
-// 13 px at medium weight in the muted colour (8.6:1). Each name keeps to its own equal column with a small gap on
-// both sides and ends in an ellipsis when it does not fit, so two names never run together.
+// 12 px at medium weight in the muted colour (8.6:1), so the names fit the default panel. Each name keeps to its own
+// equal column with a small gap on both sides and ends in an ellipsis only when it still does not fit, so two names
+// never run together.
 .caption {
   display: block;
   max-width: 100%;
-  padding: 0 0.25rem;
+  padding: 0 0.125rem;
   overflow: hidden;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
   line-height: 1.2;
   text-overflow: ellipsis;

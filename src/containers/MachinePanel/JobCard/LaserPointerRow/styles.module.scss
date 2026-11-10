@@ -1,8 +1,7 @@
-// One row under a thin rule: hold to fire, the power slider and its figure, then the details button.
+// One row: hold to fire, the power slider and its figure, then the details button. No rule or padding of its own, so
+// the card stays short enough for Move to sit above STOP while connected.
 .laserPointerRow {
   display: flex;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
   gap: var(--space-2);
   align-items: center;
   min-width: 0;
