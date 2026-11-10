@@ -27,10 +27,13 @@
   flex-shrink: 0;
 }
 
+// A fixed-width slot: a short or long project name never moves the menus, Saved, the laser or Import SVG beside it;
+// a long name ends in an ellipsis.
 .heading {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 11rem;
 }
 
 .title {

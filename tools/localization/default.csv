@@ -675,8 +675,8 @@ OBJECTS_LOCK_RATIO;Lock aspect ratio
 OBJECTS_MOVE_ONTO_BED;Move onto bed
 OBJECTS_MOVE_ONTO_BED_TOO_LARGE;Larger than the bed: use Fit to bed
 OBJECTS_OUTSIDE_BED;Outside the bed
-OBJECTS_SIZE;{{widthMm}} × {{heightMm}} mm
-OBJECTS_SIZE_HINT;Size of the drawing itself: the size that burns.
+OBJECTS_SIZE;{{widthMm}}×{{heightMm}}
+OBJECTS_SIZE_HINT;Size of the drawing itself in mm: the size that burns.
 OBJECTS_TREE_DELETE;Delete {{name}}
 OBJECTS_TREE_EMPTY;No layers or shapes to list.
 OBJECTS_TREE_HIDE;Hide the layers and shapes of {{name}}

@@ -183,7 +183,7 @@ describe(JobReadinessRow.name, () => {
     expect(selectNarrowRegion(store.getState())).toBe(WORKBENCH_REGION.BED);
   });
 
-  it('captions the open Material step as optional on screen', () => {
+  it('marks the open Material step as optional on its caption line', () => {
     renderRow();
 
     expect(within(screen.getByRole('button', { name: MATERIAL_OPEN })).getByText(OPTIONAL_CAPTION)).toBeInTheDocument();

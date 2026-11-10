@@ -1,3 +1,5 @@
+@use '../../../../styles/accessibility' as accessibility;
+
 // A stepper: round markers joined by a line, which turns green behind each step that is done.
 .jobReadinessRow {
   display: grid;
@@ -144,12 +146,27 @@
   line-height: 1.2;
 }
 
-// The small word under an optional step's name, in italic so it reads as a note, not as a second step name.
-.optionalCaption {
-  margin-top: -0.125rem;
-  font-size: 0.6875rem;
-  font-style: italic;
-  line-height: 1.1;
+// The caption and an optional step's mark share one line; the mark hangs past the name's end without taking width,
+// so a long name like Material never runs into its neighbours.
+.caption {
+  position: relative;
+  white-space: nowrap;
+}
+
+// A small hollow ring after an optional step's name, like the dotted ring of its marker; the word stays for tests
+// and hides, as the step's tooltip and label already say "optional".
+.optionalMark {
+  position: absolute;
+  top: 0.125rem;
+  left: calc(100% + 0.125rem);
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border: 0.0625rem solid var(--color-text-muted);
+  border-radius: 50%;
+}
+
+.optionalMarkText {
+  @include accessibility.visually-hidden;
 }
 
 // The steps and the next-step button, spaced like the cards' other rows.

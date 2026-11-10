@@ -70,11 +70,13 @@
   white-space: nowrap;
 }
 
-// The numbers never end in an ellipsis: a size too long for the row wraps after the icon instead.
+// The size always stays on one line in a slightly smaller tabular font: the compact format (whole millimetres from
+// 100 mm, no spaces around the times sign) fits the narrowest panel beside the chip and actions.
 .size {
-  overflow-wrap: anywhere;
+  overflow: hidden;
   font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
+  white-space: nowrap;
 }

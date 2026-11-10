@@ -5,8 +5,8 @@
  * Once the laser is connected the steps shrink to small markers on one line beside the next-step button (their names
  * stay in the tooltips and labels), so the status and Move cards keep their room above Stop.
  * Each step goes to where it is set, a done step shows a large check, and the first required one still open is outlined
- * as next. An optional step (Material) that is still open shows a dashed marker and a small "optional"
- * caption under its name: Start does not wait for it.
+ * as next. An optional step (Material) that is still open shows a dashed marker and a small hollow ring after
+ * its name, on the same line: Start does not wait for it.
  * The steps are one tab stop: the arrow keys, Home and End move between them (a roving tab index).
  *
  * @author michael.morosov
@@ -129,11 +129,16 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
             {isMet ? <CheckOutlined aria-hidden /> : iconComponent}
             {!!openCount && <span className={styles.countBadge} aria-hidden>{openCount}</span>}
           </span>
-          <span className={styles.caption}>{captionText}</span>
-          {/* Said on screen, not only to a screen reader, so the open step never reads as a blocker. */}
-          {isOptionalOpen && (
-            <span className={styles.optionalCaption} aria-hidden>{t(DEFAULT.JOB_READINESS_STEP_OPTIONAL_CAPTION)}</span>
-          )}
+          {/* An open optional step carries a small hollow mark on its caption line, so the step never reads as a
+              blocker and every step keeps the same height. */}
+          <span className={styles.caption}>
+            {captionText}
+            {isOptionalOpen && (
+              <span className={styles.optionalMark} aria-hidden>
+                <span className={styles.optionalMarkText}>{t(DEFAULT.JOB_READINESS_STEP_OPTIONAL_CAPTION)}</span>
+              </span>
+            )}
+          </span>
         </Button>
       </DismissibleTooltip>
     </li>
