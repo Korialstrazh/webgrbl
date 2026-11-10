@@ -3,7 +3,7 @@
  * line only, for a section collapsed to one line. With a note it is a muted heading line whose icon (its own, such as
  * a crossed-out eye, instead of words) tells why it has no content in this view, by tooltip, keyboard focus and screen
  * reader, so a stack of panels keeps its order. A muted line still shows its header action (such as a warning count)
- * before the note icon.
+ * before the note icon. It is an antd Card exposed as a region named by its heading.
  *
  * @author michael.morosov
  *
@@ -12,8 +12,11 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import { Card } from 'antd';
 import { useId } from 'react';
 import type { ReactNode } from 'react';
+import { ANTD_CARD_SIZE_SMALL } from '../../utils/antd.constants';
+import { ARIA_ROLE_REGION } from '../../utils/aria.constants';
 import { TooltipNoteIcon } from '../TooltipNoteIcon';
 import styles from './styles.module.scss';
 
@@ -52,21 +55,33 @@ export const Panel = ({
     isCompact ? styles.compactPanel : undefined,
   ].join(' ');
 
+  const titleComponent: ReactNode = (
+    <h2 id={headingId} className={isTitleVisuallyHidden ? styles.hiddenTitle : styles.title}>
+      {iconComponent && <span className={styles.icon} aria-hidden>{iconComponent}</span>}
+      {title}
+    </h2>
+  );
+  const extraComponent: ReactNode = noteText ? (
+    <span className={styles.headerActions}>
+      {headerActionComponent}
+      <TooltipNoteIcon noteText={noteText} iconComponent={noteIconComponent} />
+    </span>
+  ) : headerActionComponent;
+
   return (
-    <section className={panelClassName} aria-labelledby={headingId}>
-      <header className={bodyComponent ? [styles.header, styles.headerAboveBody].join(' ') : styles.header}>
-        <h2 id={headingId} className={isTitleVisuallyHidden ? styles.hiddenTitle : styles.title}>
-          {iconComponent && <span className={styles.icon} aria-hidden>{iconComponent}</span>}
-          {title}
-        </h2>
-        {noteText ? (
-          <span className={styles.headerActions}>
-            {headerActionComponent}
-            <TooltipNoteIcon noteText={noteText} iconComponent={noteIconComponent} />
-          </span>
-        ) : headerActionComponent}
-      </header>
-      {bodyComponent && <div className={styles.body}>{bodyComponent}</div>}
-    </section>
+    <Card
+      role={ARIA_ROLE_REGION}
+      aria-labelledby={headingId}
+      size={ANTD_CARD_SIZE_SMALL}
+      className={panelClassName}
+      title={titleComponent}
+      extra={extraComponent}
+      classNames={{
+        header: bodyComponent ? [styles.header, styles.headerAboveBody].join(' ') : styles.header,
+        body: bodyComponent ? styles.body : styles.emptyBody,
+      }}
+    >
+      {bodyComponent}
+    </Card>
   );
 };

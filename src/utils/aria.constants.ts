@@ -23,3 +23,6 @@ export const ARIA_ROLE_ALERT = 'alert';
 
 /** The role of a small badge that stands for a word, read with that word as its name. */
 export const ARIA_ROLE_IMG = 'img';
+
+/** The role of a titled workbench section drawn as a card, named by its heading. */
+export const ARIA_ROLE_REGION = 'region';

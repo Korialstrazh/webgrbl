@@ -12,6 +12,7 @@ import type {
   AlertProps,
   BadgeProps,
   ButtonProps,
+  CardProps,
   ColorPickerProps,
   DrawerProps,
   DropdownProps,
@@ -36,6 +37,9 @@ export const ANTD_BUTTON_SIZE_SMALL: ButtonProps['size'] = 'small';
 
 /** The round button shape, for a small floating hint button. */
 export const ANTD_BUTTON_SHAPE_CIRCLE: ButtonProps['shape'] = 'circle';
+
+/** The small card, the base of a workbench panel with a tight heading line. */
+export const ANTD_CARD_SIZE_SMALL: CardProps['size'] = 'small';
 
 /** The compact badge, for a count on an icon button. */
 export const ANTD_BADGE_SIZE_SMALL: BadgeProps['size'] = 'small';
