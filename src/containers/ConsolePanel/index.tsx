@@ -25,6 +25,7 @@ import {
 import type { GrblConsoleViewEntry } from '../../utils/states/interfaces/GrblConsoleViewEntry';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ConsoleOpenChanged } from '../../utils/states/panel.layout.state';
+import { ConsoleEmptyState } from '../../views/ConsoleEmptyState';
 import { ConsoleEntryList } from '../../views/ConsoleEntryList';
 import { IconActionButton } from '../../views/IconActionButton';
 import { ConsoleCommandInput } from './ConsoleCommandInput';
@@ -89,7 +90,7 @@ export const ConsolePanel = (): ReactNode => {
       >
         {entries.length
           ? <ConsoleEntryList entries={entries} />
-          : <p className={styles.emptyHint}>{t(DEFAULT.CONSOLE_EMPTY_HINT)}</p>}
+          : <ConsoleEmptyState hintText={t(DEFAULT.CONSOLE_EMPTY_HINT)} />}
       </div>
       <ConsoleCommandInput />
       <ConsoleLogDialog isOpen={isLogDialogOpen} onClose={() => setIsLogDialogOpen(false)} />

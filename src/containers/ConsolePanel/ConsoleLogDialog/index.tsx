@@ -17,6 +17,7 @@ import { useSelector } from 'react-redux';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectConsoleEntries } from '../../../utils/states/grbl.console.state';
 import type { GrblConsoleViewEntry } from '../../../utils/states/interfaces/GrblConsoleViewEntry';
+import { ConsoleEmptyState } from '../../../views/ConsoleEmptyState';
 import { ConsoleEntryList } from '../../../views/ConsoleEntryList';
 import { AppModal } from '../../AppModal';
 import { ConsoleCommandInput } from '../ConsoleCommandInput';
@@ -58,7 +59,7 @@ export const ConsoleLogDialog = ({ isOpen, onClose }: ConsoleLogDialogProps): Re
       >
         {entries.length
           ? <ConsoleEntryList entries={entries} />
-          : <p className={styles.emptyHint}>{t(DEFAULT.CONSOLE_EMPTY_HINT)}</p>}
+          : <ConsoleEmptyState hintText={t(DEFAULT.CONSOLE_EMPTY_HINT)} />}
       </div>
       <div className={styles.commandRow}>
         <ConsoleCommandInput />
