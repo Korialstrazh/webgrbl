@@ -11,11 +11,9 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { call, put, select } from 'redux-saga/effects';
-import { getBedDimensions } from '../bed/get.bed.dimensions';
 import type { BedDimensions } from '../bed/interfaces/BedDimensions';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
-import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { getFreeBedSpot } from '../project/get.free.bed.spot';
 import { getObjectArtworkBedBounds } from '../project/get.object.artwork.bed.bounds';
 import type { ObjectArtworkBedBounds } from '../project/interfaces/ObjectArtworkBedBounds';
@@ -35,9 +33,8 @@ import type { SvgImportFailure } from '../svg/interfaces/SvgImportFailure';
 import { isSvgImportFailure } from '../svg/is.svg.import.failure';
 import { readSvgFile } from '../svg/read.svg.file';
 import { BedSelectionFitRequested } from './bed.view.state';
-import { selectGrblSettings, selectIsConnected } from './grbl.connection.state';
+import { getCurrentBed } from './get.current.bed.saga';
 import type { AcceptedSvgFile } from './interfaces/AcceptedSvgFile';
-import { selectActiveMachineProfile } from './machine.profile.state';
 import { ProjectObjectsAdded, selectProjectDocument, selectProjectObjects } from './project.document.state';
 import type { SvgFilesImportRequested } from './project.document.state';
 import { deriveProjectLayers } from './project.layers.derive.saga';
@@ -148,15 +145,6 @@ function* showOversizedImports(oversizedObjects: ProjectObject[]): Generator {
       fitToBedObjectId: oversizedObject.id,
     }));
   }
-}
-
-function* getCurrentBed(): Generator<unknown, BedDimensions> {
-  const settings: Record<number, string> = (yield select(selectGrblSettings)) as Record<number, string>;
-  const isConnected: boolean = (yield select(selectIsConnected)) as boolean;
-  const activeProfile: MachineProfile | undefined =
-    (yield select(selectActiveMachineProfile)) as MachineProfile | undefined;
-
-  return getBedDimensions(settings, isConnected, activeProfile);
 }
 
 function* addAcceptedFiles(acceptedFiles: AcceptedSvgFile[], bed: BedDimensions): Generator<unknown, boolean> {

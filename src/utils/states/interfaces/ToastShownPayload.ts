@@ -21,4 +21,6 @@ export interface ToastShownPayload {
   isUndoOffered?: boolean;
   /** Id of an object larger than the bed that the toast offers to scale onto the bed. */
   fitToBedObjectId?: string;
+  /** Id of an object outside the bed that the toast offers to move onto the bed. */
+  moveOntoBedObjectId?: string;
 }

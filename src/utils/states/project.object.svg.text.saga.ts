@@ -8,16 +8,38 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { put, select } from 'redux-saga/effects';
+import { call, put, select } from 'redux-saga/effects';
+import type { BedDimensions } from '../bed/interfaces/BedDimensions';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { DEFAULT } from '../localization/default.locales';
 import type { ProjectDocument } from '../project/interfaces/ProjectDocument';
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
+import { isObjectArtworkOutsideBed } from '../project/is.object.artwork.outside.bed';
+import { getCurrentBed } from './get.current.bed.saga';
 import {
   ProjectObjectSvgTextChanged,
   ProjectObjectSvgTextChangeRequested,
   selectProjectDocument,
 } from './project.document.state';
 import { deriveProjectLayers } from './project.layers.derive.saga';
+import { TOAST_SEVERITY } from './toast.constants';
+import { ToastShown } from './toast.state';
+
+/** Warns when a tree edit leaves the object outside the bed; the object is never moved without the user asking. */
+function* warnOfObjectOffBed(changedObject: ProjectObject): Generator {
+  const bed: BedDimensions = (yield call(getCurrentBed)) as BedDimensions;
+
+  if (!isObjectArtworkOutsideBed(changedObject, bed)) {
+    return;
+  }
+
+  yield put(new ToastShown({
+    severity: TOAST_SEVERITY.WARNING,
+    messageKey: DEFAULT.TOAST_OBJECT_OFF_BED_AFTER_EDIT,
+    messageParameters: { name: changedObject.name },
+    moveOntoBedObjectId: changedObject.id,
+  }));
+}
 
 /** Run by the project command queue, so it never lands in a document that a project switch is replacing. */
 export function* changeProjectObjectSvgText(action: ProjectObjectSvgTextChangeRequested): Generator {
@@ -36,4 +58,11 @@ export function* changeProjectObjectSvgText(action: ProjectObjectSvgTextChangeRe
     (yield* deriveProjectLayers(changedObjects, projectDocument.layers)) as ProjectLayer[];
 
   yield put(new ProjectObjectSvgTextChanged({ objectId, svgText, layers }));
+
+  const changedObject: ProjectObject | undefined =
+    changedObjects.find((projectObject: ProjectObject): boolean => projectObject.id === objectId);
+
+  if (changedObject) {
+    yield call(warnOfObjectOffBed, changedObject);
+  }
 }

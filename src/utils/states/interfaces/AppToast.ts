@@ -23,6 +23,8 @@ export interface AppToast {
   isUndoOffered?: boolean;
   /** Id of an object larger than the bed that the toast offers to scale onto the bed. */
   fitToBedObjectId?: string;
+  /** Id of an object outside the bed that the toast offers to move onto the bed. */
+  moveOntoBedObjectId?: string;
   /** How many times this same toast was shown while it was open; 1 for a single occurrence. */
   repeatCount: number;
 }

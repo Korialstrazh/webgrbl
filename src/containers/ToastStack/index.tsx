@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CloseOutlined, CompressOutlined } from '@ant-design/icons';
+import { CloseOutlined, CompressOutlined, ImportOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,9 @@ import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppToast } from '../../utils/states/interfaces/AppToast';
 import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
 import { getObjectFittedToBedTransform } from '../../utils/project/get.object.fitted.to.bed.transform';
+import { getObjectMovedOntoBedTransform } from '../../utils/project/get.object.moved.onto.bed.transform';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import type { ProjectObjectTransform } from '../../utils/project/interfaces/ProjectObjectTransform';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { getToastMessageText } from '../../utils/states/get.toast.message.text';
 import {
@@ -67,6 +69,26 @@ export const ToastStack = ({ isWide }: ToastStackProps): ReactNode => {
   const getFitObject = (toast: AppToast): ProjectObject | undefined =>
     projectObjects.find((projectObject: ProjectObject): boolean => projectObject.id === toast.fitToBedObjectId);
 
+  const getMoveOntoBedTransforms = (toast: AppToast): Record<string, ProjectObjectTransform> | undefined => {
+    const moveObject: ProjectObject | undefined = projectObjects.find(
+      (projectObject: ProjectObject): boolean => projectObject.id === toast.moveOntoBedObjectId,
+    );
+    const movedTransform: ProjectObjectTransform | undefined =
+      moveObject && getObjectMovedOntoBedTransform(moveObject, bed);
+
+    return moveObject && movedTransform ? { [moveObject.id]: movedTransform } : undefined;
+  };
+
+  const moveObjectOntoBed = (toast: AppToast): void => {
+    const transforms: Record<string, ProjectObjectTransform> | undefined = getMoveOntoBedTransforms(toast);
+
+    if (transforms) {
+      dispatch(new ProjectObjectsTransformed({ transforms }));
+    }
+
+    dispatch(new ToastDismissed({ toastId: toast.toastId }));
+  };
+
   return (
     <div className={getToastStackClassName(isWide)} data-testid={TOAST_STACK_TEST_ID}>
       {toasts.map((toast: AppToast) => (
@@ -101,6 +123,15 @@ export const ToastStack = ({ isWide }: ToastStackProps): ReactNode => {
               }}
             >
               {t(DEFAULT.OBJECTS_FIT_TO_BED)}
+            </Button>
+          )}
+          {getMoveOntoBedTransforms(toast) && (
+            <Button
+              size={ANTD_BUTTON_SIZE_SMALL}
+              icon={<ImportOutlined aria-hidden />}
+              onClick={() => moveObjectOntoBed(toast)}
+            >
+              {t(DEFAULT.OBJECTS_MOVE_ONTO_BED)}
             </Button>
           )}
           <Button
