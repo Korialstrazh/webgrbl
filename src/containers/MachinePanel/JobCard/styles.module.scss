@@ -12,17 +12,22 @@
   gap: var(--space-1);
 }
 
-// The folded card: its facts on the left, Start filling the rest of the line.
+// The folded card: its facts on the left, wrapping onto a second line when they must, and Start at a fixed width
+// inside the card padding on the right, so the facts can never squeeze it past the card border.
 .collapsedSummary {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+
+  > .facts {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }
 
 .collapsedStart {
   position: relative;
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 0 7rem;
 
   :global(.ant-btn) {
     width: 100%;
