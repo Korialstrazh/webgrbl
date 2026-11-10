@@ -1,20 +1,21 @@
 // A compact chip: the warning icon and the count of problems that lock Start, then, apart from the count, a
 // bed-outline icon in the info colour for an object outside the bed, a note that does not lock Start.
-.chip {
+.chip:global(.ant-btn) {
   display: inline-flex;
   flex: none;
-  gap: var(--space-1);
+  gap: 0.125rem;
   align-items: center;
   align-self: center;
-  // Never flush against the size text before it.
-  margin-inline-start: var(--space-2);
+  // Never flush against the size text before it, but tight enough that the size beside it is never cut.
+  margin-inline-start: var(--space-1);
+  padding-inline: 0.125rem;
   color: var(--color-warning);
   font-variant-numeric: tabular-nums;
 }
 
 .blockingPart {
   display: inline-flex;
-  gap: var(--space-1);
+  gap: 0.125rem;
   align-items: center;
 }
 

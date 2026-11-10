@@ -13,6 +13,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { ReactNode } from 'react';
+import { ANTD_POPOVER_PLACEMENT_LEFT_TOP } from '../../utils/antd.constants';
 import { TooltipNoteIcon } from '../TooltipNoteIcon';
 import styles from './styles.module.scss';
 
@@ -23,6 +24,14 @@ interface ActionLockNoteProps {
 
 export const ActionLockNote = ({ noteText, testId }: ActionLockNoteProps): ReactNode => noteText && (
   <span className={styles.actionLockNote} data-testid={testId}>
-    <TooltipNoteIcon noteText={noteText} iconComponent={<span className={styles.dot} />} isWarning isPointerOnly />
+    {/* Opens to the left of the corner dot, over its own button, never over the next-step button above it, and
+        flips back in when it would touch the window edge. */}
+    <TooltipNoteIcon
+      noteText={noteText}
+      iconComponent={<span className={styles.dot} />}
+      placement={ANTD_POPOVER_PLACEMENT_LEFT_TOP}
+      isWarning
+      isPointerOnly
+    />
   </span>
 );
