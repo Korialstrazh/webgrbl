@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
+import { useJobStartBlockedReasonTexts } from '../../../utils/hooks/use.job.start.blocked.reason.texts';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
@@ -104,6 +105,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
 
     return shortReasonKey && t(shortReasonKey);
   };
+  const startReasonTexts: string[] = useJobStartBlockedReasonTexts();
   const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);
   const jobRunKind: JobRunKind = useSelector(selectJobRunKind);
@@ -185,6 +187,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
                 <JobStartButton />
                 <ActionLockNote
                   noteText={getLockNoteText(JOB_LOCK_ACTION.START)}
+                  reasonTexts={startReasonTexts}
                   testId={JOB_LOCK_NOTE_TEST_IDS.START}
                 />
               </span>
@@ -201,6 +204,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           <JobPauseButton />
           <FrameControls
             startActionComponent={isStartShown ? <JobStartButton /> : undefined}
+            startReasonTexts={startReasonTexts}
             lockNoteTexts={{
               [JOB_LOCK_ACTION.START]: getLockNoteText(JOB_LOCK_ACTION.START),
               [JOB_LOCK_ACTION.FRAME]: getLockNoteText(JOB_LOCK_ACTION.FRAME),

@@ -8,11 +8,33 @@
   line-height: 0;
 }
 
-// A fixed-size dot in the warning colour, so its size never changes with the text behind it.
+// A fixed-size dot in the warning colour, so its size never changes with the text behind it. The colour is set on the
+// dot itself, so the hover and focus colours of the button and the note around it never turn it white.
 .dot {
   display: block;
   width: 0.625rem;
   height: 0.625rem;
   border-radius: var(--radius-pill);
-  background-color: currentcolor;
+  background-color: var(--color-warning);
+}
+
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  max-width: 18rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reason {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.reasonIcon {
+  flex: none;
+  color: var(--color-warning);
 }

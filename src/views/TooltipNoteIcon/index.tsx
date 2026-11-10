@@ -33,6 +33,8 @@ interface TooltipNoteIconProps {
    * button): the icon opens on a pointer hover only, takes no tab stop and is hidden from screen readers.
    */
   isPointerOnly?: boolean;
+  /** Richer content for the popover, such as a list; the note text stays the accessible name. */
+  noteComponent?: ReactNode;
   /** Where the note opens; above the icon when none is given. antd flips it when it would leave the window. */
   placement?: PopoverProps['placement'];
 }
@@ -40,7 +42,8 @@ interface TooltipNoteIconProps {
 const NOTE_TOGGLE_KEYS: readonly string[] = [ENTER_KEY, SPACE_KEY];
 
 export const TooltipNoteIcon = (props: TooltipNoteIconProps): ReactNode => {
-  const { noteText, iconComponent, isWarning = false, isPointerOnly = false, placement }: TooltipNoteIconProps = props;
+  const { noteText, noteComponent, iconComponent, isWarning = false, isPointerOnly = false, placement }:
+  TooltipNoteIconProps = props;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const iconClassName: string = [
     styles.tooltipNoteIcon,
@@ -59,7 +62,7 @@ export const TooltipNoteIcon = (props: TooltipNoteIconProps): ReactNode => {
   if (isPointerOnly) {
     return (
       <Popover
-        content={<span className={styles.noteText}>{noteText}</span>}
+        content={noteComponent ?? <span className={styles.noteText}>{noteText}</span>}
         trigger={ANTD_POPOVER_TRIGGER_HOVER}
         placement={placement}
         open={isOpen}
@@ -74,7 +77,7 @@ export const TooltipNoteIcon = (props: TooltipNoteIconProps): ReactNode => {
 
   return (
     <Popover
-      content={<span className={styles.noteText}>{noteText}</span>}
+      content={noteComponent ?? <span className={styles.noteText}>{noteText}</span>}
       trigger={ANTD_POPOVER_TRIGGER_HOVER_AND_CLICK}
       placement={placement}
       open={isOpen}

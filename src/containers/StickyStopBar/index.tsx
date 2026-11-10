@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { selectJobStartBlockedReasonKey } from '../../utils/states/job.start.blocked.reason.selector';
 import { selectIsAnyDialogOpen } from '../../utils/states/ui.overlay.state';
+import { useJobStartBlockedReasonTexts } from '../../utils/hooks/use.job.start.blocked.reason.texts';
 import { ActionLockNote } from '../../views/ActionLockNote';
 import { JobStartButton } from '../JobStartButton';
 import { getJobLockShortReasonKeys } from '../MachinePanel/JobCard/get.job.lock.short.reason.keys';
@@ -32,6 +33,8 @@ export const StickyStopBar = (): ReactNode => {
     { action: JOB_LOCK_ACTION.START, blockedReasonKey: jobStartBlockedReasonKey },
   ])[JOB_LOCK_ACTION.START];
 
+  const startReasonTexts: string[] = useJobStartBlockedReasonTexts();
+
   return (
     <div className={styles.stickyStopBar}>
       <div className={styles.start} inert={isAnyDialogOpen}>
@@ -39,6 +42,7 @@ export const StickyStopBar = (): ReactNode => {
         <ActionLockNote
           noteText={startShortReasonKey && t(startShortReasonKey)}
           testId={JOB_LOCK_NOTE_TEST_IDS.START}
+          reasonTexts={startReasonTexts}
         />
       </div>
       <StopButton />

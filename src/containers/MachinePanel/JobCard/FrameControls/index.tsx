@@ -93,10 +93,13 @@ interface FrameControlsProps {
   exportActionComponent?: ReactNode;
   /** A few words under each locked action on why it is off. */
   lockNoteTexts?: Partial<Record<JobLockAction, string>>;
+  /** Every reason Start job is off, listed in its lock note. */
+  startReasonTexts?: readonly string[];
 }
 
 export const FrameControls = (props: FrameControlsProps): ReactNode => {
-  const { startActionComponent, exportActionComponent, lockNoteTexts = {} }: FrameControlsProps = props;
+  const { startActionComponent, exportActionComponent, lockNoteTexts = {}, startReasonTexts }: FrameControlsProps =
+    props;
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
@@ -214,7 +217,11 @@ export const FrameControls = (props: FrameControlsProps): ReactNode => {
         {startActionComponent && (
           <div className={styles.startAction}>
             {startActionComponent}
-            <ActionLockNote noteText={lockNoteTexts[JOB_LOCK_ACTION.START]} testId={JOB_LOCK_NOTE_TEST_IDS.START} />
+            <ActionLockNote
+              noteText={lockNoteTexts[JOB_LOCK_ACTION.START]}
+              testId={JOB_LOCK_NOTE_TEST_IDS.START}
+              reasonTexts={startReasonTexts}
+            />
           </div>
         )}
         <div className={styles.frameColumn}>
