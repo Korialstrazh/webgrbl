@@ -3,7 +3,7 @@
   align-items: stretch;
 }
 
-.pill {
+.pill:global(.ant-btn) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -15,10 +15,14 @@
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
+  height: auto;
+  box-shadow: none;
   cursor: pointer;
 
-  &:hover {
+  &:not(:disabled):hover {
+    border-color: var(--color-border);
     background-color: var(--color-surface-hover);
+    color: var(--color-text);
   }
 }
 
@@ -83,14 +87,14 @@
 }
 
 // The pill with a one-click Connect button joined on its right: one shape, split by a line.
-.joined {
+.joined:global(.ant-btn) {
   border-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
 // The one-click Connect beside the pill: the accent colour marks it as the place to connect.
-.connectButton {
+.connectButton:global(.ant-btn) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -103,14 +107,18 @@
   font-family: var(--font-ui);
   font-size: 0.8125rem;
   font-weight: 600;
+  height: auto;
+  box-shadow: none;
   cursor: pointer;
 
   > :global(.anticon) {
     font-size: 0.875rem;
   }
 
-  &:hover {
+  &:not(:disabled):hover {
+    border-color: var(--color-border);
     background-color: var(--color-surface-hover);
+    color: var(--color-accent);
   }
 }
 
@@ -138,7 +146,7 @@
 
 // At phone width the pill is its dot and the Connect verb, or the dot alone once there is a link: it must always fit.
 @media (width < 30rem) {
-  .pill {
+  .pill:global(.ant-btn) {
     padding: 0 var(--space-2);
   }
 
@@ -154,7 +162,7 @@
     border-left: 0;
   }
 
-  .connectButton {
+  .connectButton:global(.ant-btn) {
     padding: 0 var(--space-2);
   }
 }

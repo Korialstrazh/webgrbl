@@ -13,6 +13,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { ApiOutlined, DownOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
 import { useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -97,10 +98,8 @@ export const ConnectionPill = (): ReactNode => {
   return (
     <span className={styles.pillGroup}>
       <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
-        {/* A raw button: the pill is a custom status chip and antd Button would restyle its inner parts. */}
-        <button
+        <Button
           ref={pillRef}
-          type="button"
           className={pillClassName}
           aria-haspopup={POPUP_KIND_DIALOG}
           aria-expanded={isPopoverOpen}
@@ -128,12 +127,12 @@ export const ConnectionPill = (): ReactNode => {
             <span className={styles.connectVerb}>{connectVerbContent}</span>
           )}
           <DownOutlined className={styles.caret} aria-hidden="true" />
-        </button>
+        </Button>
       </ConnectionPopover>
       {isOneClickConnect && (
-        <button type="button" className={styles.connectButton} onClick={connectLaser}>
+        <Button className={styles.connectButton} onClick={connectLaser}>
           {connectVerbContent}
-        </button>
+        </Button>
       )}
     </span>
   );
