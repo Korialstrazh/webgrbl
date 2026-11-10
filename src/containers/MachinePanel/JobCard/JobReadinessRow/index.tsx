@@ -22,7 +22,11 @@ import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
+import {
+  ANTD_BUTTON_TYPE_PRIMARY,
+  ANTD_BUTTON_TYPE_TEXT,
+  ANTD_SEGMENTED_ITEM_SELECTOR,
+} from '../../../../utils/antd.constants';
 import { BED_VIEW_MODE } from '../../../../utils/bed/bed.view.constants';
 import {
   ARROW_DOWN_KEY,
@@ -32,6 +36,7 @@ import {
   END_KEY,
   HOME_KEY,
 } from '../../../../utils/browser/browser.events.constants';
+import { flashAttentionHighlight } from '../../../../utils/browser/flash.attention.highlight';
 import { useConnectLaser } from '../../../../utils/hooks/use.connect.laser';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
@@ -49,6 +54,7 @@ import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.cons
 import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
 import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
 import { BED_OBJECTS_LAYER_ID } from '../../../BedObjects/bed.objects.constants';
+import { BED_VIEW_OPTION_ATTRIBUTE } from '../../../BedPanel/bed.toolbar.constants';
 import { PROJECT_MATERIAL_SELECT_ID } from '../../../ProjectMaterialSelect/project.material.select.constants';
 import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
 import { TOOLPATH_WARNINGS_CHIP_ID } from '../../../ToolpathWarningsPanel/toolpath.warnings.panel.constants';
@@ -60,6 +66,7 @@ import styles from './styles.module.scss';
 
 const ARIA_CURRENT_STEP = 'step';
 const STEP_BUTTON_SELECTOR = 'button';
+const TOOLPATH_VIEW_OPTION_SELECTOR = `[${BED_VIEW_OPTION_ATTRIBUTE}="${BED_VIEW_MODE.TOOLPATH}"]`;
 const PREVIOUS_STEP_KEYS: readonly string[] = [ARROW_LEFT_KEY, ARROW_UP_KEY];
 const NEXT_STEP_KEYS: readonly string[] = [ARROW_RIGHT_KEY, ARROW_DOWN_KEY];
 
@@ -215,6 +222,11 @@ export const JobReadinessRow = (): ReactNode => {
 
       warningsChip?.focus();
       warningsChip?.click();
+      // The view changed on its own: a brief glow on the Toolpath tab and the chip shows where the list came from.
+      flashAttentionHighlight([
+        document.querySelector(TOOLPATH_VIEW_OPTION_SELECTOR)?.closest(ANTD_SEGMENTED_ITEM_SELECTOR),
+        warningsChip,
+      ]);
     });
   };
 

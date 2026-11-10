@@ -123,6 +123,9 @@ export const ANTD_SPLITTER_ORIENTATION_VERTICAL: SplitterProps['orientation'] = 
 /** The compact segmented control size, for secondary choices next to larger controls. */
 export const ANTD_SEGMENTED_SIZE_SMALL: SegmentedProps['size'] = 'small';
 
+/** Antd's class name of one option box of a Segmented control. */
+export const ANTD_SEGMENTED_ITEM_SELECTOR = '.ant-segmented-item';
+
 /** The small spinner, for a spinner inline with a line of text. */
 export const ANTD_SPIN_SIZE_SMALL: SpinProps['size'] = 'small';
 

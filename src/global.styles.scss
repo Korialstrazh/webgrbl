@@ -75,3 +75,28 @@ body {
 html[data-tooltip-hold] .ant-tooltip {
   display: none;
 }
+
+// A brief accent glow on a control the app just brought into view on its own, such as the Toolpath view tab and the
+// warnings chip after Fix warnings. Must match ATTENTION_HIGHLIGHT_ATTRIBUTE and ATTENTION_HIGHLIGHT_DURATION_MS.
+[data-attention-highlight] {
+  border-radius: var(--radius-sm);
+  animation: attention-highlight 0.8s ease-out 2;
+}
+
+@keyframes attention-highlight {
+  from {
+    box-shadow: 0 0 0 0.25rem var(--color-accent);
+  }
+
+  to {
+    box-shadow: 0 0 0 0.625rem transparent;
+  }
+}
+
+// Without motion the glow is a steady accent ring for the same time.
+@media (prefers-reduced-motion: reduce) {
+  [data-attention-highlight] {
+    animation: none;
+    box-shadow: 0 0 0 0.125rem var(--color-accent);
+  }
+}
