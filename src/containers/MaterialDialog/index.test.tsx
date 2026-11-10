@@ -27,6 +27,10 @@ const THICKNESS_CAPTION = 'Thickness';
 const ENTERED_NAME = '  Birch 4 mm ';
 const STORED_NAME = 'Birch 4 mm';
 const ENTERED_THICKNESS_MM = 4;
+const RENAMED_NAME = 'Oak 6 mm';
+const CHANGED_THICKNESS_MM = 6;
+const EDIT_TITLE = 'Edit material';
+const NAME_TAKEN_ERROR = 'Another material already has this name and thickness.';
 
 const renderDialog = (
   store: AppStore,
@@ -252,5 +256,69 @@ describe(MaterialDialog.name, () => {
 
     expect(selectMaterials(store.getState())).toEqual([]);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  describe('editing a saved material', () => {
+    const renderEditDialog = (store: AppStore, editedMaterial: Material, onClose: () => void = vi.fn()): void => {
+      render(
+        <Provider store={store}>
+          <AntdTestProvider>
+            <BedRegionTestHost>
+              <MaterialDialog isOpen editedMaterial={editedMaterial} onClose={onClose} />
+            </BedRegionTestHost>
+          </AntdTestProvider>
+        </Provider>,
+      );
+    };
+
+    it('renames it and changes its thickness under the same id, keeping it the project material', () => {
+      const store: AppStore = newStore();
+      const material: Material = newMaterial({ name: STORED_NAME, thicknessMm: ENTERED_THICKNESS_MM });
+
+      store.dispatch(new MaterialSaved({ material }));
+      store.dispatch(new ProjectMaterialSelected({ materialId: material.id }));
+      renderEditDialog(store, material);
+
+      expect(screen.getByText(EDIT_TITLE)).toBeInTheDocument();
+      expect(screen.getByLabelText(NAME_LABEL)).toHaveValue(STORED_NAME);
+
+      fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: RENAMED_NAME } });
+      enterThickness(String(CHANGED_THICKNESS_MM));
+      clickSave();
+
+      expect(selectMaterials(store.getState())).toEqual([
+        { ...material, name: RENAMED_NAME, thicknessMm: CHANGED_THICKNESS_MM },
+      ]);
+      expect(selectActiveMaterial(store.getState())?.name).toBe(RENAMED_NAME);
+    });
+
+    it('refuses a name and thickness another material already has', () => {
+      const store: AppStore = newStore();
+      const material: Material = newMaterial({ name: STORED_NAME, thicknessMm: ENTERED_THICKNESS_MM });
+      const otherMaterial: Material = newMaterial({ name: RENAMED_NAME, thicknessMm: ENTERED_THICKNESS_MM });
+
+      store.dispatch(new MaterialSaved({ material }));
+      store.dispatch(new MaterialSaved({ material: otherMaterial }));
+      renderEditDialog(store, material);
+      fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: RENAMED_NAME } });
+      clickSave();
+
+      expect(screen.getByText(NAME_TAKEN_ERROR)).toBeInTheDocument();
+      expect(selectMaterials(store.getState())).toEqual([material, otherMaterial]);
+    });
+
+    it('leaves the material as it was on Cancel', () => {
+      const store: AppStore = newStore();
+      const material: Material = newMaterial({ name: STORED_NAME, thicknessMm: ENTERED_THICKNESS_MM });
+      const onClose = vi.fn();
+
+      store.dispatch(new MaterialSaved({ material }));
+      renderEditDialog(store, material, onClose);
+      fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: RENAMED_NAME } });
+      fireEvent.click(screen.getByRole('button', { name: CANCEL_LABEL }));
+
+      expect(selectMaterials(store.getState())).toEqual([material]);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -549,8 +549,10 @@ MACHINE_STATUS_TITLE;Status
 MACHINE_STATUS_WORK_POSITION;Work position
 MATERIAL_DIALOG_CANCEL;Cancel
 MATERIAL_DIALOG_DUPLICATE_NOTE;You already have {{name}} at this thickness.
+MATERIAL_DIALOG_EDIT_TITLE;Edit material
 MATERIAL_DIALOG_NAME;Name
 MATERIAL_DIALOG_NAME_INVALID;Enter a name of {{min}} to {{max}} characters.
+MATERIAL_DIALOG_NAME_TAKEN;Another material already has this name and thickness.
 MATERIAL_DIALOG_SAVE;Save
 MATERIAL_DIALOG_SAVE_HINT;Name needed
 MATERIAL_DIALOG_THICKNESS;Thickness (mm)
@@ -595,6 +597,7 @@ MATERIAL_LIBRARY_IMPORTED;Imported {{count}} for this laser. Power was rescaled 
 MATERIAL_LIBRARY_LAYER_TARGET;Layer: {{layer}}
 MATERIAL_LIBRARY_MACHINE_DELETED;Deleted laser profile
 MATERIAL_LIBRARY_MATERIAL;Material
+MATERIAL_LIBRARY_MATERIAL_EDIT;Rename or change the thickness of {{name}}
 MATERIAL_LIBRARY_MATERIAL_FILTER;Filter: {{name}}, {{thickness}} mm
 MATERIAL_LIBRARY_MATERIAL_FILTER_CLEAR;Show all materials
 MATERIAL_LIBRARY_MATERIAL_OPTION;{{name}}, {{thickness}} mm

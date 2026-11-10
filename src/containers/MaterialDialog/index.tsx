@@ -3,7 +3,9 @@
  * to pass their checks, stores the material and makes it the material of the project, or hands it to the caller that
  * asked for it instead, such as the material library; a field the user has changed shows its failed check below it.
  * A name and thickness that match a saved material are allowed, with an offer to use that one. It starts over on
- * every open.
+ * every open. Given a material to edit, the same form renames it and changes its thickness in place: the id stays, so
+ * presets and the project's material keep pointing at it, and a name and thickness another material already has are
+ * refused. Cancel leaves the material as it was.
  *
  * @author michael.morosov
  *
@@ -49,7 +51,7 @@ import { MATERIAL_DIALOG_OVERLAY_ID, MATERIAL_DIALOG_WIDTH } from './material.di
 import { InputCaption } from '../../views/InputCaption';
 import styles from './styles.module.scss';
 
-type MaterialDialogContentProps = Pick<MaterialDialogProps, 'onClose' | 'onMaterialChosen'>;
+type MaterialDialogContentProps = Pick<MaterialDialogProps, 'onClose' | 'onMaterialChosen' | 'editedMaterial'>;
 
 const FIELD_ID_SEPARATOR = '-';
 const NAME_FIELD_ID_SUFFIX = 'name';
@@ -58,23 +60,33 @@ const THICKNESS_FIELD_ID_SUFFIX = 'thickness';
 const hasMaterialFieldError = ({ nameErrorKey, thicknessErrorKey }: MaterialFieldErrors): boolean =>
   Boolean(nameErrorKey || thicknessErrorKey);
 
-const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogContentProps): ReactNode => {
+const MaterialDialogContent = (props: MaterialDialogContentProps): ReactNode => {
+  const { onClose, onMaterialChosen, editedMaterial }: MaterialDialogContentProps = props;
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const formId: string = useId();
-  const [materialName, setMaterialName] = useState<string>('');
+  const [materialName, setMaterialName] = useState<string>(editedMaterial?.name ?? '');
   // The name is checked once the user leaves the field, never while it is still empty and untouched.
   const [isNameTouched, setIsNameTouched] = useState<boolean>(false);
-  const [thicknessMm, setThicknessMm] = useState<number>(DEFAULT_MATERIAL_THICKNESS_MM);
+  const [thicknessMm, setThicknessMm] =
+    useState<number>(editedMaterial?.thicknessMm ?? DEFAULT_MATERIAL_THICKNESS_MM);
   const materials: Material[] = useSelector(selectMaterials);
   const activeMaterial: Material | undefined = useSelector(selectActiveMaterial);
   const nameInputRef: RefObject<InputRef | null> = useRef<InputRef>(null);
+  // While editing, the material itself is no match: keeping its name is fine.
+  const otherMaterials: Material[] = editedMaterial
+    ? materials.filter(({ id }: Material): boolean => id !== editedMaterial.id)
+    : materials;
   const fieldErrors: MaterialFieldErrors = getMaterialFieldErrors(materialName, thicknessMm);
-  const isSaveAllowed: boolean = !hasMaterialFieldError(fieldErrors);
-  const nameErrorKey: string | undefined = isNameTouched ? fieldErrors.nameErrorKey : undefined;
-  const matchingMaterial: Material | undefined = isSaveAllowed
-    ? getMatchingMaterial(materials, { name: materialName, thicknessMm })
+  const isFieldValid: boolean = !hasMaterialFieldError(fieldErrors);
+  const matchingMaterial: Material | undefined = isFieldValid
+    ? getMatchingMaterial(otherMaterials, { name: materialName, thicknessMm })
     : undefined;
+  const isNameTaken: boolean = Boolean(editedMaterial && matchingMaterial);
+  const isSaveAllowed: boolean = isFieldValid && !isNameTaken;
+  const nameErrorKey: string | undefined = isNameTaken
+    ? DEFAULT.MATERIAL_DIALOG_NAME_TAKEN
+    : isNameTouched ? fieldErrors.nameErrorKey : undefined;
   const nameFieldId: string = [formId, NAME_FIELD_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
   const thicknessFieldId: string = [formId, THICKNESS_FIELD_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
 
@@ -97,6 +109,14 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
       return;
     }
 
+    if (editedMaterial) {
+      // The same id, so presets and the project's material stay linked, and the views that show it update at once.
+      dispatch(new MaterialSaved({ material: { ...editedMaterial, name: materialName.trim(), thicknessMm } }));
+      onClose();
+
+      return;
+    }
+
     const material: Material = newMaterial({ name: materialName.trim(), thicknessMm });
 
     dispatch(new MaterialSaved({ material }));
@@ -115,7 +135,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
       isOpen
       overlayIdPrefix={MATERIAL_DIALOG_OVERLAY_ID}
       maxWidth={MATERIAL_DIALOG_WIDTH}
-      title={t(DEFAULT.MATERIAL_DIALOG_TITLE)}
+      title={t(editedMaterial ? DEFAULT.MATERIAL_DIALOG_EDIT_TITLE : DEFAULT.MATERIAL_DIALOG_TITLE)}
       okText={t(DEFAULT.MATERIAL_DIALOG_SAVE)}
       cancelText={t(DEFAULT.MATERIAL_DIALOG_CANCEL)}
       okButtonProps={{ icon: <CheckOutlined aria-hidden /> }}
@@ -171,13 +191,13 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
         </Form.Item>
       </Form>
       {/* Only while the name is missing, so no empty row sits above the buttons. */}
-      {!isSaveAllowed && isNameTouched && (
+      {!isFieldValid && isNameTouched && (
         <p className={styles.saveHint} role="note">
           <ExclamationCircleOutlined aria-hidden />
           <span>{t(DEFAULT.MATERIAL_DIALOG_SAVE_HINT)}</span>
         </p>
       )}
-      {matchingMaterial && (
+      {matchingMaterial && !editedMaterial && (
         <div className={styles.duplicateNote} role="note">
           <span>{t(DEFAULT.MATERIAL_DIALOG_DUPLICATE_NOTE, { name: matchingMaterial.name })}</span>
           <Button size={ANTD_BUTTON_SIZE_SMALL} onClick={() => chooseMaterial(matchingMaterial.id)}>
@@ -189,5 +209,7 @@ const MaterialDialogContent = ({ onClose, onMaterialChosen }: MaterialDialogCont
   );
 };
 
-export const MaterialDialog = ({ isOpen, onClose, onMaterialChosen }: MaterialDialogProps): ReactNode =>
-  (isOpen ? <MaterialDialogContent onClose={onClose} onMaterialChosen={onMaterialChosen} /> : null);
+export const MaterialDialog = ({ isOpen, onClose, onMaterialChosen, editedMaterial }: MaterialDialogProps): ReactNode =>
+  (isOpen ? (
+    <MaterialDialogContent onClose={onClose} onMaterialChosen={onMaterialChosen} editedMaterial={editedMaterial} />
+  ) : null);

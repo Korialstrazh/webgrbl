@@ -63,6 +63,7 @@ const MAX_POWER_WATTS = 10;
 const PLYWOOD_NAME = 'Plywood';
 const HALF_POWER_PERCENT_TEXT = '50 %';
 const ACRYLIC_NAME = 'Acrylic';
+const RENAMED_ACRYLIC_NAME = 'Cast acrylic';
 const OTHER_MACHINE_NAME = 'Other laser';
 const NEW_MATERIAL_LABEL = 'New material';
 const NEW_MATERIAL_OPTION = 'New material\u2026';
@@ -278,6 +279,18 @@ describe(MaterialLibraryDrawer.name, () => {
 
     expect(await screen.findByText(getRowNamePattern(PLYWOOD_NAME))).toBeInTheDocument();
     expect(screen.queryByText(/^Filter: /)).not.toBeInTheDocument();
+  });
+
+  it('renames the filtered material in place from the pencil beside its chip, keeping its presets', async () => {
+    const store: AppStore = renderDrawer([newPresetFixture(ACRYLIC, PROFILE)], { initialMaterialId: ACRYLIC.id });
+
+    fireEvent.click(await screen.findByRole('button', { name: `Rename or change the thickness of ${ACRYLIC_NAME}` }));
+    fireEvent.change(await screen.findByLabelText('Name'), { target: { value: RENAMED_ACRYLIC_NAME } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(selectMaterials(store.getState()).find(({ id }: Material): boolean => id === ACRYLIC.id)?.name)
+      .toBe(RENAMED_ACRYLIC_NAME);
+    expect(await screen.findByText(getRowNamePattern(RENAMED_ACRYLIC_NAME))).toBeInTheDocument();
   });
 
   it('shows an empty list without column headers', async () => {
