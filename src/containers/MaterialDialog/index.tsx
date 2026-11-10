@@ -1,9 +1,9 @@
 /**
  * Adds a material: the name starts empty with the focus on it, and the thickness at the default. The name is required:
  * Save stays off, with the reason shown beside the buttons, until both fields pass their checks; then it stores the
- * material and makes it the material of the project, or hands it to the caller that asked for it instead, such as the material library; a field the user has changed shows its failed check below it.
- * A name and thickness that match a saved material are allowed, with an offer to use that one. It starts over on
- * every open. Given a material to edit, the same form renames it and changes its thickness in place: the id stays, so
+ * material and makes it the material of the project, or hands it to the caller that asked for it instead, such as
+ * the material library; a field the user has changed shows its failed check below it. A name and thickness that match
+ * a saved material are allowed, with an offer to use that one. It starts over on every open. Given a material to edit, the same form renames it and changes its thickness in place: the id stays, so
  * presets and the project's material keep pointing at it, and a name and thickness another material already has are
  * refused. Cancel leaves the material as it was.
  *
