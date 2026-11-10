@@ -63,11 +63,10 @@
   @include accessibility.visually-hidden;
 }
 
-// Always as wide as the note icon, whether a note shows or not. The header slot is as tall as the icon; the run
-// status slot only as tall as a line of the facts, with the icon centred over it, so it never adds height to the
-// card (the Move card below must still fit above the Stop bar at 1440 x 900).
-.runStatus,
-.reasonSlot {
+// Always as wide as the note icon, whether a note shows or not, and only as tall as a line of the facts, with the
+// icon centred over it, so it never adds height to the card (the Move card below must still fit above the Stop bar at
+// 1440 x 900).
+.runStatus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -77,12 +76,6 @@
 
 .runStatus.runStatus {
   height: 1.25rem;
-  overflow: visible;
-}
-
-// No taller than the small fold button beside it, so the header keeps its height.
-.reasonSlot.reasonSlot {
-  height: 1.5rem;
   overflow: visible;
 }
 

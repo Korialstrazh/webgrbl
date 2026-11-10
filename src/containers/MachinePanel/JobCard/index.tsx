@@ -1,9 +1,9 @@
 /**
  * The Job card: the layers that go to the laser, the time estimate and the job actions. Start job is the main
  * action, filled in the accent colour once it can run, and runs the job on the connected laser after a confirmation.
- * A readiness row says what is still open, and why Start job and Frame job are off sits behind a warning icon in the
- * heading for the pointer and in each button's description. While Fix warnings shows, it alone sums up the problems:
- * its count and the Check step badge stand for them, so the lock dots on Start and Frame, the heading icon and the
+ * A readiness row says what is still open, and why Start job and Frame job are off sits in each button's lock dot and
+ * description; the heading carries no unlabelled reason icon of its own. While Fix warnings shows, it sums up the
+ * problems: its count and the Check step badge stand for them, so a lock dot whose reason is the warnings and the
  * frame overrun note step back (the note moves into the warnings list);
  * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
  * gear, traces the outline of the job. A chevron in the heading folds the card to one line, its facts and Start, so the
@@ -66,7 +66,6 @@ import { JobPauseButton } from './JobPauseButton';
 import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
 import { LaserPointerRow } from './LaserPointerRow';
-import { getJobActionBlockedReasonKeys } from './get.job.action.blocked.reason.keys';
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobLockShortReasonKeys } from './get.job.lock.short.reason.keys';
 import { getJobRunStatusKey } from './get.job.run.status.key';
@@ -74,8 +73,6 @@ import { JOB_LOCK_NOTE_TEST_IDS } from './job.card.constants';
 import { JOB_LOCK_ACTION } from './job.lock.action.constants';
 import type { JobLockAction } from './job.lock.action.constants';
 import styles from './styles.module.scss';
-
-const REASON_SEPARATOR = ' ';
 
 // The lock reasons the Fix warnings button already sums up, so a dot would only repeat it.
 const FIX_WARNINGS_LOCK_REASON_KEYS: readonly string[] = [
@@ -101,13 +98,6 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
 
   const jobStartBlockedReasonKey: string | undefined = useSelector(selectJobStartBlockedReasonKey);
   const frameStartBlockedReasonKey: string | undefined = useSelector(selectFrameStartBlockedReasonKey);
-  const actionBlockedReasonKeys: string[] = getJobActionBlockedReasonKeys(
-    jobStartBlockedReasonKey,
-    frameStartBlockedReasonKey,
-  );
-  const actionBlockedReasonText: string = actionBlockedReasonKeys
-    .map((reasonKey: string): string => t(reasonKey))
-    .join(REASON_SEPARATOR);
   // Each locked action carries its lock dot in every locked state, offline included, with its short reason behind it.
   const lockShortReasonKeys: Partial<Record<JobLockAction, string>> = getJobLockShortReasonKeys([
     { action: JOB_LOCK_ACTION.START, blockedReasonKey: isStartShown ? jobStartBlockedReasonKey : undefined },
@@ -181,14 +171,6 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
       title={t(DEFAULT.MACHINE_START_JOB_TITLE)}
       headerActionComponent={(
         <span className={styles.headerActions}>
-          {/* One icon sums up why Start and Frame are off for the pointer; keyboard and screen reader users get each
-              reason from the buttons themselves, so it takes no tab stop. Its slot stays when it goes, so the fold
-              button never moves under the pointer. */}
-          <span className={styles.reasonSlot}>
-            {actionBlockedReasonText && !isFixWarningsShown && (
-              <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning isPointerOnly />
-            )}
-          </span>
           <IconActionButton
             type={ANTD_BUTTON_TYPE_TEXT}
             size={ANTD_BUTTON_SIZE_SMALL}

@@ -271,7 +271,7 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
   });
 
-  it('sums up the reason behind one icon without a tab stop while Start and Frame wait for a connection', async () => {
+  it('puts no reason icon in the heading while Start and Frame wait for a connection', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
     expect(screen.queryByRole('note')).not.toBeInTheDocument();
