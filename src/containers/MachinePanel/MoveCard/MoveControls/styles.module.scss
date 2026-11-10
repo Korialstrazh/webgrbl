@@ -58,8 +58,15 @@
     gap: var(--space-1);
   }
 
+  // The arrows fill their short rows exactly, so a clear gap stays between them and the pad is no taller than when the
+  // buttons overflowed their rows: Move still fits above STOP.
   .jogPad {
     grid-auto-rows: 2rem;
-    gap: var(--space-1) var(--space-2);
+    gap: 0.375rem var(--space-2);
+
+    > :global(.ant-btn) {
+      height: 100%;
+      min-height: 0;
+    }
   }
 }
