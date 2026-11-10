@@ -45,8 +45,10 @@ export const LaserPointerRow = (): ReactNode => {
         onChange={(percent: number) => dispatch(new LaserPointerPowerChanged({ percent }))}
         ariaLabelForHandle={t(DEFAULT.MACHINE_LASER_POWER)}
       />
+      {/* The track runs up to the pointer's low maximum, not 100 %, so the figure names that maximum too and the
+          thumb's place on the track matches what it reads. */}
       <output className={styles.powerValue} aria-hidden>
-        {t(DEFAULT.MACHINE_LASER_POWER_PERCENT, { percent: powerPercent })}
+        {t(DEFAULT.MACHINE_LASER_POWER_PERCENT_OF_MAX, { percent: powerPercent, max: MAX_POINTER_POWER_PERCENT })}
       </output>
       <PointerDetailsButton />
     </div>

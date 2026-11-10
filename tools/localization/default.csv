@@ -454,6 +454,7 @@ MACHINE_LASER_FIRMWARE_NOTE;Some firmwares keep the laser off while the head sta
 MACHINE_LASER_ON;LASER ON
 MACHINE_LASER_POWER;Pointer power
 MACHINE_LASER_POWER_PERCENT;{{percent}} %
+MACHINE_LASER_POWER_PERCENT_OF_MAX;{{percent}} / {{max}} %
 MACHINE_LASER_POWER_WATTS;About {{watts}} W
 MACHINE_LASER_TITLE;Laser pointer
 MACHINE_MOVE_COLLAPSED_HINT;Connect to move

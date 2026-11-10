@@ -41,7 +41,8 @@ const ANY_WATTS_PATTERN = / W$/;
 const FIRMWARE_NOTE_TEXT = 'Some firmwares keep the laser off while the head stands still. It switches off when you '
   + 'let go, when the window loses focus, after 10 seconds, or on any stop or alarm.';
 const DETAILS_LABEL = 'Laser pointer details';
-const POWER_FIGURE_TEXT = '3 %';
+const POWER_FIGURE_TEXT = '3 / 5 %';
+const POWER_SLIDER_MAX = '5';
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -277,6 +278,7 @@ describe(LaserPointerRow.name, () => {
 
     expect(selectLaserPointerPowerPercent(store.getState())).toBe(POWER_PERCENT);
     expect(screen.getByText(POWER_FIGURE_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('slider')).toHaveAttribute('aria-valuemax', POWER_SLIDER_MAX);
 
     openDetails();
 
