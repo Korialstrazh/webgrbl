@@ -555,7 +555,6 @@ MATERIAL_DIALOG_NAME;Name
 MATERIAL_DIALOG_NAME_INVALID;Enter a name of {{min}} to {{max}} characters.
 MATERIAL_DIALOG_NAME_TAKEN;Another material already has this name and thickness.
 MATERIAL_DIALOG_SAVE;Save
-MATERIAL_DIALOG_SAVE_HINT;Name needed
 MATERIAL_DIALOG_SAVE_HINT_THICKNESS;Thickness needed
 MATERIAL_DIALOG_THICKNESS;Thickness (mm)
 MATERIAL_DIALOG_THICKNESS_INVALID;Enter a thickness from {{min}} to {{max}} mm.

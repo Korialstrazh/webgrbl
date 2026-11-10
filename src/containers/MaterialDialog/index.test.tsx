@@ -187,22 +187,31 @@ describe(MaterialDialog.name, () => {
     fireEvent.blur(screen.getByLabelText(NAME_LABEL));
 
     expect(screen.getByText(NAME_ERROR)).toBeInTheDocument();
-    expect(screen.getByText(SAVE_HINT)).toBeInTheDocument();
+    expect(screen.queryByText(SAVE_HINT)).not.toBeInTheDocument();
   });
 
-  it('keeps Save off with the reason while the name is empty or blank, saves nothing and stays open', () => {
+  it('shows no name problem anywhere when the dialog opens', () => {
+    renderDialog(newStore());
+
+    expect(screen.queryByText(NAME_ERROR)).not.toBeInTheDocument();
+    expect(screen.queryByText(SAVE_HINT)).not.toBeInTheDocument();
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+  });
+
+  it('keeps Save off with the reason under Name while the name is blank, saves nothing and stays open', () => {
     const store: AppStore = newStore();
     const onClose = vi.fn();
 
     renderDialog(store, onClose);
     fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: ' ' } });
+    fireEvent.blur(screen.getByLabelText(NAME_LABEL));
     clickSave();
 
     const saveButton: HTMLElement = screen.getByRole('button', { name: SAVE_LABEL });
 
     expect(saveButton).toBeDisabled();
-    expect(screen.getByText(SAVE_HINT)).toBeInTheDocument();
-    expect(saveButton).toHaveAttribute('aria-describedby', screen.getByRole('note').id);
+    expect(screen.getByText(NAME_ERROR)).toBeInTheDocument();
+    expect(screen.queryByText(SAVE_HINT)).not.toBeInTheDocument();
     expect(selectMaterials(store.getState())).toEqual([]);
     expect(onClose).not.toHaveBeenCalled();
   });

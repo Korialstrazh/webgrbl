@@ -92,10 +92,11 @@ const MaterialDialogContent = (props: MaterialDialogContentProps): ReactNode => 
   const nameFieldId: string = [formId, NAME_FIELD_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
   const thicknessFieldId: string = [formId, THICKNESS_FIELD_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
   const saveHintId: string = [formId, SAVE_HINT_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
-  // The taken name already shows its own error under the field, so only a missing value needs a reason here.
-  const saveHintKey: string | undefined = fieldErrors.nameErrorKey
-    ? DEFAULT.MATERIAL_DIALOG_SAVE_HINT
-    : fieldErrors.thicknessErrorKey ? DEFAULT.MATERIAL_DIALOG_SAVE_HINT_THICKNESS : undefined;
+  // A name problem shows under the Name field once it is touched, never before the user types; only a wrong
+  // thickness, which has a value from the start, needs a reason here.
+  const saveHintKey: string | undefined = !fieldErrors.nameErrorKey && fieldErrors.thicknessErrorKey
+    ? DEFAULT.MATERIAL_DIALOG_SAVE_HINT_THICKNESS
+    : undefined;
 
   const chooseMaterial = (materialId: string): void => {
     if (onMaterialChosen) {
@@ -110,6 +111,8 @@ const MaterialDialogContent = (props: MaterialDialogContentProps): ReactNode => 
   const saveMaterial = (): void => {
     // Save is off while a field is wrong; Enter in a field must not get past that either.
     if (!isSaveAllowed) {
+      setIsNameTouched(true);
+
       return;
     }
 
