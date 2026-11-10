@@ -37,3 +37,11 @@ The approved screen layout of webgrbl and the order in which features get built.
   7. Extras (node editing, more colour ranges).
 
 Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference]]. Product goals: [[vision]].
+
+## Round 43 behaviour notes
+
+- One project name everywhere: the top bar, the browser tab and Open project show the same derived name (a default-named project is named after its first object and creation day).
+- An import larger than the bed starts at the bed origin, the view zooms out to show it whole, and its toast offers Fit to bed.
+- Tooltips close on a narrow region switch or tab change and stay hidden until the pointer moves.
+- The machine panel shows a "More below" chevron on its faded edge while its cards overflow; Position coordinates never wrap.
+
