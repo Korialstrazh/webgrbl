@@ -43,3 +43,10 @@ export const INTL_RELATIVE_TIME_STEPS: readonly IntlRelativeTimeStep[] = [
   { unit: 'hour', seconds: SECONDS_PER_HOUR },
   { unit: 'minute', seconds: SECONDS_PER_MINUTE },
 ];
+
+/** A 24-hour time of day, such as "14:05": the time in a project's automatic name. */
+export const INTL_HOUR_MINUTE_FORMAT: Intl.DateTimeFormatOptions = {
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+};

@@ -52,9 +52,10 @@ const RENAMED_NAME = 'Plates';
 const FOOTER_PATTERN = /stored in this browser/;
 const PROJECT_FILE_NAME = 'plates.webgrbl.json';
 const CREATED_AT = '2026-02-20T09:00:00.000Z';
-const UNTITLED_NAME = 'Untitled project';
+const UNTITLED_NAME = 'New project';
 const FIRST_OBJECT_NAME = 'coaster-ring';
-const FALLBACK_NAME = `${FIRST_OBJECT_NAME} \u00b7 Feb 20, 2026`;
+// The time of day follows the test machine's time zone, so only its shape is checked.
+const FALLBACK_NAME_PATTERN = new RegExp(`^${FIRST_OBJECT_NAME} \u00b7 Feb 20, 2026 \\d{2}:\\d{2}$`);
 const OBJECT_BOX: ProjectSummary['objectBoxes'][number] = {
   xMm: 10,
   yMm: 20,
@@ -197,7 +198,7 @@ describe(OpenProjectDialog.name, () => {
 
     renderDialog(newStore());
 
-    expect(await screen.findByText(FALLBACK_NAME)).toBeInTheDocument();
+    expect(await screen.findByText(FALLBACK_NAME_PATTERN)).toBeInTheDocument();
     expect(screen.queryByText(UNTITLED_NAME)).not.toBeInTheDocument();
   });
 

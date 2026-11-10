@@ -40,7 +40,7 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 
 ## Round 43 behaviour notes
 
-- One project name everywhere: the top bar, the browser tab and Open project show the same derived name (a default-named project is named after its first object and creation day).
+- One project name everywhere: the top bar, the browser tab and Open project show the same derived name (a default-named project is named after its first object and the day and time it was imported, with "(2)", "(3)" when the name is taken; a new empty project is "New project").
 - An import larger than the bed starts at the bed origin, the view zooms out to show it whole, and its toast offers Fit to bed.
 - Tooltips close on a narrow region switch or tab change and stay hidden until the pointer moves.
 - The machine panel shows a "More below" chevron while its cards overflow (since round 44 in the Stop footer's top padding); Position coordinates never wrap.
@@ -62,7 +62,7 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 - Each readiness step with an action is its own tab stop; a done Check or Connect leaves the tab order with `aria-disabled`.
 - Icon tooltips (`DismissibleTooltip`, layer mode glyph) also open on a long press for touch screens.
 - Add/Edit material keeps Save off, with the reason ("Name needed" / "Thickness needed") beside the buttons, until the fields are valid.
-- Open project row buttons are named after the project ("Open sample · Nov 10, 2026").
+- Open project row buttons are named after the project ("Open sample · Nov 10, 2026 14:05").
 - Slider handles get the 2 px accent focus ring.
 - Set zero sits in the Position card title row as an origin icon (two axes meeting at a small zero, tooltip "Set zero here (X/Y origin)"); Move no longer has a Set zero row.
 

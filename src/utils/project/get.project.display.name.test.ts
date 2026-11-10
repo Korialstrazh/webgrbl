@@ -18,7 +18,7 @@ describe(getProjectDisplayName.name, () => {
       LANGUAGE,
     );
 
-    expect(shownName).toBe('sample · Nov 9, 2026');
+    expect(shownName).toMatch(/^sample · Nov 9, 2026 \d{2}:\d{2}$/);
   });
 
   it('names the local day of the first import, not the creation day of a cleared project', () => {
@@ -39,7 +39,7 @@ describe(getProjectDisplayName.name, () => {
       LANGUAGE,
     );
 
-    expect(shownName).toBe('sample · Nov 10, 2026');
+    expect(shownName).toBe('sample · Nov 10, 2026 00:30');
   });
 
   it('keeps a name the user gave', () => {
