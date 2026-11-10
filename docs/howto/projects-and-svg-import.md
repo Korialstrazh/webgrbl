@@ -105,6 +105,10 @@ Each node has three icon buttons, all one undo step through `ProjectObjectSvgTex
 - **Colour**: `getSvgTextWithElementColour` writes the palette colour as inline `fill`/`stroke` on every painted shape under the node (a paint of none stays none), so the content joins that colour's layer.
 - **Trash**: `getSvgTextWithoutElement` removes the element.
 
+When an edit leaves the object outside the bed (for example skipping a far-off guide), `changeProjectObjectSvgText` shows a warning toast, "<name> now sits outside the bed.", with a **Move onto bed** button (`moveOntoBedObjectId` on the toast, `getObjectMovedOntoBedTransform`, one undo step). The object is never moved automatically. The frame overrun note in the Toolpath warnings list and the Job card offers the same **Move onto bed** icon button for every off-bed object that fits on the bed as it is.
+
+An import larger than the bed shows its toast as a warning (warning icon and colour, in the toast and in Messages).
+
 Nodes are addressed by child-index paths (`1.0.2`) from the root. The state lives in the SVG text, so it is saved, exported and undone with the object, and old projects need no migration.
 
 The off-bed note on the Objects row and the red outline on the bed now use the drawn geometry (`isObjectArtworkOutsideBed`), not the SVG page box. An object outside the bed also gets red arrows on each bed edge it crosses (`BedOffBedArrows`, level with the artwork centre held on the bed, two handles long at every zoom), so an object that is mostly off the bed still shows which way it went, and its problems popover offers **Move onto bed** (off when it is larger than the bed) and **Fit to bed** (shrinks it only when needed and centres it), each one undo step.

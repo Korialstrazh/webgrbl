@@ -11,3 +11,5 @@ Presets hold the power, speed and passes that work for a material on one machine
 - **Storage:** the `materialPresets` Dexie table. Only `MATERIAL_PRESET_REPOSITORY` touches it, and `watchMaterialPresets` keeps it in step with the state.
 - **Add a field to a preset:** change `MaterialPreset`, `isMaterialPreset` and the form. Stored rows without the field are left out by the guard, so give old rows a Dexie upgrade. Also update the file format, and raise `MATERIAL_PRESETS_FILE_VERSION` if old files can no longer be read.
 - **Power:** always stored in watts. Convert with `getPresetPowerPercent` (for display and `getPresetLayerSettingsChange`, to a layer) and `newMaterialPresetFromLayer` (from a layer). `getImportedMaterialPresets` rescales a file for the importing laser.
+
+- **File actions:** Import and Export sit in a More menu (`EllipsisOutlined`, "More file actions") in the drawer header, `PresetFileActions`; the badge on the button counts the ticked presets. Export is a plain menu item, never a primary button, and is off with "Tick presets to export" until a preset is ticked.
