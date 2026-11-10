@@ -16,6 +16,7 @@ import type {
   ColorPickerProps,
   DrawerProps,
   DropdownProps,
+  FlexProps,
   FormItemProps,
   FormProps,
   InputNumberProps,
@@ -54,6 +55,15 @@ export const ANTD_STEPS_STATUS = {
   PROCESS: 'process',
   WAIT: 'wait',
 } as const;
+
+/** A Flex row whose items sit on its middle line. */
+export const ANTD_FLEX_ALIGN_CENTER: FlexProps['align'] = 'center';
+
+/** A Flex row drawn as an inline span, for use inside a heading line. */
+export const ANTD_FLEX_COMPONENT_SPAN: FlexProps['component'] = 'span';
+
+/** The small Flex gap, the same as the space-2 step. */
+export const ANTD_FLEX_GAP_SMALL: FlexProps['gap'] = 'small';
 
 /** The compact badge, for a count on an icon button. */
 export const ANTD_BADGE_SIZE_SMALL: BadgeProps['size'] = 'small';

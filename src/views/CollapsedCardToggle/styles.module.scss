@@ -1,7 +1,5 @@
-// The plug badge and the Show or Hide button share the heading line of the card.
+// The plug badge and the Show or Hide button share the heading line of the card, in an antd Flex row.
 .collapsedSummary {
   display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
   min-width: 0;
 }
