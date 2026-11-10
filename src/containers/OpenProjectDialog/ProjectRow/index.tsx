@@ -16,12 +16,14 @@ import { Button, Popconfirm, Tag } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { getProjectDisplayName } from '../../../utils/project/get.project.display.name';
 import { getProjectChangedRelativeTimeText } from '../../../utils/project/get.project.changed.relative.time.text';
 import { getProjectChangedTimeText } from '../../../utils/project/get.project.changed.time.text';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { selectProjectDisplayName } from '../../../utils/states/project.display.name.selector';
 import {
   ProjectDeleteRequested,
   ProjectOpenRequested,
@@ -29,7 +31,6 @@ import {
 } from '../../../utils/states/project.state';
 import { ProjectRenameInput } from '../../ProjectRenameInput';
 import { ProjectThumbnail } from '../ProjectThumbnail';
-import { getProjectRowName } from './get.project.row.name';
 import type { ProjectRowProps } from './interfaces/ProjectRowProps';
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { IconActionButton } from '../../../views/IconActionButton';
@@ -40,7 +41,9 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
   const dispatch: AppDispatch = useDispatch();
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const { id: projectId, name: projectName, updatedAt, objectCount, objectBoxes } = summary;
-  const shownName: string = getProjectRowName(t, summary, i18n.language);
+  const openProjectDisplayName: string = useSelector(selectProjectDisplayName(i18n.language));
+  // The open project is named from its live state so the row always matches the top bar.
+  const shownName: string = isOpenProject ? openProjectDisplayName : getProjectDisplayName(summary, i18n.language);
 
   const openProject = (): void => {
     dispatch(new ProjectOpenRequested({ projectId }));
