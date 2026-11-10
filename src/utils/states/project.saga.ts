@@ -39,6 +39,7 @@ import { importProjectFile } from './project.file.import.saga';
 import { changeProjectObjectSvgText } from './project.object.svg.text.saga';
 import { openLoadedProject } from './project.open.saga';
 import { openStoredOrNewProject } from './project.open.stored.or.new.saga';
+import { storeDerivedProjectName } from './project.derived.name.store.saga';
 import { saveOpenProjectDocument } from './project.save.saga';
 import { PROJECT_SAVE_STATUS } from './project.save.status.constants';
 import type { ProjectSaveStatus } from './project.save.status.constants';
@@ -213,9 +214,13 @@ function* handleProjectCommand(action: Action<unknown>): Generator {
   case ProjectFileImportRequested.type:
     return yield call(importProjectFile, action as ProjectFileImportRequested);
   case SvgFilesImportRequested.type:
-    return yield call(importSvgFiles, action as SvgFilesImportRequested);
+    yield call(importSvgFiles, action as SvgFilesImportRequested);
+
+    return yield call(storeDerivedProjectName);
   case SampleJobAddRequested.type:
-    return yield call(addSampleJob);
+    yield call(addSampleJob);
+
+    return yield call(storeDerivedProjectName);
   case ProjectObjectSvgTextChangeRequested.type:
     return yield call(changeProjectObjectSvgText, action as ProjectObjectSvgTextChangeRequested);
   default:
