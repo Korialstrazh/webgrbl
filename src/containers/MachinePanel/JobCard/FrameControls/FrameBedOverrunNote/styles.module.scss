@@ -1,0 +1,32 @@
+@use '../../../../../styles/accessibility' as accessibility;
+
+// One compact line in the warning colours: the icon and short label on the left, the action on the right.
+.frameBedOverrunNote {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+}
+
+.label {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon {
+  color: var(--color-warning);
+}
+
+.fullText {
+  @include accessibility.visually-hidden;
+}

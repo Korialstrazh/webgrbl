@@ -20,6 +20,7 @@ const LINE_KEY_SEPARATOR = ':';
 export const getGcodeWarningLines = (warnings: ObjectWarning[], projectObjects: ProjectObject[]): GcodeWarningLine[] =>
   warnings.map((warning: ObjectWarning): GcodeWarningLine => ({
     lineKey: [warning.objectId, warning.kind].join(LINE_KEY_SEPARATOR),
+    objectId: warning.objectId,
     objectName: projectObjects.find((projectObject: ProjectObject): boolean => projectObject.id === warning.objectId)
       ?.name ?? DEFAULT_OBJECT_NAME,
     kind: warning.kind,

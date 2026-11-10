@@ -74,7 +74,7 @@ import { IconActionButton } from '../../../../views/IconActionButton';
 import { JOB_LOCK_NOTE_TEST_IDS } from '../job.card.constants';
 import { JOB_LOCK_ACTION } from '../job.lock.action.constants';
 import type { JobLockAction } from '../job.lock.action.constants';
-import { FRAME_EDGE_TEXT_KEYS } from './frame.controls.constants';
+import { FrameBedOverrunNote } from './FrameBedOverrunNote';
 import { FrameNumberInput } from './FrameNumberInput';
 import { getFrameSettingsOffReasonKey } from './get.frame.settings.off.reason.key';
 import styles from './styles.module.scss';
@@ -260,15 +260,7 @@ export const FrameControls = (props: FrameControlsProps): ReactNode => {
           <ActionLockNote noteText={lockNoteTexts[JOB_LOCK_ACTION.EXPORT]} testId={JOB_LOCK_NOTE_TEST_IDS.EXPORT} />
         </div>
       </div>
-      {bedOverrun && (
-        <Alert
-          type={ANTD_ALERT_TYPE_WARNING}
-          title={t(DEFAULT.FRAME_BED_OVERRUN, {
-            distanceMm: Math.ceil(bedOverrun.distanceMm),
-            edge: t(FRAME_EDGE_TEXT_KEYS[bedOverrun.edge]),
-          })}
-        />
-      )}
+      {bedOverrun && <FrameBedOverrunNote bedOverrun={bedOverrun} />}
       {isAlarmShown && <Alert type={ANTD_ALERT_TYPE_WARNING} title={t(DEFAULT.FRAME_ALARMED)} />}
     </div>
   );

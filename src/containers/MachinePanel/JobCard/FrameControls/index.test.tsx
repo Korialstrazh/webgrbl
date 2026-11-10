@@ -2,10 +2,13 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { FrameControls } from '.';
+import { BED_VIEW_MODE } from '../../../../utils/bed/bed.view.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE, GRBL_SETTING_LASER_MODE, GRBL_SETTING_ON_VALUE } from '../../../../utils/grbl/grbl.constants';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
 import { MACHINE_JOG_FEED_RATE_MAX, MACHINE_JOG_FEED_RATE_MIN } from '../../../../utils/profiles/machine.profile.constants';
 import { newMachineProfile } from '../../../../utils/profiles/new.machine.profile';
+import { newProjectObject } from '../../../../utils/project/new.project.object';
+import { BedViewModeChanged, selectBedViewMode } from '../../../../utils/states/bed.view.state';
 import { ConnectionEstablished, ConnectionStatusChanged } from '../../../../utils/states/grbl.connection.state';
 import { JOB_RUN_KIND } from '../../../../utils/states/job.run.kind.constants';
 import { FrameRunAlarmed, FrameStartRequested, JobRunStarted, JobRunStatusChanged } from '../../../../utils/states/job.run.state';
@@ -18,6 +21,8 @@ import {
 import { MachineStatusReceived } from '../../../../utils/states/machine.status.state';
 import type { AppDispatch, AppStore } from '../../../../utils/states/new.store';
 import { newStore } from '../../../../utils/states/new.store';
+import { ProjectDocumentLoaded } from '../../../../utils/states/project.document.state';
+import { selectSelectedObjectIds } from '../../../../utils/states/project.selection.state';
 import { selectIsAnyOverlayOpen } from '../../../../utils/states/ui.overlay.state';
 import { ToolpathReady, selectToolpathDocumentVersion } from '../../../../utils/states/toolpath.state';
 import { AntdTestProvider } from '../../../../utils/test.support/antd.test.provider';
@@ -67,6 +72,9 @@ const newIdleStatusReceived = (hasWorkPosition: boolean): MachineStatusReceived 
       overrides: undefined,
     },
   });
+
+const OBJECT_ID = 'frame-object';
+const MOVE_JOB_LABEL = 'Move job: select every object to drag it onto the bed';
 
 const newFrameStore = (endX: number): AppStore => {
   const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
@@ -330,6 +338,23 @@ describe(FrameControls.name, () => {
     expect(screen.getByText(
       `The frame goes ${OVERRUN_MM} mm past the right edge of the bed. Move the job before framing.`,
     )).toBeInTheDocument();
+  });
+
+  it('names the overrun in a few words and selects the whole job in the Design view to move it', () => {
+    const store: AppStore = newFrameStore(getActiveProfile(newFrameStore(0)).workAreaXMm + OVERRUN_MM);
+
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({
+        document: { objects: [newProjectObject({ id: OBJECT_ID })], layers: [] },
+      }));
+      store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.TOOLPATH }));
+    });
+    renderFrameControls(store);
+
+    expect(screen.getByText(`Frame +${OVERRUN_MM} mm off right`)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: MOVE_JOB_LABEL }));
+    expect(selectSelectedObjectIds(store.getState())).toEqual([OBJECT_ID]);
+    expect(selectBedViewMode(store.getState())).toBe(BED_VIEW_MODE.DESIGN);
   });
 
   it('turns the button off while no work position is known, with the reason on hover', async () => {

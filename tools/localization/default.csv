@@ -193,6 +193,8 @@ FIELD_UNIT_TIMES;×
 FIELD_UNIT_WATTS;W
 FRAME_ALARMED;The laser reported an alarm, possibly a limit. Check the laser and clear the alarm before framing again.
 FRAME_BED_OVERRUN;The frame goes {{distanceMm}} mm past the {{edge}} edge of the bed. Move the job before framing.
+FRAME_BED_OVERRUN_MOVE;Move job: select every object to drag it onto the bed
+FRAME_BED_OVERRUN_SHORT;Frame +{{distanceMm}} mm off {{edge}}
 FRAME_EDGE_BACK;back
 FRAME_EDGE_FRONT;front
 FRAME_EDGE_LEFT;left
@@ -650,6 +652,12 @@ NARROW_REGION_JOB;Job
 OBJECT_WARNING_CLIPPED;Clipped or masked parts burn in full, not only their visible part.
 OBJECT_WARNING_IMAGE;Images are not engraved yet.
 OBJECT_WARNING_OFF_PAGE;Some parts lie outside the page: the bed does not show them, but they still burn.
+OBJECT_WARNING_SHORT_CLIPPED;Clipped parts burn in full
+OBJECT_WARNING_SHORT_IMAGE;Image not engraved
+OBJECT_WARNING_SHORT_OFF_PAGE;Parts off the page
+OBJECT_WARNING_SHORT_TEXT;Text not converted
+OBJECT_WARNING_SHORT_UNREADABLE;Drawing unreadable
+OBJECT_WARNING_SHORT_USE_LIMIT;Too many repeats
 OBJECT_WARNING_TEXT;Text is not converted to paths. In Inkscape use Path > Object to Path.
 OBJECT_WARNING_UNREADABLE;The drawing could not be read, so nothing of it burns. Import the SVG again.
 OBJECT_WARNING_USE_LIMIT;The design repeats too many elements, so some repeated parts are left out.
@@ -849,6 +857,7 @@ TOOLPATH_REGENERATE;Regenerate
 TOOLPATH_SHOW_TRAVEL;Show travel moves
 TOOLPATH_SHOW_TRAVEL_CAPTION;Travel
 TOOLPATH_WARNINGS_CHIP;Toolpath warnings ({{count}}): show them
+TOOLPATH_WARNINGS_SHOW_OBJECT;Show {{name}} on the bed
 TOOLPATH_WARNINGS_TITLE;Toolpath warnings
 TOP_BAR_AUTOSAVE_SAVED;Saved
 TOP_BAR_AUTOSAVE_SAVING;Saving…

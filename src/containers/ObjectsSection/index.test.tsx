@@ -502,7 +502,10 @@ describe(ObjectsSection.name, () => {
     });
     renderSection(store);
 
-    const [textChip, outsideOnlyChip]: HTMLElement[] = screen.getAllByRole('button', { name: WARNING_CHIP_NAME });
+    const textChip: HTMLElement = screen.getByRole('button', { name: new RegExp(`^Problems with ${FIRST_NAME}`) });
+    const outsideOnlyChip: HTMLElement = screen.getByRole('button', {
+      name: new RegExp(`^Problems with ${SECOND_NAME}`),
+    });
 
     expect(textChip).toHaveAttribute(WARNING_COUNT_ATTRIBUTE, '1');
     expect(textChip).toHaveTextContent(/^1$/);

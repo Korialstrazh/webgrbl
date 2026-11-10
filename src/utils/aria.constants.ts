@@ -18,5 +18,8 @@ export const ARIA_ORIENTATION = {
 /** The role of a short note kept behind an icon, read with its text as the name. */
 export const ARIA_ROLE_NOTE = 'note';
 
+/** A live region that announces a problem as soon as it appears. */
+export const ARIA_ROLE_ALERT = 'alert';
+
 /** The role of a small badge that stands for a word, read with that word as its name. */
 export const ARIA_ROLE_IMG = 'img';

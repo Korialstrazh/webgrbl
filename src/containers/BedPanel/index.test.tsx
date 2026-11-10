@@ -27,6 +27,7 @@ import {
   selectProjectObjects,
   SvgFilesImportRequested,
 } from '../../utils/states/project.document.state';
+import { selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { SimulationPlayToggled, selectIsSimulationPlaying } from '../../utils/states/simulation.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import { selectToasts, ToastShown } from '../../utils/states/toast.state';
@@ -88,6 +89,8 @@ const GENERATING_TEXT = `Generating${HORIZONTAL_ELLIPSIS} 40 %`;
 const GENERATION_PROGRESS = 0.4;
 const TOOLPATH_WARNINGS_CHIP_LABEL = 'Toolpath warnings (1): show them';
 const TEXT_WARNING = 'Text is not converted to paths. In Inkscape use Path > Object to Path.';
+const TEXT_WARNING_SHORT = 'Text not converted';
+const WARNED_OBJECT_ID = 'warned-object';
 const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/><text x="1" y="5">Hi</text></svg>';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
@@ -665,5 +668,19 @@ describe(BedPanel.name, () => {
 
     expect(await screen.findByText(TEXT_WARNING)).toBeInTheDocument();
     expect(screen.getByText(OBJECT_NAME)).toBeInTheDocument();
+    expect(screen.getByText(TEXT_WARNING_SHORT)).toBeInTheDocument();
+  });
+
+  it('selects the object of a warning from its Show button in the warnings list', async () => {
+    const store: AppStore = await newGcodeExportTestStore({
+      objects: [newProjectObject({ id: WARNED_OBJECT_ID, name: OBJECT_NAME, svgText: TEXT_SVG_TEXT })],
+    });
+
+    renderPanel(store);
+    openToolpathView();
+    fireEvent.click(await screen.findByRole('button', { name: TOOLPATH_WARNINGS_CHIP_LABEL }));
+    fireEvent.click(await screen.findByRole('button', { name: `Show ${OBJECT_NAME} on the bed` }));
+
+    expect(selectSelectedObjectIds(store.getState())).toEqual([WARNED_OBJECT_ID]);
   });
 });

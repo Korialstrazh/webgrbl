@@ -1,3 +1,5 @@
+@use '../../styles/accessibility' as accessibility;
+
 // The same compact chip as an object's warning chip: warning icon and count, centred in the toolbar row.
 .chip {
   display: inline-flex;
@@ -21,10 +23,10 @@
   list-style: none;
 }
 
-// The kind icon first, then the object name over the warning text.
+// The kind icon first, then the object name over a few words on the warning, then a button that shows the object.
 .item {
   display: grid;
-  grid-template-columns: 1rem minmax(0, 1fr);
+  grid-template-columns: 1rem minmax(0, 1fr) auto;
   gap: var(--space-2);
   align-items: start;
 }
@@ -42,4 +44,15 @@
 
 .objectName {
   font-weight: 600;
+}
+
+.shortText {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fullText {
+  @include accessibility.visually-hidden;
 }

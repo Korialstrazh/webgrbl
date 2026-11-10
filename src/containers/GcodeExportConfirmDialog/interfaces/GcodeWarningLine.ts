@@ -13,6 +13,8 @@ import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.c
 export interface GcodeWarningLine {
   /** Unique key of the line in the list. */
   lineKey: string;
+  /** Id of the affected object. */
+  objectId: string;
   /** Display name of the affected object. */
   objectName: string;
   /** Kind of the warning, for its icon. */
