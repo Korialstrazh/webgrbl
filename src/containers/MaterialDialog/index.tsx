@@ -1,6 +1,6 @@
 /**
- * Adds a material: the name starts empty with the focus on it, and the thickness at the default. Save waits for both
- * to pass their checks, stores the material and makes it the material of the project, or hands it to the caller that
+ * Adds a material: the name starts empty with the focus on it, and the thickness at the default. The name is required:
+ * Save stays off, with the reason shown beside the buttons, until both fields pass their checks; then it stores the material and makes it the material of the project, or hands it to the caller that
  * asked for it instead, such as the material library; a field the user has changed shows its failed check below it.
  * A name and thickness that match a saved material are allowed, with an offer to use that one. It starts over on
  * every open. Given a material to edit, the same form renames it and changes its thickness in place: the id stays, so
@@ -56,6 +56,7 @@ type MaterialDialogContentProps = Pick<MaterialDialogProps, 'onClose' | 'onMater
 const FIELD_ID_SEPARATOR = '-';
 const NAME_FIELD_ID_SUFFIX = 'name';
 const THICKNESS_FIELD_ID_SUFFIX = 'thickness';
+const SAVE_HINT_ID_SUFFIX = 'save-hint';
 
 const hasMaterialFieldError = ({ nameErrorKey, thicknessErrorKey }: MaterialFieldErrors): boolean =>
   Boolean(nameErrorKey || thicknessErrorKey);
@@ -89,6 +90,11 @@ const MaterialDialogContent = (props: MaterialDialogContentProps): ReactNode => 
     : isNameTouched ? fieldErrors.nameErrorKey : undefined;
   const nameFieldId: string = [formId, NAME_FIELD_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
   const thicknessFieldId: string = [formId, THICKNESS_FIELD_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
+  const saveHintId: string = [formId, SAVE_HINT_ID_SUFFIX].join(FIELD_ID_SEPARATOR);
+  // The taken name already shows its own error under the field, so only a missing value needs a reason here.
+  const saveHintKey: string | undefined = fieldErrors.nameErrorKey
+    ? DEFAULT.MATERIAL_DIALOG_SAVE_HINT
+    : fieldErrors.thicknessErrorKey ? DEFAULT.MATERIAL_DIALOG_SAVE_HINT_THICKNESS : undefined;
 
   const chooseMaterial = (materialId: string): void => {
     if (onMaterialChosen) {
@@ -101,11 +107,8 @@ const MaterialDialogContent = (props: MaterialDialogContentProps): ReactNode => 
   };
 
   const saveMaterial = (): void => {
-    // Save stays the orange primary like in every dialog; with a field still wrong it shows why and goes to the name.
+    // Save is off while a field is wrong; Enter in a field must not get past that either.
     if (!isSaveAllowed) {
-      setIsNameTouched(true);
-      nameInputRef.current?.focus();
-
       return;
     }
 
@@ -138,7 +141,11 @@ const MaterialDialogContent = (props: MaterialDialogContentProps): ReactNode => 
       title={t(editedMaterial ? DEFAULT.MATERIAL_DIALOG_EDIT_TITLE : DEFAULT.MATERIAL_DIALOG_TITLE)}
       okText={t(DEFAULT.MATERIAL_DIALOG_SAVE)}
       cancelText={t(DEFAULT.MATERIAL_DIALOG_CANCEL)}
-      okButtonProps={{ icon: <CheckOutlined aria-hidden /> }}
+      okButtonProps={{
+        icon: <CheckOutlined aria-hidden />,
+        disabled: !isSaveAllowed,
+        'aria-describedby': saveHintKey && saveHintId,
+      }}
       onOk={saveMaterial}
       // The dialog takes the focus for itself when it opens, so the field asks for it back after that.
       afterOpenChange={(isDialogOpen: boolean) => {
@@ -162,6 +169,7 @@ const MaterialDialogContent = (props: MaterialDialogContentProps): ReactNode => 
             autoFocus
             prefix={<InputCaption iconComponent={<TagOutlined />} captionText={t(DEFAULT.FIELD_CAPTION_NAME)} />}
             aria-label={t(DEFAULT.MATERIAL_DIALOG_NAME)}
+            aria-required
             value={materialName}
             onChange={(changeEvent: ChangeEvent<HTMLInputElement>) => {
               setMaterialName(changeEvent.target.value);
@@ -190,11 +198,11 @@ const MaterialDialogContent = (props: MaterialDialogContentProps): ReactNode => 
           />
         </Form.Item>
       </Form>
-      {/* Only while the name is missing, so no empty row sits above the buttons. */}
-      {!isFieldValid && isNameTouched && (
-        <p className={styles.saveHint} role="note">
+      {/* Only while Save is off, so no empty row sits above the buttons; it says why Save cannot be pressed. */}
+      {saveHintKey && (
+        <p id={saveHintId} className={styles.saveHint} role="note">
           <ExclamationCircleOutlined aria-hidden />
-          <span>{t(DEFAULT.MATERIAL_DIALOG_SAVE_HINT)}</span>
+          <span>{t(saveHintKey)}</span>
         </p>
       )}
       {matchingMaterial && !editedMaterial && (

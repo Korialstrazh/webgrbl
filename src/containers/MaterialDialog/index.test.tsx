@@ -103,7 +103,7 @@ describe(MaterialDialog.name, () => {
     expect(document.querySelector(MODAL_MASK_SELECTOR)).toBeInTheDocument();
   });
 
-  it('registers an overlay, starts with an empty name in focus and Save as the live primary', async () => {
+  it('registers an overlay, starts with an empty name in focus and Save as the primary, off until named', async () => {
     const store: AppStore = newStore();
 
     renderDialog(store);
@@ -111,18 +111,23 @@ describe(MaterialDialog.name, () => {
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
     expect(screen.getByLabelText(NAME_LABEL)).toHaveValue('');
     await waitFor(() => expect(screen.getByLabelText(NAME_LABEL)).toHaveFocus());
-    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeEnabled();
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeDisabled();
     expect(screen.getByRole('button', { name: SAVE_LABEL })).toHaveClass('ant-btn-primary');
+    expect(screen.getByLabelText(NAME_LABEL)).toHaveAttribute('aria-required', 'true');
     expect(screen.getByLabelText(THICKNESS_LABEL)).toHaveValue(String(DEFAULT_MATERIAL_THICKNESS_MM));
   });
 
-  it('shows a short visible name on each field and no empty hint row above the buttons', () => {
+  it('shows a short visible name on each field and no hint row above the buttons once both are valid', () => {
     renderDialog(newStore());
     const dialog: HTMLElement = screen.getByRole('dialog');
 
     expect(within(dialog).getByText(NAME_CAPTION)).toBeInTheDocument();
     expect(within(dialog).getByText(THICKNESS_CAPTION)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: ENTERED_NAME } });
+
     expect(within(dialog).queryByRole('note')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: SAVE_LABEL })).toBeEnabled();
   });
 
   it('saves the trimmed material, selects it and closes', () => {
@@ -170,11 +175,10 @@ describe(MaterialDialog.name, () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('shows the name error and the save hint once the name field is left, not while typing', () => {
+  it('shows the name error once the name field is left, not while typing', () => {
     renderDialog(newStore());
 
     expect(screen.queryByText(NAME_ERROR)).not.toBeInTheDocument();
-    expect(screen.queryByText(SAVE_HINT)).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: ' ' } });
 
@@ -186,15 +190,19 @@ describe(MaterialDialog.name, () => {
     expect(screen.getByText(SAVE_HINT)).toBeInTheDocument();
   });
 
-  it('on Save with no name shows the name error and the hint, saves nothing and stays open', () => {
+  it('keeps Save off with the reason while the name is empty or blank, saves nothing and stays open', () => {
     const store: AppStore = newStore();
     const onClose = vi.fn();
 
     renderDialog(store, onClose);
+    fireEvent.change(screen.getByLabelText(NAME_LABEL), { target: { value: ' ' } });
     clickSave();
 
-    expect(screen.getByText(NAME_ERROR)).toBeInTheDocument();
+    const saveButton: HTMLElement = screen.getByRole('button', { name: SAVE_LABEL });
+
+    expect(saveButton).toBeDisabled();
     expect(screen.getByText(SAVE_HINT)).toBeInTheDocument();
+    expect(saveButton).toHaveAttribute('aria-describedby', screen.getByRole('note').id);
     expect(selectMaterials(store.getState())).toEqual([]);
     expect(onClose).not.toHaveBeenCalled();
   });
