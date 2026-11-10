@@ -2,7 +2,9 @@
  * The Job card: the layers that go to the laser, the time estimate and the job actions. Start job is the main
  * action, filled in the accent colour once it can run, and runs the job on the connected laser after a confirmation.
  * A readiness row says what is still open, and why Start job and Frame job are off sits behind a warning icon in the
- * heading for the pointer and in each button's description;
+ * heading for the pointer and in each button's description. While Fix warnings shows, it alone sums up the problems:
+ * its count and the Check step badge stand for them, so the lock dots on Start and Frame, the heading icon and the
+ * frame overrun note step back (the note moves into the warnings list);
  * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
  * gear, traces the outline of the job. A chevron in the heading folds the card to one line, its facts and Start, so the
  * cards below come into view; the fold is remembered per viewer. The laser pointer row is the card's last row, folded
@@ -45,6 +47,7 @@ import {
 } from '../../../utils/states/job.run.state';
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
 import { JobCardCollapsePreferenceChanged, selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.state';
+import { JOB_READINESS_STEP, selectFirstUnmetJobReadinessStep } from '../../../utils/states/job.readiness.selector';
 import { selectFrameStartBlockedReasonKey } from '../../../utils/states/frame.start.blocked.reason.selector';
 import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
 import type { AppDispatch } from '../../../utils/states/new.store';
@@ -103,6 +106,11 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
     { action: JOB_LOCK_ACTION.EXPORT, blockedReasonKey: gcodeExportBlockedReasonKey },
   ]);
   const getLockNoteText = (action: JobLockAction): string | undefined => {
+    // Fix warnings carries the count; Export keeps its dot, it is no part of the run.
+    if (isFixWarningsShown && action !== JOB_LOCK_ACTION.EXPORT) {
+      return undefined;
+    }
+
     const shortReasonKey: string | undefined = lockShortReasonKeys[action];
 
     return shortReasonKey && t(shortReasonKey);
@@ -117,6 +125,8 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
     JOB_PAUSED_CONTROLS.includes(pauseControl),
   );
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
+  const isFixWarningsShown: boolean =
+    useSelector(selectFirstUnmetJobReadinessStep) === JOB_READINESS_STEP.WARNINGS && !isJobRunActive;
   const isCollapsed: boolean = useSelector(selectIsJobCardCollapsed);
   const bodyId: string = useId();
 
@@ -165,7 +175,9 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
               reason from the buttons themselves, so it takes no tab stop. Its slot stays when it goes, so the fold
               button never moves under the pointer. */}
           <span className={styles.reasonSlot}>
-            {actionBlockedReasonText && <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning isPointerOnly />}
+            {actionBlockedReasonText && !isFixWarningsShown && (
+              <TooltipNoteIcon noteText={actionBlockedReasonText} isWarning isPointerOnly />
+            )}
           </span>
           <IconActionButton
             type={ANTD_BUTTON_TYPE_TEXT}
@@ -208,6 +220,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           <FrameControls
             startActionComponent={isStartShown ? <JobStartButton /> : undefined}
             startReasonTexts={startReasonTexts}
+            isBedOverrunNoteShown={!isFixWarningsShown}
             lockNoteTexts={{
               [JOB_LOCK_ACTION.START]: getLockNoteText(JOB_LOCK_ACTION.START),
               [JOB_LOCK_ACTION.FRAME]: getLockNoteText(JOB_LOCK_ACTION.FRAME),

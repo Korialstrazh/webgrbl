@@ -56,3 +56,10 @@
 .fullText {
   @include accessibility.visually-hidden;
 }
+
+// The list, then the frame overrun note when there is one, a small gap apart.
+.popoverContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}

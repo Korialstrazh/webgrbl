@@ -3,7 +3,8 @@
  * corner. It is the same compact chip as an object's: a warning icon and the number of warnings. A click opens a
  * popover that lists each affected object, one line per warning led by the icon of its kind, a few words on the
  * warning with its full sentence in a tooltip, and a button that selects the object and zooms the bed to it. Nothing
- * is shown while there is no ready toolpath or it has no warnings.
+ * is shown while there is no ready toolpath or it has no warnings. A frame that would run off the bed adds its note
+ * with its move action below the list, where Fix warnings leads.
  *
  * @author michael.morosov
  *
@@ -42,6 +43,10 @@ import type { GcodeWarningLine } from '../GcodeExportConfirmDialog/interfaces/Gc
 import { TOOLPATH_WARNINGS_CHIP_ID } from './toolpath.warnings.panel.constants';
 import styles from './styles.module.scss';
 
+import { selectFrameBedOverrun } from '../../utils/states/frame.start.blocked.reason.selector';
+import type { FrameBedOverrun } from '../../utils/frame/interfaces/FrameBedOverrun';
+import { FrameBedOverrunNote } from '../MachinePanel/JobCard/FrameControls/FrameBedOverrunNote';
+
 const TOOLPATH_WARNINGS_OVERLAY_ID = 'toolpath-warnings';
 
 export const ToolpathWarningsPanel = (): ReactNode => {
@@ -55,6 +60,7 @@ export const ToolpathWarningsPanel = (): ReactNode => {
   const projectObjects: ProjectObject[] = useSelector(selectProjectObjects);
   const currentWarnings: ObjectWarning[] = useSelector(selectCurrentToolpathWarnings) ?? [];
   const warningLines: GcodeWarningLine[] = getGcodeWarningLines(currentWarnings, projectObjects);
+  const bedOverrun: FrameBedOverrun | undefined = useSelector(selectFrameBedOverrun);
 
   usePopoverAutoClose(isOpen, () => setIsOpen(false));
 
@@ -93,10 +99,16 @@ export const ToolpathWarningsPanel = (): ReactNode => {
       ))}
     </ul>
   );
+  const popoverContent: ReactNode = (
+    <div className={styles.popoverContent}>
+      {listComponent}
+      {bedOverrun && <FrameBedOverrunNote bedOverrun={bedOverrun} />}
+    </div>
+  );
 
   return (
     <Popover
-      content={listComponent}
+      content={popoverContent}
       trigger={ANTD_POPOVER_TRIGGER_CLICK}
       placement={ANTD_POPOVER_PLACEMENT_BOTTOM_LEFT}
       open={isOpen}
