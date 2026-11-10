@@ -94,6 +94,18 @@
   }
 }
 
+// The Toolpath view has the most tools: below 75rem they take their own row under the zoom and the view switch, with
+// the warnings chip on that row beside them, instead of crowding the top row and wrapping the chip loose under it.
+@container (width < 75rem) {
+  .header[data-bed-view='toolpath'] {
+    grid-template-areas:
+      'extras view'
+      'tools tools';
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-content: stretch;
+  }
+}
+
 // The 3D view has no extras and few tools, so they share the top row with the switch, which stays where it is.
 .threeDHeader {
   grid-template-areas: 'tools view';
