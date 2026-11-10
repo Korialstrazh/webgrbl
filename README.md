@@ -5,7 +5,7 @@ A browser version of LaserGRBL: control a GRBL laser cutter or engraver straight
 ## Requirements
 
 - Node.js 24.14 or newer
-- A Chromium-based desktop browser (Chrome, Edge, Opera) for Web Serial
+- A desktop browser with Web Serial (Chrome, Edge, Opera or Firefox)
 
 ## Scripts
 

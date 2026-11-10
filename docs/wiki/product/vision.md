@@ -10,7 +10,7 @@ webgrbl is a web version of [LaserGRBL](https://lasergrbl.com/): open the websit
 
 ## Key Takeaways
 
-- **Browser-only control.** The app talks to the GRBL controller through the **Web Serial API** (Chromium desktop browsers: Chrome, Edge, Opera). Firefox and Safari have no Web Serial, so the UI must detect this and explain it.
+- **Browser-only control.** The app talks to the GRBL controller through the **Web Serial API** (desktop Chrome, Edge, Opera and Firefox; a real laser was driven from Firefox in November 2026). Safari and mobile browsers have no Web Serial, so the UI must detect this and explain it.
 - **Offline-first PWA.** The app is installable and its whole shell is precached by a service worker, so it works in a workshop without internet. Updates wait for user confirmation, because reloading during a job would stop the laser stream.
 - **Modern, very user-friendly, feature rich UI.** The UI is designed in upcoming brainstorm sessions and sketched in Claude Design before it is built (see `docs/project-rules/claude-design-sketching.rule.md`).
 - **State in Redux + redux-saga.** Sagas fit the serial streaming loop (send line, wait for `ok`, track the planner buffer, handle `!`/`~`/reset real-time commands).

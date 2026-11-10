@@ -113,7 +113,7 @@ CONNECTION_POPOVER_SIMULATED_LASER;Simulated laser (no hardware)
 CONNECTION_POPOVER_TITLE;Connect laser
 CONNECTION_POPOVER_TITLE_CONNECTED;Connected · {{port}}
 CONNECTION_POPOVER_USB_PORT;USB {{vendorId}}:{{productId}}
-CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome or Edge on desktop
+CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED;Web Serial unavailable - use Chrome, Edge or Firefox on desktop
 CONSOLE_CLOSE;Close the console
 CONSOLE_EMPTY_HINT;No messages yet. Connect a laser to see what it sends.
 CONSOLE_EXPAND;Open the console log in a large view

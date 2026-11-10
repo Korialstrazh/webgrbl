@@ -1011,7 +1011,7 @@ registerLocales({
       [DEFAULT.CONNECTION_POPOVER_TITLE]: "Connect laser",
       [DEFAULT.CONNECTION_POPOVER_TITLE_CONNECTED]: "Connected · {{port}}",
       [DEFAULT.CONNECTION_POPOVER_USB_PORT]: "USB {{vendorId}}:{{productId}}",
-      [DEFAULT.CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED]: "Web Serial unavailable - use Chrome or Edge on desktop",
+      [DEFAULT.CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED]: "Web Serial unavailable - use Chrome, Edge or Firefox on desktop",
       [DEFAULT.CONSOLE_CLOSE]: "Close the console",
       [DEFAULT.CONSOLE_EMPTY_HINT]: "No messages yet. Connect a laser to see what it sends.",
       [DEFAULT.CONSOLE_EXPAND]: "Open the console log in a large view",
