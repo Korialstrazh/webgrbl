@@ -10,7 +10,7 @@ import type { AppStore } from '../../utils/states/new.store';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import { newProjectObject } from '../../utils/project/new.project.object';
 import { ProjectDocumentLoaded } from '../../utils/states/project.document.state';
-import { selectSelectedObjectIds } from '../../utils/states/project.selection.state';
+import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { OverlayOpened } from '../../utils/states/ui.overlay.state';
 import { IDENTITY_SVG_MATRIX, mockSvgScreenMatrix } from '../../utils/test.support/svg.screen.matrix.mock';
 import { BedObjects } from '../BedObjects';
@@ -281,8 +281,13 @@ describe(BedViewport.name, () => {
     expect(viewElement.className).not.toMatch(/panning/);
   });
 
-  it('never pans for a left drag on an object unless Space is held', () => {
-    renderBedViewport(newStore(), true, <rect data-testid={OBJECT_TEST_ID} data-bed-object />);
+  it('never pans for a left drag on an object while something is selected, unless Space or Ctrl is held', () => {
+    const store: AppStore = newStore();
+    const selectedObject: ProjectObject = newProjectObject();
+
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [selectedObject], layers: [] } }));
+    store.dispatch(new ProjectSelectionChanged({ objectIds: [selectedObject.id] }));
+    renderBedViewport(store, true, <rect data-testid={OBJECT_TEST_ID} data-bed-object />);
     fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
 
     const viewElement: HTMLElement = getViewElement();
@@ -310,12 +315,66 @@ describe(BedViewport.name, () => {
     expectViewBox(PANNED_VIEW_BOX);
   });
 
-  it('pans when dragging empty bed with nothing selected, and moves an object dragged on it', () => {
+  it('pans for a Ctrl drag on an object', () => {
+    const store: AppStore = newStore();
+    const selectedObject: ProjectObject = newProjectObject();
+
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [selectedObject], layers: [] } }));
+    store.dispatch(new ProjectSelectionChanged({ objectIds: [selectedObject.id] }));
+    renderBedViewport(store, true, <rect data-testid={OBJECT_TEST_ID} data-bed-object />);
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
+
+    const objectElement: HTMLElement = screen.getByTestId(OBJECT_TEST_ID);
+
+    fireEvent.pointerDown(objectElement, {
+      pointerId: POINTER_ID,
+      button: PRIMARY_POINTER_BUTTON,
+      ctrlKey: true,
+      clientX: 100,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(objectElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+    fireEvent.pointerUp(objectElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+
+    expectViewBox(PANNED_VIEW_BOX);
+  });
+
+  it('pans for a drag that starts on an object while nothing is selected, and picks it on a plain click', () => {
     const store: AppStore = newStore();
     const starObject: ProjectObject = newProjectObject({ name: 'Star', xMm: 10, yMm: 10, widthMm: 20, heightMm: 20 });
 
     mockSvgScreenMatrix(IDENTITY_SVG_MATRIX, IDENTITY_SVG_MATRIX);
     store.dispatch(new ProjectDocumentLoaded({ document: { objects: [starObject], layers: [] } }));
+    renderBedViewport(store, true, <BedObjects dimensions={DIMENSIONS} />);
+    fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
+
+    const viewElement: HTMLElement = getViewElement();
+    const objectElement: HTMLElement = screen.getByRole('img', { name: 'Star' });
+    const restingTransform: string | null = objectElement.getAttribute('transform');
+
+    fireEvent.pointerDown(objectElement, { pointerId: POINTER_ID, button: PRIMARY_POINTER_BUTTON, clientX: 100,
+      clientY: 100 });
+    fireEvent.pointerMove(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+    fireEvent.pointerUp(viewElement, { pointerId: POINTER_ID, clientX: 140, clientY: 100 });
+
+    expectViewBox(PANNED_VIEW_BOX);
+    expect(selectSelectedObjectIds(store.getState())).toEqual([]);
+    expect(screen.getByRole('img', { name: 'Star' }).getAttribute('transform')).toBe(restingTransform);
+
+    fireEvent.pointerDown(objectElement, { pointerId: POINTER_ID, button: PRIMARY_POINTER_BUTTON, clientX: 20,
+      clientY: 280 });
+    fireEvent.pointerUp(objectElement, { pointerId: POINTER_ID, clientX: 20, clientY: 280 });
+
+    expect(selectSelectedObjectIds(store.getState())).toEqual([starObject.id]);
+  });
+
+  it('pans when dragging empty bed, and moves a selected object dragged on it', () => {
+    const store: AppStore = newStore();
+    const starObject: ProjectObject = newProjectObject({ name: 'Star', xMm: 10, yMm: 10, widthMm: 20, heightMm: 20 });
+
+    mockSvgScreenMatrix(IDENTITY_SVG_MATRIX, IDENTITY_SVG_MATRIX);
+    store.dispatch(new ProjectDocumentLoaded({ document: { objects: [starObject], layers: [] } }));
+    store.dispatch(new ProjectSelectionChanged({ objectIds: [starObject.id] }));
     renderBedViewport(store, true, <BedObjects dimensions={DIMENSIONS} />);
     fireEvent.click(screen.getByRole('button', { name: ZOOM_IN_LABEL }));
 

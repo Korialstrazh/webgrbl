@@ -27,7 +27,7 @@ import {
   selectProjectObjects,
   SvgFilesImportRequested,
 } from '../../utils/states/project.document.state';
-import { selectSelectedObjectIds } from '../../utils/states/project.selection.state';
+import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { SimulationPlayToggled, selectIsSimulationPlaying } from '../../utils/states/simulation.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import { selectToasts, ToastShown } from '../../utils/states/toast.state';
@@ -296,7 +296,7 @@ describe(BedPanel.name, () => {
     expect(designSlot?.childElementCount).toBe(1);
   });
 
-  it('has no tool switch: a drag on an object moves it', () => {
+  it('has no tool switch: a drag on a selected object moves it', () => {
     const store: AppStore = newStore();
     const projectObject: ProjectObject = newProjectObject({ name: OBJECT_NAME });
 
@@ -305,6 +305,7 @@ describe(BedPanel.name, () => {
     renderPanel(store);
     act(() => {
       store.dispatch(new ProjectDocumentLoaded({ document: { objects: [projectObject], layers: [] } }));
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [projectObject.id] }));
     });
 
     expect(screen.queryByRole('radiogroup', { name: 'Bed tool' })).not.toBeInTheDocument();

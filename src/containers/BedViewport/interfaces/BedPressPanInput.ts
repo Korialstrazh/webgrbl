@@ -13,6 +13,10 @@ export interface BedPressPanInput {
   button: number;
   /** True while Space is held over the bed. */
   isSpaceHeld: boolean;
+  /** True when Ctrl (Cmd on a Mac) was held as the button went down. */
+  isCtrlHeld: boolean;
+  /** True when at least one object is selected. */
+  hasSelection: boolean;
   /** True when the press landed on a drawn object or one of its handles. */
   isOnObject: boolean;
 }

@@ -378,7 +378,11 @@ describe(BedObjects.name, () => {
   });
 
   it('shows the drag offset while the pointer is still down', () => {
-    renderObjects([firstObject]);
+    const store: AppStore = renderObjects([firstObject]);
+
+    act(() => {
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [firstObject.id] }));
+    });
 
     fireEvent.pointerDown(getObjectElement(FIRST_NAME), {
       pointerId: POINTER_ID,
@@ -472,6 +476,11 @@ describe(BedObjects.name, () => {
 
   it('commits a fast flick from where the pointer comes up, with no move in between', () => {
     const store: AppStore = renderObjects([firstObject]);
+
+    act(() => {
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [firstObject.id] }));
+    });
+
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     fireEvent.pointerDown(getObjectElement(FIRST_NAME), {

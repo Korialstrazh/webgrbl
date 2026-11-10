@@ -1,9 +1,9 @@
 /**
- * Pans the bed by dragging with the middle mouse button, with the left button while Space is held over the bed, or
- * with the left button on empty bed. The middle and Space presses are caught before they reach the objects layer; a
- * left press on empty bed still reaches it (a click clears the selection, a double-click may move the laser) and only
- * pans once it has moved past the drag distance. A press on an object never pans, so selecting and dragging keep their
- * left drag. See getBedPressPanStart.
+ * Pans the bed by dragging with the middle mouse button, with the left button while Space (over the bed) or Ctrl
+ * (Cmd) is held, or with the left button on empty bed or on any object while nothing is selected. The middle, Space
+ * and Ctrl presses are caught before they reach the objects layer; the other left presses still reach it (a click
+ * selects or clears, a double-click may move the laser) and only pan once past the drag distance. With a selection, a
+ * press on an object never pans, so dragging it keeps its left drag. See getBedPressPanStart.
  * Space only counts while the pointer is over the bed and no text field, overlay or IME composition owns the keyboard;
  * it is then kept from scrolling the page or pressing a focused button.
  *
@@ -27,6 +27,7 @@ import {
 import { canShortcutAct } from '../../utils/browser/can.shortcut.act';
 import type { BedScreenPoint } from '../../utils/bed/interfaces/BedScreenPoint';
 import type { AppStore } from '../../utils/states/new.store';
+import { selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { selectIsAnyOverlayOpen } from '../../utils/states/ui.overlay.state';
 import { useAppStore } from '../../utils/states/use.app.store';
 import { hasPointerPassedDragStartDistance } from '../BedObjects/has.pointer.passed.drag.start.distance';
@@ -83,6 +84,7 @@ const useSpaceHeldOverBed = (isPointerOverBedRef: RefObject<boolean>): boolean =
 };
 
 export const useBedPanGesture = (panBedBy: BedPanStep): BedPanGesture => {
+  const store: AppStore = useAppStore();
   const isPointerOverBedRef = useRef<boolean>(false);
   const lastPointerRef = useRef<BedScreenPoint | undefined>(undefined);
   // A left press on empty bed that has not moved far enough to be a pan yet.
@@ -100,6 +102,8 @@ export const useBedPanGesture = (panBedBy: BedPanStep): BedPanGesture => {
     const panStart: BedPressPanStart = getBedPressPanStart({
       button: pointerEvent.button,
       isSpaceHeld,
+      isCtrlHeld: pointerEvent.ctrlKey || pointerEvent.metaKey,
+      hasSelection: selectSelectedObjectIds(store.getState()).length > 0,
       isOnObject: isPressOnBedObject(pointerEvent),
     });
 

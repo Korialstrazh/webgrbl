@@ -86,12 +86,21 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
     layerRef.current?.focus({ preventScroll: true });
   }, []);
 
+  const pendingPickRef = useRef<string | undefined>(undefined);
   const handleObjectPointerDown = useCallback((pointerEvent: PointerEvent<SVGGElement>, objectId: string): void => {
     if (!isPrimaryPress(pointerEvent)) {
       return;
     }
 
     focusLayer();
+
+    // With nothing selected, a press on an object only picks it on release: a drag from it pans the bed instead,
+    // and the pan takes the pointer, so the release never reaches this layer.
+    if (!selectedObjectIds.length && !pointerEvent.shiftKey) {
+      pendingPickRef.current = objectId;
+
+      return;
+    }
 
     const outcome: SelectToolPointerDownOutcome = getSelectToolPointerDownOutcome({
       selectedObjectIds,
@@ -143,11 +152,20 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
   };
 
   const handlePointerUp = (pointerEvent: PointerEvent<SVGGElement>): void => {
+    const pendingPickId: string | undefined = pendingPickRef.current;
+
+    pendingPickRef.current = undefined;
+
+    if (pendingPickId) {
+      dispatch(new ProjectSelectionChanged({ objectIds: [pendingPickId] }));
+    }
+
     gestureControls.handleGesturePointerUp(pointerEvent);
     dragControls.handleDragPointerUp(pointerEvent);
   };
 
   const handlePointerCancel = (pointerEvent: PointerEvent<SVGGElement>): void => {
+    pendingPickRef.current = undefined;
     gestureControls.handleGesturePointerCancel(pointerEvent);
     dragControls.handleDragPointerCancel(pointerEvent);
   };
