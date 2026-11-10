@@ -35,19 +35,26 @@
 }
 
 // Nothing on the bed yet: the controls drop their fill and border and take the muted text, so the card reads as
-// quiet as the one-line placeholders of Layers and Objects. Hover and focus bring the normal look back.
+// quiet as the one-line placeholders of Layers and Objects. Hover and focus bring a neutral edge back, never the
+// accent, so the idle select never looks focused or in error. The antd select draws its edge on its root element.
 .idleMaterialSection {
+  :global(.ant-select),
   :global(.ant-select-selector),
   :global(.ant-btn) {
     border-color: transparent !important;
     background-color: transparent !important;
+    box-shadow: none !important;
     color: var(--color-text-muted) !important;
   }
 
+  :global(.ant-select-placeholder),
+  :global(.ant-select-arrow),
   .presetSummaryIcon {
-    color: var(--color-text-muted);
+    color: var(--color-text-muted) !important;
   }
 
+  :global(.ant-select:hover),
+  :global(.ant-select-focused),
   :global(.ant-select:hover .ant-select-selector),
   :global(.ant-select-focused .ant-select-selector),
   :global(.ant-btn:hover),
