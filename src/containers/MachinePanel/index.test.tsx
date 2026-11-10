@@ -49,6 +49,10 @@ const NEW_STATUS: GrblResolvedStatus = {
   overrides: undefined,
 };
 
+// Role queries with names and descriptions across the whole connected panel (antd Steps, Card and the cards' styles)
+// take longer than the default in jsdom; the queries themselves are what this test checks.
+const FULL_PANEL_QUERY_TEST_TIMEOUT_MS = 40_000;
+
 const renderMachinePanel = (store: AppStore = newStore(), isWide: boolean = true): AppStore => {
   render(
     <Provider store={store}>
@@ -186,7 +190,7 @@ describe(MachinePanel.name, () => {
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeEnabled();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveClass('ant-btn-primary');
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveAccessibleDescription(/^Alarm:/);
-  });
+  }, FULL_PANEL_QUERY_TEST_TIMEOUT_MS);
 
   it('dispatches the reset and unlock requests when their buttons are clicked', () => {
     const store: AppStore = newStore();

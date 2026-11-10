@@ -57,6 +57,19 @@ export const JobReadinessStepButton = (props: JobReadinessStepButtonProps): Reac
   const openHintKey: string = isOptionalOpen && optionalHintKey ? optionalHintKey : hintKey;
   const openLabelKey: string = isOptionalOpen ? DEFAULT.JOB_READINESS_STEP_OPTIONAL : DEFAULT.JOB_READINESS_STEP_OPEN;
 
+  const markerComponent: ReactNode = (
+    <span className={styles.marker}>
+      {isMet ? <CheckOutlined aria-hidden /> : iconComponent}
+      {/* An open optional step carries a small dashed-ring badge on its marker, apart from the name, so it
+          never reads as punctuation or as a blocker. */}
+      {isOptionalOpen && (
+        <span className={styles.optionalMark} aria-hidden>
+          <span className={styles.optionalMarkText}>{t(DEFAULT.JOB_READINESS_STEP_OPTIONAL_CAPTION)}</span>
+        </span>
+      )}
+    </span>
+  );
+
   return (
     <DismissibleTooltip
       title={isNextStep ? undefined : t(isMet && metHintKey ? metHintKey : openHintKey, { count: warningCount })}
@@ -74,18 +87,12 @@ export const JobReadinessStepButton = (props: JobReadinessStepButtonProps): Reac
           }
         }}
       >
-        <Badge count={openCount} size={ANTD_BADGE_SIZE_SMALL} className={styles.countBadge}>
-          <span className={styles.marker}>
-            {isMet ? <CheckOutlined aria-hidden /> : iconComponent}
-            {/* An open optional step carries a small dashed-ring badge on its marker, apart from the name, so it
-                never reads as punctuation or as a blocker. */}
-            {isOptionalOpen && (
-              <span className={styles.optionalMark} aria-hidden>
-                <span className={styles.optionalMarkText}>{t(DEFAULT.JOB_READINESS_STEP_OPTIONAL_CAPTION)}</span>
-              </span>
-            )}
-          </span>
-        </Badge>
+        {/* The count badge is drawn only while there is something to count, so the other steps stay light. */}
+        {openCount ? (
+          <Badge count={openCount} size={ANTD_BADGE_SIZE_SMALL} className={styles.countBadge}>
+            {markerComponent}
+          </Badge>
+        ) : markerComponent}
       </Button>
     </DismissibleTooltip>
   );
