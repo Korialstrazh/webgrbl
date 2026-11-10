@@ -16,7 +16,7 @@
 
 // An object that runs off the bed is drawn a little muted and without the halo: a huge guide shape far off the bed
 // would otherwise glow across the whole canvas and read as a glitch. It stays clear enough to read as the object; its
-// drawing stops at the bed edge, and the red dashed outline and the edge arrows mark it as off the bed.
+// drawing stops at the bed edge, and the amber dashed outline and the edge arrows mark it as off the bed.
 .bedObject[data-outside-bed='true'] > .artwork {
   opacity: 0.75;
 }
@@ -46,9 +46,14 @@
   pointer-events: none;
 }
 
+// An object off the bed gets a thick dashed outline in the bed accent (light amber on a dark bed, dark amber on a light
+// one) over a faint tint of the same colour, whatever colours its artwork has, so even a black drawing on a dark bed
+// can be found. Wider dashes than the selection box, so the two never read as one.
 .outsideOutline {
-  stroke: var(--color-bed-danger);
-  stroke-dasharray: 3 3;
+  fill: color-mix(in oklab, var(--color-bed-accent) 10%, transparent);
+  stroke: var(--color-bed-accent);
+  stroke-width: 2;
+  stroke-dasharray: 8 4;
 }
 
 .selectionBox,
@@ -97,10 +102,23 @@
   vector-effect: non-scaling-stroke;
 }
 
-// The part of an object that lies off the bed: faint, with no halo and no presses of its own, so a huge or misplaced
-// import shows where it is without reading as something that burns.
+// The part of an object that lies off the bed: no halo and no presses of its own, its shapes redrawn as a dashed
+// outline in the bed accent over a faint tint, independent of the artwork colours, so a huge or misplaced import shows
+// clearly where it is without reading as something that burns. Artwork drawn as an image keeps its own look, faint.
 .offBedArtwork {
-  opacity: 0.3;
+  opacity: 0.85;
   pointer-events: none;
   filter: none;
+}
+
+.offBedArtwork > image {
+  opacity: 0.35;
+}
+
+.offBedArtwork :is(path, rect, circle, ellipse, line, polyline, polygon) {
+  fill: color-mix(in oklab, var(--color-bed-accent) 12%, transparent) !important;
+  stroke: var(--color-bed-accent) !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 5 3;
+  vector-effect: non-scaling-stroke;
 }

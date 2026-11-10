@@ -39,6 +39,7 @@ BED_ZOOM_IN_HINT;Zoom in (+). The mouse wheel zooms around the pointer.
 BED_ZOOM_OUT_HINT;Zoom out (-)
 BED_ZOOM_PAN_HINT;Zoom relative to the fitted bed: 100 % (fit) shows the whole bed. Drag with the middle mouse button, or hold Space and drag, to move the view.
 BED_ZOOM_PERCENT;{{percent}}%
+BED_ZOOM_SHOW_ALL_HINT;Show all: the bed and every object, parts off the bed included
 BURN_PART_LIFT_CLICK_HINT;Click a part to check it and lift it.
 BURN_PART_LIFT_HEIGHT;Lifted {{height}} mm
 BURN_PART_LIFT_HINT_BORDERLINE;Part {{part}} may stay attached.
@@ -775,7 +776,7 @@ STATUS_STRIP_CURSOR;Cursor
 STATUS_STRIP_CURSOR_VALUE;X {{x}}  Y {{y}} mm
 STATUS_STRIP_ESTIMATE;Estimate
 STATUS_STRIP_JOB_SIZE;Job size
-STATUS_STRIP_JOB_SIZE_EXPLANATION;The area the laser covers: every burnt line plus the fill overscan. An object's frame size can be larger when its SVG has empty margins.
+STATUS_STRIP_JOB_SIZE_EXPLANATION;The area the laser covers: every burnt line plus the fill overscan, parts of objects off the bed included. An object's frame size can be larger when its SVG has empty margins.
 STATUS_STRIP_JOB_SIZE_HINT;Worked out in the background from the layers that are switched on, after each change.
 STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline

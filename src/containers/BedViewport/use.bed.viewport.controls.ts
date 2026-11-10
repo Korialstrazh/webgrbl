@@ -22,6 +22,7 @@ import type { BedScreenPoint } from '../../utils/bed/interfaces/BedScreenPoint';
 import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
 import type { BedViewportFrame } from '../../utils/bed/interfaces/BedViewportFrame';
+import { newAllObjectsFitBedViewport } from '../../utils/bed/new.all.objects.fit.bed.viewport';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
 import { newSelectionFitBedViewport } from '../../utils/bed/new.selection.fit.bed.viewport';
 import { newTopFitBedViewport } from '../../utils/bed/new.top.fit.bed.viewport';
@@ -179,11 +180,17 @@ export const useBedViewportControls = (
     setViewport(newFitBedViewport(dimensions));
   }, [dimensions]);
 
+  const fitAllObjectsToView = useCallback((projectObjects: readonly ProjectObject[]): void => {
+    isStripFitRef.current = false;
+    setIsStripFit(false);
+    setViewport(newAllObjectsFitBedViewport(projectObjects, dimensions));
+  }, [dimensions]);
+
   const shownViewport: BedViewport = useMemo(
     // Held at the top of the strip, right under the ruler, never floating in the middle of a tall strip.
     () => (isStripFit ? newTopFitBedViewport(dimensions, screenSize) : viewport),
     [isStripFit, dimensions, screenSize, viewport],
   );
 
-  return { viewport: shownViewport, zoomBedBy, panBedBy, fitBedToView };
+  return { viewport: shownViewport, zoomBedBy, panBedBy, fitBedToView, fitAllObjectsToView };
 };

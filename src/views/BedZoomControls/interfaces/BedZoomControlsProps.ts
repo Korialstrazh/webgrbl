@@ -25,4 +25,6 @@ export interface BedZoomControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onFit: () => void;
+  /** Fits the bed and every object, parts off the bed included. */
+  onShowAll: () => void;
 }
