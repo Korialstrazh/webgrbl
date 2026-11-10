@@ -44,6 +44,7 @@ const LAYER_OBJECT: ProjectObject = newProjectObject({
   svgText: `<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm"><rect fill="${LAYER_COLOUR}" width="5" height="5"/></svg>`,
 });
 const IMPORT_FILE_NAME = 'presets.json';
+const MORE_LABEL = 'More file actions';
 const IMPORT_INPUT_LABEL = 'Open a material presets file';
 const POWER_LABEL = 'Power (W)';
 const SAVE_LABEL = 'Save';
@@ -189,11 +190,13 @@ const addMaterialInDialog = (): void => {
 };
 
 describe(MaterialLibraryDrawer.name, () => {
-  it('captions the file actions Import and Export, not icons alone', async () => {
+  it('keeps Import and Export in the More menu of the header, each with its caption', async () => {
     renderDrawer();
 
-    expect(await screen.findByRole('button', { name: 'Import' })).toHaveTextContent('Import');
-    expect(screen.getByRole('button', { name: 'Export' })).toHaveTextContent('Export');
+    fireEvent.click(await screen.findByRole('button', { name: MORE_LABEL }));
+
+    expect(await screen.findByRole('menuitem', { name: /Import/ })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /Tick presets to export/ })).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('saves a new preset for the active machine once a power is entered', async () => {
@@ -565,11 +568,10 @@ describe(MaterialLibraryDrawer.name, () => {
     renderDrawer([newPresetFixture(PLYWOOD, PROFILE)]);
 
     await screen.findByText(getRowNamePattern(PLYWOOD_NAME));
-    expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled();
-
     fireEvent.click(screen.getByRole('checkbox', { name: 'Select for export' }));
+    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
 
-    expect(screen.getByRole('button', { name: 'Export (1)' })).toBeEnabled();
+    expect(await screen.findByRole('menuitem', { name: /Export \(1\)/ })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.queryByRole('button', { name: SAVE_LABEL })).not.toBeInTheDocument();
   });
 });

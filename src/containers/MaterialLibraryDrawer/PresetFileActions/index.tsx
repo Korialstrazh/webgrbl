@@ -1,7 +1,7 @@
 /**
- * Imports a material presets file for the active machine and exports the ticked presets, from the header of the
- * library drawer. A file that is not valid changes nothing and shows an error toast. A successful import shows a toast
- * that asks the user to test first, because rescaled power is only a starting point on another laser.
+ * Imports a material presets file for the active machine and exports the ticked presets, from a More menu in the
+ * header of the library drawer. A file that is not valid changes nothing and shows an error toast. A successful import
+ * shows a toast that asks the user to test first, because rescaled power is only a starting point on another laser.
  *
  * @author michael.morosov
  *
@@ -10,13 +10,19 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
-import { Badge } from 'antd';
+import { DownloadOutlined, EllipsisOutlined, UploadOutlined } from '@ant-design/icons';
+import { Badge, Dropdown } from 'antd';
+import type { MenuProps } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BADGE_SIZE_SMALL, ANTD_BUTTON_SIZE_SMALL } from '../../../utils/antd.constants';
+import {
+  ANTD_BADGE_SIZE_SMALL,
+  ANTD_BUTTON_SIZE_SMALL,
+  ANTD_BUTTON_TYPE_TEXT,
+  ANTD_DROPDOWN_TRIGGER_CLICK,
+} from '../../../utils/antd.constants';
 import { downloadTextFile } from '../../../utils/browser/download.text.file';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getImportedMaterialPresets } from '../../../utils/materials/get.imported.material.presets';
@@ -42,6 +48,8 @@ import styles from './styles.module.scss';
 
 /** Clearing the picked file lets the same file be picked again, which would otherwise fire no change. */
 const EMPTY_FILE_INPUT_VALUE = '';
+const IMPORT_MENU_KEY = 'import';
+const EXPORT_MENU_KEY = 'export';
 
 export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): ReactNode => {
   const { t } = useTranslation();
@@ -114,28 +122,37 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
     });
   };
 
+  const fileMenuItems: MenuProps['items'] = [
+    {
+      key: IMPORT_MENU_KEY,
+      icon: <UploadOutlined aria-hidden />,
+      label: t(DEFAULT.MATERIAL_LIBRARY_IMPORT),
+      disabled: !activeProfile,
+      onClick: () => fileInputRef.current?.click(),
+    },
+    {
+      key: EXPORT_MENU_KEY,
+      icon: <DownloadOutlined aria-hidden />,
+      label: selectedPresets.length ? exportLabel : t(DEFAULT.MATERIAL_LIBRARY_EXPORT_HINT),
+      disabled: !selectedPresets.length,
+      onClick: exportPresets,
+    },
+  ];
+
   return (
     <div className={styles.presetFileActions}>
-      {/* Import takes a file in and Export gives one out, so the icons are the file upload and download arrows; the
-          short visible caption names each, and a badge on Export counts the ticked presets. */}
-      <IconActionButton
-        labelText={t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
-        iconComponent={<UploadOutlined aria-hidden />}
-        captionText={t(DEFAULT.MATERIAL_LIBRARY_IMPORT)}
-        size={ANTD_BUTTON_SIZE_SMALL}
-        isDisabled={!activeProfile}
-        onClick={() => fileInputRef.current?.click()}
-      />
-      <Badge count={selectedPresets.length} size={ANTD_BADGE_SIZE_SMALL}>
-        <IconActionButton
-          labelText={exportLabel}
-          iconComponent={<DownloadOutlined aria-hidden />}
-          captionText={t(DEFAULT.MATERIAL_LIBRARY_EXPORT)}
-          size={ANTD_BUTTON_SIZE_SMALL}
-          blockedReasonText={selectedPresets.length ? undefined : t(DEFAULT.MATERIAL_LIBRARY_EXPORT_HINT)}
-          onClick={exportPresets}
-        />
-      </Badge>
+      {/* Import and Export are rare, so they wait in a More menu and leave the header calm; the badge counts the
+          presets ticked for export. */}
+      <Dropdown trigger={ANTD_DROPDOWN_TRIGGER_CLICK} menu={{ items: fileMenuItems }}>
+        <Badge count={selectedPresets.length} size={ANTD_BADGE_SIZE_SMALL}>
+          <IconActionButton
+            type={ANTD_BUTTON_TYPE_TEXT}
+            labelText={t(DEFAULT.MATERIAL_LIBRARY_MORE)}
+            iconComponent={<EllipsisOutlined aria-hidden />}
+            size={ANTD_BUTTON_SIZE_SMALL}
+          />
+        </Badge>
+      </Dropdown>
       {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
       <input
         ref={fileInputRef}
