@@ -139,7 +139,7 @@ function* showOversizedImports(oversizedObjects: ProjectObject[]): Generator {
 
   for (const oversizedObject of oversizedObjects) {
     yield put(new ToastShown({
-      severity: TOAST_SEVERITY.INFO,
+      severity: TOAST_SEVERITY.WARNING,
       messageKey: DEFAULT.TOAST_SVG_LARGER_THAN_BED,
       messageParameters: { fileName: oversizedObject.name },
       fitToBedObjectId: oversizedObject.id,

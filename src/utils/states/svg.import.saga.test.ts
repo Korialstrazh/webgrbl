@@ -196,7 +196,7 @@ describe(importSvgFiles.name, () => {
 
     expect(bedToasts).toHaveLength(1);
     expect(bedToasts[0]).toMatchObject({
-      severity: TOAST_SEVERITY.INFO,
+      severity: TOAST_SEVERITY.WARNING,
       messageParameters: { fileName: BIG_FILE_STEM },
       fitToBedObjectId: bigObject?.id,
     });
