@@ -115,6 +115,14 @@
   .profileName {
     @include accessibility.visually-hidden;
   }
+
+  // Icon-only, Import SVG looks like its plain icon neighbours; a filled, bordered square would read as a toggle
+  // that is switched on.
+  .activeMenus :global(.ant-btn-default:not(:hover, :focus-visible)) {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none;
+  }
 }
 
 // The main icons of the bar are large enough to read without a tooltip.
