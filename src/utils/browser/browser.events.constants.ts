@@ -84,3 +84,5 @@ export const POINTER_DOWN_EVENT_NAME = 'pointerdown';
 export const MOUSE_OVER_EVENT_NAME = 'mouseover';
 /** Matches every element under the pointer, from the root down to the innermost one. */
 export const HOVERED_ELEMENT_SELECTOR = ':hover';
+/** Fired when a mouse, pen or finger moves. */
+export const POINTER_MOVE_EVENT_NAME = 'pointermove';

@@ -70,3 +70,8 @@ body {
   background-color: var(--color-disabled-bg);
   color: var(--color-disabled-text);
 }
+
+// Set by holdTooltipsUntilPointerMoves: a view just changed under a resting pointer, so no tooltip may show yet.
+html[data-tooltip-hold] .ant-tooltip {
+  display: none;
+}

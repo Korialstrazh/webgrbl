@@ -93,3 +93,6 @@ export const POPOVER_KEEP_CLEAR_ATTRIBUTE = 'data-popover-keep-clear';
 
 /** Finds every element marked with POPOVER_KEEP_CLEAR_ATTRIBUTE. */
 export const POPOVER_KEEP_CLEAR_SELECTOR = `[${POPOVER_KEEP_CLEAR_ATTRIBUTE}]`;
+
+/** Set on the root element while tooltips are held back after the shown view changed; the global styles hide them. */
+export const TOOLTIP_HOLD_ATTRIBUTE = 'data-tooltip-hold';
