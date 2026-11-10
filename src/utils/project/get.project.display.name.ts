@@ -1,7 +1,7 @@
 /**
  * Gets the name a project is shown with everywhere (top bar, browser tab, Open project): its own name, or, while it
- * still has the default name of a new project, the name of its first object and the local day that object was imported (the project's creation day for older objects), so projects do
- * not all read the same.
+ * still has the default name of a new project, the name of its first object and the local day that object was
+ * imported (the project's creation day for older objects), so projects do not all read the same.
  *
  * @author michael.morosov
  *
