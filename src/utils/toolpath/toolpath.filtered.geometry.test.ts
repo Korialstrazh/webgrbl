@@ -19,7 +19,7 @@ const RED = '#ff0000';
 const BLUE = '#0000ff';
 const OBJECT_SIZE_MM = 100;
 const KEPT_SHAPE = '<rect x="10" y="10" width="20" height="20" fill="none" stroke="#ff0000"/>';
-const SKIPPED_SHAPE = `<rect x="60" y="60" width="30" height="30" fill="none" stroke="#ff0000" `
+const SKIPPED_SHAPE = '<rect x="60" y="60" width="30" height="30" fill="none" stroke="#ff0000" '
   + `${SVG_TREE_DISABLED_ATTRIBUTE_NAME}="${SVG_TREE_DISABLED_ATTRIBUTE_VALUE}"/>`;
 const HIDDEN_LAYER_SHAPE = '<circle cx="70" cy="20" r="10" fill="none" stroke="#0000ff"/>';
 
