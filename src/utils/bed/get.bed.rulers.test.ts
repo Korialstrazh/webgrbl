@@ -14,9 +14,9 @@ const ZOOM_IN_FOUR_TIMES = 4;
 // 3 rem at a 16 px root font.
 const MIN_LABEL_SPACING_PX = 48;
 // At 16/3 px per mm a 10 mm step is 53 px apart, the first that keeps the minimum spacing.
-// The fitted bed is 400 mm wide at 4/3 px per mm: a short tick every 10 mm and a long one at every 50 mm label step.
-const FITTED_TOP_TICK_COUNT = 41;
-const FITTED_TOP_MAJOR_TICK_COUNT = 9;
+// The view is 624 mm wide at 4/3 px per mm: a short tick every 10 mm and a long one at every 50 mm label step.
+const FITTED_TOP_TICK_COUNT = 63;
+const FITTED_TOP_MAJOR_TICK_COUNT = 13;
 const FITTED_TICK_SPACING_PX = 40 / 3;
 // The width of a three-digit label at the 11 px ruler font, plus the 4 px gap to its tick.
 const THREE_DIGIT_LABEL_EXTENT_PX = 3 * 0.6 * 11 + 4;
@@ -34,12 +34,12 @@ const newRequest = (zoom: number, centerXMm: number = 200, centerYMm: number = 1
 const getValues = (labels: BedRulerLabel[]): number[] => labels.map((label: BedRulerLabel): number => label.valueMm);
 
 describe(getBedRulers.name, () => {
-  it('labels every 50 mm of the fitted bed, leaving out labels that would run past the bed', () => {
+  it('labels every 50 mm across the whole view, past the bed too', () => {
     const rulers: BedRulerLayout = getBedRulers(newRequest(1));
 
-    expect(getValues(rulers.topLabels)).toEqual([0, 50, 100, 150, 200, 250, 300, 350]);
+    expect(getValues(rulers.topLabels)).toEqual([-100, -50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]);
     expect(getValues(rulers.leftLabels)).toEqual([0, 50, 100, 150, 200, 250]);
-    expect(rulers.topLabels[1]?.offsetPx).toBeCloseTo(216);
+    expect(rulers.topLabels[3]?.offsetPx).toBeCloseTo(216);
   });
 
   it('labels a finer step from the part of the bed in view when zoomed in', () => {
@@ -48,7 +48,7 @@ describe(getBedRulers.name, () => {
     expect(getValues(rulers.topLabels)).toEqual(ZOOMED_TOP_LABELS);
   });
 
-  it('puts a short tick every fifth of a label step and a long tick at every label step of the bed', () => {
+  it('puts a short tick every fifth of a label step and a long tick at every label step in view', () => {
     const rulers: BedRulerLayout = getBedRulers(newRequest(1));
     const majorTicks: BedRulerTick[] = rulers.topTicks.filter((tick: BedRulerTick): boolean => tick.isMajor);
     const [firstTick, secondTick] = rulers.topTicks;
