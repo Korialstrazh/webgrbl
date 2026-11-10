@@ -61,11 +61,12 @@
     padding: 0 var(--space-3);
   }
 
-  // The app name goes so the project name can use the whole heading, on up to two lines.
+  // The app name goes so the project name can use the whole heading. The name gets the room first: a fixed width
+  // wide enough for an automatic name with its date and time, which gives way only when the bar runs out of space.
   .heading {
     flex-shrink: 1;
+    width: 15rem;
     min-width: 6.5rem;
-    max-width: 13rem;
     overflow: hidden;
   }
 
