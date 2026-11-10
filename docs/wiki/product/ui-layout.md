@@ -58,11 +58,14 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 ## Round 47 behaviour notes
 
 - Objects off the bed draw a thick amber dashed outline over a faint amber tint, their vector shapes redrawn the same way, whatever the artwork colours; the zoom group has **Show all**, which fits the bed and every object. The job size tooltip says off-bed parts count.
-- While **Fix warnings** shows, it and the Check badge carry the count alone: the lock dots on Start and Frame and the heading warning icon step back, and the frame overrun note moves into the Toolpath warnings popover. The object row chip and Cut check stay.
+- While **Fix warnings** shows, it and the Check badge carry the count: only a lock dot whose reason is the warnings (or off-bed artwork) steps back, so an offline Start keeps its "Not connected" dot; the Job heading has no shared warning icon. and the frame overrun note moves into the Toolpath warnings popover. The object row chip and Cut check stay.
 - Each readiness step with an action is its own tab stop; a done Check or Connect leaves the tab order with `aria-disabled`.
 - Icon tooltips (`DismissibleTooltip`, layer mode glyph) also open on a long press for touch screens.
 - Add/Edit material keeps Save off until the fields are valid: a name problem shows under the Name field only after it is touched or Save is tried (never on open), and a wrong thickness says "Thickness needed" beside the buttons.
 - Open project row buttons are named after the project ("Open sample · Nov 10, 2026 14:05").
 - Slider handles get the 2 px accent focus ring.
 - Set zero sits in the Position card title row as an origin icon (two axes meeting at a small zero, tooltip "Set zero here (X/Y origin)"); Move no longer has a Set zero row.
+- Frame and Export show the icon and the word on one row at 14 px (Start is 16 px). In a wide window the jog pad rows, step sizes, Pause and the job action gap close up, so Move fits above STOP at 1440 x 900 while connected, idle or running.
+- The pointer power figure names the track maximum ("1 / 5 %"), so the thumb's place matches what it reads.
+- Below 62.5 rem the project name gets a 15 rem slot first (the wordmark is hidden), so an automatic name with its date and time reads whole at 800 px.
 
