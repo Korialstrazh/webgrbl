@@ -22,18 +22,19 @@
   margin-left: auto;
 }
 
-.heading,
 .activeMenus {
   flex-shrink: 0;
 }
 
-// A fixed-width slot: a short or long project name never moves the menus, Saved, the laser or Import SVG beside it;
-// a long name ends in an ellipsis.
+// A slot of a set width that does not follow the name, so a short or long project name never moves the menus beside
+// it. The slot is wide enough for an automatic name with its date and time, and gives way only when the bar is short of
+// room; only then does a long name end in an ellipsis.
 .heading {
   display: flex;
+  flex: 0 1 24rem;
   flex-direction: column;
   align-items: flex-start;
-  width: 11rem;
+  min-width: 11rem;
 }
 
 .title {
@@ -64,8 +65,7 @@
   // The app name goes so the project name can use the whole heading. The name gets the room first: a fixed width
   // wide enough for an automatic name with its date and time, which gives way only when the bar runs out of space.
   .heading {
-    flex-shrink: 1;
-    width: 15rem;
+    flex: 0 1 15rem;
     min-width: 6.5rem;
     overflow: hidden;
   }
