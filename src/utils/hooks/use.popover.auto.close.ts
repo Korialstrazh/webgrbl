@@ -1,6 +1,7 @@
 /**
  * Closes a popover when a dialog or drawer opens, or when the narrow layout switches region, so no popover is left
- * floating over a dialog or over another region's content.
+ * floating over a dialog or over another region's content. Once closed, for any reason, the focus goes back to the
+ * control that opened it.
  *
  * @author michael.morosov
  *
@@ -15,6 +16,7 @@ import { useSelector } from 'react-redux';
 import type { WorkbenchRegion } from '../states/workbench.region.constants';
 import { selectDialogOpenCount } from '../states/ui.overlay.state';
 import { selectNarrowRegion } from '../states/ui.workbench.state';
+import { usePopoverFocusReturn } from './use.popover.focus.return';
 
 export const usePopoverAutoClose = (isPopoverOpen: boolean, closePopover: () => void): void => {
   const dialogOpenCount: number = useSelector(selectDialogOpenCount);
@@ -24,6 +26,7 @@ export const usePopoverAutoClose = (isPopoverOpen: boolean, closePopover: () => 
   const closePopoverRef: RefObject<() => void> = useRef<() => void>(closePopover);
 
   closePopoverRef.current = closePopover;
+  usePopoverFocusReturn(isPopoverOpen);
 
   useEffect(() => {
     const isNewDialogOpen: boolean = dialogOpenCount !== seenDialogOpenCountRef.current;

@@ -21,6 +21,7 @@ import {
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../../../utils/antd.constants';
 import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.registration';
+import { usePopoverFocusReturn } from '../../../../utils/hooks/use.popover.focus.return';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../../../utils/palette/interfaces/PaletteEntry';
 import type { Palette } from '../../../../utils/palette/interfaces/Palette';
@@ -43,6 +44,8 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
   const palette: Palette = useSelector(selectPalette);
   const isSkipped: boolean = node.isDisabled;
   const [isRecolourOpen, setIsRecolourOpen] = useState<boolean>(false);
+
+  usePopoverFocusReturn(isRecolourOpen);
 
   // Escape must only close the colour list, not also stop the machine.
   useOverlayRegistration(RECOLOUR_POPOVER_OVERLAY_ID, isRecolourOpen);

@@ -21,6 +21,7 @@ import {
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../../../../utils/antd.constants';
 import { useOverlayRegistration } from '../../../../../utils/hooks/use.overlay.registration';
+import { usePopoverFocusReturn } from '../../../../../utils/hooks/use.popover.focus.return';
 import { DEFAULT } from '../../../../../utils/localization/default.locales';
 import { getPointerApproximateWatts } from '../../../../../utils/machine/get.pointer.approximate.watts';
 import { MAX_POINTER_HOLD_MS, MILLISECONDS_PER_SECOND } from '../../../../../utils/machine/machine.command.constants';
@@ -44,6 +45,8 @@ export const PointerDetailsButton = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  usePopoverFocusReturn(isOpen);
 
   // Escape must only close this, not also stop the machine.
   useOverlayRegistration(POINTER_DETAILS_OVERLAY_ID, isOpen);
