@@ -14,26 +14,29 @@
   }
 }
 
-// Holds the scrolling cards and the "more below" hint floating over their bottom edge.
+// Holds the scrolling cards.
 .cardsArea {
-  position: relative;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
 }
 
-// Sits centred on the faded edge, clear of the card chevrons at the right, and casts a shadow to invite a click.
-.moreBelow {
+// A small chevron centred in the STOP footer's top padding, just below the faded edge: it never covers a card or a
+// control, and the footer keeps its height whether it shows or not.
+.moreBelow:global(.ant-btn) {
   position: absolute;
-  bottom: 0.25rem;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1;
-  border-color: var(--color-control-border);
-  background-color: var(--color-surface-2);
+  width: 2.5rem;
+  min-width: 0;
+  height: var(--space-3);
+  padding: 0;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   color: var(--color-text-muted);
-  box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 45%);
+  font-size: 0.625rem;
+  line-height: 1;
 }
 
 // A normal, visible scrollbar with a fixed gutter: the cards keep their width when it appears, and it shows at a
@@ -61,9 +64,10 @@
   mask-image: linear-gradient(to bottom, #000 calc(100% - 1rem), transparent);
 }
 
-// While cards wait below, STOP's footer casts a shadow up over them, so the edge reads as content going on underneath.
+// While cards wait below, STOP's footer casts a thin shadow up over them, so the edge reads as content going on
+// underneath.
 .stopFooterRaised {
-  box-shadow: 0 -0.5rem 1rem -0.25rem rgb(0 0 0 / 45%);
+  box-shadow: 0 -0.25rem 0.5rem -0.25rem rgb(0 0 0 / 45%);
 }
 
 .stopFooter {

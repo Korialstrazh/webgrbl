@@ -1,6 +1,9 @@
 @use '../../../../styles/accessibility' as accessibility;
 
 .frameControls {
+  // The height of Start, Frame and Export.
+  --job-action-height: 3.25rem;
+
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -33,7 +36,7 @@
     flex-direction: row;
     // Room for the lock badge that sits on the icon's corner, so it never touches the word.
     gap: var(--space-3);
-    height: 3.25rem;
+    height: var(--job-action-height);
     font-size: 1rem;
     font-weight: 600;
   }
@@ -109,7 +112,7 @@
     min-width: 0;
 
     :global(.ant-btn) {
-      height: calc(3.25rem - 2px);
+      height: calc(var(--job-action-height) - 2px);
       border-start-end-radius: 0;
       border-end-end-radius: 0;
     }
@@ -124,7 +127,7 @@
 // the one divider of the split button.
 .frameSplit.frameSplit .frameGear.frameGear:global(.ant-btn.ant-btn.ant-btn.ant-btn) {
   width: 2.75rem;
-  height: calc(3.25rem - 2px);
+  height: calc(var(--job-action-height) - 2px);
   padding: 0;
   border-inline-start-color: var(--frame-split-border);
   border-start-start-radius: 0;
@@ -208,4 +211,21 @@
 
 .frameSettingsRoot :global(.ant-popover-arrow)::before {
   background-color: var(--color-control-border);
+}
+
+// In a wide window the job actions are a little lower, so Move still fits above STOP while connected at 1440 x 900.
+// 80rem must match WIDE_LAYOUT_MEDIA_QUERY. The repeated class outweighs the captioned button's own height.
+@media (width >= 80rem) {
+  .frameControls {
+    --job-action-height: 2.75rem;
+  }
+
+  .actions.actions :global(.ant-btn) {
+    height: var(--job-action-height);
+  }
+
+  .frameSplit.frameSplit > span:first-child :global(.ant-btn),
+  .frameSplit.frameSplit .frameGear.frameGear:global(.ant-btn.ant-btn.ant-btn.ant-btn) {
+    height: calc(var(--job-action-height) - 2px);
+  }
 }

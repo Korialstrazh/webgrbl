@@ -48,3 +48,18 @@
     color: var(--color-text);
   }
 }
+
+// In a wide window, driven by a mouse, the jog pad rows and the gaps close up, so the whole Move card, Set zero
+// included, fits above STOP while connected with the status card at 1440 x 900. 80rem must match
+// WIDE_LAYOUT_MEDIA_QUERY; a narrow, touch-sized window keeps the full targets.
+@media (width >= 80rem) {
+  .moveControls,
+  .stepAndSpeed {
+    gap: var(--space-1);
+  }
+
+  .jogPad {
+    grid-auto-rows: 2rem;
+    gap: var(--space-1) var(--space-2);
+  }
+}

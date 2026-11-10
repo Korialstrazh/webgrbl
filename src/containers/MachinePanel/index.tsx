@@ -1,8 +1,8 @@
 /**
  * The right region, the main task first: the job, the compact machine status (only while connected), the positions,
  * moving the head and the laser pointer, and, in a wide window, STOP at the bottom. When the cards are cut off above
- * STOP, their bottom edge fades out over a shadow from the STOP footer, beside a normal scrollbar, so it reads as a
- * list that scrolls.
+ * STOP, their bottom edge fades out over a thin shadow from the STOP footer, beside a normal scrollbar, and a small
+ * chevron in the footer's top padding scrolls them on, so it reads as a list that scrolls.
  *
  * @author michael.morosov
  *
@@ -16,7 +16,7 @@ import { Layout } from 'antd';
 import { useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ANTD_BUTTON_SHAPE_CIRCLE, ANTD_BUTTON_SIZE_SMALL } from '../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { useIsScrollContentCutOff } from '../../utils/hooks/use.is.scroll.content.cut.off';
 import { MACHINE_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
@@ -64,22 +64,23 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
           <MoveCard />
           <LaserCard />
         </div>
-        {/* Floats over the faded edge, so it never moves a card when it comes or goes. */}
-        {isWide && isCardsCutOff && (
-          <IconActionButton
-            className={styles.moreBelow}
-            shape={ANTD_BUTTON_SHAPE_CIRCLE}
-            size={ANTD_BUTTON_SIZE_SMALL}
-            labelText={t(DEFAULT.MACHINE_PANEL_MORE_BELOW)}
-            iconComponent={<DownOutlined />}
-            onClick={scrollCardsDown}
-          />
-        )}
       </div>
       {isWide && (
         <div className={isCardsCutOff ? [styles.stopFooter, styles.stopFooterRaised].join(' ') : styles.stopFooter}>
           <StopButton />
           <StopSettingsButton />
+          {/* A small chevron in the footer's own top padding, never over a card: it comes and goes without moving
+              anything, as the footer keeps its height. */}
+          {isCardsCutOff && (
+            <IconActionButton
+              className={styles.moreBelow}
+              type={ANTD_BUTTON_TYPE_TEXT}
+              size={ANTD_BUTTON_SIZE_SMALL}
+              labelText={t(DEFAULT.MACHINE_PANEL_MORE_BELOW)}
+              iconComponent={<DownOutlined />}
+              onClick={scrollCardsDown}
+            />
+          )}
         </div>
       )}
     </Layout.Sider>

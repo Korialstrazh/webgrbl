@@ -6,7 +6,8 @@
   gap: var(--space-2);
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-1) var(--space-2);
+  height: 1.875rem;
+  padding: 0 var(--space-1) 0 var(--space-2);
   border: 1px solid var(--color-warning);
   border-radius: var(--radius-md);
   color: var(--color-text);
