@@ -823,7 +823,7 @@ TOAST_SVG_IMPORT_FAILED_NO_SIZE;{{fileName}} was skipped: it has no size (width 
 TOAST_SVG_IMPORT_FAILED_NOT_SVG;{{fileName}} was skipped: it is not a usable SVG file.
 TOAST_SVG_IMPORT_FAILED_TOO_LARGE;{{fileName}} was skipped: it is larger than 10 MB.
 TOAST_SVG_IMPORT_LIMIT_REACHED;A project holds at most {{limit}} objects. The remaining files were not imported.
-TOAST_SVG_LARGER_THAN_BED;{{fileName}} is larger than the bed. Scale it down to fit.
+TOAST_SVG_LARGER_THAN_BED;{{fileName}} is larger than the bed, so it starts at the origin corner.
 TOAST_TOOLPATH_FAILED;The toolpath could not be generated. Try again, or simplify the design.
 TOAST_UNSUPPORTED_FIRMWARE;This firmware is not supported yet (GRBL 1.1 or newer is required).
 TOOLPATH_CANCEL;Cancel

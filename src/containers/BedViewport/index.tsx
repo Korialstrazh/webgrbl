@@ -35,6 +35,7 @@ import { useIsBedRegionDrawerOpen } from '../../utils/hooks/use.is.bed.region.dr
 import { useMediaQueryMatches } from '../../utils/hooks/use.media.query.matches';
 import { BED_DRAWER_PUSH_MEDIA_QUERY } from '../../utils/layout.constants';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { selectBedSelectionFitRequestCount } from '../../utils/states/bed.view.state';
 import { selectSelectedObjects } from '../../utils/states/project.selection.state';
 import { PERCENT_DIVISOR } from '../../utils/percent.constants';
 import { BedRulers } from '../../views/BedRulers';
@@ -65,6 +66,7 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
   const screenSize: BedScreenSize = useBedScreenSize(viewRef);
   const [rootFontSizePx] = useState<number>(getRootFontSizePixels);
   const selectedObjects: ProjectObject[] = useSelector(selectSelectedObjects);
+  const selectionFitRequestCount: number = useSelector(selectBedSelectionFitRequestCount);
   const isDrawerOpen: boolean = useIsBedRegionDrawerOpen();
   const drawerInsetPx: number = useBedRegionDrawerInsetPx();
   const isPushWide: boolean = useMediaQueryMatches(BED_DRAWER_PUSH_MEDIA_QUERY);
@@ -74,7 +76,15 @@ export const BedViewport = (props: BedViewportProps): ReactNode => {
   // moves right, out from under the drawer.
   const overlayInsetPx: number = isDrawerOpen && isWide && !isPushWide ? drawerInsetPx : 0;
   const { viewport, zoomBedBy, panBedBy, fitBedToView }: BedViewportControls =
-    useBedViewportControls(dimensions, screenSize, keptViewportRef, isPushedAside, overlayInsetPx, selectedObjects);
+    useBedViewportControls(
+      dimensions,
+      screenSize,
+      keptViewportRef,
+      isPushedAside,
+      overlayInsetPx,
+      selectedObjects,
+      selectionFitRequestCount,
+    );
   const panGesture: BedPanGesture = useBedPanGesture(panBedBy);
   const viewBox: BedViewBox = getBedViewBox({ viewport, screenSize, dimensions });
   const rulers: BedRulerLayout = useMemo(

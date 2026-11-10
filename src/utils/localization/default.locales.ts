@@ -1705,7 +1705,7 @@ registerLocales({
       [DEFAULT.TOAST_SVG_IMPORT_FAILED_NOT_SVG]: "{{fileName}} was skipped: it is not a usable SVG file.",
       [DEFAULT.TOAST_SVG_IMPORT_FAILED_TOO_LARGE]: "{{fileName}} was skipped: it is larger than 10 MB.",
       [DEFAULT.TOAST_SVG_IMPORT_LIMIT_REACHED]: "A project holds at most {{limit}} objects. The remaining files were not imported.",
-      [DEFAULT.TOAST_SVG_LARGER_THAN_BED]: "{{fileName}} is larger than the bed. Scale it down to fit.",
+      [DEFAULT.TOAST_SVG_LARGER_THAN_BED]: "{{fileName}} is larger than the bed, so it starts at the origin corner.",
       [DEFAULT.TOAST_TOOLPATH_FAILED]: "The toolpath could not be generated. Try again, or simplify the design.",
       [DEFAULT.TOAST_UNSUPPORTED_FIRMWARE]: "This firmware is not supported yet (GRBL 1.1 or newer is required).",
       [DEFAULT.TOOLPATH_CANCEL]: "Cancel",

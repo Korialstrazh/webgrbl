@@ -10,18 +10,26 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CloseOutlined } from '@ant-design/icons';
+import { CloseOutlined, CompressOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { MULTIPLICATION_SIGN } from '../../utils/characters.constants';
+import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { AppToast } from '../../utils/states/interfaces/AppToast';
+import { useBedDimensions } from '../../utils/hooks/use.bed.dimensions';
+import { getObjectFittedToBedTransform } from '../../utils/project/get.object.fitted.to.bed.transform';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { getToastMessageText } from '../../utils/states/get.toast.message.text';
-import { ProjectUndoRequested } from '../../utils/states/project.document.state';
+import {
+  ProjectObjectsTransformed,
+  ProjectUndoRequested,
+  selectProjectObjects,
+} from '../../utils/states/project.document.state';
 import { TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import { ToastDismissed, selectToasts } from '../../utils/states/toast.state';
 import type { ToastStackProps } from './interfaces/ToastStackProps';
@@ -46,6 +54,18 @@ export const ToastStack = ({ isWide }: ToastStackProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const toasts: AppToast[] = useSelector(selectToasts);
+  const projectObjects: ProjectObject[] = useSelector(selectProjectObjects);
+  const bed: BedDimensions = useBedDimensions();
+
+  const fitObjectToBed = (toast: AppToast, fitObject: ProjectObject): void => {
+    dispatch(new ProjectObjectsTransformed({
+      transforms: { [fitObject.id]: getObjectFittedToBedTransform(fitObject, bed) },
+    }));
+    dispatch(new ToastDismissed({ toastId: toast.toastId }));
+  };
+
+  const getFitObject = (toast: AppToast): ProjectObject | undefined =>
+    projectObjects.find((projectObject: ProjectObject): boolean => projectObject.id === toast.fitToBedObjectId);
 
   return (
     <div className={getToastStackClassName(isWide)} data-testid={TOAST_STACK_TEST_ID}>
@@ -66,6 +86,21 @@ export const ToastStack = ({ isWide }: ToastStackProps): ReactNode => {
               }}
             >
               {t(DEFAULT.TOP_BAR_UNDO)}
+            </Button>
+          )}
+          {getFitObject(toast) && (
+            <Button
+              size={ANTD_BUTTON_SIZE_SMALL}
+              icon={<CompressOutlined aria-hidden />}
+              onClick={() => {
+                const fitObject: ProjectObject | undefined = getFitObject(toast);
+
+                if (fitObject) {
+                  fitObjectToBed(toast, fitObject);
+                }
+              }}
+            >
+              {t(DEFAULT.OBJECTS_FIT_TO_BED)}
             </Button>
           )}
           <Button

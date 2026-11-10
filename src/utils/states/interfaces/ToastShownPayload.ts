@@ -19,4 +19,6 @@ export interface ToastShownPayload {
   messageParameters: Record<string, string | number>;
   /** Whether the toast offers to undo the change it reports. */
   isUndoOffered?: boolean;
+  /** Id of an object larger than the bed that the toast offers to scale onto the bed. */
+  fitToBedObjectId?: string;
 }

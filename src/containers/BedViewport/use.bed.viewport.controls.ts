@@ -23,6 +23,7 @@ import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
 import type { BedViewportFrame } from '../../utils/bed/interfaces/BedViewportFrame';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
+import { newSelectionFitBedViewport } from '../../utils/bed/new.selection.fit.bed.viewport';
 import { newTopFitBedViewport } from '../../utils/bed/new.top.fit.bed.viewport';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
@@ -40,6 +41,7 @@ export const useBedViewportControls = (
   isStripFitWanted = false,
   overlayInsetPx = 0,
   selectedObjects: ProjectObject[] = [],
+  selectionFitRequestCount = 0,
 ): BedViewportControls => {
   const [viewport, setViewport] = useState<BedViewport>(
     () => keptViewportRef?.current ?? newFitBedViewport(dimensions),
@@ -56,6 +58,9 @@ export const useBedViewportControls = (
   const viewportBeforeOverlayRef = useRef<BedViewport | undefined>(undefined);
   // Read when a drawer opens; a later change of the selection does not move the bed again.
   const selectedObjectsRef = useRef<ProjectObject[]>(selectedObjects);
+
+  // The count seen at mount, so a request made before this view existed does not move it.
+  const handledSelectionFitCountRef = useRef<number>(selectionFitRequestCount);
 
   selectedObjectsRef.current = selectedObjects;
 
@@ -116,6 +121,22 @@ export const useBedViewportControls = (
       setViewport(viewportBeforeOverlay);
     }
   }, [overlayInsetPx, dimensions]);
+
+  useEffect(() => {
+    if (selectionFitRequestCount === handledSelectionFitCountRef.current) {
+      return;
+    }
+
+    handledSelectionFitCountRef.current = selectionFitRequestCount;
+    const selectionViewport: BedViewport | undefined =
+      newSelectionFitBedViewport(selectedObjectsRef.current, dimensions);
+
+    if (selectionViewport) {
+      isStripFitRef.current = false;
+      setIsStripFit(false);
+      setViewport(selectionViewport);
+    }
+  }, [selectionFitRequestCount, dimensions]);
 
   /** The fitted bed, once, on the first step after a drawer opened; undefined when the step starts from the state. */
   const takeStripStartViewport = useCallback((): BedViewport | undefined => {

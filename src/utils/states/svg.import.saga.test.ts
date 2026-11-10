@@ -15,6 +15,7 @@ import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { newProjectObject } from '../project/new.project.object';
 import { FREE_SPOT_GAP_MM, MAX_PROJECT_OBJECTS } from '../project/project.constants';
 import { MAX_SVG_FILE_BYTES, SVG_MIME_TYPE } from '../svg/svg.constants';
+import { selectBedSelectionFitRequestCount } from './bed.view.state';
 import type { AppToast } from './interfaces/AppToast';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
@@ -30,6 +31,7 @@ import { TOAST_SEVERITY } from './toast.constants';
 import { selectToasts } from './toast.state';
 
 const SQUARE_SIZE_MM = 20;
+const HALF_SQUARE_SIZE_MM = SQUARE_SIZE_MM / 2;
 const OVERSIZED_SIZE_MM = DEFAULT_BED_SIZE_MM + 100;
 const FIRST_FILE_NAME = 'first.svg';
 const SECOND_FILE_NAME = 'second.svg';
@@ -37,12 +39,16 @@ const BROKEN_FILE_NAME = 'broken.svg';
 const HUGE_FILE_NAME = 'huge.svg';
 const FOREIGN_FILE_NAME = 'foreign.svg';
 const BIG_FILE_NAME = 'big.svg';
+const BIG_FILE_STEM = 'big';
 const NO_SIZE_FILE_NAME = 'nosize.svg';
 const THIRD_FILE_NAME = 'third.svg';
 const PRELOADED_OBJECT_COUNT = MAX_PROJECT_OBJECTS - 1;
 
 const newSvgText = (sizeMm: number, innerMarkup: string = ''): string =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${sizeMm}mm" height="${sizeMm}mm">${innerMarkup}</svg>`;
+
+const newViewBoxSvgText = (sizeMm: number, innerMarkup: string): string =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${sizeMm}mm" height="${sizeMm}mm" viewBox="0 0 ${sizeMm} ${sizeMm}">${innerMarkup}</svg>`;
 
 const newSvgFile = (fileName: string, svgText: string = newSvgText(SQUARE_SIZE_MM)): File =>
   new File([svgText], fileName, { type: SVG_MIME_TYPE });
@@ -179,20 +185,36 @@ describe(importSvgFiles.name, () => {
     });
   });
 
-  it('imports an svg larger than the bed with an info toast', async () => {
+  it('places an svg larger than the bed at the origin, zooms to it and offers Fit to bed', async () => {
     const store: AppStore = newStore();
 
     requestImport(store, [newSvgFile(BIG_FILE_NAME, newSvgText(OVERSIZED_SIZE_MM))]);
     await waitForObjectCount(store, 1);
     await waitForToast(store, DEFAULT.TOAST_SVG_LARGER_THAN_BED);
     const bedToasts: AppToast[] = getToastsOf(store, DEFAULT.TOAST_SVG_LARGER_THAN_BED);
+    const bigObject: ProjectObject | undefined = selectProjectObjects(store.getState())[0];
 
-    expect(selectProjectObjects(store.getState())).toHaveLength(1);
     expect(bedToasts).toHaveLength(1);
     expect(bedToasts[0]).toMatchObject({
       severity: TOAST_SEVERITY.INFO,
-      messageParameters: { fileName: BIG_FILE_NAME },
+      messageParameters: { fileName: BIG_FILE_STEM },
+      fitToBedObjectId: bigObject?.id,
     });
+    expect([bigObject?.xMm, bigObject?.yMm]).toEqual([0, 0]);
+    expect(selectBedSelectionFitRequestCount(store.getState())).toBe(1);
+  });
+
+  it('places by the drawn geometry, so lines outside the page never start off the bed', async () => {
+    const store: AppStore = newStore();
+    const outsideMarkup: string =
+      `<rect x="-${HALF_SQUARE_SIZE_MM}" y="0" width="${SQUARE_SIZE_MM}" height="${SQUARE_SIZE_MM}"/>`;
+
+    requestImport(store, [newSvgFile(BIG_FILE_NAME, newViewBoxSvgText(SQUARE_SIZE_MM, outsideMarkup))]);
+    await waitForObjectCount(store, 1);
+    const placedObject: ProjectObject | undefined = selectProjectObjects(store.getState())[0];
+
+    expect([placedObject?.xMm, placedObject?.yMm]).toEqual([HALF_SQUARE_SIZE_MM, 0]);
+    expect(getToastsOf(store, DEFAULT.TOAST_SVG_LARGER_THAN_BED)).toHaveLength(0);
   });
 
   it('adds only the files that fit under the object limit and shows one error toast', async () => {
