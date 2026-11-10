@@ -34,6 +34,9 @@ import type {
 /** The compact button size, for actions inside a chip or a bar. */
 export const ANTD_BUTTON_SIZE_SMALL: ButtonProps['size'] = 'small';
 
+/** The round button shape, for a small floating hint button. */
+export const ANTD_BUTTON_SHAPE_CIRCLE: ButtonProps['shape'] = 'circle';
+
 /** The compact badge, for a count on an icon button. */
 export const ANTD_BADGE_SIZE_SMALL: BadgeProps['size'] = 'small';
 

@@ -14,6 +14,28 @@
   }
 }
 
+// Holds the scrolling cards and the "more below" hint floating over their bottom edge.
+.cardsArea {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+// Sits centred on the faded edge, clear of the card chevrons at the right, and casts a shadow to invite a click.
+.moreBelow {
+  position: absolute;
+  bottom: 0.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  border-color: var(--color-control-border);
+  background-color: var(--color-surface-2);
+  color: var(--color-text-muted);
+  box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 45%);
+}
+
 // A normal, visible scrollbar with a fixed gutter: the cards keep their width when it appears, and it shows at a
 // glance that Move and the cards below it scroll into view.
 .cards {
@@ -76,5 +98,9 @@
 
   .cards {
     overflow: visible;
+  }
+
+  .cardsArea {
+    display: block;
   }
 }
