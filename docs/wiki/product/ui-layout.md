@@ -58,7 +58,7 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 ## Round 47 behaviour notes
 
 - Objects off the bed draw a thick amber dashed outline over a faint amber tint, their vector shapes redrawn the same way, whatever the artwork colours; the zoom group has **Show all**, which fits the bed and every object. The job size tooltip says off-bed parts count.
-- While **Fix warnings** shows, it and the Check badge carry the count: only a lock dot whose reason is the warnings (or off-bed artwork) steps back, so an offline Start keeps its "Not connected" dot; the Job heading has no shared warning icon. and the frame overrun note moves into the Toolpath warnings popover. The object row chip and Cut check stay.
+- While **Fix warnings** shows, it and the Check badge carry the count: only a lock dot whose reason is the warnings (or off-bed artwork) steps back, so an offline Start keeps its "Not connected" dot; the Job heading has no shared warning icon, and the frame overrun note moves into the Toolpath warnings popover. The object row chip and Cut check stay.
 - Each readiness step with an action is its own tab stop; a done Check or Connect leaves the tab order with `aria-disabled`.
 - Icon tooltips (`DismissibleTooltip`, layer mode glyph) also open on a long press for touch screens.
 - Add/Edit material keeps Save off until the fields are valid: a name problem shows under the Name field only after it is touched or Save is tried (never on open), and a wrong thickness says "Thickness needed" beside the buttons.
