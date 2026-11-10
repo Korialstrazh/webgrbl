@@ -24,7 +24,6 @@ import type { BedViewMode } from '../../utils/bed/bed.view.constants';
 import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedViewMode } from '../../utils/states/bed.view.state';
-import { selectProjectObjects } from '../../utils/states/project.document.state';
 import { IconActionButton } from '../../views/IconActionButton';
 import { MaterialSheetIcon } from '../../views/MaterialSheetIcon';
 import { PaletteIcon } from '../../views/PaletteIcon';
@@ -45,8 +44,6 @@ export const DesignPanel = (): ReactNode => {
   const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
   // The material drives the 3D burn look, so its card is live in 3D as well as in Design.
   const isMaterialView: boolean = isDesignView || isThreeDView;
-  // On an empty bed the bed card offers the sample, so the Layers header does not repeat it.
-  const hasObjects: boolean = useSelector(selectProjectObjects).length > 0;
 
   return (
     <Layout.Sider
@@ -61,7 +58,7 @@ export const DesignPanel = (): ReactNode => {
           title={t(DEFAULT.DESIGN_LAYERS_TITLE)}
           headerActionComponent={
             <span className={styles.layersActions}>
-              {isDesignView && hasObjects && <AddTestSampleButton isIconOnly />}
+              {isDesignView && <AddTestSampleButton isIconOnly />}
               <IconActionButton
                 size={ANTD_BUTTON_SIZE_SMALL}
                 labelText={t(DEFAULT.LAYERS_OPEN_PALETTE)}

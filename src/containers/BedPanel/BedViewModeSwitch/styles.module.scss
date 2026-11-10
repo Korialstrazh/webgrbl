@@ -27,11 +27,10 @@
   font-size: 0.875rem;
 }
 
-// The current view stands out by a bold white caption on the accent-tinted fill, an accent icon and an accent bar
-// along its bottom edge, never by an outline that could be taken for the focus ring.
+// The current view stands out by a bold white caption on the accent-tinted fill and an accent icon,
+// never by an outline that could be taken for the focus ring.
 .viewSwitch :global(.ant-segmented-item-selected) {
   background-color: var(--color-accent-tint);
-  box-shadow: inset 0 -0.1875rem 0 var(--color-accent);
   color: var(--color-text);
   font-weight: 700;
 

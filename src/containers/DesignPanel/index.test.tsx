@@ -76,10 +76,12 @@ describe(DesignPanel.name, () => {
     expect(screen.queryByRole('note', { name: CUT_CHECK_NOTE })).not.toBeInTheDocument();
   });
 
-  it('leaves Add test sample to the bed card while the bed is empty', () => {
+  it('puts Add test sample in the Layers panel while the bed is empty', () => {
     renderDesignPanel(newStore());
 
-    expect(screen.queryByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).not.toBeInTheDocument();
+    const layersPanel: HTMLElement = screen.getByRole('region', { name: LAYERS_TITLE });
+
+    expect(within(layersPanel).getByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).toBeInTheDocument();
   });
 
   it('puts Add test sample in the Layers panel once the bed has objects', () => {
