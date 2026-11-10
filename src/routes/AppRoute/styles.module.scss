@@ -40,7 +40,7 @@
   overflow: auto;
   scrollbar-width: thin;
 
-  @include layout.more-below-fade(var(--color-bg));
+  @include layout.more-below-fade(rgb(0 0 0 / 45%));
 }
 
 // With the console sheet open, the region on screen ends where the sheet begins, so the bed re-fits to the space left

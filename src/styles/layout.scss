@@ -51,24 +51,30 @@ $sticky-stop-bar-height: 4.5rem;
 // The bed rulers have bands of their own along the top and left of the bed drawing; the drawing starts where they end.
 $bed-ruler-band-size: 1.25rem;
 
-// A soft fade at the bottom edge of a scrolling panel while more content waits below it, so a thin scrollbar is not
-// the only hint; it fades out as the panel reaches its end. Include it in the scrolling element with its background.
+// A thin shadow edge at the bottom of a scrolling panel while more content waits below it, so a thin scrollbar is not
+// the only hint; it fades out as the panel reaches its end. It is only as tall as the panel's bottom padding and darkens
+// rather than covering with the background, so a control under it never looks disabled. Include it in the scrolling
+// element; the colour is the shadow's.
+$more-below-fade-height: 0.5rem;
+
 @keyframes more-below-fade-out {
   to {
     opacity: 0;
   }
 }
 
-@mixin more-below-fade($background-colour) {
+@mixin more-below-fade($shadow-colour) {
+  padding-bottom: $more-below-fade-height;
+
   &::after {
     position: sticky;
     bottom: 0;
     display: block;
-    height: 2rem;
-    margin-top: -2rem;
+    height: $more-below-fade-height;
+    margin-top: -$more-below-fade-height;
     pointer-events: none;
     content: '';
-    background: linear-gradient(to bottom, transparent, $background-colour);
+    background: linear-gradient(to bottom, transparent, $shadow-colour);
     animation: more-below-fade-out linear both;
     animation-range: 85% 100%;
     animation-timeline: scroll(nearest block);
