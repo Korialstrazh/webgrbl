@@ -117,9 +117,10 @@ export const ConnectionPill = (): ReactNode => {
             </span>
           )}
           {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
-          {activeProfile && <span className={styles.profile}>{activeProfile.name}</span>}
-          {/* "No port chosen" beside "Not connected" says nothing new, so only a chosen port is shown. */}
-          {selectedPortId && <span className={styles.port}>{portText}</span>}
+          {/* The profile has its own top-bar button and the popover names the port, so once connected the pill keeps to
+              state and firmware and stays narrow; both are still in its label. "No port chosen" beside "Not connected"
+              says nothing new, so only a chosen port is shown. */}
+          {selectedPortId && !isConnected && <span className={styles.port}>{portText}</span>}
           {!isWebSerialSupported && (
             <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
           )}
