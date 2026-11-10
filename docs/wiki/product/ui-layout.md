@@ -43,5 +43,14 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 - One project name everywhere: the top bar, the browser tab and Open project show the same derived name (a default-named project is named after its first object and creation day).
 - An import larger than the bed starts at the bed origin, the view zooms out to show it whole, and its toast offers Fit to bed.
 - Tooltips close on a narrow region switch or tab change and stay hidden until the pointer moves.
-- The machine panel shows a "More below" chevron on its faded edge while its cards overflow; Position coordinates never wrap.
+- The machine panel shows a "More below" chevron while its cards overflow (since round 44 in the Stop footer's top padding); Position coordinates never wrap.
 
+## Round 44 behaviour notes
+
+- The folded Job card keeps Start at a fixed width inside the card; the facts wrap beside it.
+- Object sizes show compactly on one line ("900×900", in mm); the open Material step marks "optional" with a small hollow ring after its name, so every step is one line; the project name sits in a fixed-width slot, so the top bar never shifts.
+- The object row chip counts only the toolpath warnings that lock Start, the same number as Fix warnings; outside the bed is a separate bed-outline icon outside the count.
+- Lock-reason popovers open to the left of their dot, over their own button, and flip back inside the window.
+- The frame overrun and the Toolpath warnings list are icon, short label and action; the full sentences are tooltips.
+- Fix warnings briefly highlights the Toolpath tab and the warnings chip.
+- The machine panel's "More below" chevron sits in the Stop footer's top padding under a thin shadow, never over a control; in the wide layout the jog pad and job actions are slightly lower, so Move fits above Stop when connected at 1440 x 900.
