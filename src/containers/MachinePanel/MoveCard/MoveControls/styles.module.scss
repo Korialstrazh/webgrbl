@@ -41,9 +41,9 @@
     padding-inline: 0;
   }
 
-  // The accent ring is for keyboard focus only: a clicked arrow keeps mouse focus, and must not look pressed once the
-  // pointer has left it.
-  > :global(.ant-btn:not(:disabled):focus:not(:focus-visible, :hover, :active)) {
+  // A focused key keeps the neutral border: keyboard focus shows as the outline ring only, so a key the focus came
+  // back to after a jog (Home included, once the pad unlocks) never looks pressed or selected.
+  > :global(.ant-btn:not(:disabled):focus:not(:hover, :active)) {
     border-color: var(--color-border);
     color: var(--color-text);
   }

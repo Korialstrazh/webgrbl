@@ -11,7 +11,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { PoweroffOutlined, UnlockOutlined, WarningOutlined } from '@ant-design/icons';
+import { ReloadOutlined, UnlockOutlined, WarningOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -64,7 +64,7 @@ export const MachineResetUnlock = (): ReactNode => {
           size={ANTD_BUTTON_SIZE_SMALL}
           type={ANTD_BUTTON_TYPE_TEXT}
           className={styles.restartButton}
-          icon={<PoweroffOutlined />}
+          icon={<ReloadOutlined />}
           aria-label={t(DEFAULT.MACHINE_CONTROL_RESTART)}
           aria-description={t(DEFAULT.MACHINE_CONTROL_RESTART_NOTE)}
           disabled={!isConnected}

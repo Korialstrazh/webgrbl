@@ -164,7 +164,7 @@ describe(MachinePanel.name, () => {
     connect(store);
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
 
-    expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-poweroff')).not.toBeNull();
+    expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-reload')).not.toBeNull();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL }).querySelector('.anticon-unlock')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Set zero' }).querySelector('.anticon-aim')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Hold to fire' }).querySelector('.anticon-bulb')).not.toBeNull();
