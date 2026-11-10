@@ -17,6 +17,10 @@ describe('toast stack styles', () => {
     expect(stackRule).toMatch(/transform:\s*translateX\(-50%\);/);
   });
 
+  it('keeps the stack below the bed ruler band', () => {
+    expect(getStackRule()).toMatch(/top:[^;]*layout\.\$bed-ruler-band-size/);
+  });
+
   it('stacks the toasts above STOP', () => {
     expect(getStackRule()).toMatch(/z-index:\s*layout\.\$toast-above-stop-z-index;/);
   });
