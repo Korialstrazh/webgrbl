@@ -26,6 +26,9 @@
   height: auto;
   min-width: 0;
   padding: var(--space-2) var(--space-3);
+  // antd buttons keep their text on one line and let it run out of the box, over the warning chip beside it.
+  overflow: hidden;
+  white-space: normal;
   text-align: left;
 }
 
