@@ -1,4 +1,5 @@
-// A compact chip: warning icon and count, coloured like the worst problem it holds.
+// A compact chip: the warning icon and the count of problems that lock Start, then, apart from the count, a
+// bed-outline icon in the info colour for an object outside the bed, a note that does not lock Start.
 .chip {
   display: inline-flex;
   flex: none;
@@ -11,8 +12,14 @@
   font-variant-numeric: tabular-nums;
 }
 
-.dangerChip {
-  color: var(--color-danger-text);
+.blockingPart {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.outsideBedIcon {
+  color: var(--color-info);
 }
 
 .list {
@@ -38,7 +45,6 @@
   color: var(--color-warning);
 }
 
-.dangerItem,
-.dangerItem .itemIcon {
-  color: var(--color-danger-text);
+.noteItem .itemIcon {
+  color: var(--color-info);
 }

@@ -690,6 +690,8 @@ OBJECTS_TREE_SHOW;Show the layers and shapes of {{name}}
 OBJECTS_TREE_TURN_OFF;Skip {{name}}: it is not burned
 OBJECTS_TREE_TURN_ON;Burn {{name}} again
 OBJECTS_WARNINGS;Problems with {{name}} ({{count}}): show them
+OBJECTS_WARNINGS_AND_OUTSIDE_BED;Problems with {{name}} ({{count}}), and it is outside the bed: show them
+OBJECTS_WARNINGS_OUTSIDE_BED_ONLY;Problems with {{name}}: it is outside the bed, show how to fix it
 OPEN_PROJECT_DELETE;Delete
 OPEN_PROJECT_DELETE_CANCEL;Cancel
 OPEN_PROJECT_DELETE_CONFIRM;Delete the project {{name}}?

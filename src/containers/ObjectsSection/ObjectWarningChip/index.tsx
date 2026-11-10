@@ -1,5 +1,7 @@
 /**
- * A small chip with a warning icon and the number of problems of one object; a click or focus opens a popover that
+ * A small chip with a warning icon and the number of problems of one object that lock Start job (the same toolpath
+ * warnings the Job card's Fix warnings counts), and, apart from that count, a bed-outline icon when the object sits
+ * outside the bed, a note that does not lock Start; a click or focus opens a popover that
  * explains each problem in full, so the object row stays one line. The popover opens to the side, over the bed, so it
  * never covers the element tree below the row, and each line starts with the icon of its kind.
  *
@@ -12,6 +14,7 @@
  */
 import { BorderOuterOutlined, WarningOutlined } from '@ant-design/icons';
 import { Button, Popover } from 'antd';
+import type { TFunction } from 'i18next';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +35,21 @@ import styles from './styles.module.scss';
 
 const OBJECT_WARNING_OVERLAY_ID = 'object-warning';
 
+const getChipLabelText = (
+  t: TFunction,
+  objectName: string,
+  blockingCount: number,
+  isOutsideBed: boolean,
+): string => {
+  if (!blockingCount) {
+    return t(DEFAULT.OBJECTS_WARNINGS_OUTSIDE_BED_ONLY, { name: objectName });
+  }
+
+  const labelKey: string = isOutsideBed ? DEFAULT.OBJECTS_WARNINGS_AND_OUTSIDE_BED : DEFAULT.OBJECTS_WARNINGS;
+
+  return t(labelKey, { name: objectName, count: blockingCount });
+};
+
 export const ObjectWarningChip = (props: ObjectWarningChipProps): ReactNode => {
   const { objectName, isOutsideBed, outsideBedActionsComponent, warningKinds } = props;
   const { t } = useTranslation();
@@ -42,17 +60,18 @@ export const ObjectWarningChip = (props: ObjectWarningChipProps): ReactNode => {
 
   usePopoverAutoClose(isOpen, () => setIsOpen(false));
 
-  const problemCount: number = warningKinds.length + (isOutsideBed ? 1 : 0);
+  const blockingCount: number = warningKinds.length;
 
-  if (!problemCount) {
+  if (!blockingCount && !isOutsideBed) {
     return null;
   }
 
-  const chipClassName: string | undefined = isOutsideBed ? [styles.chip, styles.dangerChip].join(' ') : styles.chip;
+  const labelText: string = getChipLabelText(t, objectName, blockingCount, isOutsideBed);
+
   const listComponent: ReactNode = (
     <ul className={styles.list}>
       {isOutsideBed && (
-        <li className={[styles.item, styles.dangerItem].join(' ')}>
+        <li className={[styles.item, styles.noteItem].join(' ')}>
           <BorderOuterOutlined className={styles.itemIcon} aria-hidden />
           <div>
             <span>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</span>
@@ -78,15 +97,20 @@ export const ObjectWarningChip = (props: ObjectWarningChipProps): ReactNode => {
       onOpenChange={setIsOpen}
     >
       <Button
-        className={chipClassName}
+        className={styles.chip}
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
-        aria-label={t(DEFAULT.OBJECTS_WARNINGS, { name: objectName, count: problemCount })}
-        title={t(DEFAULT.OBJECTS_WARNINGS, { name: objectName, count: problemCount })}
-        data-object-warning-count={problemCount}
+        aria-label={labelText}
+        title={labelText}
+        data-object-warning-count={blockingCount}
       >
-        <WarningOutlined aria-hidden />
-        <span>{problemCount}</span>
+        {!!blockingCount && (
+          <span className={styles.blockingPart}>
+            <WarningOutlined aria-hidden />
+            <span>{blockingCount}</span>
+          </span>
+        )}
+        {isOutsideBed && <BorderOuterOutlined className={styles.outsideBedIcon} aria-hidden />}
       </Button>
     </Popover>
   );

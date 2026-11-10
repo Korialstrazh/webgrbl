@@ -56,6 +56,7 @@ const OUTSIDE_NOTE = 'Outside the bed';
 const MOVE_ONTO_BED_LABEL = 'Move onto bed';
 const FIT_TO_BED_LABEL = 'Fit to bed';
 const WARNING_CHIP_NAME = /^Problems with /;
+const WARNING_COUNT_ATTRIBUTE = 'data-object-warning-count';
 const FIRST_SIZE_TEXT = `100${MULTIPLICATION_SIGN}50.0`;
 const SECOND_SIZE_TEXT = `20.0${MULTIPLICATION_SIGN}20.0`;
 const SECOND_SIZE_MM = 20;
@@ -483,6 +484,33 @@ describe(ObjectsSection.name, () => {
     expect(warningChip).toHaveAccessibleName(new RegExp(FIRST_NAME));
     fireEvent.click(warningChip);
     expect(screen.getByText(TEXT_WARNING)).toBeInTheDocument();
+  });
+
+  it('counts only the warnings that lock Start and shows outside the bed apart, out of the count', () => {
+    const store: AppStore = newStore();
+
+    act(() => {
+      store.dispatch(new ProjectDocumentLoaded({
+        document: {
+          objects: [
+            newProjectObject({ id: FIRST_ID, name: FIRST_NAME, svgText: TEXT_SVG_TEXT, xMm: BED_OVERFLOW_X_MM }),
+            newProjectObject({ id: SECOND_ID, name: SECOND_NAME, xMm: BED_OVERFLOW_X_MM }),
+          ],
+          layers: [],
+        },
+      }));
+    });
+    renderSection(store);
+
+    const [textChip, outsideOnlyChip]: HTMLElement[] = screen.getAllByRole('button', { name: WARNING_CHIP_NAME });
+
+    expect(textChip).toHaveAttribute(WARNING_COUNT_ATTRIBUTE, '1');
+    expect(textChip).toHaveTextContent(/^1$/);
+    expect(outsideOnlyChip).toHaveAttribute(WARNING_COUNT_ATTRIBUTE, '0');
+    expect(outsideOnlyChip).toHaveTextContent(/^$/);
+    fireEvent.click(textChip);
+    expect(screen.getByText(TEXT_WARNING)).toBeInTheDocument();
+    expect(screen.getByText(OUTSIDE_NOTE)).toBeInTheDocument();
   });
 
   it('scales the height with the width while the ratio is locked, as one undo step', () => {
