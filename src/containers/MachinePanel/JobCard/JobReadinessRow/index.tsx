@@ -7,7 +7,9 @@
  * Each step goes to where it is set, a done step shows a large check, and the first required one still open is outlined
  * as next. An optional step (Material) that is still open shows a dashed marker and a small hollow ring after
  * its name, on the same line: Start does not wait for it.
- * The steps are one tab stop: the arrow keys, Home and End move between them (a roving tab index).
+ * Every step with something to do is its own tab stop: Profile, Design and Material always open where they are set,
+ * Check and Connect only while open. A done Check or Connect has nothing to open, so it leaves the tab order and states
+ * that it is done through its label and aria-disabled. The arrow keys, Home and End also move between the steps.
  *
  * @author michael.morosov
  *
@@ -18,7 +20,7 @@
  */
 import { CheckOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { KeyboardEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -87,20 +89,20 @@ const getMovedStepIndex = (key: string, index: number, count: number): number | 
   return key === END_KEY ? count - 1 : undefined;
 };
 
+// Once met these have nothing left to open: a fixed toolpath and a live connection need no visit.
+const STEPS_DONE_WHEN_MET: readonly JobReadinessStep[] = [JOB_READINESS_STEP.WARNINGS, JOB_READINESS_STEP.CONNECT];
+
 interface JobReadinessButtonProps extends JobReadinessLook {
-  /** Whether this step holds the one tab stop of the row. */
-  isTabStop: boolean;
   onGoToStep: (step: JobReadinessStep) => void;
-  onFocusStep: (step: JobReadinessStep) => void;
 }
 
 const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
-  const { step, iconComponent, captionKey, hintKey, optionalHintKey, metHintKey, isTabStop, onGoToStep, onFocusStep } =
-    props;
+  const { step, iconComponent, captionKey, hintKey, optionalHintKey, metHintKey, onGoToStep } = props;
   const { t } = useTranslation();
   const isMet: boolean = useSelector(selectIsJobReadinessStepMet(step));
   const isNextStep: boolean = useSelector(selectFirstUnmetJobReadinessStep) === step;
   const isOptionalOpen: boolean = !isMet && isJobReadinessStepOptional(step);
+  const isActionable: boolean = !isMet || !STEPS_DONE_WHEN_MET.includes(step);
   const warningCount: number = useSelector(selectJobReadinessWarningCount);
   // Only the Check step counts something: its open marker carries the number of warnings left to fix.
   const openCount: number = !isMet && step === JOB_READINESS_STEP.WARNINGS ? warningCount : 0;
@@ -128,9 +130,13 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
             { step: captionText, count: openCount },
           )}
           aria-current={isNextStep ? ARIA_CURRENT_STEP : undefined}
-          tabIndex={isTabStop ? KEYBOARD_FOCUSABLE_TAB_INDEX : SCRIPT_FOCUS_ONLY_TAB_INDEX}
-          onFocus={() => onFocusStep(step)}
-          onClick={() => onGoToStep(step)}
+          aria-disabled={!isActionable}
+          tabIndex={isActionable ? KEYBOARD_FOCUSABLE_TAB_INDEX : SCRIPT_FOCUS_ONLY_TAB_INDEX}
+          onClick={() => {
+            if (isActionable) {
+              onGoToStep(step);
+            }
+          }}
         >
           <span className={styles.marker}>
             {isMet ? <CheckOutlined aria-hidden /> : iconComponent}
@@ -166,9 +172,6 @@ export const JobReadinessRow = (): ReactNode => {
   const nextLook: JobReadinessLook | undefined =
     JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
   const listRef: RefObject<HTMLOListElement | null> = useRef<HTMLOListElement>(null);
-  // The step last focused keeps the tab stop; until then it is the next step, or the first when all are done.
-  const [focusedStep, setFocusedStep] = useState<JobReadinessStep | undefined>(undefined);
-  const tabStopStep: JobReadinessStep | undefined = focusedStep ?? nextStep ?? JOB_READINESS_LOOKS[0]?.step;
 
   const previousNextStepRef: RefObject<JobReadinessStep | undefined> = useRef<JobReadinessStep | undefined>(nextStep);
 
@@ -264,9 +267,7 @@ export const JobReadinessRow = (): ReactNode => {
           <JobReadinessButton
             key={look.step}
             {...look}
-            isTabStop={look.step === tabStopStep}
             onGoToStep={goToStep}
-            onFocusStep={setFocusedStep}
           />
         ))}
       </ol>

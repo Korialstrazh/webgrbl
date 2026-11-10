@@ -47,6 +47,14 @@ body {
   box-shadow: 0 0 0 var(--focus-outline-offset) var(--color-bg);
 }
 
+// antd draws a slider handle's focus as a slightly wider ring of its own, too faint to find; keyboard focus on a handle
+// gets the same 2 px accent ring as every button, round like the handle.
+:root:not([data-pointer-modality]) .ant-slider-handle:focus-visible {
+  border-radius: 50%;
+  outline: var(--focus-outline-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-outline-offset);
+}
+
 // The splitter bars change colour smoothly between rest, hover and drag; the colours come from the antd theme.
 .ant-splitter-bar-dragger::before {
   transition: background-color 0.12s;

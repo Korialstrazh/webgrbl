@@ -73,7 +73,7 @@ const renderRow = (): AppStore => {
 };
 
 describe(JobReadinessRow.name, () => {
-  it('makes the steps one tab stop, on the current step, and moves between them with the arrow keys', () => {
+  it('makes every step with an action a tab stop and moves between them with the arrow keys', () => {
     renderRow();
 
     const profileStep: HTMLElement = screen.getByRole('button', { name: PROFILE_OPEN });
@@ -81,14 +81,13 @@ describe(JobReadinessRow.name, () => {
     const materialStep: HTMLElement = screen.getByRole('button', { name: MATERIAL_OPEN });
 
     expect(profileStep).toHaveAttribute('tabindex', '0');
-    expect(connectStep).toHaveAttribute('tabindex', '-1');
+    expect(connectStep).toHaveAttribute('tabindex', '0');
+    expect(materialStep).toHaveAttribute('tabindex', '0');
 
     act(() => profileStep.focus());
     fireEvent.keyDown(profileStep, { key: 'ArrowLeft' });
 
     expect(connectStep).toHaveFocus();
-    expect(connectStep).toHaveAttribute('tabindex', '0');
-    expect(profileStep).toHaveAttribute('tabindex', '-1');
 
     fireEvent.keyDown(connectStep, { key: 'Home' });
     fireEvent.keyDown(profileStep, { key: 'ArrowRight' });
@@ -116,6 +115,9 @@ describe(JobReadinessRow.name, () => {
     });
 
     expect(screen.getByRole('button', { name: CONNECT_MET })).toBeInTheDocument();
+    // Done, Connect has nothing left to open: it leaves the tab order and says so.
+    expect(screen.getByRole('button', { name: CONNECT_MET })).toHaveAttribute('tabindex', '-1');
+    expect(screen.getByRole('button', { name: CONNECT_MET })).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('offers one action for the current step, which opens the place the step opens', () => {
