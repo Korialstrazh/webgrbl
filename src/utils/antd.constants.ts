@@ -40,6 +40,9 @@ export const ANTD_BUTTON_SHAPE_CIRCLE: ButtonProps['shape'] = 'circle';
 /** The compact badge, for a count on an icon button. */
 export const ANTD_BADGE_SIZE_SMALL: BadgeProps['size'] = 'small';
 
+/** The warning status badge, for the dot that marks why an action is locked. */
+export const ANTD_BADGE_STATUS_WARNING: BadgeProps['status'] = 'warning';
+
 /** The large button size, for machine controls that need the full touch target. */
 export const ANTD_BUTTON_SIZE_LARGE: ButtonProps['size'] = 'large';
 

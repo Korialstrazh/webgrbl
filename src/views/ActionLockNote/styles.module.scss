@@ -8,14 +8,29 @@
   line-height: 0;
 }
 
-// A fixed-size dot in the warning colour, so its size never changes with the text behind it. The colour is set on the
-// dot itself, so the hover and focus colours of the button and the note around it never turn it white.
-.dot {
+// The hover target around the badge, with no tab stop: the button carries the reason for keyboard users.
+.dotTarget {
   display: block;
-  width: 0.625rem;
-  height: 0.625rem;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-warning);
+  cursor: default;
+}
+
+// An antd status badge drawn as a fixed-size dot in the warning colour, so its size never changes with the text behind
+// it. The colour is set on the dot itself, so the hover and focus colours of the button around it never turn it white.
+.dot:global(.ant-badge) {
+  display: block;
+  line-height: 0;
+
+  :global(.ant-badge-status-dot) {
+    top: 0;
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color: var(--color-warning);
+  }
+}
+
+.noteText {
+  display: block;
+  max-width: 16rem;
 }
 
 .reasonList {
