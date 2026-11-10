@@ -150,6 +150,12 @@ export const ANTD_TAG_COLOR_SUCCESS: TagProps['color'] = 'success';
 /** The tooltip opens while its anchor is hovered or holds the keyboard focus. */
 export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS: TooltipProps['trigger'] = ['hover', 'focus'];
 
+/**
+ * The tooltip opens on a hover, and also on a long press (the context menu event touch browsers send), so a screen
+ * without hover still reaches the name of an icon-only control.
+ */
+export const ANTD_TOOLTIP_TRIGGER_HOVER_AND_LONG_PRESS: TooltipProps['trigger'] = ['hover', 'contextMenu'];
+
 export const ANTD_TOOLTIP_PLACEMENT_BOTTOM: TooltipProps['placement'] = 'bottom';
 export const ANTD_TOOLTIP_PLACEMENT_LEFT: TooltipProps['placement'] = 'left';
 export const ANTD_TOOLTIP_PLACEMENT_TOP_RIGHT: TooltipProps['placement'] = 'topRight';

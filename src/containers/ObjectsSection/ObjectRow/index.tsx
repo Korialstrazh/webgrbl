@@ -111,11 +111,11 @@ export const ObjectRow = ({
           aria-expanded={isTreeOpen}
           onClick={() => setIsTreeOpen(!isTreeOpen)}
         />
-        <Button
+        <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
-          icon={<CloseOutlined />}
-          aria-label={t(DEFAULT.OBJECTS_DELETE, { name: projectObject.name })}
+          labelText={t(DEFAULT.OBJECTS_DELETE, { name: projectObject.name })}
+          iconComponent={<CloseOutlined />}
           onClick={() => onDelete(projectObject.id)}
         />
       </div>

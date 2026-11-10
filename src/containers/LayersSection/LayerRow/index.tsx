@@ -22,7 +22,11 @@ import { Button, Checkbox, Tooltip } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import type { DragEvent, KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
+import {
+  ANTD_BUTTON_SIZE_SMALL,
+  ANTD_BUTTON_TYPE_TEXT,
+  ANTD_TOOLTIP_TRIGGER_HOVER_AND_LONG_PRESS,
+} from '../../../utils/antd.constants';
 import { ARROW_DOWN_KEY, ARROW_UP_KEY } from '../../../utils/browser/browser.events.constants';
 import { getLayerDisplayName } from '../../../utils/layers/get.layer.display.name';
 import { LAYER_MODE_LABEL_KEY } from '../../../utils/layers/layer.constants';
@@ -123,8 +127,11 @@ export const LayerRow = ({
             <LayerSwatch colour={layer.colour} isShading={layer.isShading} />
           </span>
         </Tooltip>
-        <Tooltip title={t(LAYER_MODE_LABEL_KEY[settings.mode])}>
-          <span className={styles.modeIcon} aria-hidden><LayerModeIcon mode={settings.mode} /></span>
+        {/* The row button's name already says the mode through the value summary; a long press shows it on touch. */}
+        <Tooltip title={t(LAYER_MODE_LABEL_KEY[settings.mode])} trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_LONG_PRESS}>
+          <span className={styles.modeIcon} aria-hidden>
+            <LayerModeIcon mode={settings.mode} />
+          </span>
         </Tooltip>
         <span className={styles.name} title={layerNameTitle}>{layerName}</span>
         {hasNoPaletteEntry && (
