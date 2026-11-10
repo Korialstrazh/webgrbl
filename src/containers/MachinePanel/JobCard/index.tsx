@@ -5,7 +5,8 @@
  * heading for the pointer and in each button's description;
  * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
  * gear, traces the outline of the job. A chevron in the heading folds the card to one line, its facts and Start, so the
- * cards below come into view; the fold is remembered per viewer.
+ * cards below come into view; the fold is remembered per viewer. The laser pointer row is the card's last row, folded
+ * or not.
  *
  * @author michael.morosov
  *
@@ -61,6 +62,7 @@ import { FrameControls } from './FrameControls';
 import { JobPauseButton } from './JobPauseButton';
 import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
+import { LaserPointerRow } from './LaserPointerRow';
 import { getJobActionBlockedReasonKeys } from './get.job.action.blocked.reason.keys';
 import { getJobLayerCountText } from './get.job.layer.count.text';
 import { getJobLockShortReasonKeys } from './get.job.lock.short.reason.keys';
@@ -195,6 +197,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           </div>
           {isJobRunActive && <JobRunProgress />}
           <JobPauseButton />
+          <LaserPointerRow />
         </div>
       ) : (
         <div id={bodyId} className={styles.jobCard}>
@@ -222,6 +225,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
               />
             )}
           />
+          <LaserPointerRow />
         </div>
       )}
     </Panel>

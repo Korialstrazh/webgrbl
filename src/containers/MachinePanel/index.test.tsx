@@ -32,8 +32,8 @@ const STATUS_CONNECT_LABEL = 'Connect';
 const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
 const JOB_CARD_TITLE = 'Job';
 const PROFILE_STEP_LABEL = 'Profile: to do';
-const CARD_TITLES_IN_ORDER: readonly string[] = ['Job', 'Status', 'Position', 'Move', 'Laser pointer'];
-const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
+const CARD_TITLES_IN_ORDER: readonly string[] = ['Job', 'Status', 'Position', 'Move'];
+const COMING_SOON_TITLES: readonly string[] = ['Job'];
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.RUN,
@@ -115,7 +115,7 @@ describe(MachinePanel.name, () => {
     expect(screen.queryByText(IDLE_LABEL)).not.toBeInTheDocument();
   });
 
-  it('puts the main task first: job, status, position, move, then the laser pointer', () => {
+  it('puts the main task first: job, status, position, then move', () => {
     connect(renderMachinePanel());
 
     const cardTitles: (string | null)[] = screen.getAllByRole('heading')

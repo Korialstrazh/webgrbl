@@ -1,37 +1,35 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { LaserCard } from '.';
-import { ENTER_KEY, SPACE_KEY } from '../../../utils/browser/browser.events.constants';
-import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
-import type { GrblConnectionStatus, GrblMachineState } from '../../../utils/grbl/grbl.constants';
-import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
-import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
-import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
-import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
-import type { Action } from '../../../utils/states/action';
-import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
+import { LaserPointerRow } from '.';
+import { ENTER_KEY, SPACE_KEY } from '../../../../utils/browser/browser.events.constants';
+import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../../utils/grbl/grbl.constants';
+import type { GrblConnectionStatus, GrblMachineState } from '../../../../utils/grbl/grbl.constants';
+import type { GrblResolvedStatus } from '../../../../utils/grbl/interfaces/GrblResolvedStatus';
+import { MACHINE_COMMAND } from '../../../../utils/machine/machine.commands';
+import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
+import { newMachineProfile } from '../../../../utils/profiles/new.machine.profile';
+import type { Action } from '../../../../utils/states/action';
+import { ConnectionStatusChanged } from '../../../../utils/states/grbl.connection.state';
 import {
   LaserPointerFireRequested,
   LaserPointerFiringStarted,
   LaserPointerPowerChanged,
   LaserPointerReleaseRequested,
   selectLaserPointerPowerPercent,
-} from '../../../utils/states/laser.pointer.state';
-import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
+} from '../../../../utils/states/laser.pointer.state';
+import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../../utils/states/machine.profile.state';
 import {
   MachineLineRequested,
   MachineResetRequested,
   MachineStatusReceived,
   MachineStopRequested,
-} from '../../../utils/states/machine.status.state';
-import { newStore } from '../../../utils/states/new.store';
-import type { AppStore } from '../../../utils/states/new.store';
+} from '../../../../utils/states/machine.status.state';
+import { newStore } from '../../../../utils/states/new.store';
+import type { AppStore } from '../../../../utils/states/new.store';
 
 const FIRE_LABEL = 'Hold to fire';
 const LASER_ON_LABEL = 'LASER ON';
 const AIR_ASSIST_LABEL = 'Air assist';
-const SHOW_CONTROLS_LABEL = 'Show the laser pointer controls';
-const COLLAPSED_HINT = 'Connect to use';
 const POWER_LABEL = 'Pointer power';
 const SECONDARY_POINTER_BUTTON = 2;
 const ARROW_RIGHT_KEY_CODE = 39;
@@ -58,18 +56,14 @@ const NEW_STATUS: GrblResolvedStatus = {
   overrides: undefined,
 };
 
-const showLaserControls = (): void => {
-  fireEvent.click(screen.getByRole('button', { name: SHOW_CONTROLS_LABEL }));
-};
-
 const openDetails = (): void => {
   fireEvent.click(screen.getByRole('button', { name: DETAILS_LABEL }));
 };
 
-const renderLaserCard = (store: AppStore): void => {
+const renderLaserPointerRow = (store: AppStore): void => {
   render(
     <Provider store={store}>
-      <LaserCard />
+      <LaserPointerRow />
     </Provider>,
   );
 };
@@ -124,12 +118,12 @@ const getRequestedLines = (dispatchSpy: ReturnType<typeof vi.spyOn>): string[] =
     (dispatched: MachineLineRequested): string => dispatched.payload.line,
   );
 
-describe(LaserCard.name, () => {
+describe(LaserPointerRow.name, () => {
   it('requests fire on pointer down', () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
     fireEvent.pointerDown(screen.getByRole('button', { name: FIRE_LABEL }));
 
@@ -140,7 +134,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
     fireEvent.pointerDown(screen.getByRole('button', { name: FIRE_LABEL }), { button: SECONDARY_POINTER_BUTTON });
 
@@ -151,7 +145,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
     const fireButton: HTMLElement = screen.getByRole('button', { name: FIRE_LABEL });
 
@@ -165,7 +159,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
     fireEvent.pointerDown(screen.getByRole('button', { name: FIRE_LABEL }));
     cleanup();
@@ -177,7 +171,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
     const fireButton: HTMLElement = screen.getByRole('button', { name: FIRE_LABEL });
 
@@ -191,7 +185,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
     const fireButton: HTMLElement = screen.getByRole('button', { name: FIRE_LABEL });
 
@@ -210,7 +204,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
     const fireButton: HTMLElement = screen.getByRole('button', { name: FIRE_LABEL });
 
@@ -224,7 +218,7 @@ describe(LaserCard.name, () => {
   it('shows LASER ON while the pointer is firing', () => {
     const store: AppStore = newStore();
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
 
     expect(screen.queryByText(LASER_ON_LABEL)).not.toBeInTheDocument();
@@ -239,8 +233,7 @@ describe(LaserCard.name, () => {
   it('disables the fire button while disconnected and when the machine is not Idle', () => {
     const store: AppStore = newStore();
 
-    renderLaserCard(store);
-    showLaserControls();
+    renderLaserPointerRow(store);
 
     expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeDisabled();
 
@@ -258,7 +251,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
     act(() => {
       store.dispatch(new LaserPointerFiringStarted());
@@ -276,8 +269,7 @@ describe(LaserCard.name, () => {
   it('stores the slider power in the state and shows the approximate watts', () => {
     const store: AppStore = newStore();
 
-    renderLaserCard(store);
-    showLaserControls();
+    renderLaserPointerRow(store);
     activateProfile(store, { maxPowerWatts: MAX_POWER_WATTS });
     act(() => {
       store.dispatch(new LaserPointerPowerChanged({ percent: POWER_PERCENT }));
@@ -296,8 +288,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
-    showLaserControls();
+    renderLaserPointerRow(store);
     fireEvent.keyDown(screen.getByRole('slider', { name: POWER_LABEL }), {
       key: 'ArrowRight',
       keyCode: ARROW_RIGHT_KEY_CODE,
@@ -307,8 +298,7 @@ describe(LaserCard.name, () => {
   });
 
   it('hides the watts without an active profile', () => {
-    renderLaserCard(newStore());
-    showLaserControls();
+    renderLaserPointerRow(newStore());
     openDetails();
 
     expect(screen.queryByText(ANY_WATTS_PATTERN)).not.toBeInTheDocument();
@@ -317,8 +307,7 @@ describe(LaserCard.name, () => {
   it('hides air assist without the profile flag', () => {
     const store: AppStore = newStore();
 
-    renderLaserCard(store);
-    showLaserControls();
+    renderLaserPointerRow(store);
     activateProfile(store, { hasAirAssist: false });
     openDetails();
 
@@ -329,8 +318,7 @@ describe(LaserCard.name, () => {
     const store: AppStore = newStore();
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
-    renderLaserCard(store);
-    showLaserControls();
+    renderLaserPointerRow(store);
     activateProfile(store, { hasAirAssist: true });
     openDetails();
 
@@ -360,7 +348,7 @@ describe(LaserCard.name, () => {
   ) => {
     const store: AppStore = newStore();
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     activateProfile(store, { hasAirAssist: true });
     connectIdle(store);
     openDetails();
@@ -375,30 +363,23 @@ describe(LaserCard.name, () => {
     expect(screen.getByRole('switch', { name: AIR_ASSIST_LABEL })).not.toBeChecked();
   });
 
-  it('collapses to one line with a Show button while disconnected and opens on Show', () => {
-    renderLaserCard(newStore());
-
-    expect(screen.getByRole('button', { name: COLLAPSED_HINT })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: FIRE_LABEL })).not.toBeInTheDocument();
-
-    showLaserControls();
+  it('keeps the row in sight while disconnected, with the fire button off', () => {
+    renderLaserPointerRow(newStore());
 
     expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeDisabled();
   });
 
-  it('shows the controls without a Show button while connected', () => {
+  it('enables the fire button once connected', () => {
     const store: AppStore = newStore();
 
-    renderLaserCard(store);
+    renderLaserPointerRow(store);
     connectIdle(store);
 
-    expect(screen.queryByRole('button', { name: SHOW_CONTROLS_LABEL })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: FIRE_LABEL })).toBeEnabled();
   });
 
   it('keeps the one-row card to the controls and opens the switch-off note from the details button', () => {
-    renderLaserCard(newStore());
-    showLaserControls();
+    renderLaserPointerRow(newStore());
 
     expect(screen.queryByText(FIRMWARE_NOTE_TEXT)).not.toBeInTheDocument();
 

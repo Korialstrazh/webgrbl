@@ -24,7 +24,6 @@ import { IconActionButton } from '../../views/IconActionButton';
 import { StopButton } from '../StopButton';
 import { StopSettingsButton } from '../StopSettingsButton';
 import { JobCard } from './JobCard';
-import { LaserCard } from './LaserCard';
 import { MachineStatusCard } from './MachineStatusCard';
 import { MoveCard } from './MoveCard';
 import { PositionCard } from './PositionCard';
@@ -62,7 +61,6 @@ export const MachinePanel = ({ isWide }: MachinePanelProps): ReactNode => {
           <MachineStatusCard />
           <PositionCard />
           <MoveCard />
-          <LaserCard />
         </div>
       </div>
       {isWide && (

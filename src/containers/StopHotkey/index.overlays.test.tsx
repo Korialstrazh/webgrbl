@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Provider } from 'react-redux';
 import { StopHotkey } from '.';
 import { ConsoleLogDialog } from '../ConsolePanel/ConsoleLogDialog';
-import { PointerDetailsButton } from '../MachinePanel/LaserCard/PointerDetailsButton';
+import { PointerDetailsButton } from '../MachinePanel/JobCard/LaserPointerRow/PointerDetailsButton';
 import { MessageHistoryDialog } from '../MessageHistoryDialog';
 import { ObjectWarningChip } from '../ObjectsSection/ObjectWarningChip';
 import { ProjectMenu } from '../TopBar/ProjectMenu';

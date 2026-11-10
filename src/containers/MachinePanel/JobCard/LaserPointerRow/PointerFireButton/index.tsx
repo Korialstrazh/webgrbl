@@ -15,19 +15,19 @@ import { useEffect } from 'react';
 import type { KeyboardEvent, PointerEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ENTER_KEY, PRIMARY_POINTER_BUTTON, SPACE_KEY } from '../../../../utils/browser/browser.events.constants';
-import type { GrblResolvedStatus } from '../../../../utils/grbl/interfaces/GrblResolvedStatus';
-import { DEFAULT } from '../../../../utils/localization/default.locales';
-import { getCanFireLaserPointer } from '../../../../utils/machine/get.can.fire.laser.pointer';
-import { selectIsConnected } from '../../../../utils/states/grbl.connection.state';
-import { selectIsJobRunActive } from '../../../../utils/states/job.run.state';
+import { ENTER_KEY, PRIMARY_POINTER_BUTTON, SPACE_KEY } from '../../../../../utils/browser/browser.events.constants';
+import type { GrblResolvedStatus } from '../../../../../utils/grbl/interfaces/GrblResolvedStatus';
+import { DEFAULT } from '../../../../../utils/localization/default.locales';
+import { getCanFireLaserPointer } from '../../../../../utils/machine/get.can.fire.laser.pointer';
+import { selectIsConnected } from '../../../../../utils/states/grbl.connection.state';
+import { selectIsJobRunActive } from '../../../../../utils/states/job.run.state';
 import {
   LaserPointerFireRequested,
   LaserPointerReleaseRequested,
   selectIsLaserPointerFiring,
-} from '../../../../utils/states/laser.pointer.state';
-import { selectMachineStatus } from '../../../../utils/states/machine.status.state';
-import type { AppDispatch } from '../../../../utils/states/new.store';
+} from '../../../../../utils/states/laser.pointer.state';
+import { selectMachineStatus } from '../../../../../utils/states/machine.status.state';
+import type { AppDispatch } from '../../../../../utils/states/new.store';
 import styles from './styles.module.scss';
 
 const FIRE_KEYS: readonly string[] = [SPACE_KEY, ENTER_KEY];

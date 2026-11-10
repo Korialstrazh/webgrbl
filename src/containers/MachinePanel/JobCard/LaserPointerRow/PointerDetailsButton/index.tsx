@@ -19,23 +19,23 @@ import {
   ANTD_BUTTON_TYPE_TEXT,
   ANTD_POPOVER_PLACEMENT_TOP_RIGHT,
   ANTD_POPOVER_TRIGGER_CLICK,
-} from '../../../../utils/antd.constants';
-import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.registration';
-import { DEFAULT } from '../../../../utils/localization/default.locales';
-import { getPointerApproximateWatts } from '../../../../utils/machine/get.pointer.approximate.watts';
-import { MAX_POINTER_HOLD_MS, MILLISECONDS_PER_SECOND } from '../../../../utils/machine/machine.command.constants';
-import { MACHINE_COMMAND } from '../../../../utils/machine/machine.commands';
-import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
-import { selectIsConnected } from '../../../../utils/states/grbl.connection.state';
-import { selectIsJobRunActive } from '../../../../utils/states/job.run.state';
-import { selectActiveMachineProfile } from '../../../../utils/states/machine.profile.state';
+} from '../../../../../utils/antd.constants';
+import { useOverlayRegistration } from '../../../../../utils/hooks/use.overlay.registration';
+import { DEFAULT } from '../../../../../utils/localization/default.locales';
+import { getPointerApproximateWatts } from '../../../../../utils/machine/get.pointer.approximate.watts';
+import { MAX_POINTER_HOLD_MS, MILLISECONDS_PER_SECOND } from '../../../../../utils/machine/machine.command.constants';
+import { MACHINE_COMMAND } from '../../../../../utils/machine/machine.commands';
+import type { MachineProfile } from '../../../../../utils/profiles/interfaces/MachineProfile';
+import { selectIsConnected } from '../../../../../utils/states/grbl.connection.state';
+import { selectIsJobRunActive } from '../../../../../utils/states/job.run.state';
+import { selectActiveMachineProfile } from '../../../../../utils/states/machine.profile.state';
 import {
   MachineAirAssistChanged,
   MachineLineRequested,
   selectIsAirAssistOn,
-} from '../../../../utils/states/machine.status.state';
-import type { AppDispatch } from '../../../../utils/states/new.store';
-import { selectPointerPowerPercent } from '../../../../utils/states/pointer.power.selector';
+} from '../../../../../utils/states/machine.status.state';
+import type { AppDispatch } from '../../../../../utils/states/new.store';
+import { selectPointerPowerPercent } from '../../../../../utils/states/pointer.power.selector';
 import styles from './styles.module.scss';
 
 const POINTER_DETAILS_OVERLAY_ID = 'pointer-details';
