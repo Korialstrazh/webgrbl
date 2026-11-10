@@ -7,7 +7,7 @@
   gap: var(--space-2);
 }
 
-// The jog speed takes the room Home and Set zero leave, in one row as wide as the step sizes above.
+// The jog speed takes the room Home leaves, in one row as wide as the step sizes above.
 .speedRow {
   display: flex;
   gap: var(--space-2);
@@ -49,7 +49,7 @@
   }
 }
 
-// In a wide window, driven by a mouse, the jog pad rows and the gaps close up, so the whole Move card, Set zero
+// In a wide window, driven by a mouse, the jog pad rows and the gaps close up, so the whole Move card, jog speed
 // included, fits above STOP while connected with the status card at 1440 x 900. 80rem must match
 // WIDE_LAYOUT_MEDIA_QUERY; a narrow, touch-sized window keeps the full targets.
 @media (width >= 80rem) {
