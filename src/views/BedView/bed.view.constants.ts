@@ -10,9 +10,18 @@
  */
 export const BED_HEAD_TEST_ID = 'bed-head';
 export const BED_WORK_ORIGIN_TEST_ID = 'bed-work-origin';
-export const CROSSHAIR_ARM_MM = 14;
-/** The ring around the head's centre, so the head reads as a target over artwork and at a bed corner. */
-export const HEAD_RING_RADIUS_MM = 6;
+export const CROSSHAIR_ARM_MM = 12;
+/** The empty space around the head's centre dot, so lines and dots under the head stay visible. */
+export const CROSSHAIR_GAP_MM = 4;
+/** The head's centre dot, the exact point the laser sits on. */
+export const HEAD_DOT_RADIUS_MM = 0.9;
+/** A shooter-style reticle: four thin arms that start past the gap around the centre dot. */
+export const HEAD_RETICLE_PATH: string = [
+  `M${-CROSSHAIR_ARM_MM} 0H${-CROSSHAIR_GAP_MM}`,
+  `M${CROSSHAIR_GAP_MM} 0H${CROSSHAIR_ARM_MM}`,
+  `M0 ${-CROSSHAIR_ARM_MM}V${-CROSSHAIR_GAP_MM}`,
+  `M0 ${CROSSHAIR_GAP_MM}V${CROSSHAIR_ARM_MM}`,
+].join('');
 export const WORK_ORIGIN_MARKER_RADIUS_MM = 3;
 export const ARIA_SENTENCE_SEPARATOR = '. ';
 export const VIEW_BOX_SEPARATOR = ' ';

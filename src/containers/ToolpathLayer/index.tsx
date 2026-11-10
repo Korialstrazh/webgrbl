@@ -44,7 +44,7 @@ import type { ToolpathStrokePiece } from '../../utils/toolpath/interfaces/Toolpa
 import { TOOLPATH_START_POINT } from '../../utils/toolpath/toolpath.constants';
 import { TOOLPATH_BURN_STATE, TOOLPATH_PATH_KEY_SEPARATOR } from '../../utils/toolpath/toolpath.drawing.constants';
 import type { ToolpathBurnState } from '../../utils/toolpath/toolpath.drawing.constants';
-import { CROSSHAIR_ARM_MM, WORK_ORIGIN_MARKER_RADIUS_MM } from '../../views/BedView/bed.view.constants';
+import { HEAD_DOT_RADIUS_MM, HEAD_RETICLE_PATH, WORK_ORIGIN_MARKER_RADIUS_MM } from '../../views/BedView/bed.view.constants';
 import { getBurnPathColour } from './get.burn.path.colour';
 import type { BurnPathColour } from './interfaces/BurnPathColour';
 import type { ToolpathLayerProps } from './interfaces/ToolpathLayerProps';
@@ -57,7 +57,6 @@ import {
   TOOLPATH_TRAVEL_PATH_TEST_ID,
 } from './toolpath.layer.constants';
 
-const CROSSHAIR_PATH: string = `M${-CROSSHAIR_ARM_MM} 0H${CROSSHAIR_ARM_MM}M0 ${-CROSSHAIR_ARM_MM}V${CROSSHAIR_ARM_MM}`;
 const BURN_STATE_CLASS_NAMES: Readonly<Record<ToolpathBurnState, string | undefined>> = {
   [TOOLPATH_BURN_STATE.BURNT]: styles.burnt,
   [TOOLPATH_BURN_STATE.REMAINING]: styles.remaining,
@@ -139,7 +138,8 @@ export const ToolpathLayer = ({ dimensions, displayMode, isTravelShown }: Toolpa
             transform={getPointTransform(position.point, markerScale)}
             data-testid={TOOLPATH_HEAD_TEST_ID}
           >
-            <path d={CROSSHAIR_PATH} />
+            <path d={HEAD_RETICLE_PATH} />
+            <circle className={styles.headDot} r={HEAD_DOT_RADIUS_MM} />
           </g>
         </g>
       )}

@@ -57,7 +57,12 @@ $band-share-step: math.div(70%, $power-band-count - 1);
 
 .head path {
   stroke: var(--color-bed-laser-head);
-  stroke-width: 2;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.headDot {
+  fill: var(--color-bed-laser-head);
 }
 
 .origin {

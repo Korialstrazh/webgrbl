@@ -1,7 +1,8 @@
 /**
  * The machine bed drawn to scale: grid, the content passed as children (the project objects), the laser-head
- * crosshair and the work zero marker. A head or work zero outside the bed is drawn at the nearest bed edge in a dashed
- * outside style. Only the children take pointer presses; the rest of the drawing lets them through.
+ * reticle (a centre dot, a gap, four thin arms) and the work zero marker. A head or work zero outside the bed is
+ * drawn at the nearest bed edge in a dashed outside style. Only the children take pointer presses; the rest of the
+ * drawing lets them through.
  *
  * The view box is the part of the bed in view, so the zoom and pan live in the SVG itself and every pointer position
  * read through the SVG's screen matrix is already in bed millimetres. The markers are divided
@@ -29,8 +30,8 @@ import {
   VIEW_BOX_SEPARATOR,
   BED_HEAD_TEST_ID,
   BED_WORK_ORIGIN_TEST_ID,
-  CROSSHAIR_ARM_MM,
-  HEAD_RING_RADIUS_MM,
+  HEAD_DOT_RADIUS_MM,
+  HEAD_RETICLE_PATH,
   WORK_ORIGIN_MARKER_RADIUS_MM,
 } from './bed.view.constants';
 import type { BedViewProps } from './interfaces/BedViewProps';
@@ -84,8 +85,6 @@ export const BedView = (props: BedViewProps): ReactNode => {
   const minorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, false), [widthMm, heightMm]);
   const majorGridPath: string = useMemo(() => getGridLinePath(widthMm, heightMm, true), [widthMm, heightMm]);
   const headMarker: BedMarker | undefined = headPosition && getBedMarker(headPosition, dimensions);
-  const headCrosshairPath: string =
-    `M${-CROSSHAIR_ARM_MM} 0H${CROSSHAIR_ARM_MM}M0 ${-CROSSHAIR_ARM_MM}V${CROSSHAIR_ARM_MM}`;
   const workOriginMarker: BedMarker | undefined = workOriginPosition && getBedMarker(workOriginPosition, dimensions);
 
   return (
@@ -118,10 +117,10 @@ export const BedView = (props: BedViewProps): ReactNode => {
           transform={getScreenTransform(headMarker.xMm, headMarker.yMm, heightMm, markerScale)}
         >
           {/* A dark halo under the red marks keeps the head visible over the artwork's glow. */}
-          <path className={styles.headHalo} d={headCrosshairPath} />
-          <circle className={styles.headHalo} r={HEAD_RING_RADIUS_MM} />
-          <path d={headCrosshairPath} />
-          <circle className={styles.headRing} r={HEAD_RING_RADIUS_MM} />
+          <path className={styles.headHalo} d={HEAD_RETICLE_PATH} />
+          <circle className={styles.headHalo} r={HEAD_DOT_RADIUS_MM} />
+          <path d={HEAD_RETICLE_PATH} />
+          <circle className={styles.headDot} r={HEAD_DOT_RADIUS_MM} />
         </g>
       )}
     </svg>
