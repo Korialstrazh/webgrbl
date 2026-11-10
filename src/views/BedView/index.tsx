@@ -118,7 +118,6 @@ export const BedView = (props: BedViewProps): ReactNode => {
         >
           {/* A dark halo under the red marks keeps the head visible over the artwork's glow. */}
           <path className={styles.headHalo} d={HEAD_RETICLE_PATH} />
-          <circle className={styles.headHalo} r={HEAD_DOT_RADIUS_MM} />
           <path d={HEAD_RETICLE_PATH} />
           <circle className={styles.headDot} r={HEAD_DOT_RADIUS_MM} />
         </g>
