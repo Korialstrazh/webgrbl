@@ -146,23 +146,23 @@
   line-height: 1.2;
 }
 
-// The caption and an optional step's mark share one line; the mark hangs past the name's end without taking width,
-// so a long name like Material never runs into its neighbours.
+// The caption and an optional step's mark share one line and centre together under the marker, so the mark never
+// runs into the next step's name.
 .caption {
-  position: relative;
   white-space: nowrap;
 }
 
-// A small hollow ring after an optional step's name, like the dotted ring of its marker; the word stays for tests
-// and hides, as the step's tooltip and label already say "optional".
+// A dashed ring after an optional step's name, centred on the caption line like the dotted ring of its marker, and
+// big enough never to read as a degree sign; the step's tooltip says it is optional. The word stays for screen readers
+// and tests.
 .optionalMark {
-  position: absolute;
-  top: 0.125rem;
-  left: calc(100% + 0.125rem);
-  width: 0.3125rem;
-  height: 0.3125rem;
-  border: 0.0625rem solid var(--color-text-muted);
+  display: inline-block;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  margin-left: 0.125rem;
+  border: 0.0625rem dashed var(--color-text-muted);
   border-radius: 50%;
+  vertical-align: middle;
 }
 
 .optionalMarkText {
