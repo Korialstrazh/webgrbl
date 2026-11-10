@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { AppRoute } from '.';
 import { newStore } from '../../utils/states/new.store';
@@ -9,9 +9,11 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 
 const START_LABEL = 'Start job';
+const START_CAPTION = 'Start';
 const SHOW_FRAME_SETTINGS_LABEL = 'Show frame settings';
 const HIDE_FRAME_SETTINGS_LABEL = 'Hide frame settings';
 const HIDDEN_REGION_SELECTOR = '[class*="hiddenRegion"]';
+const STICKY_STOP_BAR_SELECTOR = '[class*="stickyStopBar"]';
 
 const renderWorkbench = async (store: AppStore): Promise<void> => {
   render(<Provider store={store}><AntdTestProvider><AppRoute /></AntdTestProvider></Provider>);
@@ -23,9 +25,14 @@ describe(`${AppRoute.name} in a narrow window`, () => {
     setMatchMediaMatches(false);
     await renderWorkbench(newStore());
 
-    expect(screen.getAllByRole('button', { name: START_LABEL })).toHaveLength(1);
-    expect(screen.getByRole('button', { name: START_LABEL })).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByRole('button', { name: START_LABEL }).closest('[class*="stickyStopBar"]')).not.toBeNull();
+    const stickyStopBar: HTMLElement | null = document.querySelector(STICKY_STOP_BAR_SELECTOR);
+
+    // A text query counts the Start buttons across the whole workbench cheaply; a role query over all of it, hidden
+    // regions included, takes many seconds, so the button's own checks run inside the stop bar.
+    expect(screen.getAllByText(START_CAPTION)).toHaveLength(1);
+    expect(stickyStopBar).not.toBeNull();
+    expect(within(stickyStopBar ?? document.body).getByRole('button', { name: START_LABEL }))
+      .toHaveAttribute('aria-disabled', 'true');
   });
 
   it('shows only the chosen region and keeps the others mounted', async () => {
