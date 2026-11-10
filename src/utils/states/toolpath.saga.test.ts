@@ -248,6 +248,20 @@ describe(watchToolpath.name, () => {
     expect(selectToolpathStatus(store.getState())).toBe(TOOLPATH_STATUS.IDLE);
   });
 
+  it('empties the toolpath in the background once every layer is switched off', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+
+    for (const layer of selectProjectLayers(store.getState())) {
+      store.dispatch(new LayerToggled({ layerKey: getLayerKey(layer), enabled: false }));
+    }
+
+    await waitForToolpathStatus(store, TOOLPATH_STATUS.READY);
+
+    expect(selectToolpath(store.getState())?.moves).toEqual([]);
+  });
+
   it('cancels the running generation when a second request comes in', async () => {
     const toolpathWorkerClient: FakeToolpathWorkerClient = new FakeToolpathWorkerClient(true);
     const store: AppStore = await newGcodeExportTestStore({ toolpathWorkerClient });
