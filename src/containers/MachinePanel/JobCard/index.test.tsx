@@ -310,7 +310,7 @@ describe(JobCard.name, () => {
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
   });
 
-  it('drops the Start dot while connected and only the warnings lock it, as Fix warnings says so', () => {
+  it('keeps the Start dot while connected and only the warnings lock it, so a locked Start always shows why', () => {
     const store: AppStore = newStartableJobStore();
 
     store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
@@ -320,7 +320,8 @@ describe(JobCard.name, () => {
     }));
     renderJobCard(store);
 
-    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
   });
 
   it('shows no lock dot on Start while a job runs', () => {

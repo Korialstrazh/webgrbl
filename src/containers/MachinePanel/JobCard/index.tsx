@@ -48,8 +48,6 @@ import {
 import type { JobRunStatus } from '../../../utils/states/job.run.status.constants';
 import { JobCardCollapsePreferenceChanged, selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.state';
 import { JOB_READINESS_STEP, selectFirstUnmetJobReadinessStep } from '../../../utils/states/job.readiness.selector';
-import { selectFrameStartBlockedReasonKey } from '../../../utils/states/frame.start.blocked.reason.selector';
-import { selectJobStartBlockedReasonKey } from '../../../utils/states/job.start.blocked.reason.selector';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { selectEnabledProjectLayers, selectProjectLayers } from '../../../utils/states/project.document.state';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
@@ -67,21 +65,12 @@ import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
 import { LaserPointerRow } from './LaserPointerRow';
 import { getJobLayerCountText } from './get.job.layer.count.text';
-import { getJobLockShortReasonKeys } from './get.job.lock.short.reason.keys';
 import { getJobRunStatusKey } from './get.job.run.status.key';
 import { JOB_LOCK_NOTE_TEST_IDS } from './job.card.constants';
 import { JOB_LOCK_ACTION } from './job.lock.action.constants';
 import type { JobLockAction } from './job.lock.action.constants';
 import styles from './styles.module.scss';
-
-// The lock reasons the Fix warnings button already sums up, so a dot would only repeat it.
-const FIX_WARNINGS_LOCK_REASON_KEYS: readonly string[] = [
-  DEFAULT.JOB_LOCK_SHORT_WARNINGS,
-  DEFAULT.JOB_LOCK_SHORT_OFF_BED,
-];
-
-const isFixWarningsLockReason = (shortReasonKey: string | undefined): boolean =>
-  shortReasonKey ? FIX_WARNINGS_LOCK_REASON_KEYS.includes(shortReasonKey) : false;
+import { useJobLockNoteTexts } from './use.job.lock.note.texts';
 
 interface JobCardProps {
   /** False where Start job is pinned elsewhere, as in the narrow layout. */
@@ -96,25 +85,8 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const { isGcodeExportEnabled, gcodeExportBlockedReasonKey }: GcodeExportAvailability = useGcodeExportAvailability();
   const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
 
-  const jobStartBlockedReasonKey: string | undefined = useSelector(selectJobStartBlockedReasonKey);
-  const frameStartBlockedReasonKey: string | undefined = useSelector(selectFrameStartBlockedReasonKey);
-  // Each locked action carries its lock dot in every locked state, offline included, with its short reason behind it.
-  const lockShortReasonKeys: Partial<Record<JobLockAction, string>> = getJobLockShortReasonKeys([
-    { action: JOB_LOCK_ACTION.START, blockedReasonKey: isStartShown ? jobStartBlockedReasonKey : undefined },
-    { action: JOB_LOCK_ACTION.FRAME, blockedReasonKey: frameStartBlockedReasonKey },
-    { action: JOB_LOCK_ACTION.EXPORT, blockedReasonKey: gcodeExportBlockedReasonKey },
-  ]);
-  const getLockNoteText = (action: JobLockAction): string | undefined => {
-    const shortReasonKey: string | undefined = lockShortReasonKeys[action];
-
-    // Fix warnings explains a lock only when the lock is the warnings; any other reason, such as no connection, keeps
-    // its dot. Export keeps its dot, it is no part of the run.
-    if (isFixWarningsShown && action !== JOB_LOCK_ACTION.EXPORT && isFixWarningsLockReason(shortReasonKey)) {
-      return undefined;
-    }
-
-    return shortReasonKey && t(shortReasonKey);
-  };
+  const lockNoteTexts: Partial<Record<JobLockAction, string>> = useJobLockNoteTexts();
+  const getLockNoteText = (action: JobLockAction): string | undefined => lockNoteTexts[action];
   const startReasonTexts: string[] = useJobStartBlockedReasonTexts();
   const jobRunStatus: JobRunStatus = useSelector(selectJobRunStatus);
   const pauseControl: JobPauseControl = useSelector(selectJobPauseControl);

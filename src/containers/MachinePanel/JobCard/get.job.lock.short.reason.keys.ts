@@ -38,7 +38,7 @@ const JOB_LOCK_SHORT_REASON_KEYS: Readonly<Record<string, string>> = {
 const isJobRunReason = ({ blockedReasonKey }: JobLockActionReason): boolean =>
   blockedReasonKey === DEFAULT.JOB_START_BLOCKED_RUNNING;
 
-/** The short reason key of each locked action; an action that is free, or has no short form, is left out. */
+/** The short reason key of each locked action; an action that is free is left out. */
 export const getJobLockShortReasonKeys = (
   actionReasons: JobLockActionReason[],
 ): Partial<Record<JobLockAction, string>> => {
@@ -49,7 +49,9 @@ export const getJobLockShortReasonKeys = (
   const shortReasonKeys: Partial<Record<JobLockAction, string>> = {};
 
   for (const { action, blockedReasonKey } of actionReasons) {
-    const shortReasonKey: string | undefined = blockedReasonKey && JOB_LOCK_SHORT_REASON_KEYS[blockedReasonKey];
+    // A reason with no short form still gets its dot, with the full reason, so a locked action never lacks one.
+    const shortReasonKey: string | undefined =
+      blockedReasonKey && (JOB_LOCK_SHORT_REASON_KEYS[blockedReasonKey] ?? blockedReasonKey);
 
     if (shortReasonKey) {
       shortReasonKeys[action] = shortReasonKey;
