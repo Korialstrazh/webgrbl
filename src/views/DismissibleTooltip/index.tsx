@@ -30,7 +30,12 @@ export const DismissibleTooltip = ({ children, ...tooltipProps }: TooltipProps):
   };
 
   return (
-    <Tooltip trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_LONG_PRESS} {...tooltipProps} open={isOpen} onOpenChange={changeOpen}>
+    <Tooltip
+      trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_LONG_PRESS}
+      {...tooltipProps}
+      open={isOpen}
+      onOpenChange={changeOpen}
+    >
       {/* A click on the control bubbles up to here, whatever the control does with it. */}
       <span
         onClickCapture={dismiss}
