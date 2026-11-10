@@ -54,3 +54,15 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 - The frame overrun and the Toolpath warnings list are icon, short label and action; the full sentences are tooltips.
 - Fix warnings briefly highlights the Toolpath tab and the warnings chip.
 - The machine panel's "More below" chevron sits in the Stop footer's top padding under a thin shadow, never over a control; in the wide layout the jog pad and job actions are slightly lower, so Move fits above Stop when connected at 1440 x 900; the jog arrows keep a clear gap between them at every width. In the narrow layout a region with more below shows it as a thin shadow edge in its bottom padding (`more-below-fade`), never a fade that dims the controls.
+
+## Round 47 behaviour notes
+
+- Objects off the bed draw a thick amber dashed outline over a faint amber tint, their vector shapes redrawn the same way, whatever the artwork colours; the zoom group has **Show all**, which fits the bed and every object. The job size tooltip says off-bed parts count.
+- While **Fix warnings** shows, it and the Check badge carry the count alone: the lock dots on Start and Frame and the heading warning icon step back, and the frame overrun note moves into the Toolpath warnings popover. The object row chip and Cut check stay.
+- Each readiness step with an action is its own tab stop; a done Check or Connect leaves the tab order with `aria-disabled`.
+- Icon tooltips (`DismissibleTooltip`, layer mode glyph) also open on a long press for touch screens.
+- Add/Edit material keeps Save off, with the reason ("Name needed" / "Thickness needed") beside the buttons, until the fields are valid.
+- Open project row buttons are named after the project ("Open sample · Nov 10, 2026").
+- Slider handles get the 2 px accent focus ring.
+- Set zero sits in the Position card title row; Move no longer has a Set zero row.
+

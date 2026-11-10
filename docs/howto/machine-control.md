@@ -81,3 +81,11 @@ Hardware check: a known follow-up, deferred on 2026-10-31 because the ACMER lase
 - Builders and profile helpers: unit tests next to the files.
 - Cards and dialog: `index.test.tsx` in each container (render inside `AntdTestProvider`).
 - Sagas: `newStore` over a `SimulatedLaserTransport` with fake timers.
+
+## Round 47 changes
+
+- **Set zero** moved from the Move card into the Position card's title row: a small aim icon button (`IconActionButton`, tooltip "Set zero here") at the right end of the heading, gated by the same `getMoveAvailability` (`canSetZero`: connected, `Idle`, no job, pointer not firing) and sending the same `MACHINE_COMMAND.SET_WORK_ZERO`. The Position card is two rows (heading, then X / Y / Z); the Move card keeps the jog pad, step sizes, jog speed and Home.
+- Restart controller uses the circular `ReloadOutlined` glyph.
+- A focused jog key keeps the neutral border; keyboard focus shows only as the outline ring, so a key never looks selected after a jog.
+- Popovers give the focus back to the control that opened them (`usePopoverFocusReturn`, also called by `usePopoverAutoClose`).
+
