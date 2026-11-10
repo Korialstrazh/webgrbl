@@ -25,6 +25,7 @@ import type {
   SegmentedProps,
   SpinProps,
   SplitterProps,
+  StepsProps,
   SwitchProps,
   TableColumnType,
   TableProps,
@@ -40,6 +41,19 @@ export const ANTD_BUTTON_SHAPE_CIRCLE: ButtonProps['shape'] = 'circle';
 
 /** The small card, the base of a workbench panel with a tight heading line. */
 export const ANTD_CARD_SIZE_SMALL: CardProps['size'] = 'small';
+
+/** The small stepper, for the readiness row of the Job card. */
+export const ANTD_STEPS_SIZE_SMALL: StepsProps['size'] = 'small';
+
+/** Step names under their markers. */
+export const ANTD_STEPS_TITLE_PLACEMENT_VERTICAL: StepsProps['titlePlacement'] = 'vertical';
+
+/** The antd Steps status of one step. */
+export const ANTD_STEPS_STATUS = {
+  FINISH: 'finish',
+  PROCESS: 'process',
+  WAIT: 'wait',
+} as const;
 
 /** The compact badge, for a count on an icon button. */
 export const ANTD_BADGE_SIZE_SMALL: BadgeProps['size'] = 'small';

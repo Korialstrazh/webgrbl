@@ -1,46 +1,68 @@
 @use '../../../../styles/accessibility' as accessibility;
 
-// A stepper: round markers joined by a line, which turns green behind each step that is done.
-.jobReadinessRow {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+// An antd Steps row: round markers joined by its rail, which turns green behind each step that is done. The five steps
+// share the width equally and keep their names under the markers, connected or not.
+.jobReadinessRow:global(.ant-steps) {
   margin: 0;
   padding: 0;
-  list-style: none;
 }
 
-.stepCell {
-  position: relative;
+.stepsFrame {
   min-width: 0;
+}
 
-  // The line from this marker to the next one, behind both.
-  &:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 0.875rem;
-    left: 50%;
-    width: 100%;
-    height: 0.125rem;
-    background-color: var(--color-border);
+.stepCell:global(.ant-steps-item) {
+  min-width: 0;
+  overflow: visible;
+
+  // The name sits close under its marker, as tight as the card's other rows.
+  :global(.ant-steps-item-wrapper) {
+    row-gap: 0.125rem;
+  }
+
+  // The marker button is the icon: no box of antd's own around it, at the marker's size so the rail meets its middle.
+  :global(.ant-steps-item-icon) {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    background: none;
+    line-height: 1;
+  }
+
+  :global(.ant-steps-item-icon) > span {
+    display: contents;
+  }
+
+  :global(.ant-steps-item-section) {
+    max-width: 100%;
+  }
+
+  :global(.ant-steps-item-title) {
+    max-width: 100%;
+    padding: 0;
+    color: var(--color-text-muted);
+    line-height: 1.2;
+  }
+
+  :global(.ant-steps-item-rail) {
+    border-top: 0.125rem solid var(--color-border);
   }
 }
 
-.metStep:not(:last-child)::after {
-  background-color: var(--color-success);
+.metStep:global(.ant-steps-item) :global(.ant-steps-item-rail) {
+  border-top-color: var(--color-success);
 }
 
-// Above the line, and with no fill of its own: the marker is what the state shows on.
+// Above the rail, and with no fill of its own: the marker is what the state shows on.
 .step:global(.ant-btn) {
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.125rem;
-  width: 100%;
+  width: auto;
+  min-width: 0;
   height: auto;
-  // No padding above or below, so the labelled steps take little height and Move fits above STOP while connected.
+  // No padding, so the labelled steps take little height and Move fits above STOP while connected.
   padding: 0;
+  border-radius: 50%;
   color: var(--color-text-muted);
 }
 
@@ -63,21 +85,18 @@
   line-height: 1;
 }
 
-// The number of warnings left, a small filled dot on the marker's corner.
-.countBadge {
-  position: absolute;
-  top: -0.375rem;
-  right: -0.5rem;
-  min-width: 1rem;
-  height: 1rem;
-  padding: 0 0.25rem;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-warning);
-  color: var(--color-surface-1);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  line-height: 1rem;
-  font-variant-numeric: tabular-nums;
+// The number of warnings left: an antd count badge on the marker's corner, in the warning colour.
+.countBadge:global(.ant-badge) {
+  color: inherit;
+  line-height: 1;
+
+  :global(.ant-badge-count) {
+    box-shadow: none;
+    background-color: var(--color-warning);
+    color: var(--color-surface-1);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 .metStep .marker {
@@ -103,7 +122,8 @@
   animation: next-step-pulse 2s ease-out infinite;
 }
 
-.nextStep .step:global(.ant-btn) {
+.nextStep .step:global(.ant-btn),
+.stepCell.nextStep :global(.ant-steps-item-title) {
   color: var(--color-text);
   font-weight: 600;
 }
@@ -129,6 +149,7 @@
 // never run together.
 .caption {
   display: block;
+  cursor: pointer;
   max-width: 100%;
   padding: 0 0.125rem;
   overflow: hidden;

@@ -1,10 +1,11 @@
 /**
- * Why a locked action is off, as one small antd warning status badge drawn inside the top end corner of the action's button, so it
- * clearly belongs to that button: the text opens on a pointer hover. The button itself carries the reason as its
- * description and in its focus tooltip, so the dot takes no tab stop and is hidden from screen readers. The dot floats
- * over the button instead of taking a line under it, so a reason that comes and goes never shifts the buttons. It
- * renders nothing without a text. Given every reason, its popover lists each one with a warning icon. The dot keeps the
- * warning colour on hover and focus, and the popover opens above the button, so it never covers the button's caption.
+ * Why a locked action is off, as one small antd warning status badge drawn inside the top end corner of the action's
+ * button, so it clearly belongs to that button: the text opens on a pointer hover. The button itself carries the reason
+ * as its description and in its focus tooltip, so the dot takes no tab stop and is hidden from screen readers. The dot
+ * floats over the button instead of taking a line under it, so a reason that comes and goes never shifts the buttons.
+ * It renders nothing without a text. Given every reason, its popover lists each one with a warning icon. The dot keeps
+ * the warning colour on hover and focus, and the popover opens above the button, so it never covers the button's
+ * caption.
  *
  * @author michael.morosov
  *
