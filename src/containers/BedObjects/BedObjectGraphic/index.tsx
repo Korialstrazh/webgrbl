@@ -2,8 +2,8 @@
  * One object drawn on the bed: its artwork stretched to its box, drawn the way its layers burn it in full on the bed
  * and faint off it, a dashed danger outline when it leaves the bed, and the dashed selection box when it is selected.
  * As the one selected object it also gets four corner handles that scale it and a handle on an arm above the box
- * that turns it. The group is turned around the box centre, so everything inside is drawn around the origin. It renders again only when its own props change, so a drag of one object does
- * not redraw the others.
+ * that turns it. The group is turned around the box centre, so everything inside is drawn around the origin. It
+ * renders again only when its own props change, so a drag of one object does not redraw the others.
  *
  * @author michael.morosov
  *
