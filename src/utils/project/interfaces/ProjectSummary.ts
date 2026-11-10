@@ -18,4 +18,6 @@ export interface ProjectSummary extends Pick<StoredProject, 'id' | 'name' | 'cre
   objectBoxes: ProjectObjectTransform[];
   /** The name of the first object, which stands in for a project that still has the default name. */
   firstObjectName?: string;
+  /** When the first object was imported; the day in a default-named project's shown name comes from it. */
+  firstObjectImportedAt?: string;
 }

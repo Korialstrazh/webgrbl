@@ -27,6 +27,7 @@ export const selectProjectDisplayName =
         {
           name: selectProjectName(state),
           firstObjectName: selectProjectObjects(state)[0]?.name,
+          firstObjectImportedAt: selectProjectObjects(state)[0]?.importedAt,
           createdAt: openSummary?.createdAt,
         },
         language,

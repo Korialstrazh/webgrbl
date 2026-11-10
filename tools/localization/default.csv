@@ -700,9 +700,9 @@ OBJECTS_TREE_TURN_ON;Burn {{name}} again
 OBJECTS_WARNINGS;Problems with {{name}} ({{count}}): show them
 OBJECTS_WARNINGS_AND_OUTSIDE_BED;Problems with {{name}} ({{count}}), and it is outside the bed: show them
 OBJECTS_WARNINGS_OUTSIDE_BED_ONLY;Problems with {{name}}: it is outside the bed, show how to fix it
-OPEN_PROJECT_DELETE;Delete
 OPEN_PROJECT_DELETE_CANCEL;Cancel
 OPEN_PROJECT_DELETE_CONFIRM;Delete the project {{name}}?
+OPEN_PROJECT_DELETE_NAMED;Delete {{name}}
 OPEN_PROJECT_DELETE_OK;Yes, delete
 OPEN_PROJECT_EMPTY;No stored projects yet.
 OPEN_PROJECT_FALLBACK_NAME;{{name}} · {{date}}
@@ -711,10 +711,10 @@ OPEN_PROJECT_LIST;Stored projects
 OPEN_PROJECT_META_one;{{count}} object · {{time}}
 OPEN_PROJECT_META_other;{{count}} objects · {{time}}
 OPEN_PROJECT_NOW;open now
-OPEN_PROJECT_OPEN;Open
 OPEN_PROJECT_OPEN_FILE;Open file…
-OPEN_PROJECT_RENAME;Rename
+OPEN_PROJECT_OPEN_NAMED;Open {{name}}
 OPEN_PROJECT_RENAME_INPUT;New name for {{name}}
+OPEN_PROJECT_RENAME_NAMED;Rename {{name}}
 OPEN_PROJECT_STORED_CAPTION;In this browser
 OPEN_PROJECT_TITLE;Open project
 PALETTE_DELETE;Delete {{name}}

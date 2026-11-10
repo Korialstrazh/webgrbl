@@ -1,7 +1,8 @@
 /**
  * One stored project in the Open dialog: a thumbnail of where its objects sit, its name (the first object's name and
  * the day it was made while it still has the default name), then how many objects it holds and how long ago it
- * changed (the exact time in a tooltip), with Open, an in-place Rename and Delete after a confirmation. The project
+ * changed (the exact time in a tooltip), with Open, an in-place Rename and Delete after a confirmation, each named
+ * after the project so screen readers can tell the rows apart. The project
  * open now is marked and has no Open button.
  *
  * @author michael.morosov
@@ -83,7 +84,7 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
         {!isOpenProject && (
           <IconActionButton
             size={ANTD_BUTTON_SIZE_SMALL}
-            labelText={t(DEFAULT.OPEN_PROJECT_OPEN)}
+            labelText={t(DEFAULT.OPEN_PROJECT_OPEN_NAMED, { name: shownName })}
             iconComponent={<FolderOpenOutlined />}
             onClick={openProject}
           />
@@ -91,11 +92,11 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
         <IconActionButton
           size={ANTD_BUTTON_SIZE_SMALL}
           type={ANTD_BUTTON_TYPE_TEXT}
-          labelText={t(DEFAULT.OPEN_PROJECT_RENAME)}
+          labelText={t(DEFAULT.OPEN_PROJECT_RENAME_NAMED, { name: shownName })}
           iconComponent={<EditOutlined />}
           onClick={() => setIsRenaming(true)}
         />
-        <DismissibleTooltip title={t(DEFAULT.OPEN_PROJECT_DELETE)}>
+        <DismissibleTooltip title={t(DEFAULT.OPEN_PROJECT_DELETE_NAMED, { name: shownName })}>
           <Popconfirm
             title={t(DEFAULT.OPEN_PROJECT_DELETE_CONFIRM, { name: projectName })}
             okText={t(DEFAULT.OPEN_PROJECT_DELETE_OK)}
@@ -108,7 +109,7 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
               type={ANTD_BUTTON_TYPE_TEXT}
               danger
               icon={<DeleteOutlined />}
-              aria-label={t(DEFAULT.OPEN_PROJECT_DELETE)}
+              aria-label={t(DEFAULT.OPEN_PROJECT_DELETE_NAMED, { name: shownName })}
             />
           </Popconfirm>
         </DismissibleTooltip>

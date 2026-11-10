@@ -41,9 +41,9 @@ const NEWEST_META_TIME_TEXT = '5 minutes ago';
 const OLDEST_META_COUNT_TEXT = `${OLDEST_OBJECT_COUNT} objects`;
 const OLDEST_META_TIME_TEXT = '4 days ago';
 const OPEN_NOW_TEXT = 'open now';
-const OPEN_LABEL = 'Open';
-const RENAME_LABEL = 'Rename';
-const DELETE_LABEL = 'Delete';
+const OPEN_LABEL = /^Open /;
+const RENAME_LABEL = /^Rename /;
+const DELETE_LABEL = /^Delete /;
 const DELETE_OK_LABEL = 'Yes, delete';
 const OPEN_FILE_LABEL = 'Open file\u2026';
 const FILE_INPUT_LABEL = 'Open a project file';
@@ -167,6 +167,17 @@ describe(OpenProjectDialog.name, () => {
     nowSpy.mockRestore();
     expect(within(getRow(NEWEST_NAME)).queryByRole('button', { name: OPEN_LABEL })).not.toBeInTheDocument();
     expect(within(getRow(OLDEST_NAME)).getByRole('button', { name: OPEN_LABEL })).toBeInTheDocument();
+  });
+
+  it('names each row button after its project so the rows can be told apart', async () => {
+    renderDialog(newStore());
+    await screen.findByText(OLDEST_NAME);
+
+    const oldestRow: HTMLElement = getRow(OLDEST_NAME);
+
+    expect(within(oldestRow).getByRole('button', { name: `Open ${OLDEST_NAME}` })).toBeInTheDocument();
+    expect(within(oldestRow).getByRole('button', { name: `Rename ${OLDEST_NAME}` })).toBeInTheDocument();
+    expect(within(oldestRow).getByRole('button', { name: `Delete ${OLDEST_NAME}` })).toBeInTheDocument();
   });
 
   it('draws a thumbnail of the object boxes in each row', async () => {

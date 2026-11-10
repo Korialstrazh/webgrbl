@@ -57,6 +57,7 @@ const newImportedObject = (acceptedFile: AcceptedSvgFile, placement: GeometryPoi
     heightMm: acceptedFile.svg.heightMm,
     xMm: placement.x,
     yMm: placement.y,
+    importedAt: new Date().toISOString(),
   });
 };
 

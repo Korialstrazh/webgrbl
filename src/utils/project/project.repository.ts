@@ -77,6 +77,7 @@ const getProjectSummary = (storedProject: StoredProject): ProjectSummary => ({
   objectCount: storedProject.objects.length,
   objectBoxes: storedProject.objects.map(getProjectObjectBox),
   firstObjectName: storedProject.objects[0]?.name,
+  firstObjectImportedAt: storedProject.objects[0]?.importedAt,
 });
 
 const getStoredProjectLayers = (storedProject: StoredProject): ProjectLayer[] =>

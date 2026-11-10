@@ -29,4 +29,6 @@ export interface ProjectObject {
   heightMm: number;
   /** Counter-clockwise rotation around the box centre, in degrees. */
   rotationDeg: number;
+  /** When the object was imported, as a UTC ISO timestamp; objects saved before this field existed have none. */
+  importedAt?: string;
 }
