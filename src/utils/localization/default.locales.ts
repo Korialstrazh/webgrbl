@@ -1368,7 +1368,7 @@ registerLocales({
       [DEFAULT.MACHINE_POSITION_AXIS_Z]: "Z",
       [DEFAULT.MACHINE_POSITION_DISCONNECTED]: "Connect to see the position",
       [DEFAULT.MACHINE_POSITION_LASER_TOOLTIP]: "Laser position: X {{x}}, Y {{y}}, Z {{z}}",
-      [DEFAULT.MACHINE_POSITION_SET_ZERO]: "Set zero here",
+      [DEFAULT.MACHINE_POSITION_SET_ZERO]: "Set zero here (X/Y origin)",
       [DEFAULT.MACHINE_POSITION_TITLE]: "Position",
       [DEFAULT.MACHINE_PROFILE_ERROR_FRAME_FEED_RATE_INVALID]: "Frame speed must be between {{min}} and {{max}} mm/min",
       [DEFAULT.MACHINE_PROFILE_ERROR_FRAME_MARGIN_INVALID]: "Frame margin must not be negative",

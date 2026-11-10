@@ -64,5 +64,5 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 - Add/Edit material keeps Save off, with the reason ("Name needed" / "Thickness needed") beside the buttons, until the fields are valid.
 - Open project row buttons are named after the project ("Open sample · Nov 10, 2026").
 - Slider handles get the 2 px accent focus ring.
-- Set zero sits in the Position card title row; Move no longer has a Set zero row.
+- Set zero sits in the Position card title row as an origin icon (two axes meeting at a small zero, tooltip "Set zero here (X/Y origin)"); Move no longer has a Set zero row.
 

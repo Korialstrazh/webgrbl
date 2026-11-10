@@ -472,7 +472,7 @@ MACHINE_POSITION_AXIS_Y;Y
 MACHINE_POSITION_AXIS_Z;Z
 MACHINE_POSITION_DISCONNECTED;Connect to see the position
 MACHINE_POSITION_LASER_TOOLTIP;Laser position: X {{x}}, Y {{y}}, Z {{z}}
-MACHINE_POSITION_SET_ZERO;Set zero here
+MACHINE_POSITION_SET_ZERO;Set zero here (X/Y origin)
 MACHINE_POSITION_TITLE;Position
 MACHINE_PROFILE_ERROR_FRAME_FEED_RATE_INVALID;Frame speed must be between {{min}} and {{max}} mm/min
 MACHINE_PROFILE_ERROR_FRAME_MARGIN_INVALID;Frame margin must not be negative

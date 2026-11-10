@@ -22,6 +22,7 @@ const POWER_PERCENT_TEXT = '75';
 const MISSING_VALUE_TEXT = '\u2014';
 const IDLE_LABEL = 'Idle';
 const RUN_LABEL = 'Run';
+const SET_ZERO_LABEL = 'Set zero here (X/Y origin)';
 const RESET_LABEL = 'Restart controller';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
@@ -166,7 +167,7 @@ describe(MachinePanel.name, () => {
 
     expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-reload')).not.toBeNull();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL }).querySelector('.anticon-unlock')).not.toBeNull();
-    expect(screen.getByRole('button', { name: 'Set zero here' }).querySelector('.anticon-aim')).not.toBeNull();
+    expect(screen.getByRole('button', { name: SET_ZERO_LABEL }).querySelector('.anticon svg')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Hold to fire' }).querySelector('.anticon-bulb')).not.toBeNull();
   });
 

@@ -15,7 +15,7 @@ import { selectIsConnectionPopoverOpen } from '../../../utils/states/ui.overlay.
 
 const DISCONNECTED_TEXT = 'Connect to see the position';
 const WORK_ROW_NAME = 'Work position';
-const SET_ZERO_LABEL = 'Set zero here';
+const SET_ZERO_LABEL = 'Set zero here (X/Y origin)';
 
 const newStatus = (workPosition: GrblAxisPosition, machinePosition: GrblAxisPosition): GrblResolvedStatus => ({
   machineState: GRBL_MACHINE_STATE.IDLE,

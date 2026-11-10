@@ -13,7 +13,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { AimOutlined, CompassOutlined } from '@ant-design/icons';
+import { CompassOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -34,6 +34,7 @@ import { MachineLineRequested, selectMachineStatus } from '../../../utils/states
 import type { AppDispatch } from '../../../utils/states/new.store';
 import { ConnectionPopoverOpenChanged } from '../../../utils/states/ui.overlay.state';
 import { IconActionButton } from '../../../views/IconActionButton';
+import { OriginZeroIcon } from '../../../views/OriginZeroIcon';
 import { Panel } from '../../../views/Panel';
 import { PlugBadge } from '../../../views/PlugBadge';
 import styles from './styles.module.scss';
@@ -96,7 +97,7 @@ export const PositionCard = (): ReactNode => {
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
           labelText={t(DEFAULT.MACHINE_POSITION_SET_ZERO)}
-          iconComponent={<AimOutlined />}
+          iconComponent={<OriginZeroIcon />}
           isDisabled={!canSetZero}
           onClick={() => dispatch(new MachineLineRequested({ line: MACHINE_COMMAND.SET_WORK_ZERO }))}
         />
