@@ -61,12 +61,6 @@
 }
 
 // The short reason a muted section is quiet, readable muted text beside its note icon.
-.noteCaption {
-  color: var(--color-text-muted);
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
-}
-
 // A dense read-out card: less padding above and below, the same side padding as its neighbours.
 .compactPanel {
   .header {

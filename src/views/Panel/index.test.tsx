@@ -6,7 +6,7 @@ const PANEL_TITLE = 'Laser';
 const BODY_TEXT = 'Body content';
 const ACTION_LABEL = 'Panel action';
 const NOTE_TEXT = 'Set in another view.';
-const NOTE_CAPTION = 'Design only';
+const NOTE_ICON_TEST_ID = 'note-icon';
 
 describe(Panel.name, () => {
   it('renders a heading with the title, the body and the header action', () => {
@@ -61,13 +61,11 @@ describe(Panel.name, () => {
     expect(screen.getByRole('note', { name: NOTE_TEXT })).toHaveAttribute('tabindex', '0');
   });
 
-  it('writes the short caption of a muted section beside its note icon, and only while muted', () => {
-    const { rerender } = render(<Panel title={PANEL_TITLE} noteText={NOTE_TEXT} noteCaptionText={NOTE_CAPTION} />);
+  it('draws the given note icon instead of the info circle', () => {
+    const noteIconComponent: ReactNode = <span data-testid={NOTE_ICON_TEST_ID} />;
 
-    expect(screen.getByText(NOTE_CAPTION)).toBeInTheDocument();
+    render(<Panel title={PANEL_TITLE} noteText={NOTE_TEXT} noteIconComponent={noteIconComponent} />);
 
-    rerender(<Panel title={PANEL_TITLE} noteCaptionText={NOTE_CAPTION} />);
-
-    expect(screen.queryByText(NOTE_CAPTION)).not.toBeInTheDocument();
+    expect(screen.getByTestId(NOTE_ICON_TEST_ID)).toBeInTheDocument();
   });
 });

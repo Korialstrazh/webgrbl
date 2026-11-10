@@ -12,7 +12,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BlockOutlined, GroupOutlined } from '@ant-design/icons';
+import { BlockOutlined, EyeInvisibleOutlined, GroupOutlined } from '@ant-design/icons';
 import { Layout } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -77,7 +77,7 @@ export const DesignPanel = (): ReactNode => {
           iconComponent={<MaterialSheetIcon />}
           title={t(DEFAULT.DESIGN_MATERIAL_TITLE)}
           noteText={isMaterialView ? undefined : t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_NOTE)}
-          noteCaptionText={t(DEFAULT.DESIGN_MATERIAL_DESIGN_ONLY_CAPTION)}
+          noteIconComponent={<EyeInvisibleOutlined />}
         >
           <MaterialSection />
         </Panel>
@@ -85,7 +85,7 @@ export const DesignPanel = (): ReactNode => {
           iconComponent={<GroupOutlined />}
           title={t(DEFAULT.DESIGN_OBJECTS_TITLE)}
           noteText={isThreeDView ? t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_NOTE) : undefined}
-          noteCaptionText={t(DEFAULT.DESIGN_OBJECTS_NOT_IN_3D_CAPTION)}
+          noteIconComponent={<EyeInvisibleOutlined />}
         >
           <ObjectsSection />
         </Panel>

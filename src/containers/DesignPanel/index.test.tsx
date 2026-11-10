@@ -22,8 +22,8 @@ const IMPORT_SVG_LABEL = 'Import SVG';
 const PALETTE_BUTTON_LABEL = 'Palette';
 const PALETTE_LIST_LABEL = 'Palette colours';
 const CUT_CHECK_NOTE = 'The cut check runs in the 3D view.';
-const OBJECTS_NOTE = 'Objects are edited in the Design and Toolpath views.';
-const MATERIAL_NOTE = 'The material is chosen in the Design and 3D views.';
+const OBJECTS_NOTE = 'Not used in this view: objects are edited in the Design and Toolpath views.';
+const MATERIAL_NOTE = 'Not used in this view: the material is chosen in the Design and 3D views.';
 
 const renderDesignPanel = (store: AppStore): void => {
   render(

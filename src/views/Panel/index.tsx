@@ -1,8 +1,9 @@
 /**
  * A titled section of the workbench with an optional action next to the heading. Without content it is the heading
- * line only, for a section collapsed to one line. With a note it is a muted heading line whose info icon tells why it
- * has no content in this view, by tooltip, keyboard focus and screen reader, so a stack of panels keeps its order. A
- * muted line still shows its header action (such as a warning count) before the note icon.
+ * line only, for a section collapsed to one line. With a note it is a muted heading line whose icon (its own, such as
+ * a crossed-out eye, instead of words) tells why it has no content in this view, by tooltip, keyboard focus and screen
+ * reader, so a stack of panels keeps its order. A muted line still shows its header action (such as a warning count)
+ * before the note icon.
  *
  * @author michael.morosov
  *
@@ -25,8 +26,8 @@ interface PanelProps {
   headerActionComponent?: ReactNode;
   /** Why the section is empty in this view: it collapses to a muted heading line with this note behind an icon. */
   noteText?: string;
-  /** A word or two beside the note icon that says at a glance why the section is muted, such as "Design only". */
-  noteCaptionText?: string;
+  /** The icon of the note, such as a crossed-out eye for a card not used in this view; an info circle when none. */
+  noteIconComponent?: ReactNode;
   /** Tighter header and body padding, for a dense read-out card in a crowded column. */
   isCompact?: boolean;
   /** The heading stays for screen readers but is hidden on screen, for a one-line card whose content names itself. */
@@ -39,7 +40,7 @@ export const Panel = ({
   children,
   headerActionComponent,
   noteText,
-  noteCaptionText,
+  noteIconComponent,
   isCompact = false,
   isTitleVisuallyHidden = false,
 }: PanelProps): ReactNode => {
@@ -61,8 +62,7 @@ export const Panel = ({
         {noteText ? (
           <span className={styles.headerActions}>
             {headerActionComponent}
-            {noteCaptionText && <span className={styles.noteCaption}>{noteCaptionText}</span>}
-            <TooltipNoteIcon noteText={noteText} />
+            <TooltipNoteIcon noteText={noteText} iconComponent={noteIconComponent} />
           </span>
         ) : headerActionComponent}
       </header>
