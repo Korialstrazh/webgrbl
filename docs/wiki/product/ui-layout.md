@@ -61,7 +61,7 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 - While **Fix warnings** shows, it and the Check badge carry the count alone: the lock dots on Start and Frame and the heading warning icon step back, and the frame overrun note moves into the Toolpath warnings popover. The object row chip and Cut check stay.
 - Each readiness step with an action is its own tab stop; a done Check or Connect leaves the tab order with `aria-disabled`.
 - Icon tooltips (`DismissibleTooltip`, layer mode glyph) also open on a long press for touch screens.
-- Add/Edit material keeps Save off, with the reason ("Name needed" / "Thickness needed") beside the buttons, until the fields are valid.
+- Add/Edit material keeps Save off until the fields are valid: a name problem shows under the Name field only after it is touched or Save is tried (never on open), and a wrong thickness says "Thickness needed" beside the buttons.
 - Open project row buttons are named after the project ("Open sample · Nov 10, 2026 14:05").
 - Slider handles get the 2 px accent focus ring.
 - Set zero sits in the Position card title row as an origin icon (two axes meeting at a small zero, tooltip "Set zero here (X/Y origin)"); Move no longer has a Set zero row.
