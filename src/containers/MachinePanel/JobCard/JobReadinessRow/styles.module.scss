@@ -87,29 +87,14 @@
   font-size: 1.25rem;
 }
 
-// Recommended, not required: a hollow, thin dotted ring with no fill and a small skip mark (a dash in a dot) on its
-// corner, so it never reads as the solid ring of a to-do step or as a disabled one.
+// Recommended, not required: a hollow, thin dotted ring with no fill, so it never reads as the solid ring of a to-do
+// step or as a disabled one.
 .optionalStep .marker {
-  position: relative;
   border-width: 0.0625rem;
   border-style: dotted;
   border-color: var(--color-text-muted);
   background-color: transparent;
   color: var(--color-text-muted);
-
-  &::after {
-    content: '';
-    position: absolute;
-    right: -0.25rem;
-    bottom: -0.25rem;
-    width: 0.75rem;
-    height: 0.75rem;
-    border: 0.0625rem solid var(--color-text-muted);
-    border-radius: 50%;
-    background:
-      linear-gradient(var(--color-text-muted), var(--color-text-muted)) center / 0.375rem 0.0625rem no-repeat,
-      var(--color-surface-2);
-  }
 }
 
 .nextStep .marker {
@@ -139,30 +124,31 @@
   }
 }
 
-// 13 px at medium weight in the muted colour (8.6:1), so the step names read as easily as the buttons below.
+// 13 px at medium weight in the muted colour (8.6:1). Each name keeps to its own equal column with a small gap on
+// both sides and ends in an ellipsis when it does not fit, so two names never run together.
 .caption {
+  display: block;
+  max-width: 100%;
+  padding: 0 0.25rem;
+  overflow: hidden;
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.2;
-}
-
-// The caption and an optional step's mark share one line and centre together under the marker, so the mark never
-// runs into the next step's name.
-.caption {
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-// A dashed ring after an optional step's name, centred on the caption line like the dotted ring of its marker, and
-// big enough never to read as a degree sign; the step's tooltip says it is optional. The word stays for screen readers
-// and tests.
+// A small dashed-ring badge on the corner of an optional step's marker, apart from the name; the step's tooltip says
+// it is optional. The word stays for screen readers and tests.
 .optionalMark {
-  display: inline-block;
-  width: 0.4375rem;
-  height: 0.4375rem;
-  margin-left: 0.125rem;
+  position: absolute;
+  top: -0.3125rem;
+  right: -0.5rem;
+  width: 0.75rem;
+  height: 0.75rem;
   border: 0.0625rem dashed var(--color-text-muted);
   border-radius: 50%;
-  vertical-align: middle;
+  background-color: var(--color-surface-1);
 }
 
 .optionalMarkText {

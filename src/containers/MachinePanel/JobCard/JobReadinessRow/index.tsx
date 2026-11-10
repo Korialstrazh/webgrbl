@@ -135,16 +135,16 @@ const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
           <span className={styles.marker}>
             {isMet ? <CheckOutlined aria-hidden /> : iconComponent}
             {!!openCount && <span className={styles.countBadge} aria-hidden>{openCount}</span>}
-          </span>
-          {/* An open optional step carries a small hollow mark on its caption line, so the step never reads as a
-              blocker and every step keeps the same height. */}
-          <span className={styles.caption}>
-            {captionText}
+            {/* An open optional step carries a small dashed-ring badge on its marker, apart from the name, so it
+                never reads as punctuation or as a blocker. */}
             {isOptionalOpen && (
               <span className={styles.optionalMark} aria-hidden>
                 <span className={styles.optionalMarkText}>{t(DEFAULT.JOB_READINESS_STEP_OPTIONAL_CAPTION)}</span>
               </span>
             )}
+          </span>
+          <span className={styles.caption}>
+            {captionText}
           </span>
         </Button>
       </DismissibleTooltip>
