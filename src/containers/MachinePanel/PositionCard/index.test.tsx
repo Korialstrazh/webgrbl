@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { vi } from 'vitest';
 import { Provider } from 'react-redux';
 import { PositionCard } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
@@ -6,13 +7,15 @@ import type { GrblAxisPosition } from '../../../utils/grbl/interfaces/GrblAxisPo
 import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblResolvedStatus';
 import { MISSING_VALUE_TEXT } from '../../../utils/missing.value.constants';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
-import { MachineStatusReceived } from '../../../utils/states/machine.status.state';
+import { MachineLineRequested, MachineStatusReceived } from '../../../utils/states/machine.status.state';
+import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import { newStore } from '../../../utils/states/new.store';
 import type { AppStore } from '../../../utils/states/new.store';
 import { selectIsConnectionPopoverOpen } from '../../../utils/states/ui.overlay.state';
 
 const DISCONNECTED_TEXT = 'Connect to see the position';
 const WORK_ROW_NAME = 'Work position';
+const SET_ZERO_LABEL = 'Set zero here';
 
 const newStatus = (workPosition: GrblAxisPosition, machinePosition: GrblAxisPosition): GrblResolvedStatus => ({
   machineState: GRBL_MACHINE_STATE.IDLE,
@@ -91,5 +94,22 @@ describe(PositionCard.name, () => {
 
     expect(getWorkRowTexts()).toEqual(['18.000', '1.250', '0.000']);
     expect(screen.queryByRole('button', { name: DISCONNECTED_TEXT })).not.toBeInTheDocument();
+  });
+
+  it('sets the work zero from the small button in its title row, only while idle', () => {
+    const store: AppStore = newStore();
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const ZERO: GrblAxisPosition = { x: 0, y: 0, z: 0 };
+
+    renderCard(store);
+    connect(store);
+    receive(store, { ...newStatus(ZERO, ZERO), machineState: GRBL_MACHINE_STATE.JOG });
+
+    expect(screen.getByRole('button', { name: SET_ZERO_LABEL })).toBeDisabled();
+
+    receive(store, newStatus(ZERO, ZERO));
+    fireEvent.click(screen.getByRole('button', { name: SET_ZERO_LABEL }));
+
+    expect(dispatchSpy).toHaveBeenCalledWith(new MachineLineRequested({ line: MACHINE_COMMAND.SET_WORK_ZERO }));
   });
 });

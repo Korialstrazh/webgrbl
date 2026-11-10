@@ -166,7 +166,7 @@ describe(MachinePanel.name, () => {
 
     expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-reload')).not.toBeNull();
     expect(screen.getByRole('button', { name: UNLOCK_LABEL }).querySelector('.anticon-unlock')).not.toBeNull();
-    expect(screen.getByRole('button', { name: 'Set zero' }).querySelector('.anticon-aim')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Set zero here' }).querySelector('.anticon-aim')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Hold to fire' }).querySelector('.anticon-bulb')).not.toBeNull();
   });
 

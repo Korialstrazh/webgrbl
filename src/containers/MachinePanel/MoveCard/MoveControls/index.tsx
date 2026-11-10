@@ -1,5 +1,5 @@
 /**
- * The controls of the move card: home, set zero, the jog pad, the step sizes and the jog speed, centred as one column.
+ * The controls of the move card: home, the jog pad, the step sizes and the jog speed, centred as one column.
  * Each one is enabled only while the laser can take that move.
  *
  * @author michael.morosov
@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { AimOutlined, ArrowUpOutlined, HomeOutlined } from '@ant-design/icons';
+import { ArrowUpOutlined, HomeOutlined } from '@ant-design/icons';
 import { Button, Segmented, Tooltip } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -53,7 +53,7 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const [stepMm, setStepMm] = useState<number>(DEFAULT_JOG_STEP_MM);
   const feedRate: number = activeProfile?.jogFeedRate ?? DEFAULT_MACHINE_JOG_FEED_RATE;
-  const { canJog, canHome, canSetZero }: MoveAvailability = getMoveAvailability({
+  const { canJog, canHome }: MoveAvailability = getMoveAvailability({
     isConnected,
     machineState: machineStatus?.machineState,
     hasHomingSwitches: activeProfile?.hasHomingSwitches ?? false,
@@ -112,15 +112,6 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
               {t(DEFAULT.MACHINE_MOVE_HOME)}
             </Button>
           )}
-          <Button
-            size={ANTD_BUTTON_SIZE_LARGE}
-            icon={<AimOutlined />}
-            aria-label={t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
-            disabled={!canSetZero}
-            onClick={() => requestLine(MACHINE_COMMAND.SET_WORK_ZERO)}
-          >
-            {t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
-          </Button>
         </div>
       </div>
     </div>

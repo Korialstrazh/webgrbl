@@ -21,7 +21,6 @@ import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider
 const JOG_NORTH_EAST_LABEL = 'Jog up and right';
 const JOG_ORIGIN_LABEL = 'Origin';
 const HOME_LABEL = 'Home';
-const SET_ZERO_LABEL = 'Set zero';
 const STEP_ONE_LABEL = '1 mm';
 const DEFAULT_STEP_LABEL = '10 mm';
 const JOG_SPEED_LABEL = 'Jog speed';
@@ -237,9 +236,9 @@ describe(MoveCard.name, () => {
     expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeEnabled();
   });
 
-  it('locks jog, go-to-zero, Home and Set zero while the pointer fires', () => {
+  it('locks jog, go-to-zero and Home while the pointer fires', () => {
     const store: AppStore = newStore();
-    const moveButtonLabels: string[] = [JOG_NORTH_EAST_LABEL, JOG_ORIGIN_LABEL, HOME_LABEL, SET_ZERO_LABEL];
+    const moveButtonLabels: string[] = [JOG_NORTH_EAST_LABEL, JOG_ORIGIN_LABEL, HOME_LABEL];
 
     renderMoveCard(store);
     activateProfile(store, { hasHomingSwitches: true });
@@ -283,29 +282,13 @@ describe(MoveCard.name, () => {
     receiveState(store, GRBL_MACHINE_STATE.RUN);
 
     expect(screen.getByRole('button', { name: HOME_LABEL })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /^Set zero/ })).not.toBeInTheDocument();
 
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
 
     fireEvent.click(screen.getByRole('button', { name: HOME_LABEL }));
 
     expect(getRequestedLines(dispatchSpy)).toEqual([MACHINE_COMMAND.HOME]);
-  });
-
-  it('enables Set zero only in Idle and sends the exact line', () => {
-    const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
-
-    renderMoveCard(store);
-    connect(store);
-    receiveState(store, GRBL_MACHINE_STATE.JOG);
-
-    expect(screen.getByRole('button', { name: SET_ZERO_LABEL })).toBeDisabled();
-
-    receiveState(store, GRBL_MACHINE_STATE.IDLE);
-
-    fireEvent.click(screen.getByRole('button', { name: SET_ZERO_LABEL }));
-
-    expect(getRequestedLines(dispatchSpy)).toEqual([MACHINE_COMMAND.SET_WORK_ZERO]);
   });
 
   it('disables the jog speed without a profile and shows the default', () => {
