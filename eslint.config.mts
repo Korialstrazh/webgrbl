@@ -18,6 +18,40 @@ import { dirname } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// ts-prefer-design-system-components: raw form controls bypass antd's tokens, focus rings and accessibility. A local
+// rule, because eslint-plugin-react (react/forbid-elements) crashes on ESLint 10 and no-restricted-syntax here is
+// only a warning.
+const RAW_FORM_ELEMENTS: Record<string, string> = {
+  button: 'Button',
+  input: 'Input, InputNumber, Checkbox, Radio, Switch or Upload',
+  select: 'Select',
+  textarea: 'Input.TextArea',
+};
+
+const noRawFormElementsRule = {
+  meta: {
+    type: 'suggestion' as const,
+    docs: { description: 'Forbid raw <button>, <input>, <select> and <textarea> in favour of antd components.' },
+    schema: [],
+  },
+  create: (context: { report: (descriptor: { node: unknown; message: string }) => void }) => ({
+    JSXOpeningElement: (node: { name: { type: string; name?: string } }) => {
+      const elementName: string | undefined = node.name.type === 'JSXIdentifier' ? node.name.name : undefined;
+      const antdName: string | undefined = elementName ? RAW_FORM_ELEMENTS[elementName] : undefined;
+
+      if (antdName) {
+        context.report({
+          node,
+          message: `ts-prefer-design-system-components - use antd ${antdName} instead of a raw <${elementName}>. `
+            + 'Where antd truly has no fit, disable this line with a comment saying why.',
+        });
+      }
+    },
+  }),
+};
+
+const webgrblPlugin = { rules: { 'no-raw-form-elements': noRawFormElementsRule } };
+
 export default [
   { ignores: ['dist', 'build', 'dev-dist', '*.cjs', '.claude/worktrees/**', '.worktrees/**'] },
   {
@@ -185,5 +219,12 @@ export default [
         },
       ],
     },
+  },
+  {
+    // Raw form controls are forbidden in app components; tests may render them as fixtures.
+    files: ['src/**/*.tsx'],
+    ignores: ['**/*.{test,spec}.tsx'],
+    plugins: { webgrbl: webgrblPlugin },
+    rules: { 'webgrbl/no-raw-form-elements': 'error' },
   },
 ];

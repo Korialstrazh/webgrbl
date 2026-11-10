@@ -153,7 +153,7 @@ export const PresetFileActions = ({ selectedPresets }: PresetFileActionsProps): 
           />
         </Badge>
       </Dropdown>
-      {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
+      {/* eslint-disable-next-line webgrbl/no-raw-form-elements -- hidden picker; antd Upload adds a list */}
       <input
         ref={fileInputRef}
         type="file"

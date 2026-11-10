@@ -38,6 +38,7 @@ export const useSvgFilePicker = (): SvgFilePicker => {
   return {
     openSvgFilePicker: () => inputRef.current?.click(),
     fileInputComponent: (
+      // eslint-disable-next-line webgrbl/no-raw-form-elements -- hidden picker; antd Upload adds a list
       <input
         ref={inputRef}
         className={styles.hiddenInput}
