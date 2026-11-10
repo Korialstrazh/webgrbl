@@ -48,9 +48,9 @@ Feature status against LaserGRBL: [[lasergrbl/_index|LaserGRBL feature reference
 ## Round 44 behaviour notes
 
 - The folded Job card keeps Start at a fixed width inside the card; the facts wrap beside it.
-- Object sizes show compactly on one line ("900×900", in mm); the open Material step marks "optional" with a small hollow ring after its name, so every step is one line; the project name sits in a fixed-width slot, so the top bar never shifts.
+- Object sizes show compactly on one line ("900×900", in mm); the open Material step marks "optional" with a small dashed ring after its name, so every step is one line; the project name sits in a fixed-width slot, so the top bar never shifts.
 - The object row chip counts only the toolpath warnings that lock Start, the same number as Fix warnings; outside the bed is a separate bed-outline icon outside the count.
 - Lock-reason popovers open to the left of their dot, over their own button, and flip back inside the window.
 - The frame overrun and the Toolpath warnings list are icon, short label and action; the full sentences are tooltips.
 - Fix warnings briefly highlights the Toolpath tab and the warnings chip.
-- The machine panel's "More below" chevron sits in the Stop footer's top padding under a thin shadow, never over a control; in the wide layout the jog pad and job actions are slightly lower, so Move fits above Stop when connected at 1440 x 900.
+- The machine panel's "More below" chevron sits in the Stop footer's top padding under a thin shadow, never over a control; in the wide layout the jog pad and job actions are slightly lower, so Move fits above Stop when connected at 1440 x 900; the jog arrows keep a clear gap between them at every width. In the narrow layout a region with more below shows it as a thin shadow edge in its bottom padding (`more-below-fade`), never a fade that dims the controls.
