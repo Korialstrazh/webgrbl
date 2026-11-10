@@ -52,7 +52,7 @@ const EXPORT_LABEL = 'Export G-code';
 const ESTIMATE_NOTE = 'Estimate from your test.';
 const GUESS_NOTE = 'This is a guess: no test has been made with this material on this laser.';
 const TEST_SAMPLE_POINTER = 'Add the test sample in Design, burn it, then enter the result to get an estimate.';
-const BUILDING_TEXT = 'Building 3D…';
+const BUILDING_TEXT = 'Building 3D\u2026';
 const FAILED_TEXT = /^The 3D view could not be built/;
 const NOT_THROUGH_HINT = 'Part 3 stays attached: the cut does not reach through, so it cannot be lifted.';
 

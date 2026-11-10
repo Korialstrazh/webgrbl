@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getUniqueProjectName } from './get.unique.project.name';
 
-const PROJECT_NAME = 'sample · Nov 10, 2026 14:05';
+const PROJECT_NAME = 'sample \u00b7 Nov 10, 2026 14:05';
 const SECOND_NAME = `${PROJECT_NAME} (2)`;
 
 describe(getUniqueProjectName.name, () => {

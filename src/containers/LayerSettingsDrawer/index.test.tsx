@@ -208,7 +208,7 @@ describe(LayerSettingsDrawer.name, () => {
 
   it.each([
     [SAVE_TO_PALETTE_LABEL, 'Add swatch'],
-    ['Edit palette…', 'Palette'],
+    ['Edit palette\u2026', 'Palette'],
     ['Save preset', 'Save preset'],
     ['Use preset', 'Use preset'],
   ])('shows a short visible caption on the %s action', (labelText: string, captionText: string) => {

@@ -165,7 +165,7 @@ const waitForStoredPresetCount = async (count: number): Promise<void> => {
   });
 };
 
-/** A row names its preset "<material>, <thickness> mm · <operation>", so a row is found by the start of that. */
+/** A row names its preset "<material>, <thickness> mm / <operation>", so a row is found by the start of that. */
 const getRowNamePattern = (materialName: string): RegExp => new RegExp(`^${materialName}, `);
 
 const enterPower = (powerWatts: number): void => {
