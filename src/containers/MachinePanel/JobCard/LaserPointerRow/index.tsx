@@ -1,7 +1,8 @@
 /**
  * The laser pointer row, the last row of the Job card: hold to fire, the pointer power of the active laser profile and
  * its figure, and a details button whose popover holds the watts, the switch-off note and air assist. It is one compact
- * row in every state, so a connect never shifts the cards; while no laser is connected the fire button is off.
+ * row in every state, so a connect never shifts the cards; while no laser is connected the row is muted and compact:
+ * the fire button shrinks to its icon and the controls are off.
  *
  * @author michael.morosov
  *
@@ -20,6 +21,7 @@ import {
   MIN_POINTER_POWER_PERCENT,
   POINTER_POWER_STEP_PERCENT,
 } from '../../../../utils/machine/machine.command.constants';
+import { selectIsConnected } from '../../../../utils/states/grbl.connection.state';
 import { LaserPointerPowerChanged } from '../../../../utils/states/laser.pointer.state';
 import type { AppDispatch } from '../../../../utils/states/new.store';
 import { selectPointerPowerPercent } from '../../../../utils/states/pointer.power.selector';
@@ -31,9 +33,13 @@ export const LaserPointerRow = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const powerPercent: number = useSelector(selectPointerPowerPercent);
+  const isConnected: boolean = useSelector(selectIsConnected);
+  const rowClassName: string | undefined = isConnected
+    ? styles.laserPointerRow
+    : [styles.laserPointerRow, styles.offline].join(' ');
 
   return (
-    <div className={styles.laserPointerRow} role="group" aria-label={t(DEFAULT.MACHINE_LASER_TITLE)}>
+    <div className={rowClassName} role="group" aria-label={t(DEFAULT.MACHINE_LASER_TITLE)}>
       <PointerFireButton />
       <Slider
         className={styles.powerSlider}
@@ -41,6 +47,7 @@ export const LaserPointerRow = (): ReactNode => {
         max={MAX_POINTER_POWER_PERCENT}
         step={POINTER_POWER_STEP_PERCENT}
         value={powerPercent}
+        disabled={!isConnected}
         tooltip={{ open: false }}
         onChange={(percent: number) => dispatch(new LaserPointerPowerChanged({ percent }))}
         ariaLabelForHandle={t(DEFAULT.MACHINE_LASER_POWER)}

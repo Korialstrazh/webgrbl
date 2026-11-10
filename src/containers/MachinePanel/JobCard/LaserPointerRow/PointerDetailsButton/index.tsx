@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ANTD_BUTTON_TYPE_TEXT,
-  ANTD_POPOVER_PLACEMENT_TOP_RIGHT,
+  ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../../../../utils/antd.constants';
 import { useOverlayRegistration } from '../../../../../utils/hooks/use.overlay.registration';
@@ -91,7 +91,9 @@ export const PointerDetailsButton = (): ReactNode => {
     <Popover
       content={detailsComponent}
       trigger={ANTD_POPOVER_TRIGGER_CLICK}
-      placement={ANTD_POPOVER_PLACEMENT_TOP_RIGHT}
+      // Below the row, flipped by antd when there is no room, so it never covers the readiness stepper above.
+      placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+      autoAdjustOverflow
       open={isOpen}
       onOpenChange={setIsOpen}
     >

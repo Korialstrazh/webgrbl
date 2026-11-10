@@ -99,7 +99,8 @@ export const PointerFireButton = (): ReactNode => {
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
       >
-        {labelText}
+        {/* Offline the button is only its icon, so the row stays one compact line; the label names it still. */}
+        {isButtonUsable && labelText}
       </Button>
     </Tooltip>
   );

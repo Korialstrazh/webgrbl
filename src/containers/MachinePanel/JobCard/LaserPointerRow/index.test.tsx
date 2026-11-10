@@ -288,6 +288,8 @@ describe(LaserPointerRow.name, () => {
 
   it('dispatches the power change from the slider', () => {
     const store: AppStore = newStore();
+
+    connect(store);
     const dispatchSpy = vi.spyOn(store, 'dispatch');
 
     renderLaserPointerRow(store);
@@ -297,6 +299,13 @@ describe(LaserPointerRow.name, () => {
     });
 
     expect(getDispatched(dispatchSpy, LaserPointerPowerChanged)).toHaveLength(1);
+  });
+
+  it('mutes the row offline: the slider is off and the fire button is only its icon', () => {
+    renderLaserPointerRow(newStore());
+
+    expect(screen.getByRole('slider', { name: POWER_LABEL })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: FIRE_LABEL })).not.toHaveTextContent(FIRE_LABEL);
   });
 
   it('hides the watts without an active profile', () => {

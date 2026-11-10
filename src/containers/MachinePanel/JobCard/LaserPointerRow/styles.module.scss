@@ -23,3 +23,19 @@
   font-variant-numeric: tabular-nums;
   text-align: end;
 }
+
+// Offline the row is a muted, compact line: no laser can take the pointer, so it must not draw the eye.
+.offline {
+  color: var(--color-text-muted);
+
+  .powerValue {
+    color: var(--color-text-muted);
+  }
+
+  :global(.ant-btn) {
+    height: auto;
+    min-height: 1.75rem;
+    border-color: transparent;
+    background: transparent;
+  }
+}
