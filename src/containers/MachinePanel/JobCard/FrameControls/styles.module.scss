@@ -66,6 +66,25 @@
   min-width: 0;
 }
 
+// Frame and Export read like a smaller Start: the icon and the word on one row, the word at 14px (Start is 16px), so
+// the three buttons share one type scale and the row never looks cramped. The repeated classes outweigh the captioned
+// button's stacked layout and 13px caption.
+.exportAction.exportAction :global(.ant-btn),
+.frameColumn.frameColumn :global(.ant-btn) {
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+.exportAction.exportAction :global(.ant-btn) span,
+.frameColumn.frameColumn :global(.ant-btn) span {
+  font-size: 0.875rem;
+}
+
+.exportAction.exportAction :global(.ant-btn) :global(.anticon),
+.frameColumn.frameColumn :global(.ant-btn) :global(.anticon) {
+  font-size: 1.125rem;
+}
+
 .startAction {
   position: relative;
   display: flex;
@@ -218,6 +237,8 @@
 @media (width >= 80rem) {
   .frameControls {
     --job-action-height: 2.75rem;
+
+    gap: var(--space-2);
   }
 
   .actions.actions :global(.ant-btn) {
