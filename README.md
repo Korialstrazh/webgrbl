@@ -23,3 +23,9 @@ A browser version of LaserGRBL: control a GRBL laser cutter or engraver straight
 - `AGENTS.md` - rules for agents working in this repo
 - `docs/wiki/` - knowledge base (start at `_master-index.md`)
 - `docs/superpowers/` - specs and plans
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE). You may use, modify and distribute webgrbl, in open or closed source and commercial projects, under its terms. See [NOTICE](NOTICE) for attribution.
+
+**Safety disclaimer:** webgrbl drives laser cutters and engravers. It is provided "AS IS", without warranty of any kind, and the authors accept no liability for any damage or injury arising from its use. Always supervise your machine and follow your laser's safety instructions.
