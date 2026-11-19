@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { JobCutCheckHint } from '.';
@@ -7,7 +7,8 @@ import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import { DEFAULT_CUT_ENTRY, DEFAULT_FILL_ENTRY, DEFAULT_SCORE_ENTRY } from '../../utils/palette/palette.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
-import { JobCutCheckDismissed, JobCutCheckLayersCaptured } from '../../utils/states/job.run.state';
+import { JobCutCheckDismissed, JobCutCheckLayersCaptured, JobRunStarted } from '../../utils/states/job.run.state';
+import { JOB_RUN_KIND } from '../../utils/states/job.run.kind.constants';
 import { JobSafetyChecklistOpened } from '../../utils/states/job.safety.checklist.state';
 import { JOB_START_REQUEST_KIND } from '../../utils/states/job.start.request.constants';
 import { MaterialPresetCutThroughNoteAdded } from '../../utils/states/material.preset.state';
@@ -185,5 +186,34 @@ describe(JobCutCheckHint.name, () => {
     fireEvent.click(screen.getByRole('checkbox', { name: DEFAULT_CUT_ENTRY.name }));
 
     expect(screen.getByRole('button', { name: RECUT_LABEL })).toBeDisabled();
+  });
+
+  it('starts fresh after a re-cut finished, with default ticks and the note offered again', () => {
+    const store: AppStore = newFinishedJobStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+    const isNoteAction = (action: unknown): boolean => action instanceof MaterialPresetCutThroughNoteAdded;
+
+    renderHint(store);
+    fireEvent.click(screen.getByRole('button', { name: STUCK_LABEL }));
+    fireEvent.click(screen.getByRole('checkbox', { name: DEFAULT_SCORE_ENTRY.name }));
+    fireEvent.click(screen.getByRole('button', { name: RECUT_LABEL }));
+    act(() => {
+      store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.JOB }));
+      store.dispatch(new JobCutCheckLayersCaptured({
+        layerKeys: [DEFAULT_CUT_ENTRY.colour, DEFAULT_SCORE_ENTRY.colour],
+      }));
+    });
+
+    expect(screen.getByText(QUESTION_TEXT)).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: DEFAULT_SCORE_ENTRY.name })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: STUCK_LABEL }));
+
+    expect(screen.getByRole('checkbox', { name: DEFAULT_CUT_ENTRY.name })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: DEFAULT_SCORE_ENTRY.name })).not.toBeChecked();
+
+    fireEvent.click(screen.getByRole('button', { name: CLOSE_LABEL }));
+
+    expect(dispatchSpy.mock.calls.filter(([action]: unknown[]) => isNoteAction(action))).toHaveLength(3);
   });
 });

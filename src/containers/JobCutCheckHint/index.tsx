@@ -45,6 +45,15 @@ export const JobCutCheckHint = (): ReactNode => {
   const [isStuckAnswered, setIsStuckAnswered] = useState<boolean>(false);
   const [isNoteAdded, setIsNoteAdded] = useState<boolean>(false);
   const [tickedLayerKeys, setTickedLayerKeys] = useState<string[]>([]);
+  const [answeredLayers, setAnsweredLayers] = useState<JobCutCheckLayer[]>(layers);
+
+  // A new run clears the layers and a finished one captures new ones: each capture starts a fresh, unanswered check.
+  if (answeredLayers !== layers) {
+    setAnsweredLayers(layers);
+    setIsStuckAnswered(false);
+    setIsNoteAdded(false);
+    setTickedLayerKeys([]);
+  }
 
   if (!layers.length) {
     return null;
