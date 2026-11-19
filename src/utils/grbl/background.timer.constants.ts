@@ -21,3 +21,7 @@ export const BACKGROUND_TIMER_TICK_KIND = 'tick';
 
 /** The worker event that carries a posted message. */
 export const BACKGROUND_TIMER_MESSAGE_EVENT_NAME = 'message';
+/** The worker event fired when the worker script fails to load or dies. */
+export const BACKGROUND_TIMER_WORKER_ERROR_EVENT_NAME = 'error';
+/** The worker event fired when a message from the worker cannot be read. */
+export const BACKGROUND_TIMER_MESSAGE_ERROR_EVENT_NAME = 'messageerror';

@@ -77,6 +77,8 @@ export class GrblController {
   private readonly statusPoller: GrblStatusPoller;
   /** Stop, reset, feed hold and cycle resume. */
   private readonly machineControls: GrblMachineControls;
+  /** Runs the poll and the silence check; its worker ends with the connection. */
+  private readonly backgroundTimer: BackgroundTimer;
   /** Streams and checks programs. */
   private readonly programStreamer: GrblProgramStreamer;
   /** Reports a silent controller. */
@@ -88,7 +90,8 @@ export class GrblController {
     const emitEvent = (event: GrblControllerEvent): void => this.emitEvent(event);
     const isConnected = (): boolean => this.phase === GRBL_CONTROLLER_PHASE.CONNECTED;
     // One worker serves the poller and the watchdog.
-    const backgroundTimer: BackgroundTimer = newBackgroundTimer();
+    this.backgroundTimer = newBackgroundTimer();
+    const backgroundTimer: BackgroundTimer = this.backgroundTimer;
 
     this.transport = transport;
     this.commandWriter = new GrblCommandWriter(transport, emitEvent);
@@ -287,6 +290,7 @@ export class GrblController {
     this.programStreamer.releaseProgram(new GrblConnectionClosedError());
     this.notRespondingWatchdog.stopWatching();
     this.statusPoller.stopPolling();
+    this.backgroundTimer.dispose();
     this.commandWriter.releaseAllLines(new GrblConnectionClosedError());
     this.lineFramer.reset();
   }

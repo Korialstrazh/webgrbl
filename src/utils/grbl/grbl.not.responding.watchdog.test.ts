@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GRBL_NOT_RESPONDING_SILENCE_MS } from './grbl.constants';
 import { GrblNotRespondingWatchdog } from './grbl.not.responding.watchdog';
+import { WindowBackgroundTimer } from './window.background.timer';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 
 const LINE_INTERVAL_MS = 1000;
@@ -14,11 +15,14 @@ describe(GrblNotRespondingWatchdog.name, () => {
   beforeEach(() => {
     vi.useFakeTimers();
     emittedEvents = [];
-    watchdog = new GrblNotRespondingWatchdog({
-      hasInFlightLines: (): boolean => true,
-      getLatestStatus: () => undefined,
-      emitEvent: (event: GrblControllerEvent): void => void emittedEvents.push(event),
-    });
+    watchdog = new GrblNotRespondingWatchdog(
+      {
+        hasInFlightLines: (): boolean => true,
+        getLatestStatus: () => undefined,
+        emitEvent: (event: GrblControllerEvent): void => void emittedEvents.push(event),
+      },
+      new WindowBackgroundTimer(),
+    );
   });
 
   afterEach(() => {

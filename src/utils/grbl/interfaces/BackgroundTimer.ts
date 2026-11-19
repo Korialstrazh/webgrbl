@@ -13,4 +13,6 @@ export interface BackgroundTimer {
   setInterval(callback: () => void, ms: number): number;
   setTimeout(callback: () => void, ms: number): number;
   clear(id: number): void;
+  /** Stops every timer and frees what runs them; a timer set later starts afresh. */
+  dispose(): void;
 }

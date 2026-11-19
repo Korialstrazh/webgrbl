@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { BACKGROUND_TIMER_REQUEST_KIND, BACKGROUND_TIMER_TICK_KIND } from './background.timer.constants';
+import {
+  BACKGROUND_TIMER_MESSAGE_EVENT_NAME,
+  BACKGROUND_TIMER_REQUEST_KIND,
+  BACKGROUND_TIMER_TICK_KIND,
+  BACKGROUND_TIMER_WORKER_ERROR_EVENT_NAME,
+} from './background.timer.constants';
 import { newBackgroundTimer } from './background.timer';
 import type { BackgroundTimer } from './interfaces/BackgroundTimer';
 import type { BackgroundTimerRequest } from './interfaces/BackgroundTimerRequest';
@@ -21,8 +26,19 @@ class FakeWorker {
     this.requests.push(request);
   }
 
-  public addEventListener(_eventName: string, listener: (messageEvent: MessageEvent) => void): void {
-    this.messageListener = listener;
+  public addEventListener(eventName: string, listener: (messageEvent: MessageEvent) => void): void {
+    if (eventName === BACKGROUND_TIMER_WORKER_ERROR_EVENT_NAME) {
+      this.errorListener = listener;
+    } else if (eventName === BACKGROUND_TIMER_MESSAGE_EVENT_NAME) {
+      this.messageListener = listener;
+    }
+  }
+
+  public terminate = vi.fn();
+  private errorListener: ((messageEvent: MessageEvent) => void) | undefined;
+
+  public emitError(): void {
+    this.errorListener?.({} as MessageEvent);
   }
 
   public emitTick(timerId: number): void {
@@ -81,6 +97,56 @@ describe(newBackgroundTimer.name, () => {
       worker.emitTick(timerId);
 
       expect(worker.requests[1]).toEqual({ kind: BACKGROUND_TIMER_REQUEST_KIND.STOP, timerId });
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('moves running timers to window timers when the worker fails, keeping their ids', () => {
+      vi.useFakeTimers();
+
+      const intervalCallback = vi.fn();
+      const timeoutCallback = vi.fn();
+      const intervalId: number = timer.setInterval(intervalCallback, INTERVAL_MS);
+
+      timer.setTimeout(timeoutCallback, TIMEOUT_MS);
+      (FakeWorker.instances[0] as FakeWorker).emitError();
+      vi.advanceTimersByTime(INTERVAL_MS * 2);
+
+      expect(intervalCallback).toHaveBeenCalledTimes(2);
+      expect(timeoutCallback).toHaveBeenCalledTimes(1);
+
+      timer.clear(intervalId);
+      vi.advanceTimersByTime(INTERVAL_MS * 2);
+
+      expect(intervalCallback).toHaveBeenCalledTimes(2);
+      expect((FakeWorker.instances[0] as FakeWorker).terminate).toHaveBeenCalled();
+    });
+
+    it('uses window timers when the worker cannot be created', () => {
+      vi.useFakeTimers();
+      vi.stubGlobal('Worker', function ThrowingWorker(): never {
+        throw new Error('no worker');
+      });
+
+      const callback = vi.fn();
+      const throwingTimer: BackgroundTimer = newBackgroundTimer();
+      const timerId: number = throwingTimer.setInterval(callback, INTERVAL_MS);
+
+      vi.advanceTimersByTime(INTERVAL_MS * 2);
+      throwingTimer.clear(timerId);
+      vi.advanceTimersByTime(INTERVAL_MS * 2);
+
+      expect(callback).toHaveBeenCalledTimes(2);
+    });
+
+    it('terminates the worker on dispose and ignores later ticks', () => {
+      const callback = vi.fn();
+      const timerId: number = timer.setInterval(callback, INTERVAL_MS);
+      const worker: FakeWorker = FakeWorker.instances[0] as FakeWorker;
+
+      timer.dispose();
+      worker.emitTick(timerId);
+
+      expect(worker.terminate).toHaveBeenCalled();
       expect(callback).not.toHaveBeenCalled();
     });
 
