@@ -194,4 +194,43 @@ describe(JobSafetyChecklistDialog.name, () => {
     expect(selectJobSafetyChecklistRequest(store.getState())).toBeUndefined();
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
   });
+
+  describe('battery hint', () => {
+    const BATTERY_HINT = 'The laptop runs on battery. Plug it in so a long job is not cut short.';
+
+    afterEach(() => {
+      Reflect.deleteProperty(navigator, 'getBattery');
+    });
+
+    it('shows the hint when the device is not charging', async () => {
+      Object.defineProperty(navigator, 'getBattery', {
+        value: () => Promise.resolve({ charging: false }),
+        configurable: true,
+      });
+
+      await renderOpenDialog();
+
+      expect(await screen.findByText(BATTERY_HINT)).toBeInTheDocument();
+    });
+
+    it('shows no hint when the device is charging', async () => {
+      Object.defineProperty(navigator, 'getBattery', {
+        value: () => Promise.resolve({ charging: true }),
+        configurable: true,
+      });
+
+      await renderOpenDialog();
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(screen.queryByText(BATTERY_HINT)).not.toBeInTheDocument();
+    });
+
+    it('shows no hint without the Battery API', async () => {
+      await renderOpenDialog();
+
+      expect(screen.queryByText(BATTERY_HINT)).not.toBeInTheDocument();
+    });
+  });
 });

@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { JobCard } from '.';
 import { JOB_LOCK_NOTE_TEST_IDS } from './job.card.constants';
+import { screenWakeLock } from '../../../utils/browser/screen.wake.lock';
 import * as downloadModule from '../../../utils/browser/download.text.file';
 import { EM_DASH, MIDDLE_DOT } from '../../../utils/characters.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
@@ -435,5 +436,31 @@ describe(JobCard.name, () => {
 
     expect(selectIsJobCardCollapsed(store.getState())).toBe(false);
     expect(screen.getByRole('list', { name: READINESS_LABEL })).toBeInTheDocument();
+  });
+
+  it('says the screen is kept awake only while the lock is held during a run', async () => {
+    const store: AppStore = newStartableJobStore();
+
+    Object.defineProperty(navigator, 'wakeLock', {
+      value: { request: () => Promise.resolve({ release: () => Promise.resolve(), addEventListener: vi.fn() }) },
+      configurable: true,
+    });
+    store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.JOB }));
+    renderJobCard(store);
+
+    expect(screen.queryByText('Screen kept awake')).not.toBeInTheDocument();
+
+    await act(async () => {
+      await screenWakeLock.acquire();
+    });
+
+    expect(screen.getByText('Screen kept awake')).toBeInTheDocument();
+
+    await act(async () => {
+      await screenWakeLock.release();
+    });
+    Reflect.deleteProperty(navigator, 'wakeLock');
+
+    expect(screen.queryByText('Screen kept awake')).not.toBeInTheDocument();
   });
 });

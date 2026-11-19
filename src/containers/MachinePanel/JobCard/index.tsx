@@ -20,6 +20,7 @@
 import {
   BlockOutlined,
   ClockCircleOutlined,
+  DesktopOutlined,
   DownloadOutlined,
   DownOutlined,
   ProfileOutlined,
@@ -31,6 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
+import { useIsScreenKeptAwake } from '../../../utils/hooks/use.is.screen.kept.awake';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
 import { useJobStartBlockedReasonTexts } from '../../../utils/hooks/use.job.start.blocked.reason.texts';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
@@ -100,7 +102,15 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const isFixWarningsShown: boolean =
     useSelector(selectFirstUnmetJobReadinessStep) === JOB_READINESS_STEP.WARNINGS && !isJobRunActive;
   const isCollapsed: boolean = useSelector(selectIsJobCardCollapsed);
+  const isScreenKeptAwake: boolean = useIsScreenKeptAwake();
   const bodyId: string = useId();
+
+  const awakeNoteComponent: ReactNode = isJobRunActive && isScreenKeptAwake && (
+    <p className={styles.awakeNote}>
+      <DesktopOutlined aria-hidden />
+      {t(DEFAULT.JOB_SCREEN_AWAKE_NOTE)}
+    </p>
+  );
 
   const factsComponent: ReactNode = (
     <dl className={styles.facts}>
@@ -172,6 +182,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
             )}
           </div>
           {isJobRunActive && <JobRunProgress />}
+          {awakeNoteComponent}
           <JobPauseButton />
           <LaserPointerRow />
         </div>
@@ -180,6 +191,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           {factsComponent}
           {!isJobRunActive && <JobReadinessRow />}
           {isJobRunActive && <JobRunProgress />}
+          {awakeNoteComponent}
           <JobPauseButton />
           <FrameControls
             startActionComponent={isStartShown ? <JobStartButton /> : undefined}

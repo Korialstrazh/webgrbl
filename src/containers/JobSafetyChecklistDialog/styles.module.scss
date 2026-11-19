@@ -42,6 +42,12 @@ $stripe-loop: 1.4s;
   overflow-wrap: anywhere;
 }
 
+.batteryHint {
+  margin: var(--space-3) 0 0;
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
 .intro {
   margin: var(--space-3) 0;
   color: var(--color-text);

@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { getIsOnBattery } from '../../utils/browser/get.is.on.battery';
 import { MIDDLE_DOT } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
@@ -57,6 +58,7 @@ export const JobSafetyChecklistDialog = (): ReactNode => {
   const totalTimeS: number | undefined = useSelector(selectReadyToolpathTotalTimeS);
   const jobSize: JobSizeMm | undefined = getJobSizeMm(useSelector(selectToolpath)?.bounds);
   const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
+  const [isOnBattery, setIsOnBattery] = useState<boolean>(false);
   const isOpen: boolean = Boolean(request);
 
   // Every opening asks again: a tick from an earlier start must not unlock this one.
@@ -64,6 +66,29 @@ export const JobSafetyChecklistDialog = (): ReactNode => {
     if (!isOpen) {
       setIsConfirmed(false);
     }
+  }, [isOpen]);
+
+  // Checked once per opening: a long job on a dying battery is worth a word, an unknown battery is not.
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    let isCurrent = true;
+
+    const checkBattery = async (): Promise<void> => {
+      const isOnBatteryNow: boolean | undefined = await getIsOnBattery();
+
+      if (isCurrent) {
+        setIsOnBattery(isOnBatteryNow === true);
+      }
+    };
+
+    void checkBattery();
+
+    return () => {
+      isCurrent = false;
+    };
   }, [isOpen]);
 
   // A checklist left open after the start got blocked would offer a button that does nothing.
@@ -117,6 +142,7 @@ export const JobSafetyChecklistDialog = (): ReactNode => {
       <div className={styles.hazardStripe} aria-hidden />
       <p className={styles.summary}>{summaryParts.join(SUMMARY_SEPARATOR)}</p>
       <JobSizeText size={jobSize} />
+      {isOnBattery && <p className={styles.batteryHint} role="note">{t(DEFAULT.JOB_CHECKLIST_BATTERY_HINT)}</p>}
       <p className={styles.intro}>{t(DEFAULT.SAFETY_CHECKLIST_INTRO)}</p>
       <ul className={styles.reminderList} aria-label={t(DEFAULT.SAFETY_CHECKLIST_LIST_LABEL)}>
         {SAFETY_REMINDERS.map(({ kind, titleKey, hintKey }: SafetyReminder) => (

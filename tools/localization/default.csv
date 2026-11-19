@@ -289,6 +289,7 @@ GRBL_ERROR_8;This $ command only works while the laser is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
+JOB_CHECKLIST_BATTERY_HINT;The laptop runs on battery. Plug it in so a long job is not cut short.
 JOB_LOCK_SHORT_ARTWORK;No artwork
 JOB_LOCK_SHORT_BUSY;Busy
 JOB_LOCK_SHORT_CONNECT;Not connected
@@ -335,6 +336,7 @@ JOB_RUN_STATUS_INTERRUPTED;Stopped before the end
 JOB_RUN_STATUS_LABEL;Status
 JOB_RUN_STATUS_PAUSED;Paused
 JOB_RUN_STATUS_SENDING;Running
+JOB_SCREEN_AWAKE_NOTE;Screen kept awake
 JOB_SIZE_DIN_CLOSE;close to DIN {{name}} ({{width}} × {{height}} mm)
 JOB_SIZE_DIN_EXACT;DIN {{name}}
 JOB_SIZE_MM;{{width}} × {{height}} mm ({{widthCm}} × {{heightCm}} cm)
