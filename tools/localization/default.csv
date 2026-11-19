@@ -349,10 +349,6 @@ JOB_START_BLOCKED_NOT_IDLE;The laser must be idle to start a job.
 JOB_START_BLOCKED_OFF_BED;Some artwork lies outside the bed: move it onto the bed, fit it or skip it to start a job.
 JOB_START_BLOCKED_RUNNING;A job is running.
 JOB_START_BLOCKED_WARNINGS;Fix the toolpath warnings to start a job.
-JOB_START_CONFIRM_CANCEL;Cancel
-JOB_START_CONFIRM_DESCRIPTION;Check the material, focus and work zero. Keep protective glasses on and stay with the laser.
-JOB_START_CONFIRM_OK;Start and fire
-JOB_START_CONFIRM_TITLE;Start the job? The laser will fire.
 LASER_STATE_FIRING;Firing {{powerPercent}} %
 LASER_STATE_FIRING_HINT;The last report from the laser shows power above zero, so it may be firing.
 LASER_STATE_JOB_RUNNING;Job running
@@ -765,6 +761,21 @@ PALETTE_SHADING_COLOUR_NOTE;The shading colour is fixed: it covers every grey fr
 PALETTE_SHADING_LOCKED;Shading is built in and cannot be deleted.
 PALETTE_TITLE;Palette
 PROJECT_FILE_INPUT;Open a project file
+SAFETY_CHECKLIST_CANCEL;Cancel
+SAFETY_CHECKLIST_CONFIRM;I have done all of the above
+SAFETY_CHECKLIST_FIRE_HINT;Remove paper, offcuts and dust around the work area.
+SAFETY_CHECKLIST_FIRE_TITLE;Nothing flammable near the bed, extinguisher in reach
+SAFETY_CHECKLIST_GOGGLES_HINT;Rated for your laser wavelength (for diode lasers: 445 nm). Never look at the beam or its reflections.
+SAFETY_CHECKLIST_GOGGLES_TITLE;Everyone in the room wears laser goggles
+SAFETY_CHECKLIST_INTRO;Before you start, make sure that:
+SAFETY_CHECKLIST_JOB;Job: {{name}}
+SAFETY_CHECKLIST_LIST_LABEL;Safety reminders
+SAFETY_CHECKLIST_START;Start job
+SAFETY_CHECKLIST_STAY_HINT;Fire is the most common laser accident. Never leave a job running.
+SAFETY_CHECKLIST_STAY_TITLE;I will stay with the machine the whole time
+SAFETY_CHECKLIST_TITLE;The laser is about to fire
+SAFETY_CHECKLIST_VENTILATION_HINT;Never burn PVC, vinyl or faux leather: they release chlorine gas.
+SAFETY_CHECKLIST_VENTILATION_TITLE;Ventilation is on, and the material is safe to burn
 SIMULATION_BACK_TO_START;Back to start
 SIMULATION_ELAPSED_OF_TOTAL;{{elapsed}} / {{total}}
 SIMULATION_LAYER_BAR_LABEL;Burn time per layer

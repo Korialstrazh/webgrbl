@@ -22,9 +22,11 @@ import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { JobFinishRaceResult } from './interfaces/JobFinishRaceResult';
 import { JOB_RUN_KIND } from './job.run.kind.constants';
 import { JobRunStarted, JobRunStatusChanged } from './job.run.state';
+import type { JobStartRequested } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
+import { JOB_START_REQUEST_KIND } from './job.start.request.constants';
 import { getJobStartWorkPosition, returnToJobStartPosition } from './job.start.position.return.saga';
 import { selectActiveMachineProfile } from './machine.profile.state';
 import {
@@ -151,7 +153,12 @@ function* getJobEndStatusAfterStop(
   return JOB_RUN_STATUS.INTERRUPTED;
 }
 
-export function* runGrblJob(controller: GrblController): Generator {
+export function* runGrblJob(controller: GrblController, action: JobStartRequested): Generator {
+  // A re-run of layers and a resume only fill in once their own programs exist.
+  if (action.payload.kind !== JOB_START_REQUEST_KIND.FULL) {
+    return;
+  }
+
   const blockedReasonKey: string | undefined = (yield select(selectJobStartBlockedReasonKey)) as string | undefined;
 
   if (blockedReasonKey) {

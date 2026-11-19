@@ -31,6 +31,7 @@ import {
   selectJobRunKind,
   selectJobRunStatus,
 } from './job.run.state';
+import { JOB_START_REQUEST_KIND } from './job.start.request.constants';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from './machine.profile.state';
 import {
@@ -331,7 +332,7 @@ describe(runGrblFrame.name, () => {
     simulator.powerOff();
     simulator.powerOn();
     await vi.advanceTimersByTimeAsync(SETTLE_MS);
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
 
     expect(selectJobRunKind(store.getState())).toBe(JOB_RUN_KIND.JOB);
     expect(selectIsFrameAlarmed(store.getState())).toBe(false);

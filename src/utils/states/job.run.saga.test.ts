@@ -36,6 +36,7 @@ import {
   selectJobRunStatus,
   selectJobRunTotalLineCount,
 } from './job.run.state';
+import { JOB_START_REQUEST_KIND } from './job.start.request.constants';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
@@ -198,7 +199,7 @@ describe(runGrblJob.name, () => {
     const store: AppStore = await prepareConnectedStore();
 
     expect(selectJobStartBlockedReasonKey(store.getState())).toBeUndefined();
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     expect(selectIsJobRunActive(store.getState())).toBe(true);
 
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -209,11 +210,20 @@ describe(runGrblJob.name, () => {
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
   });
 
+  it('starts nothing for a re-run or a resume request yet', async () => {
+    const store: AppStore = await prepareConnectedStore();
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RECUT }));
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RESUME }));
+
+    expect(selectIsJobRunActive(store.getState())).toBe(false);
+  });
+
   it('takes the laser back to where the job started once the job has finished, with the beam off first', async () => {
     const store: AppStore = await prepareConnectedStore();
     const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(JOB_END_MS);
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
     await vi.advanceTimersByTimeAsync(JOB_END_MS);
@@ -230,7 +240,7 @@ describe(runGrblJob.name, () => {
     const store: AppStore = await prepareConnectedStore();
     const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     store.dispatch(new MachineStopRequested());
     await vi.advanceTimersByTimeAsync(SETTLE_MS);
@@ -244,7 +254,7 @@ describe(runGrblJob.name, () => {
   it('reports a stopped job as interrupted, not as finished', async () => {
     const store: AppStore = await prepareConnectedStore();
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     store.dispatch(new MachineStopRequested());
     await vi.advanceTimersByTimeAsync(SETTLE_MS);
@@ -255,7 +265,7 @@ describe(runGrblJob.name, () => {
   it('reports a job as interrupted when a stop comes before the last answers, which still arrive', async () => {
     const store: AppStore = await prepareConnectedStore();
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     store.dispatch(new MachineStopRequested());
     await vi.advanceTimersByTimeAsync(SETTLE_MS);
 
@@ -265,7 +275,7 @@ describe(runGrblJob.name, () => {
   it('keeps the locks on after a stop during finishing until the stop has ended', async () => {
     const store: AppStore = await prepareConnectedStore();
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.FINISHING);
 
@@ -283,7 +293,7 @@ describe(runGrblJob.name, () => {
 
     replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
     transport.holdResetWrite();
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.SENDING);
 
@@ -297,7 +307,7 @@ describe(runGrblJob.name, () => {
     const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
 
     transport.holdResetWrite();
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.FINISHING);
 
@@ -317,7 +327,7 @@ describe(runGrblJob.name, () => {
         store.dispatch(new MachineStopRequested());
       }
     };
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(JOB_END_MS);
 
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
@@ -335,7 +345,7 @@ describe(runGrblJob.name, () => {
 
     replaceToolpathWithMoves(store, moveCount);
     transport.holdResetWrite();
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     expect(selectJobRunStatus(store.getState())).toBe(statusAtStop);
 
@@ -352,7 +362,7 @@ describe(runGrblJob.name, () => {
   it('reports interrupted when the machine goes Idle after a reset during finishing', async () => {
     const store: AppStore = await prepareConnectedStore();
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     store.dispatch(new JobPauseRequested());
     await vi.advanceTimersByTimeAsync(SETTLE_MS);
@@ -371,7 +381,7 @@ describe(runGrblJob.name, () => {
 
     replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
     transport.holdResetWrite();
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     store.dispatch(new MachineResetRequested());
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -386,7 +396,7 @@ describe(runGrblJob.name, () => {
     const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
 
     replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     transport.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.SELF_RESET });
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -398,7 +408,7 @@ describe(runGrblJob.name, () => {
   it('reports the answered lines, and pauses and resumes the job', async () => {
     const store: AppStore = await prepareConnectedStore();
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     expect(selectJobRunTotalLineCount(store.getState())).toBeGreaterThan(0);
     expect(selectJobRunAnsweredLineCount(store.getState())).toBe(selectJobRunTotalLineCount(store.getState()));
@@ -419,7 +429,7 @@ describe(runGrblJob.name, () => {
   it('refuses to pause without laser mode, as the beam could stay on', async () => {
     const store: AppStore = await prepareConnectedStore([], {}, newLaserModeOffSimulator());
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     expect(selectJobPauseControl(store.getState())).toBe(JOB_PAUSE_CONTROL.PAUSE_BLOCKED);
 
@@ -435,7 +445,7 @@ describe(runGrblJob.name, () => {
 
       store.dispatch(new ConsoleCommandSubmitted({ commandText: line }));
       await vi.advanceTimersByTimeAsync(SETTLE_MS);
-      store.dispatch(new JobStartRequested());
+      store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
       await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
 
       expect(selectJobPauseControl(store.getState())).toBe(JOB_PAUSE_CONTROL.PAUSE_BLOCKED);
@@ -445,7 +455,7 @@ describe(runGrblJob.name, () => {
   it('marks the run interrupted when the connection ends during it', async () => {
     const store: AppStore = await prepareConnectedStore();
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     store.dispatch(new DisconnectRequested());
     await vi.advanceTimersByTimeAsync(SETTLE_MS);
@@ -457,7 +467,7 @@ describe(runGrblJob.name, () => {
     const store: AppStore = await prepareConnectedStore([OFF_PAGE_WARNING]);
 
     expect(selectJobStartBlockedReasonKey(store.getState())).toBe(DEFAULT.JOB_START_BLOCKED_WARNINGS);
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
 
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.IDLE);
@@ -466,7 +476,7 @@ describe(runGrblJob.name, () => {
   it('keeps console lines out of a running job', async () => {
     const store: AppStore = await prepareConnectedStore();
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     store.dispatch(new ConsoleCommandSubmitted({ commandText: CONSOLE_LINE }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -483,7 +493,7 @@ describe(runGrblJob.name, () => {
   it('keeps machine control lines out of a running job', async () => {
     const store: AppStore = await prepareConnectedStore();
 
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
     store.dispatch(new MachineLineRequested({ line: MACHINE_LINE }));
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -501,7 +511,7 @@ describe(runGrblJob.name, () => {
     const store: AppStore = await prepareConnectedStore([], { airAssist: true });
 
     store.dispatch(new MachineAirAssistChanged({ isAirAssistOn: true }));
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(JOB_END_MS);
 
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
@@ -512,7 +522,7 @@ describe(runGrblJob.name, () => {
     const store: AppStore = await prepareConnectedStore([], { airAssist: false });
 
     store.dispatch(new MachineAirAssistChanged({ isAirAssistOn: true }));
-    store.dispatch(new JobStartRequested());
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
     await vi.advanceTimersByTimeAsync(JOB_END_MS);
 
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);

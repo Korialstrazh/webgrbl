@@ -17,6 +17,7 @@ import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { JobRunProgressChangedPayload } from './interfaces/JobRunProgressChangedPayload';
 import type { JobRunStartedPayload } from './interfaces/JobRunStartedPayload';
 import type { JobRunStatusChangedPayload } from './interfaces/JobRunStatusChangedPayload';
+import type { JobStartRequest } from './interfaces/JobStartRequest';
 import { JOB_RUN_KIND } from './job.run.kind.constants';
 import type { JobRunKind } from './job.run.kind.constants';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
@@ -60,7 +61,7 @@ export class FrameRunAlarmed extends Action {
   public static readonly type: string = actionType('frame run alarmed');
 }
 
-export class JobStartRequested extends Action {
+export class JobStartRequested extends Action<JobStartRequest> {
   public static readonly type: string = actionType('job start requested');
 }
 
