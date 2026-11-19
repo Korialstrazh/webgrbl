@@ -9,8 +9,8 @@ const CHECK_MODE_REFUSED_ERROR_MESSAGE_PREFIX = 'GRBL refused to enter check mod
  *
  * @since 2026-10-30
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 export class GrblCheckModeRefusedError extends Error {
   /** GRBL error code of the refused $C. */

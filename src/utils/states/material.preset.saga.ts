@@ -6,8 +6,8 @@
  *
  * @since 2026-11-04
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import { call, delay, put, race, select, takeEvery } from 'redux-saga/effects';
 import { PANEL_SIZES_READ_TIMEOUT_MS } from '../layout.constants';

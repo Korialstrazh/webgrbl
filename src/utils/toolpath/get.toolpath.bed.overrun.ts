@@ -8,8 +8,8 @@
  *
  * @since 2026-11-10
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import { getFrameBedOverrun } from '../frame/get.frame.bed.overrun';
 import type { FrameBedOverrun } from '../frame/interfaces/FrameBedOverrun';

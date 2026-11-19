@@ -10,8 +10,8 @@ const HANDSHAKE_ERROR_MESSAGE_PREFIX = 'GRBL handshake failed: ';
  *
  * @since 2026-10-30
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 export class GrblHandshakeError extends Error {
   /** Why the handshake failed; callers map it to a fixed user-facing message. */

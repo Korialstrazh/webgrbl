@@ -5,8 +5,8 @@
  *
  * @since 2026-11-03
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 export const CUT_THROUGH_SAFETY_MARGIN_RATIO = 0.1;
 export const CUT_BORDERLINE_MARGIN_RATIO = 0.1;

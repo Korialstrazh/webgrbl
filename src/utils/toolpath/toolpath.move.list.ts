@@ -11,8 +11,8 @@ import { MOVE_MIN_LENGTH_MM, TOOLPATH_MOVE_KIND, TRAVEL_POWER_PERCENT } from './
  *
  * @since 2026-11-01
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 export class ToolpathMoveList {
   /** The moves collected so far, in burn order. */

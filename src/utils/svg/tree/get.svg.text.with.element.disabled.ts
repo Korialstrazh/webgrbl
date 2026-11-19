@@ -5,8 +5,8 @@
  *
  * @since 2026-11-09
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import { getSvgTextWithElementEdit } from './get.svg.text.with.element.edit';
 import { SVG_TREE_DISABLED_ATTRIBUTE_NAME, SVG_TREE_DISABLED_ATTRIBUTE_VALUE } from './svg.tree.constants';
