@@ -1,5 +1,7 @@
 /**
- * Tells whether a value has every field of a project layer with the right type; the palette entry id may be missing.
+ * Tells whether a value has every field of a project layer with the right type; the palette entry id may be
+ * missing. The preset id is not checked, so an old layer without it or a layer with a malformed one still loads; the
+ * loaders drop a malformed preset id.
  *
  * @author michael.morosov
  *

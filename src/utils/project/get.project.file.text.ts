@@ -49,6 +49,7 @@ const getProjectFileLayer = (layer: ProjectLayer): ProjectLayer => ({
   order: layer.order,
   settings: getProjectFileLayerSettings(layer.settings),
   paletteEntryId: layer.paletteEntryId,
+  presetId: layer.presetId,
   isShading: layer.isShading,
 });
 

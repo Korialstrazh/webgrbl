@@ -21,6 +21,8 @@ export interface ProjectLayer {
   settings: LayerSettings;
   /** Id of the palette entry the layer came from; undefined for a colour that is not in the palette. */
   paletteEntryId: string | undefined;
+  /** Id of the material preset the power, speed and passes were set from; cleared by a manual change to them. */
+  presetId?: string;
   /** Whether this is the shading layer that covers the whole grey axis. */
   isShading: boolean;
 }

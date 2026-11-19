@@ -44,6 +44,17 @@ describe('project repository layers', () => {
     expect(loadedProject?.document.layers).toEqual([CUT_LAYER, ORPHAN_LAYER]);
   });
 
+  it('keeps the preset id of a layer and loads an old layer without one', async () => {
+    const createdProject: StoredProject = await PROJECT_REPOSITORY.createProject(PROJECT_NAME);
+    const linkedLayer: ProjectLayer = { ...CUT_LAYER, presetId: 'p1' };
+
+    await PROJECT_REPOSITORY.saveDocument(createdProject.id, { objects: [], layers: [linkedLayer, ORPHAN_LAYER] });
+    const loadedProject: LoadedProject | undefined = await PROJECT_REPOSITORY.getProject(createdProject.id);
+
+    expect(loadedProject?.document.layers[0]?.presetId).toBe('p1');
+    expect(loadedProject?.document.layers[1]?.presetId).toBeUndefined();
+  });
+
   it('loads a project row stored without layers with an empty layer list', async () => {
     const createdProject: StoredProject = await PROJECT_REPOSITORY.createProject(PROJECT_NAME);
 

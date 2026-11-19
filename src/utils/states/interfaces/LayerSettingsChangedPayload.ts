@@ -15,4 +15,6 @@ export interface LayerSettingsChangedPayload {
   layerKey: string;
   /** The settings to change; values outside the palette ranges are clamped. */
   settings: LayerSettingsChange;
+  /** The material preset the change comes from; a change without it that alters power, speed or passes clears it. */
+  presetId?: string;
 }
