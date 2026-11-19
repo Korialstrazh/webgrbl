@@ -56,3 +56,8 @@ export const EDGE_X1_OFFSET = 2;
 export const EDGE_Y1_OFFSET = 3;
 /** At most this many horizontal bands per paint area, which bounds the memory of the edge index. */
 export const EDGE_BAND_COUNT_MAX = 4096;
+/**
+ * A resume starts this many move lines before the last line GRBL confirmed, because GRBL buffers lines ahead of the
+ * burn; a short double burn is better than a gap.
+ */
+export const RESUME_BACKUP_LINE_COUNT = 20;
