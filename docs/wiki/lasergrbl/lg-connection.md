@@ -45,7 +45,7 @@ How LaserGRBL reaches the engraver: the transports (USB serial, Telnet, WebSocke
   - Web Serial has no port enumeration before a user gesture. Use `navigator.serial.requestPort()` (optionally with USB vendor filters for CH340 `0x1a86`, CP210x `0x10c4`, FTDI `0x0403`) and `getPorts()` for previously granted ports. Listen to `connect`/`disconnect` events instead of polling.
   - Ports have no COM names. Show USB VID/PID plus a user-assigned nickname.
   - `port.open({ baudRate, dataBits: 8, parity: 'none', stopBits: 1, flowControl: 'none', bufferSize })`. Raise `bufferSize` above the default 255 so long status bursts are not dropped.
-  - Web Serial is Chromium-desktop only. Detect support and explain the fallbacks (WebSocket/bridge).
+  - Web Serial is desktop only (Chromium browsers and Firefox; not Safari). Detect support and explain the fallbacks (WebSocket/bridge).
 
 ### LG-CONN-03 Serial driver variants & CH340 read workaround
 

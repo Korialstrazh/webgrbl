@@ -1,7 +1,8 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { AppRoute } from '.';
+import { AppModal } from '../../containers/AppModal';
 import { BedRegionDrawer } from '../../containers/BedRegionDrawer';
 import { BedRegionModal } from '../../containers/BedRegionModal';
 import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
@@ -15,7 +16,12 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 
 const STOP_LABEL = 'Stop';
+const START_LABEL = /^Start/;
+const STOP_SETTINGS_LABEL = 'Stop settings';
 const MODAL_TITLE = 'Test modal';
+const APP_MODAL_TITLE = 'Test window dialog';
+const APP_MODAL_OVERLAY_ID = 'test-window-dialog';
+const APP_MODAL_MAX_WIDTH = '56rem';
 const DRAWER_TITLE = 'Test drawer';
 const MODAL_OVERLAY_ID = 'test-modal';
 const DRAWER_OVERLAY_ID = 'test-drawer';
@@ -23,6 +29,7 @@ const MODAL_ROOT_SELECTOR = '.ant-modal-root';
 const DRAWER_ROOT_SELECTOR = '.ant-drawer';
 const MODAL_MASK_SELECTOR = '.ant-modal-mask';
 const DRAWER_MASK_SELECTOR = '.ant-drawer-mask';
+const STICKY_STOP_BAR_SELECTOR = '[class*="stickyStopBar"]';
 
 // The design panel stands in for any region whose feature opens a dialog or drawer.
 const designPanelMock = vi.hoisted(() => ({ renderDesignPanel: (): ReactNode => null }));
@@ -41,6 +48,19 @@ const newTestDrawer = (onClose: () => void): ReactNode => (
   <BedRegionDrawer isOpen overlayIdPrefix={DRAWER_OVERLAY_ID} title={DRAWER_TITLE} onClose={onClose}>
     <p>body</p>
   </BedRegionDrawer>
+);
+
+const newTestAppModal = (onClose: () => void): ReactNode => (
+  <AppModal
+    isOpen
+    overlayIdPrefix={APP_MODAL_OVERLAY_ID}
+    maxWidth={APP_MODAL_MAX_WIDTH}
+    title={APP_MODAL_TITLE}
+    footer={null}
+    onClose={onClose}
+  >
+    <p>body</p>
+  </AppModal>
 );
 
 interface RenderedWorkbench {
@@ -81,6 +101,24 @@ const getOverlayRoot = (selector: string): HTMLElement => {
   }
 
   return overlayRoot;
+};
+
+/**
+ * The narrow window's stop bar. Queries run inside it, not over the whole workbench: a role query over every element
+ * of the app, hidden ones included, takes many seconds.
+ */
+const getStickyStopBar = (): HTMLElement => getOverlayRoot(STICKY_STOP_BAR_SELECTOR);
+
+/** Asserts that Start and the gear of the narrow stop bar can be neither clicked nor focused, while STOP can. */
+const expectOnlyStopUsableInBar = (stopButton: HTMLElement): void => {
+  const stickyStopBar: HTMLElement = getStickyStopBar();
+  const startButton: HTMLElement = within(stickyStopBar).getByRole('button', { name: START_LABEL, hidden: true });
+  const stopSettingsButton: HTMLElement =
+    within(stickyStopBar).getByRole('button', { name: STOP_SETTINGS_LABEL, hidden: true });
+
+  expect(startButton.closest('[inert]')).not.toBeNull();
+  expect(stopSettingsButton.closest('[inert]')).not.toBeNull();
+  expect(stopButton.closest('[inert]')).toBeNull();
 };
 
 const getNarrowRegionsHost = (): HTMLElement => {
@@ -142,5 +180,60 @@ describe.each([
 
     expect(countStopRequests()).toBe(0);
     expect(closeSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('makes Start and the stop settings in the narrow bar inert while it is open, STOP stays active', async () => {
+    setMatchMediaMatches(false);
+
+    const { countStopRequests } = await renderWorkbench(newOverlayComponent(vi.fn()));
+    await screen.findByText(title);
+    const stopButton: HTMLElement = within(getStickyStopBar()).getByRole('button', { name: STOP_LABEL });
+
+    expectOnlyStopUsableInBar(stopButton);
+    fireEvent.click(stopButton);
+
+    expect(countStopRequests()).toBe(1);
+  });
+});
+
+// Palette, Laser profiles, Open project and Add material all open through AppModal, whose scrim covers the window.
+describe('AppRoute with a full-window dialog open', () => {
+  it.each([true, false])('keeps STOP outside the dialog scrim, clickable (wide: %s)', async (isWide: boolean) => {
+    setMatchMediaMatches(isWide);
+
+    const closeSpy = vi.fn();
+    const { countStopRequests } = await renderWorkbench(newTestAppModal(closeSpy));
+    await screen.findByText(APP_MODAL_TITLE);
+    const modalRoot: HTMLElement = getOverlayRoot(MODAL_ROOT_SELECTOR);
+    const stopButton: HTMLElement = screen.getByRole('button', { name: STOP_LABEL });
+
+    expect(modalRoot.querySelector(MODAL_MASK_SELECTOR)).toBeInTheDocument();
+    expect(modalRoot).not.toContainElement(stopButton);
+    expect(stopButton).toBeEnabled();
+
+    fireEvent.click(stopButton);
+
+    expect(countStopRequests()).toBe(1);
+    expect(closeSpy).not.toHaveBeenCalled();
+  });
+
+  it('makes Start and the stop settings in the narrow bar inert while it is open', async () => {
+    setMatchMediaMatches(false);
+
+    await renderWorkbench(newTestAppModal(vi.fn()));
+    await screen.findByText(APP_MODAL_TITLE);
+
+    expectOnlyStopUsableInBar(within(getStickyStopBar()).getByRole('button', { name: STOP_LABEL }));
+  });
+
+  it('leaves Start and the stop settings in the narrow bar usable once no dialog is open', async () => {
+    setMatchMediaMatches(false);
+
+    await renderWorkbench(null);
+
+    const stickyStopBar: HTMLElement = getStickyStopBar();
+
+    expect(within(stickyStopBar).getByRole('button', { name: START_LABEL }).closest('[inert]')).toBeNull();
+    expect(within(stickyStopBar).getByRole('button', { name: STOP_SETTINGS_LABEL }).closest('[inert]')).toBeNull();
   });
 });

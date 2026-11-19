@@ -1,6 +1,6 @@
 /**
  * A tooltip that goes away when its control is clicked, so it does not cover what the click changed. The next hover
- * shows it again.
+ * shows it again. A long press opens it too, so a touch screen without hover still shows the name of an icon.
  *
  * @author michael.morosov
  *
@@ -13,6 +13,7 @@ import { Tooltip } from 'antd';
 import type { TooltipProps } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { ANTD_TOOLTIP_TRIGGER_HOVER_AND_LONG_PRESS } from '../../utils/antd.constants';
 
 export const DismissibleTooltip = ({ children, ...tooltipProps }: TooltipProps): ReactNode => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -29,7 +30,12 @@ export const DismissibleTooltip = ({ children, ...tooltipProps }: TooltipProps):
   };
 
   return (
-    <Tooltip {...tooltipProps} open={isOpen} onOpenChange={changeOpen}>
+    <Tooltip
+      trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_LONG_PRESS}
+      {...tooltipProps}
+      open={isOpen}
+      onOpenChange={changeOpen}
+    >
       {/* A click on the control bubbles up to here, whatever the control does with it. */}
       <span
         onClickCapture={dismiss}

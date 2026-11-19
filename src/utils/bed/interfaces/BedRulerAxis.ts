@@ -14,8 +14,6 @@ export interface BedRulerAxis {
   visibleStartMm: number;
   /** The last bed position in view along the band, in millimetres. */
   visibleEndMm: number;
-  /** The bed length along the band, in millimetres. */
-  bedLengthMm: number;
   /** The band length on screen, which is the drawing's width or height, in CSS pixels. */
   bandLengthPx: number;
   /** How many CSS pixels one millimetre takes on screen. */

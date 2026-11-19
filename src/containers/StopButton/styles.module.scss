@@ -1,20 +1,38 @@
+@use '../../styles/accessibility' as accessibility;
+
 // The theme already makes large buttons as tall as --target-min; the floor keeps STOP there if the theme changes.
 .stopButton {
   min-height: var(--target-min);
 }
 
-// Disconnected, STOP cannot be pressed, so it takes the disabled look of every other button and only a dark red
-// outline, so it is never mistaken for a live control; it turns solid red once it can act. The antd classes raise the
-// weight above antd's own disabled rule.
-.stopButton:global(.ant-btn.ant-btn-variant-solid):disabled {
-  border-color: var(--color-danger-disabled-border);
-  background-color: var(--color-disabled-bg);
-  color: var(--color-disabled-text);
+// Disconnected, STOP cannot be pressed: a neutral disabled button with a grey icon and no red, so red always means
+// live. Its label stays brighter than other disabled labels, so STOP is readable at rest.
+.stopButton:global(.ant-btn):disabled {
+  color: var(--color-text-muted);
 
-  // The stop sign keeps its red, so STOP is recognised at a glance even while it cannot act.
   :global(.anticon) {
-    color: var(--color-danger-text);
+    color: var(--color-text-muted);
   }
+}
+
+.notConnectedCue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-left: var(--space-2);
+  border-left: 1px solid var(--color-disabled-border-locked);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 400;
+
+  // The unplug status icon at 14 px.
+  > :global(.anticon) {
+    font-size: 0.875rem;
+  }
+}
+
+.notConnectedText {
+  @include accessibility.visually-hidden;
 }
 
 .shortcutHint {
@@ -25,5 +43,4 @@
   font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.125rem;
-  opacity: 0.85;
 }

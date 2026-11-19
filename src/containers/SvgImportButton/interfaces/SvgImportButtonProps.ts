@@ -18,4 +18,6 @@ export interface SvgImportButtonProps {
   iconComponent?: ReactNode;
   /** Class of the label, so a narrow layout can hide it; the button keeps the label as its accessible name. */
   labelClassName?: string;
+  /** The id of the button, so another control can move the focus to it. */
+  buttonId?: string;
 }

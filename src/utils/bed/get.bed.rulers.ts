@@ -1,7 +1,8 @@
 /**
  * Lays out the bed rulers for the zoomed and panned bed: which bed coordinates get a label and a long tick, where the
- * short ticks between them go, and where on screen each one sits along its band. A label whose text would reach past
- * the bed or out of its band is left out, so no label is clipped; its long tick stays.
+ * short ticks between them go, and where on screen each one sits along its band. A label whose text would reach out of
+ * its band is left out, so no label is clipped; its long tick stays. The rulers run across the whole viewport, past
+ * the bed too, so off-bed artwork keeps a scale.
  *
  * @author michael.morosov
  *
@@ -37,13 +38,13 @@ const getLabelWidthPx = (valueMm: number, fontSizePx: number): number =>
 
 /** Lists the ticks of one band: a long tick at every label step, and short ticks between them when there is room. */
 const getBedRulerTicks = (axis: BedRulerAxis, textSizes: BedRulerTextSizes): BedRulerTick[] => {
-  const { visibleStartMm, visibleEndMm, bedLengthMm, pixelsPerMm, labelStepMm, getOffsetPx } = axis;
+  const { visibleStartMm, visibleEndMm, pixelsPerMm, labelStepMm, getOffsetPx } = axis;
   const minorStepMm: number = labelStepMm / BED_RULER_MINOR_TICKS_PER_STEP;
   const hasRoomForMinorTicks: boolean = minorStepMm * pixelsPerMm >= textSizes.minMinorTickSpacingPx;
   const stepMm: number = hasRoomForMinorTicks ? minorStepMm : labelStepMm;
   const ticksPerLabel: number = hasRoomForMinorTicks ? BED_RULER_MINOR_TICKS_PER_STEP : 1;
   const ticks: BedRulerTick[] = [];
-  const positions: number[] = getBedRulerTickPositions({ visibleStartMm, visibleEndMm, bedLengthMm, stepMm });
+  const positions: number[] = getBedRulerTickPositions({ visibleStartMm, visibleEndMm, stepMm });
 
   for (const positionMm of positions) {
     ticks.push({
@@ -56,12 +57,12 @@ const getBedRulerTicks = (axis: BedRulerAxis, textSizes: BedRulerTextSizes): Bed
 };
 
 const getLabelPositions = (axis: BedRulerAxis): number[] => {
-  const { visibleStartMm, visibleEndMm, bedLengthMm, labelStepMm } = axis;
+  const { visibleStartMm, visibleEndMm, labelStepMm } = axis;
 
-  return getBedRulerTickPositions({ visibleStartMm, visibleEndMm, bedLengthMm, stepMm: labelStepMm });
+  return getBedRulerTickPositions({ visibleStartMm, visibleEndMm, stepMm: labelStepMm });
 };
 
-/** Labels of bed X, written to the right of their tick; each must end before the bed or the band does. */
+/** Labels of bed X, written to the right of their tick; each must end before the band does. */
 const getTopRulerLabels = (axis: BedRulerAxis, textSizes: BedRulerTextSizes, labelEndPx: number): BedRulerLabel[] => {
   const labels: BedRulerLabel[] = [];
 
@@ -79,7 +80,7 @@ const getTopRulerLabels = (axis: BedRulerAxis, textSizes: BedRulerTextSizes, lab
 const isOffsetInsideBand = (axis: BedRulerAxis, offsetPx: number): boolean =>
   offsetPx <= axis.bandLengthPx + BED_RULER_EDGE_TOLERANCE_PX;
 
-/** Labels of machine Y, written upwards from their tick; each must start below the bed's back edge and the band top. */
+/** Labels of machine Y, written upwards from their tick; each must start below the band top. */
 const getLeftRulerLabels = (
   axis: BedRulerAxis,
   textSizes: BedRulerTextSizes,
@@ -107,13 +108,12 @@ const getBedRulerTextSizes = (rootFontSizePx: number): BedRulerTextSizes => ({
 });
 
 const getTopRulerAxis = (request: BedRulersRequest, pixelsPerMm: number, labelStepMm: number): BedRulerAxis => {
-  const { screenSize, dimensions } = request;
+  const { screenSize } = request;
   const { xMm, widthMm } = getBedViewBox(request);
 
   return {
     visibleStartMm: xMm,
     visibleEndMm: xMm + widthMm,
-    bedLengthMm: dimensions.widthMm,
     bandLengthPx: screenSize.widthPx,
     pixelsPerMm,
     labelStepMm,
@@ -129,7 +129,6 @@ const getLeftRulerAxis = (request: BedRulersRequest, pixelsPerMm: number, labelS
   return {
     visibleStartMm: dimensions.heightMm - (yMm + heightMm),
     visibleEndMm: dimensions.heightMm - yMm,
-    bedLengthMm: dimensions.heightMm,
     bandLengthPx: screenSize.heightPx,
     pixelsPerMm,
     labelStepMm,
@@ -138,18 +137,16 @@ const getLeftRulerAxis = (request: BedRulersRequest, pixelsPerMm: number, labelS
 };
 
 export const getBedRulers = (request: BedRulersRequest): BedRulerLayout => {
-  const { screenSize, dimensions, rootFontSizePx } = request;
+  const { screenSize, rootFontSizePx } = request;
   const pixelsPerMm: number = getBedViewPixelsPerMm(request);
   const textSizes: BedRulerTextSizes = getBedRulerTextSizes(rootFontSizePx);
   const labelStepMm: number = pixelsPerMm > 0 ? getBedRulerLabelStepMm(pixelsPerMm, textSizes.minSpacingPx) : 0;
   const topAxis: BedRulerAxis = getTopRulerAxis(request, pixelsPerMm, labelStepMm);
   const leftAxis: BedRulerAxis = getLeftRulerAxis(request, pixelsPerMm, labelStepMm);
-  const bedRightPx: number = topAxis.getOffsetPx(dimensions.widthMm);
-  const bedBackPx: number = leftAxis.getOffsetPx(dimensions.heightMm);
 
   return {
-    topLabels: getTopRulerLabels(topAxis, textSizes, Math.min(screenSize.widthPx, bedRightPx)),
-    leftLabels: getLeftRulerLabels(leftAxis, textSizes, Math.max(0, bedBackPx)),
+    topLabels: getTopRulerLabels(topAxis, textSizes, screenSize.widthPx),
+    leftLabels: getLeftRulerLabels(leftAxis, textSizes, 0),
     topTicks: getBedRulerTicks(topAxis, textSizes),
     leftTicks: getBedRulerTicks(leftAxis, textSizes),
   };

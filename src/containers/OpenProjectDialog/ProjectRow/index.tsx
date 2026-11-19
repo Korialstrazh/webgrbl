@@ -1,6 +1,9 @@
 /**
- * One stored project in the Open dialog: its name, when it changed and how many objects it holds, with Open, an in-
- * place Rename and Delete after a confirmation. The project open now is marked and has no Open button.
+ * One stored project in the Open dialog: a thumbnail of where its objects sit, its name (the first object's name and
+ * the day it was made while it still has the default name), then how many objects it holds and how long ago it
+ * changed (the exact time in a tooltip), with Open, an in-place Rename and Delete after a confirmation, each named
+ * after the project so screen readers can tell the rows apart. The project
+ * open now is marked and has no Open button.
  *
  * @author michael.morosov
  *
@@ -14,17 +17,21 @@ import { Button, Popconfirm, Tag } from 'antd';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { getProjectDisplayName } from '../../../utils/project/get.project.display.name';
+import { getProjectChangedRelativeTimeText } from '../../../utils/project/get.project.changed.relative.time.text';
 import { getProjectChangedTimeText } from '../../../utils/project/get.project.changed.time.text';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { selectProjectDisplayName } from '../../../utils/states/project.display.name.selector';
 import {
   ProjectDeleteRequested,
   ProjectOpenRequested,
   ProjectRenameRequested,
 } from '../../../utils/states/project.state';
 import { ProjectRenameInput } from '../../ProjectRenameInput';
+import { ProjectThumbnail } from '../ProjectThumbnail';
 import type { ProjectRowProps } from './interfaces/ProjectRowProps';
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { IconActionButton } from '../../../views/IconActionButton';
@@ -34,7 +41,10 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
   const { t, i18n } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
-  const { id: projectId, name: projectName, updatedAt, objectCount } = summary;
+  const { id: projectId, name: projectName, updatedAt, objectCount, objectBoxes } = summary;
+  const openProjectDisplayName: string = useSelector(selectProjectDisplayName(i18n.language));
+  // The open project is named from its live state so the row always matches the top bar.
+  const shownName: string = isOpenProject ? openProjectDisplayName : getProjectDisplayName(summary, i18n.language);
 
   const openProject = (): void => {
     dispatch(new ProjectOpenRequested({ projectId }));
@@ -48,6 +58,7 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
 
   return (
     <li className={styles.row}>
+      <ProjectThumbnail objectBoxes={objectBoxes} />
       <div className={styles.details}>
         {isRenaming ? (
           <ProjectRenameInput
@@ -58,13 +69,13 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
           />
         ) : (
           <span className={styles.name}>
-            {projectName}
+            {shownName}
             {isOpenProject && <Tag className={styles.openNow}>{t(DEFAULT.OPEN_PROJECT_NOW)}</Tag>}
           </span>
         )}
-        <span className={styles.meta}>
+        <span className={styles.meta} title={getProjectChangedTimeText(updatedAt, i18n.language)}>
           {t(DEFAULT.OPEN_PROJECT_META, {
-            time: getProjectChangedTimeText(updatedAt, i18n.language),
+            time: getProjectChangedRelativeTimeText(updatedAt, Date.now(), i18n.language),
             count: objectCount,
           })}
         </span>
@@ -73,7 +84,7 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
         {!isOpenProject && (
           <IconActionButton
             size={ANTD_BUTTON_SIZE_SMALL}
-            labelText={t(DEFAULT.OPEN_PROJECT_OPEN)}
+            labelText={t(DEFAULT.OPEN_PROJECT_OPEN_NAMED, { name: shownName })}
             iconComponent={<FolderOpenOutlined />}
             onClick={openProject}
           />
@@ -81,11 +92,11 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
         <IconActionButton
           size={ANTD_BUTTON_SIZE_SMALL}
           type={ANTD_BUTTON_TYPE_TEXT}
-          labelText={t(DEFAULT.OPEN_PROJECT_RENAME)}
+          labelText={t(DEFAULT.OPEN_PROJECT_RENAME_NAMED, { name: shownName })}
           iconComponent={<EditOutlined />}
           onClick={() => setIsRenaming(true)}
         />
-        <DismissibleTooltip title={t(DEFAULT.OPEN_PROJECT_DELETE)}>
+        <DismissibleTooltip title={t(DEFAULT.OPEN_PROJECT_DELETE_NAMED, { name: shownName })}>
           <Popconfirm
             title={t(DEFAULT.OPEN_PROJECT_DELETE_CONFIRM, { name: projectName })}
             okText={t(DEFAULT.OPEN_PROJECT_DELETE_OK)}
@@ -98,7 +109,7 @@ export const ProjectRow = ({ summary, isOpenProject, onOpened }: ProjectRowProps
               type={ANTD_BUTTON_TYPE_TEXT}
               danger
               icon={<DeleteOutlined />}
-              aria-label={t(DEFAULT.OPEN_PROJECT_DELETE)}
+              aria-label={t(DEFAULT.OPEN_PROJECT_DELETE_NAMED, { name: shownName })}
             />
           </Popconfirm>
         </DismissibleTooltip>

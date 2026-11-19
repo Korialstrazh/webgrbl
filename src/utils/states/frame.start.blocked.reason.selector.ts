@@ -37,11 +37,21 @@ export const selectFrameBedOverrun = createSelector(
     rectangle && getFrameBedOverrun(rectangle, machineArea),
 );
 
+// The frame shares the job's guards, but its reason names the frame, so a locked Frame never says "start a job".
+const FRAME_REASON_KEYS_BY_JOB_REASON_KEY: Readonly<Record<string, string>> = {
+  [DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED]: DEFAULT.FRAME_START_BLOCKED_NOT_CONNECTED,
+  [DEFAULT.JOB_START_BLOCKED_NO_PROFILE]: DEFAULT.FRAME_START_BLOCKED_NO_PROFILE,
+  [DEFAULT.JOB_START_BLOCKED_NO_TOOLPATH]: DEFAULT.FRAME_START_BLOCKED_NO_TOOLPATH,
+  [DEFAULT.JOB_START_BLOCKED_WARNINGS]: DEFAULT.FRAME_START_BLOCKED_WARNINGS,
+  [DEFAULT.JOB_START_BLOCKED_NOT_IDLE]: DEFAULT.FRAME_START_BLOCKED_NOT_IDLE,
+  [DEFAULT.JOB_START_BLOCKED_OFF_BED]: DEFAULT.FRAME_START_BLOCKED_OFF_BED,
+};
+
 export const selectFrameStartBlockedReasonKey = (state: AppRootState): string | undefined => {
   const jobBlockedReasonKey: string | undefined = selectJobStartBlockedReasonKey(state);
 
   if (jobBlockedReasonKey) {
-    return jobBlockedReasonKey;
+    return FRAME_REASON_KEYS_BY_JOB_REASON_KEY[jobBlockedReasonKey] ?? jobBlockedReasonKey;
   }
 
   if (!selectIsLaserModeConfirmedOn(state)) {

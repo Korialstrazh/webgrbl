@@ -56,5 +56,6 @@ export const getSampleJobObject = (
     heightMm: SAMPLE_SIZE_MM,
     xMm: freeSpot.x,
     yMm: freeSpot.y,
+    importedAt: new Date().toISOString(),
   });
 };

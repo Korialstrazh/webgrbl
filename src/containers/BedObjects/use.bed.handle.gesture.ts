@@ -18,6 +18,7 @@ import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject
 import type { ProjectObjectTransform } from '../../utils/project/interfaces/ProjectObjectTransform';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectObjectsTransformed } from '../../utils/states/project.document.state';
+import { getObjectArtworkFrame } from '../../utils/toolpath/get.object.artwork.frame';
 import type { BedObjectHandle } from './bed.objects.constants';
 import { getBedMachinePoint } from './get.bed.machine.point';
 import { getHandleGestureTransform } from './get.handle.gesture.transform';
@@ -81,6 +82,7 @@ export const useBedHandleGesture = (
         startClientX: pointerEvent.clientX,
         startClientY: pointerEvent.clientY,
         startTransform,
+        artworkFrame: getObjectArtworkFrame(projectObject),
         startPoint,
         transform: startTransform,
         isMoving: false,

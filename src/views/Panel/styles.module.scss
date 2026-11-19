@@ -1,13 +1,16 @@
-.panel {
+@use '../../styles/accessibility' as accessibility;
+
+.panel:global(.ant-card) {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   background-color: var(--color-surface-1);
+  color: var(--color-text);
 }
 
 // A section with nothing to show in this view: a quieter heading line that keeps its place in the stack.
-.mutedPanel {
+.mutedPanel:global(.ant-card) {
   border-style: dashed;
   background-color: transparent;
 
@@ -17,17 +20,43 @@
   }
 }
 
-.header {
-  display: flex;
+// A column of cards may set tighter padding for all its cards at once through these two variables.
+.header:global(.ant-card-head) {
+  min-height: 0;
+  margin-bottom: 0;
+  padding: var(--panel-padding-block, var(--space-3)) var(--panel-padding-inline, var(--space-3));
+  border-bottom: 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  color: var(--color-text);
+  font-size: 0.875rem;
+
   // A header action that does not fit beside the title moves to a line of its own instead of being cut.
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-3);
+  :global(.ant-card-head-wrapper) {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  :global(.ant-card-head-title) {
+    flex: none;
+    padding: 0;
+    overflow: visible;
+  }
+
+  // A visually hidden heading takes no place in the line, so the action starts at the edge as before.
+  :global(.ant-card-head-title):has(> .hiddenTitle) {
+    display: contents;
+  }
+
+  // The header action lays out as a direct part of the heading line, as it did before the card wrapped it.
+  :global(.ant-card-extra) {
+    display: contents;
+    color: inherit;
+    font-size: inherit;
+  }
 }
 
-.headerAboveBody {
+.headerAboveBody:global(.ant-card-head) {
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -47,6 +76,35 @@
   font-size: 1rem;
 }
 
-.body {
-  padding: var(--space-3);
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.body:global(.ant-card-body) {
+  padding: var(--panel-padding-block, var(--space-3)) var(--panel-padding-inline, var(--space-3));
+}
+
+// A heading-only card draws no body at all.
+.emptyBody:global(.ant-card-body) {
+  display: none;
+}
+
+// The short reason a muted section is quiet, readable muted text beside its note icon.
+// A dense read-out card: less padding above and below, the same side padding as its neighbours.
+.compactPanel {
+  .header:global(.ant-card-head) {
+    padding-block: var(--space-1);
+    min-height: 2.25rem;
+  }
+
+  .body:global(.ant-card-body) {
+    padding-block: var(--space-2);
+  }
+}
+
+// The heading of a one-line card whose content names itself: read by screen readers only.
+.hiddenTitle {
+  @include accessibility.visually-hidden;
 }

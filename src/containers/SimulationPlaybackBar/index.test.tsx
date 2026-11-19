@@ -138,6 +138,9 @@ const dragSliderTo = (timeS: number): void => {
 const getSegmentWidthPercents = (): number[] => screen.getAllByTestId(SIMULATION_LAYER_SEGMENT_TEST_ID)
   .map((segment: HTMLElement): number => Number.parseFloat(segment.style.width));
 
+const UNPLAYED_CLIP_PATH = 'inset(0 100% 0 0)';
+const PLAYED_CLIP_PATH = 'inset(0 0% 0 0)';
+
 describe(SimulationPlaybackBar.name, () => {
   let animationFrames: AnimationFrameStub;
 
@@ -268,6 +271,20 @@ describe(SimulationPlaybackBar.name, () => {
     expect(segmentWidthPercents[1]).toBeCloseTo(BLUE_SHARE_PERCENT, SHARE_DECIMALS);
     expect(screen.getByRole('group', { name: LAYER_BAR_LABEL })).toBeInTheDocument();
     expect(screen.getByText(LAYER_BAR_LABEL)).toBeVisible();
+  });
+
+  it('shows the layer colours only up to the playhead, the unplayed rest as the neutral track', () => {
+    const store: AppStore = newReadyStore(TWO_LAYER_TOOLPATH);
+
+    renderBar(store);
+    const playedSegments: HTMLElement | null =
+      screen.getAllByTestId(SIMULATION_LAYER_SEGMENT_TEST_ID)[0]?.parentElement ?? null;
+
+    expect(playedSegments?.style.clipPath).toBe(UNPLAYED_CLIP_PATH);
+
+    fireEvent.click(getButton(TO_END_LABEL));
+
+    expect(playedSegments?.style.clipPath).toBe(PLAYED_CLIP_PATH);
   });
 
   it('leaves out the layer bar when the toolpath has one layer, where it would read as a second progress bar', () => {

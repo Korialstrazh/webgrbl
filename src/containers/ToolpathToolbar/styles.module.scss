@@ -7,9 +7,15 @@
   flex: none;
   flex-wrap: nowrap;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  // One framed group as tall as the zoom group beside it, so the header reads as matching, evenly spaced groups.
+  box-sizing: border-box;
+  height: 2.5rem;
   min-width: 0;
+  padding-inline: 0.125rem var(--space-1);
   overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 
   > * {
     flex: none;
@@ -17,7 +23,7 @@
 }
 
 .modeSwitch :global(.ant-segmented-item-label) {
-  min-height: 2.25rem;
+  min-height: 2rem;
   padding-inline: var(--space-2);
   line-height: 1;
 }
@@ -31,7 +37,7 @@
   align-items: center;
   justify-content: center;
   min-width: 2.5rem;
-  height: 2.25rem;
+  height: 2rem;
   font-size: 1rem;
 }
 
@@ -51,8 +57,8 @@
 
 .travelToggle:global(.ant-btn) {
   height: auto;
-  min-height: 2.25rem;
-  padding: 0.125rem var(--space-2);
+  min-height: 2rem;
+  padding: 0 var(--space-2);
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
 }
@@ -63,4 +69,30 @@
   border-color: var(--color-accent);
   background-color: var(--color-accent-tint);
   color: var(--color-accent);
+}
+
+// The same ramp as the power bands of the Toolpath layer: the weakest band (30 % ink on the bed) to full ink.
+.powerLegend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.powerIcon {
+  color: var(--color-warning);
+  font-size: 0.875rem;
+}
+
+.powerRamp {
+  width: 3.5rem;
+  height: 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-bed-ink) 30%, var(--color-bed-surface)),
+    var(--color-bed-ink)
+  );
 }

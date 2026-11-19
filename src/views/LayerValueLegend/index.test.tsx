@@ -9,4 +9,10 @@ describe(LayerValueLegend.name, () => {
     expect(screen.getByText('Speed')).toBeInTheDocument();
     expect(screen.getByText('Passes')).toBeInTheDocument();
   });
+
+  it('names the speed unit once in the key', () => {
+    render(<LayerValueLegend />);
+
+    expect(screen.getByText('mm/min')).toBeInTheDocument();
+  });
 });

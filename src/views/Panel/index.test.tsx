@@ -1,10 +1,12 @@
 import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { Panel } from '.';
 
 const PANEL_TITLE = 'Laser';
 const BODY_TEXT = 'Body content';
 const ACTION_LABEL = 'Panel action';
 const NOTE_TEXT = 'Set in another view.';
+const NOTE_ICON_TEST_ID = 'note-icon';
 
 describe(Panel.name, () => {
   it('renders a heading with the title, the body and the header action', () => {
@@ -19,6 +21,21 @@ describe(Panel.name, () => {
     expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
   });
 
+  it('takes the tighter padding only when compact', () => {
+    render(<Panel title={PANEL_TITLE} isCompact><p>{BODY_TEXT}</p></Panel>);
+
+    expect(screen.getByRole('region', { name: PANEL_TITLE }).className).toContain('compactPanel');
+  });
+
+  it('keeps a visually hidden title as the heading and region name', () => {
+    const actionComponent: ReactNode = <button type="button">{ACTION_LABEL}</button>;
+
+    render(<Panel title={PANEL_TITLE} headerActionComponent={actionComponent} isTitleVisuallyHidden />);
+
+    expect(screen.getByRole('heading', { level: 2, name: PANEL_TITLE }).className).toContain('hiddenTitle');
+    expect(screen.getByRole('region', { name: PANEL_TITLE })).toBeInTheDocument();
+  });
+
   it('stays at its heading line without content', () => {
     render(<Panel title={PANEL_TITLE} headerActionComponent={<button type="button">{ACTION_LABEL}</button>} />);
 
@@ -28,7 +45,7 @@ describe(Panel.name, () => {
     expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
   });
 
-  it('with a note hides its body and action and gives the note as a focusable icon', () => {
+  it('with a note hides its body, keeps its action and gives the note as a focusable icon', () => {
     render(
       <Panel
         title={PANEL_TITLE}
@@ -40,7 +57,15 @@ describe(Panel.name, () => {
     );
 
     expect(screen.queryByText(BODY_TEXT)).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: ACTION_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: ACTION_LABEL })).toBeInTheDocument();
     expect(screen.getByRole('note', { name: NOTE_TEXT })).toHaveAttribute('tabindex', '0');
+  });
+
+  it('draws the given note icon instead of the info circle', () => {
+    const noteIconComponent: ReactNode = <span data-testid={NOTE_ICON_TEST_ID} />;
+
+    render(<Panel title={PANEL_TITLE} noteText={NOTE_TEXT} noteIconComponent={noteIconComponent} />);
+
+    expect(screen.getByTestId(NOTE_ICON_TEST_ID)).toBeInTheDocument();
   });
 });

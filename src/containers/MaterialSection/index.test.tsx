@@ -7,6 +7,7 @@ import type { MaterialPreset } from '../../utils/materials/interfaces/MaterialPr
 import { MATERIAL_PRESET_OPERATION } from '../../utils/materials/material.preset.constants';
 import { newMaterial } from '../../utils/materials/new.material';
 import { newMaterialPreset } from '../../utils/materials/new.material.preset';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../utils/profiles/new.machine.profile';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../utils/states/machine.profile.state';
@@ -15,12 +16,12 @@ import { MaterialSaved } from '../../utils/states/material.state';
 import { newStore } from '../../utils/states/new.store';
 import { selectIsMachineProfilesDialogOpen } from '../../utils/states/ui.workbench.state';
 import type { AppStore } from '../../utils/states/new.store';
-import { ProjectMaterialSelected } from '../../utils/states/project.document.state';
+import { ProjectMaterialSelected, ProjectObjectsAdded } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 
 const LIBRARY_BUTTON_LABEL = 'Open the material library';
-const LIBRARY_TITLE = 'Material library';
+const LIBRARY_TITLE = 'Materials';
 // The drawer is found by its title text: a role query over the whole antd drawer is slow in jsdom.
 const DRAWER_ROOT_SELECTOR = '.ant-drawer';
 const DRAWER_LEFT_CLASS_NAME = 'ant-drawer-left';
@@ -75,17 +76,36 @@ const newStoreWithMaterial = (presetCount: number): AppStore => {
   return store;
 };
 
+const IDLE_ATTRIBUTE = 'data-idle';
+const IDLE_SECTION_SELECTOR = `[${IDLE_ATTRIBUTE}]`;
+
 describe(MaterialSection.name, () => {
+  it('is muted while the bed is empty and plain once an object is on it', () => {
+    const store: AppStore = newStore();
+    renderSection(store);
+
+    const section: Element | null = document.querySelector(IDLE_SECTION_SELECTOR);
+
+    expect(section).toHaveAttribute(IDLE_ATTRIBUTE, 'true');
+
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+
+    expect(section).toHaveAttribute(IDLE_ATTRIBUTE, 'false');
+  });
+
   it('counts the presets of the project material on the active machine', () => {
     renderSection(newStoreWithMaterial(2));
 
     expect(screen.getByRole('button', { name: '2 presets' })).toBeInTheDocument();
   });
 
-  it('says there are no presets yet', () => {
+  it('names the library it opens, not an add form, while there are no presets yet', () => {
     renderSection(newStoreWithMaterial(0));
 
-    expect(screen.getByRole('button', { name: 'Add preset' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Presets' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add preset' })).not.toBeInTheDocument();
   });
 
   it('asks for a material when none is chosen, and for a machine when none is active', () => {
@@ -100,6 +120,12 @@ describe(MaterialSection.name, () => {
       store.dispatch(new ActiveMachineProfileSelected({ profileId: PROFILE.id }));
     });
     expect(screen.getByRole('button', { name: 'Choose a material to see its presets' })).toBeInTheDocument();
+  });
+
+  it('captions the library button with one word', () => {
+    renderSection(newStoreWithMaterial(1));
+
+    expect(screen.getByRole('button', { name: LIBRARY_BUTTON_LABEL })).toHaveTextContent('Library');
   });
 
   it('opens the material library as a left drawer in the bed region from the book button', async () => {

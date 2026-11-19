@@ -72,3 +72,17 @@ export const UNDO_KEY = 'z';
 export const REDO_KEY = 'y';
 /** The `key` value of the S key, lowercased: Ctrl or Cmd plus S saves the project. */
 export const SAVE_KEY = 's';
+/** The `key` value of the P key, lowercased: P alone switches the laser pointer on and off. */
+export const POINTER_TOGGLE_KEY = 'p';
+/** Fired on window when its size changes. */
+export const RESIZE_EVENT_NAME = 'resize';
+/** Fired on an element when the pointer leaves it or one of its children; React builds its mouse leave from it. */
+export const MOUSE_OUT_EVENT_NAME = 'mouseout';
+/** Fired when a mouse button, a pen or a finger goes down. */
+export const POINTER_DOWN_EVENT_NAME = 'pointerdown';
+/** Fired on an element when the pointer enters it, also after a tap on a touch screen, which never sends a leave. */
+export const MOUSE_OVER_EVENT_NAME = 'mouseover';
+/** Matches every element under the pointer, from the root down to the innermost one. */
+export const HOVERED_ELEMENT_SELECTOR = ':hover';
+/** Fired when a mouse, pen or finger moves. */
+export const POINTER_MOVE_EVENT_NAME = 'pointermove';

@@ -72,8 +72,10 @@ const OPEN_PROJECT_DIALOG_LABEL = 'Open project';
 const PROJECT_FILE_INPUT_LABEL = 'Open a project file';
 const PROJECT_FILE_NAME = 'coasters.webgrbl.json';
 const SAVING_TEXT = 'Saving\u2026';
-const NOT_SAVED_TEXT = 'Not saved';
-const UNTITLED_PROJECT_NAME = 'Untitled project';
+const NOT_SAVED_TEXT = 'Waiting to save';
+const CLOCK_ICON_SELECTOR = '.anticon-clock-circle';
+const ALERT_ICON_SELECTOR = '.anticon-exclamation-circle';
+const UNTITLED_PROJECT_NAME = 'New project';
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const ARIA_DISABLED_TRUE = 'true';
 const GCODE_WARNINGS_DIALOG_LABEL = 'Export G-code with warnings?';
@@ -120,6 +122,14 @@ describe(TopBar.name, () => {
     renderWorkbenchTopBar(store);
 
     expect(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL })).toHaveTextContent(ACTIVE_PROFILE_NAME);
+  });
+
+  it('keeps the profile name as the only text of the profile button, with no generic caption beside it', () => {
+    renderWorkbenchTopBar(newStore());
+
+    const profileButton: HTMLElement = screen.getByRole('button', { name: MACHINE_PROFILES_LABEL });
+
+    expect(within(profileButton).queryByText('Laser')).not.toBeInTheDocument();
   });
 
   it('shows the app name, the autosave readout and the connection pill', () => {
@@ -497,6 +507,20 @@ describe(TopBar.name, () => {
       });
 
       expect(screen.getByRole('status')).toHaveTextContent(expectedText);
+    });
+
+    it('shows a pending change as a calm clock, not an alert mark', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.UNSAVED }));
+      });
+
+      const readout: HTMLElement = screen.getByRole('status');
+
+      expect(readout.querySelector(CLOCK_ICON_SELECTOR)).not.toBeNull();
+      expect(readout.querySelector(ALERT_ICON_SELECTOR)).toBeNull();
     });
 
     it('names the save state on the readout itself, so the icon alone still has a meaning', () => {

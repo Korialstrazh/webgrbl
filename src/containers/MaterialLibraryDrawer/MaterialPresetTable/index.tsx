@@ -151,6 +151,8 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
       columns={columns}
       dataSource={rows}
       locale={{ emptyText: emptyStateComponent }}
+      // An empty list shows its empty state alone, never column names over nothing.
+      showHeader={rows.length > 0}
       rowSelection={{
         // Ticks are for export and stay while search or the machine filter hides their rows.
         preserveSelectedRowKeys: true,

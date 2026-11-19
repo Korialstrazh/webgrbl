@@ -5,22 +5,17 @@
   min-width: 0;
 }
 
-// The select takes the width that the Library button leaves; the button keeps the control height so the two line up.
-.selectRow {
+// The presets entry and the Library button share one row under the select; they wrap only in a very narrow panel.
+.entryRow {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   align-items: center;
   min-width: 0;
 }
 
-.libraryButton {
-  flex: none;
-  height: var(--control-height);
-}
-
 // The presets entry is a small outlined button with an icon and its label, so it reads as a control, not as a note.
 .presetSummary:global(.ant-btn) {
-  align-self: flex-start;
   max-width: 100%;
   height: auto;
   min-height: 1.75rem;
@@ -28,6 +23,45 @@
   font-size: 0.8125rem;
   text-align: left;
   white-space: normal;
+}
+
+// No material yet: a quiet one-word entry, so it never reads as the next thing to press.
+.mutedPresetSummary:global(.ant-btn) {
+  color: var(--color-text-muted);
+
+  .presetSummaryIcon {
+    color: var(--color-text-muted);
+  }
+}
+
+// Nothing on the bed yet: the controls drop their fill and border and take the muted text, so the card reads as
+// quiet as the one-line placeholders of Layers and Objects. Hover and focus bring a neutral edge back, never the
+// accent, so the idle select never looks focused or in error. The antd select draws its edge on its root element.
+.idleMaterialSection {
+  :global(.ant-select),
+  :global(.ant-select-selector),
+  :global(.ant-btn) {
+    border-color: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    color: var(--color-text-muted) !important;
+  }
+
+  :global(.ant-select-placeholder),
+  :global(.ant-select-arrow),
+  .presetSummaryIcon {
+    color: var(--color-text-muted) !important;
+  }
+
+  :global(.ant-select:hover),
+  :global(.ant-select-focused),
+  :global(.ant-select:hover .ant-select-selector),
+  :global(.ant-select-focused .ant-select-selector),
+  :global(.ant-btn:hover),
+  :global(.ant-btn:focus-visible) {
+    border-color: var(--color-control-border) !important;
+    color: var(--color-text) !important;
+  }
 }
 
 .presetSummaryText {
@@ -38,8 +72,4 @@
   display: inline-flex;
   color: var(--color-accent);
   font-size: 0.875rem;
-}
-
-.selectRow :global(.ant-btn .anticon) {
-  font-size: 1.25rem;
 }

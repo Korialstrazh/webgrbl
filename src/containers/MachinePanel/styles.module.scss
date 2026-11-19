@@ -1,3 +1,5 @@
+@use '../../styles/layout' as layout;
+
 // In a wide window the panel is a column of two parts: the cards scroll on their own, and STOP sits below them as a
 // footer that never covers a card.
 .region {
@@ -12,26 +14,66 @@
   }
 }
 
-// A thin scrollbar with a fixed gutter: the cards keep their width when the scrollbar appears, and the bar takes
-// little of a narrow panel.
+// Holds the scrolling cards.
+.cardsArea {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+// A small chevron centred in the STOP footer's top padding, just below the faded edge: it never covers a card or a
+// control, and the footer keeps its height whether it shows or not.
+.moreBelow:global(.ant-btn) {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2.5rem;
+  min-width: 0;
+  height: var(--space-3);
+  padding: 0;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
+// A normal, visible scrollbar with a fixed gutter: the cards keep their width when it appears, and it shows at a
+// glance that Move and the cards below it scroll into view.
 .cards {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: var(--space-3);
+  // A tighter gap than the design panel, so the jog pad fits above STOP while connected at 900 px tall.
+  gap: var(--space-2);
   min-height: 0;
   overflow: auto;
-  padding: var(--space-3);
+  // A tighter top edge for the same reason.
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  scrollbar-color: var(--color-control-border) transparent;
   scrollbar-gutter: stable;
-  scrollbar-width: thin;
+  scrollbar-width: auto;
+  // Every card in the column gets the same tighter padding above and below its heading and content.
+  --panel-padding-block: var(--space-2);
 }
 
-// Cards cut off above STOP fade out over the last stretch, so the list reads as one that scrolls on.
+// Cards cut off above STOP fade out over a short last stretch, so the list reads as one that scrolls on while the jog
+// pad above the fade stays crisp.
 .cardsCutOff {
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 2rem), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1rem), transparent);
+}
+
+// While cards wait below, STOP's footer casts a thin shadow up over them, so the edge reads as content going on
+// underneath.
+.stopFooterRaised {
+  box-shadow: 0 -0.25rem 0.5rem -0.25rem rgb(0 0 0 / 45%);
 }
 
 .stopFooter {
+  // Above every dialog's scrim, so STOP stays visible and clickable while one is open.
+  position: relative;
+  z-index: layout.$stop-above-dialog-z-index;
   display: flex;
   flex: none;
   padding: var(--space-3);
@@ -46,13 +88,23 @@
 }
 
 // Stacked in a narrow window the panel grows with its cards and the page region scrolls; STOP is in the sticky bar.
-// 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+// Its background fills the whole region even when the cards are short, and the side border goes, since the region
+// spans the window. 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
 @media (width < 80rem) {
+  .region {
+    min-height: 100%;
+    border-left: none;
+  }
+
   .region .machinePanel {
     height: auto;
   }
 
   .cards {
     overflow: visible;
+  }
+
+  .cardsArea {
+    display: block;
   }
 }

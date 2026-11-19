@@ -27,6 +27,7 @@ import {
   selectProjectObjects,
   SvgFilesImportRequested,
 } from '../../utils/states/project.document.state';
+import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
 import { SimulationPlayToggled, selectIsSimulationPlaying } from '../../utils/states/simulation.state';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../utils/states/toast.constants';
 import { selectToasts, ToastShown } from '../../utils/states/toast.state';
@@ -86,7 +87,10 @@ const ADD_TEST_SAMPLE_LABEL = 'Add test sample';
 const CANCEL_LABEL = 'Cancel';
 const GENERATING_TEXT = `Generating${HORIZONTAL_ELLIPSIS} 40 %`;
 const GENERATION_PROGRESS = 0.4;
+const TOOLPATH_WARNINGS_CHIP_LABEL = 'Toolpath warnings (1): show them';
 const TEXT_WARNING = 'Text is not converted to paths. In Inkscape use Path > Object to Path.';
+const TEXT_WARNING_SHORT = 'Text not converted';
+const WARNED_OBJECT_ID = 'warned-object';
 const TEXT_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm" viewBox="0 0 10 10">'
   + '<rect fill="none" stroke="#ff0000" width="10" height="10"/><text x="1" y="5">Hi</text></svg>';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
@@ -220,6 +224,15 @@ describe(BedPanel.name, () => {
     expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).toBeChecked();
   });
 
+  it('moves the checked state of the view mode selector to the chosen view', () => {
+    renderPanel(newStore());
+
+    openToolpathView();
+
+    expect(screen.getByRole('radio', { name: TOOLPATH_VIEW_LABEL, hidden: true })).toBeChecked();
+    expect(screen.getByRole('radio', { name: DESIGN_VIEW_LABEL, hidden: true })).not.toBeChecked();
+  });
+
   it('shows the zoom, Fit and bed colour controls in the header, never over the bed drawing', () => {
     renderPanel(newStore());
 
@@ -283,7 +296,7 @@ describe(BedPanel.name, () => {
     expect(designSlot?.childElementCount).toBe(1);
   });
 
-  it('has no tool switch: a drag on an object moves it', () => {
+  it('has no tool switch: a drag on a selected object moves it', () => {
     const store: AppStore = newStore();
     const projectObject: ProjectObject = newProjectObject({ name: OBJECT_NAME });
 
@@ -292,6 +305,7 @@ describe(BedPanel.name, () => {
     renderPanel(store);
     act(() => {
       store.dispatch(new ProjectDocumentLoaded({ document: { objects: [projectObject], layers: [] } }));
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [projectObject.id] }));
     });
 
     expect(screen.queryByRole('radiogroup', { name: 'Bed tool' })).not.toBeInTheDocument();
@@ -516,7 +530,7 @@ describe(BedPanel.name, () => {
     expect(screen.queryByRole('region', { name: PLAYBACK_BAR_LABEL })).not.toBeInTheDocument();
   });
 
-  it('offers the import and the test sample on the card of an empty bed, not in the 3D view', () => {
+  it('offers the test sample on the card of an empty bed, not in the 3D view', () => {
     renderPanel(newHeldToolpathStore());
 
     expect(screen.getByRole('button', { name: ADD_TEST_SAMPLE_LABEL })).toBeInTheDocument();
@@ -557,7 +571,7 @@ describe(BedPanel.name, () => {
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it('shows the job size in the playback bar in Toolpath view', () => {
+  it('leaves the job size out of the playback bar in Toolpath view, as the status strip shows it', () => {
     const store: AppStore = newHeldToolpathStore();
 
     act(() => {
@@ -566,8 +580,8 @@ describe(BedPanel.name, () => {
     renderPanel(store);
     openToolpathView();
 
-    expect(within(screen.getByRole('group', { name: PLAYBACK_BAR_LABEL })).getByText(JOB_SIZE_TEXT))
-      .toBeInTheDocument();
+    expect(within(screen.getByRole('group', { name: PLAYBACK_BAR_LABEL })).queryByText(JOB_SIZE_TEXT))
+      .not.toBeInTheDocument();
   });
 
   it('hides the editing tools in Toolpath view, where they do nothing', () => {
@@ -644,15 +658,30 @@ describe(BedPanel.name, () => {
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(ToolpathCancelled));
   });
 
-  it('lists the text warning of an object in the Toolpath view', async () => {
+  it('lists the text warning of an object behind the Toolpath view warnings chip', async () => {
     const store: AppStore = await newGcodeExportTestStore({
       objects: [newProjectObject({ name: OBJECT_NAME, svgText: TEXT_SVG_TEXT })],
     });
 
     renderPanel(store);
     openToolpathView();
+    fireEvent.click(await screen.findByRole('button', { name: TOOLPATH_WARNINGS_CHIP_LABEL }));
 
     expect(await screen.findByText(TEXT_WARNING)).toBeInTheDocument();
     expect(screen.getByText(OBJECT_NAME)).toBeInTheDocument();
+    expect(screen.getByText(TEXT_WARNING_SHORT)).toBeInTheDocument();
+  });
+
+  it('selects the object of a warning from its Show button in the warnings list', async () => {
+    const store: AppStore = await newGcodeExportTestStore({
+      objects: [newProjectObject({ id: WARNED_OBJECT_ID, name: OBJECT_NAME, svgText: TEXT_SVG_TEXT })],
+    });
+
+    renderPanel(store);
+    openToolpathView();
+    fireEvent.click(await screen.findByRole('button', { name: TOOLPATH_WARNINGS_CHIP_LABEL }));
+    fireEvent.click(await screen.findByRole('button', { name: `Show ${OBJECT_NAME} on the bed` }));
+
+    expect(selectSelectedObjectIds(store.getState())).toEqual([WARNED_OBJECT_ID]);
   });
 });

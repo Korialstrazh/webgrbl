@@ -1,30 +1,31 @@
-@use '../../../../styles/layout' as layout;
 
 // One column, centred in the card, so the controls stay together at any panel width instead of hugging the left edge.
 .moveControls {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
-// Home and Set zero share the jog pad width; Set zero alone takes all of it.
-.homeRow {
-  display: grid;
-  grid-auto-columns: 1fr;
-  grid-auto-flow: column;
-  gap: var(--space-3);
+// The jog speed takes the room Home leaves, in one row as wide as the step sizes above.
+.speedRow {
+  display: flex;
+  gap: var(--space-2);
   width: 100%;
-  max-width: layout.$machine-control-max-width;
+
+  > :first-child {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }
 
-// As wide as the step sizes need; the jog speed field takes the same width below them.
+// As wide as the card; the step sizes sit centred and the speed row below takes the full width.
 .stepAndSpeed {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  width: fit-content;
-  max-width: 100%;
+  gap: var(--space-2);
+  align-items: center;
+  width: 100%;
 }
 
 // Fixed-size cells, so the arrows keep their places around Origin at any panel width instead of stretching apart.
@@ -38,5 +39,40 @@
   > :global(.ant-btn) {
     width: 100%;
     padding-inline: 0;
+  }
+
+  // A focused key keeps the neutral border: keyboard focus shows as the outline ring only, so a key the focus came
+  // back to after a jog (Home included, once the pad unlocks) never looks pressed or selected.
+  > :global(.ant-btn:not(:disabled):focus:not(:hover, :active)) {
+    border-color: var(--color-border);
+    color: var(--color-text);
+  }
+}
+
+// In a wide window, driven by a mouse, the jog pad rows and the gaps close up, so the whole Move card, jog speed
+// included, fits above STOP while connected with the status card at 1440 x 900. 80rem must match
+// WIDE_LAYOUT_MEDIA_QUERY; a narrow, touch-sized window keeps the full targets.
+@media (width >= 80rem) {
+  .moveControls,
+  .stepAndSpeed {
+    gap: var(--space-1);
+  }
+
+  // The arrows fill their short rows exactly, so a clear gap stays between them and the pad is no taller than when the
+  // buttons overflowed their rows: Move still fits above STOP.
+  .jogPad {
+    grid-auto-rows: 1.75rem;
+    gap: var(--space-1) var(--space-2);
+
+    > :global(.ant-btn) {
+      height: 100%;
+      min-height: 0;
+    }
+  }
+
+  // The step sizes close up the same way, keeping their words at full size.
+  .stepAndSpeed :global(.ant-segmented-item-label) {
+    min-height: 1.75rem;
+    line-height: 1.75rem;
   }
 }

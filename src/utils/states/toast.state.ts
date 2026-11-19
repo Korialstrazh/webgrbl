@@ -16,7 +16,7 @@ import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { AppToast } from './interfaces/AppToast';
 import type { ToastDismissedPayload } from './interfaces/ToastDismissedPayload';
 import type { ToastShownPayload } from './interfaces/ToastShownPayload';
-import { TOAST_INFO_LIFETIME_MS, TOAST_SEVERITY } from './toast.constants';
+import { TOAST_LIFETIME_MS } from './toast.constants';
 
 // #region State
 export interface ToastState {
@@ -101,22 +101,22 @@ export const toastReducer = (
 // #endregion
 
 // #region Sagas
-function* expireInfoToast(action: ToastShown): Generator {
+function* expireToast(action: ToastShown): Generator {
   const toasts: AppToast[] = (yield select(selectToasts)) as AppToast[];
   const shownToast: AppToast | undefined = toasts.find((toast: AppToast) => isSameToast(toast, action.payload));
 
   // A toast that merged into an open one already has its timer; only a first occurrence starts one.
-  if (shownToast?.severity !== TOAST_SEVERITY.INFO || shownToast.repeatCount !== FIRST_REPEAT_COUNT) {
+  if (shownToast?.repeatCount !== FIRST_REPEAT_COUNT) {
     return;
   }
 
-  yield delay(TOAST_INFO_LIFETIME_MS);
+  yield delay(TOAST_LIFETIME_MS);
   // Dismissing an id that is already gone changes nothing, so no timer needs cancelling.
   yield put(new ToastDismissed({ toastId: shownToast.toastId }));
 }
 
 export function* watchInfoToastExpiry(): Generator {
-  yield takeEvery(ToastShown.type, expireInfoToast);
+  yield takeEvery(ToastShown.type, expireToast);
 }
 // #endregion
 

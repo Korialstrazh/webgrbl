@@ -44,6 +44,7 @@ const LAYER_OBJECT: ProjectObject = newProjectObject({
   svgText: `<svg xmlns="http://www.w3.org/2000/svg" width="10mm" height="10mm"><rect fill="${LAYER_COLOUR}" width="5" height="5"/></svg>`,
 });
 const IMPORT_FILE_NAME = 'presets.json';
+const MORE_LABEL = 'More file actions';
 const IMPORT_INPUT_LABEL = 'Open a material presets file';
 const POWER_LABEL = 'Power (W)';
 const SAVE_LABEL = 'Save';
@@ -63,6 +64,7 @@ const MAX_POWER_WATTS = 10;
 const PLYWOOD_NAME = 'Plywood';
 const HALF_POWER_PERCENT_TEXT = '50 %';
 const ACRYLIC_NAME = 'Acrylic';
+const RENAMED_ACRYLIC_NAME = 'Cast acrylic';
 const OTHER_MACHINE_NAME = 'Other laser';
 const NEW_MATERIAL_LABEL = 'New material';
 const NEW_MATERIAL_OPTION = 'New material\u2026';
@@ -163,7 +165,7 @@ const waitForStoredPresetCount = async (count: number): Promise<void> => {
   });
 };
 
-/** A row names its preset "<material>, <thickness> mm · <operation>", so a row is found by the start of that. */
+/** A row names its preset "<material>, <thickness> mm / <operation>", so a row is found by the start of that. */
 const getRowNamePattern = (materialName: string): RegExp => new RegExp(`^${materialName}, `);
 
 const enterPower = (powerWatts: number): void => {
@@ -188,6 +190,15 @@ const addMaterialInDialog = (): void => {
 };
 
 describe(MaterialLibraryDrawer.name, () => {
+  it('keeps Import and Export in the More menu of the header, each with its caption', async () => {
+    renderDrawer();
+
+    fireEvent.click(await screen.findByRole('button', { name: MORE_LABEL }));
+
+    expect(await screen.findByRole('menuitem', { name: /Import/ })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /Tick presets to export/ })).toHaveAttribute('aria-disabled', 'true');
+  });
+
   it('saves a new preset for the active machine once a power is entered', async () => {
     const store: AppStore = renderDrawer();
 
@@ -271,6 +282,25 @@ describe(MaterialLibraryDrawer.name, () => {
 
     expect(await screen.findByText(getRowNamePattern(PLYWOOD_NAME))).toBeInTheDocument();
     expect(screen.queryByText(/^Filter: /)).not.toBeInTheDocument();
+  });
+
+  it('renames the filtered material in place from the pencil beside its chip, keeping its presets', async () => {
+    const store: AppStore = renderDrawer([newPresetFixture(ACRYLIC, PROFILE)], { initialMaterialId: ACRYLIC.id });
+
+    fireEvent.click(await screen.findByRole('button', { name: `Rename or change the thickness of ${ACRYLIC_NAME}` }));
+    fireEvent.change(await screen.findByLabelText('Name'), { target: { value: RENAMED_ACRYLIC_NAME } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(selectMaterials(store.getState()).find(({ id }: Material): boolean => id === ACRYLIC.id)?.name)
+      .toBe(RENAMED_ACRYLIC_NAME);
+    expect(await screen.findByText(getRowNamePattern(RENAMED_ACRYLIC_NAME))).toBeInTheDocument();
+  });
+
+  it('shows an empty list without column headers', async () => {
+    renderDrawer([newPresetFixture(PLYWOOD, PROFILE)], { initialMaterialId: ACRYLIC.id });
+
+    expect(await screen.findByText(`No presets yet for ${ACRYLIC_NAME}, 3 mm`)).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader')).not.toBeInTheDocument();
   });
 
   it('says the filtered material has no presets yet and starts a new preset with it', async () => {
@@ -538,11 +568,10 @@ describe(MaterialLibraryDrawer.name, () => {
     renderDrawer([newPresetFixture(PLYWOOD, PROFILE)]);
 
     await screen.findByText(getRowNamePattern(PLYWOOD_NAME));
-    expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled();
-
     fireEvent.click(screen.getByRole('checkbox', { name: 'Select for export' }));
+    fireEvent.click(screen.getByRole('button', { name: MORE_LABEL }));
 
-    expect(screen.getByRole('button', { name: 'Export (1)' })).toBeEnabled();
+    expect(await screen.findByRole('menuitem', { name: /Export \(1\)/ })).not.toHaveAttribute('aria-disabled', 'true');
     expect(screen.queryByRole('button', { name: SAVE_LABEL })).not.toBeInTheDocument();
   });
 });

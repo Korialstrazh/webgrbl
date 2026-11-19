@@ -23,3 +23,6 @@ export const BED_VIEW_MODE_OPTION_KEYS: readonly BedViewModeOptionKey[] = [
 
 /** The radio group name of the view switch. */
 export const BED_VIEW_MODE_SWITCH_NAME = 'bed-view-mode';
+
+/** Marks each option of the view switch with its view, so another part of the app can point at one option. */
+export const BED_VIEW_OPTION_ATTRIBUTE = 'data-bed-view-option';

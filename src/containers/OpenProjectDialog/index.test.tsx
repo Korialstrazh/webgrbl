@@ -35,10 +35,15 @@ const NEWEST_UPDATED_AT = '2026-03-05T09:00:00.000Z';
 const OLDEST_UPDATED_AT = '2026-03-01T09:00:00.000Z';
 const NEWEST_OBJECT_COUNT = 3;
 const OLDEST_OBJECT_COUNT = 12;
+const NOW_MS: number = Date.parse('2026-03-05T09:05:00.000Z');
+const NEWEST_META_COUNT_TEXT = `${NEWEST_OBJECT_COUNT} objects`;
+const NEWEST_META_TIME_TEXT = '5 minutes ago';
+const OLDEST_META_COUNT_TEXT = `${OLDEST_OBJECT_COUNT} objects`;
+const OLDEST_META_TIME_TEXT = '4 days ago';
 const OPEN_NOW_TEXT = 'open now';
-const OPEN_LABEL = 'Open';
-const RENAME_LABEL = 'Rename';
-const DELETE_LABEL = 'Delete';
+const OPEN_LABEL = /^Open /;
+const RENAME_LABEL = /^Rename /;
+const DELETE_LABEL = /^Delete /;
 const DELETE_OK_LABEL = 'Yes, delete';
 const OPEN_FILE_LABEL = 'Open file\u2026';
 const FILE_INPUT_LABEL = 'Open a project file';
@@ -46,9 +51,36 @@ const RENAME_INPUT_LABEL = `New name for ${OLDEST_NAME}`;
 const RENAMED_NAME = 'Plates';
 const FOOTER_PATTERN = /stored in this browser/;
 const PROJECT_FILE_NAME = 'plates.webgrbl.json';
+const CREATED_AT = '2026-02-20T09:00:00.000Z';
+const UNTITLED_NAME = 'New project';
+const FIRST_OBJECT_NAME = 'coaster-ring';
+// The time of day follows the test machine's time zone, so only its shape is checked.
+const FALLBACK_NAME_PATTERN = new RegExp(`^${FIRST_OBJECT_NAME} \u00b7 Feb 20, 2026 \\d{2}:\\d{2}$`);
+const OBJECT_BOX: ProjectSummary['objectBoxes'][number] = {
+  xMm: 10,
+  yMm: 20,
+  widthMm: 40,
+  heightMm: 30,
+  rotationDeg: 0,
+};
+const NEWEST_SUMMARY: ProjectSummary = {
+  id: NEWEST_ID,
+  name: NEWEST_NAME,
+  createdAt: CREATED_AT,
+  updatedAt: NEWEST_UPDATED_AT,
+  objectCount: NEWEST_OBJECT_COUNT,
+  objectBoxes: [OBJECT_BOX],
+};
 const SUMMARIES: ProjectSummary[] = [
-  { id: NEWEST_ID, name: NEWEST_NAME, updatedAt: NEWEST_UPDATED_AT, objectCount: NEWEST_OBJECT_COUNT },
-  { id: OLDEST_ID, name: OLDEST_NAME, updatedAt: OLDEST_UPDATED_AT, objectCount: OLDEST_OBJECT_COUNT },
+  NEWEST_SUMMARY,
+  {
+    id: OLDEST_ID,
+    name: OLDEST_NAME,
+    createdAt: CREATED_AT,
+    updatedAt: OLDEST_UPDATED_AT,
+    objectCount: OLDEST_OBJECT_COUNT,
+    objectBoxes: [],
+  },
 ];
 
 const renderDialog = (store: AppStore, onClose: () => void = vi.fn()): void => {
@@ -89,12 +121,27 @@ describe(OpenProjectDialog.name, () => {
     expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
     expect(getDispatchedActionCalls(dispatchSpy, ProjectSummariesRequested)).toHaveLength(1);
     expect(screen.getByRole('note', { name: FOOTER_PATTERN })).toBeInTheDocument();
-    expect(screen.getByText(STORED_CAPTION)).toBeInTheDocument();
     expect(await screen.findByText(NEWEST_NAME)).toBeInTheDocument();
   });
 
-  it('lists the projects newest first with their change time and object count, and marks the open one', async () => {
+  it('heads the list with In this browser, in one row with Open file, above the list', async () => {
+    renderDialog(newStore());
+
+    const heading: HTMLElement = screen.getByRole('heading', { name: STORED_CAPTION });
+
+    await screen.findByText(NEWEST_NAME);
+
+    const list: HTMLElement = screen.getByRole('list');
+
+    expect(heading.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(heading.parentElement?.parentElement)
+      .toContainElement(screen.getByRole('button', { name: OPEN_FILE_LABEL }));
+  });
+
+  it('lists the projects newest first with object count and relative change time, marks the open one', async () => {
     const store: AppStore = newStore();
+
+    const nowSpy: MockInstance<typeof Date.now> = vi.spyOn(Date, 'now').mockReturnValue(NOW_MS);
 
     renderDialog(store);
 
@@ -110,10 +157,49 @@ describe(OpenProjectDialog.name, () => {
     expect(rows[1]).toHaveTextContent(OLDEST_NAME);
     expect(rows[0]).toHaveTextContent(OPEN_NOW_TEXT);
     expect(rows[1]).not.toHaveTextContent(OPEN_NOW_TEXT);
-    expect(rows[0]).toHaveTextContent(`Objects: ${NEWEST_OBJECT_COUNT}`);
-    expect(rows[0]).toHaveTextContent(/2026/);
+    expect(rows[0]).toHaveTextContent(NEWEST_META_COUNT_TEXT);
+    expect(rows[0]).toHaveTextContent(NEWEST_META_TIME_TEXT);
+    expect(within(getRow(NEWEST_NAME)).getByText(new RegExp(NEWEST_META_TIME_TEXT))).toHaveAttribute(
+      'title',
+      expect.stringMatching(/2026/),
+    );
+    expect(rows[1]).toHaveTextContent(OLDEST_META_COUNT_TEXT);
+    expect(rows[1]).toHaveTextContent(OLDEST_META_TIME_TEXT);
+    nowSpy.mockRestore();
     expect(within(getRow(NEWEST_NAME)).queryByRole('button', { name: OPEN_LABEL })).not.toBeInTheDocument();
     expect(within(getRow(OLDEST_NAME)).getByRole('button', { name: OPEN_LABEL })).toBeInTheDocument();
+  });
+
+  it('names each row button after its project so the rows can be told apart', async () => {
+    renderDialog(newStore());
+    await screen.findByText(OLDEST_NAME);
+
+    const oldestRow: HTMLElement = getRow(OLDEST_NAME);
+
+    expect(within(oldestRow).getByRole('button', { name: `Open ${OLDEST_NAME}` })).toBeInTheDocument();
+    expect(within(oldestRow).getByRole('button', { name: `Rename ${OLDEST_NAME}` })).toBeInTheDocument();
+    expect(within(oldestRow).getByRole('button', { name: `Delete ${OLDEST_NAME}` })).toBeInTheDocument();
+  });
+
+  it('draws a thumbnail of the object boxes in each row', async () => {
+    renderDialog(newStore());
+
+    await screen.findByText(NEWEST_NAME);
+
+    const row: HTMLElement = getRow(NEWEST_NAME);
+
+    expect(row.querySelectorAll('svg rect')).toHaveLength(1);
+  });
+
+  it('names a project that still has the default name after its first object and the day it was made', async () => {
+    vi.spyOn(PROJECT_REPOSITORY, 'listProjects').mockResolvedValue([
+      { ...NEWEST_SUMMARY, name: UNTITLED_NAME, firstObjectName: FIRST_OBJECT_NAME },
+    ]);
+
+    renderDialog(newStore());
+
+    expect(await screen.findByText(FALLBACK_NAME_PATTERN)).toBeInTheDocument();
+    expect(screen.queryByText(UNTITLED_NAME)).not.toBeInTheDocument();
   });
 
   it('opens a project and closes the dialog', async () => {

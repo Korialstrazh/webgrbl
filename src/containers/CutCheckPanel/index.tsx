@@ -13,13 +13,14 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CheckSquareOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { CheckSquareOutlined, DownOutlined, QuestionCircleOutlined, UpOutlined } from '@ant-design/icons';
 import { Button, Tag, Tooltip } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
+import { BED_VIEW_MODE } from '../../utils/bed/bed.view.constants';
 import { BURN_PART_STATUS } from '../../utils/burn.model/burn.model.constants';
 import type { BurnModel } from '../../utils/burn.model/interfaces/BurnModel';
 import type { BurnPart } from '../../utils/burn.model/interfaces/BurnPart';
@@ -34,11 +35,15 @@ import {
   selectHoveredBurnPartId,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
+import { BedViewModeChanged } from '../../utils/states/bed.view.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectPaletteEntries } from '../../utils/states/palette.state';
-import { selectProjectLayers } from '../../utils/states/project.document.state';
+import { selectProjectLayers, selectProjectObjects } from '../../utils/states/project.document.state';
+import { IconActionButton } from '../../views/IconActionButton';
+import { CubeIcon } from '../../views/CubeIcon';
 import { Panel } from '../../views/Panel';
 import { BurnPartRowLift } from './BurnPartRowLift';
+import { CutCheckWarningCountTag } from './CutCheckWarningCountTag';
 import { CutCheckWarningRow } from './CutCheckWarningRow';
 import { PartStatusMark } from './PartStatusMark';
 import { getCutCheckSummaryCounts } from './get.cut.check.summary.counts';
@@ -82,8 +87,12 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
   const hoveredPartId: number | undefined = useSelector(selectHoveredBurnPartId);
   const selectedRowRef: RefObject<HTMLLIElement | null> = useRef<HTMLLIElement>(null);
   const [isPartListExpanded, setIsPartListExpanded] = useState<boolean>(false);
+  // The check starts folded to its heading and a warning count, so the 3D view leads with the scene, not numbers.
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const detailsId: string = useId();
   const projectLayers: ProjectLayer[] = useSelector(selectProjectLayers);
   const paletteEntries: PaletteEntry[] = useSelector(selectPaletteEntries);
+  const hasObjects: boolean = Boolean(useSelector(selectProjectObjects).length);
 
   useEffect(() => {
     // Only the panel moves: stacked, that panel does not scroll, so the scene stays with a user who clicked in it.
@@ -93,13 +102,37 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
     if (scroller && selectedRow) {
       scroller.scrollTop = getCutCheckListScrollTopPx(scroller, selectedRow);
     }
-  }, [selectedPartId, isPartListExpanded]);
+  }, [selectedPartId, isPartListExpanded, isExpanded]);
 
+  // A part picked in the scene opens the check, so its row is there to see.
+  useEffect(() => {
+    // eslint-disable-next-line no-restricted-syntax -- part 0 is a real part, distinct from no selection
+    if (selectedPartId !== undefined) {
+      setIsExpanded(true);
+    }
+  }, [selectedPartId]);
+
+  // Away from 3D the check is a muted line, but a current model's warning count stays on it, so the warnings are seen
+  // in the view where they get fixed.
   if (!isActive) {
     return (
       <Panel
         iconComponent={<CheckSquareOutlined />}
         title={t(DEFAULT.CUT_CHECK_TITLE)}
+        headerActionComponent={(
+          <>
+            {model && <CutCheckWarningCountTag count={getCutCheckWarningGroups(model.cutCheck.warnings).length} />}
+            {/* An action, not a label: the cube opens the 3D view, where the check runs; off with nothing to check. */}
+            <IconActionButton
+              size={ANTD_BUTTON_SIZE_SMALL}
+              labelText={t(DEFAULT.CUT_CHECK_OPEN_3D_LABEL)}
+              blockedReasonText={hasObjects ? undefined : t(DEFAULT.CUT_CHECK_NOTHING_TO_CHECK)}
+              captionText={t(DEFAULT.CUT_CHECK_3D_ONLY_CAPTION)}
+              iconComponent={<CubeIcon aria-hidden />}
+              onClick={() => dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }))}
+            />
+          </>
+        )}
         noteText={t(DEFAULT.CUT_CHECK_3D_ONLY_NOTE)}
       />
     );
@@ -121,74 +154,95 @@ export const CutCheckPanel = ({ isActive }: CutCheckPanelProps): ReactNode => {
     ? model.parts.filter(({ id }: BurnPart): boolean => id === selectedPartId)
     : model.parts;
 
+  const headerActionComponent: ReactNode = (
+    <span className={styles.headerActions}>
+      <CutCheckWarningCountTag count={warningGroups.length} />
+      <IconActionButton
+        type={ANTD_BUTTON_TYPE_TEXT}
+        size={ANTD_BUTTON_SIZE_SMALL}
+        labelText={t(isExpanded ? DEFAULT.CUT_CHECK_HIDE_DETAILS_LABEL : DEFAULT.CUT_CHECK_SHOW_DETAILS_LABEL)}
+        iconComponent={isExpanded ? <UpOutlined /> : <DownOutlined />}
+        aria-expanded={isExpanded}
+        aria-controls={detailsId}
+        onClick={() => setIsExpanded(!isExpanded)}
+      />
+    </span>
+  );
+
   return (
-    <Panel iconComponent={<CheckSquareOutlined />} title={t(DEFAULT.CUT_CHECK_TITLE)}>
-      <div className={styles.cutCheckPanel}>
-        <div className={styles.summary}>
-          <strong>{t(DEFAULT.CUT_CHECK_PART_COUNT, { count: model.parts.length })}</strong>
-          {summaryCounts.map(({ status, count, textKey }: CutCheckSummaryCount) => (
-            <Tag key={status} className={styles.countTag}>
-              <PartStatusMark
-                status={status}
-                count={count}
-                labelText={t(textKey, { count })}
-                isMuted={!count}
-              />
-            </Tag>
-          ))}
-          <Tooltip title={accuracyNoteText}>
-            <Tag
-              className={styles.accuracyTag}
-              icon={<QuestionCircleOutlined aria-hidden />}
-              tabIndex={0}
-              aria-label={accuracyNoteText}
-            >
-              {t(isGuess ? DEFAULT.CUT_CHECK_BADGE_GUESS : DEFAULT.CUT_CHECK_BADGE_ESTIMATE)}
-            </Tag>
-          </Tooltip>
-        </div>
-        {warningGroups.length > 0 && (
-          <ul className={styles.warningList} aria-label={t(DEFAULT.CUT_CHECK_WARNINGS_LABEL)}>
-            {warningGroups.map(({ groupKey, warnings: groupWarnings }: CutCheckWarningGroup) => (
-              <CutCheckWarningRow
-                key={groupKey}
-                warning={groupWarnings[0]}
-                layerName={getLayerName(groupWarnings[0].layerKey)}
-                partCount={groupWarnings.length}
-              />
+    <Panel
+      iconComponent={<CheckSquareOutlined />}
+      title={t(DEFAULT.CUT_CHECK_TITLE)}
+      headerActionComponent={headerActionComponent}
+    >
+      {isExpanded && (
+        <div id={detailsId} className={styles.cutCheckPanel}>
+          <div className={styles.summary}>
+            <strong>{t(DEFAULT.CUT_CHECK_PART_COUNT, { count: model.parts.length })}</strong>
+            {summaryCounts.map(({ status, count, textKey }: CutCheckSummaryCount) => (
+              <Tag key={status} className={styles.countTag}>
+                <PartStatusMark
+                  status={status}
+                  count={count}
+                  labelText={t(textKey, { count })}
+                  isMuted={!count}
+                />
+              </Tag>
+            ))}
+            <Tooltip title={accuracyNoteText}>
+              <Tag
+                className={styles.accuracyTag}
+                icon={<QuestionCircleOutlined aria-hidden />}
+                tabIndex={0}
+                aria-label={accuracyNoteText}
+              >
+                {t(isGuess ? DEFAULT.CUT_CHECK_BADGE_GUESS : DEFAULT.CUT_CHECK_BADGE_ESTIMATE)}
+              </Tag>
+            </Tooltip>
+          </div>
+          {warningGroups.length > 0 && (
+            <ul className={styles.warningList} aria-label={t(DEFAULT.CUT_CHECK_WARNINGS_LABEL)}>
+              {warningGroups.map(({ groupKey, warnings: groupWarnings }: CutCheckWarningGroup) => (
+                <CutCheckWarningRow
+                  key={groupKey}
+                  warning={groupWarnings[0]}
+                  layerName={getLayerName(groupWarnings[0].layerKey)}
+                  partCount={groupWarnings.length}
+                />
+              ))}
+            </ul>
+          )}
+          <ul className={styles.list}>
+            {shownParts.map(({ id, status }: BurnPart) => (
+              <li key={id} ref={id === selectedPartId ? selectedRowRef : undefined}>
+                <Button
+                  className={id === hoveredPartId ? [styles.partRow, styles.hoveredRow].join(' ') : styles.partRow}
+                  type={ANTD_BUTTON_TYPE_TEXT}
+                  aria-pressed={id === selectedPartId}
+                  onClick={() => dispatch(new BurnPartSelected({ partId: id }))}
+                  onMouseEnter={() => dispatch(new BurnPartHovered({ partId: id }))}
+                  onMouseLeave={() => dispatch(new BurnPartHovered({ partId: undefined }))}
+                >
+                  <span>{t(DEFAULT.CUT_CHECK_PART_ROW, { part: id })}</span>
+                  <BurnPartRowLift partId={id} />
+                  <PartStatusMark status={status} labelText={t(PART_STATUS_TEXT_KEYS[status])} />
+                </Button>
+              </li>
             ))}
           </ul>
-        )}
-        <ul className={styles.list}>
-          {shownParts.map(({ id, status }: BurnPart) => (
-            <li key={id} ref={id === selectedPartId ? selectedRowRef : undefined}>
-              <Button
-                className={id === hoveredPartId ? [styles.partRow, styles.hoveredRow].join(' ') : styles.partRow}
-                type={ANTD_BUTTON_TYPE_TEXT}
-                aria-pressed={id === selectedPartId}
-                onClick={() => dispatch(new BurnPartSelected({ partId: id }))}
-                onMouseEnter={() => dispatch(new BurnPartHovered({ partId: id }))}
-                onMouseLeave={() => dispatch(new BurnPartHovered({ partId: undefined }))}
-              >
-                <span>{t(DEFAULT.CUT_CHECK_PART_ROW, { part: id })}</span>
-                <BurnPartRowLift partId={id} />
-                <PartStatusMark status={status} labelText={t(PART_STATUS_TEXT_KEYS[status])} />
-              </Button>
-            </li>
-          ))}
-        </ul>
-        {isPartListLong && (
-          <Button
-            className={styles.partListToggle}
-            aria-expanded={isPartListExpanded}
-            onClick={() => setIsPartListExpanded(!isPartListExpanded)}
-          >
-            {isPartListExpanded
-              ? t(DEFAULT.CUT_CHECK_SHOW_FEWER_PARTS)
-              : t(DEFAULT.CUT_CHECK_SHOW_ALL_PARTS, { total: model.parts.length })}
-          </Button>
-        )}
-      </div>
+          {isPartListLong && (
+            <Button
+              className={styles.partListToggle}
+              aria-expanded={isPartListExpanded}
+              onClick={() => setIsPartListExpanded(!isPartListExpanded)}
+            >
+              {isPartListExpanded
+                ? t(DEFAULT.CUT_CHECK_SHOW_FEWER_PARTS)
+                : t(DEFAULT.CUT_CHECK_SHOW_ALL_PARTS, { total: model.parts.length })}
+            </Button>
+          )}
+        </div>
+      )}
     </Panel>
   );
 };

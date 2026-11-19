@@ -664,6 +664,27 @@ describe(watchProjects.name, () => {
       });
     });
 
+    it('keeps the derived name of the first import as the project name after every object is deleted', async () => {
+      const store: AppStore = await newStartedStore();
+
+      await vi.waitFor((): void => {
+        expect(selectProjectSummaries(store.getState())).toHaveLength(1);
+      });
+      requestArtworkImport(store);
+      await vi.waitFor((): void => {
+        expect(selectProjectName(store.getState())).not.toBe(getDefaultProjectName());
+      });
+
+      const storedName: string = selectProjectName(store.getState());
+
+      store.dispatch(new ProjectObjectsDeleted({
+        objectIds: selectProjectObjects(store.getState()).map((projectObject: ProjectObject) => projectObject.id),
+      }));
+
+      expect(storedName).toContain(ARTWORK_OBJECT_NAME);
+      expect(selectProjectName(store.getState())).toBe(storedName);
+    });
+
     it('Save as file downloads the open project as a .webgrbl.json file', async () => {
       const store: AppStore = await newStartedStore();
       const projectId: string = selectProjectId(store.getState()) ?? '';

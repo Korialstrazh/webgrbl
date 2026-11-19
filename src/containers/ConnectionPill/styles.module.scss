@@ -1,4 +1,9 @@
-.pill {
+.pillGroup {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.pill:global(.ant-btn) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -10,10 +15,14 @@
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
+  height: auto;
+  box-shadow: none;
   cursor: pointer;
 
-  &:hover {
+  &:not(:disabled):hover {
+    border-color: var(--color-border);
     background-color: var(--color-surface-hover);
+    color: var(--color-text);
   }
 }
 
@@ -43,13 +52,13 @@
 .firmware,
 .port {
   color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
-.profile {
+.port {
   max-width: 12rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .warningNote {
@@ -66,6 +75,10 @@
   border-left: 1px solid var(--color-border);
   color: var(--color-accent);
   font-weight: 600;
+
+  > :global(.anticon) {
+    font-size: 0.875rem;
+  }
 }
 
 .caret {
@@ -73,33 +86,72 @@
   font-size: 0.75rem;
 }
 
-// The profile button of the top bar names the laser, so the pill only repeats it once there is a link to name.
-.profile:has(~ .connectVerb) {
+// The pill with a one-click Connect button joined on its right: one shape, split by a line.
+.joined:global(.ant-btn) {
+  border-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+// The one-click Connect beside the pill: the accent colour marks it as the place to connect.
+.connectButton:global(.ant-btn) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background-color: var(--color-surface-2);
+  color: var(--color-accent);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  height: auto;
+  box-shadow: none;
+  cursor: pointer;
+
+  > :global(.anticon) {
+    font-size: 0.875rem;
+  }
+
+  &:not(:disabled):hover {
+    border-color: var(--color-border);
+    background-color: var(--color-surface-hover);
+    color: var(--color-accent);
+  }
+}
+
+// Wide windows spell the state out; the one-word look is only for a narrow window.
+.shortStatus {
   display: none;
 }
 
-// In a narrow window the pill keeps the state and the Connect verb, or the machine name once connected; the port and
-// the firmware move to its popover. 62.5rem must match the TopBar styles.
+// In a narrow window the pill keeps the dot, a short state ("Not connected", "Lost") after a plug and the Connect verb,
+// or the state and the chevron once connected; the port and the firmware move to its popover and its label.
+// 62.5rem must match the TopBar styles.
 @media (width < 62.5rem) {
   .firmware,
   .port,
-  .connectVerb ~ .caret {
+  .connectOffered .caret,
+  .connectOffered .status {
     display: none;
   }
 
-  .profile {
-    max-width: 7rem;
+  .shortStatus {
+    display: inline;
+    color: var(--color-text-muted);
   }
 }
 
 // At phone width the pill is its dot and the Connect verb, or the dot alone once there is a link: it must always fit.
 @media (width < 30rem) {
-  .pill {
+  .pill:global(.ant-btn) {
     padding: 0 var(--space-2);
   }
 
   .status,
-  .profile,
+  .shortStatus,
   .caret,
   .warningNote {
     display: none;
@@ -109,4 +161,22 @@
     padding-left: 0;
     border-left: 0;
   }
+
+  .connectButton:global(.ant-btn) {
+    padding: 0 var(--space-2);
+  }
+}
+
+// The plug before the narrow word, a little apart from it.
+.shortStatus :global(.anticon) {
+  margin-right: 0.25rem;
+}
+
+// Each part of the joined pill draws its own whole ring, inside its own edge and above its neighbour, so the ring never
+// breaks at the split or runs into the other part.
+.pill:focus-visible,
+.connectButton:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline-offset: calc(-1 * var(--focus-outline-width));
 }

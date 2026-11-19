@@ -1,3 +1,11 @@
 .wrapper {
   display: block;
 }
+
+// In a wide window, driven by a mouse, Pause is a little shorter than its touch size, so a running job's card still
+// leaves Move room above STOP at 1440 x 900. 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width >= 80rem) {
+  .wrapper :global(.ant-btn) {
+    height: 2.25rem;
+  }
+}

@@ -9,8 +9,8 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 
-/** The bed never gets smaller than half its fitted size, so it cannot be lost as a dot. */
-export const MIN_BED_ZOOM = 0.5;
+/** The bed never gets smaller than a quarter of its fitted size: a drawing about three times the bed still fits. */
+export const MIN_BED_ZOOM = 0.25;
 
 /** 40 times the fitted size shows tenths of a millimetre on a common bed, which is as fine as a laser burns. */
 export const MAX_BED_ZOOM = 40;

@@ -1,7 +1,7 @@
 /**
  * A row of the object list: a button that selects the object, with an icon for its kind (imported drawing or test
- * sample), its name, its size, a note when it is outside the
- * bed and the warnings for content the job leaves out (text, images, ...), and a button that deletes it.
+ * sample), its name and its size, a warning chip when it is outside
+ * the bed or has content the job leaves out (text, images, ...), and a button that deletes it.
  *
  * @author michael.morosov
  *
@@ -10,26 +10,32 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { CloseOutlined, ColumnWidthOutlined, FileImageOutlined } from '@ant-design/icons';
+import { ApartmentOutlined, CloseOutlined, ColumnWidthOutlined, FileImageOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useMemo } from 'react';
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
+import { useObjectArtworkFrame } from '../../../utils/hooks/use.object.artwork.frame';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { isSampleJobObject } from '../../../utils/materials/is.sample.job.object';
-import { selectToolpath, selectToolpathStatus } from '../../../utils/states/toolpath.state';
-import { TOOLPATH_STATUS } from '../../../utils/states/toolpath.status.constants';
+import { selectCurrentToolpathWarnings } from '../../../utils/states/toolpath.warnings.selector';
 import type { SvgUnsupportedKind } from '../../../utils/svg/geometry/svg.shape.constants';
 import type { ObjectWarning } from '../../../utils/toolpath/interfaces/ObjectWarning';
-import type { Toolpath } from '../../../utils/toolpath/interfaces/Toolpath';
-import { OBJECT_WARNING_TEXT_KEY } from '../../../utils/toolpath/object.warning.text.key';
+import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import type { ObjectRowProps } from '../interfaces/ObjectRowProps';
-import { OBJECT_KIND, OBJECT_MILLIMETRE_DECIMALS } from '../objects.section.constants';
+import { OBJECT_KIND } from '../objects.section.constants';
+import { IconActionButton } from '../../../views/IconActionButton';
 import { TestSampleIcon } from '../../../views/TestSampleIcon';
+import { ObjectBedPlacementActions } from '../ObjectBedPlacementActions';
+import { ObjectElementTree } from '../ObjectElementTree';
+import { ObjectWarningChip } from '../ObjectWarningChip';
+import { getCompactMillimetreText } from './get.compact.millimetre.text';
 import { getObjectWarningKinds } from './get.object.warning.kinds';
 import styles from './styles.module.scss';
+
+const TREE_SCROLL_INTO_VIEW_OPTIONS: ScrollIntoViewOptions = { block: 'nearest' };
 
 export const ObjectRow = ({
   projectObject,
@@ -40,55 +46,80 @@ export const ObjectRow = ({
 }: ObjectRowProps): ReactNode => {
   const { t } = useTranslation();
   const rowClassName: string | undefined = isSelected ? [styles.row, styles.selectedRow].join(' ') : styles.row;
-  const isToolpathCurrent: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.READY;
-  const toolpath: Toolpath | undefined = useSelector(selectToolpath);
-  const readyToolpathWarnings: ObjectWarning[] | undefined = isToolpathCurrent ? toolpath?.warnings : undefined;
+  const readyToolpathWarnings: ObjectWarning[] | undefined = useSelector(selectCurrentToolpathWarnings);
   const warningKinds: SvgUnsupportedKind[] = useMemo(
     () => getObjectWarningKinds(projectObject, readyToolpathWarnings),
     [projectObject, readyToolpathWarnings],
   );
 
+  const artworkFrame: ObjectArtworkFrame = useObjectArtworkFrame(projectObject);
   const isSample: boolean = isSampleJobObject(projectObject);
   const kindText: string = t(isSample ? DEFAULT.OBJECTS_KIND_SAMPLE : DEFAULT.OBJECTS_KIND_SVG);
+  const [isTreeOpen, setIsTreeOpen] = useState<boolean>(false);
+  const treeToggleTextKey: string = isTreeOpen ? DEFAULT.OBJECTS_TREE_HIDE : DEFAULT.OBJECTS_TREE_SHOW;
+  const sizeWidthMm: number = projectObject.widthMm * artworkFrame.widthFraction;
+  const sizeHeightMm: number = projectObject.heightMm * artworkFrame.heightFraction;
+  const rowRef: RefObject<HTMLLIElement | null> = useRef<HTMLLIElement>(null);
+
+  // An opened tree can fall below the fold of the panel: the panel scrolls just enough to show it.
+  useEffect(() => {
+    if (isTreeOpen) {
+      rowRef.current?.scrollIntoView(TREE_SCROLL_INTO_VIEW_OPTIONS);
+    }
+  }, [isTreeOpen]);
 
   return (
-    <li className={rowClassName}>
-      <Button
-        className={styles.selectButton}
-        type={ANTD_BUTTON_TYPE_TEXT}
-        aria-pressed={isSelected}
-        onClick={() => onSelect(projectObject.id)}
-      >
-        <span
-          className={[styles.kindIcon, isSample ? styles.sampleKind : styles.svgKind].join(' ')}
-          title={kindText}
-          data-object-kind={isSample ? OBJECT_KIND.SAMPLE : OBJECT_KIND.SVG}
-          aria-hidden
+    <li ref={rowRef} className={rowClassName}>
+      <div className={styles.rowMain}>
+        <Button
+          className={styles.selectButton}
+          type={ANTD_BUTTON_TYPE_TEXT}
+          data-object-id={projectObject.id}
+          aria-pressed={isSelected}
+          onClick={() => onSelect(projectObject.id)}
         >
-          {isSample ? <TestSampleIcon /> : <FileImageOutlined />}
-        </span>
-        <span className={styles.details}>
-          <span className={styles.name} title={projectObject.name}>{projectObject.name}</span>
-          <span className={styles.size} title={t(DEFAULT.OBJECTS_SIZE_HINT)}>
-            <ColumnWidthOutlined className={styles.sizeIcon} aria-hidden />
-            {t(DEFAULT.OBJECTS_SIZE, {
-              widthMm: projectObject.widthMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
-              heightMm: projectObject.heightMm.toFixed(OBJECT_MILLIMETRE_DECIMALS),
-            })}
+          <span
+            className={[styles.kindIcon, isSample ? styles.sampleKind : styles.svgKind].join(' ')}
+            title={kindText}
+            data-object-kind={isSample ? OBJECT_KIND.SAMPLE : OBJECT_KIND.SVG}
+            aria-hidden
+          >
+            {isSample ? <TestSampleIcon /> : <FileImageOutlined />}
           </span>
-          {isOutsideBed && <span className={styles.outsideNote}>{t(DEFAULT.OBJECTS_OUTSIDE_BED)}</span>}
-          {warningKinds.map((warningKind: SvgUnsupportedKind) => (
-            <span key={warningKind} className={styles.warningNote}>{t(OBJECT_WARNING_TEXT_KEY[warningKind])}</span>
-          ))}
-        </span>
-      </Button>
-      <Button
-        type={ANTD_BUTTON_TYPE_TEXT}
-        size={ANTD_BUTTON_SIZE_SMALL}
-        icon={<CloseOutlined />}
-        aria-label={t(DEFAULT.OBJECTS_DELETE, { name: projectObject.name })}
-        onClick={() => onDelete(projectObject.id)}
-      />
+          <span className={styles.details}>
+            <span className={styles.name} title={projectObject.name}>{projectObject.name}</span>
+            <span className={styles.size} title={t(DEFAULT.OBJECTS_SIZE_HINT)}>
+              <ColumnWidthOutlined className={styles.sizeIcon} aria-hidden />
+              {t(DEFAULT.OBJECTS_SIZE, {
+                widthMm: getCompactMillimetreText(sizeWidthMm),
+                heightMm: getCompactMillimetreText(sizeHeightMm),
+              })}
+            </span>
+          </span>
+        </Button>
+        <ObjectWarningChip
+          objectName={projectObject.name}
+          isOutsideBed={isOutsideBed}
+          outsideBedActionsComponent={<ObjectBedPlacementActions projectObject={projectObject} />}
+          warningKinds={warningKinds}
+        />
+        <IconActionButton
+          type={ANTD_BUTTON_TYPE_TEXT}
+          size={ANTD_BUTTON_SIZE_SMALL}
+          labelText={t(treeToggleTextKey, { name: projectObject.name })}
+          iconComponent={<ApartmentOutlined />}
+          aria-expanded={isTreeOpen}
+          onClick={() => setIsTreeOpen(!isTreeOpen)}
+        />
+        <IconActionButton
+          type={ANTD_BUTTON_TYPE_TEXT}
+          size={ANTD_BUTTON_SIZE_SMALL}
+          labelText={t(DEFAULT.OBJECTS_DELETE, { name: projectObject.name })}
+          iconComponent={<CloseOutlined />}
+          onClick={() => onDelete(projectObject.id)}
+        />
+      </div>
+      {isTreeOpen && <ObjectElementTree projectObject={projectObject} />}
     </li>
   );
 };

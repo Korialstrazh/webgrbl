@@ -8,6 +8,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
+import type { Material } from '../../../utils/materials/interfaces/Material';
+
 export interface MaterialDialogProps {
   /** Whether the dialog is shown. */
   isOpen: boolean;
@@ -18,4 +20,6 @@ export interface MaterialDialogProps {
    * material of the project; without it the dialog selects the material for the project.
    */
   onMaterialChosen?: (materialId: string) => void;
+  /** A saved material to rename or change the thickness of in place; without it the dialog adds a new one. */
+  editedMaterial?: Material;
 }

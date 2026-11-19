@@ -6,13 +6,13 @@ webgrbl talks to a GRBL laser over the Web Serial API. This page covers using it
 
 - Connects to a GRBL 1.1 machine (or a built-in simulated laser), runs the handshake (`$I`, `$$`) and shows live machine status.
 - Shows a console of everything sent and received, and lets you type commands.
-- Provides Stop, Reset and Unlock buttons.
+- Provides Stop, Restart controller and Unlock buttons.
 - Exposes `GrblController` for streaming and checking G-code programs.
 
 ## Connect
 
 1. Click the connection pill in the top bar to open its popover and pick a baud rate (115200 by default).
-2. In the popover press **+ USB** beside the port list to pick a real USB serial port in the browser dialog, or **Simulated laser (no hardware)** to use the built-in fake machine, then press **Connect**. No port is chosen for you, not even the simulated laser, so Connect stays disabled until you pick one. The top-bar pill and the Status card both open this popover with **Connect**. It drops below the pill, right-aligned, with the port and baud rate each on one line. In the narrow layout the pill shows its **Connect** verb on every tab.
+2. The popover is headed **Connect laser**. In it press **+ Add port** beside the port list to pick a real USB serial port in the browser dialog, or **Simulated laser (no hardware)** to use the built-in fake machine, then press **Connect**. No port is chosen for you, not even the simulated laser, so Connect stays disabled until you pick one. The top-bar pill and the Status card both open this popover with **Connect**. It drops below the pill, right-aligned, with the port and baud rate each on one line. While no laser is connected the pill ends in an orange **Connect** verb at every window width (and on every tab of the narrow layout). Once a port is chosen (picked earlier or remembered), that verb becomes its own button joined to the pill, and it and **Connect laser** in the Job card connect in one click, with the same request as the popover's Connect and nothing else; the pill itself still opens the popover to change the port. With no port chosen they open the popover. No port is ever picked for you.
 3. When the handshake succeeds the pill shows the firmware, and the machine panel shows the machine state and position.
 
 Chrome and Edge are required (Web Serial). A connection that gets no banner within 10 s fails with a toast.
@@ -36,12 +36,12 @@ Then log out and back in. Only one application or browser tab can hold a port at
 - The status-report toggle hides the `?` polls and `<...>` replies, which otherwise fill the console every 250 ms.
 - The console keeps the last 2,000 entries.
 
-## Stop, Reset, Unlock
+## Stop, Restart controller, Unlock
 
-- Pressing **Escape** in the main view stops the machine like the STOP button, but only while connected and no popover, dialog or drawer is open (Escape then just closes it). To make Escape stop the laser even then, open the gear beside STOP and tick **Esc stops the laser even when a panel is open** (off by default, remembered on this device): Escape then closes the panel and stops in one press, still only while connected. See [workbench-shell.md](workbench-shell.md).
+- Pressing **Escape** in the main view stops the machine like the STOP button, but only while connected and no popover, dialog, drawer or narrow console sheet is open (Escape then just closes it). To make Escape stop the laser even then, open the gear beside STOP and tick **Esc stops over panels too** (off by default, remembered on this device): Escape then closes the panel and stops in one press, still only while connected. See [workbench-shell.md](workbench-shell.md).
 - **Stop** sends a feed hold (which also cancels a jog), waits until the machine has come to rest (at most 2 s), then soft-resets. The position is kept and no alarm is raised.
-- **Reset** soft-resets at once. Moving machines lose steps and raise `ALARM:3`, so home again afterwards.
-- **Unlock** sends `$X` to clear an Alarm lock.
+- **Restart controller** (the circular restart icon in the Status card; `MachineResetRequested`) soft-resets at once (Ctrl-X). Moving machines lose steps and raise `ALARM:3`, so home again afterwards.
+- **Unlock** sends `$X` to clear an Alarm lock. It is shown only while GRBL is in Alarm.
 
 Leaving the page while the machine is running asks for confirmation. Disconnecting always performs a Stop first (about 50 ms when the machine is idle), so the laser never keeps moving after the port is closed.
 

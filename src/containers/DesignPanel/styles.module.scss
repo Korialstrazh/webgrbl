@@ -1,22 +1,33 @@
-// The sider scrolls on its own; its body grows with the content instead of keeping antd's fixed full height.
+@use '../../styles/layout' as layout;
+
+// The cards, Cut check last, scroll as one list in the region.
 .region {
-  overflow: auto;
-  // A thin scrollbar with a fixed gutter: the content keeps its width when the scrollbar appears, and the bar takes
-  // little of a narrow panel.
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
+  overflow: hidden;
   border-right: 1px solid var(--color-border);
   background-color: var(--color-surface-1);
 
   .designPanel {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
     min-width: 0;
-    height: auto;
-    min-height: 100%;
-    padding: var(--space-3);
+    height: 100%;
   }
+}
+
+.cards {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: var(--space-3);
+  overflow: auto;
+  // A thin scrollbar with a fixed gutter: the content keeps its width when the scrollbar appears, and the bar takes
+  // little of a narrow panel.
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+
+  @include layout.more-below-fade(var(--color-surface-1));
 }
 
 .layersActions {
@@ -27,4 +38,28 @@
 // Small buttons, but the icons that say what they do stay large enough to read.
 .layersActions :global(.ant-btn .anticon) {
   font-size: 1.125rem;
+}
+
+// In a narrow window the region is one of the stacked views and scrolls on its own, like the machine panel: the panel
+// grows with its cards instead of scrolling inside itself, and the last card (Cut check) keeps room below it, so the
+// region's bottom fade never covers it. 80rem must match WIDE_LAYOUT_MEDIA_QUERY.
+@media (width < 80rem) {
+  .region {
+    min-height: 100%;
+    overflow: visible;
+    border-right: none;
+  }
+
+  .region .designPanel {
+    height: auto;
+  }
+
+  .cards {
+    overflow: visible;
+    padding-bottom: calc(var(--space-3) + 2rem);
+
+    &::after {
+      display: none;
+    }
+  }
 }

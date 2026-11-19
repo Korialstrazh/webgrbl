@@ -1,0 +1,55 @@
+// Inside the top end corner of the button (its parent is positioned), so it takes no room in the layout and never
+// sits on a border between two buttons.
+.actionLockNote {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  z-index: 1;
+  line-height: 0;
+}
+
+// The hover target around the badge, with no tab stop: the button carries the reason for keyboard users.
+.dotTarget {
+  display: block;
+  cursor: default;
+}
+
+// An antd status badge drawn as a fixed-size dot in the warning colour, so its size never changes with the text behind
+// it. The colour is set on the dot itself, so the hover and focus colours of the button around it never turn it white.
+.dot:global(.ant-badge) {
+  display: block;
+  line-height: 0;
+
+  :global(.ant-badge-status-dot) {
+    top: 0;
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color: var(--color-warning);
+  }
+}
+
+.noteText {
+  display: block;
+  max-width: 16rem;
+}
+
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  max-width: 18rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reason {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.reasonIcon {
+  flex: none;
+  color: var(--color-warning);
+}

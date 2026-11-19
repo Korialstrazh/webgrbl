@@ -14,6 +14,7 @@ import { ANSWER_SETTLE_MS } from '../grbl/test.support/grbl.answer.settle';
 import { DEFAULT } from '../localization/default.locales';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../profiles/new.machine.profile';
+import { newProjectObject } from '../project/new.project.object';
 import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
 import type { ObjectWarning } from '../toolpath/interfaces/ObjectWarning';
 import type { ToolpathMove } from '../toolpath/interfaces/ToolpathMove';
@@ -49,6 +50,7 @@ import {
 } from './machine.status.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
+import { ProjectObjectsAdded } from './project.document.state';
 import { ToolpathReady, selectToolpathDocumentVersion } from './toolpath.state';
 
 /** 100 mm at the test move's speed outlasts the time the running checks wait. */
@@ -62,7 +64,13 @@ const LASER_MODE_OFF_LINE = '$32=0\n';
 const LASER_MODE_CHANGING_LINES: string[] = ['$32=0', '$32 = 1', '$rst=*'];
 const CONSOLE_LINE = 'G0X1';
 const MACHINE_LINE = 'G0X2';
-const OFF_PAGE_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
+const RETURN_JOG_START = '$J=G90 G21 X0 Y0';
+const LASER_OFF_LINE = 'M5\n';
+const WARNED_OBJECT_ID = 'object';
+const OFF_PAGE_WARNING: ObjectWarning = { objectId: WARNED_OBJECT_ID, kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
+
+const getSentText = (writeCalls: Uint8Array[][]): string =>
+  writeCalls.map(([bytes]: Uint8Array[]): string => new TextDecoder().decode(bytes)).join('');
 
 /** A simulated laser with laser mode off; settings survive power cycles. */
 const newLaserModeOffSimulator = (): GrblSimulator => {
@@ -134,6 +142,12 @@ const prepareConnectedStore = async (
   store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
   store.dispatch(new ConnectRequested());
   await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+  // Warnings only count for objects in the project, as a new or emptied project shows none.
+  if (warnings.length) {
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject({ id: WARNED_OBJECT_ID })], layers: [] }));
+  }
+
   store.dispatch(new ToolpathReady({
     toolpath: newToolpath({
       moves: [newToolpathMove({ to: { x: LONG_MOVE_END_X_MM, y: 0 }, ...moveOverrides })],
@@ -150,7 +164,8 @@ const replaceToolpathWithMoves = (store: AppStore, moveCount: number): void => {
   store.dispatch(new ToolpathReady({
     toolpath: newToolpath({
       moves: Array.from({ length: moveCount }, (_: unknown, moveIndex: number): ToolpathMove =>
-        newToolpathMove({ to: { x: LONG_MOVE_END_X_MM * (moveIndex + 1), y: 0 } })),
+        // Back and forth, so every move stays on the bed and Start is not held back.
+        newToolpathMove({ to: { x: moveIndex % 2 ? 0 : LONG_MOVE_END_X_MM, y: 0 } })),
       warnings: [],
     }),
     documentVersion: selectToolpathDocumentVersion(store.getState()),
@@ -192,6 +207,38 @@ describe(runGrblJob.name, () => {
     await vi.advanceTimersByTimeAsync(JOB_END_MS);
 
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
+  });
+
+  it('takes the laser back to where the job started once the job has finished, with the beam off first', async () => {
+    const store: AppStore = await prepareConnectedStore();
+    const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
+
+    store.dispatch(new JobStartRequested());
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+
+    const sentText: string = getSentText(writeSpy.mock.calls);
+
+    expect(sentText).toContain(RETURN_JOG_START);
+    expect(sentText.lastIndexOf(LASER_OFF_LINE)).toBeLessThan(sentText.indexOf(RETURN_JOG_START));
+    expect(selectMachineStatus(store.getState())?.workPosition?.x).toBe(0);
+    writeSpy.mockRestore();
+  });
+
+  it('leaves the laser where it stopped after a stop, without moving it back', async () => {
+    const store: AppStore = await prepareConnectedStore();
+    const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
+
+    store.dispatch(new JobStartRequested());
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new MachineStopRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+
+    expect(getSentText(writeSpy.mock.calls)).not.toContain(RETURN_JOG_START);
+    writeSpy.mockRestore();
   });
 
   it('reports a stopped job as interrupted, not as finished', async () => {

@@ -1,6 +1,8 @@
 /**
- * The four things a job needs, in the order to set them, each read live from existing state. It adds no rule: Start job
- * keeps its own guards, and a job can start without a material.
+ * The things a job needs, in the order to set them, each read live from existing state. Check is met once there is
+ * artwork to check and the toolpath has no warnings, since Start job stays locked by them: an empty project never
+ * shows Check done ahead of the Design step it depends on. It adds no rule: Start job keeps its own guards, and a job
+ * can start without a material: Material is a recommended step, never the next step.
  *
  * @author michael.morosov
  *
@@ -14,11 +16,13 @@ import { selectActiveMachineProfile } from './machine.profile.state';
 import { selectActiveMaterial } from './material.selectors';
 import type { AppRootState } from './new.store';
 import { selectProjectObjects } from './project.document.state';
+import { selectToolpathWarningCount } from './toolpath.warnings.selector';
 
 export const JOB_READINESS_STEP = {
   PROFILE: 'profile',
   DESIGN: 'design',
   MATERIAL: 'material',
+  WARNINGS: 'warnings',
   CONNECT: 'connect',
 } as const;
 
@@ -28,8 +32,18 @@ const JOB_READINESS_STEPS_IN_ORDER: readonly JobReadinessStep[] = [
   JOB_READINESS_STEP.PROFILE,
   JOB_READINESS_STEP.DESIGN,
   JOB_READINESS_STEP.MATERIAL,
+  JOB_READINESS_STEP.WARNINGS,
   JOB_READINESS_STEP.CONNECT,
 ];
+
+// Start job does not need these, so they never become the next step and never read as a blocking to-do.
+const OPTIONAL_JOB_READINESS_STEPS: readonly JobReadinessStep[] = [JOB_READINESS_STEP.MATERIAL];
+
+export const isJobReadinessStepOptional = (step: JobReadinessStep): boolean =>
+  OPTIONAL_JOB_READINESS_STEPS.includes(step);
+
+/** The number of toolpath warnings that keep Start job locked, from the one shared warnings source. */
+export const selectJobReadinessWarningCount = (state: AppRootState): number => selectToolpathWarningCount(state);
 
 export const selectIsJobReadinessStepMet = (step: JobReadinessStep) => (state: AppRootState): boolean => {
   switch (step) {
@@ -39,10 +53,14 @@ export const selectIsJobReadinessStepMet = (step: JobReadinessStep) => (state: A
     return Boolean(selectProjectObjects(state).length);
   case JOB_READINESS_STEP.MATERIAL:
     return Boolean(selectActiveMaterial(state));
+  case JOB_READINESS_STEP.WARNINGS:
+    return Boolean(selectProjectObjects(state).length) && !selectJobReadinessWarningCount(state);
   default:
     return selectIsConnected(state);
   }
 };
 
 export const selectFirstUnmetJobReadinessStep = (state: AppRootState): JobReadinessStep | undefined =>
-  JOB_READINESS_STEPS_IN_ORDER.find((step: JobReadinessStep): boolean => !selectIsJobReadinessStepMet(step)(state));
+  JOB_READINESS_STEPS_IN_ORDER.find(
+    (step: JobReadinessStep): boolean => !isJobReadinessStepOptional(step) && !selectIsJobReadinessStepMet(step)(state),
+  );

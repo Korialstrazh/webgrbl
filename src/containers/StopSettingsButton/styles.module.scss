@@ -1,9 +1,47 @@
+@use '../../styles/layout' as layout;
+
 .stopSettingsButton {
   flex: none;
   min-width: var(--target-min);
   min-height: var(--target-min);
 }
 
-.preference {
-  max-width: 16rem;
+.preferenceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.preferenceLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+
+  > :global(.anticon) {
+    color: var(--color-text-muted);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+// A clear edge and a visible arrow on the gear, so the popover never floats loose above the stop bar.
+.stopSettingsPopoverRoot :global(.ant-popover-container) {
+  border: 1px solid var(--color-control-border);
+  background-color: var(--color-surface-3);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 60%);
+}
+
+.stopSettingsPopoverRoot :global(.ant-popover-arrow)::before {
+  background-color: var(--color-control-border);
+}
+
+// Above the stop footer and the narrow stop bar it opens from, so its bottom edge is never tucked under the bar.
+.stopSettingsPopoverRoot:global(.ant-popover) {
+  z-index: layout.$stop-above-dialog-z-index + 1;
 }

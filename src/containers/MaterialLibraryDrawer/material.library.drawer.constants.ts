@@ -15,10 +15,10 @@ import type { MaterialPresetOperation } from '../../utils/materials/material.pre
 export const MATERIAL_LIBRARY_DRAWER_OVERLAY_ID = 'material-library-drawer';
 
 /**
- * One column: room for the compact list and the edit view, narrow enough to leave most of the bed in view beside
- * the Material panel, and never wider than the bed region, so a narrow window shows it at the width of the region.
+ * One column: room for the compact list and the edit view. A wide bed region gives it 27rem; a narrower one shrinks it
+ * down to 21rem (336 px), so the bed still fits in the strip beside it, and it is never wider than the bed region.
  */
-export const MATERIAL_LIBRARY_DRAWER_WIDTH = 'min(27rem, 100%)';
+export const MATERIAL_LIBRARY_DRAWER_WIDTH = 'min(clamp(21rem, 100% - 36rem, 27rem), 100%)';
 
 export const MATERIAL_PRESET_OPERATION_LABEL_KEY: Record<MaterialPresetOperation, string> = {
   [MATERIAL_PRESET_OPERATION.CUT]: DEFAULT.MATERIAL_LIBRARY_OPERATION_CUT,

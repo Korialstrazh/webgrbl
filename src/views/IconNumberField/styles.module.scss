@@ -10,6 +10,8 @@
 
 .adornment {
   display: inline-flex;
+  min-width: 0;
+  overflow: hidden;
   align-items: center;
   gap: var(--space-1);
   color: var(--color-text-muted);
@@ -22,7 +24,24 @@
   }
 }
 
+.caption {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .input {
   width: 100%;
   font-family: var(--font-mono);
+
+  // The value always keeps room for five digits: a long caption and unit shrink first, never the value itself.
+  :global(.ant-input-number-input) {
+    min-width: 4.5ch;
+  }
+
+  :global(.ant-input-number-prefix),
+  :global(.ant-input-number-suffix) {
+    flex-shrink: 0;
+  }
 }

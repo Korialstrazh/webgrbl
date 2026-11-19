@@ -1,4 +1,4 @@
-// The handle, the checkbox and the open button side by side; the move buttons appear over the end of the row.
+// The handle, the checkbox and the open button side by side.
 .row {
   position: relative;
   display: grid;
@@ -66,24 +66,30 @@
 }
 
 // A layer that stays home steps back, so the rows that will burn stand out; the eye keeps full strength to be found.
+// Dimmed just enough to keep its muted stats above 4.5:1 on every surface.
 .row:has(.sendToggle input:not(:checked)) .openButton {
-  opacity: 0.45;
+  opacity: 0.75;
 }
 
-// A decoration only: the Move buttons are the keyboard path.
-.handle {
-  padding: 0 0.125rem;
+// Drag it with the pointer, or focus it and use the up and down arrow keys.
+.handle:global(.ant-btn) {
+  width: 1.25rem;
+  min-width: 0;
+  padding: 0;
   color: var(--color-text-muted);
   font-size: 1rem;
   cursor: grab;
+  // A finger on the handle drags the layer instead of scrolling the panel.
+  touch-action: none;
 }
 
-// The swatch beside the name, then the summary and the palette note below across the full width of the button. The
+// The swatch beside the name and, for a colour not in the palette, a small info icon after it; then the summary below
+// across the full width of the button. The
 // name and the summary each wrap to a second line in a narrow panel instead of being cut short, and the button grows
 // with them, so they stay inside it. antd centres a button's content on one line, so the button is laid out as a start-aligned grid.
 .openButton {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   gap: 0 var(--space-2);
   align-items: center;
   justify-content: stretch;
@@ -101,13 +107,11 @@
 }
 
 .name,
-.summary,
-.note {
+.summary {
   min-width: 0;
 }
 
-.summary,
-.note {
+.summary {
   grid-column: 1 / -1;
 }
 
@@ -122,58 +126,19 @@
   margin-top: 0.125rem;
 }
 
+// A neutral hint, not an error: the colour burns fine, it just has no palette entry yet.
 .note {
-  grid-column: 2;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  grid-row: 1;
+  grid-column: 4;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
 }
 
-.note {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.75rem;
-  color: var(--color-danger-text);
-}
-
-// Out of sight until the row is hovered or holds the focus, and then only over the name line, so they never cover a
-// value. They stay in the tab order: tabbing onto one shows both.
-.moveButtons {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 0;
-  display: flex;
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface-3);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s;
-
-  > :global(.ant-btn) {
-    width: 1.75rem;
-    height: 1.5rem;
-  }
-}
-
-.row:hover .moveButtons,
-.row:focus-within .moveButtons {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-// A touch screen has no hover, so the buttons stay visible.
 @media (hover: none) {
-  .row {
-    grid-template-columns: auto auto minmax(0, 1fr) auto;
-  }
-
-  .moveButtons {
-    position: static;
-    flex-direction: column;
-    opacity: 1;
-    pointer-events: auto;
+  // A tap leaves the row "hovered" after its drawer closes, which read as a stuck selection; only the open row's
+  // accent shows which layer is being edited.
+  .row:not(.openRow) .openButton:global(.ant-btn):hover {
+    background-color: transparent;
   }
 }
 

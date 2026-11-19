@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CUT_ENTRY } from '../palette/palette.constants';
+import { getLayerDisplayName } from './get.layer.display.name';
 import { getPaletteEntryFromLayer } from './get.palette.entry.from.layer';
 import type { ProjectLayer } from './interfaces/ProjectLayer';
 
@@ -33,10 +34,15 @@ describe(getPaletteEntryFromLayer.name, () => {
     });
   });
 
-  it('names a new entry after the colour of a layer that is not in the palette', () => {
-    const entry = getPaletteEntryFromLayer(newLayer({}), undefined);
+  it('names a new entry after the plain colour of a layer that is not in the palette, as the layer is named', () => {
+    const layer = newLayer({});
+    const entry = getPaletteEntryFromLayer(layer, undefined);
 
-    expect(entry).toMatchObject({ name: UNKNOWN_COLOUR, colour: UNKNOWN_COLOUR, speedMmPerMin: CHANGED_SPEED });
+    expect(entry).toMatchObject({
+      name: getLayerDisplayName(layer, undefined),
+      colour: UNKNOWN_COLOUR,
+      speedMmPerMin: CHANGED_SPEED,
+    });
     expect(entry.id).toBeTruthy();
   });
 });

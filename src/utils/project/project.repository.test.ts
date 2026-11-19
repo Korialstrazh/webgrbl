@@ -103,7 +103,7 @@ describe(PROJECT_REPOSITORY.getProject.name, () => {
 });
 
 describe(PROJECT_REPOSITORY.listProjects.name, () => {
-  it('lists summaries newest first with object counts', async () => {
+  it('lists summaries newest first with object counts, object boxes and the first object name', async () => {
     const olderProject: StoredProject = await PROJECT_REPOSITORY.createProject(PROJECT_NAME);
 
     await waitForNextMillisecond();
@@ -111,13 +111,32 @@ describe(PROJECT_REPOSITORY.listProjects.name, () => {
     const newerProject: StoredProject = await PROJECT_REPOSITORY.createProject(OTHER_PROJECT_NAME);
 
     await waitForNextMillisecond();
-    await PROJECT_REPOSITORY.saveDocument(olderProject.id, getDocument([newProjectObject({ svgText: SVG_TEXT })]));
+    const savedObject: ProjectObject = newProjectObject({ svgText: SVG_TEXT });
+
+    await PROJECT_REPOSITORY.saveDocument(olderProject.id, getDocument([savedObject]));
 
     const savedOlderProject: StoredProject | undefined = await WEBGRBL_DATABASE.projects.get(olderProject.id);
+    const { xMm, yMm, widthMm, heightMm, rotationDeg } = savedObject;
 
     expect(await PROJECT_REPOSITORY.listProjects()).toEqual([
-      { id: olderProject.id, name: PROJECT_NAME, updatedAt: savedOlderProject?.updatedAt, objectCount: 1 },
-      { id: newerProject.id, name: OTHER_PROJECT_NAME, updatedAt: newerProject.updatedAt, objectCount: 0 },
+      {
+        id: olderProject.id,
+        name: PROJECT_NAME,
+        createdAt: olderProject.createdAt,
+        updatedAt: savedOlderProject?.updatedAt,
+        objectCount: 1,
+        objectBoxes: [{ xMm, yMm, widthMm, heightMm, rotationDeg }],
+        firstObjectName: savedObject.name,
+      },
+      {
+        id: newerProject.id,
+        name: OTHER_PROJECT_NAME,
+        createdAt: newerProject.createdAt,
+        updatedAt: newerProject.updatedAt,
+        objectCount: 0,
+        objectBoxes: [],
+        firstObjectName: undefined,
+      },
     ]);
   });
 

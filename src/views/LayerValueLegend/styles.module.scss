@@ -1,11 +1,11 @@
-// A quiet key line: small muted names, each after the icon in the colour the rows use for it.
+// A quiet key line: 13 px muted names, each after the icon in the colour the rows use for it.
 .legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0 var(--space-3);
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
 }
 
 .entry {
@@ -13,6 +13,11 @@
   align-items: center;
   gap: 0.25rem;
   white-space: nowrap;
+
+  // The key icons at 14 px, the size of the icons in the rows they explain.
+  :global(.anticon) {
+    font-size: 0.875rem;
+  }
 }
 
 .power :global(.anticon) {
@@ -25,4 +30,9 @@
 
 .passes :global(.anticon) {
   color: var(--color-success);
+}
+
+.unit {
+  margin-inline-start: 0.125rem;
+  color: var(--color-text-muted);
 }

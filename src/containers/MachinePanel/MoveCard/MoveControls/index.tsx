@@ -1,5 +1,5 @@
 /**
- * The controls of the move card: home, set zero, the jog pad, the step sizes and the jog speed, centred as one column.
+ * The controls of the move card: home, the jog pad, the step sizes and the jog speed, centred as one column.
  * Each one is enabled only while the laser can take that move.
  *
  * @author michael.morosov
@@ -38,6 +38,7 @@ import type { MoveControlsProps } from '../interfaces/MoveControlsProps';
 import { JogSpeedInput } from '../JogSpeedInput';
 import { JOG_PAD_CELLS } from '../jog.pad.constants';
 import styles from './styles.module.scss';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
 
 // eslint-disable-next-line no-restricted-syntax -- 0 degrees is a real turn, the up arrow
 const isJogArrowCell = (cell: JogPadCell): boolean => cell.arrowRotationDeg !== undefined;
@@ -52,7 +53,7 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
   const isJobRunActive: boolean = useSelector(selectIsJobRunActive);
   const [stepMm, setStepMm] = useState<number>(DEFAULT_JOG_STEP_MM);
   const feedRate: number = activeProfile?.jogFeedRate ?? DEFAULT_MACHINE_JOG_FEED_RATE;
-  const { canJog, canHome, canSetZero }: MoveAvailability = getMoveAvailability({
+  const { canJog, canHome }: MoveAvailability = getMoveAvailability({
     isConnected,
     machineState: machineStatus?.machineState,
     hasHomingSwitches: activeProfile?.hasHomingSwitches ?? false,
@@ -74,20 +75,6 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
 
   return (
     <div id={id} className={styles.moveControls}>
-      <div className={styles.homeRow}>
-        {activeProfile?.hasHomingSwitches && (
-          <Button size={ANTD_BUTTON_SIZE_LARGE} disabled={!canHome} onClick={() => requestLine(MACHINE_COMMAND.HOME)}>
-            {t(DEFAULT.MACHINE_MOVE_HOME)}
-          </Button>
-        )}
-        <Button
-          size={ANTD_BUTTON_SIZE_LARGE}
-          disabled={!canSetZero}
-          onClick={() => requestLine(MACHINE_COMMAND.SET_WORK_ZERO)}
-        >
-          {t(DEFAULT.MACHINE_MOVE_SET_ZERO)}
-        </Button>
-      </div>
       <div className={styles.jogPad}>
         {JOG_PAD_CELLS.map((cell: JogPadCell) => (
           <Tooltip key={cell.labelKey} title={isJogArrowCell(cell) ? undefined : t(cell.labelKey)}>
@@ -96,6 +83,7 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
               disabled={!canJog}
               icon={isJogArrowCell(cell) ? <ArrowUpOutlined rotate={cell.arrowRotationDeg} /> : <HomeOutlined />}
               aria-label={t(cell.labelKey)}
+              // The centre cell shows its origin icon only: the step sizes below already show the active step.
               onClick={() => requestJogPadLine(cell)}
             />
           </Tooltip>
@@ -103,12 +91,28 @@ export const MoveControls = ({ id }: MoveControlsProps): ReactNode => {
       </div>
       <div className={styles.stepAndSpeed}>
         <Segmented
+          // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+          tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
           aria-label={t(DEFAULT.MACHINE_MOVE_STEP_LABEL)}
           options={stepOptions}
           value={stepMm}
           onChange={setStepMm}
         />
-        <JogSpeedInput />
+        {/* Beside the jog speed, so the whole Move card fits on a 900 px high screen. */}
+        <div className={styles.speedRow}>
+          <JogSpeedInput />
+          {activeProfile?.hasHomingSwitches && (
+            <Button
+              size={ANTD_BUTTON_SIZE_LARGE}
+              icon={<HomeOutlined />}
+              aria-label={t(DEFAULT.MACHINE_MOVE_HOME)}
+              disabled={!canHome}
+              onClick={() => requestLine(MACHINE_COMMAND.HOME)}
+            >
+              {t(DEFAULT.MACHINE_MOVE_HOME)}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 /**
  * The project objects on the bed and the pointer and key editing of them. A click selects, Shift-click adds or
- * removes, a click on empty bed clears, and a drag moves the selection. The one selected object gets
+ * removes, a click on empty bed clears, and a drag moves the selection. When the user switched it on, a double-click on
+ * empty bed moves the laser there; a double-click on an object never does. The one selected object gets
  * handles that scale and turn it. Every drag and handle gesture is held locally while the pointer is down and becomes
  * one transform action, so one undo step, when it comes up. The layer takes keyboard focus for the nudge and delete
  * keys.
@@ -12,8 +13,8 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { useCallback, useMemo, useRef } from 'react';
-import type { PointerEvent, ReactNode, RefObject } from 'react';
+import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import type { MouseEvent, PointerEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDesignLayerLooks } from '../../utils/bed/get.design.layer.looks';
@@ -22,13 +23,14 @@ import { PRIMARY_POINTER_BUTTON } from '../../utils/browser/browser.events.const
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
-import { isObjectOutsideBed } from '../../utils/project/is.object.outside.bed';
+import { isObjectArtworkOutsideBed } from '../../utils/project/is.object.artwork.outside.bed';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { selectProjectLayers, selectProjectObjects } from '../../utils/states/project.document.state';
 import { ProjectSelectionChanged, selectSelectedObjectIds } from '../../utils/states/project.selection.state';
-import { BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
+import { BED_OBJECTS_LAYER_ID, BED_OBJECTS_SURFACE_TEST_ID } from './bed.objects.constants';
 import type { BedObjectHandle } from './bed.objects.constants';
 import { BedObjectGraphic } from './BedObjectGraphic';
+import { BedOffBedArrows } from './BedOffBedArrows';
 import { getBedHandleSizes } from './get.bed.handle.sizes';
 import { getObjectWithDragOffset } from './get.object.with.drag.offset';
 import { getObjectWithHandleGesture } from './get.object.with.handle.gesture';
@@ -40,6 +42,7 @@ import type { BedObjectsKeyDownHandler } from './interfaces/BedObjectsKeyDownHan
 import type { BedObjectsProps } from './interfaces/BedObjectsProps';
 import type { SelectToolPointerDownOutcome } from './interfaces/SelectToolPointerDownOutcome';
 import styles from './styles.module.scss';
+import { useBedDoubleClickMove } from './use.bed.double.click.move';
 import { useBedGestureActivity } from './use.bed.gesture.activity';
 import { useBedHandleGesture } from './use.bed.handle.gesture';
 import { useBedObjectDrag } from './use.bed.object.drag';
@@ -47,6 +50,8 @@ import { useBedObjectsKeys } from './use.bed.objects.keys';
 import { useBedPixelsPerMm } from './use.bed.pixels.per.mm';
 
 const LAYER_TAB_INDEX = 0;
+/** An off-bed arrow is this many selection handles long, so it is easy to spot at every zoom. */
+const OFF_BED_ARROW_HANDLE_FACTOR = 2;
 
 const isPrimaryPress = (pointerEvent: PointerEvent): boolean => pointerEvent.button === PRIMARY_POINTER_BUTTON;
 
@@ -62,6 +67,8 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
   const gestureControls: BedHandleGestureControls = useBedHandleGesture(layerRef, dimensions.heightMm);
   const handleKeyDown: BedObjectsKeyDownHandler = useBedObjectsKeys();
   const pixelsPerMm: number | undefined = useBedPixelsPerMm(layerRef, dimensions);
+  const handleBedDoubleClick: (mouseEvent: MouseEvent<SVGElement>) => void =
+    useBedDoubleClickMove(layerRef, dimensions.heightMm);
   const handleSizes: BedHandleSizes = useMemo(() => getBedHandleSizes(pixelsPerMm), [pixelsPerMm]);
   const { startObjectDrag, drag } = dragControls;
   const { startHandleGesture, handleGesture } = gestureControls;
@@ -69,17 +76,31 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
 
   useBedGestureActivity(Boolean(drag ?? handleGesture));
 
+  // Chrome counts a script focus on an SVG group as keyboard focus, so a press marks it: the bed edge ring is for the
+  // keyboard only, and a selection shows on the object alone.
+  const [isPointerFocused, setIsPointerFocused] = useState<boolean>(false);
+
   // A press on the bed gives it keyboard focus, so the arrow and Delete keys reach it next.
   const focusLayer = useCallback((): void => {
+    setIsPointerFocused(true);
     layerRef.current?.focus({ preventScroll: true });
   }, []);
 
+  const pendingPickRef = useRef<string | undefined>(undefined);
   const handleObjectPointerDown = useCallback((pointerEvent: PointerEvent<SVGGElement>, objectId: string): void => {
     if (!isPrimaryPress(pointerEvent)) {
       return;
     }
 
     focusLayer();
+
+    // With nothing selected, a press on an object only picks it on release: a drag from it pans the bed instead,
+    // and the pan takes the pointer, so the release never reaches this layer.
+    if (!selectedObjectIds.length && !pointerEvent.shiftKey) {
+      pendingPickRef.current = objectId;
+
+      return;
+    }
 
     const outcome: SelectToolPointerDownOutcome = getSelectToolPointerDownOutcome({
       selectedObjectIds,
@@ -131,11 +152,20 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
   };
 
   const handlePointerUp = (pointerEvent: PointerEvent<SVGGElement>): void => {
+    const pendingPickId: string | undefined = pendingPickRef.current;
+
+    pendingPickRef.current = undefined;
+
+    if (pendingPickId) {
+      dispatch(new ProjectSelectionChanged({ objectIds: [pendingPickId] }));
+    }
+
     gestureControls.handleGesturePointerUp(pointerEvent);
     dragControls.handleDragPointerUp(pointerEvent);
   };
 
   const handlePointerCancel = (pointerEvent: PointerEvent<SVGGElement>): void => {
+    pendingPickRef.current = undefined;
     gestureControls.handleGesturePointerCancel(pointerEvent);
     dragControls.handleDragPointerCancel(pointerEvent);
   };
@@ -143,15 +173,19 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
   return (
     <g
       ref={layerRef}
-      className={styles.bedObjects}
+      id={BED_OBJECTS_LAYER_ID}
+      className={[styles.bedObjects, isPointerFocused ? styles.pointerFocused : undefined].join(' ')}
       role="group"
       aria-label={t(DEFAULT.BED_OBJECTS_LABEL)}
       tabIndex={LAYER_TAB_INDEX}
       onKeyDown={handleKeyDown}
+      onBlur={() => setIsPointerFocused(false)}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
       onLostPointerCapture={handlePointerCancel}
+      // On the whole layer, so a double-click on an object moves the laser there just as one on the empty bed does.
+      onDoubleClick={handleBedDoubleClick}
     >
       <rect
         className={styles.surface}
@@ -168,20 +202,30 @@ export const BedObjects = ({ dimensions }: BedObjectsProps): ReactNode => {
           dragControls.drag,
         );
         const isSelected: boolean = selectedObjectIds.includes(projectObject.id);
+        const isOutsideBed: boolean = isObjectArtworkOutsideBed(drawnObject, dimensions);
 
         return (
-          <BedObjectGraphic
-            key={projectObject.id}
-            projectObject={drawnObject}
-            bedHeightMm={dimensions.heightMm}
-            isSelected={isSelected}
-            hasHandles={isSelected && hasSingleSelection}
-            isOutsideBed={isObjectOutsideBed(drawnObject, dimensions)}
-            layerLooks={layerLooks}
-            handleSizes={handleSizes}
-            onPointerDown={handleObjectPointerDown}
-            onHandlePointerDown={handleHandlePointerDown}
-          />
+          <Fragment key={projectObject.id}>
+            <BedObjectGraphic
+              projectObject={drawnObject}
+              bedWidthMm={dimensions.widthMm}
+              bedHeightMm={dimensions.heightMm}
+              isSelected={isSelected}
+              hasHandles={isSelected && hasSingleSelection}
+              isOutsideBed={isOutsideBed}
+              layerLooks={layerLooks}
+              handleSizes={handleSizes}
+              onPointerDown={handleObjectPointerDown}
+              onHandlePointerDown={handleHandlePointerDown}
+            />
+            {isOutsideBed && (
+              <BedOffBedArrows
+                projectObject={drawnObject}
+                bed={dimensions}
+                arrowSize={handleSizes.handleSizeMm * OFF_BED_ARROW_HANDLE_FACTOR}
+              />
+            )}
+          </Fragment>
         );
       })}
     </g>

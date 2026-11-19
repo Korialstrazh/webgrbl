@@ -11,12 +11,16 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { AppstoreAddOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { AppstoreAddOutlined, EditOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Input, Tag } from 'antd';
 import type { CheckboxChangeEvent } from 'antd';
+import { useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { IconActionButton } from '../../../views/IconActionButton';
+import { MaterialDialog } from '../../MaterialDialog';
 import type { MaterialLibraryFiltersProps } from '../interfaces/MaterialLibraryFiltersProps';
 import styles from './styles.module.scss';
 
@@ -29,6 +33,8 @@ export const MaterialLibraryFilters = (props: MaterialLibraryFiltersProps): Reac
   } = props;
   const { t } = useTranslation();
   const hasChips: boolean = Boolean(filteredMaterial || targetLayerName);
+  // The pencil beside the material chip edits that material in place, in the Add material form.
+  const [isMaterialEditOpen, setIsMaterialEditOpen] = useState<boolean>(false);
 
   return (
     <>
@@ -66,6 +72,15 @@ export const MaterialLibraryFilters = (props: MaterialLibraryFiltersProps): Reac
               })}
             </Tag>
           )}
+          {filteredMaterial && (
+            <IconActionButton
+              type={ANTD_BUTTON_TYPE_TEXT}
+              size={ANTD_BUTTON_SIZE_SMALL}
+              labelText={t(DEFAULT.MATERIAL_LIBRARY_MATERIAL_EDIT, { name: filteredMaterial.name })}
+              iconComponent={<EditOutlined />}
+              onClick={() => setIsMaterialEditOpen(true)}
+            />
+          )}
           {targetLayerName && (
             <Tag className={[styles.filterChip, styles.layerChip].join(' ')}>
               {t(DEFAULT.MATERIAL_LIBRARY_LAYER_TARGET, { layer: targetLayerName })}
@@ -90,6 +105,11 @@ export const MaterialLibraryFilters = (props: MaterialLibraryFiltersProps): Reac
           </Button>
         </div>
       )}
+      <MaterialDialog
+        isOpen={isMaterialEditOpen && Boolean(filteredMaterial)}
+        editedMaterial={filteredMaterial}
+        onClose={() => setIsMaterialEditOpen(false)}
+      />
     </>
   );
 };

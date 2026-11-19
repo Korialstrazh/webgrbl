@@ -1,3 +1,5 @@
+@use '../../styles/accessibility' as accessibility;
+
 .captionedActionButton:global(.ant-btn) {
   display: flex;
   flex-direction: column;
@@ -15,15 +17,20 @@
   background-color: var(--color-surface-3);
 }
 
-// A secondary action has no fill but a solid, clearly visible outline and bright text, so it still reads as ready
-// beside an off action, while the filled main action stays the one that stands out.
+// A secondary action has no fill, an outline no brighter than a locked neighbour's and muted text, so it never
+// outshines Start, Frame or the next-step button; hover and focus bring the text up to full brightness.
 .captionedActionButton.quiet:global(.ant-btn-variant-outlined):not(:disabled, [aria-disabled='true']) {
-  border-color: var(--color-text-muted);
+  border-color: var(--color-disabled-border-locked);
   background-color: transparent;
-  color: var(--color-text);
+  color: var(--color-text-muted);
+
+  &:is(:hover, :focus-visible) {
+    border-color: var(--color-control-border);
+    color: var(--color-text);
+  }
 }
 
-// Locked: the dark disabled fill, a solid outline (at least 3:1) and a dimmed icon with a lock badge, so it reads as
+// Locked: the dark disabled fill, a solid outline (at least 3:1) and a dimmed icon, so it reads as
 // locked, never as a ready action or as a dashed drop zone. The caption keeps the readable disabled grey.
 .captionedActionButton:global(.ant-btn):disabled,
 .captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'],
@@ -34,7 +41,21 @@
   // The caption keeps the readable disabled grey (at least 4.5:1 on every surface), never antd's dimmer default.
   color: var(--color-disabled-text);
   cursor: not-allowed;
+}
 
+// Locked, not merely off: the caption stays in the muted text grey (about 8:1), as it is the name of a step to come.
+.captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'] .caption {
+  color: var(--color-text-muted);
+}
+
+// A filled action (Start once it is the next step) keeps the fill's own text colour, the dark ink on the accent
+// (about 8:1), never the muted grey, which read as off at about 1.6:1.
+.captionedActionButton:global(.ant-btn-variant-solid):not(:disabled, [aria-disabled='true']) .caption {
+  color: inherit;
+}
+
+.captionedActionButton:global(.ant-btn):disabled,
+.captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'] {
   .icon > :global(.anticon):first-child {
     opacity: 0.75;
   }
@@ -46,22 +67,33 @@
   line-height: 1;
 }
 
-// Doubled class: a caller that sizes every icon in its button must not enlarge the badge.
-.icon .lockBadge.lockBadge:global(.anticon) {
-  position: absolute;
-  // Centred on the icon's lower corner, so it marks the icon without covering its middle.
-  inset-block-end: 0;
-  inset-inline-end: 0;
-  transform: translate(60%, 45%);
-  padding: 0.0625rem;
-  border-radius: 50%;
-  background-color: var(--color-surface-1);
-  color: var(--color-warning);
-  font-size: 0.6875rem;
+.caption {
+  color: var(--color-text-muted);
+}
+
+.captionedActionButton:global(.ant-btn):disabled,
+.captionedActionButton.captionedActionButton:global(.ant-btn)[aria-disabled='true'] {
+  .icon > :global(.anticon):first-child {
+    opacity: 0.75;
+  }
+}
+
+.icon {
+  position: relative;
+  font-size: 1.125rem;
   line-height: 1;
 }
 
-.caption {
+// Stronger than a caller's rule for every span in its buttons, which would drop the gap to the lock.
+.captionedActionButton .caption.caption {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
   font-size: 0.8125rem;
   line-height: 1.2;
+}
+
+// The reason a locked action is off, read out as the button's description and never shown.
+.blockedReason.blockedReason {
+  @include accessibility.visually-hidden;
 }

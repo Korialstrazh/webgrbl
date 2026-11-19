@@ -22,7 +22,7 @@ import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 export interface BrowserEnvironmentState {
   /** True while the browser reports a network connection; the app keeps working offline either way. */
   isOnline: boolean;
-  /** True when navigator.serial exists, which only Chromium-based desktop browsers offer. */
+  /** True when navigator.serial exists, which desktop Chromium browsers and Firefox offer. */
   isWebSerialSupported: boolean;
 }
 // #endregion

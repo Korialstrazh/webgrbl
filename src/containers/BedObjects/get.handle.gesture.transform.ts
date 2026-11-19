@@ -21,7 +21,7 @@ export const getHandleGestureTransform = (
   point: BedMachinePoint,
   isShiftPressed: boolean,
 ): ProjectObjectTransform => {
-  const { handle, startTransform, startPoint } = handleGesture;
+  const { handle, startTransform, startPoint, artworkFrame } = handleGesture;
 
   if (handle === BED_OBJECT_HANDLE.ROTATE) {
     return getRotatedObjectTransform({ startTransform, startPoint, point, isSnapping: isShiftPressed });
@@ -32,5 +32,6 @@ export const getHandleGestureTransform = (
     handle,
     pointerOffset: { x: point.x - startPoint.x, y: point.y - startPoint.y },
     isAspectRatioFree: isShiftPressed,
+    artworkFrame,
   });
 };

@@ -19,4 +19,6 @@ export interface LayerNumberFieldConfig {
   /** Translation key of the unit at the end of the field. */
   unitKey?: string;
   decimals: number;
+  /** The smallest value the field accepts; a lower one is dropped and the stored value shows again. */
+  minValue?: number;
 }

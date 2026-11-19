@@ -135,14 +135,14 @@ describe(burnModelReducer.name, () => {
     expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.IDLE);
   });
 
-  it('stops building when the view leaves 3D and keeps an older model as stale', () => {
+  it('keeps building when the view changes, so the Cut check count stays current in every view', () => {
     const root = newRootState(reduceActions([
       ...READY_ACTIONS,
       newBuildRequest(),
       new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }),
     ]));
 
-    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.STALE);
+    expect(selectBurnModelStatus(root)).toBe(BURN_MODEL_STATUS.BUILDING);
   });
 
   it('keeps a ready model ready when the view changes', () => {

@@ -14,6 +14,7 @@ import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
 import type { ConnectionPopoverOpenPayload } from './interfaces/ConnectionPopoverOpenPayload';
 import type { OverlayRegistryPayload } from './interfaces/OverlayRegistryPayload';
+import { OVERLAY_KIND } from './overlay.kind.constants';
 
 // #region State
 export interface UiOverlayState {
@@ -21,6 +22,10 @@ export interface UiOverlayState {
   openOverlayIds: string[];
   /** Whether the connection popover under the top-bar pill is open; the pill and the Status card both open it. */
   isConnectionPopoverOpen: boolean;
+  /** How many times a dialog or drawer has opened; each rise closes the open popovers. */
+  dialogOpenCount: number;
+  /** Ids of the open dialogs and drawers; while any is open, only STOP of the narrow stop bar stays usable. */
+  openDialogIds: string[];
 }
 // #endregion
 
@@ -50,18 +55,39 @@ export class ConnectionPopoverOpenChanged extends Action<ConnectionPopoverOpenPa
 const INITIAL_UI_OVERLAY_STATE: UiOverlayState = {
   openOverlayIds: [],
   isConnectionPopoverOpen: false,
+  dialogOpenCount: 0,
+  openDialogIds: [],
 };
 // #endregion
 
 // #region Reducer
-const getStateWithOverlay = (state: UiOverlayState, overlayId: string): UiOverlayState =>
-  state.openOverlayIds.includes(overlayId)
-    ? state
-    : { ...state, openOverlayIds: [...state.openOverlayIds, overlayId] };
+const getStateWithOverlay = (
+  state: UiOverlayState,
+  { overlayId, overlayKind }: OverlayRegistryPayload,
+): UiOverlayState => {
+  if (state.openOverlayIds.includes(overlayId)) {
+    return state;
+  }
+
+  const stateWithOverlay: UiOverlayState = { ...state, openOverlayIds: [...state.openOverlayIds, overlayId] };
+
+  return overlayKind === OVERLAY_KIND.DIALOG
+    ? {
+      ...stateWithOverlay,
+      isConnectionPopoverOpen: false,
+      dialogOpenCount: state.dialogOpenCount + 1,
+      openDialogIds: [...state.openDialogIds, overlayId],
+    }
+    : stateWithOverlay;
+};
 
 const getStateWithoutOverlay = (state: UiOverlayState, overlayId: string): UiOverlayState =>
   state.openOverlayIds.includes(overlayId)
-    ? { ...state, openOverlayIds: state.openOverlayIds.filter((openOverlayId: string) => openOverlayId !== overlayId) }
+    ? {
+      ...state,
+      openOverlayIds: state.openOverlayIds.filter((openOverlayId: string) => openOverlayId !== overlayId),
+      openDialogIds: state.openDialogIds.filter((openDialogId: string) => openDialogId !== overlayId),
+    }
     : state;
 
 export const uiOverlayReducer = (
@@ -70,7 +96,7 @@ export const uiOverlayReducer = (
 ): UiOverlayState => {
   switch (action.type) {
   case OverlayOpened.type:
-    return getStateWithOverlay(state, (action as OverlayOpened).payload.overlayId);
+    return getStateWithOverlay(state, (action as OverlayOpened).payload);
   case OverlayClosed.type:
     return getStateWithoutOverlay(state, (action as OverlayClosed).payload.overlayId);
   case ConnectionPopoverOpenChanged.type:
@@ -90,6 +116,14 @@ type RootState = { [UI_OVERLAY_STATE_NAME]: UiOverlayState };
 export const selectIsAnyOverlayOpen = (state: RootState): boolean =>
   !!state[UI_OVERLAY_STATE_NAME].openOverlayIds.length;
 
+export const selectTopOverlayId = (state: RootState): string | undefined =>
+  state[UI_OVERLAY_STATE_NAME].openOverlayIds.at(-1);
+
 export const selectIsConnectionPopoverOpen = (state: RootState): boolean =>
   state[UI_OVERLAY_STATE_NAME].isConnectionPopoverOpen;
+
+export const selectIsAnyDialogOpen = (state: RootState): boolean =>
+  !!state[UI_OVERLAY_STATE_NAME].openDialogIds.length;
+
+export const selectDialogOpenCount = (state: RootState): number => state[UI_OVERLAY_STATE_NAME].dialogOpenCount;
 // #endregion

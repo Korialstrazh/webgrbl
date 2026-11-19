@@ -1,0 +1,66 @@
+@use '../../../styles/accessibility' as accessibility;
+
+// The state badge, then feed and power, in one line.
+.machineStatusRow {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-width: 0;
+}
+
+.values {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+
+  dt {
+    display: inline-flex;
+    gap: var(--space-1);
+    align-items: center;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+
+    // The feed and power icons at 14 px, the size of every status icon.
+    :global(.anticon) {
+      font-size: 0.875rem;
+    }
+  }
+
+  // The value in full text colour and bold, with tabular figures in the UI font, so a 0 reads at a glance; its unit
+  // follows it, muted.
+  dd {
+    margin: 0 0.125rem 0 0;
+    white-space: nowrap;
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+
+    &:last-of-type {
+      margin-right: 0;
+    }
+
+    // Room for a four-digit feed from the start, so the line does not jump when a jog starts.
+    &:first-of-type {
+      min-width: 4.5rem;
+    }
+  }
+}
+
+// The value's name, for screen readers; the icon and the tooltip carry it on screen.
+.valueName {
+  @include accessibility.visually-hidden;
+}
+
+.unit {
+  margin-left: 0.125rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  // 12 px, the smallest readable size for a unit beside its value.
+  font-size: 0.75rem;
+  font-weight: 400;
+}

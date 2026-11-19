@@ -17,8 +17,8 @@ export const TOAST_SEVERITY = {
 
 export type ToastSeverity = (typeof TOAST_SEVERITY)[keyof typeof TOAST_SEVERITY];
 
-/** How long an info toast stays before it dismisses itself; warnings and errors stay until dismissed. */
-export const TOAST_INFO_LIFETIME_MS = 5_000;
+/** How long any toast stays before it dismisses itself; each one can also be closed sooner. */
+export const TOAST_LIFETIME_MS = 5_000;
 
 /** Message values for toasts whose message has no placeholders. */
 export const NO_TOAST_PARAMETERS: Record<string, string | number> = {};

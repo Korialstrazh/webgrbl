@@ -4,9 +4,27 @@
   gap: var(--space-3);
 }
 
+// The section heading and the file action share one row above the list: stored projects on the left, a file on
+// the right.
 .toolbar {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.headingText {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .rows {

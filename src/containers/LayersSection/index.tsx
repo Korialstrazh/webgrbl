@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { InboxOutlined } from '@ant-design/icons';
+import { BlockOutlined, OrderedListOutlined } from '@ant-design/icons';
 import type { DragEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -107,12 +107,14 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
   };
 
   if (!layers.length) {
-    return <p className={styles.hint}><InboxOutlined aria-hidden />{t(DEFAULT.LAYERS_EMPTY_HINT)}</p>;
+    return <p className={styles.hint}><BlockOutlined aria-hidden />{t(DEFAULT.LAYERS_EMPTY_HINT)}</p>;
   }
 
   return (
     <>
       <div className={styles.layerList}>
+        {/* Sets this card apart from the palette, which holds colour defaults for every new import. */}
+        <p className={styles.purpose}><OrderedListOutlined aria-hidden />{t(DEFAULT.LAYERS_PURPOSE_CAPTION)}</p>
         <LayerValueLegend />
         <ul className={styles.list} aria-label={t(DEFAULT.LAYERS_LIST_LABEL)}>
           {layers.map((layer: ProjectLayer, layerIndex: number) => {
@@ -122,6 +124,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
               <LayerRow
                 key={layerKey}
                 layer={layer}
+                layerKey={layerKey}
                 layerEntry={getLayerPaletteEntry(layer, paletteEntries)}
                 isFirst={layerIndex === 0}
                 isLast={layerIndex === layers.length - 1}
@@ -134,6 +137,7 @@ export const LayersSection = ({ onEditPalette }: LayersSectionProps): ReactNode 
                 onDragStart={(dragEvent: DragEvent<HTMLLIElement>) => startDrag(dragEvent, layerKey)}
                 onDragEnd={() => setDraggedLayerKey(undefined)}
                 onDrop={() => dropOnLayer(layerKey)}
+                onPointerDragOver={(targetKey: string) => moveLayer(layerKey, targetKey)}
               />
             );
           })}

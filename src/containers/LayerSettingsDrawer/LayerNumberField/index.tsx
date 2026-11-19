@@ -17,11 +17,15 @@ import type { LayerNumberFieldProps } from '../interfaces/LayerNumberFieldProps'
 import { IconNumberField } from '../../../views/IconNumberField';
 import styles from './styles.module.scss';
 
-const isDraftValueChanged = (draftValue: number | null | undefined, storedValue: number): draftValue is number =>
-  isFiniteNumber(draftValue) && draftValue !== storedValue;
+const isDraftValueCommittable = (
+  draftValue: number | null | undefined,
+  storedValue: number,
+  minValue: number | undefined,
+): draftValue is number =>
+  isFiniteNumber(draftValue) && draftValue !== storedValue && (!isFiniteNumber(minValue) || draftValue >= minValue);
 
 export const LayerNumberField = (props: LayerNumberFieldProps): ReactNode => {
-  const { label, iconComponent, captionText, unitText, value, decimals, hintText, onCommit } = props;
+  const { label, iconComponent, captionText, unitText, value, decimals, minValue, hintText, onCommit } = props;
   const inputId: string = useId();
   // No draft means the user is not editing, so the stored value is shown. A cleared field is a draft with no value.
   const [draft, setDraft] = useState<LayerFieldDraft | undefined>(undefined);
@@ -32,7 +36,7 @@ export const LayerNumberField = (props: LayerNumberFieldProps): ReactNode => {
     setDraft(undefined);
     const draftValue: number | null | undefined = draft?.fieldValue;
 
-    if (isDraftValueChanged(draftValue, value)) {
+    if (isDraftValueCommittable(draftValue, value, minValue)) {
       onCommit(draftValue);
     }
   };

@@ -10,7 +10,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ClockCircleOutlined, DownloadOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import { useRef } from 'react';
 import type { ChangeEvent, ReactNode, RefObject } from 'react';
@@ -31,6 +31,7 @@ import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
 import { NO_TOAST_PARAMETERS, TOAST_SEVERITY } from '../../../utils/states/toast.constants';
 import { ToastShown } from '../../../utils/states/toast.state';
 import { useAppStore } from '../../../utils/states/use.app.store';
+import { SoonTag } from '../../../views/SoonTag';
 import {
   MACHINE_PROFILES_EXPORT_FILE_NAME,
   MACHINE_PROFILES_FILE_ACCEPT,
@@ -105,7 +106,7 @@ export const ProfileFileActions = (): ReactNode => {
           {t(DEFAULT.MACHINE_PROFILES_EXPORT)}
         </Button>
       </div>
-      {/* A raw file input: antd has no file picker without its Upload list; the Import button opens this one. */}
+      {/* eslint-disable-next-line webgrbl/no-raw-form-elements -- hidden picker; antd Upload adds a list */}
       <input
         ref={fileInputRef}
         type="file"
@@ -114,19 +115,15 @@ export const ProfileFileActions = (): ReactNode => {
         aria-label={t(DEFAULT.MACHINE_PROFILES_IMPORT_FILE)}
         onChange={handleFileInputChange}
       />
-      {/* Not built yet: a muted note in a Coming soon list, never a button, so it is not tabbed to as an action. */}
-      <section className={styles.comingSoonList} aria-label={t(DEFAULT.COMING_SOON_LIST)}>
-        <h3 className={styles.comingSoonHeading}>
-          <ClockCircleOutlined aria-hidden />
-          {t(DEFAULT.COMING_SOON_LIST)}
-        </h3>
+      {/* Not built yet: a quiet dashed note with a clock and a Soon tag, never a button, a link or a form. */}
+      <section className={styles.comingSoonRow} aria-label={t(DEFAULT.COMING_SOON_LIST)}>
         <Tooltip title={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}>
-          <p className={styles.comingSoonItem}>
-            <SettingOutlined aria-hidden />
+          <span className={styles.comingSoonItem}>
+            <ClockCircleOutlined aria-hidden />
             {t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS)}
-            <span className={styles.hiddenDescription}>{t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)}</span>
-          </p>
+          </span>
         </Tooltip>
+        <SoonTag description={t(DEFAULT.MACHINE_PROFILES_GRBL_SETTINGS_DESCRIPTION)} />
       </section>
     </div>
   );

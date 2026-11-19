@@ -4,6 +4,7 @@ import { FakeBurnModelWorkerClient } from '../burn.model/test.support/fake.burn.
 import { DEFAULT } from '../localization/default.locales';
 import type { Material } from '../materials/interfaces/Material';
 import { newMaterial } from '../materials/new.material';
+import { NEUTRAL_PREVIEW_MATERIAL } from '../materials/neutral.preview.material';
 import { newTestResultFixture } from '../materials/new.test.result.fixture';
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../toolpath/test.support/new.toolpath';
@@ -90,12 +91,25 @@ describe(watchBurnModel.name, () => {
     vi.restoreAllMocks();
   });
 
-  it('does not build in the Design view', async () => {
+  it('builds in the Design view too, so the Cut check count is current in every view', async () => {
     const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
     const store: AppStore = await newProjectStore(client);
 
-    expect(client.generationInputs).toEqual([]);
-    expect(selectBurnModelStatus(store.getState())).not.toBe(BURN_MODEL_STATUS.BUILDING);
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+
+    expect(client.generationInputs).toHaveLength(1);
+  });
+
+  it('builds nothing more on entering 3D with a current model', async () => {
+    const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
+    const store: AppStore = await newProjectStore(client);
+
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+    store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
+    await flushSagas();
+
+    expect(client.generationInputs).toHaveLength(1);
+    expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.READY);
   });
 
   it('builds on entering 3D, from the toolpath, layers and the material thickness', async () => {
@@ -110,7 +124,7 @@ describe(watchBurnModel.name, () => {
     expect(selectBurnModel(store.getState())?.thicknessMm).toBe(THICKNESS_MM);
   });
 
-  it('does not build in 3D without a material', async () => {
+  it('builds in 3D with a neutral material when the project has none', async () => {
     const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
     const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true), client);
 
@@ -119,23 +133,25 @@ describe(watchBurnModel.name, () => {
     });
     putReadyToolpath(store);
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
-    await flushSagas();
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
 
-    expect(client.generationInputs).toEqual([]);
+    expect(client.generationInputs).toHaveLength(1);
+    expect(client.generationInputs[0]?.thicknessMm).toBe(NEUTRAL_PREVIEW_MATERIAL.thicknessMm);
   });
 
-  it('does not build in 3D while the toolpath is not ready, then builds when it is', async () => {
+  it('does not build while the toolpath is not ready, then builds when it is', async () => {
     const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
     const store: AppStore = await newProjectStore(client);
 
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
     store.dispatch(new ToolpathRequested());
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
     await flushSagas();
-    expect(client.generationInputs).toEqual([]);
+    expect(client.generationInputs).toHaveLength(1);
 
     putReadyToolpath(store);
     await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
-    expect(client.generationInputs).toHaveLength(1);
+    expect(client.generationInputs).toHaveLength(2);
   });
 
   it('rebuilds on a new toolpath and clears the lifts', async () => {
@@ -245,14 +261,15 @@ describe(watchBurnModel.name, () => {
     store.dispatch(new ProjectMaterialSelected({ materialId: TEST_MATERIAL.id }));
     putReadyToolpath(store);
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
-    await flushSagas();
-    expect(client.generationInputs).toEqual([]);
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+    expect(client.generationInputs).toHaveLength(1);
 
     store.dispatch(new MaterialsLoaded({ materials: [TEST_MATERIAL] }));
-    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
+    await vi.waitFor((): void => {
+      expect(client.generationInputs).toHaveLength(2);
+    });
 
-    expect(client.generationInputs).toHaveLength(1);
-    expect(client.generationInputs[0]?.thicknessMm).toBe(THICKNESS_MM);
+    expect(client.generationInputs[1]?.thicknessMm).toBe(THICKNESS_MM);
   });
 
   it('rebuilds on selecting another material', async () => {
@@ -305,15 +322,15 @@ describe(watchBurnModel.name, () => {
     expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.IDLE);
   });
 
-  it('cancels a running build on leaving 3D', async () => {
+  it('keeps a running build on leaving 3D', async () => {
     const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient(true);
     const store: AppStore = await newHeld3dStore(client);
 
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }));
     await flushSagas();
 
-    expect(client.cancelledGenerationCount).toBe(1);
-    expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.IDLE);
+    expect(client.cancelledGenerationCount).toBe(0);
+    expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.BUILDING);
   });
 
   it('keeps the model and its lifts when the view leaves 3D and comes back', async () => {
@@ -330,14 +347,14 @@ describe(watchBurnModel.name, () => {
     expect(selectBurnPartLiftMm(PART_ID)(store.getState())).toBe(LIFT_MM);
   });
 
-  it('rebuilds on coming back to 3D after a material edit in another view', async () => {
+  it('rebuilds at once after a material edit in another view', async () => {
     const client: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
     const store: AppStore = await newHeld3dStore(client);
 
     await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.DESIGN }));
     store.dispatch(new MaterialSaved({ material: TEST_MATERIAL }));
-    expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.STALE);
+    await waitForBurnModelStatus(store, BURN_MODEL_STATUS.READY);
     store.dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.THREE_D }));
     await flushSagas();
 

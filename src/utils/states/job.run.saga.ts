@@ -14,6 +14,7 @@ import { GRBL_MACHINE_STATE, GRBL_STOP_FINISH_MAX_WAIT_MS } from '../grbl/grbl.c
 import type { GrblController } from '../grbl/grbl.controller';
 import type { GrblProgramResult } from '../grbl/interfaces/GrblProgramResult';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
+import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { GCODE_AIR_ASSIST_OFF } from '../toolpath/gcode.constants';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { Action } from './action';
@@ -24,6 +25,7 @@ import { JobRunStarted, JobRunStatusChanged } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
+import { getJobStartWorkPosition, returnToJobStartPosition } from './job.start.position.return.saga';
 import { selectActiveMachineProfile } from './machine.profile.state';
 import {
   MachineAirAssistChanged,
@@ -156,6 +158,7 @@ export function* runGrblJob(controller: GrblController): Generator {
     return;
   }
 
+  const startPosition: GeometryPoint | undefined = (yield call(getJobStartWorkPosition)) as GeometryPoint | undefined;
   const interruptionTask: Task = (yield fork(waitForJobInterruption)) as Task;
   const stopRequestTask: Task = (yield fork(waitForJobStopRequest)) as Task;
 
@@ -173,6 +176,8 @@ export function* runGrblJob(controller: GrblController): Generator {
     if (isAirAssistOffAfterJob(endStatus, programLines)) {
       yield put(new MachineAirAssistChanged({ isAirAssistOn: false }));
     }
+
+    yield call(returnToJobStartPosition, controller, endStatus, startPosition);
   } catch (error: unknown) {
     yield put(newRawErrorConsoleInfo(error));
     yield put(newJobRunStatusChanged(JOB_RUN_STATUS.INTERRUPTED));

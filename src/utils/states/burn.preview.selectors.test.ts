@@ -7,12 +7,13 @@ import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath
 import { BedViewModeChanged } from './bed.view.state';
 import { BURN_PREVIEW_EMPTY_STATE } from './burn.preview.empty.state.constants';
 import { selectBurnPreviewEmptyState } from './burn.preview.selectors';
-import { BurnModelFailed, BurnModelReady, BurnModelRequested } from './burn.model.state';
+import { BURN_MODEL_STATE_NAME, BurnModelFailed, BurnModelReady, BurnModelRequested } from './burn.model.state';
+import { BURN_MODEL_STATUS } from './burn.model.status.constants';
 import { MaterialSaved } from './material.state';
 import { newStore } from './new.store';
-import type { AppStore } from './new.store';
+import type { AppRootState, AppStore } from './new.store';
 import { ProjectMaterialSelected } from './project.document.state';
-import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from './toolpath.state';
+import { ToolpathCancelled, ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from './toolpath.state';
 
 const MATERIAL: Material = newMaterial();
 const MODEL: BurnModel = {
@@ -23,7 +24,7 @@ const MODEL: BurnModel = {
   thicknessMm: 3,
 };
 
-/** A store held in the Toolpath view, so nothing builds by itself, with a material and a ready toolpath. */
+/** A store in the Toolpath view with a material and a ready toolpath. */
 const newMaterialStore = (): AppStore => {
   const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
 
@@ -48,14 +49,23 @@ describe(selectBurnPreviewEmptyState.name, () => {
     expect(selectBurnPreviewEmptyState(store.getState())).toBeUndefined();
   });
 
-  it('asks for a material when there is none', () => {
-    expect(selectBurnPreviewEmptyState(newStore().getState())).toBe(BURN_PREVIEW_EMPTY_STATE.NO_MATERIAL);
+  it('does not wait for a material: the model is built with a neutral one', () => {
+    expect(selectBurnPreviewEmptyState(newStore().getState())).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
   });
 
-  it('is out of date while the toolpath is not ready', () => {
+  it('is building while the toolpath is generated', () => {
     const store: AppStore = newMaterialStore();
 
     store.dispatch(new ToolpathRequested());
+
+    expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.BUILDING);
+  });
+
+  it('is out of date while the toolpath is stale and not being generated', () => {
+    const store: AppStore = newMaterialStore();
+
+    store.dispatch(new ToolpathRequested());
+    store.dispatch(new ToolpathCancelled());
 
     expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
   });
@@ -65,9 +75,15 @@ describe(selectBurnPreviewEmptyState.name, () => {
 
     store.dispatch(new BurnModelRequested({ materialId: MATERIAL.id }));
     store.dispatch(new BurnModelReady({ model: MODEL }));
-    store.dispatch(new MaterialSaved({ material: MATERIAL }));
 
-    expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
+    // The saga rebuilds a stale model at once, so the stale moment before it does is set by hand.
+    const readyState: AppRootState = store.getState();
+    const staleState: AppRootState = {
+      ...readyState,
+      [BURN_MODEL_STATE_NAME]: { ...readyState[BURN_MODEL_STATE_NAME], status: BURN_MODEL_STATUS.STALE },
+    };
+
+    expect(selectBurnPreviewEmptyState(staleState)).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
   });
 
   it('is building while a build runs, and when one is about to start', () => {
@@ -87,6 +103,7 @@ describe(selectBurnPreviewEmptyState.name, () => {
     expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.FAILED);
 
     store.dispatch(new ToolpathRequested());
+    store.dispatch(new ToolpathCancelled());
     expect(selectBurnPreviewEmptyState(store.getState())).toBe(BURN_PREVIEW_EMPTY_STATE.OUT_OF_DATE);
   });
 });

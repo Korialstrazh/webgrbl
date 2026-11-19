@@ -59,6 +59,7 @@ import {
 } from '../layer.settings.drawer.constants';
 import { ShadingPowerBar } from '../ShadingPowerBar';
 import styles from './styles.module.scss';
+import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../utils/tab.index.constants';
 
 const MODE_OPTION_VALUES: readonly LayerMode[] = [LAYER_MODE.LINE, LAYER_MODE.FILL];
 
@@ -105,6 +106,7 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
       unitText={config.unitKey && t(config.unitKey)}
       value={settings[config.field]}
       decimals={config.decimals}
+      minValue={config.minValue}
       hintText={hintText}
       onCommit={(fieldValue: number) => changeSettings({ [config.field]: fieldValue })}
     />
@@ -122,6 +124,8 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
         />
       </div>
       <Segmented<LayerMode>
+        // One tab stop: the checked option. antd also makes the group box focusable, a second stop with no use.
+        tabIndex={SCRIPT_FOCUS_ONLY_TAB_INDEX}
         block
         aria-label={t(DEFAULT.LAYER_SETTINGS_MODE)}
         value={settings.mode}
@@ -142,6 +146,8 @@ export const LayerSettingsFields = ({ layer, onEditPalette }: LayerSettingsField
       <div className={styles.grid}>
         {renderNumberField(LAYER_MAX_POWER_FIELD, <ThunderboltOutlined />, getWattsHint(settings.maxPowerPercent))}
         {renderNumberField(LAYER_MIN_POWER_FIELD, <ThunderboltOutlined />, getWattsHint(settings.minPowerPercent))}
+      </div>
+      <div className={styles.speedGrid}>
         {renderNumberField(LAYER_SPEED_FIELD, <DashboardOutlined />, undefined)}
         {renderNumberField(LAYER_PASSES_FIELD, <SyncOutlined />, undefined)}
         {isFill && renderNumberField(LAYER_LINE_INTERVAL_FIELD, <ColumnHeightOutlined />, undefined)}

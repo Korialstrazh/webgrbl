@@ -1,0 +1,17 @@
+// A small square tile in the bed's colours; the boxes keep a one-pixel outline at any project size.
+.projectThumbnail {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  background-color: var(--color-bed-surface);
+}
+
+.objectBox {
+  fill: var(--color-accent);
+  fill-opacity: 0.25;
+  stroke: var(--color-accent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}

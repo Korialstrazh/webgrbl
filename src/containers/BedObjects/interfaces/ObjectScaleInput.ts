@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { ProjectObjectTransform } from '../../../utils/project/interfaces/ProjectObjectTransform';
+import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import type { BedObjectScaleHandle } from '../bed.objects.constants';
 import type { BedMachinePoint } from './BedMachinePoint';
 
@@ -21,4 +22,6 @@ export interface ObjectScaleInput {
   pointerOffset: BedMachinePoint;
   /** Whether width and height change apart (Shift held) instead of keeping the aspect ratio. */
   isAspectRatioFree: boolean;
+  /** Where the drawn geometry sits in the box; the handles sit on its corners. The whole box when left out. */
+  artworkFrame?: ObjectArtworkFrame;
 }

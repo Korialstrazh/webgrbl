@@ -244,4 +244,13 @@ describe(ToolpathLayer.name, () => {
       .toHaveAttribute('transform', `translate(${RATE_LIMITED_END_X_MM} 0) scale(1)`);
     expect(getBurnStates()).toEqual([TOOLPATH_BURN_STATE.BURNT]);
   });
+
+  it('draws the moves still to come in their layer colour in power shading, so a weak layer stays visible', () => {
+    renderLayer(newReadyStore(), { displayMode: TOOLPATH_DISPLAY_MODE.POWER_SHADING });
+
+    const strokes: (string | null)[] = screen.queryAllByTestId(TOOLPATH_BURN_PATH_TEST_ID)
+      .map((burnPath: HTMLElement): string | null => burnPath.getAttribute('stroke'));
+
+    expect(strokes).toContain(RED_LAYER_KEY);
+  });
 });

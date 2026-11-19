@@ -29,3 +29,11 @@
 .icon {
   display: inline-flex;
 }
+
+// A bare icon with no tinted circle: it sits on or beside a button, and a circle there reads as a stray halo.
+.pointerOnly.pointerOnly {
+  min-width: 0;
+  min-height: 0;
+  background-color: transparent;
+  cursor: default;
+}

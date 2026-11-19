@@ -1,0 +1,43 @@
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 17rem;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+}
+
+.detailLine {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: 0;
+
+  > :global(.anticon) {
+    flex: none;
+    color: var(--color-text-muted);
+  }
+}
+
+.switchField {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: var(--target-min);
+  cursor: pointer;
+
+  > :global(.ant-switch) {
+    margin-left: auto;
+  }
+}
+
+.detailsButton:global(.ant-btn) {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+// Air assist left on stays in sight while its switch is tucked away: the details button wears the accent.
+.airAssistOn:global(.ant-btn) {
+  color: var(--color-accent);
+}

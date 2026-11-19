@@ -13,28 +13,34 @@
   gap: 0.125rem;
   align-items: center;
   justify-content: center;
-  height: 2.25rem;
+  // Room above the icon and below the caption, so the caption never crowds the edge of the current view's fill.
+  padding-block: 0.25rem;
   font-size: 1rem;
 }
 
-// Body-size captions in the full text colour (13:1 on the toolbar), so a view that is not current still reads clearly.
+// Body-size captions in the muted text colour, still readable, so the current view in full white stands out at once.
 .viewSwitch :global(.ant-segmented-item) {
-  color: var(--color-text);
+  color: var(--color-text-muted);
 }
 
 .caption {
   font-size: 0.875rem;
 }
 
-// The current view stands out from a hovered one by an accent-tinted fill and the accent, never by an outline that
-// could be taken for the focus ring.
+// The current view stands out by a bold white caption on the accent-tinted fill and an accent icon,
+// never by an outline that could be taken for the focus ring.
 .viewSwitch :global(.ant-segmented-item-selected) {
   background-color: var(--color-accent-tint);
-  color: var(--color-accent);
+  color: var(--color-text);
+  font-weight: 700;
+
+  :global(.anticon) {
+    color: var(--color-accent);
+  }
 }
 
 .viewSwitch :global(.ant-segmented-item-selected:hover) {
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 
 // At phone width the items close up, so the bed tools beside the switch fit without scrolling.

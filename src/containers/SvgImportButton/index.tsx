@@ -22,6 +22,7 @@ export const SvgImportButton = ({
   buttonType = ANTD_BUTTON_TYPE_DEFAULT,
   iconComponent,
   labelClassName,
+  buttonId,
 }: SvgImportButtonProps): ReactNode => {
   const { t } = useTranslation();
   const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
@@ -29,6 +30,7 @@ export const SvgImportButton = ({
   return (
     <>
       <Button
+        id={buttonId}
         type={buttonType}
         icon={iconComponent}
         aria-label={t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}

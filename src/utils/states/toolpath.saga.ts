@@ -160,17 +160,25 @@ function* runToolpathAction(
 /**
  * Whether the background refresh must ask for a toolpath. A running generation always restarts, else its result would
  * be dropped as out of date and the status would never leave generating. An idle or out-of-date toolpath is generated
- * when there is a layer to burn. A failed one waits for the user, so a failure does not repeat its toast on every edit.
+ * when there is a layer to burn, or when an older toolpath still holds moves: with every layer gone or off, the
+ * regenerated toolpath is empty, so no frame or check describes geometry that no longer exists. A failed one waits for
+ * the user, so a failure does not repeat its toast on every edit.
  */
-const isToolpathRefreshNeeded = (status: ToolpathStatus, enabledLayers: ProjectLayer[]): boolean =>
-  status === TOOLPATH_STATUS.GENERATING || (!!enabledLayers.length && TOOLPATH_BACKGROUND_STATUSES.includes(status));
+const isToolpathRefreshNeeded = (
+  status: ToolpathStatus,
+  enabledLayers: ProjectLayer[],
+  toolpath: Toolpath | undefined,
+): boolean =>
+  status === TOOLPATH_STATUS.GENERATING
+  || ((!!enabledLayers.length || !!toolpath?.moves.length) && TOOLPATH_BACKGROUND_STATUSES.includes(status));
 
 /** Keeps the toolpath current in the background once the inputs are quiet, so the Design view shows the job too. */
 function* refreshToolpath(): Generator {
   const status: ToolpathStatus = (yield select(selectToolpathStatus)) as ToolpathStatus;
   const enabledLayers: ProjectLayer[] = (yield select(selectEnabledProjectLayers)) as ProjectLayer[];
+  const toolpath: Toolpath | undefined = (yield select(selectToolpath)) as Toolpath | undefined;
 
-  if (isToolpathRefreshNeeded(status, enabledLayers)) {
+  if (isToolpathRefreshNeeded(status, enabledLayers, toolpath)) {
     yield put(new ToolpathRequested());
   }
 }

@@ -32,4 +32,5 @@ export const isMachineProfile = (value: unknown): value is MachineProfile =>
   isFiniteNumber(value.jogFeedRate) &&
   isOptionalFiniteNumber(value.frameGridCellMm) &&
   isOptionalFiniteNumber(value.frameMarginMm) &&
-  isOptionalFiniteNumber(value.frameFeedMmPerMin);
+  isOptionalFiniteNumber(value.frameFeedMmPerMin) &&
+  isOptionalFiniteNumber(value.pointerPowerPercent);

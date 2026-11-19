@@ -3,7 +3,35 @@
 .jobCard {
   display: flex;
   flex-direction: column;
+  gap: var(--space-2);
+}
+
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+// The folded card: its facts on the left, wrapping onto a second line when they must, and Start at a fixed width
+// inside the card padding on the right, so the facts can never squeeze it past the card border.
+.collapsedSummary {
+  display: flex;
+  align-items: center;
   gap: var(--space-3);
+
+  > .facts {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+.collapsedStart {
+  position: relative;
+  flex: 0 0 7rem;
+
+  :global(.ant-btn) {
+    width: 100%;
+  }
 }
 
 // Icon and value side by side; the term stays for screen readers.
@@ -33,4 +61,28 @@
 
 .factLabel {
   @include accessibility.visually-hidden;
+}
+
+// Always as wide as the note icon, whether a note shows or not, and only as tall as a line of the facts, with the
+// icon centred over it, so it never adds height to the card (the Move card below must still fit above the Stop bar at
+// 1440 x 900).
+.runStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.runStatus.runStatus {
+  height: 1.25rem;
+  overflow: visible;
+}
+
+.runStatusDot {
+  display: block;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-info);
 }

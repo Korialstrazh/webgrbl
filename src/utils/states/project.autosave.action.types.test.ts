@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { Action } from './action';
 import { PROJECT_AUTOSAVE_ACTION_TYPES } from './project.autosave.action.types';
 import * as projectDocumentStateModule from './project.document.state';
-import { ProjectDocumentLoaded, SampleJobAddRequested, SvgFilesImportRequested } from './project.document.state';
+import {
+  ProjectDocumentLoaded,
+  ProjectObjectSvgTextChangeRequested,
+  SampleJobAddRequested,
+  SvgFilesImportRequested,
+} from './project.document.state';
 
 /** An exported action class: a constructor whose instances are actions, read through its static type. */
 interface ProjectActionClass {
@@ -18,6 +23,7 @@ const NOT_AUTOSAVED_ACTION_TYPES: readonly string[] = [
   ProjectDocumentLoaded.type,
   SvgFilesImportRequested.type,
   SampleJobAddRequested.type,
+  ProjectObjectSvgTextChangeRequested.type,
 ];
 
 const isProjectActionClass = (value: unknown): value is ProjectActionClass =>

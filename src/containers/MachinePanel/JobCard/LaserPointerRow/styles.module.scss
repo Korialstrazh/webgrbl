@@ -1,0 +1,41 @@
+// One row: hold to fire, the power slider and its figure, then the details button. No rule or padding of its own, so
+// the card stays short enough for Move to sit above STOP while connected.
+.laserPointerRow {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+}
+
+.powerSlider:global(.ant-slider) {
+  flex: 1 1 auto;
+  min-width: 3rem;
+  margin-inline: var(--space-1);
+}
+
+// A fixed width, so the row never shifts as the figure changes.
+.powerValue {
+  flex: none;
+  min-width: 3.75rem;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+// Offline the row is a muted, compact line: no laser can take the pointer, so it must not draw the eye.
+.offline {
+  color: var(--color-text-muted);
+
+  .powerValue {
+    color: var(--color-text-muted);
+  }
+
+  :global(.ant-btn) {
+    height: auto;
+    min-height: 1.75rem;
+    border-color: transparent;
+    background: transparent;
+  }
+}

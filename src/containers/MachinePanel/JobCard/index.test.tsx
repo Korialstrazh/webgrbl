@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { JobCard } from '.';
+import { JOB_LOCK_NOTE_TEST_IDS } from './job.card.constants';
 import * as downloadModule from '../../../utils/browser/download.text.file';
 import { EM_DASH, MIDDLE_DOT } from '../../../utils/characters.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
@@ -10,7 +11,10 @@ import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblReso
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
+import type { Material } from '../../../utils/materials/interfaces/Material';
+import { newMaterial } from '../../../utils/materials/new.material';
 import { newProjectObject } from '../../../utils/project/new.project.object';
+import { MaterialSaved } from '../../../utils/states/material.state';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
 import { JOB_RUN_KIND } from '../../../utils/states/job.run.kind.constants';
 import { JobRunStarted, JobStartRequested } from '../../../utils/states/job.run.state';
@@ -20,12 +24,16 @@ import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
 import { newStore } from '../../../utils/states/new.store';
 import {
   LayerToggled,
+  ProjectMaterialSelected,
+  ProjectObjectsAdded,
   selectProjectDocument,
   selectProjectLayers,
 } from '../../../utils/states/project.document.state';
+import { selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.state';
 import { selectToolpathMachineArea } from '../../../utils/states/toolpath.machine.area.selector';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../../utils/states/toolpath.state';
 import { selectIsAnyOverlayOpen } from '../../../utils/states/ui.overlay.state';
+import { SVG_UNSUPPORTED_KIND } from '../../../utils/svg/geometry/svg.shape.constants';
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../../utils/test.support/bed.region.test.host';
 import { newGcodeExportTestStore } from '../../../utils/test.support/new.gcode.export.test.store';
@@ -35,10 +43,15 @@ import { getGcodeExportContext } from '../../../utils/toolpath/get.gcode.export.
 import { getGcodeText } from '../../../utils/toolpath/get.gcode.text';
 import { getToolpath } from '../../../utils/toolpath/get.toolpath';
 import type { BedDrawableSet } from '../../../utils/toolpath/interfaces/BedDrawableSet';
+import type { ObjectWarning } from '../../../utils/toolpath/interfaces/ObjectWarning';
 import { FakeToolpathWorkerClient } from '../../../utils/toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpath.move';
 
+const LOCK_REASON_CONNECT = 'Not connected';
+const CONNECT_ACTION_TEXT = 'Connect laser';
+const LOCK_REASON_LAYER = 'No layer on';
+const FRAME_LABEL = 'Frame job';
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
 const START_CONFIRM_OK_LABEL = 'Start and fire';
@@ -58,6 +71,7 @@ const THREE_COLOUR_SVG_TEXT = '<svg xmlns="http://www.w3.org/2000/svg" width="30
   + '<rect fill="none" stroke="#0000ff" x="10" width="10" height="10"/>'
   + '<rect fill="none" stroke="#00a000" x="20" width="10" height="10"/></svg>';
 const CREATED_AT_ISO = '2026-11-01T10:00:00.000Z';
+const TEXT_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.TEXT };
 const BURN_LINE_PATTERN = new RegExp(`^${GCODE_BURN_WORD} `, 'm');
 
 const newMachineStatusReceived = (machineState: GrblMachineState): MachineStatusReceived => {
@@ -123,6 +137,9 @@ const NOT_CONNECTED_REASON = 'Connect the laser to start a job.';
 const CONNECT_STEP_OPEN_LABEL = 'Connect: to do';
 const ACTIONS_NOT_CONNECTED_REASON = 'Connect the laser to start or frame.';
 const QUIET_BUTTON_CLASS = 'quiet';
+const JOB_FOLD_LABEL = 'Fold the Job card to Start';
+const JOB_UNFOLD_LABEL = 'Show the whole Job card';
+const READINESS_LABEL = 'Ready to cut?';
 
 describe(JobCard.name, () => {
   afterEach(() => {
@@ -254,12 +271,13 @@ describe(JobCard.name, () => {
     expect(screen.getByRole('button', { name: START_JOB_NAME })).not.toHaveClass(PRIMARY_BUTTON_CLASS);
   });
 
-  it('gives one shared reason behind a focusable icon while Start and Frame wait for a connection', async () => {
+  it('puts no reason icon in the heading while Start and Frame wait for a connection', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
-    expect(screen.getByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).toHaveAttribute('tabindex', '0');
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    expect(document.querySelector('[tabindex="0"][aria-label="' + ACTIONS_NOT_CONNECTED_REASON + '"]')).toBeNull();
     expect(screen.queryByText(ACTIONS_NOT_CONNECTED_REASON)).not.toBeInTheDocument();
-    expect(screen.queryByText(NOT_CONNECTED_REASON)).not.toBeInTheDocument();
+    expect(screen.getByText(NOT_CONNECTED_REASON).closest('button')).toHaveAccessibleDescription(NOT_CONNECTED_REASON);
     expect(screen.getByRole('button', { name: CONNECT_STEP_OPEN_LABEL })).toBeInTheDocument();
   });
 
@@ -267,6 +285,95 @@ describe(JobCard.name, () => {
     renderJobCard(newStartableJobStore());
 
     expect(screen.queryByRole('note', { name: ACTIONS_NOT_CONNECTED_REASON })).not.toBeInTheDocument();
+  });
+
+  it('shows the lock dot on Start, Frame and Export in an empty project, offline included', async () => {
+    renderJobCard(await newGcodeExportTestStore({ objects: [] }));
+
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).toBeInTheDocument();
+  });
+
+  it('keeps the Start dot offline while Fix warnings shows, since the warnings are not why Start is off', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.DISCONNECTED }));
+    store.dispatch(new ToolpathReady({
+      toolpath: newToolpath({ moves: [newToolpathMove()], warnings: [TEXT_WARNING] }),
+      documentVersion: selectToolpathDocumentVersion(store.getState()),
+    }));
+    renderJobCard(store);
+
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
+  });
+
+  it('keeps the Start dot while connected and only the warnings lock it, so a locked Start always shows why', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    store.dispatch(new ToolpathReady({
+      toolpath: newToolpath({ moves: [newToolpathMove()], warnings: [TEXT_WARNING] }),
+      documentVersion: selectToolpathDocumentVersion(store.getState()),
+    }));
+    renderJobCard(store);
+
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
+  });
+
+  it('shows no lock dot on Start while a job runs', () => {
+    const store: AppStore = newStartableJobStore();
+
+    store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.JOB }));
+    renderJobCard(store);
+
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).not.toBeInTheDocument();
+  });
+
+  it('makes Connect the next step without a material, as Start does not need one', async () => {
+    renderJobCard(await newGcodeExportTestStore());
+
+    expect(screen.getAllByText(CONNECT_ACTION_TEXT)).toHaveLength(1);
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toBeInTheDocument();
+  });
+
+  it('says Connect laser once, on the next-step button, while Connect is the next step', () => {
+    const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
+    const profile: MachineProfile = newMachineProfile();
+    const material: Material = newMaterial();
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    store.dispatch(new MaterialSaved({ material }));
+    store.dispatch(new ProjectMaterialSelected({ materialId: material.id }));
+    renderJobCard(store);
+
+    expect(screen.getAllByText(CONNECT_ACTION_TEXT)).toHaveLength(1);
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
+    expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
+  });
+
+  it('puts a reason no step says on its own button as a dot without a tab stop, the button describing it', async () => {
+    renderJobCard(await newGcodeExportTestStore({ areLayersEnabled: false }));
+
+    const exportNote: HTMLElement = screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT);
+
+    expect(exportNote).not.toHaveTextContent(LOCK_REASON_LAYER);
+    expect(exportNote.querySelector('[tabindex]')).toBeNull();
+    expect(getExportButton()).toHaveAccessibleDescription();
+    expect(exportNote.parentElement).toContainElement(getExportButton());
+    expect(exportNote.parentElement).not.toContainElement(screen.getByRole('button', { name: FRAME_LABEL }));
+  });
+
+  it('stops asking for the connection once the laser is connected', () => {
+    renderJobCard(newStartableJobStore());
+
+    expect(screen.queryByText(LOCK_REASON_CONNECT)).not.toBeInTheDocument();
   });
 
   it('shows Export G-code as the quiet secondary action', async () => {
@@ -327,5 +434,26 @@ describe(JobCard.name, () => {
     expect(await screen.findByText(NEEDS_LAYER_TOOLTIP)).toBeInTheDocument();
     expect(drawableSet.drawables.length).toBeGreaterThan(0);
     expect(gcodeText).not.toMatch(BURN_LINE_PATTERN);
+  });
+
+  it('folds to its facts and Start, remembers the fold, and unfolds again', async () => {
+    const store: AppStore = await newGcodeExportTestStore();
+
+    renderJobCard(store);
+    fireEvent.click(screen.getByRole('button', { name: JOB_FOLD_LABEL }));
+
+    const unfoldButton: HTMLElement = screen.getByRole('button', { name: JOB_UNFOLD_LABEL });
+
+    expect(selectIsJobCardCollapsed(store.getState())).toBe(true);
+    expect(unfoldButton).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('button', { name: START_JOB_LABEL })).toBeInTheDocument();
+    expect(screen.getByText(ESTIMATE_LABEL)).toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: READINESS_LABEL })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: FRAME_LABEL })).not.toBeInTheDocument();
+
+    fireEvent.click(unfoldButton);
+
+    expect(selectIsJobCardCollapsed(store.getState())).toBe(false);
+    expect(screen.getByRole('list', { name: READINESS_LABEL })).toBeInTheDocument();
   });
 });

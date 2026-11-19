@@ -1,5 +1,6 @@
-// One bar below the bed: the transport, the timeline, the clock and the speed, then the job size and the live head
-// readout, which wrap to a second row only when the bed is too narrow for one. The slider takes the space left.
+// One bar below the bed: the transport, the timeline, the clock and the speed, then the live head readout (the job
+// size is in the status strip), which wraps to a second row only when the bed is too narrow for one. The slider takes
+// the space left.
 .playbackBar {
   display: flex;
   flex: none;
@@ -21,9 +22,9 @@
 
 .timeline {
   display: grid;
-  flex: 1 1 15rem;
+  flex: 1 1 8rem;
   align-items: center;
-  min-width: 10rem;
+  min-width: 6rem;
 }
 
 // One transport: the layer strip and the slider share one cell, the strip under the slider as its coloured rail.
@@ -36,14 +37,15 @@
   margin-inline: 0.5rem;
 }
 
-// Over the layer strip the rail is clear and the played part a light veil, so the layer colours stay visible.
+// Over the layer strip the rail and the played part are clear: the strip itself shows the layer colours up to the
+// playhead and a neutral track after it.
 .timeline:has(> :not(.slider)) .slider {
   :global(.ant-slider-rail) {
     background-color: transparent;
   }
 
   :global(.ant-slider-track) {
-    background-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+    background-color: transparent;
   }
 }
 
@@ -51,10 +53,11 @@
   margin-block: 0;
 }
 
-// Fixed-width digits, so the clock does not shift while it counts.
+// Tabular digits in the bar's one font, so the clock does not shift while it counts.
 .clock {
   color: var(--color-text-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   white-space: nowrap;
 }
@@ -68,12 +71,6 @@
   gap: var(--space-1) var(--space-3);
 }
 
-.jobSize {
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  white-space: nowrap;
-}
 
 // The chosen speed is marked by the accent colour as well as the lighter fill, so it is found at a glance (6.4:1).
 .speedSwitch :global(.ant-segmented-item-selected) {

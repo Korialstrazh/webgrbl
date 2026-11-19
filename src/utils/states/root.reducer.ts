@@ -23,6 +23,7 @@ import { MACHINE_PROFILE_STATE_NAME, machineProfileReducer } from './machine.pro
 import { MACHINE_STATUS_STATE_NAME, machineStatusReducer } from './machine.status.state';
 import { MATERIAL_PRESET_STATE_NAME, materialPresetReducer } from './material.preset.state';
 import { MATERIAL_STATE_NAME, materialReducer } from './material.state';
+import { MESSAGE_HISTORY_STATE_NAME, messageHistoryReducer } from './message.history.state';
 import { PALETTE_STATE_NAME, paletteReducer } from './palette.state';
 import { PANEL_LAYOUT_STATE_NAME, panelLayoutReducer } from './panel.layout.state';
 import { PROJECT_DOCUMENT_STATE_NAME, projectDocumentReducer } from './project.document.state';
@@ -49,6 +50,7 @@ export const rootReducer = combineReducers({
   [PROJECT_STATE_NAME]: projectReducer,
   [GRBL_CONSOLE_STATE_NAME]: grblConsoleReducer,
   [TOAST_STATE_NAME]: toastReducer,
+  [MESSAGE_HISTORY_STATE_NAME]: messageHistoryReducer,
   [UI_OVERLAY_STATE_NAME]: uiOverlayReducer,
   [UI_WORKBENCH_STATE_NAME]: uiWorkbenchReducer,
   [BED_GESTURE_STATE_NAME]: bedGestureReducer,

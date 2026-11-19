@@ -1,3 +1,5 @@
+@use '../../styles/layout' as layout;
+
 // The workbench fills the window and never scrolls as a page; the panels and the console scroll on their own.
 .appRoute {
   // In a wide window the splitter sizes each column and the side panel fills its column.
@@ -37,6 +39,14 @@
   height: 100%;
   overflow: auto;
   scrollbar-width: thin;
+
+  @include layout.more-below-fade(rgb(0 0 0 / 45%));
+}
+
+// With the console sheet open, the region on screen ends where the sheet begins, so the bed re-fits to the space left
+// and no artwork or card sits under the sheet; it grows back when the sheet closes.
+.narrowRegionsWithSheet .narrowRegion {
+  height: calc(100% - #{layout.$console-sheet-height});
 }
 
 .hiddenRegion {

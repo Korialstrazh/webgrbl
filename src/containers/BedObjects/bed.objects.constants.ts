@@ -70,3 +70,11 @@ export const DELETE_SELECTION_KEYS: readonly string[] = [DELETE_KEY, BACKSPACE_K
 export const DRAG_START_DISTANCE_PX = 3;
 /** Stretches an object's artwork to its box, so a free scale shows as it will be cut. */
 export const SVG_PRESERVE_ASPECT_RATIO_NONE = 'none';
+
+/** The id of the focusable group of bed objects, where focus lands after an import from the Job card. */
+export const BED_OBJECTS_LAYER_ID = 'bed-objects';
+/** Matches a resize or rotate handle of the selected object, which carries the handle it stands for. */
+export const BED_HANDLE_SELECTOR = '[data-handle]';
+
+/** Test id of an arrow on the bed edge that points to where an object runs off the bed. */
+export const BED_OFF_BED_ARROW_TEST_ID = 'bed-off-bed-arrow';

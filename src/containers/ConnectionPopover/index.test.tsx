@@ -18,6 +18,8 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const CONNECT_LABEL = 'Connect';
 const DISCONNECT_LABEL = 'Disconnect';
+const DISCONNECTED_TITLE = 'Connect laser';
+const CONNECTED_TITLE = 'Connected \u00B7 Simulated laser (no hardware)';
 const CHOOSE_PORT_LABEL = 'Choose a USB port';
 const PORT_LABEL = 'Port';
 const BAUD_LABEL = 'Baud rate';
@@ -58,7 +60,10 @@ const pickSelectOption = (optionLabel: string): void => {
 };
 
 /** Renders the open popover; most tests choose the simulated laser first, since no port is chosen for the user. */
-const renderConnectionPopover = (isSimulatedLaserChosen: boolean = true): AppStore => {
+const renderConnectionPopover = (
+  isSimulatedLaserChosen: boolean = true,
+  onOpenChange: (isOpen: boolean) => void = vi.fn(),
+): AppStore => {
   const store: AppStore = newStore();
 
   if (isSimulatedLaserChosen) {
@@ -68,7 +73,7 @@ const renderConnectionPopover = (isSimulatedLaserChosen: boolean = true): AppSto
   render(
     <Provider store={store}>
       <AntdTestProvider>
-        <ConnectionPopover isOpen onOpenChange={vi.fn()} anchorRef={newAnchorRef()}>
+        <ConnectionPopover isOpen onOpenChange={onOpenChange} anchorRef={newAnchorRef()}>
           <button type="button">{ANCHOR_TEXT}</button>
         </ConnectionPopover>
       </AntdTestProvider>
@@ -100,6 +105,31 @@ describe(ConnectionPopover.name, () => {
     await settle();
 
     expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toBeEnabled();
+  });
+
+  it('names the connected port in its title and styles Disconnect as a danger action', async () => {
+    renderConnectionPopover();
+
+    expect(screen.getByText(DISCONNECTED_TITLE)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+    await settle();
+
+    expect(screen.getByText(CONNECTED_TITLE)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: DISCONNECT_LABEL })).toHaveClass('ant-btn-dangerous');
+  });
+
+  it('closes after Disconnect, as the pill then shows the result', async () => {
+    const onOpenChange = vi.fn();
+
+    renderConnectionPopover(true, onOpenChange);
+    fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+    await settle();
+    onOpenChange.mockClear();
+
+    fireEvent.click(screen.getByRole('button', { name: DISCONNECT_LABEL }));
+
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('Choose port is disabled without Web Serial but the simulated laser still connects', async () => {

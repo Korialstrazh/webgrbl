@@ -14,7 +14,10 @@ import type { ReactNode } from 'react';
 
 export interface ProfileNumberFieldDefinition {
   /** Profile field the input edits. */
-  field: keyof Pick<MachineProfile, 'maxPowerWatts' | 'workAreaXMm' | 'workAreaYMm' | 'sValueMax' | 'jogFeedRate'>;
+  field: keyof Pick<
+    MachineProfile,
+    'maxPowerWatts' | 'workAreaXMm' | 'workAreaYMm' | 'sValueMax' | 'jogFeedRate' | 'pointerPowerPercent'
+  >;
   /** Localization key of the field label. */
   labelKey: string;
   /** Localization key of a short explanation of a GRBL term in the label, shown from an info icon. */
@@ -25,4 +28,10 @@ export interface ProfileNumberFieldDefinition {
   unitKey?: string;
   /** Localization key of a short word beside the icon. */
   captionKey?: string;
+  /** The lowest value the input accepts; none means any. */
+  min?: number;
+  /** The highest value the input accepts; none means any. */
+  max?: number;
+  /** The step of the input's arrow keys; none means 1. */
+  step?: number;
 }

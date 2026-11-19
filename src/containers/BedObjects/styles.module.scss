@@ -3,7 +3,8 @@
   touch-action: none;
 }
 
-// Browsers draw no focus outline around an SVG group, so a strong ring on the bed edge shows keyboard focus instead,
+// Browsers draw no focus outline around an SVG group, so a strong ring on the bed edge shows keyboard focus instead
+// (never after a press, which shows the selection on the object only),
 // in the accent of the bed tone so it stands out on a light and a dark bed.
 .bedObjects:focus {
   outline: none;
@@ -15,7 +16,7 @@
   pointer-events: all;
 }
 
-.bedObjects:focus-visible .surface {
+.bedObjects:focus-visible:not(.pointerFocused) .surface {
   stroke: var(--color-bed-accent);
   stroke-width: 3;
   vector-effect: non-scaling-stroke;

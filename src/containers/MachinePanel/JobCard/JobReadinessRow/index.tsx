@@ -1,7 +1,14 @@
 /**
- * The readiness stepper of the Job card: Profile, Design, Material and Connect joined by a line that leads to Start.
- * Each step goes to where it is set, a done step shows a large check, and the first one still open is outlined as next.
- * The steps are one tab stop: the arrow keys, Home and End move between them (a roving tab index).
+ * The readiness stepper of the Job card, an antd Steps row: Profile, Design, Material, Check and Connect joined by its
+ * rail, with each name under its marker. A click on a name does what its marker does. Check stays open while toolpath
+ * warnings lock Start job: its marker carries the warning count as an antd Badge and its next-step button opens the
+ * Toolpath view's warnings chip, so a connected card never reads ready while Start is off. The names stay visible once
+ * the laser is connected; the row is kept short so Move fits above Stop. Each step goes to where it is set, a done step
+ * shows a large check, and the first required one still open is outlined as next. An optional step (Material) that is
+ * still open shows a dashed marker and a small hollow ring after its name, on the same line: Start does not wait for
+ * it. Every step with something to do is its own tab stop: Profile, Design and Material always open where they are set,
+ * Check and Connect only while open. A done Check or Connect has nothing to open, so it leaves the tab order and states
+ * that it is done through its label and aria-disabled. The arrow keys, Home and End also move between the steps.
  *
  * @author michael.morosov
  *
@@ -10,13 +17,19 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { ApiOutlined, CheckOutlined, ImportOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
-import { useRef, useState } from 'react';
-import type { KeyboardEvent, ReactNode, RefObject } from 'react';
+import { Button, Steps } from 'antd';
+import type { StepsProps } from 'antd';
+import { useEffect, useRef } from 'react';
+import type { KeyboardEvent, MouseEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import { ANTD_BUTTON_TYPE_PRIMARY, ANTD_BUTTON_TYPE_TEXT } from '../../../../utils/antd.constants';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import {
+  ANTD_BUTTON_TYPE_PRIMARY,
+  ANTD_SEGMENTED_ITEM_SELECTOR,
+  ANTD_STEPS_SIZE_SMALL,
+  ANTD_STEPS_STATUS,
+  ANTD_STEPS_TITLE_PLACEMENT_VERTICAL,
+} from '../../../../utils/antd.constants';
 import { BED_VIEW_MODE } from '../../../../utils/bed/bed.view.constants';
 import {
   ARROW_DOWN_KEY,
@@ -26,28 +39,36 @@ import {
   END_KEY,
   HOME_KEY,
 } from '../../../../utils/browser/browser.events.constants';
+import { flashAttentionHighlight } from '../../../../utils/browser/flash.attention.highlight';
+import { useConnectLaser } from '../../../../utils/hooks/use.connect.laser';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { BedViewModeChanged } from '../../../../utils/states/bed.view.state';
 import {
+  isJobReadinessStepOptional,
   JOB_READINESS_STEP,
   selectFirstUnmetJobReadinessStep,
   selectIsJobReadinessStepMet,
+  selectJobReadinessWarningCount,
 } from '../../../../utils/states/job.readiness.selector';
 import type { JobReadinessStep } from '../../../../utils/states/job.readiness.selector';
-import type { AppDispatch } from '../../../../utils/states/new.store';
-import { ConnectionPopoverOpenChanged } from '../../../../utils/states/ui.overlay.state';
+import type { AppDispatch, AppRootState } from '../../../../utils/states/new.store';
 import { MachineProfilesDialogOpenChanged, NarrowRegionChanged } from '../../../../utils/states/ui.workbench.state';
 import { WORKBENCH_REGION } from '../../../../utils/states/workbench.region.constants';
-import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
-import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
-import { LaserMachineIcon } from '../../../../views/LaserMachineIcon';
-import { MaterialSheetIcon } from '../../../../views/MaterialSheetIcon';
+import { BED_OBJECTS_LAYER_ID } from '../../../BedObjects/bed.objects.constants';
+import { BED_VIEW_OPTION_ATTRIBUTE } from '../../../BedPanel/bed.toolbar.constants';
 import { PROJECT_MATERIAL_SELECT_ID } from '../../../ProjectMaterialSelect/project.material.select.constants';
 import { useSvgFilePicker } from '../../../SvgImportButton/use.svg.file.picker';
+import { TOOLPATH_WARNINGS_CHIP_ID } from '../../../ToolpathWarningsPanel/toolpath.warnings.panel.constants';
+import { POPOVER_KEEP_CLEAR_ATTRIBUTE } from '../../../../utils/layout.constants';
+import type { JobReadinessLook } from './interfaces/JobReadinessLook';
+import { JOB_READINESS_LOOKS } from './job.readiness.looks';
+import { JOB_NEXT_STEP_BUTTON_ID } from './job.readiness.row.constants';
+import { JobReadinessStepButton } from './job.readiness.step.button';
 import styles from './styles.module.scss';
 
-const ARIA_CURRENT_STEP = 'step';
 const STEP_BUTTON_SELECTOR = 'button';
+const STEP_ITEM_SELECTOR = '.ant-steps-item';
+const TOOLPATH_VIEW_OPTION_SELECTOR = `[${BED_VIEW_OPTION_ATTRIBUTE}="${BED_VIEW_MODE.TOOLPATH}"]`;
 const PREVIOUS_STEP_KEYS: readonly string[] = [ARROW_LEFT_KEY, ARROW_UP_KEY];
 const NEXT_STEP_KEYS: readonly string[] = [ARROW_RIGHT_KEY, ARROW_DOWN_KEY];
 
@@ -68,105 +89,62 @@ const getMovedStepIndex = (key: string, index: number, count: number): number | 
   return key === END_KEY ? count - 1 : undefined;
 };
 
-interface JobReadinessLook {
-  step: JobReadinessStep;
-  iconComponent: ReactNode;
-  captionKey: string;
-  hintKey: string;
-  /** The tooltip once the step is done, where the hint would ask for what has been done already. */
-  metHintKey?: string;
-  /** The label of the one action button while this is the current step. */
-  actionKey: string;
-}
+// The steps and the next-step button stay in sight: the connection and frame popovers open clear of them.
+const POPOVER_KEEP_CLEAR_PROPS: Record<string, string> = { [POPOVER_KEEP_CLEAR_ATTRIBUTE]: '' };
+// antd Steps draws plain blocks, so the row and its steps name themselves a list and its items.
+const STEPS_LIST_PROPS: Record<string, string> = { ...POPOVER_KEEP_CLEAR_PROPS, role: 'list' };
+const STEP_ITEM_PROPS: Record<string, string> = { role: 'listitem' };
 
-const JOB_READINESS_LOOKS: readonly JobReadinessLook[] = [
-  {
-    step: JOB_READINESS_STEP.PROFILE,
-    iconComponent: <LaserMachineIcon aria-hidden />,
-    captionKey: DEFAULT.JOB_READINESS_PROFILE,
-    hintKey: DEFAULT.JOB_READINESS_PROFILE_HINT,
-    actionKey: DEFAULT.JOB_READINESS_PROFILE_ACTION,
-  },
-  {
-    step: JOB_READINESS_STEP.DESIGN,
-    iconComponent: <ImportOutlined aria-hidden />,
-    captionKey: DEFAULT.JOB_READINESS_DESIGN,
-    hintKey: DEFAULT.JOB_READINESS_DESIGN_HINT,
-    metHintKey: DEFAULT.JOB_READINESS_DESIGN_MET_HINT,
-    actionKey: DEFAULT.JOB_READINESS_DESIGN_ACTION,
-  },
-  {
-    step: JOB_READINESS_STEP.MATERIAL,
-    iconComponent: <MaterialSheetIcon aria-hidden />,
-    captionKey: DEFAULT.JOB_READINESS_MATERIAL,
-    hintKey: DEFAULT.JOB_READINESS_MATERIAL_HINT,
-    actionKey: DEFAULT.JOB_READINESS_MATERIAL_ACTION,
-  },
-  {
-    step: JOB_READINESS_STEP.CONNECT,
-    iconComponent: <ApiOutlined aria-hidden />,
-    captionKey: DEFAULT.JOB_READINESS_CONNECT,
-    hintKey: DEFAULT.JOB_READINESS_CONNECT_HINT,
-    actionKey: DEFAULT.JOB_READINESS_CONNECT_ACTION,
-  },
-];
+type JobReadinessStepItem = NonNullable<StepsProps['items']>[number];
 
-interface JobReadinessButtonProps extends JobReadinessLook {
-  /** Whether this step holds the one tab stop of the row. */
-  isTabStop: boolean;
-  onGoToStep: (step: JobReadinessStep) => void;
-  onFocusStep: (step: JobReadinessStep) => void;
-}
+/** Whether each step is met, in the row's order. */
+const selectMetJobReadinessSteps = (state: AppRootState): boolean[] =>
+  JOB_READINESS_LOOKS.map((look: JobReadinessLook): boolean => selectIsJobReadinessStepMet(look.step)(state));
 
-const JobReadinessButton = (props: JobReadinessButtonProps): ReactNode => {
-  const { step, iconComponent, captionKey, hintKey, metHintKey, isTabStop, onGoToStep, onFocusStep } = props;
-  const { t } = useTranslation();
-  const isMet: boolean = useSelector(selectIsJobReadinessStepMet(step));
-  const isNextStep: boolean = useSelector(selectFirstUnmetJobReadinessStep) === step;
-  const captionText: string = t(captionKey);
+/** A click on a step's name does what a click on its marker does; the keyboard reaches the marker itself. */
+const clickStepMarker = (clickEvent: MouseEvent<HTMLElement>): void => {
+  clickEvent.currentTarget.closest(STEP_ITEM_SELECTOR)?.querySelector<HTMLButtonElement>(STEP_BUTTON_SELECTOR)?.click();
+};
 
-  const cellClassName: string = [
-    styles.stepCell,
-    isMet ? styles.metStep : undefined,
-    isNextStep ? styles.nextStep : undefined,
-  ].join(' ');
+/** The antd Steps status of a step: done, the next one to do, or waiting. */
+const getStepStatus = (isMet: boolean, isNextStep: boolean): JobReadinessStepItem['status'] => {
+  if (isMet) {
+    return ANTD_STEPS_STATUS.FINISH;
+  }
 
-  return (
-    <li className={cellClassName}>
-      <DismissibleTooltip title={isNextStep ? undefined : t(isMet && metHintKey ? metHintKey : hintKey)}>
-        <Button
-          className={styles.step}
-          type={ANTD_BUTTON_TYPE_TEXT}
-          aria-label={t(
-            isMet ? DEFAULT.JOB_READINESS_STEP_MET : DEFAULT.JOB_READINESS_STEP_OPEN,
-            { step: captionText },
-          )}
-          aria-current={isNextStep ? ARIA_CURRENT_STEP : undefined}
-          tabIndex={isTabStop ? KEYBOARD_FOCUSABLE_TAB_INDEX : SCRIPT_FOCUS_ONLY_TAB_INDEX}
-          onFocus={() => onFocusStep(step)}
-          onClick={() => onGoToStep(step)}
-        >
-          <span className={styles.marker}>{isMet ? <CheckOutlined aria-hidden /> : iconComponent}</span>
-          <span className={styles.caption}>{captionText}</span>
-        </Button>
-      </DismissibleTooltip>
-    </li>
-  );
+  return isNextStep ? ANTD_STEPS_STATUS.PROCESS : ANTD_STEPS_STATUS.WAIT;
 };
 
 export const JobReadinessRow = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const { openSvgFilePicker, fileInputComponent } = useSvgFilePicker();
+  const connectLaser: () => void = useConnectLaser();
   const nextStep: JobReadinessStep | undefined = useSelector(selectFirstUnmetJobReadinessStep);
+  const warningCount: number = useSelector(selectJobReadinessWarningCount);
+  // Every open step gets its accent next-step button, Import SVG on an empty project included.
   const nextLook: JobReadinessLook | undefined =
     JOB_READINESS_LOOKS.find((look: JobReadinessLook): boolean => look.step === nextStep);
-  const listRef: RefObject<HTMLOListElement | null> = useRef<HTMLOListElement>(null);
-  // The step last focused keeps the tab stop; until then it is the next step, or the first when all are done.
-  const [focusedStep, setFocusedStep] = useState<JobReadinessStep | undefined>(undefined);
-  const tabStopStep: JobReadinessStep | undefined = focusedStep ?? nextStep ?? JOB_READINESS_LOOKS[0]?.step;
+  const metSteps: boolean[] = useSelector(selectMetJobReadinessSteps, shallowEqual);
+  const listRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
 
-  const handleRowKeyDown = (keyEvent: KeyboardEvent<HTMLOListElement>): void => {
+  const previousNextStepRef: RefObject<JobReadinessStep | undefined> = useRef<JobReadinessStep | undefined>(nextStep);
+
+  // After an import from the next-step button the button turns into the following step; focus moves on to the new
+  // artwork on the bed, so the button does not hold the focus as if it were already chosen. A hidden bed (a narrow
+  // layout showing the Job region) takes no focus, and the focus then stays where it was.
+  useEffect(() => {
+    const hasArtworkJustArrived: boolean =
+      previousNextStepRef.current === JOB_READINESS_STEP.DESIGN && nextStep !== JOB_READINESS_STEP.DESIGN;
+
+    previousNextStepRef.current = nextStep;
+
+    if (hasArtworkJustArrived && document.activeElement?.id === JOB_NEXT_STEP_BUTTON_ID) {
+      document.getElementById(BED_OBJECTS_LAYER_ID)?.focus({ preventScroll: true });
+    }
+  }, [nextStep]);
+
+  const handleRowKeyDown = (keyEvent: KeyboardEvent<HTMLDivElement>): void => {
     const stepButtons: HTMLButtonElement[] = [
       ...(listRef.current?.querySelectorAll<HTMLButtonElement>(STEP_BUTTON_SELECTOR) ?? []),
     ];
@@ -193,51 +171,93 @@ export const JobReadinessRow = (): ReactNode => {
     });
   };
 
+  const goToWarnings = (): void => {
+    dispatch(new BedViewModeChanged({ viewMode: BED_VIEW_MODE.TOOLPATH }));
+    dispatch(new NarrowRegionChanged({ narrowRegion: WORKBENCH_REGION.BED }));
+    // The chip only renders in the Toolpath view, so it may appear with the next paint; a click opens its list.
+    requestAnimationFrame(() => {
+      const warningsChip: HTMLElement | null = document.getElementById(TOOLPATH_WARNINGS_CHIP_ID);
+
+      warningsChip?.focus();
+      warningsChip?.click();
+      // The view changed on its own: a brief glow on the Toolpath tab and the chip shows where the list came from.
+      flashAttentionHighlight([
+        document.querySelector(TOOLPATH_VIEW_OPTION_SELECTOR)?.closest(ANTD_SEGMENTED_ITEM_SELECTOR),
+        warningsChip,
+      ]);
+    });
+  };
+
   const goToStep = (step: JobReadinessStep): void => {
     switch (step) {
     case JOB_READINESS_STEP.PROFILE:
       dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen: true }));
       break;
     case JOB_READINESS_STEP.DESIGN:
+      // The same file picker as Import SVG in the top bar, so the next step adds artwork in one click.
       openSvgFilePicker();
       break;
     case JOB_READINESS_STEP.MATERIAL:
       goToMaterialSelect();
       break;
+    case JOB_READINESS_STEP.WARNINGS:
+      goToWarnings();
+      break;
     default:
-      dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+      // With a port already chosen this connects at once; with none it opens the connection popover.
+      connectLaser();
     }
   };
 
+  const stepItems: JobReadinessStepItem[] = JOB_READINESS_LOOKS.map(
+    (look: JobReadinessLook, index: number): JobReadinessStepItem => {
+      const isMet: boolean = Boolean(metSteps[index]);
+      const isNextStep: boolean = look.step === nextStep;
+
+      return {
+        ...STEP_ITEM_PROPS,
+        key: look.step,
+        className: [
+          styles.stepCell,
+          isMet ? styles.metStep : undefined,
+          isNextStep ? styles.nextStep : undefined,
+          !isMet && isJobReadinessStepOptional(look.step) ? styles.optionalStep : undefined,
+        ].join(' '),
+        status: getStepStatus(isMet, isNextStep),
+        icon: <JobReadinessStepButton {...look} onGoToStep={goToStep} />,
+        // The marker carries the name as its label, so the visible name is hidden from screen readers.
+        title: <span className={styles.caption} aria-hidden onClick={clickStepMarker}>{t(look.captionKey)}</span>,
+      };
+    },
+  );
+
   return (
-    <>
-      <ol
-        ref={listRef}
-        className={styles.jobReadinessRow}
-        aria-label={t(DEFAULT.JOB_READINESS_LABEL)}
-        onKeyDown={handleRowKeyDown}
-      >
-        {JOB_READINESS_LOOKS.map((look: JobReadinessLook) => (
-          <JobReadinessButton
-            key={look.step}
-            {...look}
-            isTabStop={look.step === tabStopStep}
-            onGoToStep={goToStep}
-            onFocusStep={setFocusedStep}
-          />
-        ))}
-      </ol>
+    <div className={styles.readiness}>
+      {/* The roving arrow keys move between the step markers inside the antd Steps row. */}
+      <div ref={listRef} className={styles.stepsFrame} onKeyDown={handleRowKeyDown}>
+        <Steps
+          {...STEPS_LIST_PROPS}
+          className={styles.jobReadinessRow}
+          aria-label={t(DEFAULT.JOB_READINESS_LABEL)}
+          size={ANTD_STEPS_SIZE_SMALL}
+          titlePlacement={ANTD_STEPS_TITLE_PLACEMENT_VERTICAL}
+          current={JOB_READINESS_LOOKS.findIndex((look: JobReadinessLook): boolean => look.step === nextStep)}
+          items={stepItems}
+        />
+      </div>
       {nextLook && (
         <Button
           type={ANTD_BUTTON_TYPE_PRIMARY}
           block
-          icon={nextLook.iconComponent}
+          id={JOB_NEXT_STEP_BUTTON_ID}
+          {...POPOVER_KEEP_CLEAR_PROPS}
+          icon={nextLook.actionIconComponent ?? nextLook.iconComponent}
           onClick={() => goToStep(nextLook.step)}
         >
-          {t(nextLook.actionKey)}
+          {t(nextLook.actionKey, { count: warningCount })}
         </Button>
       )}
       {fileInputComponent}
-    </>
+    </div>
   );
 };

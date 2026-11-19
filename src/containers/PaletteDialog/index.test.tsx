@@ -39,6 +39,7 @@ const EXPORT_LABEL = 'Export for Inkscape';
 const DELETE_CONFIRM_LABEL = 'Yes, delete';
 const INKSCAPE_HELP_LABEL = 'Using the file in Inkscape';
 const LIST_LABEL = 'Palette colours';
+const ORDER_HINT_TEXT = 'Import defaults. Layers set the cut order.';
 const DIALOG_TITLE = 'Palette';
 const LINUX_PATH_TEXT = 'Linux: ~/.config/inkscape/palettes/';
 const WINDOWS_PATH_TEXT = 'Windows: %APPDATA%\\inkscape\\palettes\\';
@@ -118,6 +119,15 @@ describe(PaletteDialog.name, () => {
     renderDialog(newStore());
 
     expect(screen.getByRole('button', { name: labelText })).toHaveTextContent(captionText);
+  });
+
+  it('says in its Help, not in a standing line, that the palette order is not the cut order', async () => {
+    renderDialog(newStore());
+
+    expect(screen.queryByText(ORDER_HINT_TEXT)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: INKSCAPE_HELP_LABEL }));
+
+    expect(await screen.findByText(ORDER_HINT_TEXT)).toBeInTheDocument();
   });
 
   it('registers an overlay while it is open', () => {
@@ -275,16 +285,22 @@ describe(PaletteDialog.name, () => {
   it('gives the shading entry no delete button and a locked colour', () => {
     renderDialog(newStore());
 
-    expect(within(getRow(SHADING_NAME_PATTERN)).queryByRole('button', { name: DELETE_NAME_PATTERN }))
-      .not.toBeInTheDocument();
-    expect(within(getRow(SHADING_NAME_PATTERN)).getByRole('note', { name: SHADING_LOCKED_TEXT })).toBeInTheDocument();
-    // A single tag on the page, and it sits in the shading row.
-    expect(screen.getByText('Built-in').closest('li')).toHaveTextContent(SHADING_NAME_PATTERN);
-    expect(within(getRow(CUT_NAME_PATTERN)).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
-    expect(within(getRow(CUT_NAME_PATTERN)).queryByRole('note')).not.toBeInTheDocument();
+    // Each row is looked up once: role queries over the whole dialog are slow in jsdom.
+    const shadingRow: HTMLElement = getRow(SHADING_NAME_PATTERN);
+    const cutRow: HTMLElement = getRow(CUT_NAME_PATTERN);
+
+    expect(within(shadingRow).queryByRole('button', { name: DELETE_NAME_PATTERN })).not.toBeInTheDocument();
+    expect(within(shadingRow).getByRole('note', { name: SHADING_LOCKED_TEXT })).toBeInTheDocument();
+    // A single badge on the page, named for screen readers, and it sits in the shading row.
+    const badges: HTMLElement[] = screen.getAllByRole('img', { name: 'Built-in', hidden: true });
+
+    expect(badges).toHaveLength(1);
+    expect(shadingRow).toContainElement(badges.at(0) ?? null);
+    expect(within(cutRow).getByRole('button', { name: DELETE_NAME_PATTERN })).toBeInTheDocument();
+    expect(within(cutRow).queryByRole('note')).not.toBeInTheDocument();
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: SHADING_NAME_PATTERN }));
+    fireEvent.click(within(shadingRow).getByRole('button', { name: SHADING_NAME_PATTERN }));
 
     expect(document.querySelector(COLOUR_PICKER_DISABLED_SELECTOR)).toBeInTheDocument();
     expect(screen.getByText(SHADING_NOTE_TEXT)).toBeInTheDocument();

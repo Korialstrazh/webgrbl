@@ -19,6 +19,7 @@ import {
   ProjectObjectsAdded,
   ProjectObjectsDeleted,
   ProjectObjectsTransformed,
+  ProjectObjectSvgTextChanged,
   ProjectRedoRequested,
   ProjectUndoRequested,
   projectDocumentReducer,
@@ -109,6 +110,21 @@ describe(projectDocumentReducer.name, () => {
 
     expect(after.document.objects).toEqual([kept]);
     expect(after.past).toHaveLength(before.past.length + 1);
+  });
+
+  it('replaces the SVG text of an object after an element tree edit as one undo step', () => {
+    const original: ProjectObject = newProjectObject();
+    const editedSvgText = '<svg xmlns="http://www.w3.org/2000/svg"/>';
+    const before: ProjectDocumentState = getStateWithObjects([original]);
+    const after: ProjectDocumentState = projectDocumentReducer(
+      before,
+      new ProjectObjectSvgTextChanged({ objectId: original.id, svgText: editedSvgText, layers: [] }),
+    );
+    const undone: ProjectDocumentState = projectDocumentReducer(after, new ProjectUndoRequested());
+
+    expect(after.document.objects[0]?.svgText).toBe(editedSvgText);
+    expect(after.past).toHaveLength(before.past.length + 1);
+    expect(undone.document.objects[0]?.svgText).toBe(original.svgText);
   });
 
   it('does not create an undo step for changes that change nothing', () => {

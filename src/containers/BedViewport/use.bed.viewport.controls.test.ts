@@ -5,8 +5,10 @@ import { BED_ZOOM_STEP_FACTOR } from '../../utils/bed/bed.zoom.constants';
 import type { BedDimensions } from '../../utils/bed/interfaces/BedDimensions';
 import type { BedScreenSize } from '../../utils/bed/interfaces/BedScreenSize';
 import type { BedViewport } from '../../utils/bed/interfaces/BedViewport';
-import { newCoverBedViewport } from '../../utils/bed/new.cover.bed.viewport';
 import { newFitBedViewport } from '../../utils/bed/new.fit.bed.viewport';
+import { newTopFitBedViewport } from '../../utils/bed/new.top.fit.bed.viewport';
+import type { ProjectObject } from '../../utils/project/interfaces/ProjectObject';
+import { newProjectObject } from '../../utils/project/new.project.object';
 import type { BedViewportControls } from './interfaces/BedViewportControls';
 import type { KeptBedViewportRef } from './interfaces/KeptBedViewportRef';
 import { useBedViewportControls } from './use.bed.viewport.controls';
@@ -45,17 +47,17 @@ describe(useBedViewportControls.name, () => {
 });
 
 interface CoverFitProps {
-  isCoverFitWanted: boolean;
+  isStripFitWanted: boolean;
 }
 
 describe(`${useBedViewportControls.name} with a drawer`, () => {
   const STRIP_SIZE: BedScreenSize = { widthPx: 300, heightPx: 700 };
 
-  it('fills the strip while a drawer is open and gives the earlier zoom back once it closes', () => {
-    const initialProps: CoverFitProps = { isCoverFitWanted: false };
+  it('fits the bed to the top of the strip while a drawer is open and gives the zoom back once it closes', () => {
+    const initialProps: CoverFitProps = { isStripFitWanted: false };
     const hook: RenderHookResult<BedViewportControls, CoverFitProps> = renderHook(
-      ({ isCoverFitWanted }: CoverFitProps): BedViewportControls =>
-        useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, isCoverFitWanted),
+      ({ isStripFitWanted }: CoverFitProps): BedViewportControls =>
+        useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, isStripFitWanted),
       { initialProps },
     );
 
@@ -64,23 +66,66 @@ describe(`${useBedViewportControls.name} with a drawer`, () => {
     });
     const zoomedViewport: BedViewport = hook.result.current.viewport;
 
-    hook.rerender({ isCoverFitWanted: true });
+    hook.rerender({ isStripFitWanted: true });
 
-    expect(hook.result.current.viewport).toEqual(newCoverBedViewport(DIMENSIONS, STRIP_SIZE));
+    expect(hook.result.current.viewport).toEqual(newTopFitBedViewport(DIMENSIONS, STRIP_SIZE));
 
-    hook.rerender({ isCoverFitWanted: false });
+    hook.rerender({ isStripFitWanted: false });
 
     expect(hook.result.current.viewport).toEqual(zoomedViewport);
   });
 
-  it('starts the first zoom inside the drawer from the filled strip', () => {
+  it('starts the first zoom inside the drawer from the fitted bed', () => {
     const { result } = renderHook(() => useBedViewportControls(DIMENSIONS, STRIP_SIZE, undefined, true));
-    const coverViewport: BedViewport = newCoverBedViewport(DIMENSIONS, STRIP_SIZE);
+    const fitViewport: BedViewport = newFitBedViewport(DIMENSIONS);
 
     act(() => {
       result.current.zoomBedBy(BED_ZOOM_STEP_FACTOR);
     });
 
-    expect(result.current.viewport.zoom).toBeCloseTo(coverViewport.zoom * BED_ZOOM_STEP_FACTOR);
+    expect(result.current.viewport.zoom).toBeCloseTo(fitViewport.zoom * BED_ZOOM_STEP_FACTOR);
+  });
+});
+
+interface OverlayProps {
+  overlayInsetPx: number;
+}
+
+describe(`${useBedViewportControls.name} with a drawer over the bed`, () => {
+  const DRAWER_INSET_PX = 336;
+  const selectedObject: ProjectObject = newProjectObject({ xMm: 5, yMm: 5, widthMm: 110, heightMm: 70 });
+
+  it('keeps the zoom, moves the selection out from under the drawer, and gives the pan back once it closes', () => {
+    const initialProps: OverlayProps = { overlayInsetPx: 0 };
+    const hook: RenderHookResult<BedViewportControls, OverlayProps> = renderHook(
+      ({ overlayInsetPx }: OverlayProps): BedViewportControls =>
+        useBedViewportControls(DIMENSIONS, SCREEN_SIZE, undefined, false, overlayInsetPx, [selectedObject]),
+      { initialProps },
+    );
+    const viewportBefore: BedViewport = hook.result.current.viewport;
+
+    hook.rerender({ overlayInsetPx: DRAWER_INSET_PX });
+
+    expect(hook.result.current.viewport.zoom).toBe(viewportBefore.zoom);
+    expect(hook.result.current.viewport.centerYMm).toBe(viewportBefore.centerYMm);
+    expect(hook.result.current.viewport.centerXMm).toBeLessThan(viewportBefore.centerXMm);
+
+    hook.rerender({ overlayInsetPx: 0 });
+
+    expect(hook.result.current.viewport).toEqual(viewportBefore);
+  });
+
+  it('leaves the view as it is when nothing is selected', () => {
+    const initialProps: OverlayProps = { overlayInsetPx: 0 };
+    const hook: RenderHookResult<BedViewportControls, OverlayProps> = renderHook(
+      ({ overlayInsetPx }: OverlayProps): BedViewportControls =>
+        useBedViewportControls(DIMENSIONS, SCREEN_SIZE, undefined, false, overlayInsetPx),
+      { initialProps },
+    );
+    const viewportBefore: BedViewport = hook.result.current.viewport;
+
+    hook.rerender({ overlayInsetPx: DRAWER_INSET_PX });
+
+    expect(hook.result.current.viewport).toEqual(viewportBefore);
   });
 });

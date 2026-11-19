@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 import { Provider } from 'react-redux';
 import { ConnectionPill } from '.';
 import { ESCAPE_KEY, OFFLINE_EVENT_NAME } from '../../utils/browser/browser.events.constants';
@@ -21,7 +22,8 @@ import { WORKBENCH_REGION } from '../../utils/states/workbench.region.constants'
 import type { WorkbenchRegion } from '../../utils/states/workbench.region.constants';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
-const ONLINE_OR_OFFLINE_PATTERN = /Online|Offline/;
+const ONLINE_PATTERN = /Online/;
+const SHORT_DISCONNECTED_TEXT = 'Not connected';
 const DISCONNECTED_PATTERN = /^Connection: Not connected.*Open the connection menu\.$/;
 const CONNECT_VERB_TEXT = 'Connect';
 const CONNECT_LABEL = 'Connect';
@@ -56,6 +58,10 @@ const renderConnectionPill = (): AppStore => {
   return store;
 };
 
+/** The Connect button inside the open popover; a chosen port adds a one-click Connect beside the pill too. */
+const getPopoverConnectButton = (): HTMLElement =>
+  within(screen.getByRole('dialog', { name: POPOVER_LABEL })).getByRole('button', { name: CONNECT_LABEL });
+
 const settle = async (): Promise<void> => {
   await act(async () => {
     await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
@@ -77,12 +83,41 @@ describe(ConnectionPill.name, () => {
     expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toBeInTheDocument();
   });
 
+  it('pairs the dot with a one-word state for a narrow window, hidden from screen readers', () => {
+    renderConnectionPill();
+
+    const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    const shortStatus: HTMLElement | undefined = within(pillButton).getAllByText(SHORT_DISCONNECTED_TEXT).at(-1);
+
+    expect(shortStatus?.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('closes the connection popover when the narrow layout switches region', () => {
+    const store: AppStore = renderConnectionPill();
+
+    fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+    act(() => {
+      store.dispatch(new NarrowRegionChanged({ narrowRegion: WORKBENCH_REGION.JOB }));
+    });
+
+    expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
+  });
+
   it.each(Object.values(WORKBENCH_REGION))('keeps the Connect verb on the narrow %s tab', (region: WorkbenchRegion) => {
     const store: AppStore = renderConnectionPill();
 
     act(() => {
       store.dispatch(new NarrowRegionChanged({ narrowRegion: region }));
     });
+
+    expect(within(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).getByText(CONNECT_VERB_TEXT))
+      .toBeInTheDocument();
+  });
+
+  it('keeps the Connect verb in a wide window too, so the idle pill always reads as the place to connect', () => {
+    setMatchMediaMatches(true);
+    renderConnectionPill();
 
     expect(within(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).getByText(CONNECT_VERB_TEXT))
       .toBeInTheDocument();
@@ -95,7 +130,7 @@ describe(ConnectionPill.name, () => {
       store.dispatch(new ConnectionStatusChanged({ connectionStatus: status }));
     });
 
-    expect(screen.getByText(STATUS_LABELS[status])).toBeInTheDocument();
+    expect(screen.getAllByText(STATUS_LABELS[status])[0]).toBeInTheDocument();
   });
 
   describe('with the simulated laser', () => {
@@ -114,13 +149,35 @@ describe(ConnectionPill.name, () => {
         store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
       });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
-      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      fireEvent.click(getPopoverConnectButton());
       await settle();
 
       const pillButton: HTMLElement = screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN });
 
       expect(screen.getByText(FIRMWARE_TEXT)).toBeInTheDocument();
       expect(within(pillButton).queryByText(CONNECT_VERB_TEXT)).not.toBeInTheDocument();
+    });
+
+    it('connects in one click from the Connect button beside the pill once a port is chosen', async () => {
+      const store: AppStore = renderConnectionPill();
+
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      });
+
+      const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+      expect(within(pillButton).queryByText(CONNECT_VERB_TEXT)).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
+
+      await settle();
+
+      expect(screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: CONNECT_LABEL })).not.toBeInTheDocument();
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
     });
 
     it('closes the popover by itself after the laser connects, with focus back on the pill', async () => {
@@ -131,7 +188,7 @@ describe(ConnectionPill.name, () => {
       });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
 
-      const connectButton: HTMLElement = screen.getByRole('button', { name: CONNECT_LABEL });
+      const connectButton: HTMLElement = getPopoverConnectButton();
 
       connectButton.focus();
       fireEvent.click(connectButton);
@@ -151,7 +208,7 @@ describe(ConnectionPill.name, () => {
         store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
       });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
-      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      fireEvent.click(getPopoverConnectButton());
       await settle();
       fireEvent.click(screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN }));
       await settle();
@@ -167,7 +224,7 @@ describe(ConnectionPill.name, () => {
         store.dispatch(new SerialPortSelected({ portId: UNGRANTED_PORT_ID }));
       });
       fireEvent.click(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
-      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      fireEvent.click(getPopoverConnectButton());
       await settle();
 
       expect(selectIsConnectionPopoverOpen(store.getState())).toBe(true);
@@ -176,7 +233,7 @@ describe(ConnectionPill.name, () => {
       act(() => {
         store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
       });
-      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      fireEvent.click(getPopoverConnectButton());
 
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
@@ -216,6 +273,19 @@ describe(ConnectionPill.name, () => {
     expect(pillButton).toHaveFocus();
   });
 
+  it('opened with a pointer, focuses the popover itself, so the Port field never opens ringed', async () => {
+    renderConnectionPill();
+
+    const pillButton: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    fireEvent.pointerDown(pillButton);
+    fireEvent.click(pillButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toHaveFocus();
+    });
+  });
+
   it('shows the name of the active machine profile', () => {
     const store: AppStore = renderConnectionPill();
     const profile: MachineProfile = newMachineProfile({ name: PROFILE_NAME });
@@ -232,12 +302,15 @@ describe(ConnectionPill.name, () => {
 
   it('leaves the browser network state out of the pill, also while offline', () => {
     renderConnectionPill();
+    const pill: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+    const onlinePillText: string | null = pill.textContent;
 
     act(() => {
       window.dispatchEvent(new Event(OFFLINE_EVENT_NAME));
     });
 
-    expect(screen.queryByText(ONLINE_OR_OFFLINE_PATTERN)).not.toBeInTheDocument();
+    expect(screen.queryByText(ONLINE_PATTERN)).not.toBeInTheDocument();
+    expect(pill.textContent).toBe(onlinePillText);
   });
 
   it('opens its popover when another control asks for it, such as the Status card', () => {

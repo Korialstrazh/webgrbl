@@ -46,6 +46,8 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
 import { CONNECTION_POPOVER_OVERLAY_ID } from './connection.popover.constants';
 import { getPortOptionLabel } from './get.port.option.label';
+import { usePopoverKeepClearAlign } from '../../utils/hooks/use.popover.keep.clear.align';
+import type { PopoverKeepClearAlign } from '../../utils/hooks/use.popover.keep.clear.align';
 import styles from './styles.module.scss';
 
 interface ConnectionPopoverProps {
@@ -57,6 +59,9 @@ interface ConnectionPopoverProps {
   /** The same control as a ref: focus returns to it when the popover closes with focus inside. */
   anchorRef: RefObject<HTMLElement | null>;
 }
+
+// The popover's width with its padding: 20 rem of fields and 1 rem of padding on each side.
+const CONNECTION_POPOVER_WIDTH_PX = 384;
 
 // antd Select takes focus on its combobox input.
 const FOCUSABLE_CONTROL_SELECTOR = 'button:not([disabled]), input[role="combobox"]:not([disabled])';
@@ -105,12 +110,23 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
     { value: SIMULATED_LASER_PORT_ID, label: t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER) },
     ...availablePorts.map((port: SerialPortDescriptor) => ({ value: port.portId, label: getPortOptionLabel(port, t) })),
   ];
+  const connectedPort: SerialPortDescriptor | undefined = availablePorts.find(
+    ({ portId }: SerialPortDescriptor): boolean => portId === selectedPortId,
+  );
+  const connectedPortLabel: string = connectedPort
+    ? getPortOptionLabel(connectedPort, t)
+    : t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER);
+  const titleText: string = isConnected
+    ? t(DEFAULT.CONNECTION_POPOVER_TITLE_CONNECTED, { port: connectedPortLabel })
+    : t(DEFAULT.CONNECTION_POPOVER_TITLE);
   const baudOptions: SelectProps<number>['options'] = GRBL_BAUD_RATES.map((rate: number) => ({
     value: rate,
     label: String(rate),
   }));
 
   useOverlayRegistration(CONNECTION_POPOVER_OVERLAY_ID, isOpen);
+  const keepClearAlign: PopoverKeepClearAlign =
+    usePopoverKeepClearAlign(isOpen, anchorRef, CONNECTION_POPOVER_WIDTH_PX);
 
   // Opened with the mouse or a touch, the returned focus draws no ring, so the pill does not look like an alert; opened
   // from the keyboard it keeps the ring.
@@ -161,13 +177,22 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
   }, [anchorRef, isConnected, isConnecting, onOpenChange]);
 
   const handleAfterOpenChange = (isNowOpen: boolean): void => {
-    if (isNowOpen) {
+    // Opened with a pointer, focus waits on the popover itself, so the Port field never opens ringed like an error;
+    // opened from the keyboard, it goes straight to the first field.
+    if (isNowOpen && isOpenedByPointerRef.current) {
+      contentRef.current?.focus({ preventScroll: true });
+    } else if (isNowOpen) {
       focusFirstPopoverControl(contentRef.current);
     }
   };
 
   const toggleConnection = (): void => {
     dispatch(isConnected ? new DisconnectRequested() : new ConnectRequested());
+
+    // Disconnect is done in one click: the pill shows the result, so the popover closes and focus goes back to it.
+    if (isConnected) {
+      handleOpenChange(false);
+    }
   };
 
   const contentComponent: ReactNode = (
@@ -228,6 +253,7 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       </div>
       <Button
         type={isConnected ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
+        danger={isConnected}
         icon={isConnected ? <DisconnectOutlined aria-hidden /> : <ApiOutlined aria-hidden />}
         disabled={isConnecting || !canToggleConnection(isConnected, selectedPortId)}
         onClick={toggleConnection}
@@ -244,11 +270,19 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       onOpenChange={handleOpenChange}
       afterOpenChange={handleAfterOpenChange}
       trigger={ANTD_POPOVER_TRIGGER_CLICK}
-      // Below the pill and right-aligned to it, so it covers neither the top bar nor the views; its fields sit on
-      // one line each, which keeps it short enough to stop above the Connect laser button of the Job card.
+      // Below the pill, moved left of the Job steps and the next-step button when the window has room, or else
+      // below them, so the step the user is on never disappears behind it.
       placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+      align={keepClearAlign.align}
+      arrow={!keepClearAlign.isShifted}
       // A clear edge, shadow and arrow tie it to the pill, so it never reads as part of the Job card under it.
       rootClassName={styles.connectionPopoverRoot}
+      title={(
+        <span className={styles.title}>
+          <ApiOutlined aria-hidden />
+          {titleText}
+        </span>
+      )}
       content={contentComponent}
       destroyOnHidden
     >

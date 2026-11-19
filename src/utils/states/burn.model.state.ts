@@ -184,8 +184,9 @@ export const burnModelReducer = (
   case BurnPartLiftsReset.type:
     return { ...state, liftMmByPartId: {} };
   case BedViewModeChanged.type:
-    // The row or the canvas under the pointer goes away without saying so.
-    return { ...getStateAfterBuildStopped(state), hoveredPartId: undefined };
+    // The row or the canvas under the pointer goes away without saying so. The build goes on: the Cut check count is
+    // shown in every view.
+    return { ...state, hoveredPartId: undefined };
   case MaterialSaved.type:
     return getStateAfterMaterialChange(state, (action as MaterialSaved).payload.material.id);
   case MaterialTestResultSaved.type:

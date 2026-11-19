@@ -1,43 +1,68 @@
-// A stepper: round markers joined by a line, which turns green behind each step that is done.
-.jobReadinessRow {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+@use '../../../../styles/accessibility' as accessibility;
+
+// An antd Steps row: round markers joined by its rail, which turns green behind each step that is done. The five steps
+// share the width equally and keep their names under the markers, connected or not.
+.jobReadinessRow:global(.ant-steps) {
   margin: 0;
   padding: 0;
-  list-style: none;
 }
 
-.stepCell {
-  position: relative;
+.stepsFrame {
   min-width: 0;
+}
 
-  // The line from this marker to the next one, behind both.
-  &:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 1.5rem;
-    left: 50%;
-    width: 100%;
-    height: 0.125rem;
-    background-color: var(--color-border);
+.stepCell:global(.ant-steps-item) {
+  min-width: 0;
+  overflow: visible;
+
+  // The name sits close under its marker, as tight as the card's other rows.
+  :global(.ant-steps-item-wrapper) {
+    row-gap: 0.125rem;
+  }
+
+  // The marker button is the icon: no box of antd's own around it, at the marker's size so the rail meets its middle.
+  :global(.ant-steps-item-icon) {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    background: none;
+    line-height: 1;
+  }
+
+  :global(.ant-steps-item-icon) > span {
+    display: contents;
+  }
+
+  :global(.ant-steps-item-section) {
+    max-width: 100%;
+  }
+
+  :global(.ant-steps-item-title) {
+    max-width: 100%;
+    padding: 0;
+    color: var(--color-text-muted);
+    line-height: 1.2;
+  }
+
+  :global(.ant-steps-item-rail) {
+    border-top: 0.125rem solid var(--color-border);
   }
 }
 
-.metStep:not(:last-child)::after {
-  background-color: var(--color-success);
+.metStep:global(.ant-steps-item) :global(.ant-steps-item-rail) {
+  border-top-color: var(--color-success);
 }
 
-// Above the line, and with no fill of its own: the marker is what the state shows on.
+// Above the rail, and with no fill of its own: the marker is what the state shows on.
 .step:global(.ant-btn) {
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  width: 100%;
+  width: auto;
+  min-width: 0;
   height: auto;
-  padding: var(--space-1) 0;
+  // No padding, so the labelled steps take little height and Move fits above STOP while connected.
+  padding: 0;
+  border-radius: 50%;
   color: var(--color-text-muted);
 }
 
@@ -47,16 +72,31 @@
 }
 
 .marker {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border: 0.125rem solid var(--color-border);
   border-radius: 50%;
   background-color: var(--color-surface-1);
   font-size: 1.125rem;
   line-height: 1;
+}
+
+// The number of warnings left: an antd count badge on the marker's corner, in the warning colour.
+.countBadge:global(.ant-badge) {
+  color: inherit;
+  line-height: 1;
+
+  :global(.ant-badge-count) {
+    box-shadow: none;
+    background-color: var(--color-warning);
+    color: var(--color-surface-1);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 .metStep .marker {
@@ -66,13 +106,24 @@
   font-size: 1.25rem;
 }
 
+// Recommended, not required: a hollow, thin dotted ring with no fill, so it never reads as the solid ring of a to-do
+// step or as a disabled one.
+.optionalStep .marker {
+  border-width: 0.0625rem;
+  border-style: dotted;
+  border-color: var(--color-text-muted);
+  background-color: transparent;
+  color: var(--color-text-muted);
+}
+
 .nextStep .marker {
   border-color: var(--color-accent);
   color: var(--color-text);
   animation: next-step-pulse 2s ease-out infinite;
 }
 
-.nextStep .step:global(.ant-btn) {
+.nextStep .step:global(.ant-btn),
+.stepCell.nextStep :global(.ant-steps-item-title) {
   color: var(--color-text);
   font-weight: 600;
 }
@@ -93,8 +144,42 @@
   }
 }
 
-// 13 px at medium weight in the muted colour (8.6:1), so the step names read as easily as the buttons below.
+// 12 px at medium weight in the muted colour (8.6:1), so the names fit the default panel. Each name keeps to its own
+// equal column with a small gap on both sides and ends in an ellipsis only when it still does not fit, so two names
+// never run together.
 .caption {
-  font-size: 0.8125rem;
+  display: block;
+  cursor: pointer;
+  max-width: 100%;
+  padding: 0 0.125rem;
+  overflow: hidden;
+  font-size: 0.75rem;
   font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// A small dashed-ring badge on the corner of an optional step's marker, apart from the name; the step's tooltip says
+// it is optional. The word stays for screen readers and tests.
+.optionalMark {
+  position: absolute;
+  top: -0.3125rem;
+  right: -0.5rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 0.0625rem dashed var(--color-text-muted);
+  border-radius: 50%;
+  background-color: var(--color-surface-1);
+}
+
+.optionalMarkText {
+  @include accessibility.visually-hidden;
+}
+
+// The steps and the next-step button, spaced like the cards' other rows.
+.readiness {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }

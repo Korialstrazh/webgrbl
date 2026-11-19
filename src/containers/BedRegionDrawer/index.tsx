@@ -1,9 +1,11 @@
 /**
- * An antd Drawer rendered into the bed region, with a clear mask over the bed only, so the machine panel and STOP stay
- * visible and clickable and the bed stays in view; a click on the bed still closes the drawer. It registers as an open
+ * An antd Drawer rendered into the bed region, with a clear mask over the bed only (dimmed in a narrow layout, where it
+ * covers the one region on screen), so the machine panel and STOP stay visible and clickable and the bed stays in view;
+ * a click on the bed still closes the drawer. It registers as an open
  * overlay while shown, so Escape closes it instead of stopping the machine. While a left drawer is open it sets its
  * width on the host, so on a wide window the bed moves aside instead of being covered, and tells the bed view so it
- * fills the strip that is left. Features open drawers only through this wrapper, never through a raw antd Drawer.
+ * fits the whole bed into the strip left. Features open drawers only through this wrapper, never through a raw antd
+ * Drawer.
  *
  * @author michael.morosov
  *
@@ -15,32 +17,54 @@
 import { Drawer } from 'antd';
 import { useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useDispatch } from 'react-redux';
 import { BED_REGION_DRAWER_INSET_PROPERTY } from '../../utils/bed/bed.region.drawer.constants';
 import { BED_REGION_DRAWER_STORE } from '../../utils/bed/bed.region.drawer.store';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
 import { getBedRegionDrawerInset } from '../../utils/bed/get.bed.region.drawer.inset';
+import { getBedRegionDrawerInsetPixels } from '../../utils/bed/get.bed.region.drawer.inset.pixels';
+import { useIsWideLayout } from '../../utils/hooks/use.is.wide.layout';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
+import type { AppDispatch, AppStore } from '../../utils/states/new.store';
+import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
+import { ConsoleOpenChanged, selectIsConsoleOpen } from '../../utils/states/panel.layout.state';
+import { useAppStore } from '../../utils/states/use.app.store';
 import type { BedRegionDrawerProps } from './interfaces/BedRegionDrawerProps';
 import styles from './styles.module.scss';
+import { useCloseOnUnrelatedDialog } from './use.close.on.unrelated.dialog';
 
 export const BedRegionDrawer = (props: BedRegionDrawerProps): ReactNode => {
   const { isOpen, overlayIdPrefix, onClose, ...drawerProps } = props;
   const bedRegionHost: HTMLElement | null = useContext(BedRegionHostContext);
+  const isWide: boolean = useIsWideLayout();
+  const store: AppStore = useAppStore();
+  const dispatch: AppDispatch = useDispatch();
   // Without the bed region the drawer would fall back to the whole window, over STOP, so it waits for the region.
   const isShown: boolean = isOpen && Boolean(bedRegionHost);
 
   const insetValue: string | undefined = getBedRegionDrawerInset(drawerProps.placement, drawerProps.size);
 
-  useOverlayRegistration(overlayIdPrefix, isShown);
+  useOverlayRegistration(overlayIdPrefix, isShown, OVERLAY_KIND.DIALOG);
+  useCloseOnUnrelatedDialog(isShown, styles.bedRegionDrawer, onClose);
+
+  // In the narrow layout the console is a sheet in the same box: a drawer that opens puts it away, so the two never
+  // stack. Only the opening does, so the console can still be opened again while the drawer is open.
+  useEffect(() => {
+    if (isShown && !isWide && selectIsConsoleOpen(store.getState())) {
+      dispatch(new ConsoleOpenChanged({ isConsoleOpen: false }));
+    }
+  }, [isShown, isWide, store, dispatch]);
 
   useEffect(() => {
     if (!bedRegionHost || !isShown || !insetValue) {
       return undefined;
     }
 
-    const closeStoredDrawer: () => void = BED_REGION_DRAWER_STORE.openBedRegionDrawer();
-
     bedRegionHost.style.setProperty(BED_REGION_DRAWER_INSET_PROPERTY, insetValue);
+
+    const closeStoredDrawer: () => void = BED_REGION_DRAWER_STORE.openBedRegionDrawer(
+      getBedRegionDrawerInsetPixels(bedRegionHost),
+    );
 
     return (): void => {
       bedRegionHost.style.removeProperty(BED_REGION_DRAWER_INSET_PROPERTY);

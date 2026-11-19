@@ -10,8 +10,14 @@
   gap: var(--space-2);
 }
 
+// The one destructive action sits on a row of its own under a thin divider, at the far end, so it never reads as one of
+// the neutral ones beside it.
 .resetAction {
-  margin-inline-start: auto;
+  display: flex;
+  flex-basis: 100%;
+  justify-content: flex-end;
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--color-border);
 }
 
 .help {

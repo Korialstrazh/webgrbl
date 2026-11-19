@@ -15,6 +15,7 @@ import { BgColorsOutlined } from '@ant-design/icons';
 import { Button, ColorPicker, Tooltip } from 'antd';
 import type { ColorPickerProps } from 'antd';
 import type { Color } from 'antd/es/color-picker';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,6 +23,7 @@ import { ANTD_COLOR_PICKER_FORMAT_HEX } from '../../utils/antd.constants';
 import { BED_COLOUR_PRESETS, DEFAULT_BED_COLOUR } from '../../utils/bed/bed.colour.constants';
 import { getValidBedColour } from '../../utils/bed/get.valid.bed.colour';
 import type { BedColourPreset } from '../../utils/bed/interfaces/BedColourPreset';
+import { usePopoverAutoClose } from '../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { BedColourChanged, selectBedColour } from '../../utils/states/bed.appearance.state';
 import type { AppDispatch } from '../../utils/states/new.store';
@@ -34,6 +36,9 @@ export const BedColourPicker = (): ReactNode => {
   const dispatch: AppDispatch = useDispatch();
   const bedColour: string = useSelector(selectBedColour);
   const labelText: string = t(DEFAULT.BED_COLOUR_LABEL);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  usePopoverAutoClose(isOpen, () => setIsOpen(false));
 
   const changeBedColour = (nextBedColour: string): void => {
     dispatch(new BedColourChanged({ bedColour: nextBedColour }));
@@ -85,6 +90,8 @@ export const BedColourPicker = (): ReactNode => {
       disabledAlpha
       disabledFormat
       panelRender={renderPanel}
+      open={isOpen}
+      onOpenChange={setIsOpen}
       onChange={handlePickerChange}
     >
       <Tooltip title={labelText}>

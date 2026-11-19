@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { LayersSection } from '.';
-import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
+import { ARROW_DOWN_KEY, ARROW_UP_KEY, ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
 import { HORIZONTAL_ELLIPSIS, MIDDLE_DOT, MULTIPLICATION_SIGN } from '../../utils/characters.constants';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
@@ -21,6 +21,7 @@ import {
 } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
+import { MOUSE_POINTER_TYPE } from './layers.section.constants';
 
 const CUT_COLOUR = DEFAULT_CUT_ENTRY.colour;
 const FILL_COLOUR = DEFAULT_FILL_ENTRY.colour;
@@ -28,14 +29,16 @@ const UNKNOWN_COLOUR = '#123456';
 const DANGLING_ENTRY_ID = 'removed-entry';
 const CUT_SUMMARY = `Line ${MIDDLE_DOT} 100 % ${MIDDLE_DOT} 300 mm/min ${MIDDLE_DOT} 3${MULTIPLICATION_SIGN}`;
 const FILL_SUMMARY = `Fill ${MIDDLE_DOT} 50 % ${MIDDLE_DOT} 2000 mm/min ${MIDDLE_DOT} 1${MULTIPLICATION_SIGN}`;
-const NOT_IN_PALETTE_NOTE = 'Not in the palette';
+const NOT_IN_PALETTE_NOTE = 'Not in the palette yet: open the layer to save its colour';
+const UNKNOWN_COLOUR_NAME = 'Black';
+const CUT_COLOUR_NAME = 'Red';
 const LAYERS_LIST_NAME = 'Project layers';
 const EMPTY_HINT_PATTERN = /No layers yet/;
 const SEND_CUT_LABEL = 'Send Cut to the laser';
-const SEND_UNKNOWN_LABEL = `Send ${UNKNOWN_COLOUR} to the laser`;
-const MOVE_CUT_DOWN_LABEL = 'Move Cut down';
-const MOVE_CUT_UP_LABEL = 'Move Cut up';
-const MOVE_FILL_UP_LABEL = 'Move Fill up';
+const SEND_UNKNOWN_LABEL = `Send ${UNKNOWN_COLOUR_NAME} to the laser`;
+const TOUCH_POINTER_TYPE = 'touch';
+const CUT_HANDLE_LABEL = 'Move Cut: drag, or press the up and down arrow keys';
+const FILL_HANDLE_LABEL = 'Move Fill: drag, or press the up and down arrow keys';
 const CUT_BUTTON_PATTERN = /^Cut/;
 const DRAWER_OVERLINE = 'Layer settings';
 const CLOSE_LABEL = 'Close';
@@ -113,7 +116,7 @@ describe(LayersSection.name, () => {
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
   });
 
-  it('lists the layers with their summaries; an unknown colour shows the note and is unchecked', () => {
+  it('lists the layers with their summaries; an unknown colour gets a colour name and an info icon, unchecked', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR, FILL_COLOUR, UNKNOWN_COLOUR]);
     renderSection(store);
@@ -122,11 +125,19 @@ describe(LayersSection.name, () => {
 
     expect(fillRowText).toContain(FILL_SUMMARY);
     expect(cutRowText).toContain(CUT_SUMMARY);
-    expect(unknownRowText).toContain(UNKNOWN_COLOUR);
-    expect(unknownRowText).toContain(NOT_IN_PALETTE_NOTE);
-    expect(screen.getAllByText(NOT_IN_PALETTE_NOTE)).toHaveLength(1);
+    expect(unknownRowText).toContain(UNKNOWN_COLOUR_NAME);
+    expect(unknownRowText).not.toContain(UNKNOWN_COLOUR);
+    expect(screen.getAllByLabelText(NOT_IN_PALETTE_NOTE)).toHaveLength(1);
     expect(screen.getByRole('checkbox', { name: SEND_CUT_LABEL })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: SEND_UNKNOWN_LABEL })).not.toBeChecked();
+  });
+
+  it('names its role above the rows, so it reads apart from the palette', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    renderSection(store);
+
+    expect(screen.getByText('Burn order')).toBeInTheDocument();
   });
 
   it('shows the note for a palette id the palette no longer has', () => {
@@ -143,8 +154,8 @@ describe(LayersSection.name, () => {
     });
     renderSection(store);
 
-    expect(screen.getByText(NOT_IN_PALETTE_NOTE)).toBeInTheDocument();
-    expect(screen.getByText(CUT_COLOUR)).toBeInTheDocument();
+    expect(screen.getByLabelText(NOT_IN_PALETTE_NOTE)).toBeInTheDocument();
+    expect(screen.getByText(CUT_COLOUR_NAME)).toBeInTheDocument();
   });
 
   it('dispatches LayerToggled false when a layer is unchecked', () => {
@@ -174,6 +185,48 @@ describe(LayersSection.name, () => {
     expect(getLayerKeys(store)).toEqual([CUT_COLOUR, FILL_COLOUR]);
   });
 
+  it('moves a layer while its handle is dragged by touch, as touch has no native drag', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+    const cutHandle: HTMLElement = screen.getByRole('button', { name: CUT_HANDLE_LABEL });
+    const fillRow: HTMLElement = getRow(FILL_ROW_INDEX);
+    const originalElementFromPoint: typeof document.elementFromPoint = document.elementFromPoint;
+
+    // jsdom lays nothing out, so the finger is said to be over the Fill row.
+    document.elementFromPoint = (): Element => fillRow;
+
+    try {
+      fireEvent.pointerDown(cutHandle, { pointerId: 1, pointerType: TOUCH_POINTER_TYPE });
+      fireEvent.pointerMove(cutHandle, { pointerId: 1, pointerType: TOUCH_POINTER_TYPE });
+      fireEvent.pointerUp(cutHandle, { pointerId: 1, pointerType: TOUCH_POINTER_TYPE });
+    } finally {
+      document.elementFromPoint = originalElementFromPoint;
+    }
+
+    expect(getLayerKeys(store)).toEqual([CUT_COLOUR, FILL_COLOUR]);
+  });
+
+  it('leaves a mouse press on the handle to the native row drag', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+    const cutHandle: HTMLElement = screen.getByRole('button', { name: CUT_HANDLE_LABEL });
+    const fillRow: HTMLElement = getRow(FILL_ROW_INDEX);
+    const originalElementFromPoint: typeof document.elementFromPoint = document.elementFromPoint;
+
+    document.elementFromPoint = (): Element => fillRow;
+
+    try {
+      fireEvent.pointerDown(cutHandle, { pointerId: 1, pointerType: MOUSE_POINTER_TYPE });
+      fireEvent.pointerMove(cutHandle, { pointerId: 1, pointerType: MOUSE_POINTER_TYPE });
+    } finally {
+      document.elementFromPoint = originalElementFromPoint;
+    }
+
+    expect(getLayerKeys(store)).toEqual([FILL_COLOUR, CUT_COLOUR]);
+  });
+
   it('ignores a drop after the drag ended without a drop', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
@@ -198,18 +251,28 @@ describe(LayersSection.name, () => {
     expect(dispatchSpy).not.toHaveBeenCalled();
   });
 
-  it('reorders with the move buttons, and disables the ends', () => {
+  it('reorders with the arrow keys on the drag handle, and stays put at the ends', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
     renderSection(store);
 
-    expect(screen.getByRole('button', { name: MOVE_FILL_UP_LABEL })).toBeDisabled();
-    expect(screen.getByRole('button', { name: MOVE_CUT_DOWN_LABEL })).toBeDisabled();
+    fireEvent.keyDown(screen.getByRole('button', { name: FILL_HANDLE_LABEL }), { key: ARROW_UP_KEY });
+    fireEvent.keyDown(screen.getByRole('button', { name: CUT_HANDLE_LABEL }), { key: ARROW_DOWN_KEY });
 
-    fireEvent.click(screen.getByRole('button', { name: MOVE_CUT_UP_LABEL }));
+    expect(getLayerKeys(store)).toEqual([FILL_COLOUR, CUT_COLOUR]);
+
+    fireEvent.keyDown(screen.getByRole('button', { name: CUT_HANDLE_LABEL }), { key: ARROW_UP_KEY });
 
     expect(getLayerKeys(store)).toEqual([CUT_COLOUR, FILL_COLOUR]);
     expect(getRowTexts()[FILL_ROW_INDEX]).toContain(CUT_SUMMARY);
+  });
+
+  it('shows no move up or down buttons on a row', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR, FILL_COLOUR]);
+    renderSection(store);
+
+    expect(screen.queryByRole('button', { name: /^Move Cut (up|down)$/ })).not.toBeInTheDocument();
   });
 
   it('opens the settings drawer for the clicked layer and closes it again', () => {

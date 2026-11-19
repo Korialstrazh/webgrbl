@@ -13,6 +13,12 @@
 /** The window is at least 1280 px wide, so the regions fit side by side. */
 export const WIDE_LAYOUT_MEDIA_QUERY = '(min-width: 80rem)';
 
+/**
+ * The window is at least 1600 px wide, so a left bed drawer pushes the bed aside and the bed still keeps most of its
+ * width; below it the drawer slides over the bed, which keeps its size. Must match the media query in BedPanel styles.
+ */
+export const BED_DRAWER_PUSH_MEDIA_QUERY = '(min-width: 100rem)';
+
 /** Width of the design panel; the custom property is set from layout.scss by the workbench styles. */
 export const DESIGN_PANEL_WIDTH = 'var(--design-panel-width)';
 
@@ -81,3 +87,12 @@ export const CONSOLE_PANEL_DEFAULT_SIZE_PERCENT = 30;
  * another tab upgrades the database; after this time the workbench opens with the default sizes instead.
  */
 export const PANEL_SIZES_READ_TIMEOUT_MS = 1_500;
+
+/** Marks what a popover must never cover, such as the Job steps and the next-step button. */
+export const POPOVER_KEEP_CLEAR_ATTRIBUTE = 'data-popover-keep-clear';
+
+/** Finds every element marked with POPOVER_KEEP_CLEAR_ATTRIBUTE. */
+export const POPOVER_KEEP_CLEAR_SELECTOR = `[${POPOVER_KEEP_CLEAR_ATTRIBUTE}]`;
+
+/** Set on the root element while tooltips are held back after the shown view changed; the global styles hide them. */
+export const TOOLTIP_HOLD_ATTRIBUTE = 'data-tooltip-hold';

@@ -1,0 +1,7 @@
+// Two compact buttons under the off-bed line, wrapping onto a second line in a narrow popover.
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}

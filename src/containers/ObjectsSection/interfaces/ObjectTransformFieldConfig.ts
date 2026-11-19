@@ -15,6 +15,10 @@ export interface ObjectTransformFieldConfig {
   field: keyof ProjectObjectTransform;
   /** Translation key of the field label. */
   labelKey: string;
+  /** Translation key of the short letter shown inside the input; fields without one show an icon. */
+  prefixKey?: string;
+  /** Translation key of the tooltip that names the field and its unit. */
+  hintKey: string;
   /** Decimals shown for the value. */
   decimals: number;
 }

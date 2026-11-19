@@ -34,11 +34,25 @@ body {
   outline-offset: var(--focus-outline-offset);
 }
 
+// After a pointer press no control but a text field draws the ring, so focus that a closing popover, drawer or dialog
+// hands back never looks like a selection or an error. Must match POINTER_MODALITY_ATTRIBUTE.
+:root[data-pointer-modality] :focus-visible:not(input, textarea, [contenteditable='true']) {
+  outline: none;
+}
+
 // On a filled orange button the orange ring would vanish into the fill, so it gets a two-tone ring instead: a dark gap
 // in the background colour, then a light ring in the text colour, clear against both the fill and the surface.
-.ant-btn.ant-btn-variant-solid.ant-btn-color-primary:focus-visible {
+:root:not([data-pointer-modality]) .ant-btn.ant-btn-variant-solid.ant-btn-color-primary:focus-visible {
   outline-color: var(--color-text);
   box-shadow: 0 0 0 var(--focus-outline-offset) var(--color-bg);
+}
+
+// antd draws a slider handle's focus as a slightly wider ring of its own, too faint to find; keyboard focus on a handle
+// gets the same 2 px accent ring as every button, round like the handle.
+:root:not([data-pointer-modality]) .ant-slider-handle:focus-visible {
+  border-radius: 50%;
+  outline: var(--focus-outline-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-outline-offset);
 }
 
 // The splitter bars change colour smoothly between rest, hover and drag; the colours come from the antd theme.
@@ -57,10 +71,40 @@ body {
   border-color: var(--color-danger-text);
 }
 
-// A primary button that cannot act yet keeps its solid shape in a dark accent tint, with the readable disabled grey
-// (5.3:1), so it still reads as the main action of its dialog and never as plain disabled text.
+// A primary button that cannot act yet takes the neutral locked outline (at least 3:1 on every surface) over the dark
+// disabled fill, with the readable disabled grey (5.3:1), instead of a brown accent tint that read below 3:1.
 .ant-btn.ant-btn-color-primary.ant-btn-variant-solid:disabled {
-  border-color: var(--color-accent-tint);
-  background-color: var(--color-accent-tint);
+  border-color: var(--color-disabled-border-locked);
+  background-color: var(--color-disabled-bg);
   color: var(--color-disabled-text);
+}
+
+// Set by holdTooltipsUntilPointerMoves: a view just changed under a resting pointer, so no tooltip may show yet.
+html[data-tooltip-hold] .ant-tooltip {
+  display: none;
+}
+
+// A brief accent glow on a control the app just brought into view on its own, such as the Toolpath view tab and the
+// warnings chip after Fix warnings. Must match ATTENTION_HIGHLIGHT_ATTRIBUTE and ATTENTION_HIGHLIGHT_DURATION_MS.
+[data-attention-highlight] {
+  border-radius: var(--radius-sm);
+  animation: attention-highlight 0.8s ease-out 2;
+}
+
+@keyframes attention-highlight {
+  from {
+    box-shadow: 0 0 0 0.25rem var(--color-accent);
+  }
+
+  to {
+    box-shadow: 0 0 0 0.625rem transparent;
+  }
+}
+
+// Without motion the glow is a steady accent ring for the same time.
+@media (prefers-reduced-motion: reduce) {
+  [data-attention-highlight] {
+    animation: none;
+    box-shadow: 0 0 0 0.125rem var(--color-accent);
+  }
 }

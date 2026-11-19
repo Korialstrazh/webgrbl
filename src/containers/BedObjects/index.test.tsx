@@ -34,6 +34,7 @@ import {
   BED_OBJECT_HANDLE_TEST_ID,
   BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID,
   BED_OBJECTS_SURFACE_TEST_ID,
+  BED_OFF_BED_ARROW_TEST_ID,
   SELECTION_HANDLE_SIZE_MM,
 } from './bed.objects.constants';
 import type { BedObjectHandle } from './bed.objects.constants';
@@ -62,6 +63,7 @@ const TWO_PIXELS_PER_MM_MATRIX: SvgScreenMatrixMock = { a: 2, b: 0, c: 0, d: 2, 
 const HALF_MM_PER_PIXEL_MATRIX: SvgScreenMatrixMock = { a: 0.5, b: 0, c: 0, d: 0.5, e: 0, f: 0 };
 const HANDLE_SIZE_PX = 10;
 const OBJECTS_LAYER_NAME = 'Design objects: arrow keys move the selection, Delete removes it';
+const POINTER_FOCUSED_CLASS_PATTERN = /pointerFocused/;
 const WIDTH_ATTRIBUTE = 'width';
 const HANDLE_ATTRIBUTE = 'data-handle';
 const RESTING_TRANSFORM = 'translate(20 280) rotate(0)';
@@ -70,6 +72,8 @@ const TRANSFORM_ATTRIBUTE = 'transform';
 const TRUE_TEXT = 'true';
 const FALSE_TEXT = 'false';
 const OUTSIDE_ATTRIBUTE = 'data-outside-bed';
+const OFF_BED_ARTWORK_SELECTOR = '[data-off-bed-artwork]';
+const CLIP_PATH_ATTRIBUTE = 'clip-path';
 const WIDE_WIDTH_MM = 100;
 const WIDE_HEIGHT_MM = 50;
 const WIDE_X_MM = 50;
@@ -293,6 +297,20 @@ describe(BedObjects.name, () => {
     expect(selectSelectedObjectIds(store.getState())).toEqual([secondObject.id]);
   });
 
+  it('marks a press focus, so the bed edge ring is for keyboard focus and a selection shows on the object', () => {
+    renderObjects([firstObject]);
+    const layer: HTMLElement = getObjectsLayer();
+
+    clickElement(getObjectElement(FIRST_NAME), FIRST_GRAB_X, FIRST_GRAB_Y);
+
+    expect(layer).toHaveFocus();
+    expect(layer.getAttribute('class')).toMatch(POINTER_FOCUSED_CLASS_PATTERN);
+
+    fireEvent.blur(layer);
+
+    expect(layer.getAttribute('class')).not.toMatch(POINTER_FOCUSED_CLASS_PATTERN);
+  });
+
   it('clears the selection on a click on empty bed', () => {
     const store: AppStore = renderObjects([firstObject, secondObject]);
 
@@ -360,7 +378,11 @@ describe(BedObjects.name, () => {
   });
 
   it('shows the drag offset while the pointer is still down', () => {
-    renderObjects([firstObject]);
+    const store: AppStore = renderObjects([firstObject]);
+
+    act(() => {
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [firstObject.id] }));
+    });
 
     fireEvent.pointerDown(getObjectElement(FIRST_NAME), {
       pointerId: POINTER_ID,
@@ -454,6 +476,11 @@ describe(BedObjects.name, () => {
 
   it('commits a fast flick from where the pointer comes up, with no move in between', () => {
     const store: AppStore = renderObjects([firstObject]);
+
+    act(() => {
+      store.dispatch(new ProjectSelectionChanged({ objectIds: [firstObject.id] }));
+    });
+
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     fireEvent.pointerDown(getObjectElement(FIRST_NAME), {
@@ -502,6 +529,17 @@ describe(BedObjects.name, () => {
     expect(getObjectElement(FIRST_NAME)).toHaveAttribute(OUTSIDE_ATTRIBUTE, TRUE_TEXT);
     expect(getObjectElement(SECOND_NAME)).toHaveAttribute(OUTSIDE_ATTRIBUTE, FALSE_TEXT);
     expect(screen.getAllByTestId(BED_OBJECT_OUTSIDE_OUTLINE_TEST_ID)).toHaveLength(1);
+    expect(screen.getAllByTestId(BED_OFF_BED_ARROW_TEST_ID)).toHaveLength(1);
+  });
+
+  it('draws the off-bed part of an object faint and unclipped, and only for an object off the bed', () => {
+    renderObjects([{ ...firstObject, xMm: -OBJECT_SIZE_MM }, secondObject]);
+
+    const offBedArtwork: Element | null = getObjectElement(FIRST_NAME).querySelector(OFF_BED_ARTWORK_SELECTOR);
+
+    expect(offBedArtwork).not.toHaveAttribute(CLIP_PATH_ATTRIBUTE);
+    expect(offBedArtwork?.childElementCount).toBe(1);
+    expect(getObjectElement(SECOND_NAME).querySelector(OFF_BED_ARTWORK_SELECTOR)).toBeNull();
   });
 
   describe('handles', () => {

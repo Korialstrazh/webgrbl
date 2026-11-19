@@ -22,4 +22,24 @@
   margin: 0;
   font-size: 0.8125rem;
   color: var(--color-text-muted);
+
+  // The empty-state pictogram, large enough to read at a glance, as in the other empty states.
+  > :global(.anticon) {
+    font-size: 1.125rem;
+  }
+}
+
+// One line that names the card's role: this project's layers, in the order the laser burns them.
+.purpose {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+
+  // The leading icon at 14 px, the size of every status icon.
+  > :global(.anticon) {
+    font-size: 0.875rem;
+  }
 }

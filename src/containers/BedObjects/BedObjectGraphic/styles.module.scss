@@ -3,17 +3,29 @@
 }
 
 // On a dark bed, black fills and dark blue strokes would melt into the surface, so the drawing gets a light halo: a
-// crisp inner rim and a softer outer glow. Only the design view draws it; colours, toolpath and G-code are untouched.
+// crisp, solid inner rim and a softer outer glow. Only the design view draws it; colours, toolpath and G-code are untouched.
+// The selection gets no halo: on a huge object its glowing edge would run across the whole canvas.
 // Must match BED_OVERLAY_TONE.ON_DARK.
-:global([data-bed-tone='on-dark']) .bedObject > image,
-:global([data-bed-tone='on-dark']) .bedObject > g {
+:global([data-bed-tone='on-dark']) .bedObject > .artwork {
   filter:
     drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
     drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
-    drop-shadow(0 0 0.1875rem rgb(255 255 255 / 35%));
+    drop-shadow(0 0 0.0625rem rgb(255 255 255 / 100%))
+    drop-shadow(0 0 0.3125rem rgb(255 255 255 / 75%));
 }
 
-// The whole box takes the presses of an object drawn as outlines, as the artwork image does for a filled one.
+// An object that runs off the bed is drawn a little muted and without the halo: a huge guide shape far off the bed
+// would otherwise glow across the whole canvas and read as a glitch. It stays clear enough to read as the object; its
+// drawing stops at the bed edge, and the amber dashed outline and the edge arrows mark it as off the bed.
+.bedObject[data-outside-bed='true'] > .artwork {
+  opacity: 0.75;
+}
+
+:global([data-bed-tone='on-dark']) .bedObject[data-outside-bed='true'] > .artwork {
+  filter: none;
+}
+
+// The whole box takes the presses, also where the drawing is cut off at the bed edge.
 .hitArea {
   fill: transparent;
   pointer-events: all;
@@ -34,9 +46,14 @@
   pointer-events: none;
 }
 
+// An object off the bed gets a thick dashed outline in the bed accent (light amber on a dark bed, dark amber on a light
+// one) over a faint tint of the same colour, whatever colours its artwork has, so even a black drawing on a dark bed
+// can be found. Wider dashes than the selection box, so the two never read as one.
 .outsideOutline {
-  stroke: var(--color-bed-danger);
-  stroke-dasharray: 3 3;
+  fill: color-mix(in oklab, var(--color-bed-accent) 10%, transparent);
+  stroke: var(--color-bed-accent);
+  stroke-width: 2;
+  stroke-dasharray: 8 4;
 }
 
 .selectionBox,
@@ -67,4 +84,41 @@
 
 .selectionHandle[data-handle='rotate'] {
   cursor: grab;
+}
+
+// Content turned off in the element tree: still shown, so it can be found and turned back on, but as a faint dashed
+// outline in the bed's travel colour, with no fill and no halo, so it never reads as a laser path.
+.disabledArtwork {
+  opacity: 0.55;
+  pointer-events: none;
+  filter: none;
+}
+
+.disabledArtwork :is(path, rect, circle, ellipse, line, polyline, polygon) {
+  fill: none !important;
+  stroke: var(--color-bed-travel) !important;
+  stroke-width: 1px !important;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+
+// The part of an object that lies off the bed: no halo and no presses of its own, its shapes redrawn as a dashed
+// outline in the bed accent over a faint tint, independent of the artwork colours, so a huge or misplaced import shows
+// clearly where it is without reading as something that burns. Artwork drawn as an image keeps its own look, faint.
+.offBedArtwork {
+  opacity: 0.85;
+  pointer-events: none;
+  filter: none;
+}
+
+.offBedArtwork > image {
+  opacity: 0.35;
+}
+
+.offBedArtwork :is(path, rect, circle, ellipse, line, polyline, polygon) {
+  fill: color-mix(in oklab, var(--color-bed-accent) 12%, transparent) !important;
+  stroke: var(--color-bed-accent) !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 5 3;
+  vector-effect: non-scaling-stroke;
 }

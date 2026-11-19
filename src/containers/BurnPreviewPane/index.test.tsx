@@ -8,10 +8,8 @@ import { newBurnSceneRenderer } from '../../utils/burn.scene/burn.scene.runtime'
 import type { BurnSceneRenderer } from '../../utils/burn.scene/interfaces/BurnSceneRenderer';
 import { FakeBurnModelWorkerClient } from '../../utils/burn.model/test.support/fake.burn.model.worker.client';
 import type { Material } from '../../utils/materials/interfaces/Material';
-import { DEFAULT_MATERIAL_THICKNESS_MM } from '../../utils/materials/material.constants';
 import { newMaterial } from '../../utils/materials/new.material';
 import { BedViewModeChanged } from '../../utils/states/bed.view.state';
-import { BURN_MODEL_STATUS } from '../../utils/states/burn.model.status.constants';
 import {
   BurnModelFailed,
   BurnModelReady,
@@ -19,7 +17,6 @@ import {
   BurnPartLifted,
   BurnPartSelected,
   selectBurnPartLiftMm,
-  selectBurnModelStatus,
   selectSelectedBurnPartId,
 } from '../../utils/states/burn.model.state';
 import { selectActiveMaterial } from '../../utils/states/material.selectors';
@@ -42,7 +39,7 @@ import { newToolpathMove } from '../../utils/toolpath/test.support/new.toolpath.
 const FIT_LABEL = /^Fit/;
 const TOP_LABEL = /^Top/;
 const NO_WEBGL_TEXT = 'The 3D view could not start in this browser. The Cut check still works.';
-const LOADING_TEXT = 'Loading the 3D view';
+const LOADING_TEXT = 'Loading 3D\u2026';
 const SCENE_CANVAS_SELECTOR = 'canvas';
 const WEBGL_CONTEXT_LOST_EVENT = 'webglcontextlost';
 const PART_ID = 1;
@@ -54,11 +51,9 @@ const CLICK_Y_PX = 25;
 const DRAG_DISTANCE_PX = 40;
 const LAYER_KEY = '#ff0000';
 const OUT_OF_DATE_TEXT = /^Out of date: the design changed/;
-const NO_MATERIAL_TEXT = /^Add a material to see/;
-const BUILDING_TEXT = 'Building the 3D view';
+const NO_MATERIAL_TEXT = /^Shown with a neutral material/;
+const BUILDING_TEXT = 'Building 3D\u2026';
 const FAILED_TEXT = /^The 3D view could not be built/;
-const ADD_MATERIAL_LABEL = 'Add material\u2026';
-const SAVE_LABEL = 'Save';
 const TEST_MATERIAL: Material = newMaterial();
 
 vi.mock('../../utils/burn.scene/burn.scene.runtime', () => ({
@@ -258,7 +253,7 @@ describe(BurnPreviewPane.name, () => {
     expect(screen.queryByText(OUT_OF_DATE_TEXT)).not.toBeInTheDocument();
   });
 
-  it('asks for a material, builds nothing, and adding one selects it and builds', async () => {
+  it('builds with a neutral material, offers the material chip, and rebuilds once one is picked', async () => {
     const burnModelClient: FakeBurnModelWorkerClient = new FakeBurnModelWorkerClient();
     const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true), burnModelClient);
 
@@ -283,20 +278,22 @@ describe(BurnPreviewPane.name, () => {
       </Provider>,
     );
 
-    expect(screen.getByText(NO_MATERIAL_TEXT)).toBeInTheDocument();
-    expect(burnModelClient.generationInputs).toEqual([]);
-
-    fireEvent.click(screen.getByRole('button', { name: ADD_MATERIAL_LABEL }));
-    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Oak' } });
-    fireEvent.click(screen.getByRole('button', { name: SAVE_LABEL }));
-
+    expect(screen.getByTitle(NO_MATERIAL_TEXT)).toBeInTheDocument();
     await vi.waitFor((): void => {
-      expect(selectBurnModelStatus(store.getState())).toBe(BURN_MODEL_STATUS.READY);
+      expect(burnModelClient.generationInputs).toHaveLength(1);
     });
 
-    expect(selectActiveMaterial(store.getState())?.thicknessMm).toBe(DEFAULT_MATERIAL_THICKNESS_MM);
-    expect(burnModelClient.generationInputs).toHaveLength(1);
-    expect(screen.queryByText(NO_MATERIAL_TEXT)).not.toBeInTheDocument();
+    act(() => {
+      store.dispatch(new MaterialSaved({ material: TEST_MATERIAL }));
+      store.dispatch(new ProjectMaterialSelected({ materialId: TEST_MATERIAL.id }));
+    });
+
+    await vi.waitFor((): void => {
+      expect(burnModelClient.generationInputs).toHaveLength(2);
+    });
+
+    expect(selectActiveMaterial(store.getState())?.id).toBe(TEST_MATERIAL.id);
+    expect(screen.queryByTitle(NO_MATERIAL_TEXT)).not.toBeInTheDocument();
   });
 
   it('explains a running and a failed build', async () => {
@@ -330,7 +327,7 @@ describe(BurnPreviewPane.name, () => {
     renderPane();
 
     expect(await screen.findByText(NO_WEBGL_TEXT)).toBeInTheDocument();
-    expect(screen.getByText(NO_MATERIAL_TEXT)).toBeInTheDocument();
+    expect(screen.getByTitle(NO_MATERIAL_TEXT)).toBeInTheDocument();
   });
 
   it('offers Fit and Top once a model is on show, and they move the view', async () => {

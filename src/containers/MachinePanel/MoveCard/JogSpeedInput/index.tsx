@@ -9,13 +9,14 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import { InputNumber } from 'antd';
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_INPUT_NUMBER_PRECISION_INTEGER } from '../../../../utils/antd.constants';
+import { getCommittedNumber } from '../../../../utils/get.committed.number';
+import { useNumberFieldDraft } from '../../../../utils/hooks/use.number.field.draft';
+import type { NumberFieldDraftControls } from '../../../../utils/hooks/use.number.field.draft';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
-import { getClampedJogFeedRate } from '../../../../utils/machine/get.clamped.jog.feed.rate';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
 import {
   DEFAULT_MACHINE_JOG_FEED_RATE,
@@ -30,19 +31,19 @@ export const JogSpeedInput = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
-  const [draftFeedRate, setDraftFeedRate] = useState<number | undefined>(undefined);
   const savedFeedRate: number = activeProfile?.jogFeedRate ?? DEFAULT_MACHINE_JOG_FEED_RATE;
+  const { fieldValue, typedValue, changeDraft, clearDraft }: NumberFieldDraftControls =
+    useNumberFieldDraft(savedFeedRate);
 
+  // Only blur and Enter correct the field: an empty or unfinished draft never snaps back while the user types, and
+  // never reaches the profile; a number outside the limits is held inside them.
   const saveDraftFeedRate = (): void => {
-    if (!activeProfile || !draftFeedRate) {
-      return;
-    }
+    const jogFeedRate: number | undefined =
+      getCommittedNumber(typedValue, MACHINE_JOG_FEED_RATE_MIN, MACHINE_JOG_FEED_RATE_MAX);
 
-    const jogFeedRate: number = getClampedJogFeedRate(draftFeedRate);
+    clearDraft();
 
-    setDraftFeedRate(undefined);
-
-    if (jogFeedRate !== activeProfile.jogFeedRate) {
+    if (activeProfile && jogFeedRate && jogFeedRate !== activeProfile.jogFeedRate) {
       dispatch(new MachineProfileSaved({ profile: { ...activeProfile, jogFeedRate } }));
     }
   };
@@ -52,12 +53,12 @@ export const JogSpeedInput = (): ReactNode => {
       className={styles.jogSpeedInput}
       aria-label={t(DEFAULT.MACHINE_MOVE_JOG_SPEED_LABEL)}
       disabled={!activeProfile}
-      min={MACHINE_JOG_FEED_RATE_MIN}
-      max={MACHINE_JOG_FEED_RATE_MAX}
+      // No min or max here: the input would drop a number past them silently; blur holds it inside the limits.
       precision={ANTD_INPUT_NUMBER_PRECISION_INTEGER}
       suffix={t(DEFAULT.MACHINE_MOVE_JOG_SPEED_UNIT)}
-      value={draftFeedRate ?? savedFeedRate}
-      onChange={(feedRate: number | null): void => setDraftFeedRate(feedRate || undefined)}
+      value={fieldValue}
+      changeOnBlur={false}
+      onChange={changeDraft}
       onBlur={saveDraftFeedRate}
       onPressEnter={saveDraftFeedRate}
     />

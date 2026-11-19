@@ -37,4 +37,6 @@ export interface MachineProfile {
   frameMarginMm?: number;
   /** Speed in mm/min of the frame trace; missing means the default. */
   frameFeedMmPerMin?: number;
+  /** Laser pointer power in percent of S max; missing (a profile saved before it was stored) means the session's. */
+  pointerPowerPercent?: number;
 }

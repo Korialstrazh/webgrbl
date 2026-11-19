@@ -1,26 +1,27 @@
 import { PlayCircleFilled } from '@ant-design/icons';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { CaptionedActionButton } from '.';
-import { CAPTIONED_ACTION_LOCK_TEST_ID } from './captioned.action.constants';
 
 const LABEL_TEXT = 'Start job';
 const CAPTION_TEXT = 'Start';
 const BLOCKED_REASON_TEXT = 'Connect the laser first.';
+const PLAY_ICON_TEST_ID = 'play-icon';
 
 describe(CaptionedActionButton.name, () => {
-  it('shows a lock on the icon of an action that is off for a reason', () => {
+  it('turns off an action that is off for a reason and keeps its icon, with no lock glyph of its own', () => {
     render(
       <CaptionedActionButton
         labelText={LABEL_TEXT}
         captionText={CAPTION_TEXT}
-        iconComponent={<PlayCircleFilled />}
+        iconComponent={<PlayCircleFilled data-testid={PLAY_ICON_TEST_ID} />}
         blockedReasonText={BLOCKED_REASON_TEXT}
       />,
     );
 
     expect(screen.getByRole('button', { name: LABEL_TEXT })).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByTestId(CAPTIONED_ACTION_LOCK_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(PLAY_ICON_TEST_ID)).toBeInTheDocument();
+    expect(document.querySelector('.anticon-lock')).not.toBeInTheDocument();
   });
 
   it('keeps a blocked action focusable with its reason for screen readers', () => {
@@ -39,6 +40,23 @@ describe(CaptionedActionButton.name, () => {
     expect(button).not.toBeDisabled();
     expect(button).toHaveFocus();
     expect(button).toHaveAccessibleDescription(BLOCKED_REASON_TEXT);
+  });
+
+  it('shows the reason a blocked action is off when it takes the keyboard focus', async () => {
+    render(
+      <CaptionedActionButton
+        labelText={LABEL_TEXT}
+        captionText={CAPTION_TEXT}
+        iconComponent={<PlayCircleFilled />}
+        blockedReasonText={BLOCKED_REASON_TEXT}
+      />,
+    );
+
+    act(() => {
+      fireEvent.focus(screen.getByRole('button', { name: LABEL_TEXT }));
+    });
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(BLOCKED_REASON_TEXT);
   });
 
   it.each(['click', 'Enter', ' '])('ignores %j while blocked, also in a wrapper', (activationKey: string) => {
@@ -86,7 +104,7 @@ describe(CaptionedActionButton.name, () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('shows a lock on an action that is turned off', () => {
+  it('turns off an action that is turned off', () => {
     render(
       <CaptionedActionButton
         labelText={LABEL_TEXT}
@@ -96,15 +114,14 @@ describe(CaptionedActionButton.name, () => {
       />,
     );
 
-    expect(screen.getByTestId(CAPTIONED_ACTION_LOCK_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: LABEL_TEXT })).toBeDisabled();
   });
 
-  it('shows no lock on an action that can be used', () => {
+  it('leaves an action that can be used on', () => {
     render(
       <CaptionedActionButton labelText={LABEL_TEXT} captionText={CAPTION_TEXT} iconComponent={<PlayCircleFilled />} />,
     );
 
     expect(screen.getByRole('button', { name: LABEL_TEXT })).toBeEnabled();
-    expect(screen.queryByTestId(CAPTIONED_ACTION_LOCK_TEST_ID)).not.toBeInTheDocument();
   });
 });

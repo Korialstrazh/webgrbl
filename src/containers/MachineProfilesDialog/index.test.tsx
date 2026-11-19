@@ -10,6 +10,7 @@ import {
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import { ANSWER_SETTLE_MS } from '../../utils/grbl/test.support/grbl.answer.settle';
 import { DEFAULT } from '../../utils/localization/default.locales';
+import { DEFAULT_POINTER_POWER_PERCENT } from '../../utils/machine/machine.command.constants';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import type { MachineProfilesDocument } from '../../utils/profiles/interfaces/MachineProfilesDocument';
 import { MACHINE_PROFILES_DOCUMENT_VERSION } from '../../utils/profiles/machine.profile.constants';
@@ -38,6 +39,8 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../utils/test.support/bed.region.test.host';
 
 const NAME_LABEL = 'Name';
+const POINTER_POWER_LABEL = 'Laser pointer power (% of S max)';
+const EDITED_POINTER_POWER_PERCENT = 2.5;
 const MAX_POWER_LABEL = 'Laser power (W)';
 const WORK_AREA_X_LABEL = 'Work area width (mm)';
 const WORK_AREA_Y_LABEL = 'Work area height (mm)';
@@ -141,6 +144,12 @@ const newDocumentText = (profiles: MachineProfile[]): string => JSON.stringify({
 } satisfies MachineProfilesDocument);
 
 describe(MachineProfilesDialog.name, () => {
+  it.each(['Name', 'Width', 'Depth'])('shows the short visible field name %s', (captionText: string) => {
+    renderDialog(newStore());
+
+    expect(within(screen.getByRole('dialog')).getByText(captionText)).toBeInTheDocument();
+  });
+
   it('lists the GRBL settings editor as a coming-soon note, not as a button', () => {
     renderDialog(newStore());
 
@@ -220,8 +229,23 @@ describe(MachineProfilesDialog.name, () => {
     clickButton(SAVE_LABEL);
 
     expect(selectMachineProfiles(store.getState())).toEqual([
-      { ...workshopProfile, maxPowerWatts: EDITED_MAX_POWER_WATTS },
+      {
+        ...workshopProfile,
+        maxPowerWatts: EDITED_MAX_POWER_WATTS,
+        pointerPowerPercent: DEFAULT_POINTER_POWER_PERCENT,
+      },
     ]);
+  });
+
+  it('edits the pointer power of a profile and keeps it inside the pointer range', () => {
+    const store: AppStore = newStore();
+
+    saveProfile(store, { name: WORKSHOP_NAME });
+    renderDialog(store);
+    changeField(POINTER_POWER_LABEL, EDITED_POINTER_POWER_PERCENT);
+    clickButton(SAVE_LABEL);
+
+    expect(selectMachineProfiles(store.getState())[0]?.pointerPowerPercent).toBe(EDITED_POINTER_POWER_PERCENT);
   });
 
   it('marks a profile that is not stored yet as new and not saved in the list', () => {
@@ -371,6 +395,7 @@ describe(MachineProfilesDialog.name, () => {
         workAreaXMm: SIMULATOR_WORK_AREA_MM,
         workAreaYMm: SIMULATOR_WORK_AREA_MM,
         sValueMax: SIMULATOR_S_VALUE_MAX,
+        pointerPowerPercent: DEFAULT_POINTER_POWER_PERCENT,
       });
     });
   });

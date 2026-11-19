@@ -3,7 +3,8 @@
  * of the ready toolpath, as wide as its share of the burn time (travel left out), in the layer colour, named for
  * screen readers. With one layer or none it
  * is not shown: a single full-width segment says nothing and reads as a second progress bar. The shading layer is
- * mid-grey, as in the By layer view of the bed. The shares are worked out once per toolpath, not per frame.
+ * mid-grey, as in the By layer view of the bed. The shares are worked out once per toolpath, not per frame. Only the
+ * played part shows the layer colours; the part still to play is a neutral track, so no colour there reads as an error.
  *
  * @author michael.morosov
  *
@@ -19,6 +20,7 @@ import { useSelector } from 'react-redux';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../../utils/palette/interfaces/PaletteEntry';
+import { PERCENT_DIVISOR } from '../../../utils/percent.constants';
 import { selectPaletteEntries } from '../../../utils/states/palette.state';
 import { selectProjectLayers } from '../../../utils/states/project.document.state';
 import { selectToolpath, selectToolpathStatus } from '../../../utils/states/toolpath.state';
@@ -50,7 +52,12 @@ const renderLayerSegment = (segment: SimulationLayerSegment): ReactNode => (
 /** One segment fills the bar and tells nothing, so the bar needs at least two layers. */
 const MIN_SEGMENTS_TO_SHOW = 2;
 
-const SimulationLayerBarContent = (): ReactNode => {
+interface SimulationLayerBarProps {
+  /** How much of the job has played, from 0 to 100. */
+  playedPercent: number;
+}
+
+const SimulationLayerBarContent = ({ playedPercent }: SimulationLayerBarProps): ReactNode => {
   const { t } = useTranslation();
   const captionId: string = useId();
   const isToolpathCurrent: boolean = useSelector(selectToolpathStatus) === TOOLPATH_STATUS.READY;
@@ -76,7 +83,14 @@ const SimulationLayerBarContent = (): ReactNode => {
     <div className={styles.simulationLayerBar}>
       <span className={styles.caption} id={captionId}>{t(DEFAULT.SIMULATION_LAYER_BAR_LABEL)}</span>
       <div className={styles.layerBar} role="group" aria-labelledby={captionId}>
-        {segments.map(renderLayerSegment)}
+        {/* Clipped at the playhead, which moves at run time, so the unplayed rest shows the neutral track. */}
+        <div
+          className={styles.playedSegments}
+          // eslint-disable-next-line no-restricted-syntax -- runtime-only playhead position
+          style={{ clipPath: `inset(0 ${PERCENT_DIVISOR - playedPercent}% 0 0)` }}
+        >
+          {segments.map(renderLayerSegment)}
+        </div>
       </div>
     </div>
   );

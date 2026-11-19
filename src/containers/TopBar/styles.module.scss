@@ -22,15 +22,19 @@
   margin-left: auto;
 }
 
-.heading,
 .activeMenus {
   flex-shrink: 0;
 }
 
+// A slot of a set width that does not follow the name, so a short or long project name never moves the menus beside
+// it. The slot is wide enough for an automatic name with its date and time, and gives way only when the bar is short of
+// room; only then does a long name end in an ellipsis.
 .heading {
   display: flex;
+  flex: 0 1 24rem;
   flex-direction: column;
   align-items: flex-start;
+  min-width: 11rem;
 }
 
 .title {
@@ -58,16 +62,32 @@
     padding: 0 var(--space-3);
   }
 
-  // The app name goes so the project name can use the whole heading, on up to two lines.
+  // The app name goes so the project name can use the whole heading. The name gets the room first: a fixed width
+  // wide enough for an automatic name with its date and time, which gives way only when the bar runs out of space.
   .heading {
-    flex-shrink: 1;
-    min-width: 7.5rem;
-    max-width: 10rem;
+    flex: 0 1 15rem;
+    min-width: 6.5rem;
     overflow: hidden;
   }
 
   .title {
     @include accessibility.visually-hidden;
+  }
+}
+
+// A thin divider sets the laser profile apart from the project's file and save icons, so the icons never read as one
+// cluster when the labels are gone.
+.profileButton:global(.ant-btn) {
+  position: relative;
+  margin-inline-start: var(--space-2);
+
+  &::before {
+    position: absolute;
+    inset-block: 25%;
+    inset-inline-start: calc(-1 * var(--space-1) - 1px);
+    width: 1px;
+    background-color: var(--color-border);
+    content: '';
   }
 }
 
@@ -80,11 +100,13 @@
   white-space: nowrap;
 }
 
-// The save word, the project name and the profile name give up room first, so Import SVG keeps its label and the
-// connection pill stays whole at 50rem; Import SVG drops its label at 46rem and the profile name at 37.5rem.
+// The save word goes and the profile name shortens (the connection pill drops its own copy of the name), so the
+// project name stays readable and the connection pill stays whole at 50rem; below 57rem Import SVG drops its label and
+// the profile shrinks to its laser icon, so the bar is not crowded (the tooltip names the active profile).
 @media (width < 62.5rem) {
   .profileName {
-    max-width: 5rem;
+    max-width: 6rem;
+    font-size: 0.8125rem;
   }
 
   .activeMenus :global(.ant-btn) {
@@ -92,15 +114,18 @@
   }
 }
 
-@media (width < 46rem) {
-  .compactHiddenLabel {
-    @include accessibility.visually-hidden;
-  }
-}
-
-@media (width < 37.5rem) {
+@media (width < 57rem) {
+  .importLabel,
   .profileName {
     @include accessibility.visually-hidden;
+  }
+
+  // Icon-only, Import SVG looks like its plain icon neighbours; a filled, bordered square would read as a toggle
+  // that is switched on.
+  .activeMenus :global(.ant-btn-default:not(:hover, :focus-visible)) {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none;
   }
 }
 

@@ -4,6 +4,7 @@ import { Provider, useSelector } from 'react-redux';
 import type { Mock, MockInstance } from 'vitest';
 import { LayerSettingsDrawer } from '.';
 import { ENTER_KEY } from '../../utils/browser/browser.events.constants';
+import { getLayerDisplayName } from '../../utils/layers/get.layer.display.name';
 import { getLayerKey } from '../../utils/layers/get.layer.key';
 import { getObjectsDerivedLayers } from '../../utils/layers/get.objects.derived.layers';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
@@ -42,6 +43,10 @@ const NEW_SPEED_TEXT = '450';
 const NEW_SPEED_MM_PER_MIN = 450;
 const SPEED_LABEL = 'Speed (mm/min)';
 const MAX_POWER_LABEL = 'Max power (%)';
+const MIN_POWER_LABEL = 'Min power (%)';
+const PASSES_LABEL = 'Passes';
+const SPEED_CAPTION = 'Speed';
+const PASSES_CAPTION = 'Passes';
 const AIR_ASSIST_LABEL = 'Air assist';
 const LINE_INTERVAL_LABEL = 'Line interval (mm)';
 const SAVE_TO_PALETTE_LABEL = 'Save to palette';
@@ -143,6 +148,17 @@ const getActionCount = (dispatchSpy: MockInstance<AppDispatch>, actionType: stri
   ).length;
 
 describe(LayerSettingsDrawer.name, () => {
+  it('captions speed and passes as the Palette dialog does', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    renderDrawer(store, CUT_COLOUR);
+
+    const dialog: HTMLElement = screen.getByRole('dialog');
+
+    expect(within(dialog).getByText(SPEED_CAPTION)).toBeInTheDocument();
+    expect(within(dialog).getAllByText(PASSES_CAPTION).length).toBeGreaterThan(0);
+  });
+
   it('slides in from the left inside the bed region, next to the design panel', () => {
     const store: AppStore = newStore();
     loadColours(store, [CUT_COLOUR]);
@@ -192,7 +208,7 @@ describe(LayerSettingsDrawer.name, () => {
 
   it.each([
     [SAVE_TO_PALETTE_LABEL, 'Add swatch'],
-    ['Edit palette…', 'Palette'],
+    ['Edit palette\u2026', 'Palette'],
     ['Save preset', 'Save preset'],
     ['Use preset', 'Use preset'],
   ])('shows a short visible caption on the %s action', (labelText: string, captionText: string) => {
@@ -222,6 +238,43 @@ describe(LayerSettingsDrawer.name, () => {
     renderDrawer(store, FILL_COLOUR);
 
     expect(screen.queryByText(/ W$/)).not.toBeInTheDocument();
+  });
+
+  it('shows the real power, speed and passes of the opened layer in every field', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    act(() => {
+      store.dispatch(new LayerSettingsChanged({
+        layerKey: CUT_COLOUR,
+        settings: { maxPowerPercent: SIXTY_PERCENT, minPowerPercent: 5, speedMmPerMin: 1500, passes: 3 },
+      }));
+    });
+    renderDrawer(store, CUT_COLOUR);
+
+    expect(screen.getByLabelText(MAX_POWER_LABEL)).toHaveValue('60.0');
+    expect(screen.getByLabelText(MIN_POWER_LABEL)).toHaveValue('5.0');
+    expect(screen.getByLabelText(SPEED_LABEL)).toHaveValue('1500');
+    expect(screen.getByLabelText(PASSES_LABEL)).toHaveValue('3');
+  });
+
+  it('never writes an empty or zero speed when another field is edited, or the speed is cleared', () => {
+    const store: AppStore = newStore();
+    loadColours(store, [CUT_COLOUR]);
+    const speedBefore: number = getLayer(store, CUT_COLOUR).settings.speedMmPerMin;
+    renderDrawer(store, CUT_COLOUR);
+    const speedInput: HTMLElement = screen.getByLabelText(SPEED_LABEL);
+    const passesInput: HTMLElement = screen.getByLabelText(PASSES_LABEL);
+
+    fireEvent.change(passesInput, { target: { value: '2' } });
+    fireEvent.blur(passesInput);
+    fireEvent.change(speedInput, { target: { value: '' } });
+    fireEvent.blur(speedInput);
+    fireEvent.change(speedInput, { target: { value: '0' } });
+    fireEvent.blur(speedInput);
+
+    expect(getLayer(store, CUT_COLOUR).settings.speedMmPerMin).toBe(speedBefore);
+    expect(speedBefore).toBeGreaterThan(0);
+    expect(speedInput).toHaveValue(String(speedBefore));
   });
 
   it('commits a changed speed on blur as one change', () => {
@@ -389,10 +442,12 @@ describe(LayerSettingsDrawer.name, () => {
     expect(getActionCount(dispatchSpy, LayerPaletteEntryLinked.type)).toBe(0);
   });
 
-  it('creates a palette entry for an unknown colour and links the layer to it', () => {
+  it('creates a palette entry for an unknown colour, named as the layer is, and links the layer to it', () => {
     const store: AppStore = newStore();
     loadColours(store, [UNKNOWN_COLOUR]);
     renderDrawer(store, UNKNOWN_COLOUR);
+
+    const layerName: string = getLayerDisplayName(getLayer(store, UNKNOWN_COLOUR), undefined);
 
     fireEvent.click(screen.getByRole('button', { name: SAVE_TO_PALETTE_LABEL }));
 
@@ -400,7 +455,8 @@ describe(LayerSettingsDrawer.name, () => {
       (entry: PaletteEntry): boolean => entry.colour === UNKNOWN_COLOUR,
     );
 
-    expect(createdEntry?.name).toBe(UNKNOWN_COLOUR);
+    expect(createdEntry?.name).toBe(layerName);
+    expect(layerName).not.toBe(UNKNOWN_COLOUR);
     expect(getLayer(store, UNKNOWN_COLOUR).paletteEntryId).toBe(createdEntry?.id);
   });
 

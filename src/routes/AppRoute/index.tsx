@@ -23,14 +23,17 @@ import type { ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { BedPanel } from '../../containers/BedPanel';
 import { DesignPanel } from '../../containers/DesignPanel';
+import { FocusRingModality } from '../../containers/FocusRingModality';
 import { GcodeExportConfirmDialog } from '../../containers/GcodeExportConfirmDialog';
 import { HistoryHotkeys } from '../../containers/HistoryHotkeys';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
 import { MachinePanel } from '../../containers/MachinePanel';
+import { PointerHotkey } from '../../containers/PointerHotkey';
 import { SaveHotkey } from '../../containers/SaveHotkey';
 import { StatusStrip } from '../../containers/StatusStrip';
 import { StickyStopBar } from '../../containers/StickyStopBar';
 import { StopHotkey } from '../../containers/StopHotkey';
+import { TooltipDismissal } from '../../containers/TooltipDismissal';
 import { TopBar } from '../../containers/TopBar';
 import { NarrowRegionBar } from '../../containers/NarrowRegionBar';
 import { BedRegionHostContext } from '../../utils/bed/bed.region.host.context';
@@ -53,6 +56,11 @@ export const AppRoute = (): ReactNode => {
   const isPanelLayoutLoaded: boolean = useSelector(selectIsPanelLayoutLoaded);
   const isConsoleOpen: boolean = useSelector(selectIsConsoleOpen);
   const narrowRegion: WorkbenchRegion = useSelector(selectNarrowRegion);
+  // With the console sheet open the regions end above it, so the bed re-fits to the space left.
+  const narrowRegionsClassName: string = [
+    styles.narrowRegions,
+    isConsoleOpen ? styles.narrowRegionsWithSheet : undefined,
+  ].join(' ');
   const designPanelComponent: ReactNode = <DesignPanel />;
   const bedPanelComponent: ReactNode = <BedPanel hostRef={isWide ? setBedRegionHost : undefined} isWide={isWide} />;
   const machinePanelComponent: ReactNode = <MachinePanel isWide={isWide} />;
@@ -75,7 +83,7 @@ export const AppRoute = (): ReactNode => {
         ) : (
           // All regions stay mounted, so a hidden one keeps its state. Dialogs and drawers open in this box, not in the
           // bed region, so they show over whichever region is on screen and take its full height.
-          <div ref={setBedRegionHost} className={styles.narrowRegions}>
+          <div ref={setBedRegionHost} className={narrowRegionsClassName}>
             <div className={getNarrowRegionClassName(narrowRegion, WORKBENCH_REGION.BED)}>
               {bedPanelComponent}
             </div>
@@ -93,8 +101,11 @@ export const AppRoute = (): ReactNode => {
         {!isWide && <StickyStopBar />}
         <LeavePageGuard />
         <StopHotkey />
+        <PointerHotkey />
         <HistoryHotkeys />
         <SaveHotkey />
+        <TooltipDismissal />
+        <FocusRingModality />
         <GcodeExportConfirmDialog />
       </Layout>
     </BedRegionHostContext>

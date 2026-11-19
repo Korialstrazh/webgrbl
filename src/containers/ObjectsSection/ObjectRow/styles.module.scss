@@ -1,10 +1,15 @@
 .row {
   display: flex;
-  align-items: stretch;
-  gap: var(--space-1);
+  flex-direction: column;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-2);
+}
+
+.rowMain {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
 }
 
 .selectedRow {
@@ -21,6 +26,9 @@
   height: auto;
   min-width: 0;
   padding: var(--space-2) var(--space-3);
+  // antd buttons keep their text on one line and let it run out of the box, over the warning chip beside it.
+  overflow: hidden;
+  white-space: normal;
   text-align: left;
 }
 
@@ -62,24 +70,13 @@
   white-space: nowrap;
 }
 
+// The size always stays on one line in a slightly smaller tabular font: the compact format (whole millimetres from
+// 100 mm, no spaces around the times sign) fits the narrowest panel beside the chip and actions.
 .size {
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
-}
-
-.outsideNote {
-  font-size: 0.75rem;
-  color: var(--color-danger-text);
-}
-
-// Content the job leaves out; the text wraps, since it says what to do about it.
-.warningNote {
-  font-size: 0.75rem;
-  color: var(--color-warning);
-  white-space: normal;
+  white-space: nowrap;
 }

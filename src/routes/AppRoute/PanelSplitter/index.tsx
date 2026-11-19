@@ -59,13 +59,16 @@ export const PanelSplitter = (props: PanelSplitterProps): ReactNode => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperSize: ElementSizePx = useElementSizePx(wrapperRef);
   const workbenchWidthPx: number = wrapperSize.widthPx;
-  // The splitter reads its default sizes only when it mounts, so later stored sizes must not change them.
-  const [panelDefaultSizes] = useState<PanelDefaultSize[]>(() => getPanelDefaultSizes({
-    storedPanelSizePercents,
+  // Stored sizes are read once, when the splitter mounts, so sizes stored later by a drag do not move the panels again.
+  const [mountStoredPanelSizePercents] = useState<number[] | undefined>(storedPanelSizePercents);
+  // Read on every render, which each window resize brings (the workbench is measured again), so without stored sizes a
+  // window widened past the roomy width grows the panels instead of keeping the widths of the width it opened at.
+  const panelDefaultSizes: PanelDefaultSize[] = getPanelDefaultSizes({
+    storedPanelSizePercents: mountStoredPanelSizePercents,
     rootFontSizePx,
     // The splitter spans the whole window width in the wide layout.
     workbenchWidthPx: window.innerWidth,
-  }));
+  });
   // The sizes the user set by drag or key; until then the opening sizes, in percent once the workbench is measured.
   const [changedSizePercents, setSizePercents] = useState<number[] | undefined>(undefined);
   const sizePercents: number[] | undefined = changedSizePercents

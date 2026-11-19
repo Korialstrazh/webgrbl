@@ -8,6 +8,7 @@ import type { GrblResolvedStatus } from '../../../utils/grbl/interfaces/GrblReso
 import { MACHINE_COMMAND } from '../../../utils/machine/machine.commands';
 import type { MachineProfile } from '../../../utils/profiles/interfaces/MachineProfile';
 import { newMachineProfile } from '../../../utils/profiles/new.machine.profile';
+import { MACHINE_JOG_FEED_RATE_MAX } from '../../../utils/profiles/machine.profile.constants';
 import { ConnectRequested, ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
 import { LaserPointerFiringStarted, LaserPointerFiringStopped } from '../../../utils/states/laser.pointer.state';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
@@ -20,8 +21,8 @@ import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider
 const JOG_NORTH_EAST_LABEL = 'Jog up and right';
 const JOG_ORIGIN_LABEL = 'Origin';
 const HOME_LABEL = 'Home';
-const SET_ZERO_LABEL = 'Set zero';
 const STEP_ONE_LABEL = '1 mm';
+const DEFAULT_STEP_LABEL = '10 mm';
 const JOG_SPEED_LABEL = 'Jog speed';
 const JOG_NORTH_EAST_STEP_ONE_LINE = '$J=G91 G21 X1 Y1 F1500';
 const GO_TO_ZERO_LINE = '$J=G90 G21 X0 Y0 F1500';
@@ -30,6 +31,7 @@ const NEW_JOG_FEED_RATE = 2400;
 const NEW_JOG_FEED_RATE_TEXT = String(NEW_JOG_FEED_RATE);
 const DEFAULT_JOG_FEED_RATE_TEXT = '1500';
 const EMPTY_INPUT_TEXT = '';
+const TOO_FAST_JOG_FEED_RATE_TEXT = '99999';
 const COLLAPSED_HINT_TEXT = 'Connect to move';
 const SHOW_CONTROLS_LABEL = 'Show the move controls';
 const HIDE_CONTROLS_LABEL = 'Hide the move controls';
@@ -174,6 +176,23 @@ describe(MoveCard.name, () => {
     expect(getRequestedLines(dispatchSpy)).toEqual([DEFAULT_JOG_NORTH_EAST_LINE, GO_TO_ZERO_LINE]);
   });
 
+  it('keeps the step size out of the origin button, so it never reads as a move by that step', () => {
+    const store: AppStore = newStore();
+
+    renderMoveCard(store);
+    connect(store);
+    receiveState(store, GRBL_MACHINE_STATE.IDLE);
+
+    const originButton: HTMLElement = screen.getByRole('button', { name: JOG_ORIGIN_LABEL });
+
+    expect(originButton).not.toHaveTextContent(DEFAULT_STEP_LABEL);
+
+    fireEvent.click(screen.getByText(STEP_ONE_LABEL));
+
+    expect(originButton).not.toHaveTextContent(STEP_ONE_LABEL);
+    expect(originButton).toHaveAccessibleName(JOG_ORIGIN_LABEL);
+  });
+
   it('shows Origin as a home icon with its name in the aria-label and tooltip, and keeps the Home text', async () => {
     const store: AppStore = newStore();
 
@@ -217,9 +236,9 @@ describe(MoveCard.name, () => {
     expect(screen.getByRole('button', { name: JOG_NORTH_EAST_LABEL })).toBeEnabled();
   });
 
-  it('locks jog, go-to-zero, Home and Set zero while the pointer fires', () => {
+  it('locks jog, go-to-zero and Home while the pointer fires', () => {
     const store: AppStore = newStore();
-    const moveButtonLabels: string[] = [JOG_NORTH_EAST_LABEL, JOG_ORIGIN_LABEL, HOME_LABEL, SET_ZERO_LABEL];
+    const moveButtonLabels: string[] = [JOG_NORTH_EAST_LABEL, JOG_ORIGIN_LABEL, HOME_LABEL];
 
     renderMoveCard(store);
     activateProfile(store, { hasHomingSwitches: true });
@@ -263,29 +282,13 @@ describe(MoveCard.name, () => {
     receiveState(store, GRBL_MACHINE_STATE.RUN);
 
     expect(screen.getByRole('button', { name: HOME_LABEL })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /^Set zero/ })).not.toBeInTheDocument();
 
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
 
     fireEvent.click(screen.getByRole('button', { name: HOME_LABEL }));
 
     expect(getRequestedLines(dispatchSpy)).toEqual([MACHINE_COMMAND.HOME]);
-  });
-
-  it('enables Set zero only in Idle and sends the exact line', () => {
-    const store: AppStore = newStore();
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
-
-    renderMoveCard(store);
-    connect(store);
-    receiveState(store, GRBL_MACHINE_STATE.JOG);
-
-    expect(screen.getByRole('button', { name: SET_ZERO_LABEL })).toBeDisabled();
-
-    receiveState(store, GRBL_MACHINE_STATE.IDLE);
-
-    fireEvent.click(screen.getByRole('button', { name: SET_ZERO_LABEL }));
-
-    expect(getRequestedLines(dispatchSpy)).toEqual([MACHINE_COMMAND.SET_WORK_ZERO]);
   });
 
   it('disables the jog speed without a profile and shows the default', () => {
@@ -334,6 +337,27 @@ describe(MoveCard.name, () => {
 
     expect(jogSpeedInput).toHaveValue(NEW_JOG_FEED_RATE_TEXT);
     expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('holds a jog speed above the limit at the limit on blur', () => {
+    const store: AppStore = newStore();
+
+    renderMoveCard(store);
+    showControlsWhileDisconnected();
+
+    const profile: MachineProfile = activateProfile(store);
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const jogSpeedInput: HTMLElement = screen.getByRole('spinbutton', { name: JOG_SPEED_LABEL });
+
+    fireEvent.change(jogSpeedInput, { target: { value: TOO_FAST_JOG_FEED_RATE_TEXT } });
+
+    expect(jogSpeedInput).toHaveValue(TOO_FAST_JOG_FEED_RATE_TEXT);
+
+    fireEvent.blur(jogSpeedInput);
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { profile: { ...profile, jogFeedRate: MACHINE_JOG_FEED_RATE_MAX } } }),
+    );
   });
 
   it('jogs with the saved jog speed of the active profile', () => {

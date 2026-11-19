@@ -32,16 +32,15 @@ import {
 } from '../../../../utils/antd.constants';
 import {
   FRAME_DOT_WATTS,
-  FRAME_EDGE,
   FRAME_GRID_CELL_NONE_MM,
   FRAME_GRID_CELL_OPTIONS_MM,
   FRAME_MM_PER_CM,
 } from '../../../../utils/frame/frame.constants';
-import type { FrameEdge } from '../../../../utils/frame/frame.constants';
 import { getFrameDurationSeconds } from '../../../../utils/frame/get.frame.duration.seconds';
 import type { FrameBedOverrun } from '../../../../utils/frame/interfaces/FrameBedOverrun';
 import type { FrameRectangle } from '../../../../utils/frame/interfaces/FrameRectangle';
 import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.registration';
+import { usePopoverAutoClose } from '../../../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import { MISSING_VALUE_TEXT } from '../../../../utils/missing.value.constants';
 import type { MachineProfile } from '../../../../utils/profiles/interfaces/MachineProfile';
@@ -69,9 +68,15 @@ import type { AppDispatch } from '../../../../utils/states/new.store';
 import { FrameSettingsOpenChanged, selectIsFrameSettingsOpen } from '../../../../utils/states/ui.workbench.state';
 import { getJobEstimateText } from '../../../../utils/toolpath/get.job.estimate.text';
 import { CaptionedActionButton } from '../../../../views/CaptionedActionButton';
+import { ActionLockNote } from '../../../../views/ActionLockNote';
 import { FrameTraceIcon } from '../../../../views/FrameTraceIcon';
 import { IconActionButton } from '../../../../views/IconActionButton';
+import { JOB_LOCK_NOTE_TEST_IDS } from '../job.card.constants';
+import { JOB_LOCK_ACTION } from '../job.lock.action.constants';
+import type { JobLockAction } from '../job.lock.action.constants';
+import { FrameBedOverrunNote } from './FrameBedOverrunNote';
 import { FrameNumberInput } from './FrameNumberInput';
+import { getFrameSettingsOffReasonKey } from './get.frame.settings.off.reason.key';
 import styles from './styles.module.scss';
 
 const FRAME_SETTINGS_OVERLAY_ID = 'frame-settings';
@@ -81,30 +86,23 @@ const FRAME_MARGIN_INPUT_ID = 'frame-margin-input';
 const FRAME_SPEED_FIELD = 'frameFeedMmPerMin';
 const FRAME_SPEED_INPUT_ID = 'frame-speed-input';
 
-const FRAME_EDGE_TEXT_KEYS: Record<FrameEdge, string> = {
-  [FRAME_EDGE.LEFT]: DEFAULT.FRAME_EDGE_LEFT,
-  [FRAME_EDGE.RIGHT]: DEFAULT.FRAME_EDGE_RIGHT,
-  [FRAME_EDGE.FRONT]: DEFAULT.FRAME_EDGE_FRONT,
-  [FRAME_EDGE.BACK]: DEFAULT.FRAME_EDGE_BACK,
-};
-
 interface FrameControlsProps {
   /** Start job, first in the row of job actions; absent where it is pinned elsewhere. */
   startActionComponent?: ReactNode;
   /** Export G-code, last in the row of job actions. */
   exportActionComponent?: ReactNode;
+  /** A few words under each locked action on why it is off. */
+  lockNoteTexts?: Partial<Record<JobLockAction, string>>;
+  /** Every reason Start job is off, listed in its lock note. */
+  startReasonTexts?: readonly string[];
+  /** False while Fix warnings sums up the problems: the frame overrun note then sits in the warnings list instead. */
+  isBedOverrunNoteShown?: boolean;
 }
 
-/** Why the settings are off: a profile holds them, and a run keeps them fixed. */
-const getFrameSettingsOffReasonKey = (hasActiveProfile: boolean, isJobRunActive: boolean): string | undefined => {
-  if (!hasActiveProfile) {
-    return DEFAULT.FRAME_SETTINGS_NEEDS_PROFILE;
-  }
-
-  return isJobRunActive ? DEFAULT.FRAME_SETTINGS_RUN_LOCKED : undefined;
-};
-
-export const FrameControls = ({ startActionComponent, exportActionComponent }: FrameControlsProps): ReactNode => {
+export const FrameControls = (props: FrameControlsProps): ReactNode => {
+  const { startActionComponent, exportActionComponent, lockNoteTexts = {}, startReasonTexts }: FrameControlsProps =
+    props;
+  const { isBedOverrunNoteShown = true }: FrameControlsProps = props;
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
@@ -128,6 +126,8 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
   const changeSettingsOpen = (isFrameSettingsOpen: boolean): void => {
     dispatch(new FrameSettingsOpenChanged({ isFrameSettingsOpen }));
   };
+
+  usePopoverAutoClose(isSettingsOpen, () => changeSettingsOpen(false));
 
   const settingsComponent: ReactNode = (
     <div id={settingsId} className={styles.settings}>
@@ -217,50 +217,60 @@ export const FrameControls = ({ startActionComponent, exportActionComponent }: F
   return (
     <div className={styles.frameControls}>
       <div className={styles.actions}>
-        {startActionComponent && <div className={styles.startAction}>{startActionComponent}</div>}
-        {/* The gear is joined to Frame: it holds the settings of the frame, not of the job. */}
-        <div className={styles.frameSplit}>
-          <CaptionedActionButton
-            labelText={t(DEFAULT.MACHINE_JOB_FRAME)}
-            captionText={t(DEFAULT.MACHINE_JOB_FRAME_CAPTION)}
-            iconComponent={<FrameTraceIcon />}
-            blockedReasonText={blockedReasonKey && t(
-              blockedReasonKey === DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED
-                ? DEFAULT.FRAME_START_BLOCKED_NOT_CONNECTED
-                : blockedReasonKey,
-            )}
-            onClick={() => dispatch(new FrameStartRequested())}
-          />
-          <Popover
-            open={isSettingsOpen}
-            trigger={ANTD_POPOVER_TRIGGER_CLICK}
-            placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
-            title={t(DEFAULT.FRAME_SETTINGS_TITLE)}
-            content={settingsComponent}
-            onOpenChange={changeSettingsOpen}
-          >
-            <span>
-              <IconActionButton
-                className={styles.frameGear}
-                labelText={t(isSettingsOpen ? DEFAULT.FRAME_SETTINGS_HIDE : DEFAULT.FRAME_SETTINGS_SHOW)}
-                iconComponent={<SettingOutlined />}
-                aria-expanded={isSettingsOpen}
-                aria-controls={isSettingsOpen ? settingsId : undefined}
-              />
-            </span>
-          </Popover>
+        {startActionComponent && (
+          <div className={styles.startAction}>
+            {startActionComponent}
+            <ActionLockNote
+              noteText={lockNoteTexts[JOB_LOCK_ACTION.START]}
+              testId={JOB_LOCK_NOTE_TEST_IDS.START}
+              reasonTexts={startReasonTexts}
+            />
+          </div>
+        )}
+        <div className={styles.frameColumn}>
+          {/* The gear is joined to Frame: it holds the settings of the frame, not of the job. */}
+          <div className={styles.frameSplit}>
+            <CaptionedActionButton
+              labelText={t(DEFAULT.MACHINE_JOB_FRAME)}
+              captionText={t(DEFAULT.MACHINE_JOB_FRAME_CAPTION)}
+              iconComponent={<FrameTraceIcon />}
+              blockedReasonText={blockedReasonKey && t(
+                blockedReasonKey === DEFAULT.JOB_START_BLOCKED_NOT_CONNECTED
+                  ? DEFAULT.FRAME_START_BLOCKED_NOT_CONNECTED
+                  : blockedReasonKey,
+              )}
+              onClick={() => dispatch(new FrameStartRequested())}
+            />
+            <Popover
+              open={isSettingsOpen}
+              trigger={ANTD_POPOVER_TRIGGER_CLICK}
+              // Below the gear, right-aligned to it: clear of the Job steps and the next-step button above it.
+              placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
+              arrow={{ pointAtCenter: true }}
+              rootClassName={styles.frameSettingsRoot}
+              title={t(DEFAULT.FRAME_SETTINGS_TITLE)}
+              content={settingsComponent}
+              onOpenChange={changeSettingsOpen}
+            >
+              <span>
+                <IconActionButton
+                  className={styles.frameGear}
+                  labelText={t(isSettingsOpen ? DEFAULT.FRAME_SETTINGS_HIDE : DEFAULT.FRAME_SETTINGS_SHOW)}
+                  iconComponent={<SettingOutlined />}
+                  aria-expanded={isSettingsOpen}
+                  aria-controls={isSettingsOpen ? settingsId : undefined}
+                />
+              </span>
+            </Popover>
+          </div>
+          <ActionLockNote noteText={lockNoteTexts[JOB_LOCK_ACTION.FRAME]} testId={JOB_LOCK_NOTE_TEST_IDS.FRAME} />
         </div>
-        <div className={styles.exportAction}>{exportActionComponent}</div>
+        <div className={styles.exportAction}>
+          {exportActionComponent}
+          <ActionLockNote noteText={lockNoteTexts[JOB_LOCK_ACTION.EXPORT]} testId={JOB_LOCK_NOTE_TEST_IDS.EXPORT} />
+        </div>
       </div>
-      {bedOverrun && (
-        <Alert
-          type={ANTD_ALERT_TYPE_WARNING}
-          title={t(DEFAULT.FRAME_BED_OVERRUN, {
-            distanceMm: Math.ceil(bedOverrun.distanceMm),
-            edge: t(FRAME_EDGE_TEXT_KEYS[bedOverrun.edge]),
-          })}
-        />
-      )}
+      {bedOverrun && isBedOverrunNoteShown && <FrameBedOverrunNote bedOverrun={bedOverrun} />}
       {isAlarmShown && <Alert type={ANTD_ALERT_TYPE_WARNING} title={t(DEFAULT.FRAME_ALARMED)} />}
     </div>
   );

@@ -28,4 +28,22 @@ describe(PlugBadge.name, () => {
 
     expect(onClick).toHaveBeenCalledOnce();
   });
+
+  it('closes its tooltip when it is clicked and when anything scrolls', async () => {
+    render(<AntdTestProvider><PlugBadge reasonText={REASON_TEXT} onClick={vi.fn()} /></AntdTestProvider>);
+    const button: HTMLElement = screen.getByRole('button', { name: REASON_TEXT });
+
+    fireEvent.focus(button);
+    await waitFor(() => expect(screen.getByRole('tooltip')).toHaveTextContent(REASON_TEXT));
+
+    fireEvent.click(button);
+    await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
+
+    fireEvent.blur(button);
+    fireEvent.focus(button);
+    await waitFor(() => expect(screen.getByRole('tooltip')).toBeInTheDocument());
+
+    fireEvent.scroll(window);
+    await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
+  });
 });

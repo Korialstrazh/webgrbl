@@ -21,12 +21,23 @@ $machine-control-max-width: 14.5rem;
 $top-bar-height: 3.5rem;
 $status-strip-height: 3rem;
 
-// The status strip readouts (job size, estimate and cursor) take up to this width from the strip's left edge, and the
-// console toggle this much at its right; the docked toast stack keeps between the two.
-$status-strip-readouts-width: 31rem;
-$status-strip-toggle-width: 2.5rem;
+// The bed panel's padding and its row of view tools (bed colour, zoom, view switch) under the top bar; toasts open
+// below it so they never cover those tools. Narrow, the tools wrap to a second row.
+$bed-tools-height: 3.5rem;
+$bed-tools-height-narrow: 6rem;
 
-// The sticky STOP bar at the bottom of a narrow window; the pinned toast stack stops short of it.
+// STOP stays above the scrim of every dialog: antd stacks a dialog at 1000 plus 100 for each container it opens from
+// (a dialog opened from a drawer sits at 1200), up to 2000, so STOP sits one above that ceiling.
+$stop-above-dialog-z-index: 2001;
+
+// Toasts stay above STOP, so a message about a stop or an alarm is never hidden behind the button that caused it.
+$toast-above-stop-z-index: 2010;
+
+// The height of the console bottom sheet in a narrow window: at least 40% of the window, so the log shows a useful
+// number of lines, but never more than 60% of the region, so the bed stays in view above it.
+$console-sheet-height: min(max(40vh, 16rem), 60%);
+
+// The sticky STOP bar at the bottom of a narrow window.
 $sticky-stop-bar-height: 4.5rem;
 
 // A bar of fixed height that keeps its items on one row and never shrinks; items that do not fit are clipped inside.
@@ -39,3 +50,33 @@ $sticky-stop-bar-height: 4.5rem;
 
 // The bed rulers have bands of their own along the top and left of the bed drawing; the drawing starts where they end.
 $bed-ruler-band-size: 1.25rem;
+
+// A thin shadow edge at the bottom of a scrolling panel while more content waits below it, so a thin scrollbar is not
+// the only hint; it fades out as the panel reaches its end. It is only as tall as the panel's bottom padding and darkens
+// rather than covering with the background, so a control under it never looks disabled. Include it in the scrolling
+// element; the colour is the shadow's.
+$more-below-fade-height: 0.5rem;
+
+@keyframes more-below-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@mixin more-below-fade($shadow-colour) {
+  padding-bottom: $more-below-fade-height;
+
+  &::after {
+    position: sticky;
+    bottom: 0;
+    display: block;
+    height: $more-below-fade-height;
+    margin-top: -$more-below-fade-height;
+    pointer-events: none;
+    content: '';
+    background: linear-gradient(to bottom, transparent, $shadow-colour);
+    animation: more-below-fade-out linear both;
+    animation-range: 85% 100%;
+    animation-timeline: scroll(nearest block);
+  }
+}

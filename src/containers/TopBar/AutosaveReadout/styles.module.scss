@@ -11,9 +11,9 @@
   white-space: nowrap;
 }
 
-// Room for the longest state ("Not saved"), so a change of state never shifts the buttons after it.
+// Room for the longest state ("Waiting to save"), so a change of state never shifts the buttons after it.
 .label {
-  min-inline-size: 4.5rem;
+  min-inline-size: 6.5rem;
 }
 
 .icon {
@@ -29,8 +29,9 @@
   color: var(--color-warning);
 }
 
+// A change that autosave has not stored yet is not an error, so it stays neutral; red is kept for real failures.
 .unsaved {
-  color: var(--color-danger);
+  color: var(--color-text-muted);
 }
 
 // Below 62.5rem only the coloured icon stays on screen, so Import SVG and the connection pill keep their room; its

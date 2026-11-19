@@ -1,11 +1,16 @@
 # Machine control
 
-The Move card, the Laser pointer card and the Machine profiles dialog drive a GRBL laser by hand. This page shows how a control sends a command, how the pointer stays safe, and how profiles work. Design details: `docs/wiki/architecture/machine-control.md`.
+The Move card, the laser pointer row of the Job card and the Machine profiles dialog drive a GRBL laser by hand. This page shows how a control sends a command, how the pointer stays safe, and how profiles work. Design details: `docs/wiki/architecture/machine-control.md`.
 
 ## What the user gets
 
-- **Move card** (`src/containers/MachinePanel/MoveCard/`): while no laser is connected one line, "Connect to move", with a Show button that opens the disabled controls (the "Connect to move" hint stays beside Hide while they are open); the controls (`MoveControls/`) are centred: a 3 x 3 jog pad, step sizes 0.1 / 1 / 10 / 50 mm, a jog speed saved to the active profile, Set zero, and Home when the profile has homing switches. Unlock and Reset are in the Status card.
-- **Laser pointer card** (`src/containers/MachinePanel/LaserCard/`): while no laser is connected one line, "Connect to use", with a Show button (both cards use `CollapsedCardToggle` from `src/views/`); the controls are power 0.1..5 % of S max (the connected laser's reported `$30`, else the active profile's), a hold-to-fire button, and an air assist switch for profiles with air assist. Frame job sits on the Job card below Export G-code and Start job (see `docs/howto/running-jobs.md`).
+- **Position card** (`src/containers/MachinePanel/PositionCard/`), right above Move (in the narrow layout too): one compact line (`Panel isCompact`) with the work position on X, Y and Z beside the heading, three decimals, updated from each status report; the laser (machine) position is in the row's tooltip ("Laser position: X ..., Y ..., Z ..."). It only reads `selectMachineStatus`; nothing is sent. While no laser is connected it shows only its heading with a plug badge ("Connect to see the position", a click opens the connection popover) and no numbers.
+- **Status card** (`src/containers/MachinePanel/MachineStatusCard/`), right above Position and shown only while connected: a single compact line whose "Status" heading is read by screen readers only (`Panel isTitleVisuallyHidden`): the state as a coloured dot and word (`MachineStateReadout`), feed (gauge icon) in mm/min and power (bolt icon) as a percent of S max (the same figure as the laser chip), their names in tooltips and for screen readers (values 14 px, units and button labels 12 px), then the controller actions. **Restart controller** is a quiet power icon button whose tooltip says what it does: it stops all motion and the laser at once and resets GRBL (soft reset, Ctrl-X); it is not pause or resume (those stay on the Job card while a job runs). **Unlock** (`$X`) shows only while GRBL is in Alarm, as the primary button with its word and a warning icon whose note explains the alarm (GRBL locked the laser for safety; check the head is clear, then unlock or home). Both fit the same 32 px line, so the card keeps its height when Unlock appears; the state word has a fixed minimum width (4.5 rem) for the same reason. The feed keeps room for four digits so the line does not jump when a jog starts; a longer figure moves the buttons to a second line. With the compact Status and Position cards and a compact Move card, the whole jog pad stays above STOP at 1440 x 900 while connected, with the Job card expanded.
+- **Move card** (`src/containers/MachinePanel/MoveCard/`): while no laser is connected one line, "Connect to move", with a Show button that opens the disabled controls (the "Connect to move" hint stays beside Hide while they are open); the controls (`MoveControls/`) are centred: a 3 x 3 jog pad whose centre (go to work zero) shows only its home icon (the step sizes below show the active step), step sizes 0.1 / 1 / 10 / 50 mm, a jog speed saved to the active profile (it accepts an empty or unfinished value while you type and corrects it only on blur or Enter: empty gives the saved speed back, a number past 100–10000 mm/min is held at the limit), and, beside the jog speed in one row, Set zero (target icon) and Home (home icon) when the profile has homing switches. Unlock and Restart controller are in the Status card.
+- **Double-click to move** (off by default): the gear beside STOP has the checkbox "Double-click bed moves laser" (its detail behind an info icon) (`BedDoubleClickMovePreferenceChanged`, stored app-wide in the IndexedDB `appState` row `bedDoubleClickMovesLaser`, read at start like the Esc choice). When on, a double-click anywhere on the bed in the Design view, on empty bed or on an object (the `BedObjects` layer; never on a resize or rotate handle), sends one absolute jog to that point at the Move panel's jog speed. It is silently ignored unless connected and `Idle`, with no job or frame running, the pointer off and no overlay open. The laser stays off, and STOP and Escape cancel it like any jog.
+- **Laser chip** (`src/containers/LaserStateChip/`, top bar, only while connected): a read-only state from `selectLaserChipState` and `selectLaserChipPowerPercent`, sending nothing. "Laser off" with the laser icon in green when the last report shows zero power; "Firing nn %" in amber (the reported power as a percent of S max, at most 100) when it shows power; "Pointer on" in red while the pointer is held; "Job running" during a job between burns; "Power unknown" before the first report. The tooltip says it is the last report. The short word stays beside the icon below 1000 px (the connection pill is compact there) and from 1280 px; between those widths and at phone width the chip keeps its icon and colour.
+- **Laser pointer row** (`src/containers/MachinePanel/JobCard/LaserPointerRow/`): the last row of the Job card, folded or not, in every layout (there is no separate pointer card). It is one compact row in every state; while no laser is connected the row is muted (`offline` class: muted text, no button fill, the slider off) and shrinks to one compact line, the fire button showing only its bulb icon (its label stays the accessible name). The details popover opens below the row (`bottomRight`, flipped by antd when there is no room), so it never covers the readiness stepper. Connected, the row holds: a hold-to-fire button with a bulb icon, the power slider 0.1..5 % of S max (the connected laser's reported `$30`, else the active profile's) with its figure, which names the track maximum ("1 / 5 %") so the thumb's place matches what it reads, and a details button (three dots) whose popover holds the approximate watts, the full firmware note and, for profiles with air assist, the air assist switch (the dots turn accent-coloured while air assist is on). The pointer power belongs to the active laser profile: moving the slider saves it into that profile, switching profiles switches the power, and the Laser profiles dialog edits it too ("Laser pointer power", 0.1..5 %). A profile saved before this field existed uses the power set in the session (1 % at start) until it is changed. Frame job sits on the Job card below Export G-code and Start job (see `docs/howto/running-jobs.md`).
+- **Pointer hotkey** (`src/containers/PointerHotkey/`): P alone switches the pointer on and off, with the guards of the pointer button (connected, Idle, no job running; `getCanFireLaserPointer`). It is ignored with Ctrl, Cmd, Alt or Shift, on a held key, while typing in a text field and while an overlay is open. The pointer button's tooltip names the shortcut. Once on, the saga still switches it off after the maximum hold time, on a stop or alarm, or when the window loses the focus.
 - **Machine profiles** (`src/containers/MachineProfilesDialog/`, opened from the top bar): bed size, rated power, `$30`, origin corner, homing switches, air assist and jog speed per laser, with import, export and "Read from laser" (disabled with a tooltip while no laser is connected). The S max field explains `$30` from an info icon, and Delete stays disabled for the only profile. Saving a profile makes it active only while no profile is active; it never replaces an active one. Each other row has a **Use** button, and the active row shows a filled Active badge. The active profile's name is shown in the connection pill.
 
 ## Send a command from a control
@@ -26,9 +31,23 @@ const { canJog }: MoveAvailability = getMoveAvailability({
 }}>
 ```
 
-- Lines: `$J=G91 G21 X10 F1500` (jog), `$J=G90 G21 X0 Y0 F...` (go to work zero), `$H` (home), `G10 L20 P1 X0 Y0` (set zero, kept by Stop and reset), `M8` / `M9` (air).
+- Lines: `$J=G91 G21 X10 F1500` (jog), `$J=G90 G21 X0 Y0 F...` (go to work zero), `$J=G90 G21 X120 Y80 F1500` (bed double-click, `getBedDoubleClickJogCommand`, which gates and clamps in one pure function), `$H` (home), `G10 L20 P1 X0 Y0` (set zero, kept by Stop and reset), `M8` / `M9` (air).
 - Gate every control with `getMoveAvailability` or `getCanFireLaserPointer`; a disabled button is the only guard the UI adds, the saga checks again where it matters.
 - Numbers go through `getFormattedGcodeNumber` (3 decimals, never `-0`, never locale text).
+
+### Move to a bed point
+
+```ts
+const line: string | undefined = getBedDoubleClickJogCommand({
+  isPreferenceOn, isConnected, machineState, isJobRunActive, isPointerFiring, isOverlayOpen,
+  bedPoint: getBedMachinePoint(svgPoint, bedHeightMm),
+  machineArea: selectToolpathMachineArea(state),
+  feedRate: activeProfile?.jogFeedRate ?? DEFAULT_MACHINE_JOG_FEED_RATE,
+});
+```
+
+- The bed point becomes a work position through `getClampedWorkPositionFromBedPoint`: the same origin mapping the bed uses to draw the head (`getBedPointFromWorkPosition`; it only mirrors axes, so it is its own inverse), then held inside the profile's work area. Z is never sent.
+- Read the state at the moment of the click (`useAppStore().getState()`, see `useBedDoubleClickMove`), not from the last render.
 
 ## Add a pointer control safely
 
@@ -53,7 +72,7 @@ dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
 
 ## Try it
 
-`npm run dev`, then connect the simulated laser in the connection popover: jog and Set zero move the head and the zero marker on the bed. To see a pointer cut-off, hold the fire button and switch tab: the button releases.
+`npm run dev`, then connect the simulated laser in the connection popover: jog and Set zero move the head and the zero marker on the bed. Turn on the double-click move in the gear beside STOP and double-click the bed or an object: the head and the Position card follow. To see a pointer cut-off, hold the fire button and switch tab: the button releases.
 
 Hardware check: a known follow-up, deferred on 2026-10-31 because the ACMER laser was not available. Still to verify in Chrome: jog in every direction at 1 and 10 mm, go to zero, Set zero then Stop keeps the zero marker, Home and air assist if fitted, the pointer at 1 % shows a dot and switches off on release, Alt-Tab and after 10 s, and whether a stationary pointer lights at all on this firmware. The pointer sends `M3` and a feed-only `G1 F100`; stock GRBL keeps `M3` lit without motion, so it should light there, but that is not verified on hardware, and the card's firmware note still says some firmwares keep the laser off while the head stands still.
 
@@ -62,3 +81,11 @@ Hardware check: a known follow-up, deferred on 2026-10-31 because the ACMER lase
 - Builders and profile helpers: unit tests next to the files.
 - Cards and dialog: `index.test.tsx` in each container (render inside `AntdTestProvider`).
 - Sagas: `newStore` over a `SimulatedLaserTransport` with fake timers.
+
+## Round 47 changes
+
+- **Set zero** moved from the Move card into the Position card's title row: a small origin icon button (`OriginZeroIcon`: two axes meeting at a small zero, in an `IconActionButton` with the tooltip "Set zero here (X/Y origin)") at the right end of the heading, gated by the same `getMoveAvailability` (`canSetZero`: connected, `Idle`, no job, pointer not firing) and sending the same `MACHINE_COMMAND.SET_WORK_ZERO`. The Position card is two rows (heading, then X / Y / Z); the Move card keeps the jog pad, step sizes, jog speed and Home.
+- Restart controller uses the circular `ReloadOutlined` glyph.
+- A focused jog key keeps the neutral border; keyboard focus shows only as the outline ring, so a key never looks selected after a jog.
+- Popovers give the focus back to the control that opened them (`usePopoverFocusReturn`, also called by `usePopoverAutoClose`).
+

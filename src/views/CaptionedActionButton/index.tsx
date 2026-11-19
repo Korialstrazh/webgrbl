@@ -1,8 +1,9 @@
 /**
  * An action as an icon over one word, so it explains itself without a hover. The longer name stays the accessible name
- * and, with the reason it is off, the tooltip, which opens below the row and away from the actions above it. An off
- * action has no fill, a dashed outline and a small lock on its icon, so it never looks like one that can be used; when
- * it is blocked for a reason it stays focusable (aria-disabled) and ignores activation.
+ * and, with the reason it is off, the tooltip (on hover and on focus), which opens below the row and away from the
+ * actions above it. An off action has no fill, a solid muted outline and a small lock inline before its word, so it
+ * never looks like one that can be used; when it is blocked for a reason it stays focusable (aria-disabled) and ignores
+ * activation.
  *
  * @author michael.morosov
  *
@@ -11,13 +12,16 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { LockFilled } from '@ant-design/icons';
 import { Button } from 'antd';
 import type { ButtonProps } from 'antd';
+import { useId } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
-import { ANTD_TOOLTIP_PLACEMENT_BOTTOM } from '../../utils/antd.constants';
+import {
+  ANTD_TOOLTIP_PLACEMENT_BOTTOM,
+  ANTD_TOOLTIP_PLACEMENT_LEFT,
+  ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS,
+} from '../../utils/antd.constants';
 import { DismissibleTooltip } from '../DismissibleTooltip';
-import { CAPTIONED_ACTION_LOCK_TEST_ID } from './captioned.action.constants';
 import styles from './styles.module.scss';
 
 interface CaptionedActionButtonProps extends Omit<ButtonProps, 'icon' | 'children' | 'aria-label' | 'disabled'> {
@@ -49,7 +53,7 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
   } = props;
   const tooltipText: string | undefined = blockedReasonText ?? (isLabelTooltipShown ? labelText : undefined);
   const isBlocked: boolean = Boolean(blockedReasonText);
-  const isButtonDisabled: boolean = isDisabled || isBlocked;
+  const blockedReasonId: string = useId();
 
   // A blocked action stays in the tab order, so keyboard and screen reader users reach its reason; a click, Enter or
   // Space on it does nothing and never reaches a wrapper such as a confirmation.
@@ -65,21 +69,32 @@ export const CaptionedActionButton = (props: CaptionedActionButtonProps): ReactN
   };
 
   return (
-    <DismissibleTooltip title={tooltipText} placement={ANTD_TOOLTIP_PLACEMENT_BOTTOM}>
+    // The tooltip opens on keyboard focus too, so the reason a locked action is off shows without a pointer.
+    <DismissibleTooltip
+      title={tooltipText}
+      // A main action's reason opens to its side, so it never covers the smaller actions laid out below it.
+      placement={isLabelTooltipShown ? ANTD_TOOLTIP_PLACEMENT_BOTTOM : ANTD_TOOLTIP_PLACEMENT_LEFT}
+      trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}
+    >
       <Button
         {...buttonProps}
-        className={[styles.captionedActionButton, isQuiet ? styles.quiet : undefined, className].join(' ')}
+        className={[
+          styles.captionedActionButton,
+          isQuiet ? styles.quiet : undefined,
+          className,
+        ].join(' ')}
         aria-label={labelText}
-        aria-description={blockedReasonText}
+        aria-describedby={isBlocked ? blockedReasonId : undefined}
         aria-disabled={isBlocked || undefined}
         disabled={isDisabled && !isBlocked}
         onClick={handleClick}
       >
-        <span className={styles.icon} aria-hidden>
-          {iconComponent}
-          {isButtonDisabled && <LockFilled className={styles.lockBadge} data-testid={CAPTIONED_ACTION_LOCK_TEST_ID} />}
+        {/* A lock shows as the corner dot of ActionLockNote beside the button, one pattern for every action. */}
+        <span className={styles.icon} aria-hidden>{iconComponent}</span>
+        <span className={styles.caption}>
+          <span>{captionText}</span>
         </span>
-        <span className={styles.caption}>{captionText}</span>
+        {isBlocked && <span id={blockedReasonId} className={styles.blockedReason}>{blockedReasonText}</span>}
       </Button>
     </DismissibleTooltip>
   );

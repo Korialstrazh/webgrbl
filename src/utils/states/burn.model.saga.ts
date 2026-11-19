@@ -1,12 +1,12 @@
 /**
- * Builds the burn model through the injected worker client while the 3D view is open, a material is set and the
- * toolpath is ready.
+ * Builds the burn model through the injected worker client whenever a material is set and the toolpath is ready, in
+ * every view, so the Cut check warning count is current wherever it is shown, not only after a visit to 3D.
  *
  * - The watcher is a take loop, not takeLatest. It also listens for every change that makes the toolpath out of date.
  *   Nothing is built then, but the running build is cancelled, because its result would look current for a job that
  *   has changed.
- * - Coming back to a view with a ready model builds nothing, so the lifts stay. A ready model is current, because the
- *   state makes it stale when any of its inputs change, whatever the view.
+ * - A view change builds nothing and stops nothing, so the lifts stay. A ready model is current, because the state
+ *   makes it stale when any of its inputs change, whatever the view.
  * - A material change rebuilds at once, as it is not a toolpath input: the toolpath stays ready.
  * - A change that does not touch the current model is ignored without stopping a running build: a save for another
  *   material, selecting the same material again, or materials read while a model is current. Rebuilding would drop
@@ -21,8 +21,6 @@
  */
 import type { Task } from 'redux-saga';
 import { call, cancel, fork, join, put, select, take } from 'redux-saga/effects';
-import { BED_VIEW_MODE } from '../bed/bed.view.constants';
-import type { BedViewMode } from '../bed/bed.view.constants';
 import type { BurnModel } from '../burn.model/interfaces/BurnModel';
 import type { BurnModelGeneration } from '../burn.model/interfaces/BurnModelGeneration';
 import type { BurnModelWorkerClient } from '../burn.model/interfaces/BurnModelWorkerClient';
@@ -31,9 +29,9 @@ import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { DEFAULT } from '../localization/default.locales';
 import type { Material } from '../materials/interfaces/Material';
 import type { MaterialTestResult } from '../materials/interfaces/MaterialTestResult';
+import { NEUTRAL_PREVIEW_MATERIAL } from '../materials/neutral.preview.material';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { Action } from './action';
-import { BedViewModeChanged, selectBedViewMode } from './bed.view.state';
 import { BURN_MODEL_STATUS } from './burn.model.status.constants';
 import type { BurnModelStatus } from './burn.model.status.constants';
 import {
@@ -66,7 +64,6 @@ type BurnModelActionState =
 
 const BURN_MODEL_ACTION_TYPES: string[] = [
   ToolpathReady.type,
-  BedViewModeChanged.type,
   MaterialSaved.type,
   MaterialTestResultSaved.type,
   MaterialsLoaded.type,
@@ -101,10 +98,6 @@ function* buildBurnModel(client: BurnModelWorkerClient, toolpath: Toolpath, mate
   }
 }
 
-/** A view change alone does not make a ready model out of date, and rebuilding it would drop the lifts. */
-const isViewChangeOverCurrentModel = (action: Action<unknown>, modelStatus: BurnModelStatus): boolean =>
-  action.type === BedViewModeChanged.type && modelStatus === BURN_MODEL_STATUS.READY;
-
 const selectBurnModelActionContext = (state: BurnModelActionState): BurnModelActionContext => ({
   activeMaterialId: selectProjectDocument(state).materialId,
   builtMaterialId: selectBuiltBurnMaterialId(state),
@@ -126,27 +119,21 @@ const isMaterialActionIgnored = (
   case ProjectMaterialSelected.type:
     return isBurnModelCurrentOrComing(modelStatus)
       && (action as ProjectMaterialSelected).payload.materialId === builtMaterialId;
+  // A model built with the neutral stand-in, before the materials arrived, is rebuilt with the real one.
   case MaterialsLoaded.type:
-    return isBurnModelCurrentOrComing(modelStatus);
+    return isBurnModelCurrentOrComing(modelStatus) && builtMaterialId === activeMaterialId;
   default:
     return false;
   }
 };
 
-function* runBurnModelAction(client: BurnModelWorkerClient, action: Action<unknown>): Generator {
-  const viewMode: BedViewMode = (yield select(selectBedViewMode)) as BedViewMode;
-  const material: Material | undefined = (yield select(selectActiveMaterial)) as Material | undefined;
+function* runBurnModelAction(client: BurnModelWorkerClient): Generator {
+  const activeMaterial: Material | undefined = (yield select(selectActiveMaterial)) as Material | undefined;
+  const material: Material = activeMaterial ?? NEUTRAL_PREVIEW_MATERIAL;
   const toolpathStatus: ToolpathStatus = (yield select(selectToolpathStatus)) as ToolpathStatus;
   const toolpath: Toolpath | undefined = (yield select(selectToolpath)) as Toolpath | undefined;
-  const modelStatus: BurnModelStatus = (yield select(selectBurnModelStatus)) as BurnModelStatus;
 
-  if (
-    viewMode === BED_VIEW_MODE.THREE_D
-    && toolpathStatus === TOOLPATH_STATUS.READY
-    && material
-    && toolpath
-    && !isViewChangeOverCurrentModel(action, modelStatus)
-  ) {
+  if (toolpathStatus === TOOLPATH_STATUS.READY && toolpath) {
     yield call(buildBurnModel, client, toolpath, material);
   }
 }
@@ -164,7 +151,7 @@ function* watchBurnModelActions(client: BurnModelWorkerClient): Generator {
         yield cancel(runningTask);
       }
 
-      runningTask = (yield fork(runBurnModelAction, client, action)) as Task;
+      runningTask = (yield fork(runBurnModelAction, client)) as Task;
     }
   }
 }

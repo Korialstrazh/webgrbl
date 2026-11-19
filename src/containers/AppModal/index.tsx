@@ -16,6 +16,7 @@ import { useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { ANTD_MODAL_CONTENT_SELECTOR, ANTD_MODAL_TITLE_SELECTOR } from '../../utils/antd.constants';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
+import { OVERLAY_KIND } from '../../utils/states/overlay.kind.constants';
 import { getAppModalWidth } from './get.app.modal.width';
 import type { AppModalProps } from './interfaces/AppModalProps';
 import styles from './styles.module.scss';
@@ -42,7 +43,7 @@ export const AppModal = (props: AppModalProps): ReactNode => {
   const { isOpen, overlayIdPrefix, maxWidth, onClose, afterOpenChange, children, ...modalProps } = props;
   const bodyRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
 
-  useOverlayRegistration(overlayIdPrefix, isOpen);
+  useOverlayRegistration(overlayIdPrefix, isOpen, OVERLAY_KIND.DIALOG);
 
   return (
     <Modal

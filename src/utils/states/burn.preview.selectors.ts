@@ -13,13 +13,11 @@ import type { BurnModelStatus } from './burn.model.status.constants';
 import { selectBurnModelStatus } from './burn.model.state';
 import { BURN_PREVIEW_EMPTY_STATE } from './burn.preview.empty.state.constants';
 import type { BurnPreviewEmptyState } from './burn.preview.empty.state.constants';
-import { selectActiveMaterial } from './material.selectors';
 import { selectToolpathStatus } from './toolpath.state';
 import { TOOLPATH_STATUS } from './toolpath.status.constants';
 
 type RootState =
   & Parameters<typeof selectBurnModelStatus>[0]
-  & Parameters<typeof selectActiveMaterial>[0]
   & Parameters<typeof selectToolpathStatus>[0];
 
 /** A failure of an older toolpath says nothing about the current one, so the out-of-date reason comes first. */
@@ -30,8 +28,9 @@ export const selectBurnPreviewEmptyState = (state: RootState): BurnPreviewEmptyS
     return undefined;
   }
 
-  if (!selectActiveMaterial(state)) {
-    return BURN_PREVIEW_EMPTY_STATE.NO_MATERIAL;
+  // A toolpath being generated is the first step of the build, so the view says it is building, not out of date.
+  if (selectToolpathStatus(state) === TOOLPATH_STATUS.GENERATING) {
+    return BURN_PREVIEW_EMPTY_STATE.BUILDING;
   }
 
   if (modelStatus === BURN_MODEL_STATUS.STALE || selectToolpathStatus(state) !== TOOLPATH_STATUS.READY) {

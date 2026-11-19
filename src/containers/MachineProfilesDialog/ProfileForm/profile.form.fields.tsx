@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import {
+  AimOutlined,
   ColumnHeightOutlined,
   ColumnWidthOutlined,
   ControlOutlined,
@@ -16,6 +17,11 @@ import {
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import {
+  MAX_POINTER_POWER_PERCENT,
+  MIN_POINTER_POWER_PERCENT,
+  POINTER_POWER_STEP_PERCENT,
+} from '../../../utils/machine/machine.command.constants';
 import type { ProfileNumberFieldDefinition } from './interfaces/ProfileNumberFieldDefinition';
 
 export const MACHINE_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
@@ -33,6 +39,16 @@ export const MACHINE_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
     unitKey: DEFAULT.FIELD_UNIT_MM_PER_MIN,
     captionKey: DEFAULT.MACHINE_PROFILES_FIELD_JOG_FEED_RATE_CAPTION,
   },
+  {
+    field: 'pointerPowerPercent',
+    labelKey: DEFAULT.MACHINE_PROFILES_FIELD_POINTER_POWER,
+    iconComponent: <AimOutlined />,
+    unitKey: DEFAULT.FIELD_UNIT_PERCENT,
+    captionKey: DEFAULT.MACHINE_PROFILES_FIELD_POINTER_POWER_CAPTION,
+    min: MIN_POINTER_POWER_PERCENT,
+    max: MAX_POINTER_POWER_PERCENT,
+    step: POINTER_POWER_STEP_PERCENT,
+  },
 ];
 
 export const BED_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
@@ -40,12 +56,14 @@ export const BED_NUMBER_FIELDS: readonly ProfileNumberFieldDefinition[] = [
     field: 'workAreaXMm',
     labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_X,
     iconComponent: <ColumnWidthOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_WIDTH,
     unitKey: DEFAULT.FIELD_UNIT_MM,
   },
   {
     field: 'workAreaYMm',
     labelKey: DEFAULT.MACHINE_PROFILES_FIELD_WORK_AREA_Y,
     iconComponent: <ColumnHeightOutlined />,
+    captionKey: DEFAULT.FIELD_CAPTION_DEPTH,
     unitKey: DEFAULT.FIELD_UNIT_MM,
   },
 ];

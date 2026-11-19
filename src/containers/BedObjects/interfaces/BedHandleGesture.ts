@@ -10,6 +10,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { ProjectObjectTransform } from '../../../utils/project/interfaces/ProjectObjectTransform';
+import type { ObjectArtworkFrame } from '../../../utils/toolpath/interfaces/ObjectArtworkFrame';
 import type { BedObjectHandle } from '../bed.objects.constants';
 import type { BedMachinePoint } from './BedMachinePoint';
 import type { PointerPressOrigin } from './PointerPressOrigin';
@@ -23,6 +24,8 @@ export interface BedHandleGesture extends PointerPressOrigin {
   handle: BedObjectHandle;
   /** The object's placement when the handle was pressed. */
   startTransform: ProjectObjectTransform;
+  /** Where the drawn geometry sits in the box; the corner handles sit on it. */
+  artworkFrame: ObjectArtworkFrame;
   /** Where the pointer went down, in the machine frame. */
   startPoint: BedMachinePoint;
   /** The placement the gesture gives so far; it is drawn while the pointer is down and committed when it comes up. */

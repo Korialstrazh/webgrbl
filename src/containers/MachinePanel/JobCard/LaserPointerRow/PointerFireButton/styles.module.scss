@@ -1,0 +1,15 @@
+// A full touch target on the one-row pointer card, with tight side padding so the power slider keeps its room.
+.fireButton:global(.ant-btn) {
+  flex: none;
+  height: var(--target-min);
+  padding-inline: var(--space-2);
+}
+
+.firing,
+.firing:hover,
+.firing:active {
+  border-color: var(--color-warning);
+  background: var(--color-warning);
+  color: var(--color-bg);
+  font-weight: 700;
+}

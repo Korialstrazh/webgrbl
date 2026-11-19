@@ -1,6 +1,8 @@
 /**
- * The Status card of the machine panel. It shows the state, positions, feed and power with Reset and Unlock. While no
- * laser is connected it is not shown: the top-bar pill alone tells the connection state.
+ * The compact Status card of the machine panel, right above Position, in a single line: the state badge, feed and power
+ * with their icons and units, then Reset and Unlock as small icon buttons. Its heading is read by screen readers only,
+ * so the line fits the column and Move stays in view. The positions sit in the Position card. While no laser
+ * is connected it is not shown: the top-bar pill alone tells the connection state.
  *
  * @author michael.morosov
  *
@@ -9,7 +11,6 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { DashboardOutlined } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -17,7 +18,8 @@ import { DEFAULT } from '../../../utils/localization/default.locales';
 import { selectIsConnected } from '../../../utils/states/grbl.connection.state';
 import { Panel } from '../../../views/Panel';
 import { MachineResetUnlock } from '../MachineResetUnlock';
-import { MachineStateReadout } from '../MachineStateReadout';
+import { MachineStatusRow } from '../MachineStatusRow';
+import styles from './styles.module.scss';
 
 export const MachineStatusCard = (): ReactNode => {
   const { t } = useTranslation();
@@ -28,9 +30,16 @@ export const MachineStatusCard = (): ReactNode => {
   }
 
   return (
-    <Panel iconComponent={<DashboardOutlined />} title={t(DEFAULT.MACHINE_STATUS_TITLE)}>
-      <MachineStateReadout />
-      <MachineResetUnlock />
-    </Panel>
+    <Panel
+      title={t(DEFAULT.MACHINE_STATUS_TITLE)}
+      headerActionComponent={(
+        <div className={styles.statusLine}>
+          <MachineStatusRow />
+          <MachineResetUnlock />
+        </div>
+      )}
+      isCompact
+      isTitleVisuallyHidden
+    />
   );
 };

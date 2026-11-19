@@ -13,7 +13,17 @@
   vector-effect: non-scaling-stroke;
 }
 
-// An off layer does not burn, so its paths stay visible for editing but recede.
+// An off layer does not burn, so its paths stay visible for editing but look like skipped content: a faint dashed
+// outline in the bed's travel colour, with no fill, that never reads as a laser path.
 .offRun {
-  opacity: 0.3;
+  opacity: 0.55;
+}
+
+.offRun > path {
+  fill: none;
+  stroke: var(--color-bed-travel);
+  stroke-opacity: 1;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
 }

@@ -22,3 +22,9 @@ export const MAJOR_GRID_STEP_MM = 50;
 export const RULER_LABEL_STEP_MM = 50;
 export const COORDINATE_DECIMAL_PLACES = 2;
 export const BED_MAX_TRAVEL_MM = 5000;
+
+/**
+ * Finds a drawn project object (handles included) by the data-bed-object attribute it carries, so a left drag on it
+ * edits instead of panning the bed.
+ */
+export const BED_OBJECT_SELECTOR = '[data-bed-object]';

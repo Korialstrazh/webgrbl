@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MachinePanel } from '.';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../utils/grbl/grbl.constants';
@@ -16,21 +16,25 @@ const WORK_POSITION_TEXT = '8.000';
 const MACHINE_POSITION_TEXT = '10.500';
 const FEED_RATE = 1200;
 const SPINDLE_SPEED = 750;
+// 750 of the default profile's S max of 1000.
+const POWER_PERCENT_TEXT = '75';
 // The one empty-readout mark, an em dash.
 const MISSING_VALUE_TEXT = '\u2014';
 const IDLE_LABEL = 'Idle';
 const RUN_LABEL = 'Run';
-const RESET_LABEL = 'Reset';
+const SET_ZERO_LABEL = 'Set zero here (X/Y origin)';
+const RESET_LABEL = 'Restart controller';
 const UNLOCK_LABEL = 'Unlock';
 const STOP_LABEL = 'Stop';
+const BUTTON_SELECTOR = 'button';
 const NOT_CONNECTED_TEXT = 'Not connected';
 const STATUS_CARD_TITLE = 'Status';
 const STATUS_CONNECT_LABEL = 'Connect';
 const PRIMARY_CALL_TO_ACTION_SELECTOR = '.ant-btn-primary:not(.ant-btn-dangerous)';
 const JOB_CARD_TITLE = 'Job';
 const PROFILE_STEP_LABEL = 'Profile: to do';
-const CARD_TITLES_IN_ORDER: readonly string[] = ['Status', 'Job', 'Move', 'Laser pointer'];
-const COMING_SOON_TITLES: readonly string[] = ['Laser pointer', 'Job'];
+const CARD_TITLES_IN_ORDER: readonly string[] = ['Job', 'Status', 'Position', 'Move'];
+const COMING_SOON_TITLES: readonly string[] = ['Job'];
 
 const NEW_STATUS: GrblResolvedStatus = {
   machineState: GRBL_MACHINE_STATE.RUN,
@@ -44,6 +48,10 @@ const NEW_STATUS: GrblResolvedStatus = {
   spindleSpeed: SPINDLE_SPEED,
   overrides: undefined,
 };
+
+// Role queries with names and descriptions across the whole connected panel (antd Steps, Card and the cards' styles)
+// take longer than the default in jsdom; the queries themselves are what this test checks.
+const FULL_PANEL_QUERY_TEST_TIMEOUT_MS = 40_000;
 
 const renderMachinePanel = (store: AppStore = newStore(), isWide: boolean = true): AppStore => {
   render(
@@ -72,7 +80,9 @@ describe(MachinePanel.name, () => {
     renderMachinePanel();
 
     expect(screen.queryByRole('region', { name: STATUS_CARD_TITLE })).not.toBeInTheDocument();
-    expect(screen.queryByText(NOT_CONNECTED_TEXT)).not.toBeInTheDocument();
+    // Only STOP keeps its own short Not connected cue.
+    expect(screen.queryAllByText(NOT_CONNECTED_TEXT)
+      .filter((element: HTMLElement): boolean => !element.closest(BUTTON_SELECTOR))).toHaveLength(0);
     expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
   });
@@ -110,7 +120,7 @@ describe(MachinePanel.name, () => {
     expect(screen.queryByText(IDLE_LABEL)).not.toBeInTheDocument();
   });
 
-  it('puts the main task first: status, job, move, then the laser pointer', () => {
+  it('puts the main task first: job, status, position, then move', () => {
     connect(renderMachinePanel());
 
     const cardTitles: (string | null)[] = screen.getAllByRole('heading')
@@ -119,7 +129,7 @@ describe(MachinePanel.name, () => {
     expect(cardTitles).toEqual(CARD_TITLES_IN_ORDER);
   });
 
-  it('shows the state, positions with three decimals, feed and power after a status report', () => {
+  it('shows state, feed and power with units, and Restart controller in a one-line Status card', () => {
     const store: AppStore = renderMachinePanel();
 
     connect(store);
@@ -127,26 +137,60 @@ describe(MachinePanel.name, () => {
       store.dispatch(new MachineStatusReceived({ status: NEW_STATUS }));
     });
 
-    expect(screen.getByText(RUN_LABEL)).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(WORK_POSITION_TEXT))).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(MACHINE_POSITION_TEXT))).toBeInTheDocument();
-    expect(screen.getByText(String(FEED_RATE))).toBeInTheDocument();
-    expect(screen.getByText(String(SPINDLE_SPEED))).toBeInTheDocument();
+    const statusCard: HTMLElement = screen.getByRole('region', { name: STATUS_CARD_TITLE });
+    const positionCard: HTMLElement = screen.getByRole('region', { name: 'Position' });
+
+    expect(within(statusCard).getByText(RUN_LABEL)).toBeInTheDocument();
+    expect(within(statusCard).getByText(String(FEED_RATE))).toBeInTheDocument();
+    expect(within(statusCard).getByText(POWER_PERCENT_TEXT)).toBeInTheDocument();
+    expect(within(statusCard).getByText('mm/min')).toBeVisible();
+    expect(within(statusCard).getByText('%')).toBeVisible();
+    expect(within(statusCard).getByTitle('Feed')).toBeInTheDocument();
+    expect(within(statusCard).getByTitle('Power')).toBeInTheDocument();
+    expect(within(statusCard).getByRole('heading', { name: STATUS_CARD_TITLE }).className).toContain('hiddenTitle');
+    expect(within(statusCard).getByRole('button', { name: RESET_LABEL })).toBeInTheDocument();
+    expect(within(statusCard).queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
+    expect(within(statusCard).queryByText(WORK_POSITION_TEXT)).not.toBeInTheDocument();
+    expect(within(positionCard).getByText(WORK_POSITION_TEXT)).toBeInTheDocument();
+    expect(within(positionCard).getByTitle(new RegExp(MACHINE_POSITION_TEXT))).toBeInTheDocument();
+    expect(within(positionCard).queryByText(RUN_LABEL)).not.toBeInTheDocument();
+    expect(within(positionCard).queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
   });
 
-  it('enables reset when connected, and unlock only in alarm', () => {
+  it('hides the Status card while not connected', () => {
+    renderMachinePanel();
+
+    expect(screen.queryByRole('region', { name: STATUS_CARD_TITLE })).not.toBeInTheDocument();
+  });
+
+  it('gives Restart controller, Unlock, Set zero and Hold to fire an icon', () => {
+    const store: AppStore = renderMachinePanel();
+
+    connect(store);
+    receiveState(store, GRBL_MACHINE_STATE.ALARM);
+
+    expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-reload')).not.toBeNull();
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL }).querySelector('.anticon-unlock')).not.toBeNull();
+    expect(screen.getByRole('button', { name: SET_ZERO_LABEL }).querySelector('.anticon svg')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Hold to fire' }).querySelector('.anticon-bulb')).not.toBeNull();
+  });
+
+  it('enables Restart controller when connected, and shows Unlock only in alarm, as the primary action', () => {
     const store: AppStore = renderMachinePanel();
 
     connect(store);
     receiveState(store, GRBL_MACHINE_STATE.IDLE);
 
     expect(screen.getByRole('button', { name: RESET_LABEL })).toBeEnabled();
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: RESET_LABEL })).toHaveAccessibleDescription(/soft reset, Ctrl-X/);
+    expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
 
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
 
     expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toBeEnabled();
-  });
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveClass('ant-btn-primary');
+    expect(screen.getByRole('button', { name: UNLOCK_LABEL })).toHaveAccessibleDescription(/^Alarm:/);
+  }, FULL_PANEL_QUERY_TEST_TIMEOUT_MS);
 
   it('dispatches the reset and unlock requests when their buttons are clicked', () => {
     const store: AppStore = newStore();
@@ -155,8 +199,8 @@ describe(MachinePanel.name, () => {
     renderMachinePanel(store);
     connect(store);
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
-    fireEvent.click(screen.getByRole('button', { name: RESET_LABEL }));
     fireEvent.click(screen.getByRole('button', { name: UNLOCK_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: RESET_LABEL }));
 
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(MachineResetRequested));
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(MachineUnlockRequested));

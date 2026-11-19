@@ -28,6 +28,8 @@ export const BURN_PART_LIFT_DISPLAY_DECIMALS = 1;
 
 /** Burn depths in a mesh are rounded to this, in mm, so that nearby depths merge into one flat face. */
 export const BURN_DEPTH_QUANTUM_MM = 0.05;
+/** Burn depth in mm at which a face looks fully burnt; shallower faces shade in proportion. */
+export const BURN_FULL_SHADE_DEPTH_MM = 0.2;
 /** Most triangles of all meshes of a model together; a job with more is drawn with bigger cells. */
 export const BURN_MESH_MAX_TRIANGLES = 2000000;
 /** How much bigger the cells get each time a mesh still has too many triangles. */

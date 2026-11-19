@@ -22,11 +22,40 @@ export const OBJECT_ROTATION_DECIMALS = 0;
 export const OBJECT_FIELD_KEY_SEPARATOR = ':';
 
 export const OBJECT_TRANSFORM_FIELDS: readonly ObjectTransformFieldConfig[] = [
-  { field: 'xMm', labelKey: DEFAULT.OBJECTS_FIELD_X, decimals: OBJECT_MILLIMETRE_DECIMALS },
-  { field: 'yMm', labelKey: DEFAULT.OBJECTS_FIELD_Y, decimals: OBJECT_MILLIMETRE_DECIMALS },
-  { field: 'widthMm', labelKey: DEFAULT.OBJECTS_FIELD_WIDTH, decimals: OBJECT_MILLIMETRE_DECIMALS },
-  { field: 'heightMm', labelKey: DEFAULT.OBJECTS_FIELD_HEIGHT, decimals: OBJECT_MILLIMETRE_DECIMALS },
-  { field: 'rotationDeg', labelKey: DEFAULT.OBJECTS_FIELD_ROTATION, decimals: OBJECT_ROTATION_DECIMALS },
+  {
+    field: 'xMm',
+    labelKey: DEFAULT.OBJECTS_FIELD_X,
+    prefixKey: DEFAULT.OBJECTS_FIELD_X,
+    hintKey: DEFAULT.OBJECTS_FIELD_X_HINT,
+    decimals: OBJECT_MILLIMETRE_DECIMALS,
+  },
+  {
+    field: 'yMm',
+    labelKey: DEFAULT.OBJECTS_FIELD_Y,
+    prefixKey: DEFAULT.OBJECTS_FIELD_Y,
+    hintKey: DEFAULT.OBJECTS_FIELD_Y_HINT,
+    decimals: OBJECT_MILLIMETRE_DECIMALS,
+  },
+  {
+    field: 'widthMm',
+    labelKey: DEFAULT.OBJECTS_FIELD_WIDTH,
+    prefixKey: DEFAULT.OBJECTS_FIELD_WIDTH_SHORT,
+    hintKey: DEFAULT.OBJECTS_FIELD_WIDTH_HINT,
+    decimals: OBJECT_MILLIMETRE_DECIMALS,
+  },
+  {
+    field: 'heightMm',
+    labelKey: DEFAULT.OBJECTS_FIELD_HEIGHT,
+    prefixKey: DEFAULT.OBJECTS_FIELD_HEIGHT_SHORT,
+    hintKey: DEFAULT.OBJECTS_FIELD_HEIGHT_HINT,
+    decimals: OBJECT_MILLIMETRE_DECIMALS,
+  },
+  {
+    field: 'rotationDeg',
+    labelKey: DEFAULT.OBJECTS_FIELD_ROTATION,
+    hintKey: DEFAULT.OBJECTS_FIELD_ROTATION_HINT,
+    decimals: OBJECT_ROTATION_DECIMALS,
+  },
 ];
 
 /** The kind of a row in the object list, shown as its icon and kept on the row for tests. */

@@ -9,6 +9,7 @@
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
 import type { BedViewport } from '../../../utils/bed/interfaces/BedViewport';
+import type { ProjectObject } from '../../../utils/project/interfaces/ProjectObject';
 import type { BedPanStep } from './BedPanStep';
 import type { BedZoomStep } from './BedZoomStep';
 
@@ -18,4 +19,6 @@ export interface BedViewportControls {
   panBedBy: BedPanStep;
   /** Shows the whole bed fitted to the view again. */
   fitBedToView: () => void;
+  /** Shows the whole bed and every given object, parts off the bed included. */
+  fitAllObjectsToView: (projectObjects: readonly ProjectObject[]) => void;
 }

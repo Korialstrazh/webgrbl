@@ -50,7 +50,7 @@
 }
 
 // One line each, like a layer row; longer text is cut short, and its title shows it in full.
-// The name, and for Shading a small Built-in tag that says, without a hover, why its row has a lock and no delete.
+// The name, and for Shading a small built-in badge beside it.
 .nameCell {
   display: flex;
   align-items: center;
@@ -58,14 +58,12 @@
   min-width: 0;
 }
 
-.builtInTag {
+// A small certificate badge in the muted grey: it marks the built-in row without a word to read.
+.builtInBadge {
+  display: inline-flex;
   flex: none;
-  padding: 0 var(--space-1);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
   color: var(--color-text-muted);
-  font-size: 0.625rem;
-  line-height: 1.4;
+  font-size: 0.875rem;
 }
 
 .name {
@@ -82,8 +80,8 @@
   white-space: nowrap;
 }
 
-// Out of sight until the row is hovered or holds the focus, and then only over the name line, so they never cover a
-// value. They stay in the tab order, and delete asks before it deletes.
+// Out of sight until the row is hovered, holds the focus or is the one being edited, and then only over the name line,
+// so they never cover a value. They stay in the tab order, and delete asks before it deletes.
 .rowActions {
   position: absolute;
   inset-block-start: 0;
@@ -102,21 +100,23 @@
 }
 
 .row:hover .rowActions,
-.row:focus-within .rowActions {
+.row:focus-within .rowActions,
+.editedRow .rowActions {
   opacity: 1;
   pointer-events: auto;
 }
 
-// A touch screen has no hover, so the buttons stay in view on a line of their own above the row content.
+// A touch screen has no hover: the buttons show on the row being edited (a tap selects it) or holding the focus, on a
+// line of their own above the row content, so the list does not repeat them on every row. They stay in the tab order.
 @media (hover: none) {
-  .row {
+  .editedRow,
+  .row:focus-within {
     flex-wrap: wrap;
   }
 
-  .rowActions {
+  .editedRow .rowActions,
+  .row:focus-within .rowActions {
     position: static;
-    opacity: 1;
-    pointer-events: auto;
   }
 }
 

@@ -1,6 +1,9 @@
 @use '../../../../styles/accessibility' as accessibility;
 
 .frameControls {
+  // The height of Start, Frame and Export.
+  --job-action-height: 3.25rem;
+
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -33,7 +36,7 @@
     flex-direction: row;
     // Room for the lock badge that sits on the icon's corner, so it never touches the word.
     gap: var(--space-3);
-    height: 3.25rem;
+    height: var(--job-action-height);
     font-size: 1rem;
     font-weight: 600;
   }
@@ -45,24 +48,90 @@
   :global(.ant-btn) :global(.anticon) {
     font-size: 1.25rem;
   }
+
+  // Locked, Start steps back: regular weight in the muted grey, so the orange next-step button above leads.
+  :global(.ant-btn)[aria-disabled='true'],
+  :global(.ant-btn):disabled {
+    font-weight: 400;
+  }
 }
 
-.exportAction {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-// Frame and its gear read as one split button, as wide as Export beside it.
-.frameSplit {
+.exportAction,
+.frameColumn {
+  position: relative;
   display: flex;
   flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--space-1);
   min-width: 0;
+}
+
+// Frame and Export read like a smaller Start: the icon and the word on one row, the word at 14px (Start is 16px), so
+// the three buttons share one type scale and the row never looks cramped. The repeated classes outweigh the captioned
+// button's stacked layout and 13px caption.
+.exportAction.exportAction :global(.ant-btn),
+.frameColumn.frameColumn :global(.ant-btn) {
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+.exportAction.exportAction :global(.ant-btn) span,
+.frameColumn.frameColumn :global(.ant-btn) span {
+  font-size: 0.875rem;
+}
+
+.exportAction.exportAction :global(.ant-btn) :global(.anticon),
+.frameColumn.frameColumn :global(.ant-btn) :global(.anticon) {
+  font-size: 1.125rem;
+}
+
+.startAction {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+// Frame and its gear are one split button: the wrapper draws the single outline, fill and radius in every state, and a
+// single divider separates the two halves, so a locked Frame and an enabled gear never show two different borders.
+.frameSplit {
+  --frame-split-border: var(--color-text-muted);
+  --frame-split-fill: var(--color-surface-3);
+
+  display: flex;
+  min-width: 0;
+  border: 1px solid var(--frame-split-border);
+  border-radius: var(--radius-md);
+  background-color: var(--frame-split-fill);
+
+  &:has([aria-disabled='true'], :disabled) {
+    --frame-split-border: var(--color-disabled-border-locked);
+    --frame-split-fill: var(--color-disabled-bg);
+  }
+
+  &:hover:not(:has([aria-disabled='true'], :disabled)) {
+    --frame-split-border: var(--color-control-border);
+  }
+
+  // Each half drops its own outline and fill; the keyboard focus ring is drawn inside it, so it is never cut off.
+  // Repeated classes outweigh the locked and hover outlines of the buttons' own styles.
+  &.frameSplit :global(.ant-btn.ant-btn.ant-btn.ant-btn),
+  &.frameSplit :global(.ant-btn.ant-btn.ant-btn.ant-btn):is(:hover, :active, :focus, :disabled, [aria-disabled='true']) {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  :global(.ant-btn):focus-visible {
+    outline-offset: -3px;
+  }
 
   > span:first-child {
     flex: 1 1 0;
     min-width: 0;
 
     :global(.ant-btn) {
+      height: calc(var(--job-action-height) - 2px);
       border-start-end-radius: 0;
       border-end-end-radius: 0;
     }
@@ -70,17 +139,23 @@
 
   > span:last-child {
     flex: none;
-    margin-inline-start: -1px;
   }
 }
 
-// A full-size icon button, so the gear reads as a control of its own and not as a sliver of Frame.
-.frameGear:global(.ant-btn) {
+// A full-size icon button, so the gear reads as a control of its own and not as a sliver of Frame; its start edge is
+// the one divider of the split button.
+.frameSplit.frameSplit .frameGear.frameGear:global(.ant-btn.ant-btn.ant-btn.ant-btn) {
   width: 2.75rem;
-  height: 3.25rem;
+  height: calc(var(--job-action-height) - 2px);
   padding: 0;
+  border-inline-start-color: var(--frame-split-border);
   border-start-start-radius: 0;
   border-end-start-radius: 0;
+}
+
+// The lock dot of Frame (the only span child of the column) sits in Frame's own corner, left of the gear, not on it.
+.frameColumn.frameColumn > span {
+  right: calc(2.75rem + 0.375rem);
 }
 
 .settings {
@@ -143,4 +218,35 @@
   align-items: center;
   gap: var(--space-1);
   cursor: help;
+}
+
+// The settings float beside the Job card, so they get the control outline (3:1 or more), a deep shadow and an arrow in
+// the outline colour, which shows at a glance which button opened them.
+.frameSettingsRoot :global(.ant-popover-container) {
+  border: 1px solid var(--color-control-border);
+  background-color: var(--color-surface-3);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 60%);
+}
+
+.frameSettingsRoot :global(.ant-popover-arrow)::before {
+  background-color: var(--color-control-border);
+}
+
+// In a wide window the job actions are a little lower, so Move still fits above STOP while connected at 1440 x 900.
+// 80rem must match WIDE_LAYOUT_MEDIA_QUERY. The repeated class outweighs the captioned button's own height.
+@media (width >= 80rem) {
+  .frameControls {
+    --job-action-height: 2.75rem;
+
+    gap: var(--space-2);
+  }
+
+  .actions.actions :global(.ant-btn) {
+    height: var(--job-action-height);
+  }
+
+  .frameSplit.frameSplit > span:first-child :global(.ant-btn),
+  .frameSplit.frameSplit .frameGear.frameGear:global(.ant-btn.ant-btn.ant-btn.ant-btn) {
+    height: calc(var(--job-action-height) - 2px);
+  }
 }

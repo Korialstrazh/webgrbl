@@ -18,6 +18,8 @@ import { useDispatch } from 'react-redux';
 import { ANTD_BUTTON_TYPE_TEXT, ANTD_DROPDOWN_TRIGGER_CLICK } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
+import { useOverlayRegistration } from '../../../utils/hooks/use.overlay.registration';
+import { usePopoverAutoClose } from '../../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import {
@@ -34,14 +36,25 @@ import { getProjectMenuItems } from './get.project.menu.items';
 import { PROJECT_MENU_KEY } from './project.menu.constants';
 import styles from './styles.module.scss';
 
+const PROJECT_MENU_OVERLAY_ID = 'project-menu';
+
 export const ProjectMenu = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const fileInputRef: RefObject<HTMLInputElement | null> = useRef<HTMLInputElement | null>(null);
   const [isOpenDialogShown, setIsOpenDialogShown] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  // Escape must only close this, not also stop the machine.
+  useOverlayRegistration(PROJECT_MENU_OVERLAY_ID, isMenuOpen);
+
   const gcodeExport: GcodeExportAvailability = useGcodeExportAvailability();
 
+  usePopoverAutoClose(isMenuOpen, () => setIsMenuOpen(false));
+
   const handleMenuClick = ({ key }: ProjectMenuClickInfo): void => {
+    setIsMenuOpen(false);
+
     switch (key) {
     case PROJECT_MENU_KEY.NEW:
       dispatch(new NewProjectRequested());
@@ -71,6 +84,8 @@ export const ProjectMenu = (): ReactNode => {
       <DismissibleTooltip title={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>
         <Dropdown
           trigger={ANTD_DROPDOWN_TRIGGER_CLICK}
+          open={isMenuOpen}
+          onOpenChange={setIsMenuOpen}
           menu={{ items: getProjectMenuItems(t, gcodeExport), onClick: handleMenuClick }}
         >
           <Button type={ANTD_BUTTON_TYPE_TEXT} aria-label={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>

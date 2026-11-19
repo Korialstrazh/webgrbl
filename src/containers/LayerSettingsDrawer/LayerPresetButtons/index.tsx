@@ -28,6 +28,7 @@ import {
 import { INLINE_FEEDBACK_LIFETIME_MS } from '../../../utils/feedback.constants';
 import type { ExpiringValue } from '../../../utils/hooks/interfaces/ExpiringValue';
 import { useExpiringValue } from '../../../utils/hooks/use.expiring.value';
+import { usePopoverFocusReturn } from '../../../utils/hooks/use.popover.focus.return';
 import { getLayerKey } from '../../../utils/layers/get.layer.key';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { getLayerPresetOperation } from '../../../utils/materials/get.layer.preset.operation';
@@ -60,6 +61,9 @@ export const LayerPresetButtons = ({ layer }: LayerPresetButtonsProps): ReactNod
   const [isUpdateAsked, setIsUpdateAsked] = useState<boolean>(false);
   const { value: statusText, setValue: setStatusText }: ExpiringValue<string> =
     useExpiringValue<string>(INLINE_FEEDBACK_LIFETIME_MS);
+
+  usePopoverFocusReturn(isUpdateAsked);
+
   // The question renders into the button row, so it stays inside the drawer instead of floating over the layer list.
   const actionsRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
   const layerKey: string = getLayerKey(layer);

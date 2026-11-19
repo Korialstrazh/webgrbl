@@ -13,8 +13,6 @@ export interface BedRulerTickRequest {
   visibleStartMm: number;
   /** The last bed position in view along the ruler, in millimetres. */
   visibleEndMm: number;
-  /** The bed length along the ruler; no position lies past it. */
-  bedLengthMm: number;
   /** The distance between two listed positions, in millimetres. */
   stepMm: number;
 }

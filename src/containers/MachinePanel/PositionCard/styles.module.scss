@@ -1,0 +1,34 @@
+// The work position in one row, one axis after another; tabular figures keep the numbers still while the laser moves.
+.positionRow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  flex-wrap: nowrap;
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.axis {
+  display: inline-flex;
+  flex: none;
+  gap: var(--space-1);
+  align-items: baseline;
+
+  dt {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-text);
+    // Wide enough for the worst case, -1000.000, so a jog never widens an axis or wraps the row.
+    min-width: 9ch;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+}

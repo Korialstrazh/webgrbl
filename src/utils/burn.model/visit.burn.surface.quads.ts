@@ -9,7 +9,7 @@
  * @copyright michael.morosov - All rights reserved.
  * You may not use, distribute or modify this code without explicit permission by michael.morosov.
  */
-import { BURN_CELL_NO_MESH, BURN_DEPTH_QUANTUM_MM } from './burn.model.constants';
+import { BURN_CELL_NO_MESH, BURN_DEPTH_QUANTUM_MM, BURN_FULL_SHADE_DEPTH_MM } from './burn.model.constants';
 import type { BurnCellSurface } from './interfaces/BurnCellSurface';
 import type { BurnMeshQuad } from './interfaces/BurnMeshQuad';
 
@@ -23,8 +23,10 @@ const RIGHT_COLUMN_OFFSET = 1;
 const getCellTopMm = (surface: BurnCellSurface, cell: number): number =>
   surface.thicknessMm - (surface.depthSteps[cell] ?? 0) * BURN_DEPTH_QUANTUM_MM;
 
+/** Wood chars dark long before it is deep: the shade grows with depth up to BURN_FULL_SHADE_DEPTH_MM, whatever the
+ * thickness, so a shallow fill or engraving reads as a burn and not as a bare outline. */
 const getCellShade = (surface: BurnCellSurface, cell: number): number =>
-  Math.min(FULLY_BURNT_SHADE, ((surface.depthSteps[cell] ?? 0) * BURN_DEPTH_QUANTUM_MM) / surface.thicknessMm);
+  Math.min(FULLY_BURNT_SHADE, ((surface.depthSteps[cell] ?? 0) * BURN_DEPTH_QUANTUM_MM) / BURN_FULL_SHADE_DEPTH_MM);
 
 /** Whether the cell has a face toward the other cell: the other is in another mesh, or lower in this one. */
 const hasWallToward = (surface: BurnCellSurface, cell: number, otherCell: number): boolean =>

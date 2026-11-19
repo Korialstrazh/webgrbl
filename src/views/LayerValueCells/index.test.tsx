@@ -36,12 +36,11 @@ describe(LayerValueCells.name, () => {
 });
 
 describe(`${LayerValueCells.name} speed unit`, () => {
-  it('shows a small mm over min unit after the speed', () => {
+  it('leaves the mm/min unit to the key line, so the row stays short', () => {
     render(
       <LayerValueCells settings={{ mode: LAYER_MODE.LINE, maxPowerPercent: 100, speedMmPerMin: 300, passes: 3 }} />,
     );
 
-    expect(screen.getByText('mm')).toBeInTheDocument();
-    expect(screen.getByText('min')).toBeInTheDocument();
+    expect(screen.queryByText('mm/min')).not.toBeInTheDocument();
   });
 });
