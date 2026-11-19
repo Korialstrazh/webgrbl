@@ -42,6 +42,8 @@ const BIG_FILE_NAME = 'big.svg';
 const BIG_FILE_STEM = 'big';
 const NO_SIZE_FILE_NAME = 'nosize.svg';
 const THIRD_FILE_NAME = 'third.svg';
+const A2_NARROW_WIDTH_MM = 419;
+const A2_HEIGHT_MM = 594;
 const PRELOADED_OBJECT_COUNT = MAX_PROJECT_OBJECTS - 1;
 
 const newSvgText = (sizeMm: number, innerMarkup: string = ''): string =>
@@ -139,6 +141,21 @@ describe(importSvgFiles.name, () => {
     expect(failureToasts[0]).toMatchObject({
       severity: TOAST_SEVERITY.ERROR,
       messageParameters: { fileName: BROKEN_FILE_NAME },
+    });
+  });
+
+  it('shows the overall size of the imported objects in an info toast', async () => {
+    const store: AppStore = newStore();
+    const a2Svg: string = `<svg xmlns="http://www.w3.org/2000/svg" width="${A2_NARROW_WIDTH_MM}mm" height="${A2_HEIGHT_MM}mm"></svg>`;
+
+    requestImport(store, [newSvgFile(FIRST_FILE_NAME, a2Svg)]);
+    await waitForToast(store, DEFAULT.SVG_IMPORT_SIZE);
+
+    expect(getToastsOf(store, DEFAULT.SVG_IMPORT_SIZE)[0]).toMatchObject({
+      severity: TOAST_SEVERITY.INFO,
+      messageParameters: {
+        size: '419 \u00d7 594 mm (41.9 \u00d7 59.4 cm) \u00b7 close to DIN A2 (420 \u00d7 594 mm), 1 mm narrower',
+      },
     });
   });
 
