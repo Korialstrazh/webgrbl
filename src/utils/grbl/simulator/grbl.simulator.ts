@@ -41,8 +41,8 @@ import type { GrblSimulatorModalState } from './interfaces/GrblSimulatorModalSta
  *
  * @since 2026-10-30
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 export class GrblSimulator {
   /** Receives every output line, each ending with CRLF. */

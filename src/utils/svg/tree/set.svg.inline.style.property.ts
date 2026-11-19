@@ -6,8 +6,8 @@
  *
  * @since 2026-11-09
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import { SVG_STYLE_ATTRIBUTE_NAME } from '../svg.constants';
 import { SVG_STYLE_DECLARATION_SEPARATOR, SVG_STYLE_PROPERTY_SEPARATOR } from './svg.tree.constants';

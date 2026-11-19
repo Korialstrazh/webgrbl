@@ -5,8 +5,8 @@
  *
  * @since 2026-11-07
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 /** The short lock reason under each job action, one per locked button. */
 export const JOB_LOCK_NOTE_TEST_IDS = {

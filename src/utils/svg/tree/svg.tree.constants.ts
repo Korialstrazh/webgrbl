@@ -6,8 +6,8 @@
  *
  * @since 2026-11-09
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 /** Marks an element the job leaves out; it stays in the SVG so it can be turned back on. */
 export const SVG_TREE_DISABLED_ATTRIBUTE_NAME = 'data-webgrbl-disabled';

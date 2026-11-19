@@ -6,8 +6,8 @@
  *
  * @since 2026-11-02
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import { WHEEL_DELTA_MODE_LINE } from '../browser/browser.events.constants';
 import { BED_WHEEL_LINE_HEIGHT_PX, BED_WHEEL_ZOOM_PER_PIXEL } from './bed.zoom.constants';

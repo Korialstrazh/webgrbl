@@ -9,8 +9,8 @@
  *
  * @since 2026-11-07
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import type { ProjectObject } from '../project/interfaces/ProjectObject';
 import { getSvgMatrixPoint } from '../svg/geometry/get.svg.matrix.point';

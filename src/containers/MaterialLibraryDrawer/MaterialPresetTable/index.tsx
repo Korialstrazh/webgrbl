@@ -9,8 +9,8 @@
  *
  * @since 2026-11-04
  *
- * @copyright michael.morosov - All rights reserved.
- * You may not use, distribute or modify this code without explicit permission by michael.morosov.
+ * @copyright 2026 michael.morosov
+ * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import { CheckOutlined } from '@ant-design/icons';
 import { Button, Table, Tag, Tooltip } from 'antd';
