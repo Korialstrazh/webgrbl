@@ -75,6 +75,8 @@ const MATERIAL_DIALOG_SELECTOR = '.ant-modal';
 const BIRCH_NAME = 'Birch';
 const BIRCH_THICKNESS_MM = 4;
 const LAYER_SELECT_LABEL = 'Layer';
+const CUT_THROUGH_NOTE_TEXT = 'Did not cut through last time. Consider an extra pass or more power.';
+const CUT_THROUGH_DISMISS_LABEL = 'Dismiss';
 
 const PROFILE: MachineProfile = newMachineProfile({ maxPowerWatts: MAX_POWER_WATTS });
 const OTHER_PROFILE: MachineProfile = newMachineProfile({ name: OTHER_MACHINE_NAME, maxPowerWatts: MAX_POWER_WATTS });
@@ -190,6 +192,20 @@ const addMaterialInDialog = (): void => {
 };
 
 describe(MaterialLibraryDrawer.name, () => {
+  it('shows the cut-through note on a preset, also when applying to a layer, and clears it on dismiss', async () => {
+    const preset: MaterialPreset = { ...newPresetFixture(PLYWOOD, PROFILE), isCutThroughNoteShown: true };
+    const store: AppStore = renderDrawerForLayer([preset]);
+
+    expect(await screen.findByText(CUT_THROUGH_NOTE_TEXT)).toBeInTheDocument();
+    expect(screen.getByLabelText(ROW_APPLY_LABEL)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText(CUT_THROUGH_DISMISS_LABEL));
+
+    expect(screen.queryByText(CUT_THROUGH_NOTE_TEXT)).not.toBeInTheDocument();
+    expect(selectMaterialPresets(store.getState())[0]?.isCutThroughNoteShown).toBe(false);
+    await waitForStoredPresetCount(1);
+  });
+
   it('keeps Import and Export in the More menu of the header, each with its caption', async () => {
     renderDrawer();
 

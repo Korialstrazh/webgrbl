@@ -82,3 +82,18 @@
 .appliedTag {
   margin: 0;
 }
+
+// A soft note, never applied on its own: the user decides whether to change the preset.
+.cutThroughNote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-warning);
+  font-size: 0.875rem;
+}
+
+.cutThroughNoteDismiss {
+  padding: 0;
+  height: auto;
+}

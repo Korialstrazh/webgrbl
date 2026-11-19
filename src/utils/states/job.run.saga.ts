@@ -13,15 +13,21 @@ import { call, cancel, delay, fork, join, put, race, select, take } from 'redux-
 import { GRBL_MACHINE_STATE, GRBL_STOP_FINISH_MAX_WAIT_MS } from '../grbl/grbl.constants';
 import type { GrblController } from '../grbl/grbl.controller';
 import type { GrblProgramResult } from '../grbl/interfaces/GrblProgramResult';
+import { getLayerKey } from '../layers/get.layer.key';
+import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { LAYER_MODE } from '../palette/palette.constants';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { GCODE_AIR_ASSIST_OFF } from '../toolpath/gcode.constants';
+import { getRecutToolpath } from '../toolpath/get.recut.toolpath';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
+import type { ToolpathLayerRange } from '../toolpath/interfaces/ToolpathLayerRange';
 import type { Action } from './action';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { JobFinishRaceResult } from './interfaces/JobFinishRaceResult';
+import type { JobStartRequest } from './interfaces/JobStartRequest';
 import { JOB_RUN_KIND } from './job.run.kind.constants';
-import { JobRunStarted, JobRunStatusChanged } from './job.run.state';
+import { JobCutCheckLayersCaptured, JobRunStarted, JobRunStatusChanged } from './job.run.state';
 import type { JobStartRequested } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
@@ -37,6 +43,7 @@ import {
   MachineStopFinished,
   MachineStopRequested,
 } from './machine.status.state';
+import { selectEnabledProjectLayers } from './project.document.state';
 import { getProjectGcodeText } from './project.gcode.text.saga';
 import { selectToolpath } from './toolpath.state';
 
@@ -48,8 +55,50 @@ const newJobRunStatusChanged = (status: JobRunStatus): JobRunStatusChanged => ne
 const isAirAssistOffAfterJob = (endStatus: JobRunStatus, programLines: string[]): boolean =>
   endStatus === JOB_RUN_STATUS.INTERRUPTED || programLines.includes(GCODE_AIR_ASSIST_OFF);
 
-function* getJobProgramLines(): Generator {
+const isLineLayer = (layer: ProjectLayer): boolean => layer.settings.mode === LAYER_MODE.LINE;
+
+/** The passes of each enabled line layer; fill layers stay out, so a re-cut never runs them. */
+const getLinePassesByLayerKey = (enabledLayers: ProjectLayer[]): Record<string, number> => {
+  const passesByLayerKey: Record<string, number> = {};
+
+  for (const layer of enabledLayers) {
+    if (isLineLayer(layer)) {
+      passesByLayerKey[getLayerKey(layer)] = layer.settings.passes;
+    }
+  }
+
+  return passesByLayerKey;
+};
+
+/** The toolpath a start request runs: the whole job, or for a re-cut only its ticked line layers. */
+function* getJobRunToolpath(request: JobStartRequest): Generator {
   const toolpath: Toolpath = (yield select(selectToolpath)) as Toolpath;
+
+  if (request.kind !== JOB_START_REQUEST_KIND.RECUT) {
+    return toolpath;
+  }
+
+  const enabledLayers: ProjectLayer[] = (yield select(selectEnabledProjectLayers)) as ProjectLayer[];
+  const passesByLayerKey: Record<string, number> = getLinePassesByLayerKey(enabledLayers);
+  const layerKeys: string[] = (request.layerKeys ?? [])
+    .filter((layerKey: string): boolean => layerKey in passesByLayerKey);
+
+  return layerKeys.length
+    ? getRecutToolpath(toolpath, layerKeys, Boolean(request.isExtraPassAdded), passesByLayerKey)
+    : undefined;
+}
+
+/** The line layers a toolpath burns, in its burn order. */
+function* getToolpathLineLayerKeys(toolpath: Toolpath): Generator {
+  const enabledLayers: ProjectLayer[] = (yield select(selectEnabledProjectLayers)) as ProjectLayer[];
+  const passesByLayerKey: Record<string, number> = getLinePassesByLayerKey(enabledLayers);
+
+  return toolpath.layers
+    .map(({ layerKey }: ToolpathLayerRange): string => layerKey)
+    .filter((layerKey: string): boolean => layerKey in passesByLayerKey);
+}
+
+function* getJobProgramLines(toolpath: Toolpath): Generator {
   const profile: MachineProfile = (yield select(selectActiveMachineProfile)) as MachineProfile;
   const programText: string = (yield call(getProjectGcodeText, toolpath, profile)) as string;
 
@@ -154,8 +203,8 @@ function* getJobEndStatusAfterStop(
 }
 
 export function* runGrblJob(controller: GrblController, action: JobStartRequested): Generator {
-  // A re-run of layers and a resume only fill in once their own programs exist.
-  if (action.payload.kind !== JOB_START_REQUEST_KIND.FULL) {
+  // A resume only fills in once its own program exists.
+  if (action.payload.kind === JOB_START_REQUEST_KIND.RESUME) {
     return;
   }
 
@@ -165,6 +214,15 @@ export function* runGrblJob(controller: GrblController, action: JobStartRequeste
     return;
   }
 
+  const runToolpath: Toolpath | undefined = (yield call(getJobRunToolpath, action.payload)) as Toolpath | undefined;
+
+  if (!runToolpath) {
+    return;
+  }
+
+  // Taken before the run, so the cut check lists what was burned even if the layers change on the way.
+  const cutCheckLayerKeys: string[] = (yield call(getToolpathLineLayerKeys, runToolpath)) as string[];
+
   const startPosition: GeometryPoint | undefined = (yield call(getJobStartWorkPosition)) as GeometryPoint | undefined;
   const interruptionTask: Task = (yield fork(waitForJobInterruption)) as Task;
   const stopRequestTask: Task = (yield fork(waitForJobStopRequest)) as Task;
@@ -172,13 +230,17 @@ export function* runGrblJob(controller: GrblController, action: JobStartRequeste
   yield put(new JobRunStarted({ startedAtMs: Date.now(), kind: JOB_RUN_KIND.JOB }));
 
   try {
-    const programLines: string[] = (yield call(getJobProgramLines)) as string[];
+    const programLines: string[] = (yield call(getJobProgramLines, runToolpath)) as string[];
     const programEndStatus: JobRunStatus =
       (yield call(followJobProgram, controller, programLines, interruptionTask)) as JobRunStatus;
     const endStatus: JobRunStatus =
       (yield call(getJobEndStatusAfterStop, programEndStatus, stopRequestTask, interruptionTask)) as JobRunStatus;
 
     yield put(newJobRunStatusChanged(endStatus));
+
+    if (endStatus === JOB_RUN_STATUS.COMPLETED) {
+      yield put(new JobCutCheckLayersCaptured({ layerKeys: cutCheckLayerKeys }));
+    }
 
     if (isAirAssistOffAfterJob(endStatus, programLines)) {
       yield put(new MachineAirAssistChanged({ isAirAssistOn: false }));

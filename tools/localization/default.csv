@@ -290,6 +290,15 @@ GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
 JOB_CHECKLIST_BATTERY_HINT;The laptop runs on battery. Plug it in so a long job is not cut short.
+JOB_CUT_CHECK_CLOSE;Close the cut check
+JOB_CUT_CHECK_EXTRA_PASS;Add one extra pass
+JOB_CUT_CHECK_LAYERS_LABEL;Layers to run again at the same work zero
+JOB_CUT_CHECK_QUESTION;Did the parts come out cleanly?
+JOB_CUT_CHECK_RECUT;Run cut layers again
+JOB_CUT_CHECK_RECUT_NEEDS_LAYER;Tick at least one layer to run again.
+JOB_CUT_CHECK_STUCK;Some are stuck
+JOB_CUT_CHECK_TITLE;Don't move the sheet yet. Gently test a part first.
+JOB_CUT_CHECK_YES;Yes
 JOB_LOCK_SHORT_ARTWORK;No artwork
 JOB_LOCK_SHORT_BUSY;Busy
 JOB_LOCK_SHORT_CONNECT;Not connected
@@ -637,6 +646,8 @@ MATERIAL_LIBRARY_SPEED_INVALID;Enter a speed from {{min}} to {{max}} mm/min.
 MATERIAL_LIBRARY_SPEED_VALUE;{{speed}} mm/min
 MATERIAL_LIBRARY_TICK_FOR_EXPORT;Select for export
 MATERIAL_LIBRARY_TITLE;Materials
+MATERIAL_PRESET_CUT_THROUGH_NOTE;Did not cut through last time. Consider an extra pass or more power.
+MATERIAL_PRESET_CUT_THROUGH_NOTE_DISMISS;Dismiss
 MATERIAL_SECTION_LIBRARY;Library
 MATERIAL_SECTION_LIBRARY_CAPTION;Library
 MATERIAL_SECTION_OPEN_LIBRARY;Open the material library

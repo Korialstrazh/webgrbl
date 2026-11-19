@@ -19,6 +19,8 @@ import { MATERIAL_PRESET_REPOSITORY } from '../materials/material.preset.reposit
 import type { MaterialPresetsReadRace } from './interfaces/MaterialPresetsReadRace';
 import { MachineProfileDeleted } from './machine.profile.state';
 import {
+  MaterialPresetCutThroughNoteAdded,
+  MaterialPresetCutThroughNoteDismissed,
   MaterialPresetDeleted,
   MaterialPresetSaved,
   MaterialPresetsLoaded,
@@ -41,6 +43,17 @@ function* storeSavedPreset(action: MaterialPresetSaved): Generator {
     yield call([MATERIAL_PRESET_REPOSITORY, MATERIAL_PRESET_REPOSITORY.putMaterialPreset], action.payload.preset);
   } catch (error: unknown) {
     yield call(showPresetStorageError, error);
+  }
+}
+
+/** Stores the preset whose note changed; a preset deleted in the meantime is left alone. */
+function* storeCutThroughNoteChange(action: MaterialPresetCutThroughNoteAdded): Generator {
+  const presets: MaterialPreset[] = (yield select(selectMaterialPresets)) as MaterialPreset[];
+  const changedPreset: MaterialPreset | undefined =
+    presets.find(({ id }: MaterialPreset): boolean => id === action.payload.presetId);
+
+  if (changedPreset) {
+    yield call(storeSavedPreset, new MaterialPresetSaved({ preset: changedPreset }));
   }
 }
 
@@ -100,6 +113,10 @@ export function* watchMaterialPresets(): Generator {
 
   // Listening starts before the read, so a change made during a slow or hanging read still reaches storage.
   yield takeEvery(MaterialPresetSaved.type, storeSavedPreset);
+  yield takeEvery(
+    [MaterialPresetCutThroughNoteAdded.type, MaterialPresetCutThroughNoteDismissed.type],
+    storeCutThroughNoteChange,
+  );
   yield takeEvery(MachineProfileDeleted.type, removeDeletedProfilePresets);
   yield takeEvery(MaterialPresetDeleted.type, removeDeletedPreset);
   yield call(loadStoredPresets, deletedPresetIds, deletedProfileIds);

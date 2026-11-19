@@ -8,7 +8,7 @@
  * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
  * gear, traces the outline of the job. A chevron in the heading folds the card to one line, its facts and Start, so the
  * cards below come into view; the fold is remembered per viewer. The laser pointer row is the card's last row, folded
- * or not.
+ * or not. After a job finished normally, the cut check hint shows under the facts until it is answered or closed.
  *
  * @author michael.morosov
  *
@@ -60,6 +60,7 @@ import { CaptionedActionButton } from '../../../views/CaptionedActionButton';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { Panel } from '../../../views/Panel';
 import { TooltipNoteIcon } from '../../../views/TooltipNoteIcon';
+import { JobCutCheckHint } from '../../JobCutCheckHint';
 import { JobStartButton } from '../../JobStartButton';
 import { FrameControls } from './FrameControls';
 import { JobPauseButton } from './JobPauseButton';
@@ -183,6 +184,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           </div>
           {isJobRunActive && <JobRunProgress />}
           {awakeNoteComponent}
+          <JobCutCheckHint />
           <JobPauseButton />
           <LaserPointerRow />
         </div>
@@ -192,6 +194,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           {!isJobRunActive && <JobReadinessRow />}
           {isJobRunActive && <JobRunProgress />}
           {awakeNoteComponent}
+          <JobCutCheckHint />
           <JobPauseButton />
           <FrameControls
             startActionComponent={isStartShown ? <JobStartButton /> : undefined}
