@@ -7,7 +7,7 @@ import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import type { PaletteEntry } from '../../utils/palette/interfaces/PaletteEntry';
 import { DEFAULT_CUT_ENTRY, DEFAULT_FILL_ENTRY, DEFAULT_SCORE_ENTRY } from '../../utils/palette/palette.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
-import { JobCutCheckLayersCaptured } from '../../utils/states/job.run.state';
+import { JobCutCheckDismissed, JobCutCheckLayersCaptured } from '../../utils/states/job.run.state';
 import { JobSafetyChecklistOpened } from '../../utils/states/job.safety.checklist.state';
 import { JOB_START_REQUEST_KIND } from '../../utils/states/job.start.request.constants';
 import { MaterialPresetCutThroughNoteAdded } from '../../utils/states/material.preset.state';
@@ -17,6 +17,7 @@ import { ProjectObjectsAdded } from '../../utils/states/project.document.state';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
 const PRESET_ID = 'preset-cut';
+const SCORE_PRESET_ID = 'preset-score';
 const TITLE_TEXT = /Don't move the sheet yet/;
 const QUESTION_TEXT = 'Did the parts come out cleanly?';
 const YES_LABEL = 'Yes';
@@ -47,7 +48,7 @@ const newFinishedJobStore = (svgText: string = SVG_TEXT): AppStore => {
     objects: [newProjectObject({ svgText })],
     layers: [
       newLayer(DEFAULT_CUT_ENTRY, 0, PRESET_ID),
-      newLayer(DEFAULT_SCORE_ENTRY, 1),
+      newLayer(DEFAULT_SCORE_ENTRY, 1, SCORE_PRESET_ID),
       newLayer(DEFAULT_FILL_ENTRY, 2),
     ],
   }));
@@ -98,7 +99,7 @@ describe(JobCutCheckHint.name, () => {
     expect(screen.queryByText(QUESTION_TEXT)).not.toBeInTheDocument();
   });
 
-  it('lists the line layers on Some are stuck, Cut ticked and Score not, and notes the linked preset', () => {
+  it('lists the line layers on Some are stuck, Cut ticked and Score not, and adds no note yet', () => {
     const store: AppStore = newFinishedJobStore();
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
@@ -109,8 +110,56 @@ describe(JobCutCheckHint.name, () => {
     expect(screen.getByRole('checkbox', { name: DEFAULT_SCORE_ENTRY.name })).not.toBeChecked();
     expect(screen.queryByRole('checkbox', { name: DEFAULT_FILL_ENTRY.name })).not.toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: EXTRA_PASS_LABEL })).not.toBeChecked();
+    expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('notes the preset of the layers ticked when running again, not of the ones ticked at first', () => {
+    const store: AppStore = newFinishedJobStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderHint(store);
+    fireEvent.click(screen.getByRole('button', { name: STUCK_LABEL }));
+    fireEvent.click(screen.getByRole('checkbox', { name: DEFAULT_CUT_ENTRY.name }));
+    fireEvent.click(screen.getByRole('checkbox', { name: DEFAULT_SCORE_ENTRY.name }));
+    fireEvent.click(screen.getByRole('button', { name: RECUT_LABEL }));
+
+    expect(dispatchSpy).toHaveBeenCalledWith(new MaterialPresetCutThroughNoteAdded({ presetId: SCORE_PRESET_ID }));
+    expect(dispatchSpy).not.toHaveBeenCalledWith(new MaterialPresetCutThroughNoteAdded({ presetId: PRESET_ID }));
+  });
+
+  it('notes the preset of the ticked layer when closed after Some are stuck', () => {
+    const store: AppStore = newFinishedJobStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderHint(store);
+    fireEvent.click(screen.getByRole('button', { name: STUCK_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: CLOSE_LABEL }));
+
     expect(dispatchSpy).toHaveBeenCalledWith(new MaterialPresetCutThroughNoteAdded({ presetId: PRESET_ID }));
+  });
+
+  it('adds the note only once when closed after running again', () => {
+    const store: AppStore = newFinishedJobStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+    const isNoteAction = (action: unknown): boolean => action instanceof MaterialPresetCutThroughNoteAdded;
+
+    renderHint(store);
+    fireEvent.click(screen.getByRole('button', { name: STUCK_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: RECUT_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: CLOSE_LABEL }));
+
+    expect(dispatchSpy.mock.calls.filter(([action]: unknown[]) => isNoteAction(action))).toHaveLength(1);
+  });
+
+  it('adds no note on Yes', () => {
+    const store: AppStore = newFinishedJobStore();
+    const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
+
+    renderHint(store);
+    fireEvent.click(screen.getByRole('button', { name: YES_LABEL }));
+
     expect(dispatchSpy).toHaveBeenCalledTimes(1);
+    expect(dispatchSpy).toHaveBeenCalledWith(new JobCutCheckDismissed());
   });
 
   it('opens the Start checklist for the ticked layers, with the extra pass when asked', () => {

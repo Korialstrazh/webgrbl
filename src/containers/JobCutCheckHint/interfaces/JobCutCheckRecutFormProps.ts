@@ -13,4 +13,10 @@ import type { JobCutCheckLayer } from '../../../utils/states/interfaces/JobCutCh
 export interface JobCutCheckRecutFormProps {
   /** The line layers of the finished job that can run again. */
   layers: JobCutCheckLayer[];
+  /** Keys of the layers ticked to run again. */
+  tickedLayerKeys: string[];
+  /** Ticks or unticks one layer. */
+  onLayerTick: (layerKey: string, isTicked: boolean) => void;
+  /** Runs the ticked layers again, in burn order, with one extra pass when asked. */
+  onRecut: (layerKeys: string[], isExtraPassAdded: boolean) => void;
 }
