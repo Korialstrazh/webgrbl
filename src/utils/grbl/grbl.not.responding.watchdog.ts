@@ -1,3 +1,4 @@
+import { newBackgroundTimer } from './background.timer';
 import {
   GRBL_CONTROLLER_EVENT_KIND,
   GRBL_MACHINE_STATE,
@@ -5,6 +6,7 @@ import {
   GRBL_STATUS_POLL_INTERVAL_MS,
 } from './grbl.constants';
 import type { GrblMachineState } from './grbl.constants';
+import type { BackgroundTimer } from './interfaces/BackgroundTimer';
 import type { GrblNotRespondingWatchdogHost } from './interfaces/GrblNotRespondingWatchdogHost';
 
 /** States in which a silent controller is expected: it holds its lines until the user resumes. */
@@ -30,10 +32,13 @@ export class GrblNotRespondingWatchdog {
   /** True once the current silence was reported. */
   private isSilenceReported = false;
   /** Checks the silence; set only while watching and the current silence is not reported yet. */
-  private silenceTimerId: ReturnType<typeof setTimeout> | undefined;
+  private silenceTimerId: number | undefined;
+  /** Runs the silence check, also in a hidden tab. */
+  private readonly backgroundTimer: BackgroundTimer;
 
-  public constructor(host: GrblNotRespondingWatchdogHost) {
+  public constructor(host: GrblNotRespondingWatchdogHost, backgroundTimer: BackgroundTimer = newBackgroundTimer()) {
     this.host = host;
+    this.backgroundTimer = backgroundTimer;
   }
 
   /** Starts watching from now, as if a line had just been received. */
@@ -92,11 +97,14 @@ export class GrblNotRespondingWatchdog {
 
   private startSilenceTimer(delayMs: number): void {
     this.clearSilenceTimer();
-    this.silenceTimerId = setTimeout((): void => this.handleSilenceTimeout(), delayMs);
+    this.silenceTimerId = this.backgroundTimer.setTimeout((): void => this.handleSilenceTimeout(), delayMs);
   }
 
   private clearSilenceTimer(): void {
-    clearTimeout(this.silenceTimerId);
+    if (this.silenceTimerId) {
+      this.backgroundTimer.clear(this.silenceTimerId);
+    }
+
     this.silenceTimerId = undefined;
   }
 }

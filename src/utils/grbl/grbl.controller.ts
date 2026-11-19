@@ -1,3 +1,4 @@
+import { newBackgroundTimer } from './background.timer';
 import {
   GRBL_CONTROLLER_EVENT_KIND,
   GRBL_CONTROLLER_PHASE,
@@ -22,6 +23,7 @@ import { GrblResponseRouter } from './grbl.response.router';
 import { GrblStatusPoller } from './grbl.status.poller';
 import { GrblStatusTracker } from './grbl.status.tracker';
 import type { GrblControllerPhase } from './grbl.constants';
+import type { BackgroundTimer } from './interfaces/BackgroundTimer';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblFirmwareIdentity } from './interfaces/GrblFirmwareIdentity';
@@ -85,17 +87,23 @@ export class GrblController {
   public constructor(transport: SerialTransport) {
     const emitEvent = (event: GrblControllerEvent): void => this.emitEvent(event);
     const isConnected = (): boolean => this.phase === GRBL_CONTROLLER_PHASE.CONNECTED;
+    // One worker serves the poller and the watchdog.
+    const backgroundTimer: BackgroundTimer = newBackgroundTimer();
 
     this.transport = transport;
     this.commandWriter = new GrblCommandWriter(transport, emitEvent);
     this.statusPoller = new GrblStatusPoller(
       (): void => void this.commandWriter.writeRealtimeCommand(GRBL_REALTIME_COMMAND.STATUS_QUERY),
+      backgroundTimer,
     );
-    this.notRespondingWatchdog = new GrblNotRespondingWatchdog({
-      hasInFlightLines: (): boolean => this.commandWriter.hasInFlightLines(),
-      getLatestStatus: (): GrblResolvedStatus | undefined => this.statusTracker.getLatestStatus(),
-      emitEvent,
-    });
+    this.notRespondingWatchdog = new GrblNotRespondingWatchdog(
+      {
+        hasInFlightLines: (): boolean => this.commandWriter.hasInFlightLines(),
+        getLatestStatus: (): GrblResolvedStatus | undefined => this.statusTracker.getLatestStatus(),
+        emitEvent,
+      },
+      backgroundTimer,
+    );
     this.machineControls = new GrblMachineControls({
       commandWriter: this.commandWriter,
       statusPoller: this.statusPoller,
