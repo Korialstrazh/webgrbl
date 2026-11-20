@@ -1,17 +1,22 @@
+// One capsule around the quiet status part and the Connect button, so the two read as one control.
 .pillGroup {
   display: inline-flex;
   align-items: stretch;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
 }
 
+// The status part is passive-looking: no fill or border of its own, only the state icon and a short word.
 .pill:global(.ant-btn) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-height: var(--target-min);
   padding: 0 var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 0;
   border-radius: var(--radius-pill);
-  background-color: var(--color-surface-2);
+  background-color: transparent;
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
@@ -20,29 +25,40 @@
   cursor: pointer;
 
   &:not(:disabled):hover {
-    border-color: var(--color-border);
     background-color: var(--color-surface-hover);
     color: var(--color-text);
   }
 }
 
+// The state icon in the state colour, with the dot on its corner: unplugged, linking or linked.
+.statusIcon {
+  position: relative;
+  display: inline-flex;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
 .dot {
-  width: 0.625rem;
-  height: 0.625rem;
+  position: absolute;
+  inset-block-end: -0.125rem;
+  inset-inline-end: -0.1875rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--color-surface-2);
   border-radius: 50%;
-  background-color: var(--color-text-muted);
+  background-color: currentColor;
 }
 
 .connected {
-  background-color: var(--color-success);
+  color: var(--color-success);
 }
 
 .connecting {
-  background-color: var(--color-warning);
+  color: var(--color-warning);
 }
 
 .lost {
-  background-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .status {
@@ -67,12 +83,17 @@
 }
 
 // The action the pill offers while no laser is connected: the accent colour marks it as the place to connect.
+// The verb fills the right end of the capsule with the tinted accent, so it reads as the one button.
 .connectVerb {
   display: inline-flex;
+  align-self: stretch;
   align-items: center;
   gap: var(--space-2);
-  padding-left: var(--space-2);
+  margin-inline-end: calc(-1 * var(--space-3));
+  padding: 0 var(--space-3);
   border-left: 1px solid var(--color-border);
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background-color: var(--color-accent-tint);
   color: var(--color-accent);
   font-weight: 600;
 
@@ -84,25 +105,33 @@
 .caret {
   color: var(--color-text-muted);
   font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.pill:hover .caret,
+.pill:focus-visible .caret,
+.pill[aria-expanded='true'] .caret {
+  opacity: 1;
 }
 
 // The pill with a one-click Connect button joined on its right: one shape, split by a line.
 .joined:global(.ant-btn) {
-  border-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-// The one-click Connect beside the pill: the accent colour marks it as the place to connect.
+// The one-click Connect beside the pill: a tinted accent fill marks it as the one button to press.
 .connectButton:global(.ant-btn) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-height: var(--target-min);
   padding: 0 var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 0;
+  border-left: 1px solid var(--color-border);
   border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background-color: var(--color-surface-2);
+  background-color: var(--color-accent-tint);
   color: var(--color-accent);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
@@ -116,9 +145,8 @@
   }
 
   &:not(:disabled):hover {
-    border-color: var(--color-border);
     background-color: var(--color-surface-hover);
-    color: var(--color-accent);
+    color: var(--color-accent-hover);
   }
 }
 
@@ -131,34 +159,33 @@
   }
 }
 
-// At phone width the pill is its dot and the Connect verb, or the dot alone once there is a link: it must always fit.
+// Below 57rem the unplugged icon alone says "not connected" beside Connect (the tooltip and label still name it), so
+// the profile keeps its name. 57rem must match the TopBar styles.
+@media (width < 57rem) {
+  .connectOffered .status {
+    display: none;
+  }
+}
+
+// At phone width the pill is its state icon and the Connect verb, or the icon and Connected once there is a link: it
+// must always fit.
 @media (width < 30rem) {
   .pill:global(.ant-btn) {
+    padding: 0 0.375rem;
+  }
+
+  .connectButton:global(.ant-btn) {
     padding: 0 var(--space-2);
   }
 
-  .status,
   .caret,
   .warningNote {
     display: none;
   }
 
   .connectVerb {
-    padding-left: 0;
-    border-left: 0;
-  }
-
-  // On a phone the pill is short, so Connect gets a tinted fill that reads as a button, and keeps its word.
-  .connectVerb,
-  .connectButton:global(.ant-btn) {
-    padding: 0 var(--space-2);
-    background-color: var(--color-accent-tint);
-  }
-
-  .connectVerb {
-    align-self: stretch;
     margin-inline-end: calc(-1 * var(--space-2));
-    border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+    padding: 0 var(--space-2);
   }
 }
 

@@ -47,6 +47,9 @@ const SHORT_STATUS_LABELS: Record<GrblConnectionStatus, string> = {
   ...STATUS_LABELS,
   [GRBL_CONNECTION_STATUS.LOST]: 'Lost',
 };
+const DISCONNECTED_ICON_SELECTOR = '.anticon-disconnect';
+const CONNECTING_ICON_SELECTOR = '.anticon-sync';
+const CONNECTED_ICON_SELECTOR = '.anticon-link';
 const SIMULATED_PORT_TEXT = 'Simulated laser (no hardware)';
 
 const renderConnectionPill = (): AppStore => {
@@ -86,6 +89,28 @@ describe(ConnectionPill.name, () => {
     fireEvent.click(pillButton);
 
     expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toBeInTheDocument();
+  });
+
+  it.each<[GrblConnectionStatus, string]>([
+    [GRBL_CONNECTION_STATUS.DISCONNECTED, DISCONNECTED_ICON_SELECTOR],
+    [GRBL_CONNECTION_STATUS.LOST, DISCONNECTED_ICON_SELECTOR],
+    [GRBL_CONNECTION_STATUS.CONNECTING, CONNECTING_ICON_SELECTOR],
+    [GRBL_CONNECTION_STATUS.CONNECTED, CONNECTED_ICON_SELECTOR],
+  ])('pairs the dot with a state icon while %s, so the state reads without its word', (
+    connectionStatus: GrblConnectionStatus,
+    expectedIconSelector: string,
+  ) => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new ConnectionStatusChanged({ connectionStatus }));
+    });
+
+    const pillButton: HTMLElement = screen.getByRole('button', { name: new RegExp(STATUS_LABELS[connectionStatus]) });
+
+    const statusIcon: Element | null = pillButton.querySelector(expectedIconSelector);
+
+    expect(statusIcon?.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('pairs the dot with a one-word state for a narrow window, hidden from screen readers', () => {

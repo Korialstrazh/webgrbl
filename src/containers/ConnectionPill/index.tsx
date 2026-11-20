@@ -1,7 +1,7 @@
 /**
- * The laser connection in the top bar: a status dot, a short state word, the firmware once connected and, when the
- * browser has no Web Serial, a note. The port is never spelled out on the pill; its tooltip, its accessible name and
- * the popover name it. While no laser is connected it ends in a Connect verb: with a port
+ * The laser connection in the top bar: a state icon with a coloured dot, a short state word, the firmware once
+ * connected and, when the browser has no Web Serial, a note. The port is never spelled out on the pill; its tooltip,
+ * its accessible name and the popover name it. While no laser is connected it ends in a Connect verb: with a port
  * already chosen that verb is its own button joined to the pill and connects in one click; with none it is part of the
  * pill. Clicking the pill opens and closes the connection popover, which the Status card can open as well. The
  * browser's network state is not shown here: it is not the laser's state (the status strip shows it while offline).
@@ -13,7 +13,7 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { ApiOutlined, DownOutlined } from '@ant-design/icons';
+import { ApiOutlined, DisconnectOutlined, DownOutlined, LinkOutlined, SyncOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
@@ -50,6 +50,15 @@ const ARIA_LABEL_PART_SEPARATOR = ', ';
 /** Whether the pill offers the Connect verb: no laser is connected and no connection is being made. */
 const isConnectOffered = (connectionStatus: GrblConnectionStatus): boolean =>
   connectionStatus === GRBL_CONNECTION_STATUS.DISCONNECTED || connectionStatus === GRBL_CONNECTION_STATUS.LOST;
+
+/** The state icon the dot sits on, so the state reads without its word at phone width. */
+const getConnectionStatusIconComponent = (connectionStatus: GrblConnectionStatus): ReactNode => {
+  if (connectionStatus === GRBL_CONNECTION_STATUS.CONNECTED) {
+    return <LinkOutlined />;
+  }
+
+  return connectionStatus === GRBL_CONNECTION_STATUS.CONNECTING ? <SyncOutlined spin /> : <DisconnectOutlined />;
+};
 
 export const ConnectionPill = (): ReactNode => {
   const { t } = useTranslation();
@@ -113,17 +122,21 @@ export const ConnectionPill = (): ReactNode => {
             aria-expanded={isPopoverOpen}
             aria-label={t(DEFAULT.CONNECTION_PILL_LABEL, { details: ariaLabelDetails })}
           >
-            <span className={[styles.dot, styles[connectionStatus]].join(' ')} aria-hidden="true" />
+            <span className={[styles.statusIcon, styles[connectionStatus]].join(' ')} aria-hidden="true">
+              {getConnectionStatusIconComponent(connectionStatus)}
+              <span className={styles.dot} />
+            </span>
             {/* The button's label names the state in full; the pill shows the one-word look. */}
             <span className={styles.status} aria-hidden="true">{shortStatusText}</span>
             {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
             {!isWebSerialSupported && (
               <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
             )}
+            {/* The status part stays quiet: its chevron shows only under the pointer or the focus. */}
+            <DownOutlined className={styles.caret} aria-hidden="true" />
             {isConnectVerbShown && !isOneClickConnect && (
               <span className={styles.connectVerb}>{connectVerbContent}</span>
             )}
-            <DownOutlined className={styles.caret} aria-hidden="true" />
           </Button>
         </ConnectionPopover>
         {isOneClickConnect && (
