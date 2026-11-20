@@ -127,8 +127,9 @@ export const ConnectionPill = (): ReactNode => {
           </Button>
         </ConnectionPopover>
         {isOneClickConnect && (
-          <Button className={styles.connectButton} onClick={connectLaser}>
-            {connectVerbContent}
+          // The icon prop gives the plug the same gap to the word as every other icon and label button.
+          <Button className={styles.connectButton} icon={<ApiOutlined aria-hidden="true" />} onClick={connectLaser}>
+            <span className={styles.connectWord}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
           </Button>
         )}
       </span>

@@ -1,5 +1,3 @@
-@use '../../styles/accessibility' as accessibility;
-
 .pillGroup {
   display: inline-flex;
   align-items: stretch;
@@ -72,7 +70,7 @@
 .connectVerb {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   padding-left: var(--space-2);
   border-left: 1px solid var(--color-border);
   color: var(--color-accent);
@@ -99,7 +97,7 @@
 .connectButton:global(.ant-btn) {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   min-height: var(--target-min);
   padding: 0 var(--space-3);
   border: 1px solid var(--color-border);
@@ -150,13 +148,17 @@
     border-left: 0;
   }
 
+  // On a phone the pill is short, so Connect gets a tinted fill that reads as a button, and keeps its word.
+  .connectVerb,
   .connectButton:global(.ant-btn) {
     padding: 0 var(--space-2);
+    background-color: var(--color-accent-tint);
   }
 
-  // The plug alone says Connect on a phone; the word stays for assistive technology and the pill's tooltip.
-  .connectWord {
-    @include accessibility.visually-hidden;
+  .connectVerb {
+    align-self: stretch;
+    margin-inline-end: calc(-1 * var(--space-2));
+    border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
   }
 }
 
