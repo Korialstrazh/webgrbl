@@ -49,6 +49,11 @@
   background-color: currentColor;
 }
 
+// Unplugged is amber at every width, so the state never reads as an empty radio button.
+.disconnected {
+  color: var(--color-warning);
+}
+
 .connected {
   color: var(--color-success);
 }
@@ -159,21 +164,13 @@
   }
 }
 
-// Below 57rem the pill turns into one compact capsule: the state is a lone coloured dot (its button still opens the
-// connection popover and names the state and port), and Connect is a 32 px icon and word in the same fill, with no
-// split line or chevron. 57rem must match the TopBar styles.
+// Below 57rem the pill turns into one compact capsule: the state is its coloured state icon with the dot (its button
+// still opens the connection popover and names the state and port), and Connect is a 32 px icon and word in the same
+// fill, with no split line or chevron. 57rem must match the TopBar styles.
 @media (width < 57rem) {
   .connectOffered .status,
-  .caret,
-  .statusIcon > :global(.anticon) {
+  .caret {
     display: none;
-  }
-
-  .dot {
-    position: static;
-    width: 0.625rem;
-    height: 0.625rem;
-    border: 0;
   }
 
   .pill:global(.ant-btn),
