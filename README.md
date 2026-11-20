@@ -32,4 +32,4 @@ Licensed under the [Apache License, Version 2.0](LICENSE). You may use, modify a
 
 ## CI and deployment
 
-GitHub Actions runs `npm run check` on every push and PR, and deploys `main` to your own server over SSH. Setup: [`docs/howto/deployment.md`](docs/howto/deployment.md).
+GitHub Actions runs `npm run check` on every push and PR, and deploys `main` to your own server as a Docker container. Setup: [`docs/howto/deployment.md`](docs/howto/deployment.md).

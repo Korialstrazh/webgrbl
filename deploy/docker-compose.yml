@@ -1,0 +1,7 @@
+services:
+  webgrbl:
+    image: ghcr.io/korialstrazh/webgrbl:${WEBGRBL_TAG:-latest}
+    restart: unless-stopped
+    # Only reachable from the server itself: put your HTTPS reverse proxy in front.
+    ports:
+      - "127.0.0.1:8080:8080"
