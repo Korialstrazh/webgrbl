@@ -67,9 +67,13 @@ export const TopBar = (): ReactNode => {
         </h1>
         <ProjectNameButton />
       </div>
+      {/* Three action groups, each set apart from the one before by the same gap and a thin divider. */}
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <ProjectMenu />
         <AutosaveReadout />
+      </div>
+      {/* At phone width this group moves into the Project menu, so the project name keeps its room. */}
+      <div className={[styles.group, styles.activeMenus, styles.machineGroup].join(' ')}>
         <DismissibleTooltip title={profileTooltipText}>
           <Button
             className={styles.profileButton}
@@ -92,7 +96,7 @@ export const TopBar = (): ReactNode => {
           </span>
         </DismissibleTooltip>
       </div>
-      <div className={[styles.group, styles.activeMenus].join(' ')}>
+      <div className={[styles.group, styles.activeMenus, styles.historyGroup].join(' ')}>
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           iconComponent={<UndoArrowIcon />}

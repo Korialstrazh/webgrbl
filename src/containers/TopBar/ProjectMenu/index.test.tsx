@@ -6,6 +6,7 @@ import { newStore } from '../../../utils/states/new.store';
 import type { AppStore } from '../../../utils/states/new.store';
 import { OVERLAY_KIND } from '../../../utils/states/overlay.kind.constants';
 import { OverlayOpened } from '../../../utils/states/ui.overlay.state';
+import { selectIsMachineProfilesDialogOpen } from '../../../utils/states/ui.workbench.state';
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 import { TOP_BAR_IMPORT_SVG_BUTTON_ID } from './project.menu.constants';
 
@@ -14,6 +15,7 @@ const NEW_PROJECT_LABEL = 'New project';
 const DIALOG_OVERLAY_ID = 'test-dialog';
 const HIDDEN_DROPDOWN_SELECTOR = '.ant-dropdown-hidden';
 const IMPORT_SVG_LABEL = 'Import SVG';
+const MACHINE_PROFILES_LABEL = 'Laser profiles';
 
 describe(ProjectMenu.name, () => {
   it('closes the open menu when a dialog opens', async () => {
@@ -59,5 +61,21 @@ describe(ProjectMenu.name, () => {
 
     expect(importClickSpy).toHaveBeenCalledTimes(1);
     importButton.remove();
+  });
+
+  it('opens the laser profiles dialog from its phone-only entry', async () => {
+    const store: AppStore = newStore();
+    render(
+      <Provider store={store}>
+        <AntdTestProvider>
+          <ProjectMenu />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: PROJECT_MENU_LABEL }));
+    fireEvent.click(await screen.findByText(MACHINE_PROFILES_LABEL));
+
+    expect(selectIsMachineProfilesDialogOpen(store.getState())).toBe(true);
   });
 });

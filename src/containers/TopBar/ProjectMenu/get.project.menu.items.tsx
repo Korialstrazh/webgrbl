@@ -1,6 +1,6 @@
 /**
- * The entries of the Project menu, with the Save shortcut hint and, at phone width, Import SVG. Export G-code is
- * disabled while it cannot start, with a tooltip that says what is missing.
+ * The entries of the Project menu, with the Save shortcut hint and, at phone width, Import SVG and the laser profiles.
+ * Export G-code is disabled while it cannot start, with a tooltip that says what is missing.
  *
  * @author michael.morosov
  *
@@ -23,8 +23,9 @@ import type { TFunction } from 'i18next';
 import { ANTD_MENU_ITEM_TYPE_DIVIDER } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { LaserMachineIcon } from '../../../views/LaserMachineIcon';
 import type { ProjectMenuItems } from '../interfaces/ProjectMenuItems';
-import { PROJECT_MENU_KEY } from './project.menu.constants';
+import { LASER_MACHINE_ICON_NAME, PROJECT_MENU_KEY } from './project.menu.constants';
 import styles from './styles.module.scss';
 
 export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvailability): ProjectMenuItems => [
@@ -57,6 +58,13 @@ export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvaila
     className: styles.phoneOnly,
     icon: <UploadOutlined aria-hidden />,
     label: t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG),
+  },
+  {
+    key: PROJECT_MENU_KEY.MACHINE_PROFILES,
+    // Only at phone width, where the laser profile button leaves the bar for this entry.
+    className: styles.phoneOnly,
+    icon: <LaserMachineIcon aria-label={LASER_MACHINE_ICON_NAME} />,
+    label: t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES),
   },
   { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
   {

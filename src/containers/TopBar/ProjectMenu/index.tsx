@@ -1,6 +1,6 @@
 /**
  * The Project menu of the top bar: new project, the Open dialog, save, save as file, open file, Export G-code and,
- * at phone width, Import SVG. Open file uses a hidden file input.
+ * at phone width, Import SVG and the laser profiles. Open file uses a hidden file input.
  *
  * @author michael.morosov
  *
@@ -28,6 +28,7 @@ import {
   ProjectSaveRequested,
 } from '../../../utils/states/project.state';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
+import { MachineProfilesDialogOpenChanged } from '../../../utils/states/ui.workbench.state';
 import { OpenProjectDialog } from '../../OpenProjectDialog';
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { ProjectFileInput } from '../../ProjectFileInput';
@@ -73,6 +74,9 @@ export const ProjectMenu = (): ReactNode => {
       break;
     case PROJECT_MENU_KEY.IMPORT_SVG:
       document.getElementById(TOP_BAR_IMPORT_SVG_BUTTON_ID)?.click();
+      break;
+    case PROJECT_MENU_KEY.MACHINE_PROFILES:
+      dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen: true }));
       break;
     case PROJECT_MENU_KEY.EXPORT_GCODE:
       dispatch(new GcodeExportRequested({ isWarningConfirmed: false }));

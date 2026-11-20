@@ -39,3 +39,10 @@
     @include accessibility.visually-hidden;
   }
 }
+
+// At phone width the check closes up to the folder, so the project name keeps its room. 30rem matches the TopBar.
+@media (width < 30rem) {
+  .autosave {
+    padding-inline: var(--space-1);
+  }
+}

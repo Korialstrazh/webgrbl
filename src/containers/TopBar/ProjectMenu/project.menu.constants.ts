@@ -20,7 +20,11 @@ export const PROJECT_MENU_KEY = {
   OPEN_FILE: 'open-file',
   EXPORT_GCODE: 'export-gcode',
   IMPORT_SVG: 'import-svg',
+  MACHINE_PROFILES: 'machine-profiles',
 } as const;
+
+/** The name of the laser profile icon in the menu, in the antd icon-name style, so every entry's icon has a name. */
+export const LASER_MACHINE_ICON_NAME = 'laser-machine';
 
 /** The id of the top bar Import SVG button, which the Project menu entry clicks while the button is hidden. */
 export const TOP_BAR_IMPORT_SVG_BUTTON_ID = 'top-bar-import-svg';
