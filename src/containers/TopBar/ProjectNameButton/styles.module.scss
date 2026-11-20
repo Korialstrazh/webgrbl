@@ -31,7 +31,7 @@
 
 // In a narrow bar the app name is hidden, so the project name takes its place, a size larger and in the main text
 // colour, still on one line: a long name is cut with an ellipsis and its tooltip shows it whole.
-@media (width < 62.5rem) {
+@media (width < 75rem) {
   .nameButton {
     max-width: 100%;
     font-size: 0.875rem;

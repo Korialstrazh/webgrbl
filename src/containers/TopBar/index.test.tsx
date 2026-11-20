@@ -6,6 +6,7 @@ import { ENTER_KEY, ESCAPE_KEY, UNDO_KEY } from '../../utils/browser/browser.eve
 import * as downloadModule from '../../utils/browser/download.text.file';
 import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
 import { newProjectObject } from '../../utils/project/new.project.object';
+import { APP_VERSION } from '../../utils/app.version.constants';
 import { PROJECT_FILE_MIME_TYPE } from '../../utils/project/project.constants';
 import { ConnectionStatusChanged } from '../../utils/states/grbl.connection.state';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
@@ -48,6 +49,7 @@ const REDO_LABEL = 'Redo';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PICKED_FILE_NAME = 'star.svg';
 const APP_TITLE = 'webgrbl';
+const APP_HEADING = `${APP_TITLE} v${APP_VERSION}`;
 const AUTOSAVE_TEXT = 'Saved';
 const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
@@ -139,7 +141,7 @@ describe(TopBar.name, () => {
       </Provider>,
     );
 
-    expect(screen.getByRole('heading', { name: APP_TITLE })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: APP_HEADING })).toBeInTheDocument();
     expect(screen.getByText(AUTOSAVE_TEXT)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).toBeInTheDocument();
   });

@@ -941,7 +941,7 @@ registerLocales({
       [DEFAULT.ADD_TEST_SAMPLE]: "Add test sample",
       [DEFAULT.ADD_TEST_SAMPLE_PROJECT_FULL]: "The project has the most objects it can hold.",
       [DEFAULT.ADD_TEST_SAMPLE_TOO_SMALL]: "The 5 × 5 cm sample does not fit the work area of this laser.",
-      [DEFAULT.APP_DOCUMENT_TITLE]: "{{name}} – webgrbl",
+      [DEFAULT.APP_DOCUMENT_TITLE]: "{{name}} – webgrbl v{{version}}",
       [DEFAULT.APP_TITLE]: "webgrbl",
       [DEFAULT.APP_UPDATE_DISMISS]: "Dismiss",
       [DEFAULT.APP_UPDATE_NEED_REFRESH]: "A new version of webgrbl is available.",
