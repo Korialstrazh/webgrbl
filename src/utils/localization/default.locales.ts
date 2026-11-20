@@ -1847,7 +1847,7 @@ registerLocales({
       [DEFAULT.TOOLPATH_WARNINGS_CHIP]: "Toolpath warnings ({{count}}): show them",
       [DEFAULT.TOOLPATH_WARNINGS_SHOW_OBJECT]: "Show {{name}} on the bed",
       [DEFAULT.TOOLPATH_WARNINGS_TITLE]: "Toolpath warnings",
-      [DEFAULT.TOP_BAR_AUTOSAVE_SAVED]: "Saved",
+      [DEFAULT.TOP_BAR_AUTOSAVE_SAVED]: "All changes saved",
       [DEFAULT.TOP_BAR_AUTOSAVE_SAVING]: "Saving…",
       [DEFAULT.TOP_BAR_AUTOSAVE_UNSAVED]: "Waiting to save",
       [DEFAULT.TOP_BAR_MENU_IMPORT_SVG]: "Import SVG",

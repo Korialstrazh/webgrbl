@@ -1,7 +1,7 @@
 /**
- * The autosave readout of the top bar: an icon and the state of the open project, Saved, Saving or Waiting to save.
- * Waiting is a calm grey clock, not an error: autosave stores the change shortly. When the bar is narrow only the icon
- * stays; its tooltip and accessible name still give the state.
+ * The autosave readout of the top bar: an icon for the state of the open project. Saved is a lone green check, since it
+ * is the usual state; Saving and Waiting to save add a short word. Waiting is a calm grey clock, not an error: autosave
+ * * stores the change shortly. When the bar is narrow only the icon stays; its tooltip and name give the state.
  *
  * @author michael.morosov
  *
@@ -40,6 +40,7 @@ export const AutosaveReadout = (): ReactNode => {
   const saveStatus: ProjectSaveStatus = useSelector(selectProjectSaveStatus);
 
   const statusLabel: string = t(PROJECT_SAVE_STATUS_LABEL_KEY[saveStatus]);
+  const isSaved: boolean = saveStatus === PROJECT_SAVE_STATUS.SAVED;
 
   return (
     <Tooltip title={statusLabel}>
@@ -47,7 +48,8 @@ export const AutosaveReadout = (): ReactNode => {
         <span className={[styles.icon, ICON_CLASS_NAME[saveStatus]].join(' ')} aria-hidden>
           {getSaveStatusIconComponent(saveStatus)}
         </span>
-        <span className={styles.label}>{statusLabel}</span>
+        {/* The check alone says Saved; only a state that needs a look gets a word. */}
+        {!isSaved && <span className={styles.label}>{statusLabel}</span>}
       </p>
     </Tooltip>
   );

@@ -50,7 +50,7 @@ const IMPORT_SVG_LABEL = 'Import SVG';
 const PICKED_FILE_NAME = 'star.svg';
 const APP_TITLE = 'webgrbl';
 const APP_HEADING = `${APP_TITLE} v${APP_VERSION}`;
-const AUTOSAVE_TEXT = 'Saved';
+const AUTOSAVE_TEXT = 'All changes saved';
 const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const MACHINE_PROFILES_LABEL = 'Laser profiles';
@@ -142,7 +142,7 @@ describe(TopBar.name, () => {
     );
 
     expect(screen.getByRole('heading', { name: APP_HEADING })).toBeInTheDocument();
-    expect(screen.getByText(AUTOSAVE_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: AUTOSAVE_TEXT })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).toBeInTheDocument();
   });
 
@@ -499,7 +499,6 @@ describe(TopBar.name, () => {
     it.each<[ProjectSaveStatus, string]>([
       [PROJECT_SAVE_STATUS.SAVING, SAVING_TEXT],
       [PROJECT_SAVE_STATUS.UNSAVED, NOT_SAVED_TEXT],
-      [PROJECT_SAVE_STATUS.SAVED, AUTOSAVE_TEXT],
     ])('shows the %s status as %s', (saveStatus: ProjectSaveStatus, expectedText: string) => {
       const store: AppStore = newStore();
 
@@ -509,6 +508,17 @@ describe(TopBar.name, () => {
       });
 
       expect(screen.getByRole('status')).toHaveTextContent(expectedText);
+    });
+
+    it('shows the saved state as a lone check icon, with no word', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.SAVED }));
+      });
+
+      expect(screen.getByRole('status')).toHaveTextContent(/^$/);
     });
 
     it('shows a pending change as a calm clock, not an alert mark', () => {

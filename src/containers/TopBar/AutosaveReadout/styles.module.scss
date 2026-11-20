@@ -1,24 +1,20 @@
 @use '../../../styles/accessibility' as accessibility;
 
-// The end margin keeps the readout from touching the button after it in a tight bar.
+// The side padding keeps the lone check icon from touching the buttons beside it.
 .autosave {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin: 0 var(--space-3) 0 0;
+  margin: 0;
+  padding-inline: var(--space-2);
   font-size: 0.8125rem;
   color: var(--color-text-muted);
   white-space: nowrap;
 }
 
-// Room for the longest state ("Waiting to save"), so a change of state never shifts the buttons after it.
-.label {
-  min-inline-size: 6.5rem;
-}
-
 .icon {
   display: inline-flex;
-  font-size: 1rem;
+  font-size: 1.125rem;
 }
 
 .saved {
@@ -37,13 +33,7 @@
 // Below 75rem only the coloured icon stays on screen, so Import SVG and the connection pill keep their room; its
 // tooltip and accessible name still give the state. 75rem must match the TopBar styles.
 @media (width < 75rem) {
-  .autosave {
-    margin-right: 0;
-  }
-
   .label {
-    min-inline-size: 0;
-
     @include accessibility.visually-hidden;
   }
 }
