@@ -136,13 +136,16 @@
 .caret {
   color: var(--color-text-muted);
   font-size: 0.75rem;
+  // The chevron keeps its room at rest and only fades in, so the pill never changes width on hover, focus or open.
+  visibility: hidden;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, visibility 0.15s;
 }
 
 .pill:hover .caret,
 .pill:focus-visible .caret,
 .pill[aria-expanded='true'] .caret {
+  visibility: visible;
   opacity: 1;
 }
 
