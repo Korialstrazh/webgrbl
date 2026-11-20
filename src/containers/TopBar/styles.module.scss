@@ -25,15 +25,16 @@
   flex-shrink: 0;
 }
 
-// A slot of a set width that does not follow the name, so a short or long project name never moves the menus beside
-// it. The slot is wide enough for an automatic name with its date and time, and gives way only when the bar is short of
-// room; only then does a long name end in an ellipsis.
+// The heading is as wide as the name, up to a cap, so the action groups sit right after it on a wide screen and the free
+// space falls before the connection pill; only a long name that reaches the cap ends in an ellipsis.
 .heading {
   display: flex;
-  flex: 0 1 24rem;
+  flex: 0 1 auto;
   flex-direction: column;
   align-items: flex-start;
-  min-width: 11rem;
+  row-gap: 0.1875rem;
+  max-width: 24rem;
+  min-width: 8rem;
 }
 
 .title {
@@ -85,7 +86,7 @@
   // The app name gets small so the project name can use most of the heading. The name gets the room first: a fixed width
   // wide enough for an automatic name with its date and time, which gives way only when the bar runs out of space.
   .heading {
-    flex: 0 1 15rem;
+    max-width: 15rem;
     min-width: 6.5rem;
     overflow: hidden;
   }
@@ -121,6 +122,11 @@
   }
 }
 
+// The slot only exists so the phone layout can hide Import SVG; it adds no box of its own.
+.importSlot {
+  display: contents;
+}
+
 .profileName {
   display: inline-block;
   max-width: 9rem;
@@ -149,13 +155,6 @@
     @include accessibility.visually-hidden;
   }
 
-  // Icon-only, Import SVG looks like its plain icon neighbours; a filled, bordered square would read as a toggle
-  // that is switched on.
-  .activeMenus :global(.ant-btn-default:not(:hover, :focus-visible)) {
-    border-color: transparent;
-    background-color: transparent;
-    box-shadow: none;
-  }
 }
 
 // The main icons of the bar are large enough to read without a tooltip.
@@ -163,15 +162,21 @@
   font-size: 1.25rem;
 }
 
-// At phone width the project name and the save word go and the buttons close up, so everything fits with no scroll;
+// At phone width the labels go and the buttons close up, so everything fits with no scroll;
 // the small brand and version stay as the anchor.
 @media (width < 30rem) {
+  // The heading takes the room left over, so the project name shows cut short with an ellipsis and stays a tap
+  // target for renaming.
   .heading {
-    flex: none;
-    min-width: 0;
+    flex: 1 1 0;
+    row-gap: 0.125rem;
+    max-width: none;
+    min-width: 3rem;
+    overflow: hidden;
   }
 
-  .heading > :not(.title) {
+  // Import SVG moves into the Project menu, so the connection pill keeps its Connect button whole.
+  .importSlot {
     display: none;
   }
 
@@ -191,7 +196,7 @@
   }
 
   .activeMenus :global(.ant-btn) {
-    min-width: 2.125rem;
-    padding-inline: var(--space-1);
+    min-width: 2rem;
+    padding-inline: 0.125rem;
   }
 }

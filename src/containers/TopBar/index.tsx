@@ -10,13 +10,13 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { ImportOutlined } from '@ant-design/icons';
+import { UploadOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { APP_VERSION } from '../../utils/app.version.constants';
-import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
@@ -35,6 +35,7 @@ import { MachineProfilesDialog } from '../MachineProfilesDialog';
 import { SvgImportButton } from '../SvgImportButton';
 import { AutosaveReadout } from './AutosaveReadout';
 import { ProjectMenu } from './ProjectMenu';
+import { TOP_BAR_IMPORT_SVG_BUTTON_ID } from './ProjectMenu/project.menu.constants';
 import { ProjectNameButton } from './ProjectNameButton';
 import styles from './styles.module.scss';
 
@@ -73,7 +74,6 @@ export const TopBar = (): ReactNode => {
           <Button
             className={styles.profileButton}
             type={ANTD_BUTTON_TYPE_TEXT}
-            size={ANTD_BUTTON_SIZE_LARGE}
             icon={<LaserMachineIcon />}
             aria-label={profilesLabel}
             onClick={() => changeProfilesDialogOpen(true)}
@@ -82,13 +82,19 @@ export const TopBar = (): ReactNode => {
           </Button>
         </DismissibleTooltip>
         <DismissibleTooltip title={t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}>
-          <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.importLabel} />
+          <span className={styles.importSlot}>
+            <SvgImportButton
+              buttonType={ANTD_BUTTON_TYPE_TEXT}
+              buttonId={TOP_BAR_IMPORT_SVG_BUTTON_ID}
+              iconComponent={<UploadOutlined />}
+              labelClassName={styles.importLabel}
+            />
+          </span>
         </DismissibleTooltip>
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
-          size={ANTD_BUTTON_SIZE_LARGE}
           iconComponent={<UndoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_UNDO)}
           isDisabled={!canUndo}
@@ -96,7 +102,6 @@ export const TopBar = (): ReactNode => {
         />
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
-          size={ANTD_BUTTON_SIZE_LARGE}
           iconComponent={<RedoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_REDO)}
           isDisabled={!canRedo}

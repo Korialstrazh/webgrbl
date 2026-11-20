@@ -1,6 +1,6 @@
 /**
- * The Project menu of the top bar: new project, the Open dialog, save, save as file, open file and Export G-code.
- * Open file uses a hidden file input.
+ * The Project menu of the top bar: new project, the Open dialog, save, save as file, open file, Export G-code and,
+ * at phone width, Import SVG. Open file uses a hidden file input.
  *
  * @author michael.morosov
  *
@@ -33,7 +33,7 @@ import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { ProjectFileInput } from '../../ProjectFileInput';
 import type { ProjectMenuClickInfo } from '../interfaces/ProjectMenuClickInfo';
 import { getProjectMenuItems } from './get.project.menu.items';
-import { PROJECT_MENU_KEY } from './project.menu.constants';
+import { PROJECT_MENU_KEY, TOP_BAR_IMPORT_SVG_BUTTON_ID } from './project.menu.constants';
 import styles from './styles.module.scss';
 
 const PROJECT_MENU_OVERLAY_ID = 'project-menu';
@@ -70,6 +70,9 @@ export const ProjectMenu = (): ReactNode => {
       break;
     case PROJECT_MENU_KEY.OPEN_FILE:
       fileInputRef.current?.click();
+      break;
+    case PROJECT_MENU_KEY.IMPORT_SVG:
+      document.getElementById(TOP_BAR_IMPORT_SVG_BUTTON_ID)?.click();
       break;
     case PROJECT_MENU_KEY.EXPORT_GCODE:
       dispatch(new GcodeExportRequested({ isWarningConfirmed: false }));

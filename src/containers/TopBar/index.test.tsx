@@ -47,6 +47,7 @@ import { SVG_FILE_PICKER_ACCEPT, SVG_IMPORT_INPUT_TEST_ID } from '../SvgImportBu
 const UNDO_LABEL = 'Undo';
 const REDO_LABEL = 'Redo';
 const IMPORT_SVG_LABEL = 'Import SVG';
+const ANTD_TEXT_BUTTON_CLASS = 'ant-btn-text';
 const PICKED_FILE_NAME = 'star.svg';
 const APP_TITLE = 'webgrbl';
 const APP_HEADING = `${APP_TITLE} v${APP_VERSION}`;
@@ -224,6 +225,12 @@ describe(TopBar.name, () => {
     expect(importCalls).toHaveLength(1);
     expect(importCalls[0]?.[0]).toMatchObject({ payload: { files: [pickedFile] } });
     expect(input.value).toBe('');
+  });
+
+  it('draws Import SVG as a borderless text button, like the other toolbar actions', () => {
+    renderWorkbenchTopBar(newStore());
+
+    expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toHaveClass(ANTD_TEXT_BUTTON_CLASS);
   });
 
   it('disables undo and redo at the start, enables undo after a change and undoes it', () => {

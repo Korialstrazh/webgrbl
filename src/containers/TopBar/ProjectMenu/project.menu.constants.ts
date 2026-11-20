@@ -19,7 +19,11 @@ export const PROJECT_MENU_KEY = {
   SAVE_AS_FILE: 'save-as-file',
   OPEN_FILE: 'open-file',
   EXPORT_GCODE: 'export-gcode',
+  IMPORT_SVG: 'import-svg',
 } as const;
+
+/** The id of the top bar Import SVG button, which the Project menu entry clicks while the button is hidden. */
+export const TOP_BAR_IMPORT_SVG_BUTTON_ID = 'top-bar-import-svg';
 
 export const PROJECT_SAVE_STATUS_LABEL_KEY: Record<ProjectSaveStatus, string> = {
   [PROJECT_SAVE_STATUS.SAVED]: DEFAULT.TOP_BAR_AUTOSAVE_SAVED,

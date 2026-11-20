@@ -1,6 +1,6 @@
 /**
- * The entries of the Project menu, with the Save shortcut hint. Export G-code is disabled while it cannot start, with
- * a tooltip that says what is missing.
+ * The entries of the Project menu, with the Save shortcut hint and, at phone width, Import SVG. Export G-code is
+ * disabled while it cannot start, with a tooltip that says what is missing.
  *
  * @author michael.morosov
  *
@@ -16,6 +16,7 @@ import {
   FolderOpenOutlined,
   HistoryOutlined,
   SaveOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
@@ -49,6 +50,13 @@ export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvaila
     key: PROJECT_MENU_KEY.OPEN_FILE,
     icon: <FolderOpenOutlined aria-hidden />,
     label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN_FILE),
+  },
+  {
+    key: PROJECT_MENU_KEY.IMPORT_SVG,
+    // Only at phone width, where the Import SVG button leaves the bar for this entry.
+    className: styles.phoneOnly,
+    icon: <UploadOutlined aria-hidden />,
+    label: t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG),
   },
   { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
   {
