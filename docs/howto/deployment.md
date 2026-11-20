@@ -12,12 +12,19 @@ You can also start a run by hand from the Actions tab (**Run workflow**).
 
 ## The image
 
-- Stage 1 builds the app with Node 24 (`npm ci`, `npm run build`).
+- Stage 1 builds the app with Node 24 (`npm ci`, then `vite build --base` with the URL path).
 - Stage 2 serves `dist/` with nginx on port 8080 (`docker/nginx.conf`):
   - `index.html`, `sw.js` and `manifest.webmanifest` are sent with `Cache-Control: no-cache`, so users never get stuck on an old version;
   - files under `assets/` have hashed names and are cached for a year;
   - unknown paths fall back to `index.html`.
 - The container has a health check on `/`.
+- The app is built for the URL path in the repository variable `WEBGRBL_BASE_PATH` (default `/webgrbl/`, with leading and trailing slash). The container serves it at its own root; the host proxy strips the path.
+
+### Changing the URL path
+
+1. Set **Settings → Secrets and variables → Actions → Variables → `WEBGRBL_BASE_PATH`**, for example `/laser/`.
+2. Change the `location` in the host nginx to the same path (see below) and reload nginx.
+3. Push to `main` (or run the workflow by hand). Users who installed the PWA under the old path have to install it again.
 
 Try it locally: `docker build -t webgrbl . && docker run --rm -p 8080:8080 webgrbl`, then open http://localhost:8080 (Web Serial works on localhost without HTTPS).
 
@@ -29,21 +36,18 @@ Try it locally: `docker build -t webgrbl . && docker run --rm -p 8080:8080 webgr
 2. Create a deploy user that may run Docker (member of the `docker` group) and a folder for the compose file, for example `/opt/webgrbl`.
 3. Create an SSH key pair for the pipeline only (`ssh-keygen -t ed25519 -f webgrbl_deploy -N ""`) and add the public key to the deploy user's `~/.ssh/authorized_keys`.
 4. Let the server pull the image. Either make the package public on GitHub (**Packages → webgrbl → Package settings → Change visibility**), or log in once as the deploy user: `docker login ghcr.io -u <github user>` with a personal access token that has `read:packages`.
-5. Serve it over **HTTPS**: Web Serial only works on secure pages. The container listens on `127.0.0.1:8080` only, so put your reverse proxy in front, for example nginx:
+5. Serve it over **HTTPS**: Web Serial only works on secure pages. The container listens on `127.0.0.1:8080` only, so put your reverse proxy in front. With nginx, inside the existing HTTPS `server` block of your site:
 
 ```nginx
-server {
-    listen 443 ssl;
-    server_name webgrbl.example.com;
-    # ssl_certificate ... (for example from certbot)
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-    }
+location = /webgrbl { return 301 /webgrbl/; }
+location /webgrbl/ {
+    proxy_pass http://127.0.0.1:8080/;   # the trailing slash strips /webgrbl/
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
 
-   or Caddy, which gets certificates by itself: `webgrbl.example.com { reverse_proxy 127.0.0.1:8080 }`.
+   The path must match `WEBGRBL_BASE_PATH`.
 
 ### In GitHub
 

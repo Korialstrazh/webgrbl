@@ -60,6 +60,9 @@ jobs:
         with:
           context: .
           push: true
+          # The URL path the app is served under: set the repository variable WEBGRBL_BASE_PATH to change it.
+          build-args: |
+            WEBGRBL_BASE_PATH=${{ vars.WEBGRBL_BASE_PATH || '/webgrbl/' }}
           tags: |
             ${{ env.IMAGE }}:${{ github.sha }}
             ${{ env.IMAGE }}:latest
