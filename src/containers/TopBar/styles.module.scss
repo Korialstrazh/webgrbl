@@ -189,21 +189,41 @@
   }
 
   // The heading takes the room left over and stays a tap target for renaming.
+  // One line: the project name, then the version as a small tag right after it.
   .heading {
     flex: 1 1 0;
+    flex-direction: row;
+    align-items: center;
+    column-gap: var(--space-1);
     max-width: none;
     min-width: 3rem;
     overflow: hidden;
     padding-inline-end: var(--space-1);
   }
 
-  // The brand word gives its room to the project name; the tiny version tag stays, so the release is still visible.
+  .heading > :not(.title) {
+    min-width: 0;
+  }
+
+  // The brand word gives its room to the project name; the version stays as a muted tag after the name, so the
+  // release is still visible.
   .appName {
     @include accessibility.visually-hidden;
   }
 
+  .title {
+    flex-shrink: 0;
+    order: 1;
+    color: var(--color-text-muted);
+  }
+
   .version {
+    display: inline-block;
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-2);
     font-size: 0.625rem;
+    line-height: 1rem;
   }
 
   .machineGroup,
