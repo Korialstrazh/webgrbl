@@ -8,6 +8,7 @@ import { OVERLAY_KIND } from '../../../utils/states/overlay.kind.constants';
 import { OverlayOpened } from '../../../utils/states/ui.overlay.state';
 import { selectIsMachineProfilesDialogOpen } from '../../../utils/states/ui.workbench.state';
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
+import { APP_VERSION } from '../../../utils/app.version.constants';
 import { TOP_BAR_IMPORT_SVG_BUTTON_ID } from './project.menu.constants';
 
 const PROJECT_MENU_LABEL = 'Project';
@@ -16,6 +17,7 @@ const DIALOG_OVERLAY_ID = 'test-dialog';
 const HIDDEN_DROPDOWN_SELECTOR = '.ant-dropdown-hidden';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const MACHINE_PROFILES_LABEL = 'Laser profiles';
+const VERSION_FOOTER_TEXT = `webgrbl v${APP_VERSION}`;
 
 describe(ProjectMenu.name, () => {
   it('closes the open menu when a dialog opens', async () => {
@@ -77,5 +79,21 @@ describe(ProjectMenu.name, () => {
     fireEvent.click(await screen.findByText(MACHINE_PROFILES_LABEL));
 
     expect(selectIsMachineProfilesDialogOpen(store.getState())).toBe(true);
+  });
+
+  it('names the app version in a footer line that is not a menu entry, for the phone heading without it', async () => {
+    render(
+      <Provider store={newStore()}>
+        <AntdTestProvider>
+          <ProjectMenu />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: PROJECT_MENU_LABEL }));
+
+    const versionFooter: HTMLElement = await screen.findByText(VERSION_FOOTER_TEXT);
+
+    expect(versionFooter.closest('[role="menuitem"]')).not.toBeInTheDocument();
   });
 });

@@ -61,7 +61,7 @@ export const TopBar = (): ReactNode => {
     <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
       {/* Plain text elements: antd Typography would add its own margins and colours. */}
       <div className={styles.heading}>
-        {/* The version stays at every width; at phone width the brand word gives its room to the project name. */}
+        {/* At phone width the brand line makes room for the project name; the Project menu names the version. */}
         <h1 className={styles.title}>
           <span className={styles.appName}>{t(DEFAULT.APP_TITLE)}</span>{' '}
           <span className={styles.version}>v{APP_VERSION}</span>

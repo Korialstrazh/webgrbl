@@ -1,6 +1,6 @@
 /**
  * The entries of the Project menu in three groups (open, save, export) with shortcut hints and, at phone width, Undo,
- * Redo, Import SVG and the laser profiles in groups of their own.
+ * Redo, Import SVG and the laser profiles in groups of their own, and a muted footer line with the app version.
  * Export G-code is disabled while it cannot start, with a tooltip that says what is missing.
  *
  * @author michael.morosov
@@ -22,7 +22,8 @@ import {
 import { Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 import type { ReactNode } from 'react';
-import { ANTD_MENU_ITEM_TYPE_DIVIDER } from '../../../utils/antd.constants';
+import { ANTD_MENU_ITEM_TYPE_DIVIDER, ANTD_MENU_ITEM_TYPE_GROUP } from '../../../utils/antd.constants';
+import { APP_VERSION } from '../../../utils/app.version.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { LaserMachineIcon } from '../../../views/LaserMachineIcon';
 import { RedoArrowIcon } from '../../../views/RedoArrowIcon';
@@ -71,6 +72,14 @@ const getPhoneOnlyMenuItems = (t: TFunction, options: ProjectMenuItemsOptions): 
     className: styles.phoneOnly,
     icon: <LaserMachineIcon aria-label={LASER_MACHINE_ICON_NAME} />,
     label: t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES),
+  },
+  // The phone heading shows only the project name, so the release the user runs is named here, as a muted footer line
+  // that cannot be chosen.
+  PHONE_ONLY_DIVIDER,
+  {
+    type: ANTD_MENU_ITEM_TYPE_GROUP,
+    className: [styles.phoneOnly, styles.versionFooter].join(' '),
+    label: t(DEFAULT.TOP_BAR_PROJECT_MENU_VERSION, { appName: t(DEFAULT.APP_TITLE), version: APP_VERSION }),
   },
 ];
 

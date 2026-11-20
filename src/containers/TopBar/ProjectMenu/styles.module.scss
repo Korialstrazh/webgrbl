@@ -22,6 +22,15 @@
   color: var(--color-text-muted);
 }
 
+// The phone version footer: small muted text, centred under the entries, so it reads as information, not an action.
+:global(.ant-dropdown-menu) .versionFooter.versionFooter :global(.ant-dropdown-menu-item-group-title) {
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+  cursor: default;
+}
+
 // The same small chevron as the connection pill's.
 :global(.ant-btn) .caret.caret:global(.anticon) {
   margin-left: var(--space-1);
@@ -69,7 +78,8 @@
 @media (width >= 30rem) {
   // Doubled class: the antd menu item rule is more specific than one class.
   :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item),
-  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item-divider) {
+  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item-divider),
+  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item-group) {
     display: none;
   }
 }

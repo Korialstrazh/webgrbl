@@ -51,8 +51,11 @@
   display: flex;
   flex: 0 1 auto;
   flex-direction: column;
+  // The brand line and the name sit as one block in the vertical middle of the bar, with even room above and below.
+  align-self: center;
+  justify-content: center;
   align-items: flex-start;
-  row-gap: 0.125rem;
+  row-gap: 0.0625rem;
   max-width: 24rem;
   min-width: 8rem;
   // The same inner space as the buttons after the first divider, so it sits evenly between the name and Project.
@@ -178,13 +181,10 @@
     padding: 0 var(--space-2);
   }
 
-  // The heading takes the room left over and stays a tap target for renaming.
-  // One line: the project name, then the version as a small tag right after it.
+  // The heading takes the room left over and stays a tap target for renaming; it shows only the project name, and the
+  // version moves to a footer line of the Project menu.
   .heading {
     flex: 1 1 0;
-    flex-direction: row;
-    align-items: center;
-    column-gap: var(--space-1);
     max-width: none;
     min-width: 3rem;
     overflow: hidden;
@@ -192,28 +192,12 @@
   }
 
   .heading > :not(.title) {
+    max-width: 100%;
     min-width: 0;
   }
 
-  // The brand word gives its room to the project name; the version stays as a muted tag after the name, so the
-  // release is still visible.
-  .appName {
-    @include accessibility.visually-hidden;
-  }
-
   .title {
-    flex-shrink: 0;
-    order: 1;
-    color: var(--color-text-muted);
-  }
-
-  .version {
-    display: inline-block;
-    padding: 0 var(--space-1);
-    border-radius: var(--radius-sm);
-    background-color: var(--color-surface-2);
-    font-size: 0.625rem;
-    line-height: 1rem;
+    @include accessibility.visually-hidden;
   }
 
   .machineGroup,

@@ -185,7 +185,7 @@ describe(TopBar.name, () => {
     expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).toBeInTheDocument();
   });
 
-  it('keeps the brand word and the version tag as separate parts, so phone width can hide the word only', () => {
+  it('names the brand word and the version in the heading, which phone width hides as one line', () => {
     render(
       <Provider store={newStore()}>
         <TopBar />
