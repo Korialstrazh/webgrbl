@@ -5,6 +5,20 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   background-color: var(--color-surface-2);
+  transition: border-color 0.15s ease;
+}
+
+// While the connection popover is open the whole capsule takes the accent edge, so the open state never stops at the
+// split before Connect.
+.pillGroup:has(.pill[aria-expanded='true']) {
+  border-color: var(--color-accent);
+}
+
+// Keyboard focus on either part rings the whole capsule with the one focus ring, round at both ends; the parts draw no
+// ring of their own, which would be cut at the split. Pointer presses draw no ring, as everywhere else.
+:root:not([data-pointer-modality]) .pillGroup:has(:focus-visible) {
+  outline: var(--focus-outline-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-outline-offset);
 }
 
 // The status part is passive-looking: no fill or border of its own, only the state icon and a short word.
@@ -28,6 +42,13 @@
     background-color: var(--color-surface-hover);
     color: var(--color-text);
   }
+}
+
+// antd's outlined button paints a 1 px accent border on hover and focus, which drew a second ring that stopped at the
+// split; both parts keep no border of their own, the capsule draws the one edge.
+.pillGroup .pill:global(.ant-btn):not(:disabled):not(:global(.ant-btn-disabled)),
+.pillGroup .connectButton:global(.ant-btn):not(:disabled):not(:global(.ant-btn-disabled)) {
+  border-width: 0;
 }
 
 // The state icon in the state colour, with the dot on its corner: unplugged, linking or linked.
@@ -87,8 +108,8 @@
   font-size: 0.75rem;
 }
 
-// The action the pill offers while no laser is connected: the accent colour marks it as the place to connect.
-// The verb fills the right end of the capsule with the tinted accent, so it reads as the one button.
+// The action the pill offers while no laser is connected: a solid accent fill with dark text, like every primary
+// button, marks it as the one place to connect.
 .connectVerb {
   display: inline-flex;
   align-self: stretch;
@@ -96,10 +117,9 @@
   gap: var(--space-2);
   margin-inline-end: calc(-1 * var(--space-3));
   padding: 0 var(--space-3);
-  border-left: 1px solid var(--color-border);
   border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background-color: var(--color-accent-tint);
-  color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-bg);
   font-weight: 600;
 
   > :global(.anticon) {
@@ -134,10 +154,9 @@
   min-height: var(--target-min);
   padding: 0 var(--space-3);
   border: 0;
-  border-left: 1px solid var(--color-border);
   border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background-color: var(--color-accent-tint);
-  color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-bg);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
   font-weight: 600;
@@ -150,9 +169,24 @@
   }
 
   &:not(:disabled):hover {
-    background-color: var(--color-surface-hover);
-    color: var(--color-accent-hover);
+    background-color: var(--color-accent-hover);
+    color: var(--color-bg);
   }
+
+  &:not(:disabled):active {
+    background-color: var(--color-accent-active);
+    color: var(--color-bg);
+  }
+}
+
+.pill:not(:disabled):hover .connectVerb {
+  background-color: var(--color-accent-hover);
+}
+
+// The one-click Connect beside the solid fill: a dark inner line marks which part holds the keyboard focus inside the
+// capsule's ring.
+:root:not([data-pointer-modality]) .connectButton:focus-visible {
+  box-shadow: inset 0 0 0 var(--focus-outline-width) var(--color-bg);
 }
 
 // In a narrow window the firmware moves to the popover and the label, and the caret goes while Connect is offered.
@@ -182,11 +216,6 @@
     min-width: 2rem;
     justify-content: center;
   }
-
-  .connectVerb,
-  .connectButton:global(.ant-btn) {
-    border-left: 0;
-  }
 }
 
 // At phone width the pill is its state icon and the Connect verb, or the icon and Connected once there is a link: it
@@ -211,11 +240,8 @@
   }
 }
 
-// Each part of the joined pill draws its own whole ring, inside its own edge and above its neighbour, so the ring never
-// breaks at the split or runs into the other part.
+// The capsule draws the ring (see above), so neither part draws its own.
 .pill:focus-visible,
 .connectButton:focus-visible {
-  position: relative;
-  z-index: 1;
-  outline-offset: calc(-1 * var(--focus-outline-width));
+  outline: none;
 }
