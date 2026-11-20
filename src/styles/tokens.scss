@@ -66,9 +66,9 @@
   // The solid outline of a locked action button: at least 3:1 on every surface (3.05:1 on surface-3), so it stays
   // visible, while the dark fill and the lock badge set it apart from an enabled one. Dashes are kept for drop zones.
   --color-disabled-border-locked: #6b7178;
-  // A toolbar icon that cannot act right now: about 3:1 on the top bar (3.28:1 on surface-1), so it reads as disabled,
-  // not as absent, while the enabled icon in the main text colour stays far above 7:1.
-  --color-icon-disabled: #656b72;
+  // A toolbar icon that cannot act right now: 3.63:1 on the top bar (surface-1), a margin above 3:1 because thin strokes
+  // look fainter than their colour, so it reads as disabled, not absent; the enabled main text colour stays at 14.4:1.
+  --color-icon-disabled: #6c7279;
 
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
