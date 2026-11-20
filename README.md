@@ -29,3 +29,7 @@ A browser version of LaserGRBL: control a GRBL laser cutter or engraver straight
 Licensed under the [Apache License, Version 2.0](LICENSE). You may use, modify and distribute webgrbl, in open or closed source and commercial projects, under its terms. See [NOTICE](NOTICE) for attribution.
 
 **Safety disclaimer:** webgrbl drives laser cutters and engravers. It is provided "AS IS", without warranty of any kind, and the authors accept no liability for any damage or injury arising from its use. Always supervise your machine and follow your laser's safety instructions.
+
+## CI and deployment
+
+GitHub Actions runs `npm run check` on every push and PR, and deploys `main` to your own server over SSH. Setup: [`docs/howto/deployment.md`](docs/howto/deployment.md).
