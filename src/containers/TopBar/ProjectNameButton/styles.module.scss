@@ -45,14 +45,15 @@
   }
 }
 
-// At phone width the pencil goes, since its sliver read as a stray caret; the whole name stays a tap target to rename.
+// At phone width the name is a step smaller and the pencil closes up to it, still showing that a tap renames.
 @media (width < 30rem) {
   .nameButton {
     font-size: 0.875rem;
   }
 
   .nameButton .pencil {
-    display: none;
+    margin-inline-start: var(--space-1);
+    font-size: 0.75rem;
   }
 
   .renameBox {

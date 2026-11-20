@@ -55,6 +55,8 @@
   row-gap: 0.125rem;
   max-width: 24rem;
   min-width: 8rem;
+  // The same inner space as the buttons after the first divider, so it sits evenly between the name and Project.
+  padding-inline-end: var(--space-2);
 }
 
 // The app name and version: a small brand line, a step brighter than muted text yet below the project name, so the
@@ -92,12 +94,14 @@
 }
 
 .profileButton:global(.ant-btn) {
-  // A chip: a thin outline and round ends set it apart as a chooser; the same text size and weight as the other header
-  // controls, so the project name stays the strongest text.
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
+  // Borderless like Project and Import SVG, so the bar has one button style; only the chevron marks it as a chooser.
   font-size: 0.875rem;
   font-weight: 400;
+}
+
+// Every toolbar button has the same side padding, so each divider sits with equal space on both of its sides.
+.activeMenus :global(.ant-btn) {
+  padding-inline: var(--space-2);
 }
 
 // The same small chevron as the Project menu's.
@@ -155,10 +159,6 @@
   .profileName {
     max-width: 6rem;
   }
-
-  .activeMenus :global(.ant-btn) {
-    padding-inline: var(--space-2);
-  }
 }
 
 // Below 57rem Import SVG drops its label; the profile keeps its short name, so a beginner still reads "laser profile".
@@ -194,6 +194,12 @@
     max-width: none;
     min-width: 3rem;
     overflow: hidden;
+    padding-inline-end: var(--space-1);
+  }
+
+  // The brand word gives its room to the project name; the tiny version tag stays, so the release is still visible.
+  .appName {
+    @include accessibility.visually-hidden;
   }
 
   .version {

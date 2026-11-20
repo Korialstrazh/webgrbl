@@ -170,6 +170,19 @@ describe(TopBar.name, () => {
     expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).toBeInTheDocument();
   });
 
+  it('keeps the brand word and the version tag as separate parts, so phone width can hide the word only', () => {
+    render(
+      <Provider store={newStore()}>
+        <TopBar />
+      </Provider>,
+    );
+
+    const heading: HTMLElement = screen.getByRole('heading', { name: APP_HEADING });
+
+    expect(within(heading).getByText(APP_TITLE)).toBeInTheDocument();
+    expect(within(heading).getByText(`v${APP_VERSION}`)).toBeInTheDocument();
+  });
+
   it('shows no placeholder for planned features', () => {
     render(
       <Provider store={newStore()}>
