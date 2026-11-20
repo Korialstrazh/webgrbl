@@ -1,8 +1,21 @@
 # Per-developer Gitea configuration
 .gitea-local
 
-# Machine-local ruleset install state
-docs/rulesets/.rulesets-manifest.json
+# The maintainer's personal rules, agent instructions, skills, specs and plans: kept on the maintainer's machine only,
+# never published.
+docs/rulesets/
+docs/project-rules/
+docs/superpowers/
+.claude/skills/
+AGENTS.md
+CLAUDE.md
+.superpowers/
+graphify-out/
+
+# Local secrets, logs and coverage
+.env*
+*.log
+coverage/
 
 # Agent worktrees
 .claude/worktrees/
