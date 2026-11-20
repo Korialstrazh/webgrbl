@@ -243,4 +243,3 @@ Only printable ASCII (0x20 to 0x7E) is ever sent (`GRBL_PRINTABLE_ASCII_LINE_PAT
 - `src/utils/storage/connection.preferences.storage.ts`
 - `src/utils/storage/interfaces/ConnectionPreferences.ts`
 - `src/utils/type.guards/`
-- `docs/superpowers/specs/2026-10-30_(01)_connection-streaming-engine.spec.md`
