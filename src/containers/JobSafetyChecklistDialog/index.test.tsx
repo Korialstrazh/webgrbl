@@ -227,6 +227,42 @@ describe(JobSafetyChecklistDialog.name, () => {
       expect(screen.queryByText(BATTERY_HINT)).not.toBeInTheDocument();
     });
 
+    it('shows no stale hint on a reopening while the battery is being checked again', async () => {
+      let isCharging = false;
+      let resolveSecondCheck: (battery: { charging: boolean }) => void = () => undefined;
+
+      Object.defineProperty(navigator, 'getBattery', {
+        value: () => isCharging
+          ? new Promise((resolve: (battery: { charging: boolean }) => void): void => {
+            resolveSecondCheck = resolve;
+          })
+          : Promise.resolve({ charging: false }),
+        configurable: true,
+      });
+
+      const store: AppStore = await renderOpenDialog();
+
+      expect(await screen.findByText(BATTERY_HINT)).toBeInTheDocument();
+
+      act(() => {
+        store.dispatch(new JobSafetyChecklistClosed());
+      });
+      isCharging = true;
+      act(() => {
+        store.dispatch(new JobSafetyChecklistOpened(FULL_REQUEST));
+      });
+      await screen.findByRole('dialog', { name: DIALOG_TITLE });
+
+      expect(screen.queryByText(BATTERY_HINT)).not.toBeInTheDocument();
+
+      await act(async () => {
+        resolveSecondCheck({ charging: true });
+        await Promise.resolve();
+      });
+
+      expect(screen.queryByText(BATTERY_HINT)).not.toBeInTheDocument();
+    });
+
     it('shows no hint without the Battery API', async () => {
       await renderOpenDialog();
 

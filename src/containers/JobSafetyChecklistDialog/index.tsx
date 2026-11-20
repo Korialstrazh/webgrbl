@@ -80,6 +80,9 @@ export const JobSafetyChecklistDialog = (): ReactNode => {
 
     let isCurrent = true;
 
+    // A hint from an earlier opening must not show while this one is still being checked.
+    setIsOnBattery(false);
+
     const checkBattery = async (): Promise<void> => {
       const isOnBatteryNow: boolean | undefined = await getIsOnBattery();
 
