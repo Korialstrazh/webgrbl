@@ -1,6 +1,7 @@
 /**
- * The top region: app name, the project name, the Project menu and autosave readout, the machine profiles dialog, SVG
- * import, undo and redo, the connection pill and update notice. The material library opens from the Material panel.
+ * The top region: app name and version, the project name, the Project menu and autosave readout, the machine profiles
+ * dialog, SVG import, undo and redo, the connection pill and update notice. The material library opens from the
+ * Material panel.
  *
  * @author michael.morosov
  *
@@ -14,6 +15,7 @@ import { Button, Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { APP_VERSION } from '../../utils/app.version.constants';
 import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
@@ -58,7 +60,9 @@ export const TopBar = (): ReactNode => {
     <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
       {/* Plain text elements: antd Typography would add its own margins and colours. */}
       <div className={styles.heading}>
-        <h1 className={styles.title}>{t(DEFAULT.APP_TITLE)}</h1>
+        <h1 className={styles.title}>
+          {t(DEFAULT.APP_TITLE)} <span className={styles.version}>v{APP_VERSION}</span>
+        </h1>
         <ProjectNameButton />
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
@@ -97,7 +101,9 @@ export const TopBar = (): ReactNode => {
         />
       </div>
       <div className={styles.trailing}>
-        <AppUpdatePrompt />
+        <div className={styles.updateSlot}>
+          <AppUpdatePrompt />
+        </div>
         <LaserStateChip />
         <ConnectionPill />
       </div>

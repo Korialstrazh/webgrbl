@@ -129,8 +129,8 @@
 
 // In a narrow window the pill keeps the dot, a short state ("Not connected", "Lost") after a plug and the Connect verb,
 // or the state and the chevron once connected; the port and the firmware move to its popover and its label.
-// 62.5rem must match the TopBar styles.
-@media (width < 62.5rem) {
+// 75rem must match the TopBar styles.
+@media (width < 75rem) {
   .firmware,
   .port,
   .connectOffered .caret,

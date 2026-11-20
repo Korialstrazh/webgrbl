@@ -36,7 +36,10 @@ describe(AppUpdatePrompt.name, () => {
 
     expect(noticeChip.className).toContain(CHIP_CLASS_NAME);
     expect(noticeChip).toHaveAttribute('title', OFFLINE_READY_TEXT);
-    expect(noticeChip.parentElement).toContainElement(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+    // The chip sits in its own slot, so the connection pill is a neighbour of that slot.
+    const trailingGroup: HTMLElement | null | undefined = noticeChip.parentElement?.parentElement;
+
+    expect(trailingGroup).toContainElement(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
     expect(screen.getByText(OFFLINE_READY_TEXT).className).toContain(MESSAGE_CLASS_NAME);
   });
 

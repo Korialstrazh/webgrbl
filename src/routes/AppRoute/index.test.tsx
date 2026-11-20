@@ -4,8 +4,9 @@ import { AppRoute } from '.';
 import { PANEL_SIZES_REPOSITORY } from '../../utils/project/panel.sizes.repository';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 import { newStore } from '../../utils/states/new.store';
+import { APP_VERSION } from '../../utils/app.version.constants';
 
-const APP_TITLE = 'webgrbl';
+const APP_TITLE = `webgrbl v${APP_VERSION}`;
 const CONNECTION_PILL_PATTERN = /^Connection: Not connected/;
 const STOP_LABEL = 'Stop';
 const CONSOLE_TITLE = 'Console';

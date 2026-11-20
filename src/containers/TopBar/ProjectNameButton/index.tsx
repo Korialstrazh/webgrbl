@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { APP_VERSION } from '../../../utils/app.version.constants';
 import { ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
@@ -30,7 +31,7 @@ export const ProjectNameButton = (): ReactNode => {
   const projectName: string = useSelector(selectProjectName);
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const shownName: string = useSelector(selectProjectDisplayName(i18n.language));
-  const documentTitle: string = t(DEFAULT.APP_DOCUMENT_TITLE, { name: shownName });
+  const documentTitle: string = t(DEFAULT.APP_DOCUMENT_TITLE, { name: shownName, version: APP_VERSION });
 
   useEffect(() => {
     document.title = documentTitle;

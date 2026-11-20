@@ -34,9 +34,9 @@
   color: var(--color-text-muted);
 }
 
-// Below 62.5rem only the coloured icon stays on screen, so Import SVG and the connection pill keep their room; its
-// tooltip and accessible name still give the state. 62.5rem must match the TopBar styles.
-@media (width < 62.5rem) {
+// Below 75rem only the coloured icon stays on screen, so Import SVG and the connection pill keep their room; its
+// tooltip and accessible name still give the state. 75rem must match the TopBar styles.
+@media (width < 75rem) {
   .autosave {
     margin-right: 0;
   }

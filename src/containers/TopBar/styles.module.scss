@@ -18,7 +18,6 @@
 
 // The connection pill always stays visible; the coming-soon groups give up space first, then the title and the menus.
 .trailing {
-  flex-shrink: 0;
   margin-left: auto;
 }
 
@@ -41,6 +40,14 @@
   margin: 0;
   font-size: 1.125rem;
   line-height: 1.2;
+  white-space: nowrap;
+}
+
+// The version from package.json, small and muted after the app name, so a user can tell which release they run.
+.version {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
 }
 
 .group {
@@ -53,10 +60,23 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  min-width: 0;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+// The offline and update notice is the one part of the trailing group that gives way: its message is cut short, so it
+// never pushes the connection pill out of the window.
+.trailing > .updateSlot {
+  display: flex;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 // In a narrow window the gaps close up, so the connection pill keeps its place.
-@media (width < 62.5rem) {
+@media (width < 75rem) {
   .topBar {
     gap: var(--space-2);
     padding: 0 var(--space-3);
@@ -103,7 +123,7 @@
 // The save word goes and the profile name shortens (the connection pill drops its own copy of the name), so the
 // project name stays readable and the connection pill stays whole at 50rem; below 57rem Import SVG drops its label and
 // the profile shrinks to its laser icon, so the bar is not crowded (the tooltip names the active profile).
-@media (width < 62.5rem) {
+@media (width < 75rem) {
   .profileName {
     max-width: 6rem;
     font-size: 0.8125rem;
