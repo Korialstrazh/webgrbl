@@ -6,3 +6,12 @@ dist
 .gitea-local
 docs
 *.log
+dev-dist
+coverage
+.vitest
+.reference
+.worktrees
+*.tsbuildinfo
+.env*
+AGENTS.md
+CLAUDE.md

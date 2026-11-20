@@ -5,3 +5,11 @@ services:
     # Only reachable from the server itself: put your HTTPS reverse proxy in front.
     ports:
       - "127.0.0.1:8080:8080"
+    # The app is static files: nothing in the container needs to change except nginx's temp files in /tmp.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

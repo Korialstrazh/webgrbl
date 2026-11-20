@@ -13,11 +13,18 @@ You can also start a run by hand from the Actions tab (**Run workflow**).
 ## The image
 
 - Stage 1 builds the app with Node 24 (`npm ci`, then `vite build --base` with the URL path).
-- Stage 2 serves `dist/` with nginx on port 8080 (`docker/nginx.conf`):
+- Stage 2 serves `dist/` with nginx on port 8080 (`docker/nginx.conf`), as the unprivileged `nginx` user, not root:
   - `index.html`, `sw.js` and `manifest.webmanifest` are sent with `Cache-Control: no-cache`, so users never get stuck on an old version;
   - files under `assets/` have hashed names and are cached for a year;
-  - unknown paths fall back to `index.html`.
-- The container has a health check on `/`.
+  - unknown paths fall back to `index.html`;
+  - every response carries security headers (`docker/security-headers.conf`): a Content-Security-Policy that allows
+    only the app's own scripts, nosniff, no referrer, no framing, and a Permissions-Policy that allows Web Serial and
+    blocks camera, microphone and location. If you add an outside script, font or API, extend the policy, or the
+    browser blocks it.
+- The container has a health check on `/`. Both base images are pinned by digest; Dependabot
+  (`.github/dependabot.yml`) proposes updates for them and for the pinned CI actions every week.
+- `deploy/docker-compose.yml` runs the container with a read-only file system (only `/tmp` is writable), no Linux
+  capabilities and `no-new-privileges`.
 - The app is built for the URL path in the repository variable `WEBGRBL_BASE_PATH` (default `/webgrbl/`, with leading and trailing slash). The container serves it at its own root; the host proxy strips the path.
 
 ### Changing the URL path
@@ -61,7 +68,16 @@ Under **Settings → Secrets and variables → Actions**, add:
 | `DEPLOY_SSH_KEY` | The whole private key file `webgrbl_deploy` |
 | `DEPLOY_KNOWN_HOSTS` | The output of `ssh-keyscan -t ed25519 <host>`, checked against the server's real key |
 
-The image push uses the workflow's own `GITHUB_TOKEN`, so it needs no secret. Under **Settings → Environments**, a `production` environment is created on the first deploy; add required reviewers there if a person should approve each deploy.
+The image push uses the workflow's own `GITHUB_TOKEN`, so it needs no secret.
+
+Before the repository is public, also set:
+
+- **Settings → Environments → `production`:** add yourself as a required reviewer, and allow only the `main` branch to
+  deploy, so nothing else can reach the deploy key.
+- **Settings → Branches:** protect `main` (no force-push, pull request required).
+- **Settings → Actions → General:** require approval for workflows from first-time contributors.
+- **Settings → Code security:** turn on private vulnerability reporting (see `SECURITY.md`) and Dependabot alerts.
+- On the host nginx, add `add_header Strict-Transport-Security "max-age=31536000" always;` to the HTTPS server block. Under **Settings → Environments**, a `production` environment is created on the first deploy; add required reviewers there if a person should approve each deploy.
 
 ## Rolling back
 
