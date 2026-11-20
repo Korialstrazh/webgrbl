@@ -1,5 +1,5 @@
 /**
- * The autosave readout of the top bar: an icon for the state of the open project. Saved is a lone green check, since it
+ * The autosave readout of the top bar: an icon for the state of the open project. Saved is a lone muted outline check, since it
  * is the usual state; Saving and Waiting to save add a short word. Waiting is a calm grey clock, not an error: autosave
  * * stores the change shortly. When the bar is narrow only the icon stays; its tooltip and name give the state.
  *
@@ -10,7 +10,7 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { CheckCircleFilled, ClockCircleOutlined, SyncOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +32,7 @@ const getSaveStatusIconComponent = (saveStatus: ProjectSaveStatus): ReactNode =>
     return <SyncOutlined spin />;
   }
 
-  return saveStatus === PROJECT_SAVE_STATUS.SAVED ? <CheckCircleFilled /> : <ClockCircleOutlined />;
+  return saveStatus === PROJECT_SAVE_STATUS.SAVED ? <CheckCircleOutlined /> : <ClockCircleOutlined />;
 };
 
 export const AutosaveReadout = (): ReactNode => {

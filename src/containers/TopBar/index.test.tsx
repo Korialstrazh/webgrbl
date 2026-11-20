@@ -76,6 +76,9 @@ const PROJECT_FILE_INPUT_LABEL = 'Open a project file';
 const PROJECT_FILE_NAME = 'coasters.webgrbl.json';
 const SAVING_TEXT = 'Saving\u2026';
 const NOT_SAVED_TEXT = 'Waiting to save';
+const CHECK_ICON_PATH_SELECTOR = '.anticon-check-circle path';
+// The outline check draws its ring and its tick as two paths; the filled disc is one.
+const OUTLINE_CHECK_PATH_COUNT = 2;
 const CLOCK_ICON_SELECTOR = '.anticon-clock-circle';
 const ALERT_ICON_SELECTOR = '.anticon-exclamation-circle';
 const UNTITLED_PROJECT_NAME = 'New project';
@@ -526,6 +529,19 @@ describe(TopBar.name, () => {
       });
 
       expect(screen.getByRole('status')).toHaveTextContent(/^$/);
+    });
+
+    it('shows the saved state as a calm outline check, not a filled disc', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.SAVED }));
+      });
+
+      const readout: HTMLElement = screen.getByRole('status');
+
+      expect(readout.querySelectorAll(CHECK_ICON_PATH_SELECTOR)).toHaveLength(OUTLINE_CHECK_PATH_COUNT);
     });
 
     it('shows a pending change as a calm clock, not an alert mark', () => {

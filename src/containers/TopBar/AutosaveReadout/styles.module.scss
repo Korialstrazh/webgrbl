@@ -17,8 +17,10 @@
   font-size: 1.125rem;
 }
 
+// Saved is the usual state, so the check stays calm and muted; only saving takes a colour, so it never competes with
+// the Connect button.
 .saved {
-  color: var(--color-success);
+  color: var(--color-text-muted);
 }
 
 .saving {
