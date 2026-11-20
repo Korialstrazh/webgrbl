@@ -60,6 +60,7 @@ export const TopBar = (): ReactNode => {
     <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
       {/* Plain text elements: antd Typography would add its own margins and colours. */}
       <div className={styles.heading}>
+        {/* The brand and version stay at every width, small and muted once the window is narrow. */}
         <h1 className={styles.title}>
           {t(DEFAULT.APP_TITLE)} <span className={styles.version}>v{APP_VERSION}</span>
         </h1>
@@ -80,7 +81,9 @@ export const TopBar = (): ReactNode => {
             <span className={styles.profileName}>{activeProfile?.name ?? profilesLabel}</span>
           </Button>
         </DismissibleTooltip>
-        <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.importLabel} />
+        <DismissibleTooltip title={t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}>
+          <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.importLabel} />
+        </DismissibleTooltip>
       </div>
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <IconActionButton

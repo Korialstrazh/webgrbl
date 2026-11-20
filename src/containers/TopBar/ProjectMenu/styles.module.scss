@@ -18,3 +18,22 @@
   color: var(--color-text-muted);
   font-size: 0.75rem;
 }
+
+.label {
+  margin-inline-start: var(--space-1);
+  font-size: 0.875rem;
+}
+
+// 57rem must match the TopBar styles, where Import SVG drops its label too.
+@media (width < 57rem) {
+  .label {
+    display: none;
+  }
+}
+
+// At phone width the chevron goes too, so the bar fits; the folder and its tooltip stay. 30rem matches the TopBar.
+@media (width < 30rem) {
+  :global(.ant-btn) .caret.caret:global(.anticon) {
+    display: none;
+  }
+}

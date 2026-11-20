@@ -82,7 +82,7 @@
     padding: 0 var(--space-3);
   }
 
-  // The app name goes so the project name can use the whole heading. The name gets the room first: a fixed width
+  // The app name gets small so the project name can use most of the heading. The name gets the room first: a fixed width
   // wide enough for an automatic name with its date and time, which gives way only when the bar runs out of space.
   .heading {
     flex: 0 1 15rem;
@@ -90,8 +90,15 @@
     overflow: hidden;
   }
 
+  // The app name and version shrink to a small, muted brand line above the project name, so a brand anchor stays.
   .title {
-    @include accessibility.visually-hidden;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .version {
+    font-size: 0.6875rem;
   }
 }
 
@@ -100,6 +107,9 @@
 .profileButton:global(.ant-btn) {
   position: relative;
   margin-inline-start: var(--space-2);
+  // The same text size and weight as the other header controls; the app title stays the strongest text.
+  font-size: 0.875rem;
+  font-weight: 400;
 
   &::before {
     position: absolute;
@@ -126,7 +136,6 @@
 @media (width < 75rem) {
   .profileName {
     max-width: 6rem;
-    font-size: 0.8125rem;
   }
 
   .activeMenus :global(.ant-btn) {
@@ -154,10 +163,22 @@
   font-size: 1.25rem;
 }
 
-// At phone width the title, the name and the save word go, and the buttons close up, so everything fits with no scroll.
+// At phone width the project name and the save word go and the buttons close up, so everything fits with no scroll;
+// the small brand and version stay as the anchor.
 @media (width < 30rem) {
   .heading {
+    flex: none;
+    min-width: 0;
+  }
+
+  .heading > :not(.title) {
     display: none;
+  }
+
+  .title {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
   }
 
   .topBar {

@@ -90,6 +90,8 @@ export const ProjectMenu = (): ReactNode => {
         >
           <Button type={ANTD_BUTTON_TYPE_TEXT} aria-label={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>
             <FolderOutlined aria-hidden="true" />
+            {/* A short word while there is room, so the folder reads as the Project menu; the tooltip names it too. */}
+            <span className={styles.label} aria-hidden="true">{t(DEFAULT.TOP_BAR_MENU_PROJECT)}</span>
             <DownOutlined className={styles.caret} aria-hidden="true" />
           </Button>
         </Dropdown>
