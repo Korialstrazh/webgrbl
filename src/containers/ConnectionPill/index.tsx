@@ -88,10 +88,6 @@ export const ConnectionPill = (): ReactNode => {
   const ariaLabelDetails: string = [statusText, firmwareText, activeProfile?.name, portText]
     .filter(Boolean)
     .join(ARIA_LABEL_PART_SEPARATOR);
-  // "No port chosen" beside "Not connected" says nothing new, so only a chosen port joins the tooltip.
-  const tooltipText: string = selectedPortId
-    ? t(DEFAULT.CONNECTION_PILL_TOOLTIP, { status: statusText, port: portText })
-    : statusText;
 
   const changePopoverOpen = (isOpen: boolean): void => {
     dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: isOpen }));
@@ -112,7 +108,8 @@ export const ConnectionPill = (): ReactNode => {
   ].filter(Boolean).join(' ');
 
   return (
-    <DismissibleTooltip title={tooltipText}>
+    // The pill already shows the state, so its tooltip names only the port, on one line.
+    <DismissibleTooltip title={portText} rootClassName={styles.portTooltip}>
       <span className={styles.pillGroup}>
         <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
           <Button

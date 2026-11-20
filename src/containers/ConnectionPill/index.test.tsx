@@ -179,8 +179,21 @@ describe(ConnectionPill.name, () => {
 
     fireEvent.mouseEnter(pill);
 
-    expect(await screen.findByText(`${STATUS_LABELS[GRBL_CONNECTION_STATUS.DISCONNECTED]}: ${SIMULATED_PORT_TEXT}`))
-      .toBeInTheDocument();
+    const tooltip: HTMLElement = await screen.findByRole('tooltip');
+
+    expect(tooltip).toHaveTextContent(SIMULATED_PORT_TEXT);
+    expect(tooltip).not.toHaveTextContent(SHORT_DISCONNECTED_TEXT);
+  });
+
+  it('names only "No port chosen" in the tooltip while no port is chosen', async () => {
+    renderConnectionPill();
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+
+    const tooltip: HTMLElement = await screen.findByRole('tooltip');
+
+    expect(tooltip).toHaveTextContent(NO_PORT_CHOSEN_LABEL);
+    expect(tooltip).not.toHaveTextContent(SHORT_DISCONNECTED_TEXT);
   });
 
   describe('with the simulated laser', () => {

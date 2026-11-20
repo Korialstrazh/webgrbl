@@ -245,3 +245,12 @@
 .connectButton:focus-visible {
   outline: none;
 }
+
+// The port name stays on one line at every width instead of wrapping over the panel below.
+.portTooltip :global(.ant-tooltip-inner) {
+  white-space: nowrap;
+}
+
+.portTooltip:global(.ant-tooltip) {
+  max-width: none;
+}
