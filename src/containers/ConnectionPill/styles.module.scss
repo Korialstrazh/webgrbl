@@ -1,3 +1,5 @@
+@use '../../styles/accessibility' as accessibility;
+
 .pillGroup {
   display: inline-flex;
   align-items: stretch;
@@ -49,16 +51,13 @@
   font-weight: 600;
 }
 
-.firmware,
-.port {
-  color: var(--color-text-muted);
+.status,
+.firmware {
   white-space: nowrap;
 }
 
-.port {
-  max-width: 12rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.firmware {
+  color: var(--color-text-muted);
 }
 
 .warningNote {
@@ -71,6 +70,9 @@
 
 // The action the pill offers while no laser is connected: the accent colour marks it as the place to connect.
 .connectVerb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   padding-left: var(--space-2);
   border-left: 1px solid var(--color-border);
   color: var(--color-accent);
@@ -122,25 +124,12 @@
   }
 }
 
-// Wide windows spell the state out; the one-word look is only for a narrow window.
-.shortStatus {
-  display: none;
-}
-
-// In a narrow window the pill keeps the dot, a short state ("Not connected", "Lost") after a plug and the Connect verb,
-// or the state and the chevron once connected; the port and the firmware move to its popover and its label.
+// In a narrow window the firmware moves to the popover and the label, and the caret goes while Connect is offered.
 // 75rem must match the TopBar styles.
 @media (width < 75rem) {
   .firmware,
-  .port,
-  .connectOffered .caret,
-  .connectOffered .status {
+  .connectOffered .caret {
     display: none;
-  }
-
-  .shortStatus {
-    display: inline;
-    color: var(--color-text-muted);
   }
 }
 
@@ -151,7 +140,6 @@
   }
 
   .status,
-  .shortStatus,
   .caret,
   .warningNote {
     display: none;
@@ -165,11 +153,11 @@
   .connectButton:global(.ant-btn) {
     padding: 0 var(--space-2);
   }
-}
 
-// The plug before the narrow word, a little apart from it.
-.shortStatus :global(.anticon) {
-  margin-right: 0.25rem;
+  // The plug alone says Connect on a phone; the word stays for assistive technology and the pill's tooltip.
+  .connectWord {
+    @include accessibility.visually-hidden;
+  }
 }
 
 // Each part of the joined pill draws its own whole ring, inside its own edge and above its neighbour, so the ring never

@@ -43,6 +43,11 @@ const STATUS_LABELS: Record<GrblConnectionStatus, string> = {
   [GRBL_CONNECTION_STATUS.CONNECTED]: 'Connected',
   [GRBL_CONNECTION_STATUS.LOST]: 'Connection lost',
 };
+const SHORT_STATUS_LABELS: Record<GrblConnectionStatus, string> = {
+  ...STATUS_LABELS,
+  [GRBL_CONNECTION_STATUS.LOST]: 'Lost',
+};
+const SIMULATED_PORT_TEXT = 'Simulated laser (no hardware)';
 
 const renderConnectionPill = (): AppStore => {
   const store: AppStore = newStore();
@@ -130,7 +135,27 @@ describe(ConnectionPill.name, () => {
       store.dispatch(new ConnectionStatusChanged({ connectionStatus: status }));
     });
 
-    expect(screen.getAllByText(STATUS_LABELS[status])[0]).toBeInTheDocument();
+    const pill: HTMLElement = screen.getByRole('button', { name: new RegExp(`^Connection: ${STATUS_LABELS[status]}`) });
+
+    expect(pill).toHaveTextContent(SHORT_STATUS_LABELS[status]);
+  });
+
+  it('keeps the chosen port out of the pill text but names it in its accessible name and tooltip', async () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+    });
+
+    const pill: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    expect(pill).not.toHaveTextContent(SIMULATED_PORT_TEXT);
+    expect(pill).toHaveAccessibleName(new RegExp(SIMULATED_PORT_TEXT.replace(/[()]/g, '\\$&')));
+
+    fireEvent.mouseEnter(pill);
+
+    expect(await screen.findByText(`${STATUS_LABELS[GRBL_CONNECTION_STATUS.DISCONNECTED]}: ${SIMULATED_PORT_TEXT}`))
+      .toBeInTheDocument();
   });
 
   describe('with the simulated laser', () => {
