@@ -34,6 +34,7 @@ const CONNECTED_WITH_FIRMWARE_PATTERN = /Connected.*Grbl 1\.1h/;
 const POPOVER_LABEL = 'Laser connection';
 const NO_WEB_SERIAL_LABEL = 'No Web Serial';
 const NO_PORT_CHOSEN_LABEL = 'No port chosen';
+const NO_PORT_PILL_TOOLTIP_TEXT = `Not connected · ${NO_PORT_CHOSEN_LABEL}`;
 const PORT_LABEL = 'Port';
 const PROFILE_NAME = 'Workshop laser';
 const PILL_WITH_PROFILE_PATTERN = /Not connected, Workshop laser/;
@@ -52,6 +53,8 @@ const CONNECTING_ICON_SELECTOR = '.anticon-sync';
 const CONNECTED_ICON_SELECTOR = '.anticon-link';
 const SIMULATED_PORT_TEXT = 'Simulated laser (no hardware)';
 const SIMULATED_ICON_SELECTOR = '.anticon-experiment';
+const STATE_ICON_SELECTOR = '.anticon-disconnect';
+const SIMULATED_PILL_TOOLTIP_TEXT = 'Not connected · Simulated laser (no hardware)';
 
 const renderConnectionPill = (): AppStore => {
   const store: AppStore = newStore();
@@ -166,7 +169,7 @@ describe(ConnectionPill.name, () => {
     expect(pill).toHaveTextContent(SHORT_STATUS_LABELS[status]);
   });
 
-  it('keeps the chosen port out of the pill text but names it in its accessible name and tooltip', async () => {
+  it('keeps the chosen port out of the pill text but names it in its accessible name and state tooltip', async () => {
     const store: AppStore = renderConnectionPill();
 
     act(() => {
@@ -182,11 +185,10 @@ describe(ConnectionPill.name, () => {
 
     const tooltip: HTMLElement = await screen.findByRole('tooltip');
 
-    expect(tooltip).toHaveTextContent(SIMULATED_PORT_TEXT);
-    expect(tooltip).not.toHaveTextContent(SHORT_DISCONNECTED_TEXT);
+    expect(tooltip).toHaveTextContent(SIMULATED_PILL_TOOLTIP_TEXT);
   });
 
-  it('marks the simulated laser with a flask icon on the pill, and a real port without one', () => {
+  it('marks the simulated laser with a flask badge on the state icon, and a real port without one', () => {
     const store: AppStore = renderConnectionPill();
 
     act(() => {
@@ -197,6 +199,7 @@ describe(ConnectionPill.name, () => {
     const simulatedIcon: Element | null = pill.querySelector(SIMULATED_ICON_SELECTOR);
 
     expect(simulatedIcon).toHaveAttribute('aria-label', SIMULATED_PORT_TEXT);
+    expect(simulatedIcon?.parentElement?.querySelector(STATE_ICON_SELECTOR)).toBeInTheDocument();
 
     act(() => {
       store.dispatch(new SerialPortSelected({ portId: UNGRANTED_PORT_ID }));
@@ -205,15 +208,14 @@ describe(ConnectionPill.name, () => {
     expect(pill.querySelector(SIMULATED_ICON_SELECTOR)).not.toBeInTheDocument();
   });
 
-  it('names only "No port chosen" in the tooltip while no port is chosen', async () => {
+  it('names the state and "No port chosen" on one tooltip line while no port is chosen', async () => {
     renderConnectionPill();
 
     fireEvent.mouseEnter(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
 
     const tooltip: HTMLElement = await screen.findByRole('tooltip');
 
-    expect(tooltip).toHaveTextContent(NO_PORT_CHOSEN_LABEL);
-    expect(tooltip).not.toHaveTextContent(SHORT_DISCONNECTED_TEXT);
+    expect(tooltip).toHaveTextContent(NO_PORT_PILL_TOOLTIP_TEXT);
   });
 
   describe('with the simulated laser', () => {
@@ -223,6 +225,19 @@ describe(ConnectionPill.name, () => {
 
     afterEach(() => {
       vi.useRealTimers();
+    });
+
+    it('connects from the one-click Connect without opening the popover the capsule carries', async () => {
+      const store: AppStore = renderConnectionPill();
+
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      });
+      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      await settle();
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
+      expect(screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN })).toBeInTheDocument();
     });
 
     it('connecting to the simulated laser from the popover shows Grbl 1.1h in the pill', async () => {

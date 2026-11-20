@@ -91,10 +91,22 @@
   font-weight: 600;
 }
 
-// The flask beside the state icon while the simulated laser is the chosen port; the pill tooltip names it in full.
-.simulatedIcon {
-  color: var(--color-info);
-  font-size: 0.875rem;
+// The state glyph keeps its own box, so the dot or the badge can sit on its corner.
+.stateGlyph {
+  display: inline-flex;
+}
+
+// While the simulated laser is the chosen port, a small flask in the state colour takes the dot's corner, cut out of
+// the pill by a ring in the pill's own fill, so state and simulator read as one icon; the tooltip names it in full.
+.simulatedBadge:global(.anticon) {
+  position: absolute;
+  inset-block-end: -0.25rem;
+  inset-inline-end: -0.375rem;
+  padding: 0.0625rem;
+  border-radius: 50%;
+  background-color: var(--color-surface-2);
+  color: currentColor;
+  font-size: 0.625rem;
 }
 
 .status,
@@ -255,11 +267,14 @@
   outline: none;
 }
 
-// The port name stays on one line at every width instead of wrapping over the panel below.
+// The state and port stay on one line at every width instead of wrapping over the panel below; a port name too long for
+// the window ends in an ellipsis rather than breaking the line.
 .portTooltip :global(.ant-tooltip-inner) {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .portTooltip:global(.ant-tooltip) {
-  max-width: none;
+  max-width: min(32rem, calc(100vw - var(--space-4)));
 }

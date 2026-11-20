@@ -1,10 +1,11 @@
 /**
- * The laser connection in the top bar: a state icon with a coloured dot, a short state word, the firmware once
- * connected and, when the browser has no Web Serial, a note. The port is never spelled out on the pill; its tooltip,
- * its accessible name and the popover name it. While no laser is connected it ends in a Connect verb: with a port
- * already chosen that verb is its own button joined to the pill and connects in one click; with none it is part of the
- * pill. Clicking the pill opens and closes the connection popover, which the Status card can open as well. The
- * browser's network state is not shown here: it is not the laser's state (the status strip shows it while offline).
+ * The laser connection in the top bar: a state icon with a coloured dot (a flask badge for the simulated laser), a
+ * short state word, the firmware once connected and, when the browser has no Web Serial, a note. The port is never
+ * spelled out on the pill; its one-line tooltip (state and port), its accessible name and the popover name it. While no
+ * laser is connected it ends in a Connect verb: with a port already chosen that verb is its own button joined to the
+ * pill and connects in one click; with none it is part of the pill. Clicking the pill opens and closes the connection
+ * popover, which hangs from the whole capsule and which the Status card can open as well. The browser's network state
+ * is not shown here: it is not the laser's state (the status strip shows it while offline).
  *
  * @author michael.morosov
  *
@@ -23,7 +24,7 @@ import {
 } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useRef } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { MouseEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
@@ -117,10 +118,14 @@ export const ConnectionPill = (): ReactNode => {
   ].filter(Boolean).join(' ');
 
   return (
-    // The pill already shows the state, so its tooltip names only the port, on one line.
-    <DismissibleTooltip title={portText} rootClassName={styles.portTooltip}>
-      <span className={styles.pillGroup}>
-        <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
+    // One line, the state and then the port, so a pointer user reads both without opening the popover.
+    <DismissibleTooltip
+      title={t(DEFAULT.CONNECTION_PILL_TOOLTIP, { state: statusText, port: portText })}
+      rootClassName={styles.portTooltip}
+    >
+      {/* The popover hangs from the whole capsule, so its right edge lines up with the pill's, Connect included. */}
+      <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
+        <span className={styles.pillGroup}>
           <Button
             ref={pillRef}
             className={pillClassName}
@@ -128,17 +133,21 @@ export const ConnectionPill = (): ReactNode => {
             aria-expanded={isPopoverOpen}
             aria-label={t(DEFAULT.CONNECTION_PILL_LABEL, { details: ariaLabelDetails })}
           >
-            <span className={[styles.statusIcon, styles[connectionStatus]].join(' ')} aria-hidden="true">
-              {getConnectionStatusIconComponent(connectionStatus)}
-              <span className={styles.dot} />
+            <span className={[styles.statusIcon, styles[connectionStatus]].join(' ')}>
+              <span className={styles.stateGlyph} aria-hidden="true">
+                {getConnectionStatusIconComponent(connectionStatus)}
+              </span>
+              {/* The simulated laser takes the dot's corner as a small flask badge, so the state stays one icon. */}
+              {isSimulatedPort ? (
+                <ExperimentOutlined
+                  className={styles.simulatedBadge}
+                  role="img"
+                  aria-label={t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER)}
+                />
+              ) : (
+                <span className={styles.dot} aria-hidden="true" />
+              )}
             </span>
-            {isSimulatedPort && (
-              <ExperimentOutlined
-                className={styles.simulatedIcon}
-                role="img"
-                aria-label={t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER)}
-              />
-            )}
             {/* The button's label names the state in full; the pill shows the one-word look. */}
             <span className={styles.status} aria-hidden="true">{shortStatusText}</span>
             {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
@@ -151,14 +160,22 @@ export const ConnectionPill = (): ReactNode => {
               <span className={styles.connectVerb}>{connectVerbContent}</span>
             )}
           </Button>
-        </ConnectionPopover>
-        {isOneClickConnect && (
-          // The icon prop gives the plug the same gap to the word as every other icon and label button.
-          <Button className={styles.connectButton} icon={<ApiOutlined aria-hidden="true" />} onClick={connectLaser}>
-            <span className={styles.connectWord}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
-          </Button>
-        )}
-      </span>
+          {isOneClickConnect && (
+            // The icon prop gives the plug the same gap to the word as every other icon and label button. The click
+            // connects and stops there, so it never also opens the popover the capsule carries.
+            <Button
+              className={styles.connectButton}
+              icon={<ApiOutlined aria-hidden="true" />}
+              onClick={(event: MouseEvent<HTMLElement>) => {
+                event.stopPropagation();
+                connectLaser();
+              }}
+            >
+              <span className={styles.connectWord}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
+            </Button>
+          )}
+        </span>
+      </ConnectionPopover>
     </DismissibleTooltip>
   );
 };
