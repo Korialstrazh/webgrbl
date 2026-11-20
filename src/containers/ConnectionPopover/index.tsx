@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   ANTD_BUTTON_TYPE_DEFAULT,
   ANTD_BUTTON_TYPE_PRIMARY,
+  ANTD_BUTTON_TYPE_TEXT,
   ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../utils/antd.constants';
@@ -218,7 +219,10 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
             onChange={(portId: string) => dispatch(new SerialPortSelected({ portId }))}
           />
           <Tooltip title={t(DEFAULT.CONNECTION_POPOVER_CHOOSE_PORT_LABEL)}>
+            {/* A quiet text button, so the filled Connect below stays the one main action of the panel. */}
             <Button
+              className={styles.addPortButton}
+              type={ANTD_BUTTON_TYPE_TEXT}
               icon={<PlusOutlined aria-hidden />}
               aria-label={t(DEFAULT.CONNECTION_POPOVER_CHOOSE_PORT_LABEL)}
               disabled={!isWebSerialSupported || isLinkLocked}

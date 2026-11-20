@@ -46,6 +46,12 @@
   gap: var(--space-1);
 }
 
+.addPortButton:global(.ant-btn) {
+  padding-inline: var(--space-2);
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
 .select {
   flex: 1;
   min-width: 0;
