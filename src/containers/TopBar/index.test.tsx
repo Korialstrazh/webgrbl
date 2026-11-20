@@ -65,6 +65,7 @@ const SOON_LABEL = 'Soon';
 const PROJECT_MENU_LABEL = 'Project';
 const PROJECT_ID = 'project-1';
 const PROJECT_NAME = 'Coasters';
+const RENAME_PROJECT_LABEL = `Rename ${PROJECT_NAME}`;
 const NEW_PROJECT_NAME = 'Coasters v2';
 const PROJECT_NAME_INPUT_LABEL = 'Project name';
 const NEW_PROJECT_LABEL = 'New project';
@@ -530,11 +531,11 @@ describe(TopBar.name, () => {
 
       renderWorkbenchTopBar(store);
 
-      expect(screen.getByRole('button', { name: UNTITLED_PROJECT_NAME })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: `Rename ${UNTITLED_PROJECT_NAME}` })).toBeInTheDocument();
 
       openProject(store);
 
-      expect(screen.getByRole('button', { name: PROJECT_NAME })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: RENAME_PROJECT_LABEL })).toBeInTheDocument();
     });
 
     it('renames the project on Enter with a trimmed name', () => {
@@ -545,7 +546,7 @@ describe(TopBar.name, () => {
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
       renderWorkbenchTopBar(store);
-      fireEvent.click(screen.getByRole('button', { name: PROJECT_NAME }));
+      fireEvent.click(screen.getByRole('button', { name: RENAME_PROJECT_LABEL }));
       fireEvent.change(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), {
         target: { value: `  ${NEW_PROJECT_NAME}  ` },
       });
@@ -566,7 +567,7 @@ describe(TopBar.name, () => {
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
       renderWorkbenchTopBar(store);
-      fireEvent.click(screen.getByRole('button', { name: PROJECT_NAME }));
+      fireEvent.click(screen.getByRole('button', { name: RENAME_PROJECT_LABEL }));
       fireEvent.change(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), {
         target: { value: NEW_PROJECT_NAME },
       });
@@ -586,14 +587,14 @@ describe(TopBar.name, () => {
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
       renderWorkbenchTopBar(store);
-      fireEvent.click(screen.getByRole('button', { name: PROJECT_NAME }));
+      fireEvent.click(screen.getByRole('button', { name: RENAME_PROJECT_LABEL }));
       fireEvent.change(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), {
         target: { value: typedName },
       });
       fireEvent.keyDown(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), { key: ENTER_KEY });
 
       expect(getDispatchedActionCalls(dispatchSpy, ProjectRenameRequested)).toEqual([]);
-      expect(screen.getByRole('button', { name: PROJECT_NAME })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: RENAME_PROJECT_LABEL })).toBeInTheDocument();
     });
 
     it('cancels on Escape without a rename and without stopping the machine', () => {
@@ -607,7 +608,7 @@ describe(TopBar.name, () => {
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
       renderWorkbenchTopBar(store);
-      fireEvent.click(screen.getByRole('button', { name: PROJECT_NAME }));
+      fireEvent.click(screen.getByRole('button', { name: RENAME_PROJECT_LABEL }));
       fireEvent.change(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), {
         target: { value: NEW_PROJECT_NAME },
       });
@@ -723,7 +724,7 @@ describe(TopBar.name, () => {
     renderWorkbenchTopBar(store);
     openProject(store);
 
-    const nameButton: HTMLElement = screen.getByRole('button', { name: PROJECT_NAME });
+    const nameButton: HTMLElement = screen.getByRole('button', { name: RENAME_PROJECT_LABEL });
     const projectMenuButton: HTMLElement = screen.getByRole('button', { name: PROJECT_MENU_LABEL });
 
     expect(nameButton).toBeEnabled();

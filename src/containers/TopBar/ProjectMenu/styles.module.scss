@@ -51,13 +51,16 @@
   }
 
   // Doubled class: the TopBar squares its phone buttons to 2rem, which has no room for the chevron.
+  // antd puts its icon gap between the folder and the chevron; a hair of space keeps the pair as one tap target and
+  // leaves the room to the project name.
   .trigger.trigger:global(.ant-btn) {
     width: auto;
-    padding-inline: var(--space-1);
+    gap: 0;
+    padding-inline: 0.125rem;
   }
 
   :global(.ant-btn) .caret.caret:global(.anticon) {
-    margin-left: 0.125rem;
+    margin-left: 0.0625rem;
     font-size: 0.625rem;
   }
 }

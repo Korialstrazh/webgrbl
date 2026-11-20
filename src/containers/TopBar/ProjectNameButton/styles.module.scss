@@ -45,15 +45,15 @@
   }
 }
 
-// At phone width the name is a step smaller and the pencil closes up to it, still showing that a tap renames.
+// At phone width the name is a step smaller and the pencil goes, so the name keeps its room; the tooltip and the
+// button label still say a tap renames.
 @media (width < 30rem) {
   .nameButton {
     font-size: 0.875rem;
   }
 
   .nameButton .pencil {
-    margin-inline-start: var(--space-1);
-    font-size: 0.75rem;
+    display: none;
   }
 
   .renameBox {
