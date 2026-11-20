@@ -12,9 +12,22 @@
   white-space: nowrap;
 }
 
+// The same icon size as the toolbar buttons beside it.
 .icon {
+  position: relative;
   display: inline-flex;
-  font-size: 1.125rem;
+  font-size: 1.25rem;
+}
+
+// The small check on the cloud's lower right corner: the familiar cloud-saved mark.
+.cloudCheck {
+  position: absolute;
+  inset-block-end: 0.125rem;
+  inset-inline-end: -0.125rem;
+  padding: 0.0625rem;
+  border-radius: 50%;
+  background-color: var(--color-surface-1);
+  font-size: 0.5625rem;
 }
 
 // Saved is the usual state, so the check stays calm and muted; only saving takes a colour, so it never competes with

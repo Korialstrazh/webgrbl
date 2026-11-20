@@ -1,7 +1,8 @@
 /**
- * The autosave readout of the top bar: an icon for the state of the open project. Saved is a lone muted outline check,
- * since it is the usual state; Saving and Waiting to save add a short word. Waiting is a calm grey clock, not an error:
- * autosave stores the change shortly. When the bar is narrow only the icon stays; its tooltip and name give the state.
+ * The autosave readout of the top bar: a cloud icon for the state of the open project. Saved is a muted cloud with
+ * a check, since it is the usual state; Saving (a syncing cloud) and Waiting to save (an upload cloud) add a short
+ * word. Waiting stays calm grey, not an error: autosave stores the change shortly.
+ * When the bar is narrow only the icon stays; its tooltip and name give the state.
  *
  * @author michael.morosov
  *
@@ -10,7 +11,7 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { CheckCircleOutlined, ClockCircleOutlined, SyncOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloudOutlined, CloudSyncOutlined, CloudUploadOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,10 +30,20 @@ const ICON_CLASS_NAME: Record<ProjectSaveStatus, string | undefined> = {
 
 const getSaveStatusIconComponent = (saveStatus: ProjectSaveStatus): ReactNode => {
   if (saveStatus === PROJECT_SAVE_STATUS.SAVING) {
-    return <SyncOutlined spin />;
+    return <CloudSyncOutlined />;
   }
 
-  return saveStatus === PROJECT_SAVE_STATUS.SAVED ? <CheckCircleOutlined /> : <ClockCircleOutlined />;
+  if (saveStatus === PROJECT_SAVE_STATUS.UNSAVED) {
+    return <CloudUploadOutlined />;
+  }
+
+  // antd has no cloud with a check, so a small check sits on the cloud's corner.
+  return (
+    <>
+      <CloudOutlined />
+      <CheckOutlined className={styles.cloudCheck} />
+    </>
+  );
 };
 
 export const AutosaveReadout = (): ReactNode => {
@@ -48,7 +59,7 @@ export const AutosaveReadout = (): ReactNode => {
         <span className={[styles.icon, ICON_CLASS_NAME[saveStatus]].join(' ')} aria-hidden>
           {getSaveStatusIconComponent(saveStatus)}
         </span>
-        {/* The check alone says Saved; only a state that needs a look gets a word. */}
+        {/* The cloud check alone says Saved; only a state that needs a look gets a word. */}
         {!isSaved && <span className={styles.label}>{statusLabel}</span>}
       </p>
     </Tooltip>
