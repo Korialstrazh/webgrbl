@@ -64,10 +64,10 @@ const PROJECT_NAME = 'Coasters';
 const NEW_PROJECT_NAME = 'Coasters v2';
 const PROJECT_NAME_INPUT_LABEL = 'Project name';
 const NEW_PROJECT_LABEL = 'New project';
-const OPEN_LABEL = 'Open from this browser\u2026';
+const OPEN_LABEL = 'Open saved project\u2026';
 const SAVE_SHORTCUT_PATTERN = /Ctrl\+S/;
 const SAVE_AS_FILE_LABEL = 'Save as file';
-const OPEN_FILE_LABEL = 'Open project file\u2026';
+const OPEN_FILE_LABEL = 'Open file\u2026';
 const ICON_SELECTOR = '[role="img"]';
 const FOLDER_OPEN_ICON_NAME = 'folder-open';
 const EXPORT_GCODE_PATTERN = /Export G-code/;
@@ -294,7 +294,7 @@ describe(TopBar.name, () => {
       expect(getDispatchedActionCalls(dispatchSpy, ProjectSaveRequested)).toHaveLength(1);
     });
 
-    it('gives each project menu entry its own icon, so Save as file and Open project file never look alike', () => {
+    it('gives each project menu entry its own icon, so Save as file and Open file never look alike', () => {
       renderWorkbenchTopBar(newStore());
       openProjectMenu();
 
