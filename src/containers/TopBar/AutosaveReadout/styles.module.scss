@@ -1,12 +1,22 @@
 @use '../../../styles/accessibility' as accessibility;
 
-// The side padding keeps the lone check icon from touching the buttons beside it.
+// Its own element after the Project menu: a clear gap from the chevron and a hover area of its own, so the cloud never
+// reads as part of the Project control.
 .autosave {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: 2rem;
   margin: 0;
+  margin-inline-start: var(--space-2);
   padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: default;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--color-surface-hover);
+  }
   font-size: 0.8125rem;
   color: var(--color-text-muted);
   white-space: nowrap;
@@ -62,9 +72,10 @@
   }
 }
 
-// At phone width the check closes up to the folder, so the project name keeps its room. 30rem matches the TopBar.
+// At phone width the padding tightens, yet the gap from the folder chevron stays at least 8 px. 30rem matches the TopBar.
 @media (width < 30rem) {
   .autosave {
+    margin-inline-start: var(--space-1);
     padding-inline: var(--space-1);
   }
 }
