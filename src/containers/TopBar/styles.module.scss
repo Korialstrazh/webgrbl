@@ -96,13 +96,14 @@
   font-weight: 400;
 }
 
-// Undo and Redo in the full text colour while they can act, and clearly faded while they cannot.
+// Undo and Redo in the full text colour while they can act, and a dimmed muted grey while they cannot: still above
+// 3:1 on the bar, yet clearly weaker than the enabled white.
 .historyGroup :global(.ant-btn) {
   color: var(--color-text);
 
   &:disabled {
-    color: var(--color-text);
-    opacity: 0.4;
+    color: var(--color-text-muted);
+    opacity: 0.65;
   }
 }
 
@@ -120,7 +121,7 @@
   white-space: nowrap;
 }
 
-// The main icons of the bar are large enough to read without a tooltip.
+// Every icon of the toolbar has one size, large enough to read without a tooltip; the menu chevron keeps its own.
 .group :global(.ant-btn .anticon) {
   font-size: 1.25rem;
 }
@@ -165,7 +166,7 @@
 }
 
 // At phone width the labels go and the buttons close up, so everything fits with no scroll. The laser profile and
-// Import SVG move into the Project menu, so the project name stays readable.
+// Import SVG, Undo and Redo move into the Project menu, so the project name stays readable.
 @media (width < 30rem) {
   .topBar {
     --top-bar-group-gap: 0.375rem;
@@ -185,7 +186,8 @@
     font-size: 0.625rem;
   }
 
-  .machineGroup {
+  .machineGroup,
+  .historyGroup {
     display: none;
   }
 

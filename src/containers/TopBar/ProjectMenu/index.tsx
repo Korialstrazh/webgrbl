@@ -1,6 +1,6 @@
 /**
- * The Project menu of the top bar: new project, the Open dialog, save, save as file, open file, Export G-code and,
- * at phone width, Import SVG and the laser profiles. Open file uses a hidden file input.
+ * The Project menu of the top bar: new project, the Open dialog, open file, save, save as file, Export G-code and,
+ * at phone width, Undo, Redo, Import SVG and the laser profiles. Open file uses a hidden file input.
  *
  * @author michael.morosov
  *
@@ -14,7 +14,7 @@ import { Button, Dropdown } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_TYPE_TEXT, ANTD_DROPDOWN_TRIGGER_CLICK } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
@@ -22,6 +22,12 @@ import { useOverlayRegistration } from '../../../utils/hooks/use.overlay.registr
 import { usePopoverAutoClose } from '../../../utils/hooks/use.popover.auto.close';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import {
+  ProjectRedoRequested,
+  ProjectUndoRequested,
+  selectCanRedo,
+  selectCanUndo,
+} from '../../../utils/states/project.document.state';
 import {
   NewProjectRequested,
   ProjectFileExportRequested,
@@ -50,6 +56,8 @@ export const ProjectMenu = (): ReactNode => {
   useOverlayRegistration(PROJECT_MENU_OVERLAY_ID, isMenuOpen);
 
   const gcodeExport: GcodeExportAvailability = useGcodeExportAvailability();
+  const canUndo: boolean = useSelector(selectCanUndo);
+  const canRedo: boolean = useSelector(selectCanRedo);
 
   usePopoverAutoClose(isMenuOpen, () => setIsMenuOpen(false));
 
@@ -78,6 +86,12 @@ export const ProjectMenu = (): ReactNode => {
     case PROJECT_MENU_KEY.MACHINE_PROFILES:
       dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen: true }));
       break;
+    case PROJECT_MENU_KEY.UNDO:
+      dispatch(new ProjectUndoRequested());
+      break;
+    case PROJECT_MENU_KEY.REDO:
+      dispatch(new ProjectRedoRequested());
+      break;
     case PROJECT_MENU_KEY.EXPORT_GCODE:
       dispatch(new GcodeExportRequested({ isWarningConfirmed: false }));
       break;
@@ -93,7 +107,7 @@ export const ProjectMenu = (): ReactNode => {
           trigger={ANTD_DROPDOWN_TRIGGER_CLICK}
           open={isMenuOpen}
           onOpenChange={setIsMenuOpen}
-          menu={{ items: getProjectMenuItems(t, gcodeExport), onClick: handleMenuClick }}
+          menu={{ items: getProjectMenuItems(t, { gcodeExport, canUndo, canRedo }), onClick: handleMenuClick }}
         >
           <Button type={ANTD_BUTTON_TYPE_TEXT} aria-label={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>
             <FolderOutlined aria-hidden="true" />

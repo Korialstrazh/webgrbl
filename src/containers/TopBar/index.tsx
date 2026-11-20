@@ -96,11 +96,16 @@ export const TopBar = (): ReactNode => {
           </span>
         </DismissibleTooltip>
       </div>
+      {/* At phone width Undo and Redo move into the Project menu too, so the project name gets their room. */}
       <div className={[styles.group, styles.activeMenus, styles.historyGroup].join(' ')}>
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           iconComponent={<UndoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_UNDO)}
+          tooltipText={t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+            action: t(DEFAULT.TOP_BAR_UNDO),
+            shortcut: t(DEFAULT.TOP_BAR_UNDO_SHORTCUT),
+          })}
           isDisabled={!canUndo}
           onClick={() => dispatch(new ProjectUndoRequested())}
         />
@@ -108,6 +113,10 @@ export const TopBar = (): ReactNode => {
           type={ANTD_BUTTON_TYPE_TEXT}
           iconComponent={<RedoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_REDO)}
+          tooltipText={t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+            action: t(DEFAULT.TOP_BAR_REDO),
+            shortcut: t(DEFAULT.TOP_BAR_REDO_SHORTCUT),
+          })}
           isDisabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}
         />

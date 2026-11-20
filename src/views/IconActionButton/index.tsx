@@ -24,13 +24,23 @@ interface IconActionButtonProps extends Omit<ButtonProps, 'icon' | 'children' | 
   isDisabled?: boolean;
   /** A short visible text beside the icon; without it the button shows the icon only. */
   captionText?: string;
+  /** A tooltip that says more than the label, such as the label with its keyboard shortcut. */
+  tooltipText?: string;
 }
 
 export const IconActionButton = (props: IconActionButtonProps): ReactNode => {
-  const { labelText, iconComponent, blockedReasonText, isDisabled = false, captionText, ...buttonProps } = props;
+  const {
+    labelText,
+    iconComponent,
+    blockedReasonText,
+    isDisabled = false,
+    captionText,
+    tooltipText,
+    ...buttonProps
+  } = props;
 
   return (
-    <DismissibleTooltip title={blockedReasonText ?? labelText}>
+    <DismissibleTooltip title={blockedReasonText ?? tooltipText ?? labelText}>
       <Button
         {...buttonProps}
         icon={iconComponent}

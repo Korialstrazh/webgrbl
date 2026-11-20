@@ -51,7 +51,10 @@ const ANTD_TEXT_BUTTON_CLASS = 'ant-btn-text';
 const PICKED_FILE_NAME = 'star.svg';
 const APP_TITLE = 'webgrbl';
 const APP_HEADING = `${APP_TITLE} v${APP_VERSION}`;
-const AUTOSAVE_TEXT = 'All changes saved';
+const AUTOSAVE_TEXT = 'Saved';
+const UNDO_TOOLTIP_TEXT = 'Undo (Ctrl+Z)';
+const REDO_TOOLTIP_TEXT = 'Redo (Ctrl+Shift+Z)';
+const PROFILE_TOOLTIP_TEXT = 'Laser profile: Garage laser';
 const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const MACHINE_PROFILES_LABEL = 'Laser profiles';
@@ -65,7 +68,7 @@ const NEW_PROJECT_NAME = 'Coasters v2';
 const PROJECT_NAME_INPUT_LABEL = 'Project name';
 const NEW_PROJECT_LABEL = 'New project';
 const OPEN_LABEL = 'Open saved project\u2026';
-const SAVE_SHORTCUT_PATTERN = /Ctrl\+S/;
+const SAVE_SHORTCUT_PATTERN = /Ctrl\+S$/;
 const SAVE_AS_FILE_LABEL = 'Save as file';
 const OPEN_FILE_LABEL = 'Open file\u2026';
 const ICON_SELECTOR = '[role="img"]';
@@ -76,10 +79,9 @@ const PROJECT_FILE_INPUT_LABEL = 'Open a project file';
 const PROJECT_FILE_NAME = 'coasters.webgrbl.json';
 const SAVING_TEXT = 'Saving\u2026';
 const NOT_SAVED_TEXT = 'Waiting to save';
-const CHECK_ICON_PATH_SELECTOR = '.anticon-check-circle path';
-// The outline check draws its ring and its tick as two paths; the filled disc is one.
-const OUTLINE_CHECK_PATH_COUNT = 2;
-const CLOCK_ICON_SELECTOR = '.anticon-clock-circle';
+const CLOUD_ICON_SELECTOR = '.anticon-cloud';
+const CHECK_ICON_SELECTOR = '.anticon-check';
+const CLOUD_UPLOAD_ICON_SELECTOR = '.anticon-cloud-upload';
 const ALERT_ICON_SELECTOR = '.anticon-exclamation-circle';
 const UNTITLED_PROJECT_NAME = 'New project';
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
@@ -128,6 +130,18 @@ describe(TopBar.name, () => {
     renderWorkbenchTopBar(store);
 
     expect(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL })).toHaveTextContent(ACTIVE_PROFILE_NAME);
+  });
+
+  it('names the active profile in a short tooltip', async () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile({ name: ACTIVE_PROFILE_NAME });
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    renderWorkbenchTopBar(store);
+    fireEvent.mouseEnter(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(PROFILE_TOOLTIP_TEXT);
   });
 
   it('keeps the profile name as the only text of the profile button, with no generic caption beside it', () => {
@@ -259,6 +273,55 @@ describe(TopBar.name, () => {
 
     expect(selectProjectObjects(store.getState())).toHaveLength(1);
     expect(selectCanRedo(store.getState())).toBe(false);
+  });
+
+  it('shows the undo shortcut in the Undo tooltip', async () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+    fireEvent.mouseEnter(screen.getByRole('button', { name: UNDO_LABEL }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(UNDO_TOOLTIP_TEXT);
+  });
+
+  it('shows the redo shortcut in the Redo tooltip', async () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+    fireEvent.click(screen.getByRole('button', { name: UNDO_LABEL }));
+    fireEvent.mouseEnter(screen.getByRole('button', { name: REDO_LABEL }));
+
+    expect(await screen.findByText(REDO_TOOLTIP_TEXT)).toBeInTheDocument();
+  });
+
+  it('undoes and redoes from the phone-only Project menu entries', async () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+    openProjectMenu();
+    const menu: HTMLElement = await screen.findByRole('menu');
+
+    expect(within(menu).getByRole('menuitem', { name: /Redo/ }))
+      .toHaveAttribute(ARIA_DISABLED_ATTRIBUTE, ARIA_DISABLED_TRUE);
+    expect(within(menu).getByRole('menuitem', { name: /Undo/ })).toHaveTextContent(/Ctrl\+Z/);
+
+    fireEvent.click(within(menu).getByRole('menuitem', { name: /Undo/ }));
+
+    expect(selectProjectObjects(store.getState())).toEqual([]);
+
+    openProjectMenu();
+    fireEvent.click(within(await screen.findByRole('menu')).getByRole('menuitem', { name: /Redo/ }));
+
+    expect(selectProjectObjects(store.getState())).toHaveLength(1);
   });
 
   it('does not undo with Ctrl+Z while the machine profiles dialog is open', () => {
@@ -531,7 +594,7 @@ describe(TopBar.name, () => {
       expect(screen.getByRole('status')).toHaveTextContent(/^$/);
     });
 
-    it('shows the saved state as a calm outline check, not a filled disc', () => {
+    it('shows the saved state as a cloud with a check', () => {
       const store: AppStore = newStore();
 
       renderWorkbenchTopBar(store);
@@ -541,10 +604,11 @@ describe(TopBar.name, () => {
 
       const readout: HTMLElement = screen.getByRole('status');
 
-      expect(readout.querySelectorAll(CHECK_ICON_PATH_SELECTOR)).toHaveLength(OUTLINE_CHECK_PATH_COUNT);
+      expect(readout.querySelector(CLOUD_ICON_SELECTOR)).not.toBeNull();
+      expect(readout.querySelector(CHECK_ICON_SELECTOR)).not.toBeNull();
     });
 
-    it('shows a pending change as a calm clock, not an alert mark', () => {
+    it('shows a pending change as a calm upload cloud, not an alert mark', () => {
       const store: AppStore = newStore();
 
       renderWorkbenchTopBar(store);
@@ -554,7 +618,7 @@ describe(TopBar.name, () => {
 
       const readout: HTMLElement = screen.getByRole('status');
 
-      expect(readout.querySelector(CLOCK_ICON_SELECTOR)).not.toBeNull();
+      expect(readout.querySelector(CLOUD_UPLOAD_ICON_SELECTOR)).not.toBeNull();
       expect(readout.querySelector(ALERT_ICON_SELECTOR)).toBeNull();
     });
 

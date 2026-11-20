@@ -33,15 +33,22 @@
 
 // At phone width the chevron goes too, so the bar fits; the folder and its tooltip stay. 30rem matches the TopBar.
 @media (width < 30rem) {
+  // A tighter hint gap, so the menu with Ctrl+Shift+Z still fits inside a phone screen.
+  .menuEntry {
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
   :global(.ant-btn) .caret.caret:global(.anticon) {
     display: none;
   }
 }
 
-// The Import SVG entry is for phones only; a wider bar shows its own Import SVG button. 30rem matches the TopBar.
+// The phone-only entries and their dividers; a wider bar shows its own Undo, Redo, Import SVG and profile buttons. 30rem matches the TopBar.
 @media (width >= 30rem) {
   // Doubled class: the antd menu item rule is more specific than one class.
-  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item) {
+  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item),
+  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item-divider) {
     display: none;
   }
 }

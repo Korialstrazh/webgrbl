@@ -931,7 +931,10 @@ export const DEFAULT = {
   TOP_BAR_PROJECT_NAME_INPUT: 'TOP_BAR_PROJECT_NAME_INPUT',
   TOP_BAR_PROJECT_PLACEHOLDER: 'TOP_BAR_PROJECT_PLACEHOLDER',
   TOP_BAR_REDO: 'TOP_BAR_REDO',
+  TOP_BAR_REDO_SHORTCUT: 'TOP_BAR_REDO_SHORTCUT',
+  TOP_BAR_SHORTCUT_TOOLTIP: 'TOP_BAR_SHORTCUT_TOOLTIP',
   TOP_BAR_UNDO: 'TOP_BAR_UNDO',
+  TOP_BAR_UNDO_SHORTCUT: 'TOP_BAR_UNDO_SHORTCUT',
 } as const;
 
 export type DefaultLocaleKey = (typeof DEFAULT)[keyof typeof DEFAULT];
@@ -1847,13 +1850,13 @@ registerLocales({
       [DEFAULT.TOOLPATH_WARNINGS_CHIP]: "Toolpath warnings ({{count}}): show them",
       [DEFAULT.TOOLPATH_WARNINGS_SHOW_OBJECT]: "Show {{name}} on the bed",
       [DEFAULT.TOOLPATH_WARNINGS_TITLE]: "Toolpath warnings",
-      [DEFAULT.TOP_BAR_AUTOSAVE_SAVED]: "All changes saved",
+      [DEFAULT.TOP_BAR_AUTOSAVE_SAVED]: "Saved",
       [DEFAULT.TOP_BAR_AUTOSAVE_SAVING]: "Saving…",
       [DEFAULT.TOP_BAR_AUTOSAVE_UNSAVED]: "Waiting to save",
       [DEFAULT.TOP_BAR_MENU_IMPORT_SVG]: "Import SVG",
       [DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES]: "Laser profiles",
       [DEFAULT.TOP_BAR_MENU_PROJECT]: "Project",
-      [DEFAULT.TOP_BAR_PROFILE_TOOLTIP]: "Laser profile: {{name}}. Click to manage profiles",
+      [DEFAULT.TOP_BAR_PROFILE_TOOLTIP]: "Laser profile: {{name}}",
       [DEFAULT.TOP_BAR_PROJECT_MENU_EXPORT_GCODE]: "Export G-code",
       [DEFAULT.TOP_BAR_PROJECT_MENU_NEW]: "New project",
       [DEFAULT.TOP_BAR_PROJECT_MENU_OPEN]: "Open saved project…",
@@ -1864,7 +1867,10 @@ registerLocales({
       [DEFAULT.TOP_BAR_PROJECT_NAME_INPUT]: "Project name",
       [DEFAULT.TOP_BAR_PROJECT_PLACEHOLDER]: "New project",
       [DEFAULT.TOP_BAR_REDO]: "Redo",
+      [DEFAULT.TOP_BAR_REDO_SHORTCUT]: "Ctrl+Shift+Z",
+      [DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP]: "{{action}} ({{shortcut}})",
       [DEFAULT.TOP_BAR_UNDO]: "Undo",
+      [DEFAULT.TOP_BAR_UNDO_SHORTCUT]: "Ctrl+Z",
     },
   },
 });
