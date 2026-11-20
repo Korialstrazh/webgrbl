@@ -9,7 +9,8 @@
   // A faint pencil always shows that the name can be changed; it gets clear under the pointer or the focus.
   .pencil {
     margin-inline-start: var(--space-1);
-    opacity: 0.45;
+    // Enough to stay at 3:1 or more against the header.
+    opacity: 0.75;
     transition: opacity 0.15s ease;
   }
 
