@@ -9,7 +9,7 @@ COPY . .
 RUN npx vite build --base "$WEBGRBL_BASE_PATH"
 
 # Stage 2: serve the static build with nginx.
-FROM nginx:1.28.0-alpine
+FROM nginx:1.30.7-alpine
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 8080
