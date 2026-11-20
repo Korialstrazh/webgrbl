@@ -21,6 +21,7 @@
  */
 import { getClampedLayerSettings } from '../layers/get.clamped.layer.settings';
 import { getLayerKey } from '../layers/get.layer.key';
+import { getValidPresetId } from '../layers/get.valid.preset.id';
 import { getObjectsDerivedLayers } from '../layers/get.objects.derived.layers';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { getImportedMaterial } from '../materials/get.imported.material';
@@ -108,6 +109,7 @@ const getImportedProjectLayer = (fileLayer: ProjectLayer): ProjectLayer | undefi
     order: fileLayer.order,
     settings: getClampedLayerSettings(fileLayer.settings),
     paletteEntryId: fileLayer.paletteEntryId,
+    presetId: getValidPresetId(fileLayer.presetId),
     isShading: fileLayer.isShading,
   };
 };

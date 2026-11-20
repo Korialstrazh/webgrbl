@@ -187,6 +187,55 @@ describe(LayerSettingsChanged.name, () => {
   });
 });
 
+describe('layer preset link', () => {
+  const PRESET_ID = 'p1';
+  const getPresetState = (): ProjectDocumentState => projectDocumentReducer(
+    getStateWithAddedObjects(getInitialState(), [newColouredObject(RED)]),
+    new LayerSettingsChanged({ layerKey: RED, settings: { passes: 3 }, presetId: PRESET_ID }),
+  );
+
+  it('remembers the preset a change comes from', () => {
+    expect(getDocumentLayer(getPresetState(), RED)?.presetId).toBe(PRESET_ID);
+  });
+
+  it('remembers the preset when only the link changes', () => {
+    const state: ProjectDocumentState = getStateWithAddedObjects(getInitialState(), [newColouredObject(RED)]);
+    const linkedState: ProjectDocumentState = projectDocumentReducer(state, new LayerSettingsChanged({
+      layerKey: RED,
+      settings: { passes: DEFAULT_CUT_ENTRY.passes },
+      presetId: PRESET_ID,
+    }));
+
+    expect(getDocumentLayer(linkedState, RED)?.presetId).toBe(PRESET_ID);
+  });
+
+  it('clears the link on a manual change to power, speed or passes', () => {
+    expect(getDocumentLayer(projectDocumentReducer(getPresetState(), new LayerSettingsChanged({
+      layerKey: RED,
+      settings: { maxPowerPercent: CHANGED_POWER_PERCENT },
+    })), RED)?.presetId).toBeUndefined();
+    expect(getDocumentLayer(projectDocumentReducer(getPresetState(), new LayerSettingsChanged({
+      layerKey: RED,
+      settings: { speedMmPerMin: 1234 },
+    })), RED)?.presetId).toBeUndefined();
+    expect(getDocumentLayer(projectDocumentReducer(getPresetState(), new LayerSettingsChanged({
+      layerKey: RED,
+      settings: { passes: 5 },
+    })), RED)?.presetId).toBeUndefined();
+  });
+
+  it('keeps the link on a change to other settings, a toggle or a reorder', () => {
+    const state: ProjectDocumentState = getPresetState();
+
+    expect(getDocumentLayer(projectDocumentReducer(state, new LayerSettingsChanged({
+      layerKey: RED,
+      settings: { airAssist: true, lineIntervalMm: 0.2, passes: 3 },
+    })), RED)?.presetId).toBe(PRESET_ID);
+    expect(getDocumentLayer(projectDocumentReducer(state, new LayerToggled({ layerKey: RED, enabled: false })), RED)
+      ?.presetId).toBe(PRESET_ID);
+  });
+});
+
 describe(LayersReordered.name, () => {
   it('orders the listed layers first and keeps hidden layers after them in their old order', () => {
     const redObject: ProjectObject = newColouredObject(RED);

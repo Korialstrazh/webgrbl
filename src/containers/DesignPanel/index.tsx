@@ -24,7 +24,11 @@ import type { BedViewMode } from '../../utils/bed/bed.view.constants';
 import { DESIGN_PANEL_WIDTH } from '../../utils/layout.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectBedViewMode } from '../../utils/states/bed.view.state';
+import { selectToolpath } from '../../utils/states/toolpath.state';
+import { getJobSizeMm } from '../../utils/toolpath/get.job.size.mm';
+import type { JobSizeMm } from '../../utils/toolpath/interfaces/JobSizeMm';
 import { IconActionButton } from '../../views/IconActionButton';
+import { JobSizeText } from '../../views/JobSizeText';
 import { MaterialSheetIcon } from '../../views/MaterialSheetIcon';
 import { PaletteIcon } from '../../views/PaletteIcon';
 import { Panel } from '../../views/Panel';
@@ -40,6 +44,7 @@ export const DesignPanel = (): ReactNode => {
   const { t } = useTranslation();
   const [isPaletteDialogOpen, setIsPaletteDialogOpen] = useState<boolean>(false);
   const viewMode: BedViewMode = useSelector(selectBedViewMode);
+  const jobSize: JobSizeMm | undefined = getJobSizeMm(useSelector(selectToolpath)?.bounds);
   const isDesignView: boolean = viewMode === BED_VIEW_MODE.DESIGN;
   const isThreeDView: boolean = viewMode === BED_VIEW_MODE.THREE_D;
   // The material drives the 3D burn look, so its card is live in 3D as well as in Design.
@@ -53,6 +58,7 @@ export const DesignPanel = (): ReactNode => {
       aria-label={t(DEFAULT.DESIGN_PANEL_TITLE)}
     >
       <div className={styles.cards}>
+        <JobSizeText size={jobSize} />
         <Panel
           iconComponent={<BlockOutlined />}
           title={t(DEFAULT.DESIGN_LAYERS_TITLE)}

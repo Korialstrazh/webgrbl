@@ -13,7 +13,10 @@
 import { call, put, select } from 'redux-saga/effects';
 import type { BedDimensions } from '../bed/interfaces/BedDimensions';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
+import { i18n } from '../localization/localization';
 import { DEFAULT } from '../localization/default.locales';
+import { getJobSizeText } from '../toolpath/get.job.size.text';
+import type { JobSizeMm } from '../toolpath/interfaces/JobSizeMm';
 import { getFreeBedSpot } from '../project/get.free.bed.spot';
 import { getObjectArtworkBedBounds } from '../project/get.object.artwork.bed.bounds';
 import type { ObjectArtworkBedBounds } from '../project/interfaces/ObjectArtworkBedBounds';
@@ -147,6 +150,20 @@ function* showOversizedImports(oversizedObjects: ProjectObject[]): Generator {
   }
 }
 
+/** The overall box of the imported objects, from their positions, widths and heights. */
+const getImportedObjectsSizeMm = (importedObjects: ProjectObject[]): JobSizeMm => {
+  const minXMm: number = Math.min(...importedObjects.map((projectObject: ProjectObject): number => projectObject.xMm));
+  const minYMm: number = Math.min(...importedObjects.map((projectObject: ProjectObject): number => projectObject.yMm));
+  const maxXMm: number = Math.max(
+    ...importedObjects.map((projectObject: ProjectObject): number => projectObject.xMm + projectObject.widthMm),
+  );
+  const maxYMm: number = Math.max(
+    ...importedObjects.map((projectObject: ProjectObject): number => projectObject.yMm + projectObject.heightMm),
+  );
+
+  return { widthMm: maxXMm - minXMm, heightMm: maxYMm - minYMm };
+};
+
 function* addAcceptedFiles(acceptedFiles: AcceptedSvgFile[], bed: BedDimensions): Generator<unknown, boolean> {
   // Read again after the awaited file reads: other imports, deletes or undo may have changed the count meanwhile.
   const projectDocument: ProjectDocument = (yield select(selectProjectDocument)) as ProjectDocument;
@@ -183,6 +200,9 @@ function* addAcceptedFiles(acceptedFiles: AcceptedSvgFile[], bed: BedDimensions)
       objectIds: importedObjects.map((projectObject: ProjectObject): string => projectObject.id),
     }));
     yield call(showOversizedImports, oversizedObjects);
+    yield call(showToast, TOAST_SEVERITY.INFO, DEFAULT.SVG_IMPORT_SIZE, {
+      size: getJobSizeText(getImportedObjectsSizeMm(importedObjects), i18n.t),
+    });
   }
 
   return fittingFiles.length < acceptedFiles.length;

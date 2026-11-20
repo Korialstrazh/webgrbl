@@ -289,6 +289,18 @@ GRBL_ERROR_8;This $ command only works while the laser is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
+JOB_CHECKLIST_BATTERY_HINT;The laptop runs on battery. Plug it in so a long job is not cut short.
+JOB_CUT_CHECK_CLOSE;Close the cut check
+JOB_CUT_CHECK_EXTRA_PASS;Add one extra pass
+JOB_CUT_CHECK_LAYERS_LABEL;Layers to run again at the same work zero
+JOB_CUT_CHECK_QUESTION;Did the parts come out cleanly?
+JOB_CUT_CHECK_RECUT;Run cut layers again
+JOB_CUT_CHECK_RECUT_NEEDS_LAYER;Tick at least one layer to run again.
+JOB_CUT_CHECK_STUCK;Some are stuck
+JOB_CUT_CHECK_TITLE;Don't move the sheet yet. Gently test a part first.
+JOB_CUT_CHECK_YES;Yes
+JOB_INTERRUPTED_LAST_POINT;Last confirmed point: X {{x}} mm, Y {{y}} mm
+JOB_INTERRUPTED_STOPPED_AT;Stopped in layer {{layer}} at about {{percent}} %
 JOB_LOCK_SHORT_ARTWORK;No artwork
 JOB_LOCK_SHORT_BUSY;Busy
 JOB_LOCK_SHORT_CONNECT;Not connected
@@ -326,6 +338,13 @@ JOB_READINESS_WARNINGS_ACTION;Fix warnings ({{count}})
 JOB_READINESS_WARNINGS_HINT;Fix the toolpath warnings ({{count}}) so the job can start
 JOB_READINESS_WARNINGS_MET_HINT;No toolpath warnings
 JOB_RESUME;Resume
+JOB_RESUME_BLOCKED_NO_POINT;No interrupted job to resume.
+JOB_RESUME_BLOCKED_PROFILE_CHANGED;The job ran with another laser profile. Select it again to resume.
+JOB_RESUME_BLOCKED_PROJECT_CHANGED;The project changed after the job stopped, so it cannot resume.
+JOB_RESUME_CAPTION;Continue the interrupted job
+JOB_RESUME_FRAME_HINT;Run Frame job first to check the position, and do not touch the material.
+JOB_RESUME_FROM;Resume from about {{percent}} %
+JOB_RESUME_NO_HOMING_WARNING;This laser has no homing: the head must be at exactly the same work zero as before. Check the alignment with Frame job first.
 JOB_RESUME_WAITING;Wait until the laser has stopped and any door is closed.
 JOB_RUN_PROGRESS_DETAIL;{{answered}} of {{total}} lines answered, {{elapsed}} elapsed
 JOB_RUN_PROGRESS_LABEL;Job progress
@@ -335,6 +354,14 @@ JOB_RUN_STATUS_INTERRUPTED;Stopped before the end
 JOB_RUN_STATUS_LABEL;Status
 JOB_RUN_STATUS_PAUSED;Paused
 JOB_RUN_STATUS_SENDING;Running
+JOB_SCREEN_AWAKE_NOTE;Screen kept awake
+JOB_SIZE_DIN_CLOSE;close to DIN {{name}} ({{width}} × {{height}} mm)
+JOB_SIZE_DIN_EXACT;DIN {{name}}
+JOB_SIZE_MM;{{width}} × {{height}} mm ({{widthCm}} × {{heightCm}} cm)
+JOB_SIZE_NARROWER;{{amount}} mm narrower
+JOB_SIZE_SHORTER;{{amount}} mm shorter
+JOB_SIZE_TALLER;{{amount}} mm taller
+JOB_SIZE_WIDER;{{amount}} mm wider
 JOB_START_BLOCKED_NO_PROFILE;Add a laser profile to start a job.
 JOB_START_BLOCKED_NO_TOOLPATH;Wait for an up-to-date toolpath with something to burn.
 JOB_START_BLOCKED_NOT_CONNECTED;Connect the laser to start a job.
@@ -342,10 +369,6 @@ JOB_START_BLOCKED_NOT_IDLE;The laser must be idle to start a job.
 JOB_START_BLOCKED_OFF_BED;Some artwork lies outside the bed: move it onto the bed, fit it or skip it to start a job.
 JOB_START_BLOCKED_RUNNING;A job is running.
 JOB_START_BLOCKED_WARNINGS;Fix the toolpath warnings to start a job.
-JOB_START_CONFIRM_CANCEL;Cancel
-JOB_START_CONFIRM_DESCRIPTION;Check the material, focus and work zero. Keep protective glasses on and stay with the laser.
-JOB_START_CONFIRM_OK;Start and fire
-JOB_START_CONFIRM_TITLE;Start the job? The laser will fire.
 LASER_STATE_FIRING;Firing {{powerPercent}} %
 LASER_STATE_FIRING_HINT;The last report from the laser shows power above zero, so it may be firing.
 LASER_STATE_JOB_RUNNING;Job running
@@ -632,6 +655,8 @@ MATERIAL_LIBRARY_SPEED_INVALID;Enter a speed from {{min}} to {{max}} mm/min.
 MATERIAL_LIBRARY_SPEED_VALUE;{{speed}} mm/min
 MATERIAL_LIBRARY_TICK_FOR_EXPORT;Select for export
 MATERIAL_LIBRARY_TITLE;Materials
+MATERIAL_PRESET_CUT_THROUGH_NOTE;Did not cut through last time. Consider an extra pass or more power.
+MATERIAL_PRESET_CUT_THROUGH_NOTE_DISMISS;Dismiss
 MATERIAL_SECTION_LIBRARY;Library
 MATERIAL_SECTION_LIBRARY_CAPTION;Library
 MATERIAL_SECTION_OPEN_LIBRARY;Open the material library
@@ -758,6 +783,21 @@ PALETTE_SHADING_COLOUR_NOTE;The shading colour is fixed: it covers every grey fr
 PALETTE_SHADING_LOCKED;Shading is built in and cannot be deleted.
 PALETTE_TITLE;Palette
 PROJECT_FILE_INPUT;Open a project file
+SAFETY_CHECKLIST_CANCEL;Cancel
+SAFETY_CHECKLIST_CONFIRM;I have done all of the above
+SAFETY_CHECKLIST_FIRE_HINT;Remove paper, offcuts and dust around the work area.
+SAFETY_CHECKLIST_FIRE_TITLE;Nothing flammable near the bed, extinguisher in reach
+SAFETY_CHECKLIST_GOGGLES_HINT;Rated for your laser wavelength (for diode lasers: 445 nm). Never look at the beam or its reflections.
+SAFETY_CHECKLIST_GOGGLES_TITLE;Everyone in the room wears laser goggles
+SAFETY_CHECKLIST_INTRO;Before you start, make sure that:
+SAFETY_CHECKLIST_JOB;Job: {{name}}
+SAFETY_CHECKLIST_LIST_LABEL;Safety reminders
+SAFETY_CHECKLIST_START;Start job
+SAFETY_CHECKLIST_STAY_HINT;Fire is the most common laser accident. Never leave a job running.
+SAFETY_CHECKLIST_STAY_TITLE;I will stay with the machine the whole time
+SAFETY_CHECKLIST_TITLE;The laser is about to fire
+SAFETY_CHECKLIST_VENTILATION_HINT;Never burn PVC, vinyl or faux leather: they release chlorine gas.
+SAFETY_CHECKLIST_VENTILATION_TITLE;Ventilation is on, and the material is safe to burn
 SIMULATION_BACK_TO_START;Back to start
 SIMULATION_ELAPSED_OF_TOTAL;{{elapsed}} / {{total}}
 SIMULATION_LAYER_BAR_LABEL;Burn time per layer
@@ -788,6 +828,7 @@ STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER;Double-click bed moves laser
 STOP_SETTINGS_ESC_HINT;One Esc closes the panel and stops.
 STOP_SETTINGS_ESC_STOPS_WITH_PANEL_OPEN;Esc stops over panels too
 STOP_SETTINGS_TITLE;Stop settings
+SVG_IMPORT_SIZE;Imported size: {{size}}
 TEST_SAMPLE_DIALOG_CANCEL;Cancel
 TEST_SAMPLE_DIALOG_CUT_THROUGH;Cut through
 TEST_SAMPLE_DIALOG_DEPTH;Depth (mm)

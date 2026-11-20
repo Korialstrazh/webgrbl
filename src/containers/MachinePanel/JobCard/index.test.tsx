@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import type { MockInstance } from 'vitest';
 import { JobCard } from '.';
 import { JOB_LOCK_NOTE_TEST_IDS } from './job.card.constants';
+import { screenWakeLock } from '../../../utils/browser/screen.wake.lock';
 import * as downloadModule from '../../../utils/browser/download.text.file';
 import { EM_DASH, MIDDLE_DOT } from '../../../utils/characters.constants';
 import { GRBL_CONNECTION_STATUS, GRBL_MACHINE_STATE } from '../../../utils/grbl/grbl.constants';
@@ -18,6 +19,8 @@ import { MaterialSaved } from '../../../utils/states/material.state';
 import { ConnectionStatusChanged } from '../../../utils/states/grbl.connection.state';
 import { JOB_RUN_KIND } from '../../../utils/states/job.run.kind.constants';
 import { JobRunStarted, JobStartRequested } from '../../../utils/states/job.run.state';
+import { selectJobSafetyChecklistRequest } from '../../../utils/states/job.safety.checklist.state';
+import { JOB_START_REQUEST_KIND } from '../../../utils/states/job.start.request.constants';
 import { ActiveMachineProfileSelected, MachineProfileSaved } from '../../../utils/states/machine.profile.state';
 import { MachineStatusReceived } from '../../../utils/states/machine.status.state';
 import type { AppDispatch, AppStore } from '../../../utils/states/new.store';
@@ -32,7 +35,6 @@ import {
 import { selectIsJobCardCollapsed } from '../../../utils/states/app.preferences.state';
 import { selectToolpathMachineArea } from '../../../utils/states/toolpath.machine.area.selector';
 import { ToolpathReady, ToolpathRequested, selectToolpathDocumentVersion } from '../../../utils/states/toolpath.state';
-import { selectIsAnyOverlayOpen } from '../../../utils/states/ui.overlay.state';
 import { SVG_UNSUPPORTED_KIND } from '../../../utils/svg/geometry/svg.shape.constants';
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 import { BedRegionTestHost } from '../../../utils/test.support/bed.region.test.host';
@@ -54,7 +56,6 @@ const LOCK_REASON_LAYER = 'No layer on';
 const FRAME_LABEL = 'Frame job';
 const EXPORT_LABEL = 'Export G-code';
 const START_JOB_LABEL = 'Start job';
-const START_CONFIRM_OK_LABEL = 'Start and fire';
 const SOON_LABEL = 'Soon';
 const PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
 const ESTIMATE_LABEL = 'Estimate';
@@ -187,7 +188,7 @@ describe(JobCard.name, () => {
     expect(startJobButton).toHaveAccessibleDescription(NOT_CONNECTED_REASON);
   });
 
-  it('opens no start confirmation from a blocked Start job, which stays focusable', async () => {
+  it('opens no safety checklist from a blocked Start job, which stays focusable', async () => {
     const store: AppStore = await newGcodeExportTestStore();
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
@@ -198,39 +199,19 @@ describe(JobCard.name, () => {
     fireEvent.click(startJobButton);
 
     expect(startJobButton).toHaveFocus();
-    expect(screen.queryByRole('button', { name: START_CONFIRM_OK_LABEL })).not.toBeInTheDocument();
-    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
+    expect(selectJobSafetyChecklistRequest(store.getState())).toBeUndefined();
     expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(JobStartRequested));
   });
 
-  it('starts the job only after the confirmation, which the Escape-to-STOP hotkey treats as an overlay', async () => {
+  it('asks for the safety checklist from Start job and starts nothing before it is confirmed', () => {
     const store: AppStore = newStartableJobStore();
     const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
     renderJobCard(store);
     fireEvent.click(screen.getByRole('button', { name: START_JOB_LABEL }));
 
+    expect(selectJobSafetyChecklistRequest(store.getState())).toEqual({ kind: JOB_START_REQUEST_KIND.FULL });
     expect(dispatchSpy).not.toHaveBeenCalledWith(expect.any(JobStartRequested));
-    expect(selectIsAnyOverlayOpen(store.getState())).toBe(true);
-
-    fireEvent.click(await screen.findByRole('button', { name: START_CONFIRM_OK_LABEL }));
-
-    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(JobStartRequested));
-    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
-  });
-
-  it('closes the confirmation when the start gets blocked while it is open', async () => {
-    const store: AppStore = newStartableJobStore();
-
-    renderJobCard(store);
-    fireEvent.click(screen.getByRole('button', { name: START_JOB_LABEL }));
-    await screen.findByRole('button', { name: START_CONFIRM_OK_LABEL });
-
-    act(() => {
-      store.dispatch(newMachineStatusReceived(GRBL_MACHINE_STATE.RUN));
-    });
-
-    expect(selectIsAnyOverlayOpen(store.getState())).toBe(false);
   });
 
   it('shows the run as Paused during a hold, not as Running', () => {
@@ -455,5 +436,31 @@ describe(JobCard.name, () => {
 
     expect(selectIsJobCardCollapsed(store.getState())).toBe(false);
     expect(screen.getByRole('list', { name: READINESS_LABEL })).toBeInTheDocument();
+  });
+
+  it('says the screen is kept awake only while the lock is held during a run', async () => {
+    const store: AppStore = newStartableJobStore();
+
+    Object.defineProperty(navigator, 'wakeLock', {
+      value: { request: () => Promise.resolve({ release: () => Promise.resolve(), addEventListener: vi.fn() }) },
+      configurable: true,
+    });
+    store.dispatch(new JobRunStarted({ startedAtMs: 0, kind: JOB_RUN_KIND.JOB }));
+    renderJobCard(store);
+
+    expect(screen.queryByText('Screen kept awake')).not.toBeInTheDocument();
+
+    await act(async () => {
+      await screenWakeLock.acquire();
+    });
+
+    expect(screen.getByText('Screen kept awake')).toBeInTheDocument();
+
+    await act(async () => {
+      await screenWakeLock.release();
+    });
+    Reflect.deleteProperty(navigator, 'wakeLock');
+
+    expect(screen.queryByText('Screen kept awake')).not.toBeInTheDocument();
   });
 });

@@ -27,4 +27,6 @@ export interface MaterialPreset {
   passes: number;
   /** Free text from the user; empty when there are none. */
   notes: string;
+  /** True after a job with this preset did not cut through, until the user dismisses the note. */
+  isCutThroughNoteShown?: boolean;
 }

@@ -1,3 +1,4 @@
+import { newBackgroundTimer } from './background.timer';
 import {
   GRBL_CONTROLLER_EVENT_KIND,
   GRBL_CONTROLLER_PHASE,
@@ -22,6 +23,7 @@ import { GrblResponseRouter } from './grbl.response.router';
 import { GrblStatusPoller } from './grbl.status.poller';
 import { GrblStatusTracker } from './grbl.status.tracker';
 import type { GrblControllerPhase } from './grbl.constants';
+import type { BackgroundTimer } from './interfaces/BackgroundTimer';
 import type { GrblConnectionInfo } from './interfaces/GrblConnectionInfo';
 import type { GrblControllerEvent } from './interfaces/GrblControllerEvent';
 import type { GrblFirmwareIdentity } from './interfaces/GrblFirmwareIdentity';
@@ -75,6 +77,8 @@ export class GrblController {
   private readonly statusPoller: GrblStatusPoller;
   /** Stop, reset, feed hold and cycle resume. */
   private readonly machineControls: GrblMachineControls;
+  /** Runs the poll and the silence check; its worker ends with the connection. */
+  private readonly backgroundTimer: BackgroundTimer;
   /** Streams and checks programs. */
   private readonly programStreamer: GrblProgramStreamer;
   /** Reports a silent controller. */
@@ -85,17 +89,24 @@ export class GrblController {
   public constructor(transport: SerialTransport) {
     const emitEvent = (event: GrblControllerEvent): void => this.emitEvent(event);
     const isConnected = (): boolean => this.phase === GRBL_CONTROLLER_PHASE.CONNECTED;
+    // One worker serves the poller and the watchdog.
+    this.backgroundTimer = newBackgroundTimer();
+    const backgroundTimer: BackgroundTimer = this.backgroundTimer;
 
     this.transport = transport;
     this.commandWriter = new GrblCommandWriter(transport, emitEvent);
     this.statusPoller = new GrblStatusPoller(
       (): void => void this.commandWriter.writeRealtimeCommand(GRBL_REALTIME_COMMAND.STATUS_QUERY),
+      backgroundTimer,
     );
-    this.notRespondingWatchdog = new GrblNotRespondingWatchdog({
-      hasInFlightLines: (): boolean => this.commandWriter.hasInFlightLines(),
-      getLatestStatus: (): GrblResolvedStatus | undefined => this.statusTracker.getLatestStatus(),
-      emitEvent,
-    });
+    this.notRespondingWatchdog = new GrblNotRespondingWatchdog(
+      {
+        hasInFlightLines: (): boolean => this.commandWriter.hasInFlightLines(),
+        getLatestStatus: (): GrblResolvedStatus | undefined => this.statusTracker.getLatestStatus(),
+        emitEvent,
+      },
+      backgroundTimer,
+    );
     this.machineControls = new GrblMachineControls({
       commandWriter: this.commandWriter,
       statusPoller: this.statusPoller,
@@ -279,6 +290,7 @@ export class GrblController {
     this.programStreamer.releaseProgram(new GrblConnectionClosedError());
     this.notRespondingWatchdog.stopWatching();
     this.statusPoller.stopPolling();
+    this.backgroundTimer.dispose();
     this.commandWriter.releaseAllLines(new GrblConnectionClosedError());
     this.lineFramer.reset();
   }

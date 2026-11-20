@@ -25,6 +25,8 @@ import { BedPanel } from '../../containers/BedPanel';
 import { DesignPanel } from '../../containers/DesignPanel';
 import { FocusRingModality } from '../../containers/FocusRingModality';
 import { GcodeExportConfirmDialog } from '../../containers/GcodeExportConfirmDialog';
+import { JobSafetyChecklistDialog } from '../../containers/JobSafetyChecklistDialog';
+import { JobWakeLock } from '../../containers/JobWakeLock';
 import { HistoryHotkeys } from '../../containers/HistoryHotkeys';
 import { LeavePageGuard } from '../../containers/LeavePageGuard';
 import { MachinePanel } from '../../containers/MachinePanel';
@@ -107,6 +109,8 @@ export const AppRoute = (): ReactNode => {
         <TooltipDismissal />
         <FocusRingModality />
         <GcodeExportConfirmDialog />
+        <JobSafetyChecklistDialog />
+        <JobWakeLock />
       </Layout>
     </BedRegionHostContext>
   );

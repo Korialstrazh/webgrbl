@@ -14,14 +14,17 @@ import { actionTypePrefixer } from './action.type.prefixer';
 import { ConnectionEstablished, ConnectionStatusChanged } from './grbl.connection.state';
 import { ConsoleCommandSubmitted } from './grbl.console.state';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
+import type { JobCutCheckLayersPayload } from './interfaces/JobCutCheckLayersPayload';
 import type { JobRunProgressChangedPayload } from './interfaces/JobRunProgressChangedPayload';
 import type { JobRunStartedPayload } from './interfaces/JobRunStartedPayload';
 import type { JobRunStatusChangedPayload } from './interfaces/JobRunStatusChangedPayload';
+import type { JobStartRequest } from './interfaces/JobStartRequest';
 import { JOB_RUN_KIND } from './job.run.kind.constants';
 import type { JobRunKind } from './job.run.kind.constants';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
 import { MachineStatusReceived } from './machine.status.state';
+import { PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES } from './project.document.change.action.types';
 
 // #region State
 export interface JobRunState {
@@ -39,6 +42,8 @@ export interface JobRunState {
   kind: JobRunKind;
   /** True when the latest run was a frame that an Alarm report ended. */
   isFrameAlarmed: boolean;
+  /** Line layer keys of the last job that finished normally, for the cut check; empty once it is closed. */
+  cutCheckLayerKeys: string[];
 }
 // #endregion
 
@@ -60,7 +65,7 @@ export class FrameRunAlarmed extends Action {
   public static readonly type: string = actionType('frame run alarmed');
 }
 
-export class JobStartRequested extends Action {
+export class JobStartRequested extends Action<JobStartRequest> {
   public static readonly type: string = actionType('job start requested');
 }
 
@@ -80,6 +85,15 @@ export class JobResumeRequested extends Action {
   public static readonly type: string = actionType('job resume requested');
 }
 
+/** A job finished normally: the line layers it burned are kept, so a later edit does not change the cut check. */
+export class JobCutCheckLayersCaptured extends Action<JobCutCheckLayersPayload> {
+  public static readonly type: string = actionType('job cut check layers captured');
+}
+
+export class JobCutCheckDismissed extends Action {
+  public static readonly type: string = actionType('job cut check dismissed');
+}
+
 export class JobRunStatusChanged extends Action<JobRunStatusChangedPayload> {
   public static readonly type: string = actionType('job run status changed');
 }
@@ -94,6 +108,7 @@ const INITIAL_JOB_RUN_STATE: JobRunState = {
   isLaserModeUnconfirmed: false,
   kind: JOB_RUN_KIND.JOB,
   isFrameAlarmed: false,
+  cutCheckLayerKeys: [],
 };
 
 // Settings are read only at connect: a write to $32 or a settings reset leaves them out of date.
@@ -125,7 +140,12 @@ export const jobRunReducer = (state: JobRunState = INITIAL_JOB_RUN_STATE, action
       startedAtMs: (action as JobRunStarted).payload.startedAtMs,
       kind: (action as JobRunStarted).payload.kind,
       isFrameAlarmed: false,
+      cutCheckLayerKeys: [],
     };
+  case JobCutCheckLayersCaptured.type:
+    return { ...state, cutCheckLayerKeys: (action as JobCutCheckLayersCaptured).payload.layerKeys };
+  case JobCutCheckDismissed.type:
+    return { ...state, cutCheckLayerKeys: [] };
   case FrameRunAlarmed.type:
     return { ...state, isFrameAlarmed: true };
   case MachineStatusReceived.type:
@@ -146,7 +166,10 @@ export const jobRunReducer = (state: JobRunState = INITIAL_JOB_RUN_STATE, action
       ? { ...state, status: JOB_RUN_STATUS.INTERRUPTED }
       : state;
   default:
-    return state;
+    // A changed or newly loaded project no longer matches the sheet on the bed.
+    return PROJECT_TOOLPATH_INPUT_CHANGE_ACTION_TYPES.includes(action.type) && state.cutCheckLayerKeys.length
+      ? { ...state, cutCheckLayerKeys: [] }
+      : state;
   }
 };
 // #endregion
@@ -166,6 +189,8 @@ export const selectIsLaserModeUnconfirmed = (state: RootState): boolean =>
 export const selectJobRunStartedAtMs = (state: RootState): number => state[JOB_RUN_STATE_NAME].startedAtMs;
 
 export const selectJobRunKind = (state: RootState): JobRunKind => state[JOB_RUN_STATE_NAME].kind;
+
+export const selectJobCutCheckLayerKeys = (state: RootState): string[] => state[JOB_RUN_STATE_NAME].cutCheckLayerKeys;
 
 export const selectIsFrameAlarmed = (state: RootState): boolean => state[JOB_RUN_STATE_NAME].isFrameAlarmed;
 

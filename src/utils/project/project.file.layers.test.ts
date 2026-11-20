@@ -81,6 +81,23 @@ describe('project file layers', () => {
     expect(importedFile?.document.layers).toEqual(changedLayers);
   });
 
+  it('keeps a valid preset id and drops one that is not a string', () => {
+    const objects: ProjectObject[] = [newColouredObject(RED)];
+    const layer: ProjectLayer = { ...getLayersOf(objects)[0]!, presetId: 'p1' };
+    const linkedFile: ImportedProjectFile | undefined = getImportedProjectFile(
+      getProjectFileText(PROJECT_NAME, { objects, layers: [layer] }, undefined),
+      DEFAULT_PALETTE,
+    );
+    const malformedImport: ImportedProjectFile | undefined = getImportedValue({
+      ...getFileValue(objects, [layer]),
+      layers: [{ ...layer, presetId: 42 }],
+    });
+
+    expect(getImportedLayer(linkedFile, RED)?.presetId).toBe('p1');
+    expect(malformedImport).toBeDefined();
+    expect(getImportedLayer(malformedImport, RED)?.presetId).toBeUndefined();
+  });
+
   it('derives the layers of a version 1 file from the current palette', () => {
     const objects: ProjectObject[] = [newColouredObject(RED)];
     const customPalette: Palette = {

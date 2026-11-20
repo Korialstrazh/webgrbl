@@ -1,6 +1,9 @@
 /**
  * Gets the layers with the laser settings of one layer changed and clamped to the palette ranges. Gives the same list
- * back when the layer is unknown, a value is not a finite number, or the settings stay the same.
+ * back when the layer is unknown, a value is not a finite number, or neither the settings nor the preset link change.
+ *
+ * The layer remembers the preset it was set from: a given preset id is stored, and a change without one that alters
+ * power, speed or passes clears it. A change to any other setting keeps the link.
  *
  * @author michael.morosov
  *
@@ -25,10 +28,28 @@ const areLayerSettingsEqual = (firstSettings: LayerSettings, secondSettings: Lay
   firstSettings.airAssist === secondSettings.airAssist &&
   firstSettings.lineIntervalMm === secondSettings.lineIntervalMm;
 
+const arePresetSettingsEqual = (firstSettings: LayerSettings, secondSettings: LayerSettings): boolean =>
+  firstSettings.maxPowerPercent === secondSettings.maxPowerPercent &&
+  firstSettings.speedMmPerMin === secondSettings.speedMmPerMin &&
+  firstSettings.passes === secondSettings.passes;
+
+const getLinkedPresetId = (
+  layer: ProjectLayer,
+  clampedSettings: LayerSettings,
+  presetId: string | undefined,
+): string | undefined => {
+  if (typeof presetId === 'string') {
+    return presetId;
+  }
+
+  return arePresetSettingsEqual(layer.settings, clampedSettings) ? layer.presetId : undefined;
+};
+
 export const getLayersWithSettings = (
   layers: ProjectLayer[],
   layerKey: string,
   settingsChange: LayerSettingsChange,
+  presetId?: string,
 ): ProjectLayer[] => {
   const changedLayer: ProjectLayer | undefined = layers.find(
     (layer: ProjectLayer): boolean => getLayerKey(layer) === layerKey,
@@ -47,11 +68,15 @@ export const getLayersWithSettings = (
 
   const clampedSettings: LayerSettings = getClampedLayerSettings(changedSettings);
 
-  if (areLayerSettingsEqual(changedLayer.settings, clampedSettings)) {
+  const linkedPresetId: string | undefined = getLinkedPresetId(changedLayer, clampedSettings, presetId);
+
+  if (areLayerSettingsEqual(changedLayer.settings, clampedSettings) && linkedPresetId === changedLayer.presetId) {
     return layers;
   }
 
   return layers.map(
-    (layer: ProjectLayer): ProjectLayer => (layer === changedLayer ? { ...layer, settings: clampedSettings } : layer),
+    (layer: ProjectLayer): ProjectLayer => (layer === changedLayer
+      ? { ...layer, settings: clampedSettings, presetId: linkedPresetId }
+      : layer),
   );
 };

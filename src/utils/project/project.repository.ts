@@ -22,6 +22,7 @@
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import { DEXIE_TRANSACTION_MODE_READ, DEXIE_TRANSACTION_MODE_READ_WRITE } from '../dexie.constants';
+import { getValidPresetId } from '../layers/get.valid.preset.id';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
 import { isProjectLayer } from '../layers/is.project.layer';
 import { isString } from '../type.guards/is.string';
@@ -81,7 +82,9 @@ const getProjectSummary = (storedProject: StoredProject): ProjectSummary => ({
 });
 
 const getStoredProjectLayers = (storedProject: StoredProject): ProjectLayer[] =>
-  (storedProject.layers ?? []).filter(isProjectLayer);
+  (storedProject.layers ?? []).filter(isProjectLayer).map(
+    (layer: ProjectLayer): ProjectLayer => ({ ...layer, presetId: getValidPresetId(layer.presetId) }),
+  );
 
 /** Joins the SVG text into the stored objects; an object whose SVG row is missing is left out, never a crash. */
 const getJoinedProjectDocument = (storedProject: StoredProject, svgAssetRows: StoredSvgAsset[]): ProjectDocument => {

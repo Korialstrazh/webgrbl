@@ -12,6 +12,7 @@ import type { MaterialPreset } from '../materials/interfaces/MaterialPreset';
 import { Action } from './action';
 import { actionTypePrefixer } from './action.type.prefixer';
 import type { ActionTypeFormatter } from './interfaces/ActionTypeFormatter';
+import type { MaterialPresetCutThroughNotePayload } from './interfaces/MaterialPresetCutThroughNotePayload';
 import type { MaterialPresetDeletedPayload } from './interfaces/MaterialPresetDeletedPayload';
 import type { MaterialPresetPayload } from './interfaces/MaterialPresetPayload';
 import type { MaterialPresetsPayload } from './interfaces/MaterialPresetsPayload';
@@ -44,6 +45,15 @@ export class MaterialPresetSaved extends Action<MaterialPresetPayload> {
 export class MaterialPresetDeleted extends Action<MaterialPresetDeletedPayload> {
   public static readonly type: string = actionType('material preset deleted');
 }
+
+/** A job set from the preset did not cut through: the preset shows a note the next time it is used. */
+export class MaterialPresetCutThroughNoteAdded extends Action<MaterialPresetCutThroughNotePayload> {
+  public static readonly type: string = actionType('material preset cut through note added');
+}
+
+export class MaterialPresetCutThroughNoteDismissed extends Action<MaterialPresetCutThroughNotePayload> {
+  public static readonly type: string = actionType('material preset cut through note dismissed');
+}
 // #endregion
 
 // #region Initial state
@@ -56,6 +66,14 @@ const getPresetsWithSavedPreset = (presets: MaterialPreset[], savedPreset: Mater
     ? presets.map((preset: MaterialPreset): MaterialPreset => preset.id === savedPreset.id ? savedPreset : preset)
     : [...presets, savedPreset];
 
+const getPresetsWithCutThroughNote = (
+  presets: MaterialPreset[],
+  presetId: string,
+  isCutThroughNoteShown: boolean,
+): MaterialPreset[] =>
+  presets.map((preset: MaterialPreset): MaterialPreset =>
+    preset.id === presetId ? { ...preset, isCutThroughNoteShown } : preset);
+
 export const materialPresetReducer = (
   state: MaterialPresetState = INITIAL_MATERIAL_PRESET_STATE,
   action: Action<unknown>,
@@ -67,6 +85,24 @@ export const materialPresetReducer = (
     return {
       ...state,
       presets: getPresetsWithSavedPreset(state.presets, (action as MaterialPresetSaved).payload.preset),
+    };
+  case MaterialPresetCutThroughNoteAdded.type:
+    return {
+      ...state,
+      presets: getPresetsWithCutThroughNote(
+        state.presets,
+        (action as MaterialPresetCutThroughNoteAdded).payload.presetId,
+        true,
+      ),
+    };
+  case MaterialPresetCutThroughNoteDismissed.type:
+    return {
+      ...state,
+      presets: getPresetsWithCutThroughNote(
+        state.presets,
+        (action as MaterialPresetCutThroughNoteDismissed).payload.presetId,
+        false,
+      ),
     };
   case MaterialPresetDeleted.type:
     return {

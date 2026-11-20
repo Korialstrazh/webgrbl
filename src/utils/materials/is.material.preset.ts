@@ -8,6 +8,7 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
+import { isBoolean } from '../type.guards/is.boolean';
 import { isFiniteNumber } from '../type.guards/is.finite.number';
 import { isRecord } from '../type.guards/is.record';
 import { isString } from '../type.guards/is.string';
@@ -25,4 +26,5 @@ export const isMaterialPreset = (value: unknown): value is MaterialPreset =>
   isFiniteNumber(value.powerWatts) &&
   isFiniteNumber(value.speedMmPerMin) &&
   isFiniteNumber(value.passes) &&
-  isString(value.notes);
+  isString(value.notes) &&
+  (!value.isCutThroughNoteShown || isBoolean(value.isCutThroughNoteShown));

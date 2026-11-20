@@ -8,7 +8,8 @@
  * Export G-code is a quiet secondary action that gives its reason in a tooltip. Frame job, with its settings behind a
  * gear, traces the outline of the job. A chevron in the heading folds the card to one line, its facts and Start, so the
  * cards below come into view; the fold is remembered per viewer. The laser pointer row is the card's last row, folded
- * or not.
+ * or not. After a job finished normally, the cut check hint shows under the facts until it is answered or closed.
+ * After a job stopped early, a summary under the facts says where it stopped, with the offer to resume it.
  *
  * @author michael.morosov
  *
@@ -20,6 +21,7 @@
 import {
   BlockOutlined,
   ClockCircleOutlined,
+  DesktopOutlined,
   DownloadOutlined,
   DownOutlined,
   ProfileOutlined,
@@ -31,6 +33,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_SIZE_SMALL, ANTD_BUTTON_TYPE_TEXT } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
+import { useIsScreenKeptAwake } from '../../../utils/hooks/use.is.screen.kept.awake';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
 import { useJobStartBlockedReasonTexts } from '../../../utils/hooks/use.job.start.blocked.reason.texts';
 import type { ProjectLayer } from '../../../utils/layers/interfaces/ProjectLayer';
@@ -58,10 +61,13 @@ import { CaptionedActionButton } from '../../../views/CaptionedActionButton';
 import { IconActionButton } from '../../../views/IconActionButton';
 import { Panel } from '../../../views/Panel';
 import { TooltipNoteIcon } from '../../../views/TooltipNoteIcon';
+import { JobCutCheckHint } from '../../JobCutCheckHint';
 import { JobStartButton } from '../../JobStartButton';
 import { FrameControls } from './FrameControls';
+import { JobInterruptionSummary } from './JobInterruptionSummary';
 import { JobPauseButton } from './JobPauseButton';
 import { JobReadinessRow } from './JobReadinessRow';
+import { JobResumeControls } from './JobResumeControls';
 import { JobRunProgress } from './JobRunProgress';
 import { LaserPointerRow } from './LaserPointerRow';
 import { getJobLayerCountText } from './get.job.layer.count.text';
@@ -100,7 +106,15 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
   const isFixWarningsShown: boolean =
     useSelector(selectFirstUnmetJobReadinessStep) === JOB_READINESS_STEP.WARNINGS && !isJobRunActive;
   const isCollapsed: boolean = useSelector(selectIsJobCardCollapsed);
+  const isScreenKeptAwake: boolean = useIsScreenKeptAwake();
   const bodyId: string = useId();
+
+  const awakeNoteComponent: ReactNode = isJobRunActive && isScreenKeptAwake && (
+    <p className={styles.awakeNote}>
+      <DesktopOutlined aria-hidden />
+      {t(DEFAULT.JOB_SCREEN_AWAKE_NOTE)}
+    </p>
+  );
 
   const factsComponent: ReactNode = (
     <dl className={styles.facts}>
@@ -172,6 +186,10 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
             )}
           </div>
           {isJobRunActive && <JobRunProgress />}
+          {awakeNoteComponent}
+          <JobInterruptionSummary />
+          <JobResumeControls />
+          <JobCutCheckHint />
           <JobPauseButton />
           <LaserPointerRow />
         </div>
@@ -180,6 +198,10 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           {factsComponent}
           {!isJobRunActive && <JobReadinessRow />}
           {isJobRunActive && <JobRunProgress />}
+          {awakeNoteComponent}
+          <JobInterruptionSummary />
+          <JobResumeControls />
+          <JobCutCheckHint />
           <JobPauseButton />
           <FrameControls
             startActionComponent={isStartShown ? <JobStartButton /> : undefined}

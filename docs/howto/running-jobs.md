@@ -1,9 +1,9 @@
 # Running a job
 
-**Not yet verified on a real laser.** Everything here has only run against the GRBL simulator.
+Hardware: the user ran real production jobs on an ACMER 12 W on 2026-11-19 and reported that everything works; that covers Start, Pause, Resume and Frame job. The safety checklist, job size, cut check, screen wake lock, background-tab timers and Resume after an interruption (below) are built on the GRBL simulator only.
 
 1. Connect the laser, then wait for the toolpath to be ready. If Start job is off, its tooltip says why.
-2. Press **Start job** in the Job card, check the material, focus and work zero, then confirm with **Start and fire**.
+2. Press **Start job** in the Job card. A safety checklist opens with four reminders (goggles, ventilation and material, fire, stay with the machine), each with a looping picture, plus the job name, layers, estimate and size. Check the material, focus and work zero, tick **I have done all of the above**, then press **Start job**. Cancel or Escape starts nothing.
 3. The Job card shows Running, Finishing, then Finished, or "Stopped before the end", and Paused during a hold. STOP works throughout.
 
 While a job runs, the Job card shows a progress bar, lines answered and elapsed time. A line counts when the laser has answered it, which is slightly ahead of the burn because GRBL buffers lines, and the elapsed time keeps counting during a pause. **Pause** holds the job, and **Resume** continues once the machine has stopped; after a safety door opened, Resume also waits until the door is closed. Pause is off when laser mode is off (`$32=0`), because the beam could stay on while the head stands still; use STOP then. The app reads `$32` when it connects, so reconnect after changing it in the console.
@@ -16,12 +16,12 @@ Start job and Frame job stay locked while any active content (not skipped or hid
 
 ## Frame job
 
-**Not yet verified on a real laser.** The checks on the ACMER are pending: the dot visible at about 0.05 W including at corners, dark while paused, and dark when the head stops. The dot uses `M4`, so it goes dark when the head stands still and dims at corners.
+Confirmed on the ACMER 12 W by the user on 2026-11-19. The dot uses `M4`, so it goes dark when the head stands still and dims at corners.
 
 Frame job traces the job with a dim dot, so you can see where it lands before you burn. Watch the dot to answer three questions: does the job stay within the limits of the laser, can the head travel the whole path without getting stuck, and is the sheet flat (a wider or blurrier spot shows where it rises or dips).
 
 1. Connect the laser, wait for the toolpath to be ready and set work zero where the job should start.
-2. In the Job card, choose the **Grid** (Outline only, no grid, 1 cm, 2 cm or 5 cm), a **Margin** in mm (0 by default), which grows the rectangle on all four sides, and a **Frame speed** in mm/min (6000 by default, 100 to 10000). All three are saved per machine profile. A field corrects itself only when you leave it or press Enter: left empty it gives the saved value back, and a number outside the range is held at the nearest limit. The frame time shown in the card uses the same speed, but it is a lower bound: GRBL caps every move at the machine's `$110` and `$111` limits, so a slower machine takes longer. A faster trace may also change how visible the dot is; this is not verified on a real laser.
+2. In the Job card, choose the **Grid** (Outline only, no grid, 1 cm, 2 cm or 5 cm), a **Margin** in mm (0 by default), which grows the rectangle on all four sides, and a **Frame speed** in mm/min (6000 by default, 100 to 10000). All three are saved per machine profile. A field corrects itself only when you leave it or press Enter: left empty it gives the saved value back, and a number outside the range is held at the nearest limit. The frame time shown in the card uses the same speed, but it is a lower bound: GRBL caps every move at the machine's `$110` and `$111` limits, so a slower machine takes longer. A faster trace may also change how visible the dot is.
 3. Check the dot power shown in the card: it is 0.05 W and assumes the maximum watts of the named machine profile (10 W until you change it), so set the real laser power in the profile first.
 4. Press **Frame job**. There is no confirmation. The head traces the rectangle around the job, then the grid lines, switches the dot off and returns to where it started.
 5. **Pause**, **Resume** and **STOP** work as for a job. The dot is off while paused. While a frame runs, the same locks as for a job apply.
@@ -33,6 +33,37 @@ Frame job is off (no fill, a solid grey outline and a dimmed icon, like Start wh
 For developers: `runGrblFrame` in `src/utils/states/frame.run.saga.ts` runs the frame from the program of `src/utils/frame/`. `runGrblJob` in `src/utils/states/job.run.saga.ts` runs the job, and `selectJobStartBlockedReasonKey` holds the start conditions. Design: [the spec](../superpowers/specs/2026-11-03_(03)_running-jobs.spec.md).
 
 If you send `$32=` or `$RST=` in the console after connecting, Pause stays off until you reconnect, because the app reads settings only when it connects. Other ways of changing the setting, such as the machine's own screen, are not seen.
+
+## Job size
+
+The size of the burnable content (not the SVG canvas), as width x height in mm and cm, shows in the Design panel next to the project, in the toast after an SVG import and in the safety checklist. When both sides are within 3 mm of a DIN A size (A0 to A10, portrait or landscape) it says so with the difference, for example "419 x 594 mm, close to DIN A2 (420 x 594), 1 mm narrower"; an exact match says "DIN A2". Check it before you cut: an SVG meant as A2 can come out slightly smaller. Code: `getJobSizeMm`, `getDinAMatch`, `getJobSizeText` in `src/utils/toolpath/`, shown by `JobSizeText` (`src/views/JobSizeText/`).
+
+## Safety checklist
+
+Every Start job opens `JobSafetyChecklistDialog` (it replaces the old confirmation; there is no "don't show again"). Four reminders (goggles, ventilation and a safe material, fire, stay with the machine) each loop an animation while it is open (`SafetyReminderAnimation`; with reduced motion set it shows the still end frame). One checkbox, **I have done all of the above**, unlocks Start. When the laptop reports it is on battery (Battery Status API, skipped silently where unsupported) the dialog adds a hint to plug it in. Resume (below) goes through the same dialog. Frame job never does. The saga still repeats every start check, so the dialog adds a step and removes none (`job.safety.checklist.state.ts`, `JobStartRequest`).
+
+## Long jobs
+
+- **Screen kept awake.** While a job or frame runs the app holds a Screen Wake Lock and shows "Screen kept awake" in the Job card; it takes the lock again when the tab becomes visible (`JobWakeLock`, `screen.wake.lock.ts`). Where the browser has no Wake Lock the indicator does not show.
+- **Background tabs.** Browsers slow main-thread timers in hidden tabs, so the status poller and the not-responding watchdog run on a Worker clock (`src/utils/grbl/background.timer*.ts`), which keeps ticking in a hidden tab. If the Worker cannot start or fails, they fall back to window timers (the old behaviour) and are disposed on disconnect. The stream itself stays on the main thread, driven by serial reads. Only the simulator has been tried; check a hidden tab during a long job on the real laser.
+- **Leaving the page** is still guarded by `LeavePageGuard`.
+
+## End-of-job cut check
+
+When a job finishes normally and had a line layer, a non-blocking hint (`JobCutCheckHint`) says: don't move the sheet yet, test a part gently. Ask **Did the parts come out cleanly?**: **Yes** closes it; **Some are stuck** lists the job's line layers with a checkbox each (layers set from the Cut palette entry are ticked, others such as Score are not; fill layers are never listed) and an **Add one extra pass** option. **Run cut layers again** re-runs only the ticked layers at the same work zero, through the normal Start and checklist, so do not move the sheet or the work zero. Nothing is forced: ignore or close the hint at any time.
+
+Material note: each layer remembers the preset it was last set from (`presetId`; old projects load without it, and editing power, speed or passes by hand clears the link). Once you answer **Some are stuck**, the presets of the ticked linked layers get a dismissible note ("did not cut through last time, consider an extra pass or more power"), shown in the material library and when the preset is applied. The note is added when you press Run cut layers again, or when you close the hint after answering. Notes are never applied to the layer settings; pressing **Update** on a preset (new values) drops its note. The hint stays after a re-cut, which can fail to cut through too. Code: `getRecutToolpath`, `job.cut.check.selector.ts`, `material.preset.state.ts`.
+
+## Interrupted job and Resume
+
+After a stop, reset, alarm or lost connection the Job card shows where the job stopped: the layer, the percentage and the last confirmed point (`JobInterruptionSummary`). In the same session, **Resume** (`JobResumeControls`) can continue it:
+
+1. If the machine profile has homing switches, Resume homes first (`$H`), so the head finds work zero again (Set zero is kept in G54). Without homing the card warns that the head must be at exactly the same work zero as before, and suggests Frame job first. The start position is read before homing.
+2. It backs up 20 G-code lines from the last answered one (`RESUME_BACKUP_LINE_COUNT`), because GRBL buffers lines ahead of the burn: a short double burn is preferred to a gap.
+3. A header restores laser mode with power zero (`M4 S0`), then the head travels to that move with the laser off, then the program continues with its own modal state (`getResumeToolpath`, `getResumeMoveIndex`).
+4. Resume goes through the safety checklist. The card suggests Frame job first and not to touch the material.
+
+Resume is refused when the project or the machine profile changed since the stop, or when Start is blocked for another reason (the reason shows in the card). A reload or a new session loses the resume point. Live feed and power overrides were dropped: the user does not need them.
 
 ## Stable layout while the machine works
 

@@ -7,7 +7,13 @@ import { newMaterialPreset } from '../materials/new.material.preset';
 import type { AppToast } from './interfaces/AppToast';
 import { MachineProfileDeleted } from './machine.profile.state';
 import { watchMaterialPresets } from './material.preset.saga';
-import { MaterialPresetDeleted, MaterialPresetSaved, selectMaterialPresets } from './material.preset.state';
+import {
+  MaterialPresetCutThroughNoteAdded,
+  MaterialPresetCutThroughNoteDismissed,
+  MaterialPresetDeleted,
+  MaterialPresetSaved,
+  selectMaterialPresets,
+} from './material.preset.state';
 import { newStore } from './new.store';
 import type { AppStore } from './new.store';
 import { selectToasts } from './toast.state';
@@ -92,6 +98,29 @@ describe(watchMaterialPresets.name, () => {
 
     expect(selectMaterialPresets(store.getState())).toEqual([changedPreset]);
     await waitForStoredPresets([changedPreset]);
+  });
+
+  it('puts the cut-through note on a preset, stores it, and clears it again on dismiss', async () => {
+    const preset: MaterialPreset = newPresetFixture();
+    const store: AppStore = await newLoadedStore();
+
+    store.dispatch(new MaterialPresetSaved({ preset }));
+    store.dispatch(new MaterialPresetCutThroughNoteAdded({ presetId: preset.id }));
+    expect(selectMaterialPresets(store.getState())).toEqual([{ ...preset, isCutThroughNoteShown: true }]);
+    await waitForStoredPresets([{ ...preset, isCutThroughNoteShown: true }]);
+
+    store.dispatch(new MaterialPresetCutThroughNoteDismissed({ presetId: preset.id }));
+    expect(selectMaterialPresets(store.getState())).toEqual([{ ...preset, isCutThroughNoteShown: false }]);
+    await waitForStoredPresets([{ ...preset, isCutThroughNoteShown: false }]);
+  });
+
+  it('ignores the cut-through note for a preset that no longer exists', async () => {
+    const store: AppStore = await newLoadedStore();
+
+    store.dispatch(new MaterialPresetCutThroughNoteAdded({ presetId: DELETED_PROFILE_ID }));
+
+    expect(selectMaterialPresets(store.getState())).toEqual([]);
+    await waitForStoredPresets([]);
   });
 
   it('removes a deleted preset from the state and storage', async () => {

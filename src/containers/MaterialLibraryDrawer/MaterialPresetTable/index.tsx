@@ -4,6 +4,7 @@
  * belong to several lasers. A click or Enter on a row opens it in the edit view; a tick selects it for export
  * without opening it. Opened from a layer, each row of the active laser gets an Apply button that applies it to that
  * layer at once, and the row says "Applied" in its place for a moment, so the confirmation is where the click was.
+ * A preset that did not cut through last time carries a soft note under its numbers until the user dismisses it.
  *
  * @author michael.morosov
  *
@@ -12,18 +13,26 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { CheckOutlined } from '@ant-design/icons';
+import { CheckOutlined, WarningOutlined } from '@ant-design/icons';
 import { Button, Table, Tag, Tooltip } from 'antd';
 import type { TableColumnsType } from 'antd';
 import type { Key, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ANTD_BUTTON_SIZE_SMALL, ANTD_TABLE_SIZE_SMALL, ANTD_TAG_COLOR_SUCCESS } from '../../../utils/antd.constants';
+import { useDispatch } from 'react-redux';
+import {
+  ANTD_BUTTON_SIZE_SMALL,
+  ANTD_BUTTON_TYPE_LINK,
+  ANTD_TABLE_SIZE_SMALL,
+  ANTD_TAG_COLOR_SUCCESS,
+} from '../../../utils/antd.constants';
 import { ENTER_KEY, SPACE_KEY } from '../../../utils/browser/browser.events.constants';
 import { MIDDLE_DOT } from '../../../utils/characters.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { MaterialPreset } from '../../../utils/materials/interfaces/MaterialPreset';
 import { getPresetPowerPercent } from '../../../utils/materials/get.preset.power.percent';
 import type { MaterialPresetRow } from '../../../utils/materials/interfaces/MaterialPresetRow';
+import { MaterialPresetCutThroughNoteDismissed } from '../../../utils/states/material.preset.state';
+import type { AppDispatch } from '../../../utils/states/new.store';
 import type { MaterialPresetRowApply, MaterialPresetTableProps } from '../interfaces/MaterialPresetTableProps';
 import styles from './styles.module.scss';
 
@@ -48,6 +57,7 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
     getOperationLabel, getProfileName, onTick, onPick,
   } = props;
   const { t } = useTranslation();
+  const dispatch: AppDispatch = useDispatch();
 
   /** The watts, and for a preset of the active laser the percent beside them, as the layers show power in percent. */
   const renderPower = (preset: MaterialPreset): ReactNode => (
@@ -87,6 +97,24 @@ export const MaterialPresetTable = (props: MaterialPresetTableProps): ReactNode 
           </span>
         )}
       </span>
+      {preset.isCutThroughNoteShown && (
+        <span className={styles.cutThroughNote}>
+          <WarningOutlined aria-hidden />
+          <span>{t(DEFAULT.MATERIAL_PRESET_CUT_THROUGH_NOTE)}</span>
+          <Button
+            type={ANTD_BUTTON_TYPE_LINK}
+            size={ANTD_BUTTON_SIZE_SMALL}
+            className={styles.cutThroughNoteDismiss}
+            onClick={(clickEvent: MouseEvent<HTMLElement>) => {
+              // The link must not open the row in the edit view as well.
+              clickEvent.stopPropagation();
+              dispatch(new MaterialPresetCutThroughNoteDismissed({ presetId: preset.id }));
+            }}
+          >
+            {t(DEFAULT.MATERIAL_PRESET_CUT_THROUGH_NOTE_DISMISS)}
+          </Button>
+        </span>
+      )}
     </span>
   );
 

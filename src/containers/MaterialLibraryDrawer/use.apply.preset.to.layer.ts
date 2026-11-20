@@ -45,7 +45,7 @@ export const useApplyPresetToLayer = (maxPowerWatts: number): ApplyPresetToLayer
 
     const settingsChange: LayerSettingsChange = getPresetLayerSettingsChange(preset, maxPowerWatts);
 
-    dispatch(new LayerSettingsChanged({ layerKey, settings: settingsChange }));
+    dispatch(new LayerSettingsChanged({ layerKey, settings: settingsChange, presetId: preset.id }));
 
     return t(
       isMinimumPowerLowered(layer, settingsChange)

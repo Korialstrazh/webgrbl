@@ -1,0 +1,126 @@
+$stripe-width: 1.75rem;
+$stripe-loop: 1.4s;
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 1.25rem;
+}
+
+.warningIcon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-accent-tint);
+  color: var(--color-warning);
+  font-size: 1.375rem;
+  animation: icon-pulse 1.6s ease-in-out infinite, icon-ring 1.6s ease-out infinite;
+}
+
+.hazardStripe {
+  height: 0.5rem;
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-warning) 0 0.5rem,
+    var(--color-bg) 0.5rem 1rem
+  );
+  background-size: $stripe-width 0.5rem;
+  animation: stripes $stripe-loop linear infinite;
+}
+
+.summary {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.batteryHint {
+  margin: var(--space-3) 0 0;
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.intro {
+  margin: var(--space-3) 0;
+  color: var(--color-text);
+}
+
+.reminderList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.reminder {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+
+.reminderText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.reminderTitle {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.reminderHint {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.confirmBox {
+  margin-top: var(--space-4);
+  font-weight: 600;
+}
+
+// The Start button glows once the tick unlocks it.
+.startButtonReady {
+  animation: start-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes stripes {
+  from { background-position: 0 0; }
+  to { background-position: $stripe-width 0; }
+}
+
+@keyframes icon-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.12); opacity: 0.75; }
+}
+
+@keyframes icon-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-warning) 55%, transparent); }
+  100% { box-shadow: 0 0 0 0.75rem color-mix(in srgb, var(--color-warning) 0%, transparent); }
+}
+
+@keyframes start-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-danger) 60%, transparent); }
+  50% { box-shadow: 0 0 0 0.5rem color-mix(in srgb, var(--color-danger) 0%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .warningIcon, .hazardStripe, .startButtonReady {
+    animation: none;
+  }
+}

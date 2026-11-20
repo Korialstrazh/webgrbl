@@ -231,9 +231,9 @@ const getStateWithLayerAction = (state: ProjectDocumentState, action: Action<unk
 
   switch (action.type) {
   case LayerSettingsChanged.type: {
-    const { layerKey, settings } = (action as LayerSettingsChanged).payload;
+    const { layerKey, settings, presetId } = (action as LayerSettingsChanged).payload;
 
-    return getStateWithLayers(state, getLayersWithSettings(layers, layerKey, settings));
+    return getStateWithLayers(state, getLayersWithSettings(layers, layerKey, settings, presetId));
   }
   case LayerToggled.type: {
     const { layerKey, enabled } = (action as LayerToggled).payload;

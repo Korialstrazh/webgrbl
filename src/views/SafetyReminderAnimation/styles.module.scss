@@ -1,0 +1,162 @@
+// The lengths inside the keyframes are units of the picture's 64 by 64 view box, not screen lengths, so they stay
+// unitless-as-px: rem would make them drift from the drawing when the reader's root font size changes.
+
+$loop-goggles: 3.2s;
+$loop-fire: 3s;
+
+.tile {
+  flex: none;
+  display: inline-flex;
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+// Fills and strokes come from the app tokens, so the pictures follow the theme.
+.skin { fill: var(--color-text-muted); }
+.hair { fill: var(--color-surface-3); }
+.body { fill: var(--color-info); }
+.ink { fill: var(--color-bg); }
+.mouth { stroke: var(--color-bg); }
+.strap { stroke: var(--color-surface-3); }
+.lens { fill: var(--color-accent); stroke: var(--color-bg); }
+.shine { fill: var(--color-text); fill-opacity: 0.8; }
+.beam { stroke: var(--color-info); }
+.frameLine { stroke: var(--color-control-border); }
+.blade { fill: var(--color-info); }
+.hub { fill: var(--color-text); }
+.air { stroke: var(--color-info); }
+.smoke { fill: var(--color-text-muted); }
+.switchBase { fill: var(--color-surface-3); }
+.switchOn { fill: var(--color-success); }
+.switchKnob { fill: var(--color-text); }
+.table { fill: var(--color-disabled-border-locked); }
+.sheet { fill: var(--color-text); }
+.flameOuter { fill: var(--color-accent); }
+.flameInner { fill: var(--color-warning); }
+.extinguisher { fill: var(--color-danger); }
+.nozzle { fill: var(--color-surface-3); }
+.hose { stroke: var(--color-surface-3); }
+.spray { fill: var(--color-text); }
+.clockHand { stroke: var(--color-warning); }
+.head { fill: var(--color-text-muted); }
+.headBeam { stroke: var(--color-info); }
+
+.goggles { transform-origin: 32px 30px; animation: goggles-on $loop-goggles ease-out infinite; }
+.shine { animation: lens-shine $loop-goggles ease-in-out infinite; }
+.beam { animation: beam-flash $loop-goggles ease-in-out infinite; }
+
+.blades { transform-origin: 24px 32px; animation: spin 0.7s linear infinite; }
+.air { animation: air 1.1s ease-out infinite; }
+.airSecond { animation-delay: 0.35s; }
+.airThird { animation-delay: 0.7s; }
+.smoke { animation: smoke-out 1.6s ease-out infinite; }
+.switchKnob { animation: switch-on 3s ease-out infinite; }
+
+.flameWrap { transform-origin: 22px 46px; animation: flame-out $loop-fire ease-in-out infinite; }
+.flame { transform-origin: 22px 46px; animation: flame-flicker 0.5s ease-in-out infinite; }
+.spray { animation: spray $loop-fire ease-in-out infinite; }
+.paper { transform-origin: 14px 44px; animation: paper-fly $loop-fire ease-in infinite; }
+
+.eye { transform-box: fill-box; transform-origin: center; animation: blink 3s infinite; }
+.clockHand { transform-origin: 50px 16px; animation: clock-turn 4s linear infinite; }
+.watcher { animation: head-move 2s ease-in-out infinite; }
+.laserHead { animation: laser-head 2s ease-in-out infinite; }
+
+@keyframes goggles-on {
+  0%, 12% { transform: translateY(-30px) rotate(-14deg); opacity: 0; }
+  38% { transform: translateY(2px) rotate(0); opacity: 1; }
+  46%, 88% { transform: translateY(0); }
+  100% { transform: translateY(0); opacity: 0; }
+}
+
+@keyframes lens-shine {
+  0%, 45% { transform: translateX(-14px); opacity: 0; }
+  55% { opacity: 0.9; }
+  70%, 100% { transform: translateX(14px); opacity: 0; }
+}
+
+@keyframes beam-flash {
+  0%, 40%, 100% { opacity: 0; }
+  48%, 60% { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes switch-on {
+  0%, 15% { transform: translateX(0); }
+  25%, 100% { transform: translateX(8px); }
+}
+
+@keyframes air {
+  0% { transform: translateX(-6px); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: translateX(14px); opacity: 0; }
+}
+
+@keyframes smoke-out {
+  0% { transform: translate(0, 0); opacity: 0.8; }
+  100% { transform: translate(18px, -14px); opacity: 0; }
+}
+
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1, 1); }
+  25% { transform: scale(0.92, 1.08); }
+  50% { transform: scale(1.06, 0.94); }
+  75% { transform: scale(0.96, 1.05); }
+}
+
+@keyframes flame-out {
+  0%, 35% { opacity: 1; transform: scale(1); }
+  60%, 85% { opacity: 0; transform: scale(0.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spray {
+  0%, 30% { opacity: 0; transform: translateX(0); }
+  40%, 60% { opacity: 1; }
+  70%, 100% { opacity: 0; transform: translateX(-10px); }
+}
+
+@keyframes paper-fly {
+  0%, 10% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  40%, 100% { transform: translate(-30px, -10px) rotate(-60deg); opacity: 0; }
+}
+
+@keyframes blink {
+  0%, 44%, 52%, 100% { transform: scaleY(1); }
+  48% { transform: scaleY(0.1); }
+}
+
+@keyframes clock-turn {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes head-move {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(1.5px, 0); }
+}
+
+@keyframes laser-head {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(12px); }
+}
+
+// Still pictures show the end of each story: goggles on, flame out, air out.
+@media (prefers-reduced-motion: reduce) {
+  .goggles, .shine, .beam, .blades, .air, .smoke, .switchKnob, .flameWrap, .flame, .spray, .paper, .eye, .clockHand,
+  .watcher, .laserHead {
+    animation: none;
+  }
+
+  .shine, .beam, .smoke, .paper, .flameWrap, .spray {
+    opacity: 0;
+  }
+
+  .switchKnob { transform: translateX(8px); }
+}

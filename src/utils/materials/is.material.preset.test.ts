@@ -26,4 +26,9 @@ describe(isMaterialPreset.name, () => {
   it('rejects power that is not a finite number', () => {
     expect(isMaterialPreset({ ...VALID_PRESET, powerWatts: Number.NaN })).toBe(false);
   });
+
+  it('accepts the cut-through note flag when it is a boolean, and rejects it otherwise', () => {
+    expect(isMaterialPreset({ ...VALID_PRESET, isCutThroughNoteShown: true })).toBe(true);
+    expect(isMaterialPreset({ ...VALID_PRESET, isCutThroughNoteShown: 'yes' })).toBe(false);
+  });
 });
