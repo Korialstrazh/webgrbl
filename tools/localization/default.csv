@@ -299,6 +299,8 @@ JOB_CUT_CHECK_RECUT_NEEDS_LAYER;Tick at least one layer to run again.
 JOB_CUT_CHECK_STUCK;Some are stuck
 JOB_CUT_CHECK_TITLE;Don't move the sheet yet. Gently test a part first.
 JOB_CUT_CHECK_YES;Yes
+JOB_INTERRUPTED_LAST_POINT;Last confirmed point: X {{x}} mm, Y {{y}} mm
+JOB_INTERRUPTED_STOPPED_AT;Stopped in layer {{layer}} at about {{percent}} %
 JOB_LOCK_SHORT_ARTWORK;No artwork
 JOB_LOCK_SHORT_BUSY;Busy
 JOB_LOCK_SHORT_CONNECT;Not connected

@@ -28,6 +28,7 @@ import { newToolpathMove } from '../toolpath/test.support/new.toolpath.move';
 import { ConnectRequested, DisconnectRequested, SerialPortSelected } from './grbl.connection.state';
 import { ConsoleCommandSubmitted, selectConsoleEntries } from './grbl.console.state';
 import type { GrblConsoleViewEntry } from './interfaces/GrblConsoleViewEntry';
+import { selectJobResume } from './job.resume.state';
 import { JOB_PAUSE_CONTROL } from './job.pause.control.constants';
 import { selectJobPauseControl } from './job.pause.control.selector';
 import { runGrblJob } from './job.run.saga';
@@ -45,7 +46,8 @@ import { JOB_START_REQUEST_KIND } from './job.start.request.constants';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
-import { ActiveMachineProfileSelected, MachineProfileSaved } from './machine.profile.state';
+import type { JobResumeState } from './interfaces/JobResumeState';
+import { ActiveMachineProfileSelected, MachineProfileSaved, selectActiveMachineProfile } from './machine.profile.state';
 import {
   MachineAirAssistChanged,
   MachineLineRequested,
@@ -549,6 +551,52 @@ describe(runGrblJob.name, () => {
       expect(selectJobPauseControl(store.getState())).toBe(JOB_PAUSE_CONTROL.PAUSE_BLOCKED);
     },
   );
+
+  it('records the resume state of a run that was stopped', async () => {
+    const store: AppStore = await prepareConnectedStore();
+    const documentVersion: number = selectToolpathDocumentVersion(store.getState());
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new MachineStopRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    const resume: JobResumeState | undefined = selectJobResume(store.getState());
+
+    expect(resume?.lines.length).toBeGreaterThan(selectJobRunTotalLineCount(store.getState()));
+    expect(resume?.answeredLineCount).toBeGreaterThanOrEqual(selectJobRunAnsweredLineCount(store.getState()));
+    expect(resume?.toolpathDocumentVersion).toBe(documentVersion);
+    expect(resume?.profileId).toBe(selectActiveMachineProfile(store.getState())?.id);
+    expect(resume?.toolpath.moves.length).toBe(1);
+  });
+
+  it('keeps the resume state after the connection ends during the run', async () => {
+    const store: AppStore = await prepareConnectedStore();
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new DisconnectRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    expect(selectJobResume(store.getState())).toBeDefined();
+  });
+
+  it('clears the resume state when a run finishes and when a new run starts', async () => {
+    const store: AppStore = await prepareConnectedStore();
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new MachineStopRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+    expect(selectJobResume(store.getState())).toBeDefined();
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
+    expect(selectJobResume(store.getState())).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
+    expect(selectJobResume(store.getState())).toBeUndefined();
+  });
 
   it('marks the run interrupted when the connection ends during it', async () => {
     const store: AppStore = await prepareConnectedStore();

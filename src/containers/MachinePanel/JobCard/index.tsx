@@ -9,6 +9,7 @@
  * gear, traces the outline of the job. A chevron in the heading folds the card to one line, its facts and Start, so the
  * cards below come into view; the fold is remembered per viewer. The laser pointer row is the card's last row, folded
  * or not. After a job finished normally, the cut check hint shows under the facts until it is answered or closed.
+ * After a job stopped early, a summary under the facts says where it stopped.
  *
  * @author michael.morosov
  *
@@ -63,6 +64,7 @@ import { TooltipNoteIcon } from '../../../views/TooltipNoteIcon';
 import { JobCutCheckHint } from '../../JobCutCheckHint';
 import { JobStartButton } from '../../JobStartButton';
 import { FrameControls } from './FrameControls';
+import { JobInterruptionSummary } from './JobInterruptionSummary';
 import { JobPauseButton } from './JobPauseButton';
 import { JobReadinessRow } from './JobReadinessRow';
 import { JobRunProgress } from './JobRunProgress';
@@ -184,6 +186,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           </div>
           {isJobRunActive && <JobRunProgress />}
           {awakeNoteComponent}
+          <JobInterruptionSummary />
           <JobCutCheckHint />
           <JobPauseButton />
           <LaserPointerRow />
@@ -194,6 +197,7 @@ export const JobCard = ({ isStartShown = true }: JobCardProps): ReactNode => {
           {!isJobRunActive && <JobReadinessRow />}
           {isJobRunActive && <JobRunProgress />}
           {awakeNoteComponent}
+          <JobInterruptionSummary />
           <JobCutCheckHint />
           <JobPauseButton />
           <FrameControls

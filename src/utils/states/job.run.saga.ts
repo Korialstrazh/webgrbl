@@ -20,14 +20,23 @@ import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { GCODE_AIR_ASSIST_OFF } from '../toolpath/gcode.constants';
 import { getRecutToolpath } from '../toolpath/get.recut.toolpath';
+import type { GcodeLine } from '../toolpath/interfaces/GcodeLine';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathLayerRange } from '../toolpath/interfaces/ToolpathLayerRange';
 import type { Action } from './action';
+import { getAnsweredProgramLineCount } from './get.answered.program.line.count';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { JobFinishRaceResult } from './interfaces/JobFinishRaceResult';
 import type { JobStartRequest } from './interfaces/JobStartRequest';
+import type { JobResumeState } from './interfaces/JobResumeState';
+import { JobResumePointCleared, JobResumePointRecorded } from './job.resume.state';
 import { JOB_RUN_KIND } from './job.run.kind.constants';
-import { JobCutCheckLayersCaptured, JobRunStarted, JobRunStatusChanged } from './job.run.state';
+import {
+  JobCutCheckLayersCaptured,
+  JobRunStarted,
+  JobRunStatusChanged,
+  selectJobRunAnsweredLineCount,
+} from './job.run.state';
 import type { JobStartRequested } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
@@ -44,10 +53,8 @@ import {
   MachineStopRequested,
 } from './machine.status.state';
 import { selectEnabledProjectLayers } from './project.document.state';
-import { getProjectGcodeText } from './project.gcode.text.saga';
-import { selectToolpath } from './toolpath.state';
-
-const PROGRAM_LINE_BREAK_PATTERN = /\r?\n/;
+import { getProjectGcodeLines } from './project.gcode.lines.saga';
+import { selectToolpath, selectToolpathDocumentVersion } from './toolpath.state';
 
 const newJobRunStatusChanged = (status: JobRunStatus): JobRunStatusChanged => new JobRunStatusChanged({ status });
 
@@ -100,9 +107,23 @@ function* getToolpathLineLayerKeys(toolpath: Toolpath): Generator {
 
 function* getJobProgramLines(toolpath: Toolpath): Generator {
   const profile: MachineProfile = (yield select(selectActiveMachineProfile)) as MachineProfile;
-  const programText: string = (yield call(getProjectGcodeText, toolpath, profile)) as string;
 
-  return programText.split(PROGRAM_LINE_BREAK_PATTERN);
+  return (yield call(getProjectGcodeLines, toolpath, profile)) as GcodeLine[];
+}
+
+/** Keeps what a resume needs: the lines that streamed, how far the laser answered, and the toolpath they came from. */
+function* recordJobResumePoint(lines: GcodeLine[], toolpath: Toolpath, toolpathDocumentVersion: number): Generator {
+  const profile: MachineProfile = (yield select(selectActiveMachineProfile)) as MachineProfile;
+  const answeredSentLineCount: number = (yield select(selectJobRunAnsweredLineCount)) as number;
+  const resume: JobResumeState = {
+    lines,
+    answeredLineCount: getAnsweredProgramLineCount(lines, answeredSentLineCount),
+    toolpathDocumentVersion,
+    profileId: profile.id,
+    toolpath,
+  };
+
+  yield put(new JobResumePointRecorded(resume));
 }
 
 /** Resolves true at the next Idle report and false at an Alarm report. */
@@ -227,18 +248,34 @@ export function* runGrblJob(controller: GrblController, action: JobStartRequeste
   const interruptionTask: Task = (yield fork(waitForJobInterruption)) as Task;
   const stopRequestTask: Task = (yield fork(waitForJobStopRequest)) as Task;
 
+  const toolpathDocumentVersion: number = (yield select(selectToolpathDocumentVersion)) as number;
+  let streamedLines: GcodeLine[] | undefined;
+  let isResumePointSettled = false;
+
+  yield put(new JobResumePointCleared());
   yield put(new JobRunStarted({ startedAtMs: Date.now(), kind: JOB_RUN_KIND.JOB }));
 
   try {
-    const programLines: string[] = (yield call(getJobProgramLines, runToolpath)) as string[];
+    const gcodeLines: GcodeLine[] = (yield call(getJobProgramLines, runToolpath)) as GcodeLine[];
+    const programLines: string[] = gcodeLines.map(({ text }: GcodeLine): string => text);
+
+    streamedLines = gcodeLines;
+
     const programEndStatus: JobRunStatus =
       (yield call(followJobProgram, controller, programLines, interruptionTask)) as JobRunStatus;
     const endStatus: JobRunStatus =
       (yield call(getJobEndStatusAfterStop, programEndStatus, stopRequestTask, interruptionTask)) as JobRunStatus;
 
+    // Recorded before the status flips, so the card has the stop point the moment it shows the stop.
+    if (endStatus === JOB_RUN_STATUS.INTERRUPTED) {
+      yield call(recordJobResumePoint, gcodeLines, runToolpath, toolpathDocumentVersion);
+    }
+
+    isResumePointSettled = true;
     yield put(newJobRunStatusChanged(endStatus));
 
     if (endStatus === JOB_RUN_STATUS.COMPLETED) {
+      yield put(new JobResumePointCleared());
       yield put(new JobCutCheckLayersCaptured({ layerKeys: cutCheckLayerKeys }));
     }
 
@@ -251,6 +288,11 @@ export function* runGrblJob(controller: GrblController, action: JobStartRequeste
     yield put(newRawErrorConsoleInfo(error));
     yield put(newJobRunStatusChanged(JOB_RUN_STATUS.INTERRUPTED));
   } finally {
+    // A lost connection cancels this saga before it ends the run, and a resume after it is the main use.
+    if (streamedLines && !isResumePointSettled) {
+      yield call(recordJobResumePoint, streamedLines, runToolpath, toolpathDocumentVersion);
+    }
+
     yield cancel(stopRequestTask);
     yield cancel(interruptionTask);
   }
