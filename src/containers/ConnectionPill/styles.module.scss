@@ -91,6 +91,12 @@
   font-weight: 600;
 }
 
+// The flask beside the state icon while the simulated laser is the chosen port; the pill tooltip names it in full.
+.simulatedIcon {
+  color: var(--color-info);
+  font-size: 0.875rem;
+}
+
 .status,
 .firmware {
   white-space: nowrap;

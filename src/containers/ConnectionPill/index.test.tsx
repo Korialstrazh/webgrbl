@@ -51,6 +51,7 @@ const DISCONNECTED_ICON_SELECTOR = '.anticon-disconnect';
 const CONNECTING_ICON_SELECTOR = '.anticon-sync';
 const CONNECTED_ICON_SELECTOR = '.anticon-link';
 const SIMULATED_PORT_TEXT = 'Simulated laser (no hardware)';
+const SIMULATED_ICON_SELECTOR = '.anticon-experiment';
 
 const renderConnectionPill = (): AppStore => {
   const store: AppStore = newStore();
@@ -183,6 +184,25 @@ describe(ConnectionPill.name, () => {
 
     expect(tooltip).toHaveTextContent(SIMULATED_PORT_TEXT);
     expect(tooltip).not.toHaveTextContent(SHORT_DISCONNECTED_TEXT);
+  });
+
+  it('marks the simulated laser with a flask icon on the pill, and a real port without one', () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+    });
+
+    const pill: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+    const simulatedIcon: Element | null = pill.querySelector(SIMULATED_ICON_SELECTOR);
+
+    expect(simulatedIcon).toHaveAttribute('aria-label', SIMULATED_PORT_TEXT);
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: UNGRANTED_PORT_ID }));
+    });
+
+    expect(pill.querySelector(SIMULATED_ICON_SELECTOR)).not.toBeInTheDocument();
   });
 
   it('names only "No port chosen" in the tooltip while no port is chosen', async () => {

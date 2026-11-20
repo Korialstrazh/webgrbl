@@ -13,13 +13,20 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { ApiOutlined, DisconnectOutlined, DownOutlined, LinkOutlined, SyncOutlined } from '@ant-design/icons';
+import {
+  ApiOutlined,
+  DisconnectOutlined,
+  DownOutlined,
+  ExperimentOutlined,
+  LinkOutlined,
+  SyncOutlined,
+} from '@ant-design/icons';
 import { Button } from 'antd';
 import { useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
+import { GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
@@ -84,6 +91,8 @@ export const ConnectionPill = (): ReactNode => {
       version: firmwareIdentity.version,
     })
     : undefined;
+  // The simulated laser looks like any port on the pill unless it says so: a flask marks that no hardware will move.
+  const isSimulatedPort: boolean = selectedPortId === SIMULATED_LASER_PORT_ID;
   const portText: string = getSelectedPortLabel(selectedPortId, availablePorts, t);
   const ariaLabelDetails: string = [statusText, firmwareText, activeProfile?.name, portText]
     .filter(Boolean)
@@ -123,6 +132,13 @@ export const ConnectionPill = (): ReactNode => {
               {getConnectionStatusIconComponent(connectionStatus)}
               <span className={styles.dot} />
             </span>
+            {isSimulatedPort && (
+              <ExperimentOutlined
+                className={styles.simulatedIcon}
+                role="img"
+                aria-label={t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER)}
+              />
+            )}
             {/* The button's label names the state in full; the pill shows the one-word look. */}
             <span className={styles.status} aria-hidden="true">{shortStatusText}</span>
             {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
