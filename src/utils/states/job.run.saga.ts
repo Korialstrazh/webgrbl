@@ -303,7 +303,13 @@ export function* runGrblJob(controller: GrblController, action: JobStartRequeste
 
     if (streamedLines && !isResumePointSettled) {
       isResumePointSettled = true;
-      yield call(recordJobResumePoint, streamedLines, runToolpath, toolpathDocumentVersion);
+
+      try {
+        yield call(recordJobResumePoint, streamedLines, runToolpath, toolpathDocumentVersion);
+      } catch (recordError: unknown) {
+        // The card must not stay running because its resume point failed to record.
+        yield put(newRawErrorConsoleInfo(recordError));
+      }
     }
 
     yield put(newJobRunStatusChanged(JOB_RUN_STATUS.INTERRUPTED));

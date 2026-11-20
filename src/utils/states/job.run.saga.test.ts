@@ -248,6 +248,8 @@ const expectLocksOnWhileResetIsHeld = async (store: AppStore, transport: Control
 const isIdleReportWhileJobFinishing = (store: AppStore, receivedText: string): boolean =>
   receivedText.includes(IDLE_REPORT_START) && selectJobRunStatus(store.getState()) === JOB_RUN_STATUS.FINISHING;
 
+const PROGRAM_WAIT_STEP_MS = 5;
+const PROGRAM_WAIT_STEP_LIMIT = 400;
 const RESUME_MOVE_COUNT = 30;
 const RESUME_HEADER_LINE_COUNT = 2;
 /** 20 lines back from the last answered one is line 12, which carries move 10. */
@@ -321,6 +323,35 @@ class HomingAlarmLaserTransport extends SimulatedLaserTransport {
     await super.write(bytes);
   }
 }
+
+/** Steps the clock until the resumed program, not the homing line, is what the run reports progress on. */
+const advanceUntilProgramStreams = async (store: AppStore): Promise<void> => {
+  for (let step = 0; step < PROGRAM_WAIT_STEP_LIMIT; step++) {
+    if (selectJobRunTotalLineCount(store.getState()) > 1) {
+      return;
+    }
+
+    await vi.advanceTimersByTimeAsync(PROGRAM_WAIT_STEP_MS);
+  }
+};
+
+const answeredCountFailure = vi.hoisted(() => ({ isFailing: false }));
+
+vi.mock('./get.answered.program.line.count', async (importOriginal: () => Promise<Record<string, unknown>>) => {
+  const original = await importOriginal() as {
+    getAnsweredProgramLineCount: (lines: unknown[], count: number) => number;
+  };
+
+  return {
+    getAnsweredProgramLineCount: (lines: unknown[], count: number): number => {
+      if (answeredCountFailure.isFailing) {
+        throw new Error('The resume point could not be recorded');
+      }
+
+      return original.getAnsweredProgramLineCount(lines, count);
+    },
+  };
+});
 
 describe(runGrblJob.name, () => {
   beforeEach(() => {
@@ -411,6 +442,44 @@ describe(runGrblJob.name, () => {
     expect(sentText).not.toMatch(MOTION_LINE_PATTERN);
     expect(selectJobResume(store.getState())).toBe(resumeBefore);
     writeSpy.mockRestore();
+  });
+
+  it('still ends a stopped run as interrupted when its resume point cannot be recorded', async () => {
+    const store: AppStore = await prepareConnectedStore();
+
+    replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
+    answeredCountFailure.isFailing = true;
+
+    try {
+      store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
+      await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+      store.dispatch(new MachineStopRequested());
+      await vi.advanceTimersByTimeAsync(SETTLE_MS);
+    } finally {
+      answeredCountFailure.isFailing = false;
+    }
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    expect(selectIsJobRunActive(store.getState())).toBe(false);
+  });
+
+  it('records the resume point of an interrupted resume against the resumed program, not the homing line', async () => {
+    const store: AppStore = await prepareResumeStore(true);
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RESUME }));
+    await advanceUntilProgramStreams(store);
+    store.dispatch(new MachineStopRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    const resume: JobResumeState | undefined = selectJobResume(store.getState());
+    const answeredSentLineCount: number = selectJobRunAnsweredLineCount(store.getState());
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    expect(resume?.lines.length).toBeGreaterThan(0);
+    expect(selectJobRunTotalLineCount(store.getState())).toBeLessThanOrEqual(resume?.lines.length ?? 0);
+    expect(resume?.answeredLineCount).toBe(getAnsweredProgramLineCount(resume?.lines ?? [], answeredSentLineCount));
+    expect(answeredSentLineCount).toBeLessThanOrEqual(selectJobRunTotalLineCount(store.getState()));
+    expect(resume?.answeredLineCount).toBeLessThanOrEqual(resume?.lines.length ?? 0);
   });
 
   it('refuses a resume after the project changed', async () => {
