@@ -30,7 +30,7 @@ Frame job is off (no fill, a solid grey outline and a dimmed icon, like Start wh
 
 **The machine reports a limit only if it can.** Without soft limits (`$20=1` and a homed machine) or hard limit switches, GRBL reports nothing when the head reaches the end of its travel, and the head can stall against the frame of the machine. The app cannot detect that, so watch the head and press STOP. If the machine does report an alarm, the frame ends and the card says so; clear the alarm before framing again.
 
-For developers: `runGrblFrame` in `src/utils/states/frame.run.saga.ts` runs the frame from the program of `src/utils/frame/`. `runGrblJob` in `src/utils/states/job.run.saga.ts` runs the job, and `selectJobStartBlockedReasonKey` holds the start conditions. Design: [the spec](../superpowers/specs/2026-11-03_(03)_running-jobs.spec.md).
+For developers: `runGrblFrame` in `src/utils/states/frame.run.saga.ts` runs the frame from the program of `src/utils/frame/`. `runGrblJob` in `src/utils/states/job.run.saga.ts` runs the job, and `selectJobStartBlockedReasonKey` holds the start conditions.
 
 If you send `$32=` or `$RST=` in the console after connecting, Pause stays off until you reconnect, because the app reads settings only when it connects. Other ways of changing the setting, such as the machine's own screen, are not seen.
 

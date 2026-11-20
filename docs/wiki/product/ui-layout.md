@@ -1,7 +1,7 @@
 ---
 title: UI Layout and Feature Roadmap
 created: 2026-10-31
-provenance: UI brainstorm with the user, 2026-10-31; spec docs/superpowers/specs/2026-10-31_(01)_ui-layout.spec.md; sketches https://claude.ai/artifact/7Y6LLeCiuwKiYpdRF7nDGF
+provenance: UI brainstorm with the user, 2026-10-31
 ---
 
 # UI Layout and Feature Roadmap

@@ -5,7 +5,7 @@ created: 2026-11-01
 
 # Layers and G-code
 
-Layers come from colour: each distinct colour drawn by the project's SVG objects becomes a layer with laser settings, and the settings of a new layer come from the laser palette. This article covers the palette, the paint and layer derivation, and the layers in the project document, the layers UI with the palette dialog, and the toolpath model with its line mode and fill rasteriser, the G-code writer, the toolpath worker and the G-code export, the motion timeline with the time estimate, and the Toolpath view with its simulation (roadmap item 4a, done; 4b adds the 3D burn preview). User guide: `docs/howto/layers-and-gcode.md`. Design: `docs/superpowers/specs/2026-11-01_(02)_layers-gcode.spec.md`.
+Layers come from colour: each distinct colour drawn by the project's SVG objects becomes a layer with laser settings, and the settings of a new layer come from the laser palette. This article covers the palette, the paint and layer derivation, and the layers in the project document, the layers UI with the palette dialog, and the toolpath model with its line mode and fill rasteriser, the G-code writer, the toolpath worker and the G-code export, the motion timeline with the time estimate, and the Toolpath view with its simulation (roadmap item 4a, done; 4b adds the 3D burn preview). User guide: `docs/howto/layers-and-gcode.md`.
 
 ## Key Takeaways
 
