@@ -150,6 +150,20 @@ describe(TopBar.name, () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent(PROFILE_TOOLTIP_TEXT);
   });
 
+  it('shows the profile tooltip on hover after the dialog was opened from the keyboard', async () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile({ name: ACTIVE_PROFILE_NAME });
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    renderWorkbenchTopBar(store);
+    fireEvent.click(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL }));
+    fireEvent.keyDown(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL }), { key: ESCAPE_KEY });
+    fireEvent.mouseEnter(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(PROFILE_TOOLTIP_TEXT);
+  });
+
   it('keeps the profile name as the only text of the profile button, with no generic caption beside it', () => {
     renderWorkbenchTopBar(newStore());
 
