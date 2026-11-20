@@ -110,14 +110,13 @@
   font-size: 0.75rem;
 }
 
-// Undo and Redo in the full text colour while they can act, and a dimmed muted grey while they cannot: still above
-// 3:1 on the bar, yet clearly weaker than the enabled white.
+// Undo and Redo in the full text colour while they can act (above 7:1), and the disabled icon grey while they cannot
+// (about 3:1), so they read as disabled, never as absent.
 .historyGroup :global(.ant-btn) {
   color: var(--color-text);
 
   &:disabled {
-    color: var(--color-text-muted);
-    opacity: 0.45;
+    color: var(--color-icon-disabled);
   }
 }
 
