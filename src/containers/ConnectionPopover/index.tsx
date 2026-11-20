@@ -12,7 +12,7 @@
  */
 import { ApiOutlined, DashboardOutlined, DisconnectOutlined, PlusOutlined, UsbOutlined } from '@ant-design/icons';
 import { Button, Popover, Select, Tooltip } from 'antd';
-import type { SelectProps } from 'antd';
+import type { PopoverProps, SelectProps } from 'antd';
 import { useEffect, useId, useRef } from 'react';
 import type { ReactElement, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,8 +46,6 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
 import { CONNECTION_POPOVER_OVERLAY_ID } from './connection.popover.constants';
 import { getPortOptionLabel } from './get.port.option.label';
-import { usePopoverKeepClearAlign } from '../../utils/hooks/use.popover.keep.clear.align';
-import type { PopoverKeepClearAlign } from '../../utils/hooks/use.popover.keep.clear.align';
 import styles from './styles.module.scss';
 
 interface ConnectionPopoverProps {
@@ -60,8 +58,8 @@ interface ConnectionPopoverProps {
   anchorRef: RefObject<HTMLElement | null>;
 }
 
-// The popover's width with its padding: 20 rem of fields and 1 rem of padding on each side.
-const CONNECTION_POPOVER_WIDTH_PX = 384;
+// On a narrow screen the panel slides sideways to stay in view instead of running off the left edge.
+const CONNECTION_POPOVER_ALIGN: PopoverProps['align'] = { overflow: { adjustX: true, adjustY: true, shiftX: true } };
 
 // antd Select takes focus on its combobox input.
 const FOCUSABLE_CONTROL_SELECTOR = 'button:not([disabled]), input[role="combobox"]:not([disabled])';
@@ -125,8 +123,6 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
   }));
 
   useOverlayRegistration(CONNECTION_POPOVER_OVERLAY_ID, isOpen);
-  const keepClearAlign: PopoverKeepClearAlign =
-    usePopoverKeepClearAlign(isOpen, anchorRef, CONNECTION_POPOVER_WIDTH_PX);
 
   // Opened with the mouse or a touch, the returned focus draws no ring, so the pill does not look like an alert; opened
   // from the keyboard it keeps the ring.
@@ -270,11 +266,10 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       onOpenChange={handleOpenChange}
       afterOpenChange={handleAfterOpenChange}
       trigger={ANTD_POPOVER_TRIGGER_CLICK}
-      // Below the pill, moved left of the Job steps and the next-step button when the window has room, or else
-      // below them, so the step the user is on never disappears behind it.
+      // Right under the pill and lined up with its right edge, the arrow on the status part, so it reads as the pill's
+      // own panel at every width.
       placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
-      align={keepClearAlign.align}
-      arrow={!keepClearAlign.isShifted}
+      align={CONNECTION_POPOVER_ALIGN}
       // A clear edge, shadow and arrow tie it to the pill, so it never reads as part of the Job card under it.
       rootClassName={styles.connectionPopoverRoot}
       title={(
