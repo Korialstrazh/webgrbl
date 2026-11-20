@@ -684,5 +684,36 @@ describe(TopBar.name, () => {
 
       expect(screen.getByRole('status', { name: AUTOSAVE_TEXT })).toBeInTheDocument();
     });
+
+    it('is a Tab stop that shows its state in a tooltip on keyboard focus', async () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.SAVED }));
+      });
+
+      const readout: HTMLElement = screen.getByRole('status', { name: AUTOSAVE_TEXT });
+
+      expect(readout).toHaveAttribute('tabindex', '0');
+
+      fireEvent.focus(readout);
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(AUTOSAVE_TEXT);
+    });
+  });
+
+  it('puts the project name button in the Tab order before the Project menu', () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+    openProject(store);
+
+    const nameButton: HTMLElement = screen.getByRole('button', { name: PROJECT_NAME });
+    const projectMenuButton: HTMLElement = screen.getByRole('button', { name: PROJECT_MENU_LABEL });
+
+    expect(nameButton).toBeEnabled();
+    expect(nameButton.tabIndex).toBe(0);
+    expect(nameButton.compareDocumentPosition(projectMenuButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

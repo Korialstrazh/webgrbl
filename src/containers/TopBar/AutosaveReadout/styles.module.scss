@@ -14,12 +14,20 @@
   cursor: default;
   transition: background-color 0.15s ease;
 
-  &:hover {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus-visible {
     background-color: var(--color-surface-hover);
   }
-  font-size: 0.8125rem;
-  color: var(--color-text-muted);
-  white-space: nowrap;
+
+  // The same focus ring as the toolbar buttons beside it.
+  &:focus-visible {
+    outline: var(--focus-outline-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-outline-offset);
+  }
 }
 
 // The same icon size as the toolbar buttons beside it.

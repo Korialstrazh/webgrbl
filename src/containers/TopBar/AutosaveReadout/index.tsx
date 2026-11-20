@@ -2,7 +2,8 @@
  * The autosave readout of the top bar: a cloud icon for the state of the open project. Saved is a cloud with a green
  * check; Saving (an amber syncing cloud), Waiting to save (a grey upload cloud) and Save failed (a red cloud with an
  * exclamation mark) add a short word. Waiting stays calm grey, not an error: autosave stores the change shortly.
- * When the bar is narrow only the icon stays; its tooltip and name give the state.
+ * When the bar is narrow only the icon stays; its tooltip and name give the state. It is a Tab stop, and its tooltip
+ * also opens on keyboard focus.
  *
  * @author michael.morosov
  *
@@ -22,6 +23,7 @@ import { Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../../utils/antd.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { PROJECT_SAVE_STATUS } from '../../../utils/states/project.save.status.constants';
 import type { ProjectSaveStatus } from '../../../utils/states/project.save.status.constants';
@@ -74,8 +76,9 @@ export const AutosaveReadout = (): ReactNode => {
   const isSaved: boolean = saveStatus === PROJECT_SAVE_STATUS.SAVED;
 
   return (
-    <Tooltip title={statusLabel}>
-      <p className={styles.autosave} role="status" aria-label={statusLabel}>
+    // A Tab stop of its own, so a keyboard user can reach the state and read it in the tooltip, as a mouse user does.
+    <Tooltip title={statusLabel} trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}>
+      <p className={styles.autosave} role="status" aria-label={statusLabel} tabIndex={0}>
         <span className={[styles.icon, iconClassName].join(' ')} aria-hidden>
           {hasSaveFailed ? getSaveFailedIconComponent() : getSaveStatusIconComponent(saveStatus)}
         </span>
