@@ -20,9 +20,8 @@ A browser version of LaserGRBL: control a GRBL laser cutter or engraver straight
 
 ## Docs
 
-- `AGENTS.md` - rules for agents working in this repo
 - `docs/wiki/` - knowledge base (start at `_master-index.md`)
-- `docs/superpowers/` - specs and plans
+- `docs/howto/` - user guides and the deployment guide
 
 ## License
 
