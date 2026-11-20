@@ -2,12 +2,12 @@
 .gitea-local
 
 # The maintainer's personal rules, agent instructions, skills, specs and plans: kept on the maintainer's machine only,
-# never published.
-docs/rulesets/
-docs/project-rules/
-docs/superpowers/
-docs/wiki-private/
-.claude/skills/
+# never published. No trailing slash, so a worktree's symlinks to them are ignored too.
+docs/rulesets
+docs/project-rules
+docs/superpowers
+docs/wiki-private
+.claude/skills
 AGENTS.md
 CLAUDE.md
 .superpowers/
