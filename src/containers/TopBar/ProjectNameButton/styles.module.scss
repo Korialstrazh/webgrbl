@@ -1,5 +1,8 @@
 // The project name is the main title of the header: the strongest text, in the main text colour.
 .nameButton {
+  // A flex row centres the pencil on the name, not on its baseline.
+  display: inline-flex;
+  align-items: center;
   max-width: 100%;
   height: auto;
   padding: 0;
@@ -10,6 +13,7 @@
 
   // A muted pencil always shows that the name can be changed; it turns full contrast under the pointer or the focus.
   .pencil {
+    display: inline-flex;
     margin-inline-start: var(--space-2);
     color: var(--color-text-muted);
     font-size: 0.875rem;

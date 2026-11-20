@@ -1,3 +1,13 @@
+// A little air between the bar and the open menu, and icons big enough to read at a glance.
+.projectMenuRoot {
+  padding-top: var(--space-2);
+
+  :global(.ant-dropdown-menu-item-icon),
+  :global(.ant-dropdown-menu-item .anticon) {
+    font-size: 1rem;
+  }
+}
+
 .menuEntry {
   display: flex;
   align-items: baseline;
@@ -31,7 +41,8 @@
   }
 }
 
-// At phone width the chevron goes too, so the bar fits; the folder and its tooltip stay. 30rem matches the TopBar.
+// At phone width the chevron stays beside the folder, so the trigger reads as the menu that also holds Undo, Redo,
+// Import SVG and the laser profile. 30rem matches the TopBar.
 @media (width < 30rem) {
   // A tighter hint gap, so the menu with Ctrl+Shift+Z still fits inside a phone screen.
   .menuEntry {
@@ -39,8 +50,15 @@
     min-width: 0;
   }
 
+  // Doubled class: the TopBar squares its phone buttons to 2rem, which has no room for the chevron.
+  .trigger.trigger:global(.ant-btn) {
+    width: auto;
+    padding-inline: var(--space-1);
+  }
+
   :global(.ant-btn) .caret.caret:global(.anticon) {
-    display: none;
+    margin-left: 0.125rem;
+    font-size: 0.625rem;
   }
 }
 
