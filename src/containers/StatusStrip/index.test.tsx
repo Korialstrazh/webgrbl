@@ -33,6 +33,8 @@ const FRAME_TIME_MS = 16;
 const SIXTY_SIX_SECONDS_TEXT = '1 min 6 s';
 // One burn at 6000 mm/min from rest to rest with the default 1000 mm/s2: 65.9 s cruising plus 0.1 s of ramps.
 const SIXTY_SIX_SECOND_MOVE_END_X_MM = 6590;
+const SOURCE_CODE_LABEL = 'Source code on GitHub (opens in a new tab)';
+const REPOSITORY_URL = 'https://github.com/Korialstrazh/webgrbl';
 
 const renderStatusStrip = (store: AppStore = newStore()): void => {
   render(
@@ -59,6 +61,16 @@ describe(StatusStrip.name, () => {
     });
 
     expect(screen.queryByText(OFFLINE_LABEL)).not.toBeInTheDocument();
+  });
+
+  it('links to the source code on GitHub in a new tab that gets no handle on this one', () => {
+    renderStatusStrip();
+
+    const repositoryLink: HTMLElement = screen.getByRole('link', { name: SOURCE_CODE_LABEL });
+
+    expect(repositoryLink).toHaveAttribute('href', REPOSITORY_URL);
+    expect(repositoryLink).toHaveAttribute('target', '_blank');
+    expect(repositoryLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('keeps the console collapsed by default', () => {
