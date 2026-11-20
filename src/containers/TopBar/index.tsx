@@ -10,7 +10,7 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { DownOutlined, UploadOutlined } from '@ant-design/icons';
+import { DownOutlined, FileAddOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -93,7 +93,7 @@ export const TopBar = (): ReactNode => {
             <SvgImportButton
               buttonType={ANTD_BUTTON_TYPE_TEXT}
               buttonId={TOP_BAR_IMPORT_SVG_BUTTON_ID}
-              iconComponent={<UploadOutlined />}
+              iconComponent={<FileAddOutlined />}
               labelClassName={styles.importLabel}
             />
           </span>

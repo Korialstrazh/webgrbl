@@ -16,8 +16,8 @@ import {
   FileAddOutlined,
   FolderOpenOutlined,
   HistoryOutlined,
+  PlusSquareOutlined,
   SaveOutlined,
-  UploadOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
@@ -63,7 +63,7 @@ const getPhoneOnlyMenuItems = (t: TFunction, options: ProjectMenuItemsOptions): 
   {
     key: PROJECT_MENU_KEY.IMPORT_SVG,
     className: styles.phoneOnly,
-    icon: <UploadOutlined aria-hidden />,
+    icon: <FileAddOutlined aria-hidden />,
     label: t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG),
   },
   {
@@ -82,7 +82,7 @@ const getShortcutMenuLabel = (labelText: string, shortcutText: string): ReactNod
 );
 
 export const getProjectMenuItems = (t: TFunction, options: ProjectMenuItemsOptions): ProjectMenuItems => [
-  { key: PROJECT_MENU_KEY.NEW, icon: <FileAddOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_NEW) },
+  { key: PROJECT_MENU_KEY.NEW, icon: <PlusSquareOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_NEW) },
   { key: PROJECT_MENU_KEY.OPEN, icon: <HistoryOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN) },
   {
     key: PROJECT_MENU_KEY.OPEN_FILE,
