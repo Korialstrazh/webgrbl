@@ -160,21 +160,12 @@
   }
 }
 
-// Below 57rem Import SVG drops its label; the profile keeps its short name, so a beginner still reads "laser profile".
+// Below 57rem Project, Import SVG and the laser profile all drop their labels together, so the bar has one label rule;
+// the profile keeps its laser icon and chevron, and its tooltip names the active profile.
 @media (width < 57rem) {
-  .importLabel {
-    @include accessibility.visually-hidden;
-  }
-}
-
-// Below 44rem the profile shrinks to its laser icon too; the tooltip names the active profile.
-@media (width < 44rem) {
+  .importLabel,
   .profileName {
     @include accessibility.visually-hidden;
-  }
-
-  .group :global(.ant-btn) .profileCaret:global(.anticon) {
-    display: none;
   }
 }
 
