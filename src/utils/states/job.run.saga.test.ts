@@ -21,6 +21,8 @@ import { newMachineProfile } from '../profiles/new.machine.profile';
 import { newProjectObject } from '../project/new.project.object';
 import { SVG_UNSUPPORTED_KIND } from '../svg/geometry/svg.shape.constants';
 import type { ObjectWarning } from '../toolpath/interfaces/ObjectWarning';
+import type { GcodeLine } from '../toolpath/interfaces/GcodeLine';
+import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathMove } from '../toolpath/interfaces/ToolpathMove';
 import { FakeToolpathWorkerClient } from '../toolpath/test.support/fake.toolpath.worker.client';
 import { newToolpath } from '../toolpath/test.support/new.toolpath';
@@ -28,7 +30,7 @@ import { newToolpathMove } from '../toolpath/test.support/new.toolpath.move';
 import { ConnectRequested, DisconnectRequested, SerialPortSelected } from './grbl.connection.state';
 import { ConsoleCommandSubmitted, selectConsoleEntries } from './grbl.console.state';
 import type { GrblConsoleViewEntry } from './interfaces/GrblConsoleViewEntry';
-import { selectJobResume } from './job.resume.state';
+import { JobResumePointRecorded, selectJobResume } from './job.resume.state';
 import { JOB_PAUSE_CONTROL } from './job.pause.control.constants';
 import { selectJobPauseControl } from './job.pause.control.selector';
 import { runGrblJob } from './job.run.saga';
@@ -246,6 +248,80 @@ const expectLocksOnWhileResetIsHeld = async (store: AppStore, transport: Control
 const isIdleReportWhileJobFinishing = (store: AppStore, receivedText: string): boolean =>
   receivedText.includes(IDLE_REPORT_START) && selectJobRunStatus(store.getState()) === JOB_RUN_STATUS.FINISHING;
 
+const RESUME_MOVE_COUNT = 30;
+const RESUME_HEADER_LINE_COUNT = 2;
+/** 20 lines back from the last answered one is line 12, which carries move 10. */
+const RESUME_ANSWERED_LINE_COUNT = 32;
+const RESUME_MOVE_Y_MM = 5;
+const RESUME_MOVE_X_OFFSET_MM = 0.25;
+const RESUME_FIRST_MOVE_START_TEXT = `X10.25Y${RESUME_MOVE_Y_MM}`;
+const RESUME_FIRST_MOVE_END_TEXT = 'X11.25';
+const SKIPPED_MOVE_END_TEXT = 'X5.25';
+const HOME_LINE = '$H\n';
+const MOTION_LINE_PATTERN = /^G[01](?!\d).*$/m;
+const TRAVEL_LINE_START_PATTERN = /^G0(?!\d)/;
+
+const getResumeMoveStartX = (moveIndex: number): number => moveIndex + RESUME_MOVE_X_OFFSET_MM;
+
+/** Moves one mm long side by side, so each line names its own x. */
+const newResumeToolpath = (): Toolpath => newToolpath({
+  moves: Array.from({ length: RESUME_MOVE_COUNT }, (_: unknown, moveIndex: number): ToolpathMove => newToolpathMove({
+    from: { x: getResumeMoveStartX(moveIndex), y: RESUME_MOVE_Y_MM },
+    to: { x: getResumeMoveStartX(moveIndex + 1), y: RESUME_MOVE_Y_MM },
+  })),
+  warnings: [],
+});
+
+const newResumeLines = (): GcodeLine[] => [
+  ...Array.from({ length: RESUME_HEADER_LINE_COUNT }, (): GcodeLine => ({ text: 'G21', moveIndex: undefined })),
+  ...Array.from({ length: RESUME_MOVE_COUNT }, (_: unknown, moveIndex: number): GcodeLine => ({
+    text: `G1 X${getResumeMoveStartX(moveIndex + 1)}`,
+    moveIndex,
+  })),
+];
+
+/** A connected laser with the resume point of an interrupted run of the current toolpath. */
+const prepareResumeStore = async (
+  hasHomingSwitches: boolean,
+  transport: SimulatedLaserTransport = new SimulatedLaserTransport(),
+): Promise<AppStore> => {
+  const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
+  const profile: MachineProfile | undefined = selectActiveMachineProfile(store.getState());
+  const toolpath: Toolpath = newResumeToolpath();
+
+  if (profile) {
+    store.dispatch(new MachineProfileSaved({ profile: { ...profile, hasHomingSwitches } }));
+  }
+
+  store.dispatch(new ToolpathReady({ toolpath, documentVersion: selectToolpathDocumentVersion(store.getState()) }));
+  store.dispatch(new JobResumePointRecorded({
+    lines: newResumeLines(),
+    answeredLineCount: RESUME_ANSWERED_LINE_COUNT,
+    toolpathDocumentVersion: selectToolpathDocumentVersion(store.getState()),
+    profileId: profile?.id ?? '',
+    toolpath,
+  }));
+
+  return store;
+};
+
+/** A simulated laser that raises an alarm instead of homing, as a homing switch that never triggers would. */
+class HomingAlarmLaserTransport extends SimulatedLaserTransport {
+  /** True once the homing line was written. */
+  public isHomingRequested = false;
+
+  public override async write(bytes: Uint8Array): Promise<void> {
+    if (new TextDecoder().decode(bytes).includes(HOME_LINE)) {
+      this.isHomingRequested = true;
+      this.getSimulator().injectFault({ kind: GRBL_SIMULATOR_FAULT_KIND.ALARM, alarmCode: ALARM_CODE });
+
+      return;
+    }
+
+    await super.write(bytes);
+  }
+}
+
 describe(runGrblJob.name, () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -270,12 +346,99 @@ describe(runGrblJob.name, () => {
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
   });
 
-  it('starts nothing for a resume request yet', async () => {
+  it('starts nothing for a resume request when no run stopped early', async () => {
     const store: AppStore = await prepareConnectedStore();
 
     store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RESUME }));
 
     expect(selectIsJobRunActive(store.getState())).toBe(false);
+  });
+
+  it('homes first, then travels with the laser off and continues from the backed-up move', async () => {
+    const store: AppStore = await prepareResumeStore(true);
+    const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RESUME }));
+    expect(selectIsJobRunActive(store.getState())).toBe(true);
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+
+    const sentText: string = getSentText(writeSpy.mock.calls);
+    const homeIndex: number = sentText.indexOf(HOME_LINE);
+    const programText: string = sentText.slice(homeIndex + HOME_LINE.length);
+    const firstMotionLine: string | undefined = programText.match(MOTION_LINE_PATTERN)?.[0];
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
+    expect(homeIndex).toBeGreaterThanOrEqual(0);
+    expect(sentText.slice(0, homeIndex)).not.toMatch(MOTION_LINE_PATTERN);
+    expect(firstMotionLine).toMatch(TRAVEL_LINE_START_PATTERN);
+    expect(firstMotionLine).toContain(RESUME_FIRST_MOVE_START_TEXT);
+    expect(programText).toContain(RESUME_FIRST_MOVE_END_TEXT);
+    expect(programText).not.toContain(SKIPPED_MOVE_END_TEXT);
+    expect(selectJobResume(store.getState())).toBeUndefined();
+    writeSpy.mockRestore();
+  });
+
+  it('sends no homing for a laser without homing switches and still resumes', async () => {
+    const store: AppStore = await prepareResumeStore(false);
+    const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RESUME }));
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+
+    const sentText: string = getSentText(writeSpy.mock.calls);
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
+    expect(sentText).not.toContain(HOME_LINE);
+    expect(sentText.match(MOTION_LINE_PATTERN)?.[0]).toContain(RESUME_FIRST_MOVE_START_TEXT);
+    expect(sentText).toContain(RESUME_FIRST_MOVE_END_TEXT);
+    writeSpy.mockRestore();
+  });
+
+  it('ends a resume as interrupted with nothing streamed when homing fails, keeping the resume point', async () => {
+    const transport: HomingAlarmLaserTransport = new HomingAlarmLaserTransport();
+    const store: AppStore = await prepareResumeStore(true, transport);
+    const resumeBefore: JobResumeState | undefined = selectJobResume(store.getState());
+    const writeSpy = vi.spyOn(SimulatedLaserTransport.prototype, 'write');
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RESUME }));
+    await vi.advanceTimersByTimeAsync(JOB_END_MS);
+
+    const sentText: string = getSentText(writeSpy.mock.calls);
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    expect(selectIsJobRunActive(store.getState())).toBe(false);
+    expect(transport.isHomingRequested).toBe(true);
+    expect(sentText).not.toMatch(MOTION_LINE_PATTERN);
+    expect(selectJobResume(store.getState())).toBe(resumeBefore);
+    writeSpy.mockRestore();
+  });
+
+  it('refuses a resume after the project changed', async () => {
+    const store: AppStore = await prepareResumeStore(true);
+
+    store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    store.dispatch(new ToolpathReady({
+      toolpath: newResumeToolpath(),
+      documentVersion: selectToolpathDocumentVersion(store.getState()),
+    }));
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RESUME }));
+
+    expect(selectIsJobRunActive(store.getState())).toBe(false);
+  });
+
+  it('records a new resume point relative to the resumed program when a resumed run stops again', async () => {
+    const store: AppStore = await prepareResumeStore(false);
+
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.RESUME }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new MachineStopRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    const resume: JobResumeState | undefined = selectJobResume(store.getState());
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    // The resumed toolpath: the travel to the backed-up move, then moves 10 to 29.
+    expect(resume?.toolpath.moves.length).toBe(RESUME_MOVE_COUNT - 10 + 1);
   });
 
   it('runs only the moves of the ticked line layers for a re-cut', async () => {

@@ -338,6 +338,13 @@ JOB_READINESS_WARNINGS_ACTION;Fix warnings ({{count}})
 JOB_READINESS_WARNINGS_HINT;Fix the toolpath warnings ({{count}}) so the job can start
 JOB_READINESS_WARNINGS_MET_HINT;No toolpath warnings
 JOB_RESUME;Resume
+JOB_RESUME_BLOCKED_NO_POINT;No interrupted job to resume.
+JOB_RESUME_BLOCKED_PROFILE_CHANGED;The job ran with another laser profile. Select it again to resume.
+JOB_RESUME_BLOCKED_PROJECT_CHANGED;The project changed after the job stopped, so it cannot resume.
+JOB_RESUME_CAPTION;Continue the interrupted job
+JOB_RESUME_FRAME_HINT;Run Frame job first to check the position, and do not touch the material.
+JOB_RESUME_FROM;Resume from about {{percent}} %
+JOB_RESUME_NO_HOMING_WARNING;This laser has no homing: the head must be at exactly the same work zero as before. Check the alignment with Frame job first.
 JOB_RESUME_WAITING;Wait until the laser has stopped and any door is closed.
 JOB_RUN_PROGRESS_DETAIL;{{answered}} of {{total}} lines answered, {{elapsed}} elapsed
 JOB_RUN_PROGRESS_LABEL;Job progress

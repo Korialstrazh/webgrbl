@@ -22,7 +22,9 @@ import { MIDDLE_DOT } from '../../utils/characters.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { ProjectLayer } from '../../utils/layers/interfaces/ProjectLayer';
 import type { JobStartRequest } from '../../utils/states/interfaces/JobStartRequest';
+import { selectJobResumeBlockedReasonKey } from '../../utils/states/job.resume.blocked.reason.selector';
 import { selectJobStartBlockedReasonKey } from '../../utils/states/job.start.blocked.reason.selector';
+import { JOB_START_REQUEST_KIND } from '../../utils/states/job.start.request.constants';
 import { JobStartRequested } from '../../utils/states/job.run.state';
 import {
   JobSafetyChecklistClosed,
@@ -51,7 +53,9 @@ export const JobSafetyChecklistDialog = (): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const request: JobStartRequest | undefined = useSelector(selectJobSafetyChecklistRequest);
-  const jobStartBlockedReasonKey: string | undefined = useSelector(selectJobStartBlockedReasonKey);
+  const isResumeRequest: boolean = request?.kind === JOB_START_REQUEST_KIND.RESUME;
+  const jobStartBlockedReasonKey: string | undefined =
+    useSelector(isResumeRequest ? selectJobResumeBlockedReasonKey : selectJobStartBlockedReasonKey);
   const projectName: string = useSelector(selectProjectName);
   const layers: ProjectLayer[] = useSelector(selectProjectLayers);
   const enabledLayers: ProjectLayer[] = useSelector(selectEnabledProjectLayers);

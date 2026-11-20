@@ -13,22 +13,22 @@ import { call, cancel, delay, fork, join, put, race, select, take } from 'redux-
 import { GRBL_MACHINE_STATE, GRBL_STOP_FINISH_MAX_WAIT_MS } from '../grbl/grbl.constants';
 import type { GrblController } from '../grbl/grbl.controller';
 import type { GrblProgramResult } from '../grbl/interfaces/GrblProgramResult';
-import { getLayerKey } from '../layers/get.layer.key';
 import type { ProjectLayer } from '../layers/interfaces/ProjectLayer';
-import { LAYER_MODE } from '../palette/palette.constants';
+import { MACHINE_COMMAND } from '../machine/machine.commands';
 import type { MachineProfile } from '../profiles/interfaces/MachineProfile';
 import type { GeometryPoint } from '../svg/geometry/interfaces/GeometryPoint';
 import { GCODE_AIR_ASSIST_OFF } from '../toolpath/gcode.constants';
-import { getRecutToolpath } from '../toolpath/get.recut.toolpath';
 import type { GcodeLine } from '../toolpath/interfaces/GcodeLine';
 import type { Toolpath } from '../toolpath/interfaces/Toolpath';
 import type { ToolpathLayerRange } from '../toolpath/interfaces/ToolpathLayerRange';
 import type { Action } from './action';
 import { getAnsweredProgramLineCount } from './get.answered.program.line.count';
+import { getLinePassesByLayerKey } from './get.line.passes.by.layer.key';
 import { newRawErrorConsoleInfo } from './grbl.raw.error.console.info';
 import type { JobFinishRaceResult } from './interfaces/JobFinishRaceResult';
 import type { JobStartRequest } from './interfaces/JobStartRequest';
 import type { JobResumeState } from './interfaces/JobResumeState';
+import { selectJobResumeBlockedReasonKey } from './job.resume.blocked.reason.selector';
 import { JobResumePointCleared, JobResumePointRecorded } from './job.resume.state';
 import { JOB_RUN_KIND } from './job.run.kind.constants';
 import {
@@ -40,6 +40,7 @@ import {
 import type { JobStartRequested } from './job.run.state';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
+import { getJobRunToolpath } from './job.run.toolpath.saga';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
 import { JOB_START_REQUEST_KIND } from './job.start.request.constants';
 import { getJobStartWorkPosition, returnToJobStartPosition } from './job.start.position.return.saga';
@@ -54,46 +55,13 @@ import {
 } from './machine.status.state';
 import { selectEnabledProjectLayers } from './project.document.state';
 import { getProjectGcodeLines } from './project.gcode.lines.saga';
-import { selectToolpath, selectToolpathDocumentVersion } from './toolpath.state';
+import { selectToolpathDocumentVersion } from './toolpath.state';
 
 const newJobRunStatusChanged = (status: JobRunStatus): JobRunStatusChanged => new JobRunStatusChanged({ status });
 
 /** A job that ended early ended in a reset, which switches the air off; a finished one did if its program says so. */
 const isAirAssistOffAfterJob = (endStatus: JobRunStatus, programLines: string[]): boolean =>
   endStatus === JOB_RUN_STATUS.INTERRUPTED || programLines.includes(GCODE_AIR_ASSIST_OFF);
-
-const isLineLayer = (layer: ProjectLayer): boolean => layer.settings.mode === LAYER_MODE.LINE;
-
-/** The passes of each enabled line layer; fill layers stay out, so a re-cut never runs them. */
-const getLinePassesByLayerKey = (enabledLayers: ProjectLayer[]): Record<string, number> => {
-  const passesByLayerKey: Record<string, number> = {};
-
-  for (const layer of enabledLayers) {
-    if (isLineLayer(layer)) {
-      passesByLayerKey[getLayerKey(layer)] = layer.settings.passes;
-    }
-  }
-
-  return passesByLayerKey;
-};
-
-/** The toolpath a start request runs: the whole job, or for a re-cut only its ticked line layers. */
-function* getJobRunToolpath(request: JobStartRequest): Generator {
-  const toolpath: Toolpath = (yield select(selectToolpath)) as Toolpath;
-
-  if (request.kind !== JOB_START_REQUEST_KIND.RECUT) {
-    return toolpath;
-  }
-
-  const enabledLayers: ProjectLayer[] = (yield select(selectEnabledProjectLayers)) as ProjectLayer[];
-  const passesByLayerKey: Record<string, number> = getLinePassesByLayerKey(enabledLayers);
-  const layerKeys: string[] = (request.layerKeys ?? [])
-    .filter((layerKey: string): boolean => layerKey in passesByLayerKey);
-
-  return layerKeys.length
-    ? getRecutToolpath(toolpath, layerKeys, Boolean(request.isExtraPassAdded), passesByLayerKey)
-    : undefined;
-}
 
 /** The line layers a toolpath burns, in its burn order. */
 function* getToolpathLineLayerKeys(toolpath: Toolpath): Generator {
@@ -200,6 +168,34 @@ export function* followJobProgram(
   return isFinished ? JOB_RUN_STATUS.COMPLETED : JOB_RUN_STATUS.INTERRUPTED;
 }
 
+/**
+ * Homes a machine with homing switches before a resume, so the head finds the work zero again; a machine without them
+ * stays where it is. Resolves false when homing failed or the run was interrupted, true once the machine is Idle.
+ */
+function* homeMachineBeforeResume(controller: GrblController, interruptionTask: Task): Generator {
+  const profile: MachineProfile = (yield select(selectActiveMachineProfile)) as MachineProfile;
+
+  if (!profile.hasHomingSwitches) {
+    return true;
+  }
+
+  const { isCompleted }: GrblProgramResult = (yield call(
+    [controller, controller.streamProgram],
+    [MACHINE_COMMAND.HOME],
+    { isStopOnErrorEnabled: true },
+  )) as GrblProgramResult;
+
+  if (!isCompleted) {
+    return false;
+  }
+
+  return (yield call(waitForJobFinish, interruptionTask)) as boolean;
+}
+
+/** The start blockers of a request: a resume also needs a resume point that still matches the project and profile. */
+const getJobStartBlockedReasonSelector = (request: JobStartRequest): typeof selectJobStartBlockedReasonKey =>
+  request.kind === JOB_START_REQUEST_KIND.RESUME ? selectJobResumeBlockedReasonKey : selectJobStartBlockedReasonKey;
+
 function* waitForJobStopRequest(): Generator {
   yield take(MachineStopRequested.type);
 }
@@ -224,12 +220,9 @@ function* getJobEndStatusAfterStop(
 }
 
 export function* runGrblJob(controller: GrblController, action: JobStartRequested): Generator {
-  // A resume only fills in once its own program exists.
-  if (action.payload.kind === JOB_START_REQUEST_KIND.RESUME) {
-    return;
-  }
-
-  const blockedReasonKey: string | undefined = (yield select(selectJobStartBlockedReasonKey)) as string | undefined;
+  const isResume: boolean = action.payload.kind === JOB_START_REQUEST_KIND.RESUME;
+  const blockedReasonKey: string | undefined =
+    (yield select(getJobStartBlockedReasonSelector(action.payload))) as string | undefined;
 
   if (blockedReasonKey) {
     return;
@@ -252,10 +245,31 @@ export function* runGrblJob(controller: GrblController, action: JobStartRequeste
   let streamedLines: GcodeLine[] | undefined;
   let isResumePointSettled = false;
 
-  yield put(new JobResumePointCleared());
+  // A resume keeps its point until its own program streams, so a failed homing can be resumed again.
+  if (!isResume) {
+    yield put(new JobResumePointCleared());
+  }
+
   yield put(new JobRunStarted({ startedAtMs: Date.now(), kind: JOB_RUN_KIND.JOB }));
 
   try {
+    const isHomed: boolean = isResume
+      ? (yield call(homeMachineBeforeResume, controller, interruptionTask)) as boolean
+      : true;
+
+    if (!isHomed) {
+      const homingEndStatus: JobRunStatus = (yield call(
+        getJobEndStatusAfterStop,
+        JOB_RUN_STATUS.INTERRUPTED,
+        stopRequestTask,
+        interruptionTask,
+      )) as JobRunStatus;
+
+      yield put(newJobRunStatusChanged(homingEndStatus));
+
+      return;
+    }
+
     const gcodeLines: GcodeLine[] = (yield call(getJobProgramLines, runToolpath)) as GcodeLine[];
     const programLines: string[] = gcodeLines.map(({ text }: GcodeLine): string => text);
 
