@@ -10,11 +10,12 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { CodeOutlined, ColumnWidthOutlined, FieldTimeOutlined } from '@ant-design/icons';
+import { CodeOutlined, ColumnWidthOutlined, FieldTimeOutlined, GithubOutlined } from '@ant-design/icons';
 import { Layout, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { APP_REPOSITORY_URL, EXTERNAL_LINK_REL, EXTERNAL_LINK_TARGET } from '../../utils/app.repository.constants';
 import { ANTD_BUTTON_TYPE_TEXT, ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsOnline } from '../../utils/states/browser.environment.state';
@@ -87,6 +88,16 @@ export const StatusStrip = (): ReactNode => {
           </span>
         </Tooltip>
       )}
+      {/* webgrbl is open source: the link to its code, in a new tab so a running job is never left. */}
+      <IconActionButton
+        className={styles.repositoryLink}
+        type={ANTD_BUTTON_TYPE_TEXT}
+        labelText={t(DEFAULT.STATUS_STRIP_SOURCE_CODE)}
+        iconComponent={<GithubOutlined aria-hidden />}
+        href={APP_REPOSITORY_URL}
+        target={EXTERNAL_LINK_TARGET}
+        rel={EXTERNAL_LINK_REL}
+      />
       <MessageHistoryButton />
       {/* A panel toggle, not a setting: quiet until pressed. */}
       <IconActionButton

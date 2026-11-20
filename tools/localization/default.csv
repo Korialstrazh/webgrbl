@@ -822,6 +822,7 @@ STATUS_STRIP_JOB_SIZE_HINT;Worked out in the background from the layers that are
 STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
+STATUS_STRIP_SOURCE_CODE;Source code on GitHub (opens in a new tab)
 STATUS_STRIP_TITLE;Status
 STOP_SETTINGS_DOUBLE_CLICK_HINT;Only when connected and idle. The laser stays off, and STOP cancels the move.
 STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER;Double-click bed moves laser

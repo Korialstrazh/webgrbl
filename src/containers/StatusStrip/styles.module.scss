@@ -44,6 +44,12 @@
   font-size: 1.125rem;
 }
 
+// The link to the source code looks like its icon neighbours, the bell and the console toggle.
+.repositoryLink:global(.ant-btn) {
+  flex-shrink: 0;
+  font-size: 1.125rem;
+}
+
 .consoleToggleOn:global(.ant-btn) {
   background-color: var(--color-surface-3);
   color: var(--color-accent);

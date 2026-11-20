@@ -1,8 +1,16 @@
 {
   "name": "webgrbl",
   "private": true,
-  "version": "0.3.1",
+  "version": "0.3.2",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/Korialstrazh/webgrbl#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Korialstrazh/webgrbl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Korialstrazh/webgrbl/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=24.14.0"
