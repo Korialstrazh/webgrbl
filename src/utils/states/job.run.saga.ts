@@ -286,6 +286,12 @@ export function* runGrblJob(controller: GrblController, action: JobStartRequeste
     yield call(returnToJobStartPosition, controller, endStatus, startPosition);
   } catch (error: unknown) {
     yield put(newRawErrorConsoleInfo(error));
+
+    if (streamedLines && !isResumePointSettled) {
+      isResumePointSettled = true;
+      yield call(recordJobResumePoint, streamedLines, runToolpath, toolpathDocumentVersion);
+    }
+
     yield put(newJobRunStatusChanged(JOB_RUN_STATUS.INTERRUPTED));
   } finally {
     // A lost connection cancels this saga before it ends the run, and a resume after it is the main use.

@@ -46,6 +46,7 @@ import { JOB_START_REQUEST_KIND } from './job.start.request.constants';
 import { JOB_RUN_STATUS } from './job.run.status.constants';
 import type { JobRunStatus } from './job.run.status.constants';
 import { selectJobStartBlockedReasonKey } from './job.start.blocked.reason.selector';
+import { getAnsweredProgramLineCount } from './get.answered.program.line.count';
 import type { JobResumeState } from './interfaces/JobResumeState';
 import { ActiveMachineProfileSelected, MachineProfileSaved, selectActiveMachineProfile } from './machine.profile.state';
 import {
@@ -596,6 +597,48 @@ describe(runGrblJob.name, () => {
 
     expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.COMPLETED);
     expect(selectJobResume(store.getState())).toBeUndefined();
+  });
+
+  it('records the resume state when the task is cancelled by a disconnect in the middle of the program', async () => {
+    const store: AppStore = await prepareConnectedStore();
+
+    replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    store.dispatch(new DisconnectRequested());
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    const resume: JobResumeState | undefined = selectJobResume(store.getState());
+
+    expect(selectJobRunAnsweredLineCount(store.getState())).toBeLessThan(selectJobRunTotalLineCount(store.getState()));
+    expect(resume).toBeDefined();
+    expect(resume?.answeredLineCount).toBe(getAnsweredProgramLineCount(
+      resume?.lines ?? [],
+      selectJobRunAnsweredLineCount(store.getState()),
+    ));
+    expect(resume?.answeredLineCount).toBeLessThan(resume?.lines.length ?? 0);
+  });
+
+  it('records the resume state when the connection is lost in the middle of the program', async () => {
+    const transport: ControlledLaserTransport = new ControlledLaserTransport();
+    const store: AppStore = await prepareConnectedStore([], {}, undefined, transport);
+
+    replaceToolpathWithMoves(store, MANY_MOVES_COUNT);
+    store.dispatch(new JobStartRequested({ kind: JOB_START_REQUEST_KIND.FULL }));
+    await vi.advanceTimersByTimeAsync(ANSWER_SETTLE_MS);
+    transport.simulateConnectionLoss();
+    await vi.advanceTimersByTimeAsync(SETTLE_MS);
+
+    const resume: JobResumeState | undefined = selectJobResume(store.getState());
+
+    expect(selectJobRunStatus(store.getState())).toBe(JOB_RUN_STATUS.INTERRUPTED);
+    expect(selectIsJobRunActive(store.getState())).toBe(false);
+    expect(resume).toBeDefined();
+    expect(resume?.answeredLineCount).toBe(getAnsweredProgramLineCount(
+      resume?.lines ?? [],
+      selectJobRunAnsweredLineCount(store.getState()),
+    ));
+    expect(resume?.answeredLineCount).toBeLessThan(resume?.lines.length ?? 0);
   });
 
   it('marks the run interrupted when the connection ends during it', async () => {
