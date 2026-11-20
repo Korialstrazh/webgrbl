@@ -159,11 +159,36 @@
   }
 }
 
-// Below 57rem the unplugged icon alone says "not connected" beside Connect (the tooltip and label still name it), so
-// the profile keeps its name. 57rem must match the TopBar styles.
+// Below 57rem the pill turns into one compact capsule: the state is a lone coloured dot (its button still opens the
+// connection popover and names the state and port), and Connect is a 32 px icon and word in the same fill, with no
+// split line or chevron. 57rem must match the TopBar styles.
 @media (width < 57rem) {
-  .connectOffered .status {
+  .connectOffered .status,
+  .caret,
+  .statusIcon > :global(.anticon) {
     display: none;
+  }
+
+  .dot {
+    position: static;
+    width: 0.625rem;
+    height: 0.625rem;
+    border: 0;
+  }
+
+  .pill:global(.ant-btn),
+  .connectButton:global(.ant-btn) {
+    min-height: 2rem;
+  }
+
+  .pill:global(.ant-btn) {
+    min-width: 2rem;
+    justify-content: center;
+  }
+
+  .connectVerb,
+  .connectButton:global(.ant-btn) {
+    border-left: 0;
   }
 }
 
