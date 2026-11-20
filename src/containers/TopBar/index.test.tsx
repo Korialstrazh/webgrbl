@@ -29,6 +29,7 @@ import {
   ProjectFileImportRequested,
   ProjectOpened,
   ProjectRenameRequested,
+  ProjectSaveFailed,
   ProjectSaveRequested,
   ProjectSaveStatusChanged,
 } from '../../utils/states/project.state';
@@ -83,6 +84,11 @@ const CLOUD_ICON_SELECTOR = '.anticon-cloud';
 const CHECK_ICON_SELECTOR = '.anticon-check';
 const CLOUD_UPLOAD_ICON_SELECTOR = '.anticon-cloud-upload';
 const ALERT_ICON_SELECTOR = '.anticon-exclamation-circle';
+const EXCLAMATION_ICON_SELECTOR = '.anticon-exclamation';
+const SAVE_FAILED_TEXT = 'Save failed';
+const NOTHING_TO_UNDO_TEXT = 'Nothing to undo';
+const NOTHING_TO_REDO_TEXT = 'Nothing to redo';
+const CHEVRON_ICON_SELECTOR = '.anticon-down';
 const UNTITLED_PROJECT_NAME = 'New project';
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const ARIA_DISABLED_TRUE = 'true';
@@ -298,6 +304,25 @@ describe(TopBar.name, () => {
     fireEvent.mouseEnter(screen.getByRole('button', { name: REDO_LABEL }));
 
     expect(await screen.findByText(REDO_TOOLTIP_TEXT)).toBeInTheDocument();
+  });
+
+  it('says there is nothing to undo or redo while both are disabled', async () => {
+    renderWorkbenchTopBar(newStore());
+    fireEvent.mouseEnter(screen.getByRole('button', { name: UNDO_LABEL }));
+
+    expect(await screen.findByText(NOTHING_TO_UNDO_TEXT)).toBeInTheDocument();
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: REDO_LABEL }));
+
+    expect(await screen.findByText(NOTHING_TO_REDO_TEXT)).toBeInTheDocument();
+  });
+
+  it('shows the laser profile as a chip with a chevron, since it opens a chooser', () => {
+    renderWorkbenchTopBar(newStore());
+
+    const profileButton: HTMLElement = screen.getByRole('button', { name: MACHINE_PROFILES_LABEL });
+
+    expect(profileButton.querySelector(CHEVRON_ICON_SELECTOR)).not.toBeNull();
   });
 
   it('undoes and redoes from the phone-only Project menu entries', async () => {
@@ -620,6 +645,20 @@ describe(TopBar.name, () => {
 
       expect(readout.querySelector(CLOUD_UPLOAD_ICON_SELECTOR)).not.toBeNull();
       expect(readout.querySelector(ALERT_ICON_SELECTOR)).toBeNull();
+    });
+
+    it('shows a failed save as a cloud with an exclamation mark and the word Save failed', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveFailed());
+      });
+
+      const readout: HTMLElement = screen.getByRole('status', { name: SAVE_FAILED_TEXT });
+
+      expect(readout).toHaveTextContent(SAVE_FAILED_TEXT);
+      expect(readout.querySelector(EXCLAMATION_ICON_SELECTOR)).not.toBeNull();
     });
 
     it('names the save state on the readout itself, so the icon alone still has a meaning', () => {

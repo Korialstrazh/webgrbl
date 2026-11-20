@@ -57,10 +57,11 @@
   min-width: 8rem;
 }
 
-// The app name and version: a small, muted brand line, so the project name is what the eye finds first.
+// The app name and version: a small brand line, a step brighter than muted text yet below the project name, so the
+// project name is what the eye finds first.
 .title {
   margin: 0;
-  color: var(--color-text-muted);
+  color: color-mix(in srgb, var(--color-text-muted) 60%, var(--color-text));
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.2;
@@ -91,9 +92,18 @@
 }
 
 .profileButton:global(.ant-btn) {
-  // The same text size and weight as the other header controls; the project name stays the strongest text.
+  // A chip: a thin outline and round ends set it apart as a chooser; the same text size and weight as the other header
+  // controls, so the project name stays the strongest text.
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 400;
+}
+
+// The same small chevron as the Project menu's.
+.group :global(.ant-btn) .profileCaret:global(.anticon) {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
 }
 
 // Undo and Redo in the full text colour while they can act, and a dimmed muted grey while they cannot: still above
@@ -103,7 +113,7 @@
 
   &:disabled {
     color: var(--color-text-muted);
-    opacity: 0.65;
+    opacity: 0.45;
   }
 }
 
@@ -162,6 +172,10 @@
 @media (width < 44rem) {
   .profileName {
     @include accessibility.visually-hidden;
+  }
+
+  .group :global(.ant-btn) .profileCaret:global(.anticon) {
+    display: none;
   }
 }
 

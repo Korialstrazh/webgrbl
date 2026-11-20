@@ -10,7 +10,7 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { UploadOutlined } from '@ant-design/icons';
+import { DownOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -83,6 +83,8 @@ export const TopBar = (): ReactNode => {
             onClick={() => changeProfilesDialogOpen(true)}
           >
             <span className={styles.profileName}>{activeProfile?.name ?? profilesLabel}</span>
+            {/* The chevron says the chip opens the profile chooser. */}
+            <DownOutlined className={styles.profileCaret} aria-hidden="true" />
           </Button>
         </DismissibleTooltip>
         <DismissibleTooltip title={t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}>
@@ -102,10 +104,10 @@ export const TopBar = (): ReactNode => {
           type={ANTD_BUTTON_TYPE_TEXT}
           iconComponent={<UndoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_UNDO)}
-          tooltipText={t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+          tooltipText={canUndo ? t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
             action: t(DEFAULT.TOP_BAR_UNDO),
             shortcut: t(DEFAULT.TOP_BAR_UNDO_SHORTCUT),
-          })}
+          }) : t(DEFAULT.TOP_BAR_NOTHING_TO_UNDO)}
           isDisabled={!canUndo}
           onClick={() => dispatch(new ProjectUndoRequested())}
         />
@@ -113,10 +115,10 @@ export const TopBar = (): ReactNode => {
           type={ANTD_BUTTON_TYPE_TEXT}
           iconComponent={<RedoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_REDO)}
-          tooltipText={t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+          tooltipText={canRedo ? t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
             action: t(DEFAULT.TOP_BAR_REDO),
             shortcut: t(DEFAULT.TOP_BAR_REDO_SHORTCUT),
-          })}
+          }) : t(DEFAULT.TOP_BAR_NOTHING_TO_REDO)}
           isDisabled={!canRedo}
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
