@@ -108,7 +108,10 @@ export const TopBar = (): ReactNode => {
           tooltipText={canUndo ? t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
             action: t(DEFAULT.TOP_BAR_UNDO),
             shortcut: t(DEFAULT.TOP_BAR_UNDO_SHORTCUT),
-          }) : t(DEFAULT.TOP_BAR_NOTHING_TO_UNDO)}
+          }) : t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+            action: t(DEFAULT.TOP_BAR_NOTHING_TO_UNDO),
+            shortcut: t(DEFAULT.TOP_BAR_UNDO_SHORTCUT),
+          })}
           isDisabled={!canUndo}
           isFocusableWhenDisabled
           onClick={() => dispatch(new ProjectUndoRequested())}
@@ -120,7 +123,10 @@ export const TopBar = (): ReactNode => {
           tooltipText={canRedo ? t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
             action: t(DEFAULT.TOP_BAR_REDO),
             shortcut: t(DEFAULT.TOP_BAR_REDO_SHORTCUT),
-          }) : t(DEFAULT.TOP_BAR_NOTHING_TO_REDO)}
+          }) : t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+            action: t(DEFAULT.TOP_BAR_NOTHING_TO_REDO),
+            shortcut: t(DEFAULT.TOP_BAR_REDO_SHORTCUT),
+          })}
           isDisabled={!canRedo}
           isFocusableWhenDisabled
           onClick={() => dispatch(new ProjectRedoRequested())}

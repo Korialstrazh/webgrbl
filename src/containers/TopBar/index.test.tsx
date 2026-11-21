@@ -88,8 +88,8 @@ const ALERT_ICON_SELECTOR = '.anticon-exclamation-circle';
 const EXCLAMATION_ICON_SELECTOR = '.anticon-exclamation';
 const SAVE_FAILED_TEXT = 'Save failed';
 const AUTOSAVE_FAILED_TEXT = 'Autosave: Save failed';
-const NOTHING_TO_UNDO_TEXT = 'Nothing to undo';
-const NOTHING_TO_REDO_TEXT = 'Nothing to redo';
+const NOTHING_TO_UNDO_TEXT = 'Nothing to undo (Ctrl+Z)';
+const NOTHING_TO_REDO_TEXT = 'Nothing to redo (Ctrl+Shift+Z)';
 const CHEVRON_ICON_SELECTOR = '.anticon-down';
 const UNTITLED_PROJECT_NAME = 'New project';
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
@@ -335,7 +335,7 @@ describe(TopBar.name, () => {
     expect(await screen.findByText(REDO_TOOLTIP_TEXT)).toBeInTheDocument();
   });
 
-  it('says there is nothing to undo or redo while both are disabled', async () => {
+  it('says there is nothing to undo or redo, with the shortcut, while both are disabled', async () => {
     renderWorkbenchTopBar(newStore());
     fireEvent.mouseEnter(screen.getByRole('button', { name: UNDO_LABEL }));
 
