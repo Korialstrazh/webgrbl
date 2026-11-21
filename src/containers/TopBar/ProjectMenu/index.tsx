@@ -9,7 +9,7 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { DownOutlined, FolderOutlined } from '@ant-design/icons';
+import { DownOutlined, FolderOutlined, MenuOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
@@ -115,7 +115,8 @@ export const ProjectMenu = (): ReactNode => {
             type={ANTD_BUTTON_TYPE_TEXT}
             aria-label={t(DEFAULT.TOP_BAR_MENU_PROJECT)}
           >
-            <FolderOutlined aria-hidden="true" />
+            <FolderOutlined className={styles.folderIcon} aria-hidden="true" />
+            <MenuOutlined className={styles.menuIcon} aria-hidden="true" />
             {/* A short word while there is room, so the folder reads as the Project menu; the tooltip names it too. */}
             <span className={styles.label} aria-hidden="true">{t(DEFAULT.TOP_BAR_MENU_PROJECT)}</span>
             <DownOutlined className={styles.caret} aria-hidden="true" />

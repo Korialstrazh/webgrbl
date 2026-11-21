@@ -50,7 +50,23 @@
   }
 }
 
-// At phone width the chevron stays beside the folder, so the trigger reads as the menu that also holds Undo, Redo,
+// The folder names the Project menu on a wide bar; at phone width the menu also holds Undo, Redo, Import SVG and the
+// laser profile, so a hamburger takes its place. 30rem matches the TopBar.
+.menuIcon {
+  display: none;
+}
+
+@media (width < 30rem) {
+  .folderIcon {
+    display: none;
+  }
+
+  .menuIcon {
+    display: inline-flex;
+  }
+}
+
+// At phone width the chevron stays beside the hamburger, so the trigger reads as the menu that also holds Undo, Redo,
 // Import SVG and the laser profile. 30rem matches the TopBar.
 @media (width < 30rem) {
   // A phone has no keyboard to press Ctrl+Z on, so the shortcut hints go and the entries read as plain labels.

@@ -18,6 +18,8 @@ const HIDDEN_DROPDOWN_SELECTOR = '.ant-dropdown-hidden';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const MACHINE_PROFILES_LABEL = 'Laser profiles';
 const VERSION_FOOTER_TEXT = `webgrbl v${APP_VERSION}`;
+const FOLDER_ICON_SELECTOR = '.anticon-folder';
+const MENU_ICON_SELECTOR = '.anticon-menu';
 
 describe(ProjectMenu.name, () => {
   it('closes the open menu when a dialog opens', async () => {
@@ -95,5 +97,20 @@ describe(ProjectMenu.name, () => {
     const versionFooter: HTMLElement = await screen.findByText(VERSION_FOOTER_TEXT);
 
     expect(versionFooter.closest('[role="menuitem"]')).not.toBeInTheDocument();
+  });
+
+  it('carries both the folder and the phone hamburger icon on its trigger, under the one Project name', () => {
+    render(
+      <Provider store={newStore()}>
+        <AntdTestProvider>
+          <ProjectMenu />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    const trigger: HTMLElement = screen.getByRole('button', { name: PROJECT_MENU_LABEL });
+
+    expect(trigger.querySelector(FOLDER_ICON_SELECTOR)).toBeInTheDocument();
+    expect(trigger.querySelector(MENU_ICON_SELECTOR)).toBeInTheDocument();
   });
 });
