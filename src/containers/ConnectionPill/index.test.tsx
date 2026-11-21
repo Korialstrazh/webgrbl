@@ -432,15 +432,29 @@ describe(ConnectionPill.name, () => {
       store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
     });
 
-    // The pill's own Connect is hidden from assistive technology and disabled, so it is no Tab stop either.
+    // The pill's own Connect leaves the bar: no grey ghost, no Tab stop, and the pill keeps both ends round.
     expect(screen.getAllByRole('button', { name: CONNECT_LABEL })).toEqual([getPopoverConnectButton()]);
-    expect(document.querySelector(PILL_CONNECT_BUTTON_SELECTOR)).toBeDisabled();
+    expect(document.querySelector(PILL_CONNECT_BUTTON_SELECTOR)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN }).className).not.toMatch(/joined/);
 
     act(() => {
       store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: false }));
     });
 
     expect(document.querySelector(PILL_CONNECT_BUTTON_SELECTOR)).toBeEnabled();
+  });
+
+  it('hides the in-pill Connect word while the popover is open', () => {
+    const store: AppStore = renderConnectionPill();
+    const pill: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    expect(pill).toHaveTextContent(CONNECT_LABEL);
+
+    act(() => {
+      store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+    });
+
+    expect(pill).not.toHaveTextContent(CONNECT_LABEL);
   });
 
   it('shows no tooltip over the open popover', async () => {

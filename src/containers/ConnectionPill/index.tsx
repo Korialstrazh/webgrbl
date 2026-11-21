@@ -84,6 +84,9 @@ export const ConnectionPill = (): ReactNode => {
   const isConnectVerbShown: boolean = isConnectOffered(connectionStatus);
   // A chosen port lets the verb connect at once, so it leaves the pill for a button of its own.
   const isOneClickConnect: boolean = isConnectVerbShown && Boolean(selectedPortId);
+  // While the popover is open its own Connect is the one call to action, so the pill's Connect leaves the bar entirely
+  // (no Tab stop, no grey ghost) and comes back as the orange button when the popover closes.
+  const isPillConnectShown: boolean = isConnectVerbShown && !isPopoverOpen;
   const statusText: string = t(CONNECTION_PILL_STATUS_LABEL_KEY[connectionStatus]);
   const shortStatusText: string = t(CONNECTION_PILL_SHORT_STATUS_LABEL_KEY[connectionStatus]);
   const firmwareText: string | undefined = isConnected && firmwareIdentity
@@ -113,8 +116,8 @@ export const ConnectionPill = (): ReactNode => {
   );
   const pillClassName: string = [
     styles.pill,
-    isConnectVerbShown ? styles.connectOffered : undefined,
-    isOneClickConnect ? styles.joined : undefined,
+    isPillConnectShown ? styles.connectOffered : undefined,
+    isOneClickConnect && isPillConnectShown ? styles.joined : undefined,
   ].filter(Boolean).join(' ');
 
   return (
@@ -157,20 +160,15 @@ export const ConnectionPill = (): ReactNode => {
             )}
             {/* The status part stays quiet: its chevron shows only under the pointer or the focus. */}
             <DownOutlined className={styles.caret} aria-hidden="true" />
-            {isConnectVerbShown && !isOneClickConnect && (
+            {isPillConnectShown && !isOneClickConnect && (
               <span className={styles.connectVerb}>{connectVerbContent}</span>
             )}
           </Button>
-          {isOneClickConnect && (
+          {isOneClickConnect && isPillConnectShown && (
             // The icon prop gives the plug the same gap to the word as every other icon and label button. The click
             // connects and stops there, so it never also opens the popover the capsule carries.
-            // While the popover is open its own Connect is the one call to action, so this one turns quiet and leaves
-            // the Tab order (disabled), keeping its room so the popover does not move.
             <Button
-              className={[styles.connectButton, isPopoverOpen ? styles.connectSuppressed : undefined]
-                .filter(Boolean).join(' ')}
-              disabled={isPopoverOpen}
-              aria-hidden={isPopoverOpen || undefined}
+              className={styles.connectButton}
               icon={<ApiOutlined aria-hidden="true" />}
               onClick={(event: MouseEvent<HTMLElement>) => {
                 event.stopPropagation();

@@ -213,15 +213,6 @@
   background-color: var(--color-accent-hover);
 }
 
-// While the popover is open its Connect is the one call to action: the pill's own Connect turns quiet and muted.
-.pill[aria-expanded='true'] .connectVerb,
-.pill[aria-expanded='true']:not(:disabled):hover .connectVerb,
-.connectButton.connectSuppressed:global(.ant-btn):disabled {
-  background-color: transparent;
-  color: var(--color-text-muted);
-  cursor: default;
-}
-
 // In a narrow window the firmware moves to the popover and the label, and the caret goes while Connect is offered.
 // 75rem must match the TopBar styles.
 @media (width < 75rem) {
