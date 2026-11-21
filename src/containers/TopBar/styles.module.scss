@@ -235,6 +235,15 @@
     gap: 0;
   }
 
+  // No dead space beside Undo: the empty update slot takes no gap, so the project name gets that width.
+  .trailing {
+    gap: 0;
+  }
+
+  .trailing > .updateSlot:not(:empty) {
+    margin-inline-end: var(--space-2);
+  }
+
   .activeMenus :global(.ant-btn) {
     width: 2rem;
     min-width: 2rem;
