@@ -188,8 +188,8 @@
   }
 }
 
-// At phone width the labels go and the buttons close up, so everything fits with no scroll. The laser profile and
-// Import SVG, Undo and Redo move into the Project menu, so the project name stays readable.
+// At phone width the labels go and the buttons close up, so everything fits with no scroll. The laser profile,
+// Import SVG and Redo move into the Project menu, so the project name stays readable.
 @media (width < 30rem) {
   .topBar {
     --top-bar-group-gap: 0.375rem;
@@ -216,9 +216,19 @@
     @include accessibility.visually-hidden;
   }
 
-  .machineGroup,
-  .historyGroup {
+  .machineGroup {
     display: none;
+  }
+
+  // Undo, the most used action, stays in the bar as a 44 px icon; Redo moves into the Project menu.
+  .historyGroup .redoButton {
+    display: none;
+  }
+
+  .activeMenus.historyGroup :global(.ant-btn) {
+    width: var(--target-min);
+    min-width: var(--target-min);
+    height: var(--target-min);
   }
 
   .activeMenus {

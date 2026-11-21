@@ -1,5 +1,5 @@
 /**
- * The entries of the Project menu in three groups (open, save, export) with shortcut hints and, at phone width, Undo,
+ * The entries of the Project menu in three groups (open, save, export) with shortcut hints and, at phone width,
  * Redo, Import SVG and the laser profiles in groups of their own, and a muted footer line with the app version. A
  * phone hides the shortcut hints, having no keyboard to press them on.
  * Export G-code is disabled while it cannot start, with a tooltip that says what is missing.
@@ -28,14 +28,12 @@ import { APP_VERSION } from '../../../utils/app.version.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import { LaserMachineIcon } from '../../../views/LaserMachineIcon';
 import { RedoArrowIcon } from '../../../views/RedoArrowIcon';
-import { UndoArrowIcon } from '../../../views/UndoArrowIcon';
 import type { ProjectMenuItems } from '../interfaces/ProjectMenuItems';
 import type { ProjectMenuItemsOptions } from '../interfaces/ProjectMenuItemsOptions';
 import {
   LASER_MACHINE_ICON_NAME,
   PROJECT_MENU_KEY,
   REDO_ARROW_ICON_NAME,
-  UNDO_ARROW_ICON_NAME,
 } from './project.menu.constants';
 import styles from './styles.module.scss';
 
@@ -44,16 +42,9 @@ const PHONE_ONLY_DIVIDER: ProjectMenuItems[number] = {
   className: styles.phoneOnly,
 };
 
-// Only at phone width, where Undo, Redo, Import SVG and the laser profile button leave the bar for these entries.
+// Only at phone width, where Redo, Import SVG and the laser profile button leave the bar for these entries.
 const getPhoneOnlyMenuItems = (t: TFunction, options: ProjectMenuItemsOptions): ProjectMenuItems => [
   PHONE_ONLY_DIVIDER,
-  {
-    key: PROJECT_MENU_KEY.UNDO,
-    className: styles.phoneOnly,
-    icon: <UndoArrowIcon aria-label={UNDO_ARROW_ICON_NAME} />,
-    disabled: !options.canUndo,
-    label: getShortcutMenuLabel(t(DEFAULT.TOP_BAR_UNDO), t(DEFAULT.TOP_BAR_UNDO_SHORTCUT)),
-  },
   {
     key: PROJECT_MENU_KEY.REDO,
     className: styles.phoneOnly,

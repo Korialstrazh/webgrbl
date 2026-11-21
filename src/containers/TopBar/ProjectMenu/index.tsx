@@ -1,6 +1,6 @@
 /**
  * The Project menu of the top bar: new project, the Open dialog, open file, save, save as file, Export G-code and,
- * at phone width, Undo, Redo, Import SVG and the laser profiles. Open file uses a hidden file input.
+ * at phone width, Redo, Import SVG and the laser profiles. Open file uses a hidden file input.
  *
  * @author michael.morosov
  *
@@ -24,9 +24,7 @@ import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import {
   ProjectRedoRequested,
-  ProjectUndoRequested,
   selectCanRedo,
-  selectCanUndo,
 } from '../../../utils/states/project.document.state';
 import {
   NewProjectRequested,
@@ -56,7 +54,6 @@ export const ProjectMenu = (): ReactNode => {
   useOverlayRegistration(PROJECT_MENU_OVERLAY_ID, isMenuOpen);
 
   const gcodeExport: GcodeExportAvailability = useGcodeExportAvailability();
-  const canUndo: boolean = useSelector(selectCanUndo);
   const canRedo: boolean = useSelector(selectCanRedo);
 
   usePopoverAutoClose(isMenuOpen, () => setIsMenuOpen(false));
@@ -86,9 +83,6 @@ export const ProjectMenu = (): ReactNode => {
     case PROJECT_MENU_KEY.MACHINE_PROFILES:
       dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen: true }));
       break;
-    case PROJECT_MENU_KEY.UNDO:
-      dispatch(new ProjectUndoRequested());
-      break;
     case PROJECT_MENU_KEY.REDO:
       dispatch(new ProjectRedoRequested());
       break;
@@ -108,7 +102,7 @@ export const ProjectMenu = (): ReactNode => {
           open={isMenuOpen}
           onOpenChange={setIsMenuOpen}
           rootClassName={styles.projectMenuRoot}
-          menu={{ items: getProjectMenuItems(t, { gcodeExport, canUndo, canRedo }), onClick: handleMenuClick }}
+          menu={{ items: getProjectMenuItems(t, { gcodeExport, canRedo }), onClick: handleMenuClick }}
         >
           <Button
             className={styles.trigger}

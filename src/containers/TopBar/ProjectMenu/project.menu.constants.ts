@@ -21,7 +21,6 @@ export const PROJECT_MENU_KEY = {
   EXPORT_GCODE: 'export-gcode',
   IMPORT_SVG: 'import-svg',
   MACHINE_PROFILES: 'machine-profiles',
-  UNDO: 'undo',
   REDO: 'redo',
 } as const;
 
@@ -29,7 +28,6 @@ export const PROJECT_MENU_KEY = {
 export const LASER_MACHINE_ICON_NAME = 'laser-machine';
 
 /** The names of the undo and redo icons in the menu, in the antd icon-name style. */
-export const UNDO_ARROW_ICON_NAME = 'undo';
 
 export const REDO_ARROW_ICON_NAME = 'redo';
 

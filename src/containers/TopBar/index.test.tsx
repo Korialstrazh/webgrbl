@@ -17,6 +17,7 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import {
   ProjectObjectsAdded,
+  ProjectUndoRequested,
   selectCanRedo,
   selectProjectObjects,
   SvgFilesImportRequested,
@@ -372,7 +373,7 @@ describe(TopBar.name, () => {
     expect(profileButton.querySelector(CHEVRON_ICON_SELECTOR)).not.toBeNull();
   });
 
-  it('undoes and redoes from the phone-only Project menu entries', async () => {
+  it('redoes from the phone-only Project menu entry and keeps Undo out of the menu', async () => {
     const store: AppStore = newStore();
 
     renderWorkbenchTopBar(store);
@@ -382,16 +383,12 @@ describe(TopBar.name, () => {
     openProjectMenu();
     const menu: HTMLElement = await screen.findByRole('menu');
 
-    expect(within(menu).getByRole('menuitem', { name: /Redo/ }))
-      .toHaveAttribute(ARIA_DISABLED_ATTRIBUTE, ARIA_DISABLED_TRUE);
-    expect(within(menu).getByRole('menuitem', { name: /Undo/ })).toHaveTextContent(/Ctrl\+Z/);
+    expect(within(menu).queryByRole('menuitem', { name: /Undo/ })).toBeNull();
 
-    fireEvent.click(within(menu).getByRole('menuitem', { name: /Undo/ }));
-
-    expect(selectProjectObjects(store.getState())).toEqual([]);
-
-    openProjectMenu();
-    fireEvent.click(within(await screen.findByRole('menu')).getByRole('menuitem', { name: /Redo/ }));
+    act(() => {
+      store.dispatch(new ProjectUndoRequested());
+    });
+    fireEvent.click(within(menu).getByRole('menuitem', { name: /Redo/ }));
 
     expect(selectProjectObjects(store.getState())).toHaveLength(1);
   });

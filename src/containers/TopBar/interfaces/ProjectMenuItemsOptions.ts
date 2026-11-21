@@ -12,8 +12,6 @@ import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/Gc
 
 export interface ProjectMenuItemsOptions {
   gcodeExport: GcodeExportAvailability;
-  /** Whether there is a change to undo; the phone-only Undo entry is off without one. */
-  canUndo: boolean;
   /** Whether there is an undone change to redo; the phone-only Redo entry is off without one. */
   canRedo: boolean;
 }

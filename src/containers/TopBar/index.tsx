@@ -99,7 +99,7 @@ export const TopBar = (): ReactNode => {
           </span>
         </DismissibleTooltip>
       </div>
-      {/* At phone width Undo and Redo move into the Project menu too, so the project name gets their room. */}
+      {/* At phone width Redo moves into the Project menu too; Undo stays as an icon. */}
       <div className={[styles.group, styles.activeMenus, styles.historyGroup].join(' ')}>
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
@@ -118,6 +118,7 @@ export const TopBar = (): ReactNode => {
         />
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
+          className={styles.redoButton}
           iconComponent={<RedoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_REDO)}
           tooltipText={canRedo ? t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
