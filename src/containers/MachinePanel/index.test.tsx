@@ -63,6 +63,13 @@ const renderMachinePanel = (store: AppStore = newStore(), isWide: boolean = true
   return store;
 };
 
+/** The button a label names, by its aria-label or its text. */
+const getButtonByLabel = (labelText: string): HTMLElement => {
+  const labelled: HTMLElement | null = screen.queryByLabelText(labelText, { selector: BUTTON_SELECTOR });
+
+  return labelled ?? screen.getByText(labelText).closest<HTMLElement>(BUTTON_SELECTOR) ?? screen.getByText(labelText);
+};
+
 const connect = (store: AppStore): void => {
   act(() => {
     store.dispatch(new ConnectionStatusChanged({ connectionStatus: GRBL_CONNECTION_STATUS.CONNECTED }));
@@ -173,10 +180,11 @@ describe(MachinePanel.name, () => {
     connect(store);
     receiveState(store, GRBL_MACHINE_STATE.ALARM);
 
-    expect(screen.getByRole('button', { name: RESET_LABEL }).querySelector('.anticon-reload')).not.toBeNull();
-    expect(screen.getByRole('button', { name: UNLOCK_LABEL }).querySelector('.anticon-unlock')).not.toBeNull();
-    expect(screen.getByRole('button', { name: SET_ZERO_LABEL }).querySelector('.anticon svg')).not.toBeNull();
-    expect(screen.getByRole('button', { name: 'Hold to fire' }).querySelector('.anticon-bulb')).not.toBeNull();
+    // Label queries, not role queries: four role queries with names over the connected panel take over 10 s in jsdom.
+    expect(getButtonByLabel(RESET_LABEL).querySelector('.anticon-reload')).not.toBeNull();
+    expect(getButtonByLabel(UNLOCK_LABEL).querySelector('.anticon-unlock')).not.toBeNull();
+    expect(getButtonByLabel(SET_ZERO_LABEL).querySelector('.anticon svg')).not.toBeNull();
+    expect(getButtonByLabel('Hold to fire').querySelector('.anticon-bulb')).not.toBeNull();
   });
 
   it('enables Restart controller when connected, and shows Unlock only in alarm, as the primary action', () => {
