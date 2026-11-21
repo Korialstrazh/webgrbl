@@ -118,9 +118,10 @@ export const ConnectionPill = (): ReactNode => {
   ].filter(Boolean).join(' ');
 
   return (
-    // One line, the state and then the port, so a pointer user reads both without opening the popover.
+    // One line, the state and then the port, so a pointer user reads both without opening the popover. While the
+    // popover is open it says all of that itself, so no tooltip covers it (an empty title shows none).
     <DismissibleTooltip
-      title={t(DEFAULT.CONNECTION_PILL_TOOLTIP, { state: statusText, port: portText })}
+      title={isPopoverOpen ? undefined : t(DEFAULT.CONNECTION_PILL_TOOLTIP, { state: statusText, port: portText })}
       rootClassName={styles.portTooltip}
     >
       {/* The popover hangs from the whole capsule, so its right edge lines up with the pill's, Connect included. */}
@@ -163,8 +164,13 @@ export const ConnectionPill = (): ReactNode => {
           {isOneClickConnect && (
             // The icon prop gives the plug the same gap to the word as every other icon and label button. The click
             // connects and stops there, so it never also opens the popover the capsule carries.
+            // While the popover is open its own Connect is the one call to action, so this one turns quiet and leaves
+            // the Tab order (disabled), keeping its room so the popover does not move.
             <Button
-              className={styles.connectButton}
+              className={[styles.connectButton, isPopoverOpen ? styles.connectSuppressed : undefined]
+                .filter(Boolean).join(' ')}
+              disabled={isPopoverOpen}
+              aria-hidden={isPopoverOpen || undefined}
               icon={<ApiOutlined aria-hidden="true" />}
               onClick={(event: MouseEvent<HTMLElement>) => {
                 event.stopPropagation();

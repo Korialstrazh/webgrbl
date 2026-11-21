@@ -54,6 +54,8 @@ const CONNECTED_ICON_SELECTOR = '.anticon-link';
 const SIMULATED_PORT_TEXT = 'Simulated laser (no hardware)';
 const SIMULATED_ICON_SELECTOR = '.anticon-experiment';
 const STATE_ICON_SELECTOR = '.anticon-disconnect';
+const PILL_CONNECT_BUTTON_SELECTOR = '.ant-btn:not([aria-haspopup]):not([role="dialog"] *)';
+const TOOLTIP_ABSENT_WAIT_MS = 300;
 const SIMULATED_PILL_TOOLTIP_TEXT = 'Not connected · Simulated laser (no hardware)';
 
 const renderConnectionPill = (): AppStore => {
@@ -420,6 +422,38 @@ describe(ConnectionPill.name, () => {
 
     expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('leaves only the popover\'s Connect as a call to action while the popover is open', () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+    });
+
+    // The pill's own Connect is hidden from assistive technology and disabled, so it is no Tab stop either.
+    expect(screen.getAllByRole('button', { name: CONNECT_LABEL })).toEqual([getPopoverConnectButton()]);
+    expect(document.querySelector(PILL_CONNECT_BUTTON_SELECTOR)).toBeDisabled();
+
+    act(() => {
+      store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: false }));
+    });
+
+    expect(document.querySelector(PILL_CONNECT_BUTTON_SELECTOR)).toBeEnabled();
+  });
+
+  it('shows no tooltip over the open popover', async () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+    });
+    fireEvent.mouseEnter(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+
+    // The popover itself has the tooltip role in antd, so the check looks for the pill tooltip's text.
+    await expect(screen.findByText(NO_PORT_PILL_TOOLTIP_TEXT, {}, { timeout: TOOLTIP_ABSENT_WAIT_MS }))
+      .rejects.toThrow();
   });
 
   it('flags Web Serial as unavailable in a browser without navigator.serial', () => {
