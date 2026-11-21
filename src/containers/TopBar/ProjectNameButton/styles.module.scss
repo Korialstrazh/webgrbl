@@ -53,7 +53,9 @@
 // At phone width the name is a step smaller and the pencil goes, so the name keeps its room; the tooltip and the
 // button label still say a tap renames.
 @media (width < 30rem) {
+  // A full 44 px tall tap target, though the name itself is one short line.
   .nameButton {
+    min-height: var(--target-min);
     font-size: 0.875rem;
   }
 

@@ -262,12 +262,16 @@
 
 // At phone width the pill is its state icon and the Connect verb, or the icon and Connected once there is a link: it
 // must always fit.
+// Both parts are full 44 px touch targets here.
 @media (width < 30rem) {
   .pill:global(.ant-btn) {
+    min-width: var(--target-min);
+    min-height: var(--target-min);
     padding: 0 0.375rem;
   }
 
   .connectButton:global(.ant-btn) {
+    min-height: var(--target-min);
     padding: 0 var(--space-2);
   }
 
