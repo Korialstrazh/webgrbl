@@ -15,6 +15,15 @@
   line-height: normal;
 }
 
+// One keyboard focus ring for every header stop, the project name to Connect: a dark gap and a light outer line drawn as
+// shadows, so it stays clear on the orange Connect fill as on the bar, and follows each control's own rounded corners.
+:global(:root:not([data-pointer-modality])) .topBar :focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 var(--focus-outline-offset) var(--color-bg),
+    0 0 0 calc(var(--focus-outline-offset) + var(--focus-outline-width)) var(--color-text);
+}
+
 .fixedHeightBar {
   @include layout.fixed-height-bar(layout.$top-bar-height);
 }

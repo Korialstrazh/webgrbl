@@ -22,12 +22,6 @@
   &:focus-visible {
     background-color: var(--color-surface-hover);
   }
-
-  // The same focus ring as the toolbar buttons beside it.
-  &:focus-visible {
-    outline: var(--focus-outline-width) solid var(--color-focus-ring);
-    outline-offset: var(--focus-outline-offset);
-  }
 }
 
 // The same icon size as the toolbar buttons beside it.
