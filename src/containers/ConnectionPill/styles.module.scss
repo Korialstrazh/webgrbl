@@ -222,9 +222,13 @@
   cursor: default;
 }
 
-// The one-click Connect in its solid fill: a dark inner line keeps its focus ring apart from the accent fill.
-:root:not([data-pointer-modality]) .connectButton:focus-visible {
-  box-shadow: inset 0 0 0 var(--focus-outline-width) var(--color-bg);
+// The one-click Connect in its solid fill: an orange outline would vanish on the orange fill, so the ring is a dark gap
+// and a light outer line drawn as shadows, which follow the pill's rounded end where an outline was cut square.
+:root:not([data-pointer-modality]) .connectButton:global(.ant-btn):focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 var(--focus-outline-offset) var(--color-bg),
+    0 0 0 calc(var(--focus-outline-offset) + var(--focus-outline-width)) var(--color-text);
 }
 
 // In a narrow window the firmware moves to the popover and the label, and the caret goes while Connect is offered.
