@@ -83,8 +83,12 @@ describe(MachinePanel.name, () => {
     // Only STOP keeps its own short Not connected cue.
     expect(screen.queryAllByText(NOT_CONNECTED_TEXT)
       .filter((element: HTMLElement): boolean => !element.closest(BUTTON_SELECTOR))).toHaveLength(0);
-    expect(screen.queryByRole('button', { name: RESET_LABEL })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: UNLOCK_LABEL })).not.toBeInTheDocument();
+    // Label and text queries, not role queries: a role query computes every accessible name in the whole panel,
+    // which takes seconds in jsdom on the file's first, cold test.
+    expect(screen.queryByLabelText(RESET_LABEL)).not.toBeInTheDocument();
+    expect(screen.queryByText(RESET_LABEL)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(UNLOCK_LABEL)).not.toBeInTheDocument();
+    expect(screen.queryByText(UNLOCK_LABEL)).not.toBeInTheDocument();
   });
 
   it('leaves Connect to the top-bar pill while not connected', () => {
