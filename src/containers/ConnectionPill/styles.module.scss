@@ -222,15 +222,6 @@
   cursor: default;
 }
 
-// The one-click Connect in its solid fill: an orange outline would vanish on the orange fill, so the ring is a dark gap
-// and a light outer line drawn as shadows, which follow the pill's rounded end where an outline was cut square.
-:root:not([data-pointer-modality]) .connectButton:global(.ant-btn):focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 var(--focus-outline-offset) var(--color-bg),
-    0 0 0 calc(var(--focus-outline-offset) + var(--focus-outline-width)) var(--color-text);
-}
-
 // In a narrow window the firmware moves to the popover and the label, and the caret goes while Connect is offered.
 // 75rem must match the TopBar styles.
 @media (width < 75rem) {
@@ -241,8 +232,8 @@
 }
 
 // Below 57rem the pill turns into one compact capsule: the state is its coloured state icon with the dot (its button
-// still opens the connection popover and names the state and port), and Connect is a 32 px icon and word in the same
-// fill, with no split line or chevron. 57rem must match the TopBar styles.
+// still opens the connection popover and names the state and port), and Connect is an icon and word in the same
+// fill, with no split line or chevron, both as tall as the other header buttons (36 px). 57rem must match the TopBar styles.
 @media (width < 57rem) {
   .connectOffered .status,
   .caret {
@@ -251,11 +242,11 @@
 
   .pill:global(.ant-btn),
   .connectButton:global(.ant-btn) {
-    min-height: 2rem;
+    min-height: var(--control-height);
   }
 
   .pill:global(.ant-btn) {
-    min-width: 2rem;
+    min-width: var(--control-height);
     justify-content: center;
   }
 }
