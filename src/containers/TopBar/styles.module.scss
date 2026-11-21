@@ -55,7 +55,8 @@
   align-self: center;
   justify-content: center;
   align-items: flex-start;
-  row-gap: 0.0625rem;
+  // Room for the name button's focus ring, so it never touches the brand line above.
+  row-gap: 0.25rem;
   max-width: 24rem;
   min-width: 8rem;
   // The same inner space as the buttons after the first divider, so it sits evenly between the name and Project.
@@ -99,12 +100,13 @@
 .profileButton:global(.ant-btn) {
   // Borderless like Project and Import SVG, so the bar has one button style; only the chevron marks it as a chooser.
   font-size: 0.875rem;
-  font-weight: 400;
 }
 
-// Every toolbar button has the same side padding, so each divider sits with equal space on both of its sides.
+// Every toolbar button has the same side padding, so each divider sits with equal space on both of its sides, and one
+// label weight, so Project, the laser profile and Import SVG read as one row.
 .activeMenus :global(.ant-btn) {
   padding-inline: var(--space-2);
+  font-weight: 500;
 }
 
 // The same small chevron as the Project menu's.
@@ -118,8 +120,13 @@
 .historyGroup :global(.ant-btn) {
   color: var(--color-text);
 
-  &:disabled {
+  // Off yet focusable (aria-disabled), so the tooltip says why; no hover fill, as nothing happens on a click.
+  &:disabled,
+  &[aria-disabled='true'],
+  &[aria-disabled='true']:hover {
+    background-color: transparent;
     color: var(--color-icon-disabled);
+    cursor: not-allowed;
   }
 }
 

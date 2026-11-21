@@ -25,6 +25,11 @@
     color: var(--color-text);
   }
 
+  // A ring close to the name, so it stays clear of the brand line above it.
+  &:focus-visible {
+    outline-offset: 0.0625rem;
+  }
+
   // The button label is the project name, so a long one is cut instead of widening the top bar.
   > span {
     overflow: hidden;
