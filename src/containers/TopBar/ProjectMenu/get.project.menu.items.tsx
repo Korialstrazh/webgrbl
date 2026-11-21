@@ -1,6 +1,7 @@
 /**
  * The entries of the Project menu in three groups (open, save, export) with shortcut hints and, at phone width, Undo,
- * Redo, Import SVG and the laser profiles in groups of their own, and a muted footer line with the app version.
+ * Redo, Import SVG and the laser profiles in groups of their own, and a muted footer line with the app version. A
+ * phone hides the shortcut hints, having no keyboard to press them on.
  * Export G-code is disabled while it cannot start, with a tooltip that says what is missing.
  *
  * @author michael.morosov

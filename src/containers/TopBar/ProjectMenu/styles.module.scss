@@ -53,10 +53,13 @@
 // At phone width the chevron stays beside the folder, so the trigger reads as the menu that also holds Undo, Redo,
 // Import SVG and the laser profile. 30rem matches the TopBar.
 @media (width < 30rem) {
-  // A tighter hint gap, so the menu with Ctrl+Shift+Z still fits inside a phone screen.
+  // A phone has no keyboard to press Ctrl+Z on, so the shortcut hints go and the entries read as plain labels.
   .menuEntry {
-    gap: var(--space-3);
     min-width: 0;
+  }
+
+  .hint {
+    display: none;
   }
 
   // Doubled class: the TopBar squares its phone buttons to 2rem, which has no room for the chevron.
