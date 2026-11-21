@@ -110,6 +110,7 @@ export const TopBar = (): ReactNode => {
             shortcut: t(DEFAULT.TOP_BAR_UNDO_SHORTCUT),
           }) : t(DEFAULT.TOP_BAR_NOTHING_TO_UNDO)}
           isDisabled={!canUndo}
+          isFocusableWhenDisabled
           onClick={() => dispatch(new ProjectUndoRequested())}
         />
         <IconActionButton
@@ -121,6 +122,7 @@ export const TopBar = (): ReactNode => {
             shortcut: t(DEFAULT.TOP_BAR_REDO_SHORTCUT),
           }) : t(DEFAULT.TOP_BAR_NOTHING_TO_REDO)}
           isDisabled={!canRedo}
+          isFocusableWhenDisabled
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
       </div>

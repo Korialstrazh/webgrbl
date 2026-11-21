@@ -52,7 +52,7 @@ const ANTD_TEXT_BUTTON_CLASS = 'ant-btn-text';
 const PICKED_FILE_NAME = 'star.svg';
 const APP_TITLE = 'webgrbl';
 const APP_HEADING = `${APP_TITLE} v${APP_VERSION}`;
-const AUTOSAVE_TEXT = 'Saved';
+const AUTOSAVE_TEXT = 'Autosave: Saved';
 const UNDO_TOOLTIP_TEXT = 'Undo (Ctrl+Z)';
 const REDO_TOOLTIP_TEXT = 'Redo (Ctrl+Shift+Z)';
 const PROFILE_TOOLTIP_TEXT = 'Laser profile: Garage laser';
@@ -87,6 +87,7 @@ const CLOUD_UPLOAD_ICON_SELECTOR = '.anticon-cloud-upload';
 const ALERT_ICON_SELECTOR = '.anticon-exclamation-circle';
 const EXCLAMATION_ICON_SELECTOR = '.anticon-exclamation';
 const SAVE_FAILED_TEXT = 'Save failed';
+const AUTOSAVE_FAILED_TEXT = 'Autosave: Save failed';
 const NOTHING_TO_UNDO_TEXT = 'Nothing to undo';
 const NOTHING_TO_REDO_TEXT = 'Nothing to redo';
 const CHEVRON_ICON_SELECTOR = '.anticon-down';
@@ -289,19 +290,19 @@ describe(TopBar.name, () => {
 
     renderWorkbenchTopBar(store);
 
-    expect(screen.getByRole('button', { name: UNDO_LABEL })).toBeDisabled();
-    expect(screen.getByRole('button', { name: REDO_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: UNDO_LABEL })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: REDO_LABEL })).toHaveAttribute('aria-disabled', 'true');
 
     act(() => {
       store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
     });
 
-    expect(screen.getByRole('button', { name: UNDO_LABEL })).toBeEnabled();
+    expect(screen.getByRole('button', { name: UNDO_LABEL })).not.toHaveAttribute('aria-disabled');
 
     fireEvent.click(screen.getByRole('button', { name: UNDO_LABEL }));
 
     expect(selectProjectObjects(store.getState())).toEqual([]);
-    expect(screen.getByRole('button', { name: REDO_LABEL })).toBeEnabled();
+    expect(screen.getByRole('button', { name: REDO_LABEL })).not.toHaveAttribute('aria-disabled');
 
     fireEvent.click(screen.getByRole('button', { name: REDO_LABEL }));
 
@@ -343,6 +344,24 @@ describe(TopBar.name, () => {
     fireEvent.mouseEnter(screen.getByRole('button', { name: REDO_LABEL }));
 
     expect(await screen.findByText(NOTHING_TO_REDO_TEXT)).toBeInTheDocument();
+  });
+
+  it('keeps disabled Undo and Redo focusable, shows why on keyboard focus and ignores a click', async () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+
+    const undoButton: HTMLElement = screen.getByRole('button', { name: UNDO_LABEL });
+
+    expect(undoButton).not.toBeDisabled();
+
+    fireEvent.focus(undoButton);
+
+    expect(await screen.findByText(NOTHING_TO_UNDO_TEXT)).toBeInTheDocument();
+
+    fireEvent.click(undoButton);
+
+    expect(selectCanRedo(store.getState())).toBe(false);
   });
 
   it('shows the laser profile as a chip with a chevron, since it opens a chooser', () => {
@@ -683,7 +702,7 @@ describe(TopBar.name, () => {
         store.dispatch(new ProjectSaveFailed());
       });
 
-      const readout: HTMLElement = screen.getByRole('status', { name: SAVE_FAILED_TEXT });
+      const readout: HTMLElement = screen.getByRole('status', { name: AUTOSAVE_FAILED_TEXT });
 
       expect(readout).toHaveTextContent(SAVE_FAILED_TEXT);
       expect(readout.querySelector(EXCLAMATION_ICON_SELECTOR)).not.toBeNull();
