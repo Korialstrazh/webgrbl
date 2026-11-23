@@ -1,0 +1,58 @@
+@use '../handbook.animation';
+
+$loop: 5s;
+
+.laserDot { opacity: 0; }
+.alertDisc { fill: var(--color-danger-button); }
+.alertMark { fill: var(--color-text); font-size: 16px; font-weight: 800; }
+.alertBadge { transform-box: fill-box; transform-origin: center; }
+.stopCaption { fill: var(--color-danger-text); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+.stopCap { fill: var(--color-danger-button); stroke: var(--color-danger); }
+.unlockLabel { font-family: var(--font-ui); font-size: 10px; }
+
+// The head runs right and halts where Esc catches it, waits through the alert, then goes back home after Unlock.
+// Motion only for readers who have not asked for less; otherwise the drawing as written is the still picture.
+@media (prefers-reduced-motion: no-preference) {
+  .headColumn { animation: head-column $loop ease-in-out infinite; }
+  .laserDot { animation: laser-on $loop linear infinite; }
+  .stopKey { animation: stop-press $loop ease-out infinite; }
+  .alertBadge { animation: alert-show $loop ease-out infinite; }
+  .unlockKey { animation: unlock-press $loop ease-out infinite; }
+  .unlockKey .keyCap { animation: unlock-light $loop ease-out infinite; }
+}
+
+@keyframes head-column {
+  0% { transform: translateX(0); animation-timing-function: linear; }
+  30%, 70% { transform: translateX(84px); }
+  86%, 100% { transform: translateX(0); }
+}
+
+@keyframes laser-on {
+  0%, 29% { opacity: 1; }
+  30%, 100% { opacity: 0; }
+}
+
+@keyframes stop-press {
+  0%, 27% { transform: translateY(0); }
+  30% { transform: translateY(3px); }
+  35%, 100% { transform: translateY(0); }
+}
+
+@keyframes alert-show {
+  0%, 32% { opacity: 0; transform: scale(0.4); }
+  38% { opacity: 1; transform: scale(1.12); }
+  42%, 68% { opacity: 1; transform: scale(1); }
+  74%, 100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes unlock-press {
+  0%, 64% { transform: translateY(0); }
+  67% { transform: translateY(3px); }
+  72%, 100% { transform: translateY(0); }
+}
+
+@keyframes unlock-light {
+  0%, 64% { fill: var(--color-surface-3); }
+  67%, 80% { fill: var(--color-accent-tint); }
+  90%, 100% { fill: var(--color-surface-3); }
+}

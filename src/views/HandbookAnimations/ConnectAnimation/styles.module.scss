@@ -1,0 +1,73 @@
+@use '../handbook.animation';
+
+$loop: 4s;
+
+.cable { stroke: var(--color-control-border); stroke-width: 4; stroke-linecap: round; }
+.plugBody { fill: var(--color-surface-3); stroke: var(--color-control-border); stroke-width: 1.5; }
+.plugTip { fill: var(--color-text-muted); }
+.device { fill: var(--color-bed-surface); stroke: var(--color-border); stroke-width: 1.5; }
+.port { fill: var(--color-bg); }
+.linkDot { fill: var(--color-success); }
+.sliderTrack { fill: var(--color-surface-3); }
+.sliderFill { fill: var(--color-accent); transform-origin: 40px 144px; }
+.sliderKnob { fill: var(--color-text); stroke: var(--color-accent); stroke-width: 2; }
+.tagChip { fill: var(--color-surface-3); stroke: var(--color-control-border); }
+.wattsTag { transform-box: fill-box; transform-origin: center; }
+
+// Motion only for readers who have not asked for less; otherwise the drawing as written is the still picture.
+@media (prefers-reduced-motion: no-preference) {
+  .plug { animation: plug-in $loop ease-out infinite; }
+  .linkDot { animation: link-pulse $loop ease-in-out infinite; }
+  .linkDotSecond { animation-name: link-pulse-second; }
+  .linkDotThird { animation-name: link-pulse-third; }
+  .sliderFill { animation: slider-fill $loop ease-in-out infinite; }
+  .sliderKnob { animation: slider-knob $loop ease-in-out infinite; }
+  .powerPercent { animation: label-show $loop ease-out infinite; }
+  .wattsTag { animation: watts-show $loop ease-out infinite; }
+}
+
+@keyframes plug-in {
+  0%, 5% { transform: translateX(-56px); }
+  25%, 100% { transform: translateX(0); }
+}
+
+@keyframes link-pulse {
+  0%, 28% { opacity: 0.15; }
+  34% { opacity: 1; }
+  40% { opacity: 0.4; }
+  48%, 100% { opacity: 1; }
+}
+
+@keyframes link-pulse-second {
+  0%, 31% { opacity: 0.15; }
+  37% { opacity: 1; }
+  43% { opacity: 0.4; }
+  51%, 100% { opacity: 1; }
+}
+
+@keyframes link-pulse-third {
+  0%, 34% { opacity: 0.15; }
+  40% { opacity: 1; }
+  46% { opacity: 0.4; }
+  54%, 100% { opacity: 1; }
+}
+
+@keyframes slider-fill {
+  0%, 52% { transform: scaleX(0.05); }
+  75%, 100% { transform: scaleX(1); }
+}
+
+@keyframes slider-knob {
+  0%, 52% { transform: translateX(-171px); }
+  75%, 100% { transform: translateX(0); }
+}
+
+@keyframes label-show {
+  0%, 72% { opacity: 0; }
+  78%, 100% { opacity: 1; }
+}
+
+@keyframes watts-show {
+  0%, 78% { opacity: 0; transform: scale(0.6); }
+  86%, 100% { opacity: 1; transform: scale(1); }
+}

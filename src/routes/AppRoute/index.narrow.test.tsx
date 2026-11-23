@@ -8,6 +8,7 @@ import { selectIsFrameSettingsOpen } from '../../utils/states/ui.workbench.state
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 import { setMatchMediaMatches } from '../../utils/test.support/match.media.mock';
 
+const HELP_LABEL = 'Help';
 const START_LABEL = 'Start job';
 const START_CAPTION = 'Start';
 const SHOW_FRAME_SETTINGS_LABEL = 'Show frame settings';
@@ -92,5 +93,12 @@ describe(`${AppRoute.name} in a narrow window`, () => {
     expect(selectIsFrameSettingsOpen(store.getState())).toBe(true);
     // The Job region is hidden in the narrow layout; the open settings stay mounted there for when it is shown.
     expect(screen.getByRole('button', { name: HIDE_FRAME_SETTINGS_LABEL, hidden: true })).toBeInTheDocument();
+  });
+
+  it('keeps the Help button in the top bar', async () => {
+    setMatchMediaMatches(false);
+    await renderWorkbench(newStore());
+
+    expect(screen.getByRole('button', { name: HELP_LABEL, hidden: true })).toBeInTheDocument();
   });
 });

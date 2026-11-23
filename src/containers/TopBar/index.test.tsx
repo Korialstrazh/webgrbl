@@ -46,6 +46,9 @@ import { PROJECT_FILE_PICKER_ACCEPT } from '../ProjectFileInput/project.file.inp
 import { StopHotkey } from '../StopHotkey';
 import { SVG_FILE_PICKER_ACCEPT, SVG_IMPORT_INPUT_TEST_ID } from '../SvgImportButton/svg.import.button.constants';
 
+const HELP_LABEL = 'Help';
+const ABOUT_LABEL = 'About webgrbl';
+const HANDBOOK_LABEL = 'Getting started';
 const UNDO_LABEL = 'Undo';
 const REDO_LABEL = 'Redo';
 const IMPORT_SVG_LABEL = 'Import SVG';
@@ -126,6 +129,24 @@ const renderWorkbenchTopBar = (store: AppStore): void => {
 };
 
 describe(TopBar.name, () => {
+  it('opens the About dialog from the Help menu', async () => {
+    renderWorkbenchTopBar(newStore());
+
+    fireEvent.click(screen.getByRole('button', { name: HELP_LABEL }));
+    fireEvent.click(await screen.findByText(ABOUT_LABEL));
+
+    expect(await screen.findByRole('dialog', { name: ABOUT_LABEL })).toBeInTheDocument();
+  });
+
+  it('opens the handbook from the Help menu', async () => {
+    renderWorkbenchTopBar(newStore());
+
+    fireEvent.click(screen.getByRole('button', { name: HELP_LABEL }));
+    fireEvent.click(await screen.findByText(HANDBOOK_LABEL));
+
+    expect(await screen.findByRole('dialog', { name: HANDBOOK_LABEL })).toBeInTheDocument();
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
