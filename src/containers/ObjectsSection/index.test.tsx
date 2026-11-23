@@ -277,6 +277,15 @@ describe(ObjectsSection.name, () => {
     expect(scrollSpy).toHaveBeenCalledWith({ block: 'nearest' });
   });
 
+  it('keeps the full name of an object on hover, where a long one is cut short', () => {
+    const store: AppStore = newStore();
+
+    loadObjects(store);
+    renderSection(store);
+
+    expect(screen.getByText(FIRST_NAME).getAttribute('title')).toBe(FIRST_NAME);
+  });
+
   it('scrolls the fields and the row of a new selection into view', () => {
     const store: AppStore = newStore();
     const scrollSpy: MockInstance<Element['scrollIntoView']> = vi.spyOn(Element.prototype, 'scrollIntoView');
