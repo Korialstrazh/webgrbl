@@ -8,7 +8,6 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { InputNumber } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,6 +25,7 @@ import {
 import { MachineProfileSaved, selectActiveMachineProfile } from '../../../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../../../utils/states/new.store';
 import styles from './styles.module.scss';
+import { DecimalNumberInput } from '../../../../views/DecimalNumberInput';
 
 export const JogSpeedInput = (): ReactNode => {
   const { t } = useTranslation();
@@ -49,7 +49,7 @@ export const JogSpeedInput = (): ReactNode => {
   };
 
   return (
-    <InputNumber
+    <DecimalNumberInput
       className={styles.jogSpeedInput}
       aria-label={t(DEFAULT.MACHINE_MOVE_JOG_SPEED_LABEL)}
       disabled={!activeProfile}

@@ -12,7 +12,7 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { Button, Form, InputNumber } from 'antd';
+import { Button, Form } from 'antd';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,6 +48,7 @@ import {
   TEST_SAMPLE_SPEED_MM_PER_MIN_MIN,
 } from './test.sample.dialog.constants';
 import styles from './styles.module.scss';
+import { DecimalNumberInput } from '../../views/DecimalNumberInput';
 
 type TestSampleDialogContentProps = Pick<TestSampleDialogProps, 'material' | 'onClose'>;
 
@@ -173,7 +174,7 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
               validateStatus={depthErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
               help={depthErrorKey && t(depthErrorKey, { max: material.thicknessMm })}
             >
-              <InputNumber
+              <DecimalNumberInput
                 id={getFieldId(DEPTH_FIELD_ID_SUFFIX)}
                 disabled={!isNotThrough}
                 value={depthMm ?? null}
@@ -189,21 +190,21 @@ const TestSampleDialogContent = ({ material, onClose }: TestSampleDialogContentP
         <div className={styles.settingsRow}>
           <Form layout={ANTD_FORM_LAYOUT_VERTICAL} component={false}>
             <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_POWER)} htmlFor={getFieldId(POWER_FIELD_ID_SUFFIX)}>
-              <InputNumber
+              <DecimalNumberInput
                 id={getFieldId(POWER_FIELD_ID_SUFFIX)}
                 value={isFiniteNumber(cutSettings.powerPercent) ? cutSettings.powerPercent : null}
                 onChange={(value: number | null) => changeCutSetting('powerPercent', value)}
               />
             </Form.Item>
             <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_SPEED)} htmlFor={getFieldId(SPEED_FIELD_ID_SUFFIX)}>
-              <InputNumber
+              <DecimalNumberInput
                 id={getFieldId(SPEED_FIELD_ID_SUFFIX)}
                 value={isFiniteNumber(cutSettings.speedMmPerMin) ? cutSettings.speedMmPerMin : null}
                 onChange={(value: number | null) => changeCutSetting('speedMmPerMin', value)}
               />
             </Form.Item>
             <Form.Item label={t(DEFAULT.TEST_SAMPLE_DIALOG_PASSES)} htmlFor={getFieldId(PASSES_FIELD_ID_SUFFIX)}>
-              <InputNumber
+              <DecimalNumberInput
                 id={getFieldId(PASSES_FIELD_ID_SUFFIX)}
                 precision={ANTD_INPUT_NUMBER_PRECISION_INTEGER}
                 value={isFiniteNumber(cutSettings.passes) ? cutSettings.passes : null}

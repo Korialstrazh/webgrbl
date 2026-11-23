@@ -9,7 +9,6 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { InputNumber } from 'antd';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { isFiniteNumber } from '../../../../utils/type.guards/is.finite.number';
@@ -17,6 +16,7 @@ import { DismissibleTooltip } from '../../../../views/DismissibleTooltip';
 import type { ObjectFieldDraft } from '../../interfaces/ObjectFieldDraft';
 import type { ObjectTransformFieldProps } from '../../interfaces/ObjectTransformFieldProps';
 import styles from './styles.module.scss';
+import { DecimalNumberInput } from '../../../../views/DecimalNumberInput';
 
 const isDraftValueChanged = (draftValue: number | null | undefined, storedValue: number): draftValue is number =>
   isFiniteNumber(draftValue) && draftValue !== storedValue;
@@ -43,7 +43,7 @@ export const ObjectTransformField = (props: ObjectTransformFieldProps): ReactNod
     <DismissibleTooltip title={hintText}>
       <div className={styles.field}>
         <label className={styles.label} htmlFor={inputId}>{label}</label>
-        <InputNumber
+        <DecimalNumberInput
           id={inputId}
           className={styles.input}
           prefix={<span className={styles.prefix} aria-hidden>{prefixComponent}</span>}
