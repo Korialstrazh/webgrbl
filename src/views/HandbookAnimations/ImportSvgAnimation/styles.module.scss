@@ -1,0 +1,48 @@
+@use '../handbook.animation';
+
+$loop: 4.5s;
+
+.part {
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  fill-opacity: 0.35;
+}
+
+.layerBlue { stroke: var(--color-info); fill: var(--color-info); }
+.layerOrange { stroke: var(--color-accent); fill: var(--color-accent); }
+.filePage { fill: var(--color-surface-3); stroke: var(--color-text-muted); stroke-width: 2; stroke-linejoin: round; }
+.fileFold { stroke: var(--color-text-muted); stroke-width: 2; stroke-linejoin: round; }
+
+.fileLabel {
+  fill: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.file { opacity: 0; transform-box: fill-box; transform-origin: center; animation: file-drop $loop ease-out infinite; }
+.part { animation: part-draw $loop ease-in-out infinite; }
+.layerBlue { animation-name: part-draw-second; }
+
+@keyframes file-drop {
+  0% { opacity: 0; transform: translateY(-60px); }
+  10% { opacity: 1; }
+  28% { opacity: 1; transform: translateY(0) scale(1); }
+  40%, 100% { opacity: 0; transform: translateY(0) scale(0.7); }
+}
+
+@keyframes part-draw {
+  0%, 36% { stroke-dashoffset: 100; fill-opacity: 0; }
+  58% { stroke-dashoffset: 0; fill-opacity: 0; }
+  72%, 100% { stroke-dashoffset: 0; fill-opacity: 0.35; }
+}
+
+@keyframes part-draw-second {
+  0%, 44% { stroke-dashoffset: 100; fill-opacity: 0; }
+  64% { stroke-dashoffset: 0; fill-opacity: 0; }
+  78%, 100% { stroke-dashoffset: 0; fill-opacity: 0.35; }
+}

@@ -1,0 +1,57 @@
+@use '../handbook.animation';
+
+$loop: 4s;
+
+.jobBox { stroke: var(--color-bed-text); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.6; }
+.trace { stroke: var(--color-bed-laser-head); stroke-width: 1.5; stroke-dasharray: 100; stroke-dashoffset: 0; opacity: 0.5; }
+.faintDot { fill: var(--color-bed-laser-head); opacity: 0; }
+.pointerDot { fill: var(--color-bed-laser-head); }
+
+.headColumn { animation: head-column $loop linear infinite; }
+.gantryRow { animation: gantry-row $loop linear infinite; }
+.trace { animation: trace-draw $loop linear infinite; }
+.faintDot { animation: faint-dot $loop linear infinite; }
+.pointerDot { animation: pointer-blink $loop step-end infinite; }
+.pointerKey { animation: key-press $loop ease-out infinite; }
+.pointerKey .keyCap { animation: key-light $loop ease-out infinite; }
+
+// The bounding box is 110 by 70: the head rides the gantry along x while the gantry moves along y, and each side takes
+// a share of the time that matches its length, so the head stays on the tip of the trace line.
+@keyframes head-column {
+  0% { transform: translateX(0); }
+  18.3%, 30% { transform: translateX(110px); }
+  48.3%, 100% { transform: translateX(0); }
+}
+
+@keyframes gantry-row {
+  0%, 18.3% { transform: translateY(0); }
+  30%, 48.3% { transform: translateY(70px); }
+  60%, 100% { transform: translateY(0); }
+}
+
+@keyframes trace-draw {
+  0% { stroke-dashoffset: 100; }
+  60%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes faint-dot {
+  0%, 60% { opacity: 0.5; }
+  62%, 100% { opacity: 0; }
+}
+
+@keyframes pointer-blink {
+  0%, 66%, 76%, 86% { opacity: 0; }
+  71%, 81%, 91% { opacity: 1; }
+}
+
+@keyframes key-press {
+  0%, 62% { transform: translateY(0); }
+  65% { transform: translateY(2px); }
+  70%, 100% { transform: translateY(0); }
+}
+
+@keyframes key-light {
+  0%, 62% { fill: var(--color-surface-3); }
+  65%, 92% { fill: var(--color-accent-tint); }
+  100% { fill: var(--color-surface-3); }
+}
