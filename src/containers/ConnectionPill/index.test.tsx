@@ -55,6 +55,7 @@ const SIMULATED_PORT_TEXT = 'Simulated laser (no hardware)';
 const SIMULATED_ICON_SELECTOR = '.anticon-experiment';
 const STATE_ICON_SELECTOR = '.anticon-disconnect';
 const PILL_CONNECT_BUTTON_SELECTOR = '.ant-btn:not([aria-haspopup]):not([role="dialog"] *)';
+const SIMULATED_CONNECT_TOOLTIP_TEXT = 'Connect to Simulated laser (no hardware)';
 const TOOLTIP_ABSENT_WAIT_MS = 300;
 const SIMULATED_PILL_TOOLTIP_TEXT = 'Not connected · Simulated laser (no hardware)';
 
@@ -208,6 +209,24 @@ describe(ConnectionPill.name, () => {
     });
 
     expect(pill.querySelector(SIMULATED_ICON_SELECTOR)).not.toBeInTheDocument();
+  });
+
+  it('names the action and the port, not the state, in the tooltip of the one-click Connect button', async () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+    });
+
+    const connectButton: Element | null = document.querySelector(PILL_CONNECT_BUTTON_SELECTOR);
+
+    expect(connectButton).toBeInTheDocument();
+    fireEvent.mouseEnter(connectButton ?? document.body);
+
+    const tooltip: HTMLElement = await screen.findByRole('tooltip');
+
+    expect(tooltip).toHaveTextContent(SIMULATED_CONNECT_TOOLTIP_TEXT);
+    expect(tooltip).not.toHaveTextContent(SHORT_DISCONNECTED_TEXT);
   });
 
   it('names the state and "No port chosen" on one tooltip line while no port is chosen', async () => {
