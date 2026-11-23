@@ -17,6 +17,7 @@ import { newStore } from '../../utils/states/new.store';
 import type { AppDispatch, AppStore } from '../../utils/states/new.store';
 import {
   ProjectObjectsAdded,
+  ProjectUndoRequested,
   selectCanRedo,
   selectProjectObjects,
   SvgFilesImportRequested,
@@ -29,6 +30,7 @@ import {
   ProjectFileImportRequested,
   ProjectOpened,
   ProjectRenameRequested,
+  ProjectSaveFailed,
   ProjectSaveRequested,
   ProjectSaveStatusChanged,
 } from '../../utils/states/project.state';
@@ -47,10 +49,14 @@ import { SVG_FILE_PICKER_ACCEPT, SVG_IMPORT_INPUT_TEST_ID } from '../SvgImportBu
 const UNDO_LABEL = 'Undo';
 const REDO_LABEL = 'Redo';
 const IMPORT_SVG_LABEL = 'Import SVG';
+const ANTD_TEXT_BUTTON_CLASS = 'ant-btn-text';
 const PICKED_FILE_NAME = 'star.svg';
 const APP_TITLE = 'webgrbl';
 const APP_HEADING = `${APP_TITLE} v${APP_VERSION}`;
-const AUTOSAVE_TEXT = 'Saved';
+const AUTOSAVE_TEXT = 'Autosave: Saved';
+const UNDO_TOOLTIP_TEXT = 'Undo (Ctrl+Z)';
+const REDO_TOOLTIP_TEXT = 'Redo (Ctrl+Shift+Z)';
+const PROFILE_TOOLTIP_TEXT = 'Laser profile: Garage laser';
 const DISCONNECTED_PATTERN = /^Connection: Not connected/;
 const FIXED_HEIGHT_CLASS_NAME = 'fixedHeightBar';
 const MACHINE_PROFILES_LABEL = 'Laser profiles';
@@ -60,13 +66,14 @@ const SOON_LABEL = 'Soon';
 const PROJECT_MENU_LABEL = 'Project';
 const PROJECT_ID = 'project-1';
 const PROJECT_NAME = 'Coasters';
+const RENAME_PROJECT_LABEL = `Rename ${PROJECT_NAME}`;
 const NEW_PROJECT_NAME = 'Coasters v2';
 const PROJECT_NAME_INPUT_LABEL = 'Project name';
 const NEW_PROJECT_LABEL = 'New project';
-const OPEN_LABEL = 'Open from this browser\u2026';
-const SAVE_SHORTCUT_PATTERN = /Ctrl\+S/;
+const OPEN_LABEL = 'Open saved project\u2026';
+const SAVE_SHORTCUT_PATTERN = /Ctrl\+S$/;
 const SAVE_AS_FILE_LABEL = 'Save as file';
-const OPEN_FILE_LABEL = 'Open project file\u2026';
+const OPEN_FILE_LABEL = 'Open file\u2026';
 const ICON_SELECTOR = '[role="img"]';
 const FOLDER_OPEN_ICON_NAME = 'folder-open';
 const EXPORT_GCODE_PATTERN = /Export G-code/;
@@ -75,8 +82,16 @@ const PROJECT_FILE_INPUT_LABEL = 'Open a project file';
 const PROJECT_FILE_NAME = 'coasters.webgrbl.json';
 const SAVING_TEXT = 'Saving\u2026';
 const NOT_SAVED_TEXT = 'Waiting to save';
-const CLOCK_ICON_SELECTOR = '.anticon-clock-circle';
+const CLOUD_ICON_SELECTOR = '.anticon-cloud';
+const CHECK_ICON_SELECTOR = '.anticon-check';
+const CLOUD_UPLOAD_ICON_SELECTOR = '.anticon-cloud-upload';
 const ALERT_ICON_SELECTOR = '.anticon-exclamation-circle';
+const EXCLAMATION_ICON_SELECTOR = '.anticon-exclamation';
+const SAVE_FAILED_TEXT = 'Save failed';
+const AUTOSAVE_FAILED_TEXT = 'Autosave: Save failed';
+const NOTHING_TO_UNDO_TEXT = 'Nothing to undo (Ctrl+Z)';
+const NOTHING_TO_REDO_TEXT = 'Nothing to redo (Ctrl+Shift+Z)';
+const CHEVRON_ICON_SELECTOR = '.anticon-down';
 const UNTITLED_PROJECT_NAME = 'New project';
 const ARIA_DISABLED_ATTRIBUTE = 'aria-disabled';
 const ARIA_DISABLED_TRUE = 'true';
@@ -126,6 +141,32 @@ describe(TopBar.name, () => {
     expect(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL })).toHaveTextContent(ACTIVE_PROFILE_NAME);
   });
 
+  it('names the active profile in a short tooltip', async () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile({ name: ACTIVE_PROFILE_NAME });
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    renderWorkbenchTopBar(store);
+    fireEvent.mouseEnter(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(PROFILE_TOOLTIP_TEXT);
+  });
+
+  it('shows the profile tooltip on hover after the dialog was opened from the keyboard', async () => {
+    const store: AppStore = newStore();
+    const profile: MachineProfile = newMachineProfile({ name: ACTIVE_PROFILE_NAME });
+
+    store.dispatch(new MachineProfileSaved({ profile }));
+    store.dispatch(new ActiveMachineProfileSelected({ profileId: profile.id }));
+    renderWorkbenchTopBar(store);
+    fireEvent.click(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL }));
+    fireEvent.keyDown(screen.getByRole('dialog', { name: MACHINE_PROFILES_LABEL }), { key: ESCAPE_KEY });
+    fireEvent.mouseEnter(screen.getByRole('button', { name: MACHINE_PROFILES_LABEL }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(PROFILE_TOOLTIP_TEXT);
+  });
+
   it('keeps the profile name as the only text of the profile button, with no generic caption beside it', () => {
     renderWorkbenchTopBar(newStore());
 
@@ -142,8 +183,21 @@ describe(TopBar.name, () => {
     );
 
     expect(screen.getByRole('heading', { name: APP_HEADING })).toBeInTheDocument();
-    expect(screen.getByText(AUTOSAVE_TEXT)).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: AUTOSAVE_TEXT })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).toBeInTheDocument();
+  });
+
+  it('names the brand word and the version in the heading, which phone width hides as one line', () => {
+    render(
+      <Provider store={newStore()}>
+        <TopBar />
+      </Provider>,
+    );
+
+    const heading: HTMLElement = screen.getByRole('heading', { name: APP_HEADING });
+
+    expect(within(heading).getByText(APP_TITLE)).toBeInTheDocument();
+    expect(within(heading).getByText(`v${APP_VERSION}`)).toBeInTheDocument();
   });
 
   it('shows no placeholder for planned features', () => {
@@ -226,29 +280,117 @@ describe(TopBar.name, () => {
     expect(input.value).toBe('');
   });
 
+  it('draws Import SVG as a borderless text button, like the other toolbar actions', () => {
+    renderWorkbenchTopBar(newStore());
+
+    expect(screen.getByRole('button', { name: IMPORT_SVG_LABEL })).toHaveClass(ANTD_TEXT_BUTTON_CLASS);
+  });
+
   it('disables undo and redo at the start, enables undo after a change and undoes it', () => {
     const store: AppStore = newStore();
 
     renderWorkbenchTopBar(store);
 
-    expect(screen.getByRole('button', { name: UNDO_LABEL })).toBeDisabled();
-    expect(screen.getByRole('button', { name: REDO_LABEL })).toBeDisabled();
+    expect(screen.getByRole('button', { name: UNDO_LABEL })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: REDO_LABEL })).toHaveAttribute('aria-disabled', 'true');
 
     act(() => {
       store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
     });
 
-    expect(screen.getByRole('button', { name: UNDO_LABEL })).toBeEnabled();
+    expect(screen.getByRole('button', { name: UNDO_LABEL })).not.toHaveAttribute('aria-disabled');
 
     fireEvent.click(screen.getByRole('button', { name: UNDO_LABEL }));
 
     expect(selectProjectObjects(store.getState())).toEqual([]);
-    expect(screen.getByRole('button', { name: REDO_LABEL })).toBeEnabled();
+    expect(screen.getByRole('button', { name: REDO_LABEL })).not.toHaveAttribute('aria-disabled');
 
     fireEvent.click(screen.getByRole('button', { name: REDO_LABEL }));
 
     expect(selectProjectObjects(store.getState())).toHaveLength(1);
     expect(selectCanRedo(store.getState())).toBe(false);
+  });
+
+  it('shows the undo shortcut in the Undo tooltip', async () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+    fireEvent.mouseEnter(screen.getByRole('button', { name: UNDO_LABEL }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(UNDO_TOOLTIP_TEXT);
+  });
+
+  it('shows the redo shortcut in the Redo tooltip', async () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+    fireEvent.click(screen.getByRole('button', { name: UNDO_LABEL }));
+    fireEvent.mouseEnter(screen.getByRole('button', { name: REDO_LABEL }));
+
+    expect(await screen.findByText(REDO_TOOLTIP_TEXT)).toBeInTheDocument();
+  });
+
+  it('says there is nothing to undo or redo, with the shortcut, while both are disabled', async () => {
+    renderWorkbenchTopBar(newStore());
+    fireEvent.mouseEnter(screen.getByRole('button', { name: UNDO_LABEL }));
+
+    expect(await screen.findByText(NOTHING_TO_UNDO_TEXT)).toBeInTheDocument();
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: REDO_LABEL }));
+
+    expect(await screen.findByText(NOTHING_TO_REDO_TEXT)).toBeInTheDocument();
+  });
+
+  it('keeps disabled Undo and Redo focusable, shows why on keyboard focus and ignores a click', async () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+
+    const undoButton: HTMLElement = screen.getByRole('button', { name: UNDO_LABEL });
+
+    expect(undoButton).not.toBeDisabled();
+
+    fireEvent.focus(undoButton);
+
+    expect(await screen.findByText(NOTHING_TO_UNDO_TEXT)).toBeInTheDocument();
+
+    fireEvent.click(undoButton);
+
+    expect(selectCanRedo(store.getState())).toBe(false);
+  });
+
+  it('shows the laser profile as a chip with a chevron, since it opens a chooser', () => {
+    renderWorkbenchTopBar(newStore());
+
+    const profileButton: HTMLElement = screen.getByRole('button', { name: MACHINE_PROFILES_LABEL });
+
+    expect(profileButton.querySelector(CHEVRON_ICON_SELECTOR)).not.toBeNull();
+  });
+
+  it('redoes from the phone-only Project menu entry and keeps Undo out of the menu', async () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+    act(() => {
+      store.dispatch(new ProjectObjectsAdded({ objects: [newProjectObject()], layers: [] }));
+    });
+    openProjectMenu();
+    const menu: HTMLElement = await screen.findByRole('menu');
+
+    expect(within(menu).queryByRole('menuitem', { name: /Undo/ })).toBeNull();
+
+    act(() => {
+      store.dispatch(new ProjectUndoRequested());
+    });
+    fireEvent.click(within(menu).getByRole('menuitem', { name: /Redo/ }));
+
+    expect(selectProjectObjects(store.getState())).toHaveLength(1);
   });
 
   it('does not undo with Ctrl+Z while the machine profiles dialog is open', () => {
@@ -287,7 +429,7 @@ describe(TopBar.name, () => {
       expect(getDispatchedActionCalls(dispatchSpy, ProjectSaveRequested)).toHaveLength(1);
     });
 
-    it('gives each project menu entry its own icon, so Save as file and Open project file never look alike', () => {
+    it('gives each project menu entry its own icon, so Save as file and Open file never look alike', () => {
       renderWorkbenchTopBar(newStore());
       openProjectMenu();
 
@@ -405,11 +547,11 @@ describe(TopBar.name, () => {
 
       renderWorkbenchTopBar(store);
 
-      expect(screen.getByRole('button', { name: UNTITLED_PROJECT_NAME })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: `Rename ${UNTITLED_PROJECT_NAME}` })).toBeInTheDocument();
 
       openProject(store);
 
-      expect(screen.getByRole('button', { name: PROJECT_NAME })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: RENAME_PROJECT_LABEL })).toBeInTheDocument();
     });
 
     it('renames the project on Enter with a trimmed name', () => {
@@ -420,7 +562,7 @@ describe(TopBar.name, () => {
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
       renderWorkbenchTopBar(store);
-      fireEvent.click(screen.getByRole('button', { name: PROJECT_NAME }));
+      fireEvent.click(screen.getByRole('button', { name: RENAME_PROJECT_LABEL }));
       fireEvent.change(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), {
         target: { value: `  ${NEW_PROJECT_NAME}  ` },
       });
@@ -441,7 +583,7 @@ describe(TopBar.name, () => {
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
       renderWorkbenchTopBar(store);
-      fireEvent.click(screen.getByRole('button', { name: PROJECT_NAME }));
+      fireEvent.click(screen.getByRole('button', { name: RENAME_PROJECT_LABEL }));
       fireEvent.change(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), {
         target: { value: NEW_PROJECT_NAME },
       });
@@ -461,14 +603,14 @@ describe(TopBar.name, () => {
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
       renderWorkbenchTopBar(store);
-      fireEvent.click(screen.getByRole('button', { name: PROJECT_NAME }));
+      fireEvent.click(screen.getByRole('button', { name: RENAME_PROJECT_LABEL }));
       fireEvent.change(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), {
         target: { value: typedName },
       });
       fireEvent.keyDown(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), { key: ENTER_KEY });
 
       expect(getDispatchedActionCalls(dispatchSpy, ProjectRenameRequested)).toEqual([]);
-      expect(screen.getByRole('button', { name: PROJECT_NAME })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: RENAME_PROJECT_LABEL })).toBeInTheDocument();
     });
 
     it('cancels on Escape without a rename and without stopping the machine', () => {
@@ -482,7 +624,7 @@ describe(TopBar.name, () => {
       const dispatchSpy: MockInstance<AppDispatch> = vi.spyOn(store, 'dispatch');
 
       renderWorkbenchTopBar(store);
-      fireEvent.click(screen.getByRole('button', { name: PROJECT_NAME }));
+      fireEvent.click(screen.getByRole('button', { name: RENAME_PROJECT_LABEL }));
       fireEvent.change(screen.getByRole('textbox', { name: PROJECT_NAME_INPUT_LABEL }), {
         target: { value: NEW_PROJECT_NAME },
       });
@@ -499,7 +641,6 @@ describe(TopBar.name, () => {
     it.each<[ProjectSaveStatus, string]>([
       [PROJECT_SAVE_STATUS.SAVING, SAVING_TEXT],
       [PROJECT_SAVE_STATUS.UNSAVED, NOT_SAVED_TEXT],
-      [PROJECT_SAVE_STATUS.SAVED, AUTOSAVE_TEXT],
     ])('shows the %s status as %s', (saveStatus: ProjectSaveStatus, expectedText: string) => {
       const store: AppStore = newStore();
 
@@ -511,7 +652,32 @@ describe(TopBar.name, () => {
       expect(screen.getByRole('status')).toHaveTextContent(expectedText);
     });
 
-    it('shows a pending change as a calm clock, not an alert mark', () => {
+    it('shows the saved state as a lone check icon, with no word', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.SAVED }));
+      });
+
+      expect(screen.getByRole('status')).toHaveTextContent(/^$/);
+    });
+
+    it('shows the saved state as a cloud with a check', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.SAVED }));
+      });
+
+      const readout: HTMLElement = screen.getByRole('status');
+
+      expect(readout.querySelector(CLOUD_ICON_SELECTOR)).not.toBeNull();
+      expect(readout.querySelector(CHECK_ICON_SELECTOR)).not.toBeNull();
+    });
+
+    it('shows a pending change as a calm upload cloud, not an alert mark', () => {
       const store: AppStore = newStore();
 
       renderWorkbenchTopBar(store);
@@ -521,8 +687,22 @@ describe(TopBar.name, () => {
 
       const readout: HTMLElement = screen.getByRole('status');
 
-      expect(readout.querySelector(CLOCK_ICON_SELECTOR)).not.toBeNull();
+      expect(readout.querySelector(CLOUD_UPLOAD_ICON_SELECTOR)).not.toBeNull();
       expect(readout.querySelector(ALERT_ICON_SELECTOR)).toBeNull();
+    });
+
+    it('shows a failed save as a cloud with an exclamation mark and the word Save failed', () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveFailed());
+      });
+
+      const readout: HTMLElement = screen.getByRole('status', { name: AUTOSAVE_FAILED_TEXT });
+
+      expect(readout).toHaveTextContent(SAVE_FAILED_TEXT);
+      expect(readout.querySelector(EXCLAMATION_ICON_SELECTOR)).not.toBeNull();
     });
 
     it('names the save state on the readout itself, so the icon alone still has a meaning', () => {
@@ -535,5 +715,36 @@ describe(TopBar.name, () => {
 
       expect(screen.getByRole('status', { name: AUTOSAVE_TEXT })).toBeInTheDocument();
     });
+
+    it('is a Tab stop that shows its state in a tooltip on keyboard focus', async () => {
+      const store: AppStore = newStore();
+
+      renderWorkbenchTopBar(store);
+      act(() => {
+        store.dispatch(new ProjectSaveStatusChanged({ saveStatus: PROJECT_SAVE_STATUS.SAVED }));
+      });
+
+      const readout: HTMLElement = screen.getByRole('status', { name: AUTOSAVE_TEXT });
+
+      expect(readout).toHaveAttribute('tabindex', '0');
+
+      fireEvent.focus(readout);
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(AUTOSAVE_TEXT);
+    });
+  });
+
+  it('puts the project name button in the Tab order before the Project menu', () => {
+    const store: AppStore = newStore();
+
+    renderWorkbenchTopBar(store);
+    openProject(store);
+
+    const nameButton: HTMLElement = screen.getByRole('button', { name: RENAME_PROJECT_LABEL });
+    const projectMenuButton: HTMLElement = screen.getByRole('button', { name: PROJECT_MENU_LABEL });
+
+    expect(nameButton).toBeEnabled();
+    expect(nameButton.tabIndex).toBe(0);
+    expect(nameButton.compareDocumentPosition(projectMenuButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

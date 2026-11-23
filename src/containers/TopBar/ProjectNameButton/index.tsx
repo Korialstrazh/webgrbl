@@ -31,6 +31,7 @@ export const ProjectNameButton = (): ReactNode => {
   const projectName: string = useSelector(selectProjectName);
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const shownName: string = useSelector(selectProjectDisplayName(i18n.language));
+  const renameText: string = t(DEFAULT.TOP_BAR_PROJECT_NAME_RENAME, { name: shownName });
   const documentTitle: string = t(DEFAULT.APP_DOCUMENT_TITLE, { name: shownName, version: APP_VERSION });
 
   useEffect(() => {
@@ -59,11 +60,13 @@ export const ProjectNameButton = (): ReactNode => {
   }
 
   return (
-    // The name stays on one line and may be cut, so the tooltip shows it whole.
-    <Tooltip title={shownName}>
+    // The name stays on one line and may be cut, so the tooltip shows it whole. Tooltip and label say a click renames,
+    // since at phone width the pencil gives its room to the name.
+    <Tooltip title={renameText}>
       <Button
         className={styles.nameButton}
         type={ANTD_BUTTON_TYPE_TEXT}
+        aria-label={renameText}
         disabled={!projectId}
         onClick={() => setIsRenaming(true)}
       >

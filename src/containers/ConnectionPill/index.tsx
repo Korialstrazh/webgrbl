@@ -1,9 +1,11 @@
 /**
- * The laser connection in the top bar: the connection state, the firmware, the active machine profile, the port and,
- * when the browser has no Web Serial, a note. While no laser is connected it ends in a Connect verb: with a port
- * already chosen that verb is its own button joined to the pill and connects in one click; with none it is part of the
- * pill. Clicking the pill opens and closes the connection popover, which the Status card can open as well. The
- * browser's network state is not shown here: it is not the laser's state (the status strip shows it while offline).
+ * The laser connection in the top bar: a state icon with a coloured dot (a flask badge for the simulated laser), a
+ * short state word, the firmware once connected and, when the browser has no Web Serial, a note. The port is never
+ * spelled out on the pill; its one-line tooltip (state and port), its accessible name and the popover name it. While no
+ * laser is connected it ends in a Connect verb: with a port already chosen that verb is its own button joined to the
+ * pill and connects in one click; with none it is part of the pill. Clicking the pill opens and closes the connection
+ * popover, which hangs from the whole capsule and which the Status card can open as well. The browser's network state
+ * is not shown here: it is not the laser's state (the status strip shows it while offline).
  *
  * @author michael.morosov
  *
@@ -12,13 +14,20 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { ApiOutlined, DownOutlined } from '@ant-design/icons';
+import {
+  ApiOutlined,
+  DisconnectOutlined,
+  DownOutlined,
+  ExperimentOutlined,
+  LinkOutlined,
+  SyncOutlined,
+} from '@ant-design/icons';
 import { Button } from 'antd';
 import { useRef } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { MouseEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { GRBL_CONNECTION_STATUS } from '../../utils/grbl/grbl.constants';
+import { GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { GrblFirmwareIdentity } from '../../utils/grbl/interfaces/GrblFirmwareIdentity';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
@@ -37,6 +46,7 @@ import {
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ConnectionPopoverOpenChanged, selectIsConnectionPopoverOpen } from '../../utils/states/ui.overlay.state';
+import { DismissibleTooltip } from '../../views/DismissibleTooltip';
 import { ConnectionPopover } from '../ConnectionPopover';
 import { CONNECTION_PILL_SHORT_STATUS_LABEL_KEY, CONNECTION_PILL_STATUS_LABEL_KEY } from './connection.pill.constants';
 import { getSelectedPortLabel } from './get.selected.port.label';
@@ -48,6 +58,15 @@ const ARIA_LABEL_PART_SEPARATOR = ', ';
 /** Whether the pill offers the Connect verb: no laser is connected and no connection is being made. */
 const isConnectOffered = (connectionStatus: GrblConnectionStatus): boolean =>
   connectionStatus === GRBL_CONNECTION_STATUS.DISCONNECTED || connectionStatus === GRBL_CONNECTION_STATUS.LOST;
+
+/** The state icon the dot sits on, so the state reads without its word at phone width. */
+const getConnectionStatusIconComponent = (connectionStatus: GrblConnectionStatus): ReactNode => {
+  if (connectionStatus === GRBL_CONNECTION_STATUS.CONNECTED) {
+    return <LinkOutlined />;
+  }
+
+  return connectionStatus === GRBL_CONNECTION_STATUS.CONNECTING ? <SyncOutlined spin /> : <DisconnectOutlined />;
+};
 
 export const ConnectionPill = (): ReactNode => {
   const { t } = useTranslation();
@@ -65,13 +84,19 @@ export const ConnectionPill = (): ReactNode => {
   const isConnectVerbShown: boolean = isConnectOffered(connectionStatus);
   // A chosen port lets the verb connect at once, so it leaves the pill for a button of its own.
   const isOneClickConnect: boolean = isConnectVerbShown && Boolean(selectedPortId);
+  // While the popover is open its own Connect is the one call to action, so the pill's Connect leaves the bar entirely
+  // (no Tab stop, no grey ghost) and comes back as the orange button when the popover closes.
+  const isPillConnectShown: boolean = isConnectVerbShown && !isPopoverOpen;
   const statusText: string = t(CONNECTION_PILL_STATUS_LABEL_KEY[connectionStatus]);
+  const shortStatusText: string = t(CONNECTION_PILL_SHORT_STATUS_LABEL_KEY[connectionStatus]);
   const firmwareText: string | undefined = isConnected && firmwareIdentity
     ? t(DEFAULT.CONNECTION_PILL_FIRMWARE, {
       firmwareName: firmwareIdentity.firmwareName,
       version: firmwareIdentity.version,
     })
     : undefined;
+  // The simulated laser looks like any port on the pill unless it says so: a flask marks that no hardware will move.
+  const isSimulatedPort: boolean = selectedPortId === SIMULATED_LASER_PORT_ID;
   const portText: string = getSelectedPortLabel(selectedPortId, availablePorts, t);
   const ariaLabelDetails: string = [statusText, firmwareText, activeProfile?.name, portText]
     .filter(Boolean)
@@ -86,54 +111,75 @@ export const ConnectionPill = (): ReactNode => {
   const connectVerbContent: ReactNode = (
     <>
       <ApiOutlined aria-hidden="true" />
-      {` ${t(DEFAULT.CONNECTION_CONNECT_MENU)}`}
+      <span className={styles.connectWord}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
     </>
   );
   const pillClassName: string = [
     styles.pill,
-    isConnectVerbShown ? styles.connectOffered : undefined,
-    isOneClickConnect ? styles.joined : undefined,
+    isPillConnectShown ? styles.connectOffered : undefined,
+    isOneClickConnect && isPillConnectShown ? styles.joined : undefined,
   ].filter(Boolean).join(' ');
 
   return (
-    <span className={styles.pillGroup}>
+    // One line, the state and then the port, so a pointer user reads both without opening the popover. While the
+    // popover is open it says all of that itself, so no tooltip covers it (an empty title shows none).
+    <DismissibleTooltip
+      title={isPopoverOpen ? undefined : t(DEFAULT.CONNECTION_PILL_TOOLTIP, { state: statusText, port: portText })}
+      rootClassName={styles.portTooltip}
+    >
+      {/* The popover hangs from the whole capsule, so its right edge lines up with the pill's, Connect included. */}
       <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
-        <Button
-          ref={pillRef}
-          className={pillClassName}
-          aria-haspopup={POPUP_KIND_DIALOG}
-          aria-expanded={isPopoverOpen}
-          aria-label={t(DEFAULT.CONNECTION_PILL_LABEL, { details: ariaLabelDetails })}
-        >
-          <span className={[styles.dot, styles[connectionStatus]].join(' ')} aria-hidden="true" />
-          <span className={styles.status}>{statusText}</span>
-          {/* The button's label already names the state; this is its one-word look for a narrow window. */}
-          {isConnectVerbShown && (
-            <span className={styles.shortStatus} aria-hidden="true">
-              {/* A plug, so the narrow word never reads like the Laser off chip beside it. */}
-              <ApiOutlined />
-              {t(CONNECTION_PILL_SHORT_STATUS_LABEL_KEY[connectionStatus])}
+        <span className={styles.pillGroup}>
+          <Button
+            ref={pillRef}
+            className={pillClassName}
+            aria-haspopup={POPUP_KIND_DIALOG}
+            aria-expanded={isPopoverOpen}
+            aria-label={t(DEFAULT.CONNECTION_PILL_LABEL, { details: ariaLabelDetails })}
+          >
+            <span className={[styles.statusIcon, styles[connectionStatus]].join(' ')}>
+              <span className={styles.stateGlyph} aria-hidden="true">
+                {getConnectionStatusIconComponent(connectionStatus)}
+              </span>
+              {/* The simulated laser takes the dot's corner as a small flask badge, so the state stays one icon. */}
+              {isSimulatedPort ? (
+                <ExperimentOutlined
+                  className={styles.simulatedBadge}
+                  role="img"
+                  aria-label={t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER)}
+                />
+              ) : (
+                <span className={styles.dot} aria-hidden="true" />
+              )}
             </span>
+            {/* The button's label names the state in full; the pill shows the one-word look. */}
+            <span className={styles.status} aria-hidden="true">{shortStatusText}</span>
+            {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
+            {!isWebSerialSupported && (
+              <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
+            )}
+            {/* The status part stays quiet: its chevron shows only under the pointer or the focus. */}
+            <DownOutlined className={styles.caret} aria-hidden="true" />
+            {isPillConnectShown && !isOneClickConnect && (
+              <span className={styles.connectVerb}>{connectVerbContent}</span>
+            )}
+          </Button>
+          {isOneClickConnect && isPillConnectShown && (
+            // The icon prop gives the plug the same gap to the word as every other icon and label button. The click
+            // connects and stops there, so it never also opens the popover the capsule carries.
+            <Button
+              className={styles.connectButton}
+              icon={<ApiOutlined aria-hidden="true" />}
+              onClick={(event: MouseEvent<HTMLElement>) => {
+                event.stopPropagation();
+                connectLaser();
+              }}
+            >
+              <span className={styles.connectWord}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
+            </Button>
           )}
-          {firmwareText && <span className={styles.firmware}>{firmwareText}</span>}
-          {/* The profile has its own top-bar button and the popover names the port, so once connected the pill keeps to
-              state and firmware and stays narrow; both are still in its label. "No port chosen" beside "Not connected"
-              says nothing new, so only a chosen port is shown. */}
-          {selectedPortId && !isConnected && <span className={styles.port}>{portText}</span>}
-          {!isWebSerialSupported && (
-            <span className={styles.warningNote}>{t(DEFAULT.CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED)}</span>
-          )}
-          {isConnectVerbShown && !isOneClickConnect && (
-            <span className={styles.connectVerb}>{connectVerbContent}</span>
-          )}
-          <DownOutlined className={styles.caret} aria-hidden="true" />
-        </Button>
+        </span>
       </ConnectionPopover>
-      {isOneClickConnect && (
-        <Button className={styles.connectButton} onClick={connectLaser}>
-          {connectVerbContent}
-        </Button>
-      )}
-    </span>
+    </DismissibleTooltip>
   );
 };

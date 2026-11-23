@@ -1,6 +1,6 @@
 /**
- * The Project menu of the top bar: new project, the Open dialog, save, save as file, open file and Export G-code.
- * Open file uses a hidden file input.
+ * The Project menu of the top bar: new project, the Open dialog, open file, save, save as file, Export G-code and,
+ * at phone width, Redo, Import SVG and the laser profiles. Open file uses a hidden file input.
  *
  * @author michael.morosov
  *
@@ -9,12 +9,12 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { DownOutlined, FolderOutlined } from '@ant-design/icons';
+import { DownOutlined, FolderOutlined, MenuOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
 import { useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ANTD_BUTTON_TYPE_TEXT, ANTD_DROPDOWN_TRIGGER_CLICK } from '../../../utils/antd.constants';
 import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
 import { useGcodeExportAvailability } from '../../../utils/hooks/use.gcode.export.availability';
@@ -23,17 +23,22 @@ import { usePopoverAutoClose } from '../../../utils/hooks/use.popover.auto.close
 import { DEFAULT } from '../../../utils/localization/default.locales';
 import type { AppDispatch } from '../../../utils/states/new.store';
 import {
+  ProjectRedoRequested,
+  selectCanRedo,
+} from '../../../utils/states/project.document.state';
+import {
   NewProjectRequested,
   ProjectFileExportRequested,
   ProjectSaveRequested,
 } from '../../../utils/states/project.state';
 import { GcodeExportRequested } from '../../../utils/states/toolpath.state';
+import { MachineProfilesDialogOpenChanged } from '../../../utils/states/ui.workbench.state';
 import { OpenProjectDialog } from '../../OpenProjectDialog';
 import { DismissibleTooltip } from '../../../views/DismissibleTooltip';
 import { ProjectFileInput } from '../../ProjectFileInput';
 import type { ProjectMenuClickInfo } from '../interfaces/ProjectMenuClickInfo';
 import { getProjectMenuItems } from './get.project.menu.items';
-import { PROJECT_MENU_KEY } from './project.menu.constants';
+import { PROJECT_MENU_KEY, TOP_BAR_IMPORT_SVG_BUTTON_ID } from './project.menu.constants';
 import styles from './styles.module.scss';
 
 const PROJECT_MENU_OVERLAY_ID = 'project-menu';
@@ -49,6 +54,7 @@ export const ProjectMenu = (): ReactNode => {
   useOverlayRegistration(PROJECT_MENU_OVERLAY_ID, isMenuOpen);
 
   const gcodeExport: GcodeExportAvailability = useGcodeExportAvailability();
+  const canRedo: boolean = useSelector(selectCanRedo);
 
   usePopoverAutoClose(isMenuOpen, () => setIsMenuOpen(false));
 
@@ -71,6 +77,15 @@ export const ProjectMenu = (): ReactNode => {
     case PROJECT_MENU_KEY.OPEN_FILE:
       fileInputRef.current?.click();
       break;
+    case PROJECT_MENU_KEY.IMPORT_SVG:
+      document.getElementById(TOP_BAR_IMPORT_SVG_BUTTON_ID)?.click();
+      break;
+    case PROJECT_MENU_KEY.MACHINE_PROFILES:
+      dispatch(new MachineProfilesDialogOpenChanged({ isMachineProfilesDialogOpen: true }));
+      break;
+    case PROJECT_MENU_KEY.REDO:
+      dispatch(new ProjectRedoRequested());
+      break;
     case PROJECT_MENU_KEY.EXPORT_GCODE:
       dispatch(new GcodeExportRequested({ isWarningConfirmed: false }));
       break;
@@ -86,10 +101,18 @@ export const ProjectMenu = (): ReactNode => {
           trigger={ANTD_DROPDOWN_TRIGGER_CLICK}
           open={isMenuOpen}
           onOpenChange={setIsMenuOpen}
-          menu={{ items: getProjectMenuItems(t, gcodeExport), onClick: handleMenuClick }}
+          rootClassName={styles.projectMenuRoot}
+          menu={{ items: getProjectMenuItems(t, { gcodeExport, canRedo }), onClick: handleMenuClick }}
         >
-          <Button type={ANTD_BUTTON_TYPE_TEXT} aria-label={t(DEFAULT.TOP_BAR_MENU_PROJECT)}>
-            <FolderOutlined aria-hidden="true" />
+          <Button
+            className={styles.trigger}
+            type={ANTD_BUTTON_TYPE_TEXT}
+            aria-label={t(DEFAULT.TOP_BAR_MENU_PROJECT)}
+          >
+            <FolderOutlined className={styles.folderIcon} aria-hidden="true" />
+            <MenuOutlined className={styles.menuIcon} aria-hidden="true" />
+            {/* A short word while there is room, so the folder reads as the Project menu; the tooltip names it too. */}
+            <span className={styles.label} aria-hidden="true">{t(DEFAULT.TOP_BAR_MENU_PROJECT)}</span>
             <DownOutlined className={styles.caret} aria-hidden="true" />
           </Button>
         </Dropdown>

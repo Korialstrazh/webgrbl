@@ -7,9 +7,10 @@ import { ProjectRenamed, selectProjectId } from '../../../utils/states/project.s
 import { AntdTestProvider } from '../../../utils/test.support/antd.test.provider';
 
 const PROJECT_NAME = 'Coasters with a long name';
+const RENAME_LABEL = `Rename ${PROJECT_NAME}`;
 
 describe(ProjectNameButton.name, () => {
-  it('shows the whole project name in a tooltip, since a narrow bar may cut it', async () => {
+  it('shows the whole name in a tooltip that says a click renames, as the phone hides the pencil', async () => {
     const store: AppStore = newStore();
 
     render(<Provider store={store}><AntdTestProvider><ProjectNameButton /></AntdTestProvider></Provider>);
@@ -20,8 +21,8 @@ describe(ProjectNameButton.name, () => {
     act(() => {
       store.dispatch(new ProjectRenamed({ projectId: selectProjectId(store.getState()) ?? '', name: PROJECT_NAME }));
     });
-    fireEvent.mouseEnter(screen.getByRole('button', { name: PROJECT_NAME }));
+    fireEvent.mouseEnter(screen.getByRole('button', { name: RENAME_LABEL }));
 
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(PROJECT_NAME);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(RENAME_LABEL);
   });
 });

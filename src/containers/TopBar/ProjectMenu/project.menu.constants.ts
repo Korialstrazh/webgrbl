@@ -19,7 +19,20 @@ export const PROJECT_MENU_KEY = {
   SAVE_AS_FILE: 'save-as-file',
   OPEN_FILE: 'open-file',
   EXPORT_GCODE: 'export-gcode',
+  IMPORT_SVG: 'import-svg',
+  MACHINE_PROFILES: 'machine-profiles',
+  REDO: 'redo',
 } as const;
+
+/** The name of the laser profile icon in the menu, in the antd icon-name style, so every entry's icon has a name. */
+export const LASER_MACHINE_ICON_NAME = 'laser-machine';
+
+/** The names of the undo and redo icons in the menu, in the antd icon-name style. */
+
+export const REDO_ARROW_ICON_NAME = 'redo';
+
+/** The id of the top bar Import SVG button, which the Project menu entry clicks while the button is hidden. */
+export const TOP_BAR_IMPORT_SVG_BUTTON_ID = 'top-bar-import-svg';
 
 export const PROJECT_SAVE_STATUS_LABEL_KEY: Record<ProjectSaveStatus, string> = {
   [PROJECT_SAVE_STATUS.SAVED]: DEFAULT.TOP_BAR_AUTOSAVE_SAVED,

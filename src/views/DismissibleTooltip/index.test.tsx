@@ -45,4 +45,19 @@ describe(DismissibleTooltip.name, () => {
 
     expect(screen.getByText(TOOLTIP_TEXT)).toBeInTheDocument();
   });
+
+  it('shows again on the next hover after a keyboard click that the pointer never left', () => {
+    render(<DismissibleTooltip title={TOOLTIP_TEXT}><Button>Open</Button></DismissibleTooltip>);
+
+    const wrapper: HTMLElement | null = screen.getByRole('button').parentElement;
+
+    if (!wrapper) {
+      throw new Error('The tooltip wrapper is missing.');
+    }
+
+    fireEvent.click(screen.getByRole('button'));
+    hoverAndWait(wrapper);
+
+    expect(screen.getByText(TOOLTIP_TEXT)).toBeInTheDocument();
+  });
 });

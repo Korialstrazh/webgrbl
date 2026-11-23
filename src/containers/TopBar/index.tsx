@@ -10,13 +10,13 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { ImportOutlined } from '@ant-design/icons';
+import { DownOutlined, FileAddOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { APP_VERSION } from '../../utils/app.version.constants';
-import { ANTD_BUTTON_SIZE_LARGE, ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
+import { ANTD_BUTTON_TYPE_TEXT } from '../../utils/antd.constants';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProfile';
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
@@ -35,6 +35,7 @@ import { MachineProfilesDialog } from '../MachineProfilesDialog';
 import { SvgImportButton } from '../SvgImportButton';
 import { AutosaveReadout } from './AutosaveReadout';
 import { ProjectMenu } from './ProjectMenu';
+import { TOP_BAR_IMPORT_SVG_BUTTON_ID } from './ProjectMenu/project.menu.constants';
 import { ProjectNameButton } from './ProjectNameButton';
 import styles from './styles.module.scss';
 
@@ -60,43 +61,75 @@ export const TopBar = (): ReactNode => {
     <Layout.Header className={[styles.topBar, styles.fixedHeightBar].join(' ')}>
       {/* Plain text elements: antd Typography would add its own margins and colours. */}
       <div className={styles.heading}>
+        {/* At phone width the brand line makes room for the project name; the Project menu names the version. */}
         <h1 className={styles.title}>
-          {t(DEFAULT.APP_TITLE)} <span className={styles.version}>v{APP_VERSION}</span>
+          <span className={styles.appName}>{t(DEFAULT.APP_TITLE)}</span>{' '}
+          <span className={styles.version}>v{APP_VERSION}</span>
         </h1>
         <ProjectNameButton />
       </div>
+      {/* Three action groups, each set apart from the one before by the same gap and a thin divider. */}
       <div className={[styles.group, styles.activeMenus].join(' ')}>
         <ProjectMenu />
         <AutosaveReadout />
+      </div>
+      {/* At phone width this group moves into the Project menu, so the project name keeps its room. */}
+      <div className={[styles.group, styles.activeMenus, styles.machineGroup].join(' ')}>
         <DismissibleTooltip title={profileTooltipText}>
           <Button
             className={styles.profileButton}
             type={ANTD_BUTTON_TYPE_TEXT}
-            size={ANTD_BUTTON_SIZE_LARGE}
             icon={<LaserMachineIcon />}
             aria-label={profilesLabel}
             onClick={() => changeProfilesDialogOpen(true)}
           >
             <span className={styles.profileName}>{activeProfile?.name ?? profilesLabel}</span>
+            {/* The chevron says the chip opens the profile chooser. */}
+            <DownOutlined className={styles.profileCaret} aria-hidden="true" />
           </Button>
         </DismissibleTooltip>
-        <SvgImportButton iconComponent={<ImportOutlined />} labelClassName={styles.importLabel} />
+        <DismissibleTooltip title={t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG)}>
+          <span className={styles.importSlot}>
+            <SvgImportButton
+              buttonType={ANTD_BUTTON_TYPE_TEXT}
+              buttonId={TOP_BAR_IMPORT_SVG_BUTTON_ID}
+              iconComponent={<FileAddOutlined />}
+              labelClassName={styles.importLabel}
+            />
+          </span>
+        </DismissibleTooltip>
       </div>
-      <div className={[styles.group, styles.activeMenus].join(' ')}>
+      {/* At phone width Redo moves into the Project menu too; Undo stays as an icon. */}
+      <div className={[styles.group, styles.activeMenus, styles.historyGroup].join(' ')}>
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
-          size={ANTD_BUTTON_SIZE_LARGE}
           iconComponent={<UndoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_UNDO)}
+          tooltipText={canUndo ? t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+            action: t(DEFAULT.TOP_BAR_UNDO),
+            shortcut: t(DEFAULT.TOP_BAR_UNDO_SHORTCUT),
+          }) : t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+            action: t(DEFAULT.TOP_BAR_NOTHING_TO_UNDO),
+            shortcut: t(DEFAULT.TOP_BAR_UNDO_SHORTCUT),
+          })}
           isDisabled={!canUndo}
+          isFocusableWhenDisabled
           onClick={() => dispatch(new ProjectUndoRequested())}
         />
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
-          size={ANTD_BUTTON_SIZE_LARGE}
+          className={styles.redoButton}
           iconComponent={<RedoArrowIcon />}
           labelText={t(DEFAULT.TOP_BAR_REDO)}
+          tooltipText={canRedo ? t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+            action: t(DEFAULT.TOP_BAR_REDO),
+            shortcut: t(DEFAULT.TOP_BAR_REDO_SHORTCUT),
+          }) : t(DEFAULT.TOP_BAR_SHORTCUT_TOOLTIP, {
+            action: t(DEFAULT.TOP_BAR_NOTHING_TO_REDO),
+            shortcut: t(DEFAULT.TOP_BAR_REDO_SHORTCUT),
+          })}
           isDisabled={!canRedo}
+          isFocusableWhenDisabled
           onClick={() => dispatch(new ProjectRedoRequested())}
         />
       </div>

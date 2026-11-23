@@ -21,6 +21,7 @@ const DISCONNECT_LABEL = 'Disconnect';
 const DISCONNECTED_TITLE = 'Connect laser';
 const CONNECTED_TITLE = 'Connected \u00B7 Simulated laser (no hardware)';
 const CHOOSE_PORT_LABEL = 'Choose a USB port';
+const ANTD_TEXT_BUTTON_CLASS = 'ant-btn-text';
 const PORT_LABEL = 'Port';
 const BAUD_LABEL = 'Baud rate';
 const SIMULATED_LASER_LABEL = 'Simulated laser (no hardware)';
@@ -130,6 +131,12 @@ describe(ConnectionPopover.name, () => {
     fireEvent.click(screen.getByRole('button', { name: DISCONNECT_LABEL }));
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('draws Add port as a quiet text button, so the filled Connect stays the main action', () => {
+    renderConnectionPopover();
+
+    expect(screen.getByRole('button', { name: CHOOSE_PORT_LABEL })).toHaveClass(ANTD_TEXT_BUTTON_CLASS);
   });
 
   it('Choose port is disabled without Web Serial but the simulated laser still connects', async () => {

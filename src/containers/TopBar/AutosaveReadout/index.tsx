@@ -1,7 +1,9 @@
 /**
- * The autosave readout of the top bar: an icon and the state of the open project, Saved, Saving or Waiting to save.
- * Waiting is a calm grey clock, not an error: autosave stores the change shortly. When the bar is narrow only the icon
- * stays; its tooltip and accessible name still give the state.
+ * The autosave readout of the top bar: a cloud icon for the state of the open project. Saved is a cloud with a green
+ * check; Saving (an amber syncing cloud), Waiting to save (a grey upload cloud) and Save failed (a red cloud with an
+ * exclamation mark) add a short word. Waiting stays calm grey, not an error: autosave stores the change shortly.
+ * When the bar is narrow only the icon stays; its tooltip and name ("Autosave: Saved") give purpose and state. It is
+ * a Tab stop only so its tooltip opens on keyboard focus too; activating it does nothing.
  *
  * @author michael.morosov
  *
@@ -10,14 +12,22 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { CheckCircleFilled, ClockCircleOutlined, SyncOutlined } from '@ant-design/icons';
+import {
+  CheckOutlined,
+  CloudOutlined,
+  CloudSyncOutlined,
+  CloudUploadOutlined,
+  ExclamationOutlined,
+} from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../../utils/antd.constants';
+import { DEFAULT } from '../../../utils/localization/default.locales';
 import { PROJECT_SAVE_STATUS } from '../../../utils/states/project.save.status.constants';
 import type { ProjectSaveStatus } from '../../../utils/states/project.save.status.constants';
-import { selectProjectSaveStatus } from '../../../utils/states/project.state';
+import { selectHasProjectSaveFailed, selectProjectSaveStatus } from '../../../utils/states/project.state';
 import { PROJECT_SAVE_STATUS_LABEL_KEY } from '../ProjectMenu/project.menu.constants';
 import styles from './styles.module.scss';
 
@@ -27,27 +37,54 @@ const ICON_CLASS_NAME: Record<ProjectSaveStatus, string | undefined> = {
   [PROJECT_SAVE_STATUS.UNSAVED]: styles.unsaved,
 };
 
+const getSaveFailedIconComponent = (): ReactNode => (
+  <>
+    <CloudOutlined />
+    <ExclamationOutlined className={styles.cloudBadge} />
+  </>
+);
+
 const getSaveStatusIconComponent = (saveStatus: ProjectSaveStatus): ReactNode => {
   if (saveStatus === PROJECT_SAVE_STATUS.SAVING) {
-    return <SyncOutlined spin />;
+    return <CloudSyncOutlined />;
   }
 
-  return saveStatus === PROJECT_SAVE_STATUS.SAVED ? <CheckCircleFilled /> : <ClockCircleOutlined />;
+  if (saveStatus === PROJECT_SAVE_STATUS.UNSAVED) {
+    return <CloudUploadOutlined />;
+  }
+
+  // antd has no cloud with a check, so a small check sits on the cloud's corner.
+  return (
+    <>
+      <CloudOutlined />
+      <CheckOutlined className={[styles.cloudBadge, styles.cloudCheck].join(' ')} />
+    </>
+  );
 };
 
 export const AutosaveReadout = (): ReactNode => {
   const { t } = useTranslation();
   const saveStatus: ProjectSaveStatus = useSelector(selectProjectSaveStatus);
 
-  const statusLabel: string = t(PROJECT_SAVE_STATUS_LABEL_KEY[saveStatus]);
+  const hasSaveFailed: boolean = useSelector(selectHasProjectSaveFailed);
+
+  // A failed save outranks the waiting state it leaves behind, so the user sees why the change is not stored.
+  const statusLabel: string = hasSaveFailed
+    ? t(DEFAULT.TOP_BAR_AUTOSAVE_FAILED)
+    : t(PROJECT_SAVE_STATUS_LABEL_KEY[saveStatus]);
+  const iconClassName: string | undefined = hasSaveFailed ? styles.failed : ICON_CLASS_NAME[saveStatus];
+  const isSaved: boolean = saveStatus === PROJECT_SAVE_STATUS.SAVED;
+  const accessibleName: string = t(DEFAULT.TOP_BAR_AUTOSAVE_ACCESSIBLE_NAME, { state: statusLabel });
 
   return (
-    <Tooltip title={statusLabel}>
-      <p className={styles.autosave} role="status" aria-label={statusLabel}>
-        <span className={[styles.icon, ICON_CLASS_NAME[saveStatus]].join(' ')} aria-hidden>
-          {getSaveStatusIconComponent(saveStatus)}
+    // A Tab stop of its own only so a keyboard user can read the tooltip, as a mouse user does; it has no action.
+    <Tooltip title={accessibleName} trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS}>
+      <p className={styles.autosave} role="status" aria-label={accessibleName} tabIndex={0}>
+        <span className={[styles.icon, iconClassName].join(' ')} aria-hidden>
+          {hasSaveFailed ? getSaveFailedIconComponent() : getSaveStatusIconComponent(saveStatus)}
         </span>
-        <span className={styles.label}>{statusLabel}</span>
+        {/* The cloud check alone says Saved; only a state that needs a look gets a word. */}
+        {!isSaved && <span className={styles.label}>{statusLabel}</span>}
       </p>
     </Tooltip>
   );

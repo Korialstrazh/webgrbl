@@ -1,3 +1,13 @@
+// A little air between the bar and the open menu, and icons big enough to read at a glance.
+.projectMenuRoot {
+  padding-top: var(--space-2);
+
+  :global(.ant-dropdown-menu-item-icon),
+  :global(.ant-dropdown-menu-item .anticon) {
+    font-size: 1rem;
+  }
+}
+
 .menuEntry {
   display: flex;
   align-items: baseline;
@@ -12,9 +22,86 @@
   color: var(--color-text-muted);
 }
 
+// The phone version footer: small muted text, centred under the entries, so it reads as information, not an action.
+:global(.ant-dropdown-menu) .versionFooter.versionFooter :global(.ant-dropdown-menu-item-group-title) {
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+  cursor: default;
+}
+
 // The same small chevron as the connection pill's.
 :global(.ant-btn) .caret.caret:global(.anticon) {
   margin-left: var(--space-1);
   color: var(--color-text-muted);
   font-size: 0.75rem;
+}
+
+.label {
+  margin-inline-start: var(--space-1);
+  font-size: 0.875rem;
+}
+
+// 57rem must match the TopBar styles, where Import SVG drops its label too.
+@media (width < 57rem) {
+  .label {
+    display: none;
+  }
+}
+
+// The folder names the Project menu on a wide bar; at phone width the menu also holds Undo, Redo, Import SVG and the
+// laser profile, so a hamburger takes its place. 30rem matches the TopBar.
+.menuIcon {
+  display: none;
+}
+
+@media (width < 30rem) {
+  .folderIcon {
+    display: none;
+  }
+
+  .menuIcon {
+    display: inline-flex;
+  }
+}
+
+// At phone width the chevron stays beside the hamburger, so the trigger reads as the menu that also holds Undo, Redo,
+// Import SVG and the laser profile. 30rem matches the TopBar.
+@media (width < 30rem) {
+  // A phone has no keyboard to press Ctrl+Z on, so the shortcut hints go and the entries read as plain labels.
+  .menuEntry {
+    min-width: 0;
+  }
+
+  .hint {
+    display: none;
+  }
+
+  // Doubled class: the TopBar squares its phone buttons to 2rem, which has no room for the chevron.
+  // antd puts its icon gap between the folder and the chevron; a hair of space keeps the pair as one tap target and
+  // leaves the room to the project name.
+  // At least 44 px square, so the trigger is an easy tap.
+  .trigger.trigger:global(.ant-btn) {
+    width: auto;
+    min-width: var(--target-min);
+    height: var(--target-min);
+    gap: 0;
+    padding-inline: 0.25rem;
+  }
+
+  :global(.ant-btn) .caret.caret:global(.anticon) {
+    margin-left: 0.0625rem;
+    font-size: 0.625rem;
+  }
+}
+
+// The phone-only entries and their dividers; a wider bar shows its own Undo, Redo, Import SVG and profile buttons. 30rem matches the TopBar.
+@media (width >= 30rem) {
+  // Doubled class: the antd menu item rule is more specific than one class.
+  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item),
+  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item-divider),
+  :global(.ant-dropdown-menu) .phoneOnly.phoneOnly:global(.ant-dropdown-menu-item-group) {
+    display: none;
+  }
 }

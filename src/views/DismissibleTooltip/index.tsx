@@ -29,6 +29,10 @@ export const DismissibleTooltip = ({ children, ...tooltipProps }: TooltipProps):
     setIsOpen(false);
   };
 
+  const clearDismissal = (): void => {
+    isDismissedRef.current = false;
+  };
+
   return (
     <Tooltip
       trigger={ANTD_TOOLTIP_TRIGGER_HOVER_AND_LONG_PRESS}
@@ -39,9 +43,10 @@ export const DismissibleTooltip = ({ children, ...tooltipProps }: TooltipProps):
       {/* A click on the control bubbles up to here, whatever the control does with it. */}
       <span
         onClickCapture={dismiss}
-        onMouseLeave={() => {
-          isDismissedRef.current = false;
-        }}
+        // A keyboard Enter also counts as a click, yet the pointer never leaves; so every new hover clears the
+        // dismissal, or the tooltip would stay away until the pointer had entered and left once.
+        onMouseEnter={clearDismissal}
+        onMouseLeave={clearDismissal}
       >
         {children}
       </span>

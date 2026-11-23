@@ -19,7 +19,7 @@ export const CONNECTION_PILL_STATUS_LABEL_KEY: Record<GrblConnectionStatus, stri
   [GRBL_CONNECTION_STATUS.LOST]: DEFAULT.CONNECTION_PILL_LOST,
 };
 
-/** The one-word state a narrow window shows beside the dot while the pill offers Connect, so the dot is never bare. */
+/** The short state word the pill shows beside its dot at every width; the full state is in its label and tooltip. */
 export const CONNECTION_PILL_SHORT_STATUS_LABEL_KEY: Record<GrblConnectionStatus, string> = {
   [GRBL_CONNECTION_STATUS.DISCONNECTED]: DEFAULT.CONNECTION_PILL_DISCONNECTED_SHORT,
   [GRBL_CONNECTION_STATUS.CONNECTING]: DEFAULT.CONNECTION_PILL_CONNECTING,
