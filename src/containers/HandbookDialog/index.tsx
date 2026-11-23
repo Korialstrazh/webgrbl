@@ -1,6 +1,6 @@
 /**
- * The body of the handbook: the current step with its animation and text, a step list beside it in a wide window, and a
- * Previous / Next pager that ends in Done. It holds the current step, so unmounting it resets the handbook to step 1.
+ * The getting-started handbook dialog: a modal around the step pager. It closes on Escape, the close button or Done on
+ * the last step, and drops its content when hidden, so the handbook opens on step 1 again.
  *
  * @author michael.morosov
  *

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { HandbookDialog } from '.';
+import { ESCAPE_KEY } from '../../utils/browser/browser.events.constants';
 import { newStore } from '../../utils/states/new.store';
 import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 
@@ -67,5 +68,14 @@ describe(HandbookDialog.name, () => {
     rerenderOpen(true);
 
     await waitFor(() => expect(screen.getByText(FIRST_COUNTER)).toBeVisible());
+  });
+
+  it('asks to close on Escape', () => {
+    const onClose = vi.fn();
+    renderDialog(true, onClose);
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: ESCAPE_KEY, code: ESCAPE_KEY, keyCode: 27 });
+
+    expect(onClose).toHaveBeenCalled();
   });
 });
