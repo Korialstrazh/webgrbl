@@ -77,6 +77,15 @@ describe(ObjectElementTree.name, () => {
     expect(screen.queryAllByLabelText(/^Burn with /).length).toBeGreaterThan(0);
   });
 
+  it('closes the colour list once a colour is picked', async () => {
+    renderTree(SMALL_SVG_TEXT);
+
+    fireEvent.click(screen.getByLabelText(new RegExp(`^Colour of ${FIRST_PATH_NAME}:`)));
+    fireEvent.click(screen.getAllByLabelText(/^Burn with /).at(0) as HTMLElement);
+
+    await waitFor(() => expect(document.querySelector('.ant-popover:not(.ant-popover-hidden)')).toBeNull());
+  });
+
   it('keeps the row actions reachable from the keyboard', () => {
     renderTree(SMALL_SVG_TEXT);
 

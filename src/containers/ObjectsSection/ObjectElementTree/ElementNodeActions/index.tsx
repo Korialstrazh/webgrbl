@@ -58,7 +58,10 @@ export const ElementNodeActions = memo((props: ElementNodeActionsProps): ReactNo
           className={styles.colourButton}
           aria-label={t(DEFAULT.OBJECTS_TREE_RECOLOUR_TO, { entry: entry.name })}
           title={entry.name}
-          onClick={() => onRecolour(node.path, entry.colour)}
+          onClick={() => {
+            onRecolour(node.path, entry.colour);
+            setIsRecolourOpen(false);
+          }}
         >
           <span className={styles.colourSwatch}><LayerSwatch colour={entry.colour} isShading={false} /></span>
         </Button>
