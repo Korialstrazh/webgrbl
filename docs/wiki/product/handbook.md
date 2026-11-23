@@ -28,7 +28,7 @@ The "?" help menu in the top bar opens **Getting started**, a six-step pager tha
 | Layers per colour, Burn order | `LAYERS_PURPOSE_CAPTION` | `src/containers/LayersSection/index.tsx`, `ProjectLayer` interface (colour) |
 | Mode, Speed (mm/min), Max power (%), Passes, Line/Fill help, "Use preset" | `LAYER_SETTINGS_*` | `src/containers/LayerSettingsDrawer/` |
 | Frame (caption), guide light that never burns, blocked when off the bed | `MACHINE_JOB_FRAME_CAPTION`, `FRAME_POWER_*`, `FRAME_START_BLOCKED_BED_OVERRUN` | `src/containers/MachinePanel/JobCard/FrameControls/index.tsx` |
-| P toggles the pointer; only connected, idle, no job | `POINTER_TOGGLE_KEY` | `src/containers/PointerHotkey/index.tsx`, `src/utils/machine/get.can.fire.laser.pointer.ts` |
+| P toggles the pointer; only connected, idle, no job; ignored while a panel or dialog is open or a text field has focus | `POINTER_TOGGLE_KEY` | `src/containers/PointerHotkey/index.tsx`, `src/utils/browser/can.shortcut.act.ts`, `src/utils/machine/get.can.fire.laser.pointer.ts` |
 | "Hold to fire" | `MACHINE_LASER_FIRE` | `src/containers/MachinePanel/JobCard/LaserPointerRow/PointerFireButton/index.tsx` |
 | Start, safety checklist, "I have done all of the above", "Start job" | `MACHINE_START_JOB_CAPTION`, `SAFETY_CHECKLIST_*` | `src/containers/JobStartButton/index.tsx`, `src/containers/JobSafetyChecklistDialog/index.tsx` |
 | Status, Pause, Resume in the Job card | `JOB_RUN_STATUS_LABEL`, `JOB_PAUSE`, `JOB_RESUME` | `src/containers/MachinePanel/JobCard/` |
@@ -36,7 +36,7 @@ The "?" help menu in the top bar opens **Getting started**, a six-step pager tha
 | Stop / Esc: halt, then soft reset | — | `src/containers/StopHotkey/index.tsx`, `src/utils/grbl/grbl.stop.sequence.ts` |
 | "Esc stops over panels too" in Stop settings | `STOP_SETTINGS_*` | `src/containers/StopSettingsButton/index.tsx` |
 | Alarm, Unlock in the Status card | `MACHINE_CONTROL_ALARM_NOTE`, `MACHINE_CONTROL_UNLOCK` | `src/containers/MachinePanel/MachineResetUnlock/index.tsx` |
-| "Connection lost" toast | `TOAST_CONNECTION_LOST` | `src/utils/states/grbl.controller.event.actions.ts` |
+| "Connection lost" toast; laser may still finish received moves | `TOAST_CONNECTION_LOST` | `src/utils/states/grbl.controller.event.actions.ts` |
 | Messages | `MESSAGE_HISTORY_OPEN` | `src/containers/MessageHistoryButton/index.tsx` |
 
 Related: [[ui-layout]], [[vision]].
