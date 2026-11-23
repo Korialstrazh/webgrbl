@@ -12,8 +12,8 @@
 import { BlockOutlined, FolderOutlined } from '@ant-design/icons';
 import { Tree } from 'antd';
 import type { TreeDataNode } from 'antd';
-import { useCallback, useMemo } from 'react';
-import type { ReactNode } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { DEFAULT } from '../../../utils/localization/default.locales';
@@ -30,9 +30,9 @@ import { SVG_TREE_NODE_KIND } from '../../../utils/svg/tree/svg.tree.constants';
 import type { SvgTreeNodeKind } from '../../../utils/svg/tree/svg.tree.constants';
 import { SvgShapeIcon } from '../../../views/SvgShapeIcon';
 import { ElementNodeActions } from './ElementNodeActions';
-import { ELEMENT_TREE_VIEWPORT_HEIGHT_PX } from './element.tree.constants';
 import type { ObjectElementTreeProps } from './interfaces/ObjectElementTreeProps';
 import styles from './styles.module.scss';
+import { useElementTreeViewportHeightPx } from './use.element.tree.viewport.height.px';
 
 const getNodeKindIcon = (svgNode: SvgTreeNode): ReactNode => {
   if (svgNode.kind === SVG_TREE_NODE_KIND.LAYER) {
@@ -72,6 +72,8 @@ export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): Re
   const palette: Palette = useSelector(selectPalette);
   const { id: objectId, svgText, name: objectName } = projectObject;
   const treeData: ElementTreeDataNode[] = useMemo(() => getElementTreeData(getSvgElementTree(svgText)), [svgText]);
+  const treeWrapperRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+  const viewportHeightPx: number = useElementTreeViewportHeightPx(treeWrapperRef);
 
   const changeSvgText = useCallback((changedSvgText: string): void => {
     dispatch(new ProjectObjectSvgTextChangeRequested({ objectId, svgText: changedSvgText }));
@@ -115,14 +117,15 @@ export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): Re
   }
 
   // A height turns on the virtual list of antd: only the rows in view are rendered, so an SVG of thousands of shapes
-  // opens at once. The list only grows to this height, so a short tree takes no more room than its rows.
+  // opens at once. The height follows the panel, and the list only grows to it, so a short tree takes no more room
+  // than its rows.
   return (
-    <div className={styles.tree} aria-label={t(DEFAULT.OBJECTS_TREE_LABEL, { name: objectName })}>
+    <div ref={treeWrapperRef} className={styles.tree} aria-label={t(DEFAULT.OBJECTS_TREE_LABEL, { name: objectName })}>
       <Tree<ElementTreeDataNode>
         blockNode
         defaultExpandAll
         selectable={false}
-        height={ELEMENT_TREE_VIEWPORT_HEIGHT_PX}
+        height={viewportHeightPx}
         treeData={treeData}
         titleRender={renderNodeTitle}
       />
