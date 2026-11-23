@@ -32,8 +32,3 @@
   text-anchor: middle;
   dominant-baseline: central;
 }
-
-// Each picture's keyframes end on the drawing as written, so a still picture shows the end of the story.
-@media (prefers-reduced-motion: reduce) {
-  .animation * { animation: none; }
-}

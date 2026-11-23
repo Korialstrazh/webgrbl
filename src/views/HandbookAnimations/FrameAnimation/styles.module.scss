@@ -7,16 +7,19 @@ $loop: 4s;
 .faintDot { fill: var(--color-bed-laser-head); opacity: 0; }
 .pointerDot { fill: var(--color-bed-laser-head); }
 
-.headColumn { animation: head-column $loop linear infinite; }
-.gantryRow { animation: gantry-row $loop linear infinite; }
-.trace { animation: trace-draw $loop linear infinite; }
-.faintDot { animation: faint-dot $loop linear infinite; }
-.pointerDot { animation: pointer-blink $loop step-end infinite; }
-.pointerKey { animation: key-press $loop ease-out infinite; }
-.pointerKey .keyCap { animation: key-light $loop ease-out infinite; }
-
 // The bounding box is 110 by 70: the head rides the gantry along x while the gantry moves along y, and each side takes
 // a share of the time that matches its length, so the head stays on the tip of the trace line.
+// Motion only for readers who have not asked for less; otherwise the drawing as written is the still picture.
+@media (prefers-reduced-motion: no-preference) {
+  .headColumn { animation: head-column $loop linear infinite; }
+  .gantryRow { animation: gantry-row $loop linear infinite; }
+  .trace { animation: trace-draw $loop linear infinite; }
+  .faintDot { animation: faint-dot $loop linear infinite; }
+  .pointerDot { animation: pointer-blink $loop step-end infinite; }
+  .pointerKey { animation: key-press $loop ease-out infinite; }
+  .pointerKey .keyCap { animation: key-light $loop ease-out infinite; }
+}
+
 @keyframes head-column {
   0% { transform: translateX(0); }
   18.3%, 30% { transform: translateX(110px); }

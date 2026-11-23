@@ -24,9 +24,14 @@ $loop: 4.5s;
   dominant-baseline: central;
 }
 
-.file { opacity: 0; transform-box: fill-box; transform-origin: center; animation: file-drop $loop ease-out infinite; }
-.part { animation: part-draw $loop ease-in-out infinite; }
-.layerBlue { animation-name: part-draw-second; }
+.file { opacity: 0; transform-box: fill-box; transform-origin: center; }
+
+// Motion only for readers who have not asked for less; otherwise the drawing as written is the still picture.
+@media (prefers-reduced-motion: no-preference) {
+  .file { animation: file-drop $loop ease-out infinite; }
+  .part { animation: part-draw $loop ease-in-out infinite; }
+  .layerBlue { animation-name: part-draw-second; }
+}
 
 @keyframes file-drop {
   0% { opacity: 0; transform: translateY(-60px); }

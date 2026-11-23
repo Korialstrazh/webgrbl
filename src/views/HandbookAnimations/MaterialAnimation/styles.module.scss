@@ -10,9 +10,12 @@ $loop: 4s;
 .swatchGreen { fill: var(--color-success); }
 .swatchRing { stroke: var(--color-text); stroke-width: 2; }
 
-.sheet { animation: sheet-slide $loop ease-out infinite; }
-.thicknessTag { animation: tag-show $loop ease-out infinite; }
-.swatchRing { animation: ring-pick $loop ease-in-out infinite; }
+// Motion only for readers who have not asked for less; otherwise the drawing as written is the still picture.
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: sheet-slide $loop ease-out infinite; }
+  .thicknessTag { animation: tag-show $loop ease-out infinite; }
+  .swatchRing { animation: ring-pick $loop ease-in-out infinite; }
+}
 
 @keyframes sheet-slide {
   0% { transform: translateX(-260px); stroke: var(--color-control-border); fill: var(--color-surface-3); }
