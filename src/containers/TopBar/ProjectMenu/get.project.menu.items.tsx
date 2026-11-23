@@ -1,6 +1,6 @@
 /**
  * The entries of the Project menu in three groups (open, save, export) with shortcut hints and, at phone width,
- * Redo, Import SVG and the laser profiles in groups of their own, and a muted footer line with the app version. A
+ * Import SVG with the laser profiles, then Redo, in groups of their own, and a muted footer line with the app version. A
  * phone hides the shortcut hints, having no keyboard to press them on.
  * Export G-code is disabled while it cannot start, with a tooltip that says what is missing.
  *
@@ -42,16 +42,9 @@ const PHONE_ONLY_DIVIDER: ProjectMenuItems[number] = {
   className: styles.phoneOnly,
 };
 
-// Only at phone width, where Redo, Import SVG and the laser profile button leave the bar for these entries.
+// Only at phone width, where Import SVG, the laser profile button and Redo leave the bar for these entries: the two
+// that add to the project first, then Redo on its own, then the version footer.
 const getPhoneOnlyMenuItems = (t: TFunction, options: ProjectMenuItemsOptions): ProjectMenuItems => [
-  PHONE_ONLY_DIVIDER,
-  {
-    key: PROJECT_MENU_KEY.REDO,
-    className: styles.phoneOnly,
-    icon: <RedoArrowIcon aria-label={REDO_ARROW_ICON_NAME} />,
-    disabled: !options.canRedo,
-    label: getShortcutMenuLabel(t(DEFAULT.TOP_BAR_REDO), t(DEFAULT.TOP_BAR_REDO_SHORTCUT)),
-  },
   PHONE_ONLY_DIVIDER,
   {
     key: PROJECT_MENU_KEY.IMPORT_SVG,
@@ -64,6 +57,14 @@ const getPhoneOnlyMenuItems = (t: TFunction, options: ProjectMenuItemsOptions): 
     className: styles.phoneOnly,
     icon: <LaserMachineIcon aria-label={LASER_MACHINE_ICON_NAME} />,
     label: t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES),
+  },
+  PHONE_ONLY_DIVIDER,
+  {
+    key: PROJECT_MENU_KEY.REDO,
+    className: styles.phoneOnly,
+    icon: <RedoArrowIcon aria-label={REDO_ARROW_ICON_NAME} />,
+    disabled: !options.canRedo,
+    label: getShortcutMenuLabel(t(DEFAULT.TOP_BAR_REDO), t(DEFAULT.TOP_BAR_REDO_SHORTCUT)),
   },
   // The phone heading shows only the project name, so the release the user runs is named here, as a muted footer line
   // that cannot be chosen.

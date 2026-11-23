@@ -17,6 +17,8 @@ const DIALOG_OVERLAY_ID = 'test-dialog';
 const HIDDEN_DROPDOWN_SELECTOR = '.ant-dropdown-hidden';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const MACHINE_PROFILES_LABEL = 'Laser profiles';
+const EXPORT_GCODE_LABEL = 'Export G-code';
+const REDO_LABEL = 'Redo';
 const VERSION_FOOTER_TEXT = `webgrbl v${APP_VERSION}`;
 const FOLDER_ICON_SELECTOR = '.anticon-folder';
 const MENU_ICON_SELECTOR = '.anticon-menu';
@@ -97,6 +99,30 @@ describe(ProjectMenu.name, () => {
     const versionFooter: HTMLElement = await screen.findByText(VERSION_FOOTER_TEXT);
 
     expect(versionFooter.closest('[role="menuitem"]')).not.toBeInTheDocument();
+  });
+
+  it('lists the phone entries after Export G-code as Import SVG, laser profiles, then Redo', async () => {
+    render(
+      <Provider store={newStore()}>
+        <AntdTestProvider>
+          <ProjectMenu />
+        </AntdTestProvider>
+      </Provider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: PROJECT_MENU_LABEL }));
+    await screen.findByText(IMPORT_SVG_LABEL);
+
+    const entryTexts: string[] = screen.getAllByRole('menuitem').map((entry: HTMLElement) => entry.textContent ?? '');
+    const exportIndex: number = entryTexts.findIndex((text: string) => text.includes(EXPORT_GCODE_LABEL));
+    const importIndex: number = entryTexts.findIndex((text: string) => text.includes(IMPORT_SVG_LABEL));
+    const profilesIndex: number = entryTexts.findIndex((text: string) => text.includes(MACHINE_PROFILES_LABEL));
+    const redoIndex: number = entryTexts.findIndex((text: string) => text.includes(REDO_LABEL));
+
+    expect(exportIndex).toBeGreaterThanOrEqual(0);
+    expect(importIndex).toBeGreaterThan(exportIndex);
+    expect(profilesIndex).toBeGreaterThan(importIndex);
+    expect(redoIndex).toBeGreaterThan(profilesIndex);
   });
 
   it('carries both the folder and the phone hamburger icon on its trigger, under the one Project name', () => {
