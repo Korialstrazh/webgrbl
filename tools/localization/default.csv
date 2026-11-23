@@ -318,7 +318,7 @@ JOB_LOCK_SHORT_WARNINGS;Warnings
 JOB_PAUSE;Pause
 JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.
 JOB_READINESS_CONNECT;Connect
-JOB_READINESS_CONNECT_ACTION;Connect laser
+JOB_READINESS_CONNECT_ACTION;Connect
 JOB_READINESS_CONNECT_HINT;Connect the laser
 JOB_READINESS_DESIGN;Artwork
 JOB_READINESS_DESIGN_ACTION;Import SVG

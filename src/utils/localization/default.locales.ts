@@ -1270,7 +1270,7 @@ registerLocales({
       [DEFAULT.JOB_PAUSE]: "Pause",
       [DEFAULT.JOB_PAUSE_BLOCKED_LASER_MODE]: "Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.",
       [DEFAULT.JOB_READINESS_CONNECT]: "Connect",
-      [DEFAULT.JOB_READINESS_CONNECT_ACTION]: "Connect laser",
+      [DEFAULT.JOB_READINESS_CONNECT_ACTION]: "Connect",
       [DEFAULT.JOB_READINESS_CONNECT_HINT]: "Connect the laser",
       [DEFAULT.JOB_READINESS_DESIGN]: "Artwork",
       [DEFAULT.JOB_READINESS_DESIGN_ACTION]: "Import SVG",

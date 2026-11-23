@@ -51,7 +51,7 @@ import { newToolpath } from '../../../utils/toolpath/test.support/new.toolpath';
 import { newToolpathMove } from '../../../utils/toolpath/test.support/new.toolpath.move';
 
 const LOCK_REASON_CONNECT = 'Not connected';
-const CONNECT_ACTION_TEXT = 'Connect laser';
+const CONNECT_ACTION_TEXT = 'Connect';
 const LOCK_REASON_LAYER = 'No layer on';
 const FRAME_LABEL = 'Frame job';
 const EXPORT_LABEL = 'Export G-code';
@@ -317,12 +317,12 @@ describe(JobCard.name, () => {
   it('makes Connect the next step without a material, as Start does not need one', async () => {
     renderJobCard(await newGcodeExportTestStore());
 
-    expect(screen.getAllByText(CONNECT_ACTION_TEXT)).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: CONNECT_ACTION_TEXT })).toHaveLength(1);
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
     expect(screen.queryByTestId(JOB_LOCK_NOTE_TEST_IDS.EXPORT)).not.toBeInTheDocument();
   });
 
-  it('says Connect laser once, on the next-step button, while Connect is the next step', () => {
+  it('offers Connect once, on the next-step button, while Connect is the next step', () => {
     const store: AppStore = newStore(undefined, new FakeToolpathWorkerClient(true));
     const profile: MachineProfile = newMachineProfile();
     const material: Material = newMaterial();
@@ -334,7 +334,7 @@ describe(JobCard.name, () => {
     store.dispatch(new ProjectMaterialSelected({ materialId: material.id }));
     renderJobCard(store);
 
-    expect(screen.getAllByText(CONNECT_ACTION_TEXT)).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: CONNECT_ACTION_TEXT })).toHaveLength(1);
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.START)).toBeInTheDocument();
     expect(screen.getByTestId(JOB_LOCK_NOTE_TEST_IDS.FRAME)).toBeInTheDocument();
   });
