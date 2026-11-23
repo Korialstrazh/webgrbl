@@ -1,0 +1,60 @@
+.handbook {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+// Below the wide breakpoint (80rem, as in AppRoute) the step list gives way to the pager alone.
+@media (width < 80rem) {
+  .handbook {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stepList {
+    display: none;
+  }
+}
+
+.stepList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stepButton,
+.currentStepButton {
+  justify-content: flex-start;
+  height: auto;
+  text-align: left;
+  white-space: normal;
+}
+
+.currentStepButton {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.animationFrame {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.stepTitle {
+  margin: 0;
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+}

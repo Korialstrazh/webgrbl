@@ -299,6 +299,24 @@ GRBL_ERROR_8;This $ command only works while the laser is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
+HANDBOOK_CONNECT_BODY_1;Connect the laser over USB.
+HANDBOOK_CONNECT_TITLE;Connect the laser
+HANDBOOK_DONE;Done
+HANDBOOK_ERRORS_BODY_1;Stop the machine and read the message.
+HANDBOOK_ERRORS_TITLE;When something goes wrong
+HANDBOOK_FRAME_BODY_1;Frame the job on the material.
+HANDBOOK_FRAME_TITLE;Frame the job
+HANDBOOK_IMPORT_BODY_1;Import an SVG file.
+HANDBOOK_IMPORT_TITLE;Import a design
+HANDBOOK_MATERIAL_BODY_1;Place the material on the bed.
+HANDBOOK_MATERIAL_TITLE;Prepare the material
+HANDBOOK_NEXT;Next
+HANDBOOK_PREVIOUS;Previous
+HANDBOOK_RUN_BODY_1;Start the job.
+HANDBOOK_RUN_TITLE;Run the job
+HANDBOOK_STEP_COUNTER;Step {{current}} of {{total}}
+HANDBOOK_STEPS_LABEL;Handbook steps
+HANDBOOK_TITLE;Getting started
 HELP_MENU_ABOUT;About webgrbl
 HELP_MENU_HANDBOOK;Getting started
 HELP_MENU_LABEL;Help

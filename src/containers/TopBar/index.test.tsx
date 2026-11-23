@@ -48,6 +48,7 @@ import { SVG_FILE_PICKER_ACCEPT, SVG_IMPORT_INPUT_TEST_ID } from '../SvgImportBu
 
 const HELP_LABEL = 'Help';
 const ABOUT_LABEL = 'About webgrbl';
+const HANDBOOK_LABEL = 'Getting started';
 const UNDO_LABEL = 'Undo';
 const REDO_LABEL = 'Redo';
 const IMPORT_SVG_LABEL = 'Import SVG';
@@ -135,6 +136,15 @@ describe(TopBar.name, () => {
     fireEvent.click(await screen.findByText(ABOUT_LABEL));
 
     expect(await screen.findByRole('dialog', { name: ABOUT_LABEL })).toBeInTheDocument();
+  });
+
+  it('opens the handbook from the Help menu', async () => {
+    renderWorkbenchTopBar(newStore());
+
+    fireEvent.click(screen.getByRole('button', { name: HELP_LABEL }));
+    fireEvent.click(await screen.findByText(HANDBOOK_LABEL));
+
+    expect(await screen.findByRole('dialog', { name: HANDBOOK_LABEL })).toBeInTheDocument();
   });
 
   afterEach(() => {

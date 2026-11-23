@@ -24,8 +24,10 @@ import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
 import {
   AboutDialogOpenChanged,
+  HandbookDialogOpenChanged,
   MachineProfilesDialogOpenChanged,
   selectIsAboutOpen,
+  selectIsHandbookOpen,
   selectIsMachineProfilesDialogOpen,
 } from '../../utils/states/ui.workbench.state';
 import { DismissibleTooltip } from '../../views/DismissibleTooltip';
@@ -34,6 +36,7 @@ import { LaserMachineIcon } from '../../views/LaserMachineIcon';
 import { RedoArrowIcon } from '../../views/RedoArrowIcon';
 import { UndoArrowIcon } from '../../views/UndoArrowIcon';
 import { AboutDialog } from '../AboutDialog';
+import { HandbookDialog } from '../HandbookDialog';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
 import { HelpMenu } from '../HelpMenu';
@@ -53,6 +56,7 @@ export const TopBar = (): ReactNode => {
   const canRedo: boolean = useSelector(selectCanRedo);
   const isProfilesDialogOpen: boolean = useSelector(selectIsMachineProfilesDialogOpen);
   const isAboutDialogOpen: boolean = useSelector(selectIsAboutOpen);
+  const isHandbookDialogOpen: boolean = useSelector(selectIsHandbookOpen);
 
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const profilesLabel: string = t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES);
@@ -153,6 +157,10 @@ export const TopBar = (): ReactNode => {
       <AboutDialog
         isOpen={isAboutDialogOpen}
         onClose={() => dispatch(new AboutDialogOpenChanged({ isAboutOpen: false }))}
+      />
+      <HandbookDialog
+        isOpen={isHandbookDialogOpen}
+        onClose={() => dispatch(new HandbookDialogOpenChanged({ isHandbookOpen: false }))}
       />
     </Layout.Header>
   );
