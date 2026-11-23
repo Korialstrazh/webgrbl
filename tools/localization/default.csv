@@ -1,4 +1,11 @@
 key;en
+ABOUT_CREATOR;Created by {{name}}
+ABOUT_CREDIT;Inspired by LaserGRBL, the Windows laser engraving app.
+ABOUT_DESCRIPTION;webgrbl drives GRBL laser cutters and engravers straight from the browser over USB: design, frame and burn your jobs, even offline.
+ABOUT_LICENCE;Released under the Apache License 2.0.
+ABOUT_SOURCE;Source code on GitHub
+ABOUT_TITLE;About webgrbl
+ABOUT_VERSION;Version {{version}}
 ADD_TEST_SAMPLE;Add test sample
 ADD_TEST_SAMPLE_PROJECT_FULL;The project has the most objects it can hold.
 ADD_TEST_SAMPLE_TOO_SMALL;The 5 × 5 cm sample does not fit the work area of this laser.
@@ -292,6 +299,9 @@ GRBL_ERROR_8;This $ command only works while the laser is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
+HELP_MENU_ABOUT;About webgrbl
+HELP_MENU_HANDBOOK;Getting started
+HELP_MENU_LABEL;Help
 JOB_CHECKLIST_BATTERY_HINT;The laptop runs on battery. Plug it in so a long job is not cut short.
 JOB_CUT_CHECK_CLOSE;Close the cut check
 JOB_CUT_CHECK_EXTRA_PASS;Add one extra pass

@@ -1,7 +1,7 @@
 /**
  * The top region: app name and version, the project name, the Project menu and autosave readout, the machine profiles
- * dialog, SVG import, undo and redo, the connection pill and update notice. The material library opens from the
- * Material panel.
+ * dialog, the Help menu with its About dialog, SVG import, undo and redo, the connection pill and update notice. The
+ * material library opens from the Material panel.
  *
  * @author michael.morosov
  *
@@ -22,14 +22,21 @@ import type { MachineProfile } from '../../utils/profiles/interfaces/MachineProf
 import { selectActiveMachineProfile } from '../../utils/states/machine.profile.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { ProjectRedoRequested, ProjectUndoRequested, selectCanRedo, selectCanUndo } from '../../utils/states/project.document.state';
-import { MachineProfilesDialogOpenChanged, selectIsMachineProfilesDialogOpen } from '../../utils/states/ui.workbench.state';
+import {
+  AboutDialogOpenChanged,
+  MachineProfilesDialogOpenChanged,
+  selectIsAboutOpen,
+  selectIsMachineProfilesDialogOpen,
+} from '../../utils/states/ui.workbench.state';
 import { DismissibleTooltip } from '../../views/DismissibleTooltip';
 import { IconActionButton } from '../../views/IconActionButton';
 import { LaserMachineIcon } from '../../views/LaserMachineIcon';
 import { RedoArrowIcon } from '../../views/RedoArrowIcon';
 import { UndoArrowIcon } from '../../views/UndoArrowIcon';
+import { AboutDialog } from '../AboutDialog';
 import { AppUpdatePrompt } from '../AppUpdatePrompt';
 import { ConnectionPill } from '../ConnectionPill';
+import { HelpMenu } from '../HelpMenu';
 import { LaserStateChip } from '../LaserStateChip';
 import { MachineProfilesDialog } from '../MachineProfilesDialog';
 import { SvgImportButton } from '../SvgImportButton';
@@ -45,6 +52,7 @@ export const TopBar = (): ReactNode => {
   const canUndo: boolean = useSelector(selectCanUndo);
   const canRedo: boolean = useSelector(selectCanRedo);
   const isProfilesDialogOpen: boolean = useSelector(selectIsMachineProfilesDialogOpen);
+  const isAboutDialogOpen: boolean = useSelector(selectIsAboutOpen);
 
   const activeProfile: MachineProfile | undefined = useSelector(selectActiveMachineProfile);
   const profilesLabel: string = t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES);
@@ -137,10 +145,15 @@ export const TopBar = (): ReactNode => {
         <div className={styles.updateSlot}>
           <AppUpdatePrompt />
         </div>
+        <HelpMenu />
         <LaserStateChip />
         <ConnectionPill />
       </div>
       <MachineProfilesDialog isOpen={isProfilesDialogOpen} onClose={() => changeProfilesDialogOpen(false)} />
+      <AboutDialog
+        isOpen={isAboutDialogOpen}
+        onClose={() => dispatch(new AboutDialogOpenChanged({ isAboutOpen: false }))}
+      />
     </Layout.Header>
   );
 };

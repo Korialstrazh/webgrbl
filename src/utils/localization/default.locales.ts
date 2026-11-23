@@ -14,6 +14,13 @@ import { registerLocales } from './localization';
 
 // #region DEFAULT
 export const DEFAULT = {
+  ABOUT_CREATOR: 'ABOUT_CREATOR',
+  ABOUT_CREDIT: 'ABOUT_CREDIT',
+  ABOUT_DESCRIPTION: 'ABOUT_DESCRIPTION',
+  ABOUT_LICENCE: 'ABOUT_LICENCE',
+  ABOUT_SOURCE: 'ABOUT_SOURCE',
+  ABOUT_TITLE: 'ABOUT_TITLE',
+  ABOUT_VERSION: 'ABOUT_VERSION',
   ADD_TEST_SAMPLE: 'ADD_TEST_SAMPLE',
   ADD_TEST_SAMPLE_PROJECT_FULL: 'ADD_TEST_SAMPLE_PROJECT_FULL',
   ADD_TEST_SAMPLE_TOO_SMALL: 'ADD_TEST_SAMPLE_TOO_SMALL',
@@ -304,6 +311,9 @@ export const DEFAULT = {
   GRBL_ERROR_9: 'GRBL_ERROR_9',
   GRBL_ERROR_NON_ASCII_LINE: 'GRBL_ERROR_NON_ASCII_LINE',
   GRBL_ERROR_UNKNOWN: 'GRBL_ERROR_UNKNOWN',
+  HELP_MENU_ABOUT: 'HELP_MENU_ABOUT',
+  HELP_MENU_HANDBOOK: 'HELP_MENU_HANDBOOK',
+  HELP_MENU_LABEL: 'HELP_MENU_LABEL',
   JOB_CHECKLIST_BATTERY_HINT: 'JOB_CHECKLIST_BATTERY_HINT',
   JOB_CUT_CHECK_CLOSE: 'JOB_CUT_CHECK_CLOSE',
   JOB_CUT_CHECK_EXTRA_PASS: 'JOB_CUT_CHECK_EXTRA_PASS',
@@ -951,6 +961,13 @@ registerLocales({
   en: {
     code: 'en',
     translation: {
+      [DEFAULT.ABOUT_CREATOR]: "Created by {{name}}",
+      [DEFAULT.ABOUT_CREDIT]: "Inspired by LaserGRBL, the Windows laser engraving app.",
+      [DEFAULT.ABOUT_DESCRIPTION]: "webgrbl drives GRBL laser cutters and engravers straight from the browser over USB: design, frame and burn your jobs, even offline.",
+      [DEFAULT.ABOUT_LICENCE]: "Released under the Apache License 2.0.",
+      [DEFAULT.ABOUT_SOURCE]: "Source code on GitHub",
+      [DEFAULT.ABOUT_TITLE]: "About webgrbl",
+      [DEFAULT.ABOUT_VERSION]: "Version {{version}}",
       [DEFAULT.ADD_TEST_SAMPLE]: "Add test sample",
       [DEFAULT.ADD_TEST_SAMPLE_PROJECT_FULL]: "The project has the most objects it can hold.",
       [DEFAULT.ADD_TEST_SAMPLE_TOO_SMALL]: "The 5 × 5 cm sample does not fit the work area of this laser.",
@@ -1244,6 +1261,9 @@ registerLocales({
       [DEFAULT.GRBL_ERROR_9]: "G-code is locked during an alarm or jog.",
       [DEFAULT.GRBL_ERROR_NON_ASCII_LINE]: "The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.",
       [DEFAULT.GRBL_ERROR_UNKNOWN]: "Unknown error.",
+      [DEFAULT.HELP_MENU_ABOUT]: "About webgrbl",
+      [DEFAULT.HELP_MENU_HANDBOOK]: "Getting started",
+      [DEFAULT.HELP_MENU_LABEL]: "Help",
       [DEFAULT.JOB_CHECKLIST_BATTERY_HINT]: "The laptop runs on battery. Plug it in so a long job is not cut short.",
       [DEFAULT.JOB_CUT_CHECK_CLOSE]: "Close the cut check",
       [DEFAULT.JOB_CUT_CHECK_EXTRA_PASS]: "Add one extra pass",

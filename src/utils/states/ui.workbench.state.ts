@@ -23,6 +23,10 @@ export interface UiWorkbenchState {
   isFrameSettingsOpen: boolean;
   /** Whether the laser profiles dialog is open; the top bar and the Job card both open it. */
   isMachineProfilesDialogOpen: boolean;
+  /** Whether the getting-started handbook is open; the Help menu opens it. */
+  isHandbookOpen: boolean;
+  /** Whether the About dialog is open; the Help menu opens it. */
+  isAboutOpen: boolean;
   /** The key of the layer whose settings drawer is open; the layer row and the 3D Cut check both open it. */
   openLayerSettingsKey?: string;
 }
@@ -48,6 +52,15 @@ export class FrameSettingsOpenChanged extends Action<Pick<UiWorkbenchState, 'isF
 export class MachineProfilesDialogOpenChanged extends Action<Pick<UiWorkbenchState, 'isMachineProfilesDialogOpen'>> {
   public static readonly type: string = actionType('machine profiles dialog open changed');
 }
+
+export class HandbookDialogOpenChanged extends Action<Pick<UiWorkbenchState, 'isHandbookOpen'>> {
+  public static readonly type: string = actionType('handbook dialog open changed');
+}
+
+export class AboutDialogOpenChanged extends Action<Pick<UiWorkbenchState, 'isAboutOpen'>> {
+  public static readonly type: string = actionType('about dialog open changed');
+}
+
 export class LayerSettingsOpenChanged extends Action<Pick<UiWorkbenchState, 'openLayerSettingsKey'>> {
   public static readonly type: string = actionType('layer settings open changed');
 }
@@ -58,6 +71,8 @@ const INITIAL_UI_WORKBENCH_STATE: UiWorkbenchState = {
   narrowRegion: WORKBENCH_REGION.BED,
   isFrameSettingsOpen: false,
   isMachineProfilesDialogOpen: false,
+  isHandbookOpen: false,
+  isAboutOpen: false,
 };
 // #endregion
 
@@ -70,6 +85,8 @@ export const uiWorkbenchReducer = (
   case NarrowRegionChanged.type:
   case FrameSettingsOpenChanged.type:
   case MachineProfilesDialogOpenChanged.type:
+  case HandbookDialogOpenChanged.type:
+  case AboutDialogOpenChanged.type:
   case LayerSettingsOpenChanged.type:
     return { ...state, ...(action as Action<Partial<UiWorkbenchState>>).payload };
   default:
@@ -88,6 +105,11 @@ export const selectIsFrameSettingsOpen = (state: RootState): boolean =>
 
 export const selectIsMachineProfilesDialogOpen = (state: RootState): boolean =>
   state[UI_WORKBENCH_STATE_NAME].isMachineProfilesDialogOpen;
+
+export const selectIsHandbookOpen = (state: RootState): boolean => state[UI_WORKBENCH_STATE_NAME].isHandbookOpen;
+
+export const selectIsAboutOpen = (state: RootState): boolean => state[UI_WORKBENCH_STATE_NAME].isAboutOpen;
+
 export const selectOpenLayerSettingsKey = (state: RootState): string | undefined =>
   state[UI_WORKBENCH_STATE_NAME].openLayerSettingsKey;
 // #endregion
