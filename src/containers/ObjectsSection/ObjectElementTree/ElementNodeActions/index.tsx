@@ -10,10 +10,9 @@
  */
 import { BgColorsOutlined, DeleteOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { Button, Popover } from 'antd';
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import {
   ANTD_BUTTON_SIZE_SMALL,
   ANTD_BUTTON_TYPE_TEXT,
@@ -24,8 +23,6 @@ import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.regi
 import { usePopoverFocusReturn } from '../../../../utils/hooks/use.popover.focus.return';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../../../utils/palette/interfaces/PaletteEntry';
-import type { Palette } from '../../../../utils/palette/interfaces/Palette';
-import { selectPalette } from '../../../../utils/states/palette.state';
 import { IconActionButton } from '../../../../views/IconActionButton';
 import { LayerSwatch } from '../../../../views/LayerSwatch';
 import type { ElementNodeActionsProps } from '../interfaces/ElementNodeActionsProps';
@@ -38,10 +35,11 @@ const stopRowSelect = (mouseEvent: MouseEvent): void => {
   mouseEvent.stopPropagation();
 };
 
-export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode => {
-  const { node, onDisabledChange, onDelete, onRecolour } = props;
+// Memoised: a tree of thousands of rows re-renders its visible rows on every edit, and a row whose node, palette and
+// handlers did not change can skip its tooltips and popover.
+export const ElementNodeActions = memo((props: ElementNodeActionsProps): ReactNode => {
+  const { node, palette, onDisabledChange, onDelete, onRecolour } = props;
   const { t } = useTranslation();
-  const palette: Palette = useSelector(selectPalette);
   const isSkipped: boolean = node.isDisabled;
   const [isRecolourOpen, setIsRecolourOpen] = useState<boolean>(false);
 
@@ -50,7 +48,8 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
   // Escape must only close the colour list, not also stop the machine.
   useOverlayRegistration(RECOLOUR_POPOVER_OVERLAY_ID, isRecolourOpen);
 
-  const colourListComponent: ReactNode = (
+  // Built only when the popover opens, so a closed row never renders the palette buttons.
+  const getColourListComponent = useCallback((): ReactNode => (
     <div className={styles.colourList}>
       {palette.entries.map((entry: PaletteEntry) => (
         <Button
@@ -65,7 +64,7 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
         </Button>
       ))}
     </div>
-  );
+  ), [node.path, onRecolour, palette.entries, t]);
 
   return (
     <span className={styles.actions} onClick={stopRowSelect}>
@@ -78,7 +77,7 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
         onClick={() => onDisabledChange(node.path, !isSkipped)}
       />
       <Popover
-        content={colourListComponent}
+        content={getColourListComponent}
         trigger={ANTD_POPOVER_TRIGGER_CLICK}
         placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
         open={isRecolourOpen}
@@ -100,4 +99,4 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
       />
     </span>
   );
-};
+});

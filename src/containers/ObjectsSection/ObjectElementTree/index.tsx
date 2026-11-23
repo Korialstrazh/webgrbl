@@ -12,12 +12,14 @@
 import { BlockOutlined, FolderOutlined } from '@ant-design/icons';
 import { Tree } from 'antd';
 import type { TreeDataNode } from 'antd';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import type { Palette } from '../../../utils/palette/interfaces/Palette';
 import type { AppDispatch } from '../../../utils/states/new.store';
+import { selectPalette } from '../../../utils/states/palette.state';
 import { ProjectObjectSvgTextChangeRequested } from '../../../utils/states/project.document.state';
 import { getSvgElementTree } from '../../../utils/svg/tree/get.svg.element.tree';
 import { getSvgTextWithElementColour } from '../../../utils/svg/tree/get.svg.text.with.element.colour';
@@ -28,6 +30,7 @@ import { SVG_TREE_NODE_KIND } from '../../../utils/svg/tree/svg.tree.constants';
 import type { SvgTreeNodeKind } from '../../../utils/svg/tree/svg.tree.constants';
 import { SvgShapeIcon } from '../../../views/SvgShapeIcon';
 import { ElementNodeActions } from './ElementNodeActions';
+import { ELEMENT_TREE_VIEWPORT_HEIGHT_PX } from './element.tree.constants';
 import type { ObjectElementTreeProps } from './interfaces/ObjectElementTreeProps';
 import styles from './styles.module.scss';
 
@@ -66,18 +69,27 @@ const getElementTreeData = (nodes: SvgTreeNode[]): ElementTreeDataNode[] =>
 export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): ReactNode => {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
+  const palette: Palette = useSelector(selectPalette);
   const { id: objectId, svgText, name: objectName } = projectObject;
   const treeData: ElementTreeDataNode[] = useMemo(() => getElementTreeData(getSvgElementTree(svgText)), [svgText]);
 
-  const changeSvgText = (changedSvgText: string): void => {
+  const changeSvgText = useCallback((changedSvgText: string): void => {
     dispatch(new ProjectObjectSvgTextChangeRequested({ objectId, svgText: changedSvgText }));
-  };
+  }, [dispatch, objectId]);
 
-  if (!treeData.length) {
-    return <p className={styles.empty}>{t(DEFAULT.OBJECTS_TREE_EMPTY)}</p>;
-  }
+  const changeElementDisabled = useCallback((nodePath: string, isDisabled: boolean): void => {
+    changeSvgText(getSvgTextWithElementDisabled(svgText, nodePath, isDisabled));
+  }, [changeSvgText, svgText]);
 
-  const renderNodeTitle = ({ svgNode }: ElementTreeDataNode): ReactNode => {
+  const deleteElement = useCallback((nodePath: string): void => {
+    changeSvgText(getSvgTextWithoutElement(svgText, nodePath));
+  }, [changeSvgText, svgText]);
+
+  const recolourElement = useCallback((nodePath: string, colour: string): void => {
+    changeSvgText(getSvgTextWithElementColour(svgText, nodePath, colour));
+  }, [changeSvgText, svgText]);
+
+  const renderNodeTitle = useCallback(({ svgNode }: ElementTreeDataNode): ReactNode => {
     const isSkipped: boolean = svgNode.isDisabled || svgNode.isInsideDisabled;
     const nodeClassName: string | undefined = isSkipped ? [styles.node, styles.skippedNode].join(' ') : styles.node;
 
@@ -89,22 +101,28 @@ export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): Re
         <span className={styles.name} title={svgNode.name}>{svgNode.name}</span>
         <ElementNodeActions
           node={svgNode}
-          onDisabledChange={(nodePath: string, isDisabled: boolean) =>
-            changeSvgText(getSvgTextWithElementDisabled(svgText, nodePath, isDisabled))}
-          onDelete={(nodePath: string) => changeSvgText(getSvgTextWithoutElement(svgText, nodePath))}
-          onRecolour={(nodePath: string, colour: string) =>
-            changeSvgText(getSvgTextWithElementColour(svgText, nodePath, colour))}
+          palette={palette}
+          onDisabledChange={changeElementDisabled}
+          onDelete={deleteElement}
+          onRecolour={recolourElement}
         />
       </span>
     );
-  };
+  }, [changeElementDisabled, deleteElement, palette, recolourElement, t]);
 
+  if (!treeData.length) {
+    return <p className={styles.empty}>{t(DEFAULT.OBJECTS_TREE_EMPTY)}</p>;
+  }
+
+  // A height turns on the virtual list of antd: only the rows in view are rendered, so an SVG of thousands of shapes
+  // opens at once. The list only grows to this height, so a short tree takes no more room than its rows.
   return (
     <div className={styles.tree} aria-label={t(DEFAULT.OBJECTS_TREE_LABEL, { name: objectName })}>
       <Tree<ElementTreeDataNode>
         blockNode
         defaultExpandAll
         selectable={false}
+        height={ELEMENT_TREE_VIEWPORT_HEIGHT_PX}
         treeData={treeData}
         titleRender={renderNodeTitle}
       />
