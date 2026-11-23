@@ -1,7 +1,8 @@
 /**
- * Port, baud rate and connect controls of the laser connection, shown in an antd popover under its anchor (the
- * connection pill). Opening moves focus into the popover; closing it while focus is inside returns focus to the opener.
- * It closes by itself once a connect it started succeeds; a failed connect keeps it open with the reason.
+ * Port and connect controls of the laser connection, with the baud rate folded under Advanced, shown in an antd
+ * popover under its anchor (the connection pill). Opening moves focus into the popover; closing it while focus is
+ * inside returns focus to the opener. It closes by itself once a connect it started succeeds; a failed connect keeps
+ * it open with the reason.
  *
  * @author michael.morosov
  *
@@ -10,8 +11,14 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { ApiOutlined, DashboardOutlined, DisconnectOutlined, PlusOutlined, UsbOutlined } from '@ant-design/icons';
-import { Button, Popover, Select, Tooltip } from 'antd';
+import {
+  ApiOutlined,
+  DisconnectOutlined,
+  PlusOutlined,
+  SettingOutlined,
+  UsbOutlined,
+} from '@ant-design/icons';
+import { Button, Collapse, Popover, Select, Tooltip } from 'antd';
 import type { PopoverProps, SelectProps } from 'antd';
 import { useEffect, useId, useRef } from 'react';
 import type { ReactElement, ReactNode, RefObject } from 'react';
@@ -21,23 +28,22 @@ import {
   ANTD_BUTTON_TYPE_DEFAULT,
   ANTD_BUTTON_TYPE_PRIMARY,
   ANTD_BUTTON_TYPE_TEXT,
+  ANTD_COLLAPSE_SIZE_SMALL,
   ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT,
   ANTD_POPOVER_TRIGGER_CLICK,
 } from '../../utils/antd.constants';
-import { GRBL_BAUD_RATES, GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
+import { GRBL_CONNECTION_STATUS, SIMULATED_LASER_PORT_ID } from '../../utils/grbl/grbl.constants';
 import type { GrblConnectionStatus } from '../../utils/grbl/grbl.constants';
 import type { SerialPortDescriptor } from '../../utils/grbl/interfaces/SerialPortDescriptor';
 import { useOverlayRegistration } from '../../utils/hooks/use.overlay.registration';
 import { DEFAULT } from '../../utils/localization/default.locales';
 import { selectIsWebSerialSupported } from '../../utils/states/browser.environment.state';
 import {
-  BaudRateSelected,
   ConnectRequested,
   DisconnectRequested,
   SerialPortPickerRequested,
   SerialPortSelected,
   selectAvailablePorts,
-  selectBaudRate,
   selectConnectFailureKey,
   selectConnectionStatus,
   selectIsConnected,
@@ -45,6 +51,7 @@ import {
 } from '../../utils/states/grbl.connection.state';
 import type { AppDispatch } from '../../utils/states/new.store';
 import { SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../utils/tab.index.constants';
+import { BaudRateField } from './BaudRateField';
 import { CONNECTION_POPOVER_OVERLAY_ID } from './connection.popover.constants';
 import { getPortOptionLabel } from './get.port.option.label';
 import styles from './styles.module.scss';
@@ -58,6 +65,8 @@ interface ConnectionPopoverProps {
   /** The same control as a ref: focus returns to it when the popover closes with focus inside. */
   anchorRef: RefObject<HTMLElement | null>;
 }
+
+const ADVANCED_PANEL_KEY = 'advanced';
 
 // On a narrow screen the panel slides sideways to stay in view instead of running off the left edge.
 const CONNECTION_POPOVER_ALIGN: PopoverProps['align'] = { overflow: { adjustX: true, adjustY: true, shiftX: true } };
@@ -96,7 +105,6 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
   const isWebSerialSupported: boolean = useSelector(selectIsWebSerialSupported);
   const availablePorts: SerialPortDescriptor[] = useSelector(selectAvailablePorts);
   const selectedPortId: string = useSelector(selectSelectedPortId);
-  const baudRate: number = useSelector(selectBaudRate);
   const connectFailureKey: string | undefined = useSelector(selectConnectFailureKey);
   const isConnecting: boolean = connectionStatus === GRBL_CONNECTION_STATUS.CONNECTING;
   const isLinkLocked: boolean = isConnected || isConnecting;
@@ -104,7 +112,6 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
   const wasConnectingRef: RefObject<boolean> = useRef<boolean>(isConnecting);
   const isOpenedByPointerRef: RefObject<boolean> = useRef<boolean>(false);
   const portSelectId: string = useId();
-  const baudSelectId: string = useId();
   const portOptions: SelectProps<string>['options'] = [
     { value: SIMULATED_LASER_PORT_ID, label: t(DEFAULT.CONNECTION_POPOVER_SIMULATED_LASER) },
     ...availablePorts.map((port: SerialPortDescriptor) => ({ value: port.portId, label: getPortOptionLabel(port, t) })),
@@ -118,10 +125,6 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
   const titleText: string = isConnected
     ? t(DEFAULT.CONNECTION_POPOVER_TITLE_CONNECTED, { port: connectedPortLabel })
     : t(DEFAULT.CONNECTION_POPOVER_TITLE);
-  const baudOptions: SelectProps<number>['options'] = GRBL_BAUD_RATES.map((rate: number) => ({
-    value: rate,
-    label: String(rate),
-  }));
 
   useOverlayRegistration(CONNECTION_POPOVER_OVERLAY_ID, isOpen);
 
@@ -236,21 +239,6 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
       {!isWebSerialSupported && (
         <p className={styles.unsupportedNotice}>{t(DEFAULT.CONNECTION_POPOVER_WEB_SERIAL_UNSUPPORTED)}</p>
       )}
-      <div className={styles.field}>
-        <label className={styles.fieldLabel} htmlFor={baudSelectId}>
-          <DashboardOutlined aria-hidden />
-          {t(DEFAULT.CONNECTION_POPOVER_BAUD)}
-        </label>
-        <Select<number>
-          id={baudSelectId}
-          className={styles.select}
-          value={baudRate}
-          options={baudOptions}
-          disabled={isLinkLocked}
-          virtual={false}
-          onChange={(nextBaudRate: number) => dispatch(new BaudRateSelected({ baudRate: nextBaudRate }))}
-        />
-      </div>
       <Button
         type={isConnected ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
         danger={isConnected}
@@ -261,6 +249,22 @@ export const ConnectionPopover = ({ isOpen, onOpenChange, children, anchorRef }:
         {t(getConnectButtonKey(isConnected, isConnecting))}
       </Button>
       {connectFailureKey && <p className={styles.failureNotice} role="alert">{t(connectFailureKey)}</p>}
+      {/* Most lasers talk at the default rate, so the baud rate waits folded under Advanced, closed on every open. */}
+      <Collapse
+        className={styles.advanced}
+        ghost
+        size={ANTD_COLLAPSE_SIZE_SMALL}
+        items={[{
+          key: ADVANCED_PANEL_KEY,
+          label: (
+            <span className={styles.advancedLabel}>
+              <SettingOutlined aria-hidden />
+              {t(DEFAULT.CONNECTION_POPOVER_ADVANCED)}
+            </span>
+          ),
+          children: <BaudRateField isLocked={isLinkLocked} />,
+        }]}
+      />
     </div>
   );
 

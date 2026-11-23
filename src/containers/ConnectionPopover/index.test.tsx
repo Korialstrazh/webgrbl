@@ -24,6 +24,7 @@ const CHOOSE_PORT_LABEL = 'Choose a USB port';
 const ANTD_TEXT_BUTTON_CLASS = 'ant-btn-text';
 const PORT_LABEL = 'Port';
 const BAUD_LABEL = 'Baud rate';
+const ADVANCED_LABEL = 'Advanced';
 const SIMULATED_LASER_LABEL = 'Simulated laser (no hardware)';
 const NO_PORT_CHOSEN_LABEL = 'No port chosen';
 const WEB_SERIAL_UNAVAILABLE_PATTERN = /Web Serial unavailable/;
@@ -243,9 +244,21 @@ describe(ConnectionPopover.name, () => {
     expect(selectSelectedPortId(store.getState())).toBe(USB_PORT_ID);
   });
 
+  it('keeps the baud rate folded under a closed Advanced section until it is opened', () => {
+    renderConnectionPopover();
+
+    expect(screen.queryByRole('combobox', { name: BAUD_LABEL })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: ADVANCED_LABEL })).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByRole('button', { name: ADVANCED_LABEL }));
+
+    expect(screen.getByRole('combobox', { name: BAUD_LABEL })).toBeInTheDocument();
+  });
+
   it('offers every baud rate and stores the chosen one', () => {
     const store: AppStore = renderConnectionPopover();
 
+    fireEvent.click(screen.getByRole('button', { name: ADVANCED_LABEL }));
     openSelect(BAUD_LABEL);
 
     expect(getSelectOptionLabels()).toEqual(GRBL_BAUD_RATES.map(String));
@@ -260,6 +273,7 @@ describe(ConnectionPopover.name, () => {
 
     fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
     await settle();
+    fireEvent.click(screen.getByRole('button', { name: ADVANCED_LABEL }));
 
     expect(screen.getByRole('combobox', { name: PORT_LABEL })).toBeDisabled();
     expect(screen.getByRole('combobox', { name: BAUD_LABEL })).toBeDisabled();
