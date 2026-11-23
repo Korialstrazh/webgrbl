@@ -9,11 +9,12 @@
  * @copyright 2026 michael.morosov
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
-import { InputNumber, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import type { InputNumberProps } from 'antd';
 import type { ReactNode } from 'react';
 import { ANTD_TOOLTIP_TRIGGER_HOVER_AND_FOCUS } from '../../utils/antd.constants';
 import styles from './styles.module.scss';
+import { DecimalNumberInput } from '../DecimalNumberInput';
 
 interface IconNumberFieldProps extends Omit<InputNumberProps<number>, 'id' | 'prefix' | 'suffix' | 'controls'> {
   inputId: string;
@@ -33,7 +34,7 @@ export const IconNumberField = (props: IconNumberFieldProps): ReactNode => {
   const { inputId, labelText, hintText, iconComponent, captionText, unitText, ...fieldProps } = props;
   const { hasTooltip = true, className, ...inputProps } = fieldProps;
   const inputComponent: ReactNode = (
-    <InputNumber<number>
+    <DecimalNumberInput
       {...inputProps}
       id={inputId}
       className={[styles.input, className].join(' ')}
