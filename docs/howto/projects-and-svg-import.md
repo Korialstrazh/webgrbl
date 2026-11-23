@@ -109,6 +109,10 @@ When an edit leaves the object outside the bed (for example skipping a far-off g
 
 An import larger than the bed shows its toast as a warning (warning icon and colour, in the toast and in Messages).
 
+The tree is an antd virtual list (`height` on `Tree`): only the rows in view are mounted, so an SVG of thousands of shapes opens at once. `useElementTreeViewportHeightPx` sizes it to 60% of the panel that scrolls it, at least 240 px, measured with a `ResizeObserver` (without one it stays at 320 px); the list never grows taller than its rows. Picking a colour closes the colour list.
+
+Keyboard (`useElementTreeKeyboard`): only one row's buttons are in the Tab order (roving tab index), so Tab enters the tree on that row, walks its three buttons and leaves the tree. Arrow Up and Down move to the previous or next visible row, Home and End to the first and last; each scrolls the virtual list to that row (`Tree.scrollTo`) and focuses its first button, so every row is reachable. Focusing a row by mouse or Tab makes it the Tab stop; after a mouse scroll that unmounts it, the first row in view takes over. A row's keys and focus events never reach antd's own tree keyboard (`focusable={false}` also drops its hidden input from the Tab order): it scrolled back to the first row on focus, and Enter on a layer row's button folded the layer.
+
 Nodes are addressed by child-index paths (`1.0.2`) from the root. The state lives in the SVG text, so it is saved, exported and undone with the object, and old projects need no migration.
 
 The off-bed note on the Objects row and the red outline on the bed now use the drawn geometry (`isObjectArtworkOutsideBed`), not the SVG page box. An object outside the bed also gets red arrows on each bed edge it crosses (`BedOffBedArrows`, level with the artwork centre held on the bed, two handles long at every zoom), so an object that is mostly off the bed still shows which way it went, and its problems popover offers **Move onto bed** (off when it is larger than the bed) and **Fit to bed** (shrinks it only when needed and centres it), each one undo step.

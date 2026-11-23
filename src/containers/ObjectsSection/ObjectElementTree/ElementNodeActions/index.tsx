@@ -10,10 +10,9 @@
  */
 import { BgColorsOutlined, DeleteOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { Button, Popover } from 'antd';
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import {
   ANTD_BUTTON_SIZE_SMALL,
   ANTD_BUTTON_TYPE_TEXT,
@@ -24,8 +23,7 @@ import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.regi
 import { usePopoverFocusReturn } from '../../../../utils/hooks/use.popover.focus.return';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../../../utils/palette/interfaces/PaletteEntry';
-import type { Palette } from '../../../../utils/palette/interfaces/Palette';
-import { selectPalette } from '../../../../utils/states/palette.state';
+import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
 import { IconActionButton } from '../../../../views/IconActionButton';
 import { LayerSwatch } from '../../../../views/LayerSwatch';
 import type { ElementNodeActionsProps } from '../interfaces/ElementNodeActionsProps';
@@ -38,10 +36,12 @@ const stopRowSelect = (mouseEvent: MouseEvent): void => {
   mouseEvent.stopPropagation();
 };
 
-export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode => {
-  const { node, onDisabledChange, onDelete, onRecolour } = props;
+// Memoised: a tree of thousands of rows re-renders its visible rows on every edit, and a row whose node, palette and
+// handlers did not change can skip its tooltips and popover.
+export const ElementNodeActions = memo((props: ElementNodeActionsProps): ReactNode => {
+  const { node, palette, isTabStop, onDisabledChange, onDelete, onRecolour } = props;
+  const rowButtonTabIndex: number = isTabStop ? KEYBOARD_FOCUSABLE_TAB_INDEX : SCRIPT_FOCUS_ONLY_TAB_INDEX;
   const { t } = useTranslation();
-  const palette: Palette = useSelector(selectPalette);
   const isSkipped: boolean = node.isDisabled;
   const [isRecolourOpen, setIsRecolourOpen] = useState<boolean>(false);
 
@@ -50,7 +50,8 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
   // Escape must only close the colour list, not also stop the machine.
   useOverlayRegistration(RECOLOUR_POPOVER_OVERLAY_ID, isRecolourOpen);
 
-  const colourListComponent: ReactNode = (
+  // Built only when the popover opens, so a closed row never renders the palette buttons.
+  const getColourListComponent = useCallback((): ReactNode => (
     <div className={styles.colourList}>
       {palette.entries.map((entry: PaletteEntry) => (
         <Button
@@ -59,26 +60,30 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
           className={styles.colourButton}
           aria-label={t(DEFAULT.OBJECTS_TREE_RECOLOUR_TO, { entry: entry.name })}
           title={entry.name}
-          onClick={() => onRecolour(node.path, entry.colour)}
+          onClick={() => {
+            onRecolour(node.path, entry.colour);
+            setIsRecolourOpen(false);
+          }}
         >
           <span className={styles.colourSwatch}><LayerSwatch colour={entry.colour} isShading={false} /></span>
         </Button>
       ))}
     </div>
-  );
+  ), [node.path, onRecolour, palette.entries, t]);
 
   return (
     <span className={styles.actions} onClick={stopRowSelect}>
       <IconActionButton
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
+        tabIndex={rowButtonTabIndex}
         labelText={t(isSkipped ? DEFAULT.OBJECTS_TREE_TURN_ON : DEFAULT.OBJECTS_TREE_TURN_OFF, { name: node.name })}
         iconComponent={isSkipped ? <EyeInvisibleOutlined /> : <EyeOutlined />}
         aria-pressed={isSkipped}
         onClick={() => onDisabledChange(node.path, !isSkipped)}
       />
       <Popover
-        content={colourListComponent}
+        content={getColourListComponent}
         trigger={ANTD_POPOVER_TRIGGER_CLICK}
         placement={ANTD_POPOVER_PLACEMENT_BOTTOM_RIGHT}
         open={isRecolourOpen}
@@ -87,6 +92,7 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
+          tabIndex={rowButtonTabIndex}
           labelText={t(DEFAULT.OBJECTS_TREE_RECOLOUR, { name: node.name })}
           iconComponent={<BgColorsOutlined />}
         />
@@ -94,10 +100,11 @@ export const ElementNodeActions = (props: ElementNodeActionsProps): ReactNode =>
       <IconActionButton
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
+        tabIndex={rowButtonTabIndex}
         labelText={t(DEFAULT.OBJECTS_TREE_DELETE, { name: node.name })}
         iconComponent={<DeleteOutlined />}
         onClick={() => onDelete(node.path)}
       />
     </span>
   );
-};
+});
