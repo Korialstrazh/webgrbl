@@ -8,7 +8,7 @@ import { AntdTestProvider } from '../../utils/test.support/antd.test.provider';
 const FIRST_COUNTER = 'Step 1 of 6';
 const FOURTH_COUNTER = 'Step 4 of 6';
 const LAST_COUNTER = 'Step 6 of 6';
-const FRAME_STEP_BUTTON_NAME = /^4\. Frame the job/;
+const FRAME_STEP_BUTTON_NAME = /^4\. Frame and aim/;
 const PREVIOUS_LABEL = 'Previous';
 const NEXT_LABEL = 'Next';
 const DONE_LABEL = 'Done';
