@@ -43,10 +43,12 @@ const FIX_WARNINGS_ACTION = 'Fix warnings (2)';
 const TEXT_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.TEXT };
 const OFF_PAGE_WARNING: ObjectWarning = { objectId: 'object', kind: SVG_UNSUPPORTED_KIND.OFF_PAGE };
 
-const CONNECT_ACTION = 'Connect laser';
+const CONNECT_ACTION = 'Connect';
 const FILE_INPUT_SELECTOR = 'input[type="file"]';
 const IMPORT_SVG_LABEL = 'Import SVG';
 const PRIMARY_BUTTON_SELECTOR = '.ant-btn-primary';
+const PRIMARY_BUTTON_CLASS = 'ant-btn-primary';
+const PLUG_ICON_SELECTOR = '.anticon-api';
 const MATERIAL_THICKNESS_MM = 3;
 
 /** Profile, design and material are done, so Connect is the current step. */
@@ -70,6 +72,10 @@ const renderRow = (): AppStore => {
   render(<Provider store={store}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>);
 
   return store;
+};
+
+const renderStoreAtConnectStep = (): void => {
+  render(<Provider store={newSetUpStore()}><AntdTestProvider><JobReadinessRow /></AntdTestProvider></Provider>);
 };
 
 describe(JobReadinessRow.name, () => {
@@ -146,6 +152,15 @@ describe(JobReadinessRow.name, () => {
     expect(selectConnectionStatus(store.getState())).toBe(GRBL_CONNECTION_STATUS.CONNECTED);
     expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
     vi.useRealTimers();
+  });
+
+  it('draws the Connect action as an outlined button, leaving the header Connect the one primary', () => {
+    renderStoreAtConnectStep();
+
+    const connectAction: HTMLElement = screen.getByRole('button', { name: CONNECT_ACTION });
+
+    expect(connectAction).not.toHaveClass(PRIMARY_BUTTON_CLASS);
+    expect(connectAction.querySelector(PLUG_ICON_SELECTOR)).toBeInTheDocument();
   });
 
   it('only opens the connection popover from the Connect action without a chosen port, starting nothing', () => {

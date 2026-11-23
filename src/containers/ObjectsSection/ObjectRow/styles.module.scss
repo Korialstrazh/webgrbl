@@ -71,9 +71,11 @@
 }
 
 // The size always stays on one line in a slightly smaller tabular font: the compact format (whole millimetres from
-// 100 mm, no spaces around the times sign) fits the narrowest panel beside the chip and actions.
+// 100 mm, no spaces around the times sign) fits most panels beside the chip and actions; with the splitter dragged to its
+// narrowest it ends in an ellipsis instead of cutting a digit in half.
 .size {
   overflow: hidden;
+  text-overflow: ellipsis;
   font-family: var(--font-ui);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;

@@ -66,8 +66,8 @@
   }
 }
 
-// At phone width the chevron stays beside the hamburger, so the trigger reads as the menu that also holds Undo, Redo,
-// Import SVG and the laser profile. 30rem matches the TopBar.
+// At phone width the hamburger alone names the menu; a chevron beside it would read as a second symbol. 30rem matches
+// the TopBar.
 @media (width < 30rem) {
   // A phone has no keyboard to press Ctrl+Z on, so the shortcut hints go and the entries read as plain labels.
   .menuEntry {
@@ -78,10 +78,7 @@
     display: none;
   }
 
-  // Doubled class: the TopBar squares its phone buttons to 2rem, which has no room for the chevron.
-  // antd puts its icon gap between the folder and the chevron; a hair of space keeps the pair as one tap target and
-  // leaves the room to the project name.
-  // At least 44 px square, so the trigger is an easy tap.
+  // Doubled class: the TopBar squares its phone buttons to 2rem; at least 44 px square, so the trigger is an easy tap.
   .trigger.trigger:global(.ant-btn) {
     width: auto;
     min-width: var(--target-min);
@@ -91,8 +88,7 @@
   }
 
   :global(.ant-btn) .caret.caret:global(.anticon) {
-    margin-left: 0.0625rem;
-    font-size: 0.625rem;
+    display: none;
   }
 }
 

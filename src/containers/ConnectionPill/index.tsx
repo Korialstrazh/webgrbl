@@ -98,6 +98,7 @@ export const ConnectionPill = (): ReactNode => {
   // The simulated laser looks like any port on the pill unless it says so: a flask marks that no hardware will move.
   const isSimulatedPort: boolean = selectedPortId === SIMULATED_LASER_PORT_ID;
   const portText: string = getSelectedPortLabel(selectedPortId, availablePorts, t);
+  const statusTooltipText: string = t(DEFAULT.CONNECTION_PILL_TOOLTIP, { state: statusText, port: portText });
   const ariaLabelDetails: string = [statusText, firmwareText, activeProfile?.name, portText]
     .filter(Boolean)
     .join(ARIA_LABEL_PART_SEPARATOR);
@@ -121,15 +122,15 @@ export const ConnectionPill = (): ReactNode => {
   ].filter(Boolean).join(' ');
 
   return (
-    // One line, the state and then the port, so a pointer user reads both without opening the popover. While the
-    // popover is open it says all of that itself, so no tooltip covers it (an empty title shows none).
-    <DismissibleTooltip
-      title={isPopoverOpen ? undefined : t(DEFAULT.CONNECTION_PILL_TOOLTIP, { state: statusText, port: portText })}
-      rootClassName={styles.portTooltip}
-    >
-      {/* The popover hangs from the whole capsule, so its right edge lines up with the pill's, Connect included. */}
-      <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
-        <span className={styles.pillGroup}>
+    // The popover hangs from the whole capsule, so its right edge lines up with the pill's, Connect included.
+    <ConnectionPopover isOpen={isPopoverOpen} onOpenChange={changePopoverOpen} anchorRef={pillRef}>
+      <span className={styles.pillGroup}>
+        {/* One line, the state and then the port, so a pointer user reads both without opening the popover. While
+          the popover is open it says all of that itself, so no tooltip covers it (an empty title shows none). */}
+        <DismissibleTooltip
+          title={isPopoverOpen ? undefined : statusTooltipText}
+          rootClassName={styles.portTooltip}
+        >
           <Button
             ref={pillRef}
             className={pillClassName}
@@ -164,9 +165,15 @@ export const ConnectionPill = (): ReactNode => {
               <span className={styles.connectVerb}>{connectVerbContent}</span>
             )}
           </Button>
-          {isOneClickConnect && isPillConnectShown && (
-            // The icon prop gives the plug the same gap to the word as every other icon and label button. The click
-            // connects and stops there, so it never also opens the popover the capsule carries.
+        </DismissibleTooltip>
+        {isOneClickConnect && isPillConnectShown && (
+        // The icon prop gives the plug the same gap to the word as every other icon and label button. The click
+        // connects and stops there, so it never also opens the popover the capsule carries. Its tooltip names the
+        // action, not the state the status part already tells.
+          <DismissibleTooltip
+            title={t(DEFAULT.CONNECTION_PILL_CONNECT_TOOLTIP, { port: portText })}
+            rootClassName={styles.portTooltip}
+          >
             <Button
               className={styles.connectButton}
               icon={<ApiOutlined aria-hidden="true" />}
@@ -177,9 +184,9 @@ export const ConnectionPill = (): ReactNode => {
             >
               <span className={styles.connectWord}>{t(DEFAULT.CONNECTION_CONNECT_MENU)}</span>
             </Button>
-          )}
-        </span>
-      </ConnectionPopover>
-    </DismissibleTooltip>
+          </DismissibleTooltip>
+        )}
+      </span>
+    </ConnectionPopover>
   );
 };

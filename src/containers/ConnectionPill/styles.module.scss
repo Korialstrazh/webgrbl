@@ -268,7 +268,7 @@
   }
 }
 
-// The state and port stay on one line at every width instead of wrapping over the panel below; a port name too long for
+// The status and Connect tooltips stay on one line at every width instead of wrapping over the panel below; a port name too long for
 // the window ends in an ellipsis rather than breaking the line.
 .portTooltip :global(.ant-tooltip-inner) {
   overflow: hidden;

@@ -24,6 +24,7 @@ import type { KeyboardEvent, MouseEvent, ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
+  ANTD_BUTTON_TYPE_DEFAULT,
   ANTD_BUTTON_TYPE_PRIMARY,
   ANTD_SEGMENTED_ITEM_SELECTOR,
   ANTD_STEPS_SIZE_SMALL,
@@ -246,8 +247,9 @@ export const JobReadinessRow = (): ReactNode => {
         />
       </div>
       {nextLook && (
+        // The header pill's orange Connect is the one main Connect, so the Connect step stays an outlined button here.
         <Button
-          type={ANTD_BUTTON_TYPE_PRIMARY}
+          type={nextLook.step === JOB_READINESS_STEP.CONNECT ? ANTD_BUTTON_TYPE_DEFAULT : ANTD_BUTTON_TYPE_PRIMARY}
           block
           id={JOB_NEXT_STEP_BUTTON_ID}
           {...POPOVER_KEEP_CLEAR_PROPS}
