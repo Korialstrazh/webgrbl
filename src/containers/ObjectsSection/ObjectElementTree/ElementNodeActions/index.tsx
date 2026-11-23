@@ -23,6 +23,7 @@ import { useOverlayRegistration } from '../../../../utils/hooks/use.overlay.regi
 import { usePopoverFocusReturn } from '../../../../utils/hooks/use.popover.focus.return';
 import { DEFAULT } from '../../../../utils/localization/default.locales';
 import type { PaletteEntry } from '../../../../utils/palette/interfaces/PaletteEntry';
+import { KEYBOARD_FOCUSABLE_TAB_INDEX, SCRIPT_FOCUS_ONLY_TAB_INDEX } from '../../../../utils/tab.index.constants';
 import { IconActionButton } from '../../../../views/IconActionButton';
 import { LayerSwatch } from '../../../../views/LayerSwatch';
 import type { ElementNodeActionsProps } from '../interfaces/ElementNodeActionsProps';
@@ -38,7 +39,8 @@ const stopRowSelect = (mouseEvent: MouseEvent): void => {
 // Memoised: a tree of thousands of rows re-renders its visible rows on every edit, and a row whose node, palette and
 // handlers did not change can skip its tooltips and popover.
 export const ElementNodeActions = memo((props: ElementNodeActionsProps): ReactNode => {
-  const { node, palette, onDisabledChange, onDelete, onRecolour } = props;
+  const { node, palette, isTabStop, onDisabledChange, onDelete, onRecolour } = props;
+  const rowButtonTabIndex: number = isTabStop ? KEYBOARD_FOCUSABLE_TAB_INDEX : SCRIPT_FOCUS_ONLY_TAB_INDEX;
   const { t } = useTranslation();
   const isSkipped: boolean = node.isDisabled;
   const [isRecolourOpen, setIsRecolourOpen] = useState<boolean>(false);
@@ -74,6 +76,7 @@ export const ElementNodeActions = memo((props: ElementNodeActionsProps): ReactNo
       <IconActionButton
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
+        tabIndex={rowButtonTabIndex}
         labelText={t(isSkipped ? DEFAULT.OBJECTS_TREE_TURN_ON : DEFAULT.OBJECTS_TREE_TURN_OFF, { name: node.name })}
         iconComponent={isSkipped ? <EyeInvisibleOutlined /> : <EyeOutlined />}
         aria-pressed={isSkipped}
@@ -89,6 +92,7 @@ export const ElementNodeActions = memo((props: ElementNodeActionsProps): ReactNo
         <IconActionButton
           type={ANTD_BUTTON_TYPE_TEXT}
           size={ANTD_BUTTON_SIZE_SMALL}
+          tabIndex={rowButtonTabIndex}
           labelText={t(DEFAULT.OBJECTS_TREE_RECOLOUR, { name: node.name })}
           iconComponent={<BgColorsOutlined />}
         />
@@ -96,6 +100,7 @@ export const ElementNodeActions = memo((props: ElementNodeActionsProps): ReactNo
       <IconActionButton
         type={ANTD_BUTTON_TYPE_TEXT}
         size={ANTD_BUTTON_SIZE_SMALL}
+        tabIndex={rowButtonTabIndex}
         labelText={t(DEFAULT.OBJECTS_TREE_DELETE, { name: node.name })}
         iconComponent={<DeleteOutlined />}
         onClick={() => onDelete(node.path)}

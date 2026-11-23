@@ -11,7 +11,7 @@
  */
 import { BlockOutlined, FolderOutlined } from '@ant-design/icons';
 import { Tree } from 'antd';
-import type { TreeDataNode } from 'antd';
+import type { GetRef, TreeDataNode } from 'antd';
 import { useCallback, useMemo, useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -30,8 +30,10 @@ import { SVG_TREE_NODE_KIND } from '../../../utils/svg/tree/svg.tree.constants';
 import type { SvgTreeNodeKind } from '../../../utils/svg/tree/svg.tree.constants';
 import { SvgShapeIcon } from '../../../views/SvgShapeIcon';
 import { ElementNodeActions } from './ElementNodeActions';
+import type { ElementTreeKeyboard } from './interfaces/ElementTreeKeyboard';
 import type { ObjectElementTreeProps } from './interfaces/ObjectElementTreeProps';
 import styles from './styles.module.scss';
+import { useElementTreeKeyboard } from './use.element.tree.keyboard';
 import { useElementTreeViewportHeightPx } from './use.element.tree.viewport.height.px';
 
 const getNodeKindIcon = (svgNode: SvgTreeNode): ReactNode => {
@@ -71,9 +73,13 @@ export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): Re
   const dispatch: AppDispatch = useDispatch();
   const palette: Palette = useSelector(selectPalette);
   const { id: objectId, svgText, name: objectName } = projectObject;
-  const treeData: ElementTreeDataNode[] = useMemo(() => getElementTreeData(getSvgElementTree(svgText)), [svgText]);
+  const svgNodes: SvgTreeNode[] = useMemo(() => getSvgElementTree(svgText), [svgText]);
+  const treeData: ElementTreeDataNode[] = useMemo(() => getElementTreeData(svgNodes), [svgNodes]);
   const treeWrapperRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement>(null);
+  const treeRef: RefObject<GetRef<typeof Tree> | null> = useRef<GetRef<typeof Tree>>(null);
   const viewportHeightPx: number = useElementTreeViewportHeightPx(treeWrapperRef);
+  const treeKeyboard: ElementTreeKeyboard = useElementTreeKeyboard(svgNodes, treeWrapperRef, treeRef);
+  const { tabStopPath, moveTabStopByKey, followFocusedRow, stopRowBlur } = treeKeyboard;
 
   const changeSvgText = useCallback((changedSvgText: string): void => {
     dispatch(new ProjectObjectSvgTextChangeRequested({ objectId, svgText: changedSvgText }));
@@ -96,7 +102,13 @@ export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): Re
     const nodeClassName: string | undefined = isSkipped ? [styles.node, styles.skippedNode].join(' ') : styles.node;
 
     return (
-      <span className={nodeClassName} data-tree-path={svgNode.path}>
+      <span
+        className={nodeClassName}
+        data-tree-path={svgNode.path}
+        onKeyDown={moveTabStopByKey}
+        onFocus={followFocusedRow}
+        onBlur={stopRowBlur}
+      >
         <span className={styles.kindIcon} title={t(NODE_KIND_TEXT_KEY[svgNode.kind])} aria-hidden>
           {getNodeKindIcon(svgNode)}
         </span>
@@ -104,13 +116,24 @@ export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): Re
         <ElementNodeActions
           node={svgNode}
           palette={palette}
+          isTabStop={svgNode.path === tabStopPath}
           onDisabledChange={changeElementDisabled}
           onDelete={deleteElement}
           onRecolour={recolourElement}
         />
       </span>
     );
-  }, [changeElementDisabled, deleteElement, palette, recolourElement, t]);
+  }, [
+    changeElementDisabled,
+    deleteElement,
+    followFocusedRow,
+    moveTabStopByKey,
+    palette,
+    recolourElement,
+    stopRowBlur,
+    t,
+    tabStopPath,
+  ]);
 
   if (!treeData.length) {
     return <p className={styles.empty}>{t(DEFAULT.OBJECTS_TREE_EMPTY)}</p>;
@@ -119,12 +142,22 @@ export const ObjectElementTree = ({ projectObject }: ObjectElementTreeProps): Re
   // A height turns on the virtual list of antd: only the rows in view are rendered, so an SVG of thousands of shapes
   // opens at once. The height follows the panel, and the list only grows to it, so a short tree takes no more room
   // than its rows.
+  // The keyboard model is our own (see useElementTreeKeyboard), so the hidden focus input of antd stays out of the
+  // Tab order.
   return (
-    <div ref={treeWrapperRef} className={styles.tree} aria-label={t(DEFAULT.OBJECTS_TREE_LABEL, { name: objectName })}>
+    <div
+      ref={treeWrapperRef}
+      className={styles.tree}
+      aria-label={t(DEFAULT.OBJECTS_TREE_LABEL, { name: objectName })}
+    >
       <Tree<ElementTreeDataNode>
+        ref={treeRef}
         blockNode
-        defaultExpandAll
+        focusable={false}
         selectable={false}
+        expandedKeys={treeKeyboard.expandedPaths}
+        onExpand={treeKeyboard.changeExpandedPaths}
+        onScroll={treeKeyboard.keepTabStopInView}
         height={viewportHeightPx}
         treeData={treeData}
         titleRender={renderNodeTitle}

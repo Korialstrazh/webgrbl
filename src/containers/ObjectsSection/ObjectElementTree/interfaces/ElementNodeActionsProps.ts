@@ -16,6 +16,8 @@ export interface ElementNodeActionsProps {
   node: SvgTreeNode;
   /** The laser palette the recolour list offers, read once by the tree instead of once per row. */
   palette: Palette;
+  /** Whether this row's buttons are in the Tab order: only one row of the tree is, the arrow keys move it. */
+  isTabStop: boolean;
   /** Turns the node off (skipped by the job) or back on. */
   onDisabledChange: (nodePath: string, isDisabled: boolean) => void;
   /** Removes the node from the object's SVG. */
