@@ -170,7 +170,10 @@ export const ConnectionPill = (): ReactNode => {
         // The icon prop gives the plug the same gap to the word as every other icon and label button. The click
         // connects and stops there, so it never also opens the popover the capsule carries. Its tooltip names the
         // action, not the state the status part already tells.
-          <DismissibleTooltip title={t(DEFAULT.CONNECTION_PILL_CONNECT_TOOLTIP, { port: portText })}>
+          <DismissibleTooltip
+            title={t(DEFAULT.CONNECTION_PILL_CONNECT_TOOLTIP, { port: portText })}
+            rootClassName={styles.portTooltip}
+          >
             <Button
               className={styles.connectButton}
               icon={<ApiOutlined aria-hidden="true" />}
