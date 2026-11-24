@@ -58,7 +58,9 @@ location /webgrbl/ {
 
 ### In GitHub
 
-Under **Settings → Secrets and variables → Actions**, add:
+Create the environment under **Settings → Environments → New environment → `production`**, set **Deployment branches
+and tags** to **Selected branches and tags** with only `main`, and add these as **Environment secrets** there (not as
+repository secrets, so only the deploy job from `main` can read them):
 
 | Secret | Value |
 |---|---|
@@ -72,12 +74,12 @@ The image push uses the workflow's own `GITHUB_TOKEN`, so it needs no secret.
 
 Before the repository is public, also set:
 
-- **Settings → Environments → `production`:** add yourself as a required reviewer, and allow only the `main` branch to
-  deploy, so nothing else can reach the deploy key.
+- **Settings → Environments → `production`:** add yourself as a required reviewer, so a person approves each deploy.
+  GitHub's free plan offers required reviewers on public repositories only.
 - **Settings → Branches:** protect `main` (no force-push, pull request required).
 - **Settings → Actions → General:** require approval for workflows from first-time contributors.
 - **Settings → Code security:** turn on private vulnerability reporting (see `SECURITY.md`) and Dependabot alerts.
-- On the host nginx, add `add_header Strict-Transport-Security "max-age=31536000" always;` to the HTTPS server block. Under **Settings → Environments**, a `production` environment is created on the first deploy; add required reviewers there if a person should approve each deploy.
+- On the host nginx, add `add_header Strict-Transport-Security "max-age=31536000" always;` to the HTTPS server block.
 
 ## Rolling back
 
