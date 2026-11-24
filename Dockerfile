@@ -10,7 +10,7 @@ COPY . .
 RUN npx vite build --base "$WEBGRBL_BASE_PATH"
 
 # Stage 2: serve the static build with nginx, as the unprivileged nginx user rather than root.
-FROM nginx:1.30.7-alpine@sha256:caf4e1e032a20f9c3c5e28fc7f25ffd768ad8677b4975c54193075997b3a97e3
+FROM nginx:1.31.0-alpine@sha256:2f07d83bf561b506400dc183b1b2003803e39efbd22451f848adaba14d28c7c7
 # Without root, nginx cannot switch users or write to /run and /var/cache: its pid file and temp files go to /tmp.
 RUN sed -i -e '/^user /d' -e 's#^pid .*#pid /tmp/nginx.pid;#' /etc/nginx/nginx.conf
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
