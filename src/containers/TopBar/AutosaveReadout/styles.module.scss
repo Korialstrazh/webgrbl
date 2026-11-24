@@ -1,28 +1,69 @@
 @use '../../../styles/accessibility' as accessibility;
 
-// The end margin keeps the readout from touching the button after it in a tight bar.
+// Its own element after the Project menu: a clear gap from the chevron and a hover area of its own, so the cloud never
+// reads as part of the Project control.
 .autosave {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin: 0 var(--space-3) 0 0;
-  font-size: 0.8125rem;
+  min-height: 2rem;
+  margin: 0;
+  margin-inline-start: var(--space-2);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: default;
+  transition: background-color 0.15s ease;
+
   color: var(--color-text-muted);
+  font-size: 0.8125rem;
   white-space: nowrap;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-surface-hover);
+  }
 }
 
-// Room for the longest state ("Waiting to save"), so a change of state never shifts the buttons after it.
-.label {
-  min-inline-size: 6.5rem;
-}
-
+// The same icon size as the toolbar buttons beside it.
 .icon {
+  position: relative;
   display: inline-flex;
-  font-size: 1rem;
+  font-size: 1.25rem;
 }
 
+// The small badge on the cloud's lower right corner: a check once saved, an exclamation mark when saving failed.
+.cloudBadge {
+  position: absolute;
+  inset-block-end: 0.125rem;
+  inset-inline-end: -0.125rem;
+  padding: 0.0625rem;
+  border-radius: 50%;
+  background-color: var(--color-surface-1);
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+// Saved is the usual state: a light cloud, well above 3:1 on the bar, with its check in the success green, so the
+// state reads at a glance without a tooltip.
 .saved {
+  color: var(--color-text);
+}
+
+// A larger, stroked check, so Saved reads at a glance at toolbar icon size.
+.cloudCheck.cloudCheck {
+  inset-block-end: 0;
+  inset-inline-end: -0.25rem;
   color: var(--color-success);
+  font-size: 0.8125rem;
+
+  svg {
+    stroke: currentColor;
+    stroke-width: 90;
+  }
+}
+
+.failed {
+  color: var(--color-danger-text);
 }
 
 .saving {
@@ -37,13 +78,15 @@
 // Below 75rem only the coloured icon stays on screen, so Import SVG and the connection pill keep their room; its
 // tooltip and accessible name still give the state. 75rem must match the TopBar styles.
 @media (width < 75rem) {
-  .autosave {
-    margin-right: 0;
-  }
-
   .label {
-    min-inline-size: 0;
-
     @include accessibility.visually-hidden;
+  }
+}
+
+// At phone width the padding tightens, yet the gap from the folder chevron stays at least 8 px. 30rem matches the TopBar.
+@media (width < 30rem) {
+  .autosave {
+    margin-inline-start: var(--space-1);
+    padding-inline: var(--space-1);
   }
 }

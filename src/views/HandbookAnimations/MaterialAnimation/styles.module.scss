@@ -1,0 +1,34 @@
+@use '../handbook.animation';
+
+$loop: 4s;
+
+.sheet { fill: var(--color-accent-tint); stroke: var(--color-accent); stroke-width: 2; }
+.tagChip { fill: var(--color-surface-3); stroke: var(--color-control-border); }
+.swatch { stroke: var(--color-border); stroke-width: 1.5; }
+.swatchBlue { fill: var(--color-info); }
+.swatchOrange { fill: var(--color-accent); }
+.swatchGreen { fill: var(--color-success); }
+.swatchRing { stroke: var(--color-text); stroke-width: 2; }
+
+// Motion only for readers who have not asked for less; otherwise the drawing as written is the still picture.
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: sheet-slide $loop ease-out infinite; }
+  .thicknessTag { animation: tag-show $loop ease-out infinite; }
+  .swatchRing { animation: ring-pick $loop ease-in-out infinite; }
+}
+
+@keyframes sheet-slide {
+  0% { transform: translateX(-260px); stroke: var(--color-control-border); fill: var(--color-surface-3); }
+  30%, 62% { transform: translateX(0); stroke: var(--color-control-border); fill: var(--color-surface-3); }
+  75%, 100% { transform: translateX(0); stroke: var(--color-accent); fill: var(--color-accent-tint); }
+}
+
+@keyframes tag-show {
+  0%, 32% { opacity: 0; transform: translateY(6px); }
+  48%, 100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ring-pick {
+  0%, 52% { transform: translateY(-30px); }
+  66%, 100% { transform: translateY(0); }
+}

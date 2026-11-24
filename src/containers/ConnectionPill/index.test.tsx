@@ -34,6 +34,7 @@ const CONNECTED_WITH_FIRMWARE_PATTERN = /Connected.*Grbl 1\.1h/;
 const POPOVER_LABEL = 'Laser connection';
 const NO_WEB_SERIAL_LABEL = 'No Web Serial';
 const NO_PORT_CHOSEN_LABEL = 'No port chosen';
+const NO_PORT_PILL_TOOLTIP_TEXT = `Not connected · ${NO_PORT_CHOSEN_LABEL}`;
 const PORT_LABEL = 'Port';
 const PROFILE_NAME = 'Workshop laser';
 const PILL_WITH_PROFILE_PATTERN = /Not connected, Workshop laser/;
@@ -43,6 +44,20 @@ const STATUS_LABELS: Record<GrblConnectionStatus, string> = {
   [GRBL_CONNECTION_STATUS.CONNECTED]: 'Connected',
   [GRBL_CONNECTION_STATUS.LOST]: 'Connection lost',
 };
+const SHORT_STATUS_LABELS: Record<GrblConnectionStatus, string> = {
+  ...STATUS_LABELS,
+  [GRBL_CONNECTION_STATUS.LOST]: 'Lost',
+};
+const DISCONNECTED_ICON_SELECTOR = '.anticon-disconnect';
+const CONNECTING_ICON_SELECTOR = '.anticon-sync';
+const CONNECTED_ICON_SELECTOR = '.anticon-link';
+const SIMULATED_PORT_TEXT = 'Simulated laser (no hardware)';
+const SIMULATED_ICON_SELECTOR = '.anticon-experiment';
+const STATE_ICON_SELECTOR = '.anticon-disconnect';
+const PILL_CONNECT_BUTTON_SELECTOR = '.ant-btn:not([aria-haspopup]):not([role="dialog"] *)';
+const SIMULATED_CONNECT_TOOLTIP_TEXT = 'Connect to Simulated laser (no hardware)';
+const TOOLTIP_ABSENT_WAIT_MS = 300;
+const SIMULATED_PILL_TOOLTIP_TEXT = 'Not connected · Simulated laser (no hardware)';
 
 const renderConnectionPill = (): AppStore => {
   const store: AppStore = newStore();
@@ -81,6 +96,28 @@ describe(ConnectionPill.name, () => {
     fireEvent.click(pillButton);
 
     expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toBeInTheDocument();
+  });
+
+  it.each<[GrblConnectionStatus, string]>([
+    [GRBL_CONNECTION_STATUS.DISCONNECTED, DISCONNECTED_ICON_SELECTOR],
+    [GRBL_CONNECTION_STATUS.LOST, DISCONNECTED_ICON_SELECTOR],
+    [GRBL_CONNECTION_STATUS.CONNECTING, CONNECTING_ICON_SELECTOR],
+    [GRBL_CONNECTION_STATUS.CONNECTED, CONNECTED_ICON_SELECTOR],
+  ])('pairs the dot with a state icon while %s, so the state reads without its word', (
+    connectionStatus: GrblConnectionStatus,
+    expectedIconSelector: string,
+  ) => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new ConnectionStatusChanged({ connectionStatus }));
+    });
+
+    const pillButton: HTMLElement = screen.getByRole('button', { name: new RegExp(STATUS_LABELS[connectionStatus]) });
+
+    const statusIcon: Element | null = pillButton.querySelector(expectedIconSelector);
+
+    expect(statusIcon?.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('pairs the dot with a one-word state for a narrow window, hidden from screen readers', () => {
@@ -130,7 +167,76 @@ describe(ConnectionPill.name, () => {
       store.dispatch(new ConnectionStatusChanged({ connectionStatus: status }));
     });
 
-    expect(screen.getAllByText(STATUS_LABELS[status])[0]).toBeInTheDocument();
+    const pill: HTMLElement = screen.getByRole('button', { name: new RegExp(`^Connection: ${STATUS_LABELS[status]}`) });
+
+    expect(pill).toHaveTextContent(SHORT_STATUS_LABELS[status]);
+  });
+
+  it('keeps the chosen port out of the pill text but names it in its accessible name and state tooltip', async () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+    });
+
+    const pill: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    expect(pill).not.toHaveTextContent(SIMULATED_PORT_TEXT);
+    expect(pill).toHaveAccessibleName(new RegExp(SIMULATED_PORT_TEXT.replace(/[()]/g, '\\$&')));
+
+    fireEvent.mouseEnter(pill);
+
+    const tooltip: HTMLElement = await screen.findByRole('tooltip');
+
+    expect(tooltip).toHaveTextContent(SIMULATED_PILL_TOOLTIP_TEXT);
+  });
+
+  it('marks the simulated laser with a flask badge on the state icon, and a real port without one', () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+    });
+
+    const pill: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+    const simulatedIcon: Element | null = pill.querySelector(SIMULATED_ICON_SELECTOR);
+
+    expect(simulatedIcon).toHaveAttribute('aria-label', SIMULATED_PORT_TEXT);
+    expect(simulatedIcon?.parentElement?.querySelector(STATE_ICON_SELECTOR)).toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: UNGRANTED_PORT_ID }));
+    });
+
+    expect(pill.querySelector(SIMULATED_ICON_SELECTOR)).not.toBeInTheDocument();
+  });
+
+  it('names the action and the port, not the state, in the tooltip of the one-click Connect button', async () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+    });
+
+    const connectButton: Element | null = document.querySelector(PILL_CONNECT_BUTTON_SELECTOR);
+
+    expect(connectButton).toBeInTheDocument();
+    fireEvent.mouseEnter(connectButton ?? document.body);
+
+    const tooltip: HTMLElement = await screen.findByRole('tooltip');
+
+    expect(tooltip).toHaveTextContent(SIMULATED_CONNECT_TOOLTIP_TEXT);
+    expect(tooltip).not.toHaveTextContent(SHORT_DISCONNECTED_TEXT);
+  });
+
+  it('names the state and "No port chosen" on one tooltip line while no port is chosen', async () => {
+    renderConnectionPill();
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+
+    const tooltip: HTMLElement = await screen.findByRole('tooltip');
+
+    expect(tooltip).toHaveTextContent(NO_PORT_PILL_TOOLTIP_TEXT);
   });
 
   describe('with the simulated laser', () => {
@@ -140,6 +246,19 @@ describe(ConnectionPill.name, () => {
 
     afterEach(() => {
       vi.useRealTimers();
+    });
+
+    it('connects from the one-click Connect without opening the popover the capsule carries', async () => {
+      const store: AppStore = renderConnectionPill();
+
+      act(() => {
+        store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      });
+      fireEvent.click(screen.getByRole('button', { name: CONNECT_LABEL }));
+      await settle();
+
+      expect(selectIsConnectionPopoverOpen(store.getState())).toBe(false);
+      expect(screen.getByRole('button', { name: CONNECTED_WITH_FIRMWARE_PATTERN })).toBeInTheDocument();
     });
 
     it('connecting to the simulated laser from the popover shows Grbl 1.1h in the pill', async () => {
@@ -322,6 +441,52 @@ describe(ConnectionPill.name, () => {
 
     expect(screen.getByRole('dialog', { name: POPOVER_LABEL })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN })).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('leaves only the popover\'s Connect as a call to action while the popover is open', () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new SerialPortSelected({ portId: SIMULATED_LASER_PORT_ID }));
+      store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+    });
+
+    // The pill's own Connect leaves the bar: no grey ghost, no Tab stop, and the pill keeps both ends round.
+    expect(screen.getAllByRole('button', { name: CONNECT_LABEL })).toEqual([getPopoverConnectButton()]);
+    expect(document.querySelector(PILL_CONNECT_BUTTON_SELECTOR)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: DISCONNECTED_PATTERN }).className).not.toMatch(/joined/);
+
+    act(() => {
+      store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: false }));
+    });
+
+    expect(document.querySelector(PILL_CONNECT_BUTTON_SELECTOR)).toBeEnabled();
+  });
+
+  it('hides the in-pill Connect word while the popover is open', () => {
+    const store: AppStore = renderConnectionPill();
+    const pill: HTMLElement = screen.getByRole('button', { name: DISCONNECTED_PATTERN });
+
+    expect(pill).toHaveTextContent(CONNECT_LABEL);
+
+    act(() => {
+      store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+    });
+
+    expect(pill).not.toHaveTextContent(CONNECT_LABEL);
+  });
+
+  it('shows no tooltip over the open popover', async () => {
+    const store: AppStore = renderConnectionPill();
+
+    act(() => {
+      store.dispatch(new ConnectionPopoverOpenChanged({ isConnectionPopoverOpen: true }));
+    });
+    fireEvent.mouseEnter(screen.getByRole('button', { name: DISCONNECTED_PATTERN }));
+
+    // The popover itself has the tooltip role in antd, so the check looks for the pill tooltip's text.
+    await expect(screen.findByText(NO_PORT_PILL_TOOLTIP_TEXT, {}, { timeout: TOOLTIP_ABSENT_WAIT_MS }))
+      .rejects.toThrow();
   });
 
   it('flags Web Serial as unavailable in a browser without navigator.serial', () => {

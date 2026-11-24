@@ -1,14 +1,23 @@
 {
   "name": "webgrbl",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/Korialstrazh/webgrbl#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Korialstrazh/webgrbl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Korialstrazh/webgrbl/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=24.14.0"
   },
   "scripts": {
     "dev": "node tools/select-worktree.cjs",
+    "version": "node -p \"require('./package.json').version\"",
     "dev:root": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",

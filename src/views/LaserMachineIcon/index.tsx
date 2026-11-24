@@ -1,6 +1,6 @@
 /**
- * The laser machine of a Laser profile: a gantry, its head and an accent beam on the work plate. The icon set has
- * none.
+ * The laser machine of a Laser profile: a bold laser head with a nozzle, its beam and two sparks where the beam meets
+ * the work surface. The icon set has none.
  *
  * @author michael.morosov
  *
@@ -20,14 +20,18 @@ const LaserMachineIconDrawing = (): ReactNode => (
     height="1em"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.2"
+    strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M5 1.5h6v4.5l-1.5 2h-3L5 6Z" />
-    <path d="M8 8v4.5" strokeWidth="1.6" />
-    <path d="M2 14.5h12" />
-    <path d="M4.5 10.5l1.2 1.2 M11.5 10.5l-1.2 1.2" />
+    {/* Few bold shapes, so it still reads as a laser head at 16 px: the module, its nozzle and one fin line. */}
+    <path d="M3.5 1.25h9v5.5h-9Z" />
+    <path d="M6 4h4" />
+    <path d="M6 6.75l1 2h2l1-2" />
+    {/* The beam, the boldest line, down to the work surface, with two sparks where it burns. */}
+    <path d="M8 8.75v4.5" strokeWidth="2" />
+    <path d="M1.75 14.75h12.5" />
+    <path d="M4.5 12l1.25 1.25 M11.5 12l-1.25 1.25" />
   </svg>
 );
 

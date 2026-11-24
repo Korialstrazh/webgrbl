@@ -5,7 +5,7 @@ created: 2026-11-03
 
 # Running jobs
 
-Roadmap item 5, done. Slices 1 (Start job), 2 (progress, Pause and Resume) and 3 (Frame job) were confirmed on the ACMER 12 W: the user ran real production jobs on 2026-11-19 and reported that everything works. The former slices 4 to 6 were replaced by `docs/superpowers/specs/2026-11-19_(01)_running-jobs-safety.spec.md` (checklist, job size, cut check, long jobs, resume), which is simulator-tested only. Live overrides were dropped by the user. User steps: `docs/howto/running-jobs.md`. Earlier slices: `docs/superpowers/specs/2026-11-03_(03)_running-jobs.spec.md`; Frame job: `docs/superpowers/specs/2026-11-04_(02)_frame-job.spec.md`.
+Roadmap item 5, done. Slices 1 (Start job), 2 (progress, Pause and Resume) and 3 (Frame job) were confirmed on the ACMER 12 W: the user ran real production jobs on 2026-11-19 and reported that everything works. The former slices 4 to 6 were replaced by the running-jobs safety design (checklist, job size, cut check, long jobs, resume), which is simulator-tested only. Live overrides were dropped by the user. User steps: `docs/howto/running-jobs.md`.
 
 ## Key Takeaways
 

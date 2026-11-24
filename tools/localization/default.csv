@@ -1,4 +1,11 @@
 key;en
+ABOUT_CREATOR;Created by {{name}}
+ABOUT_CREDIT;Inspired by LaserGRBL, the Windows laser engraving app.
+ABOUT_DESCRIPTION;webgrbl drives GRBL laser cutters and engravers straight from the browser over USB: design, frame and burn your jobs, even offline.
+ABOUT_LICENCE;Released under the Apache License 2.0.
+ABOUT_SOURCE;Source code on GitHub
+ABOUT_TITLE;About webgrbl
+ABOUT_VERSION;Version {{version}}
 ADD_TEST_SAMPLE;Add test sample
 ADD_TEST_SAMPLE_PROJECT_FULL;The project has the most objects it can hold.
 ADD_TEST_SAMPLE_TOO_SMALL;The 5 × 5 cm sample does not fit the work area of this laser.
@@ -91,6 +98,7 @@ COMING_SOON;Soon
 COMING_SOON_LIST;Coming soon
 CONNECTION_CONNECT_MENU;Connect
 CONNECTION_NO_PORT_CHOSEN;No port chosen
+CONNECTION_PILL_CONNECT_TOOLTIP;Connect to {{port}}
 CONNECTION_PILL_CONNECTED;Connected
 CONNECTION_PILL_CONNECTING;Connecting
 CONNECTION_PILL_DISCONNECTED;Not connected
@@ -99,7 +107,9 @@ CONNECTION_PILL_FIRMWARE;{{firmwareName}} {{version}}
 CONNECTION_PILL_LABEL;Connection: {{details}}. Open the connection menu.
 CONNECTION_PILL_LOST;Connection lost
 CONNECTION_PILL_LOST_SHORT;Lost
+CONNECTION_PILL_TOOLTIP;{{state}} · {{port}}
 CONNECTION_PILL_WEB_SERIAL_UNSUPPORTED;No Web Serial
+CONNECTION_POPOVER_ADVANCED;Advanced
 CONNECTION_POPOVER_BAUD;Baud rate
 CONNECTION_POPOVER_CHOOSE_PORT;Add port
 CONNECTION_POPOVER_CHOOSE_PORT_LABEL;Choose a USB port
@@ -289,6 +299,48 @@ GRBL_ERROR_8;This $ command only works while the laser is idle.
 GRBL_ERROR_9;G-code is locked during an alarm or jog.
 GRBL_ERROR_NON_ASCII_LINE;The line contains characters the controller cannot receive, so it was not sent - use plain ASCII only.
 GRBL_ERROR_UNKNOWN;Unknown error.
+HANDBOOK_CONNECT_BODY_1;Plug the laser in over USB. Then open the connection pill in the top bar.
+HANDBOOK_CONNECT_BODY_2;Press "Add port", choose your laser, then press "Connect".
+HANDBOOK_CONNECT_BODY_3;No laser at hand? Choose "Simulated laser (no hardware)" to try everything without firing a beam.
+HANDBOOK_CONNECT_BODY_4;Open "Laser profiles" in the top bar. Set "Laser power (W)" to your laser's power and press Save.
+HANDBOOK_CONNECT_BODY_5;While connected, "Read from laser" fills in the settings GRBL reports. Press Save to keep them.
+HANDBOOK_CONNECT_TITLE;Connect and set up the laser
+HANDBOOK_DONE;Done
+HANDBOOK_ERRORS_BODY_1;Press Stop, or Esc on the keyboard. The laser halts its motion and beam, and GRBL is reset.
+HANDBOOK_ERRORS_BODY_2;Esc does not stop while a panel is open, unless you turn on "Esc stops over panels too" in Stop settings.
+HANDBOOK_ERRORS_BODY_3;An alarm means GRBL has locked the laser for safety. Check the head is clear, then press Unlock in the Status card, or home the laser.
+HANDBOOK_ERRORS_BODY_4;"Connection lost" means the USB link dropped. Check the cable, then connect again from the connection pill. The laser may still finish moves it had already received, so watch it.
+HANDBOOK_ERRORS_BODY_5;Missed a message? Press Messages to read earlier messages again.
+HANDBOOK_ERRORS_TITLE;When something goes wrong
+HANDBOOK_FRAME_BODY_1;In the Laser panel, press Frame. The guide light, a faint dot that never burns, traces the outline of the job.
+HANDBOOK_FRAME_BODY_2;Move the material until the frame sits where you want the burn.
+HANDBOOK_FRAME_BODY_3;Press P to switch the laser pointer on, and P again to switch it off. You can also hold "Hold to fire". The pointer works only while the laser is connected, idle and no job runs. P does nothing while a panel or dialog is open or while you type in a text field.
+HANDBOOK_FRAME_BODY_4;If the frame would leave the bed, Frame is blocked. Move the job onto the bed first.
+HANDBOOK_FRAME_TITLE;Frame and aim
+HANDBOOK_IMPORT_BODY_1;Press "Import SVG" in the top bar and pick a file.
+HANDBOOK_IMPORT_BODY_2;Drag the design to where you want it on the bed.
+HANDBOOK_IMPORT_BODY_3;Each colour becomes a layer. Layers burn in the order shown under Burn order.
+HANDBOOK_IMPORT_BODY_4;Open a layer to set its Mode, Speed (mm/min), Max power (%) and Passes. Line follows the shapes, Fill scans across them.
+HANDBOOK_IMPORT_BODY_5;Does your material have a saved preset? Press "Use preset" to apply it.
+HANDBOOK_IMPORT_TITLE;Import a design
+HANDBOOK_MATERIAL_BODY_1;Place the material flat on the laser bed.
+HANDBOOK_MATERIAL_BODY_2;In the Material panel, open the Material list and choose what you will cut.
+HANDBOOK_MATERIAL_BODY_3;Not in the list? Choose "Add material…", enter its Name and Thickness (mm), then press Save. The new material becomes the project material.
+HANDBOOK_MATERIAL_BODY_4;Press Library to open your Materials. They keep saved power and speed presets for each material and laser.
+HANDBOOK_MATERIAL_TITLE;Choose the material
+HANDBOOK_NEXT;Next
+HANDBOOK_PREVIOUS;Previous
+HANDBOOK_RUN_BODY_1;Press Start. The safety checklist opens.
+HANDBOOK_RUN_BODY_2;Check every point, tick "I have done all of the above", then press "Start job".
+HANDBOOK_RUN_BODY_3;Watch the progress bar and Status in the Job card of the Laser panel. Pause holds the job, Resume continues it.
+HANDBOOK_RUN_BODY_4;Stay with the machine the whole time. The Stop button stays on screen, even above dialogs.
+HANDBOOK_RUN_TITLE;Start the job
+HANDBOOK_STEP_COUNTER;Step {{current}} of {{total}}
+HANDBOOK_STEPS_LABEL;Handbook steps
+HANDBOOK_TITLE;Getting started
+HELP_MENU_ABOUT;About webgrbl
+HELP_MENU_HANDBOOK;Getting started
+HELP_MENU_LABEL;Help
 JOB_CHECKLIST_BATTERY_HINT;The laptop runs on battery. Plug it in so a long job is not cut short.
 JOB_CUT_CHECK_CLOSE;Close the cut check
 JOB_CUT_CHECK_EXTRA_PASS;Add one extra pass
@@ -315,7 +367,7 @@ JOB_LOCK_SHORT_WARNINGS;Warnings
 JOB_PAUSE;Pause
 JOB_PAUSE_BLOCKED_LASER_MODE;Pause is off because laser mode is not confirmed on ($32=1): the beam could stay on while the head stands still. Use STOP. After changing $32, reconnect.
 JOB_READINESS_CONNECT;Connect
-JOB_READINESS_CONNECT_ACTION;Connect laser
+JOB_READINESS_CONNECT_ACTION;Connect
 JOB_READINESS_CONNECT_HINT;Connect the laser
 JOB_READINESS_DESIGN;Artwork
 JOB_READINESS_DESIGN_ACTION;Import SVG
@@ -822,6 +874,7 @@ STATUS_STRIP_JOB_SIZE_HINT;Worked out in the background from the layers that are
 STATUS_STRIP_JOB_SIZE_VALUE;{{width}} × {{height}} mm
 STATUS_STRIP_OFFLINE;Offline
 STATUS_STRIP_OFFLINE_HINT;No network connection. webgrbl keeps working, and the laser connection does not need the network.
+STATUS_STRIP_SOURCE_CODE;Source code on GitHub (opens in a new tab)
 STATUS_STRIP_TITLE;Status
 STOP_SETTINGS_DOUBLE_CLICK_HINT;Only when connected and idle. The laser stays off, and STOP cancels the move.
 STOP_SETTINGS_DOUBLE_CLICK_MOVES_LASER;Double-click bed moves laser
@@ -904,21 +957,30 @@ TOOLPATH_SHOW_TRAVEL_CAPTION;Travel
 TOOLPATH_WARNINGS_CHIP;Toolpath warnings ({{count}}): show them
 TOOLPATH_WARNINGS_SHOW_OBJECT;Show {{name}} on the bed
 TOOLPATH_WARNINGS_TITLE;Toolpath warnings
+TOP_BAR_AUTOSAVE_ACCESSIBLE_NAME;Autosave: {{state}}
+TOP_BAR_AUTOSAVE_FAILED;Save failed
 TOP_BAR_AUTOSAVE_SAVED;Saved
 TOP_BAR_AUTOSAVE_SAVING;Saving…
 TOP_BAR_AUTOSAVE_UNSAVED;Waiting to save
 TOP_BAR_MENU_IMPORT_SVG;Import SVG
 TOP_BAR_MENU_MACHINE_PROFILES;Laser profiles
 TOP_BAR_MENU_PROJECT;Project
-TOP_BAR_PROFILE_TOOLTIP;Laser profile: {{name}}. Click to manage profiles
+TOP_BAR_NOTHING_TO_REDO;Nothing to redo
+TOP_BAR_NOTHING_TO_UNDO;Nothing to undo
+TOP_BAR_PROFILE_TOOLTIP;Laser profile: {{name}}
 TOP_BAR_PROJECT_MENU_EXPORT_GCODE;Export G-code
 TOP_BAR_PROJECT_MENU_NEW;New project
-TOP_BAR_PROJECT_MENU_OPEN;Open from this browser…
-TOP_BAR_PROJECT_MENU_OPEN_FILE;Open project file…
+TOP_BAR_PROJECT_MENU_OPEN;Open saved project…
+TOP_BAR_PROJECT_MENU_OPEN_FILE;Open file…
 TOP_BAR_PROJECT_MENU_SAVE;Save
 TOP_BAR_PROJECT_MENU_SAVE_AS_FILE;Save as file
 TOP_BAR_PROJECT_MENU_SAVE_SHORTCUT;Ctrl+S
+TOP_BAR_PROJECT_MENU_VERSION;{{appName}} v{{version}}
 TOP_BAR_PROJECT_NAME_INPUT;Project name
+TOP_BAR_PROJECT_NAME_RENAME;Rename {{name}}
 TOP_BAR_PROJECT_PLACEHOLDER;New project
 TOP_BAR_REDO;Redo
+TOP_BAR_REDO_SHORTCUT;Ctrl+Shift+Z
+TOP_BAR_SHORTCUT_TOOLTIP;{{action}} ({{shortcut}})
 TOP_BAR_UNDO;Undo
+TOP_BAR_UNDO_SHORTCUT;Ctrl+Z

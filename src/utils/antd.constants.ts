@@ -145,6 +145,9 @@ export const ANTD_DROPDOWN_TRIGGER_CLICK: DropdownProps['trigger'] = ['click'];
 /** The `type` of a menu entry that draws a dividing line between two groups of items. */
 export const ANTD_MENU_ITEM_TYPE_DIVIDER = 'divider' as const;
 
+/** The `type` of a menu entry drawn as a muted group title: plain text that cannot be chosen. */
+export const ANTD_MENU_ITEM_TYPE_GROUP = 'group' as const;
+
 /** The colour picker value format: a six-digit hex colour. */
 export const ANTD_COLOR_PICKER_FORMAT_HEX: ColorPickerProps['format'] = 'hex';
 
@@ -200,3 +203,6 @@ export const ANTD_MODAL_TITLE_SELECTOR = '.ant-modal-title';
 
 /** A popover that opens above its anchor and ends at its right edge. */
 export const ANTD_POPOVER_PLACEMENT_TOP_RIGHT: PopoverProps['placement'] = 'topRight';
+
+/** The `align` of `Tree.scrollTo` that scrolls only as far as needed to bring the row into view. */
+export const ANTD_TREE_SCROLL_ALIGN_AUTO = 'auto';

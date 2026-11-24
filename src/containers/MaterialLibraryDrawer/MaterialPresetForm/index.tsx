@@ -13,7 +13,7 @@
  * Licensed under the Apache License, Version 2.0. See the LICENSE file.
  */
 import { ArrowLeftOutlined, DeleteOutlined, SaveOutlined } from '@ant-design/icons';
-import { Button, Form, Input, InputNumber, Popconfirm, Select } from 'antd';
+import { Button, Form, Input, Popconfirm, Select } from 'antd';
 import { useState } from 'react';
 import type { ChangeEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,6 +47,7 @@ import { isFiniteNumber } from '../../../utils/type.guards/is.finite.number';
 import type { MaterialPresetFormProps } from '../interfaces/MaterialPresetFormProps';
 import { MATERIAL_PRESET_OPERATION_LABEL_KEY } from '../material.library.drawer.constants';
 import styles from './styles.module.scss';
+import { DecimalNumberInput } from '../../../views/DecimalNumberInput';
 
 type MaterialPresetNumberField = keyof Pick<MaterialPreset, 'powerWatts' | 'speedMmPerMin' | 'passes'>;
 
@@ -167,7 +168,7 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
               label={t(DEFAULT.MATERIAL_LIBRARY_POWER)}
               validateStatus={powerErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
             >
-              <InputNumber
+              <DecimalNumberInput
                 className={styles.numberInput}
                 aria-label={t(DEFAULT.MATERIAL_LIBRARY_POWER)}
                 // A new preset has no power yet, and that is what the user came to type.
@@ -181,7 +182,7 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
               label={t(DEFAULT.MATERIAL_LIBRARY_SPEED)}
               validateStatus={speedErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
             >
-              <InputNumber
+              <DecimalNumberInput
                 className={styles.numberInput}
                 aria-label={t(DEFAULT.MATERIAL_LIBRARY_SPEED)}
                 value={getNumberInputValue(preset.speedMmPerMin)}
@@ -193,7 +194,7 @@ export const MaterialPresetForm = (props: MaterialPresetFormProps): ReactNode =>
               label={t(DEFAULT.MATERIAL_LIBRARY_PASSES)}
               validateStatus={passesErrorKey && ANTD_FORM_ITEM_STATUS_ERROR}
             >
-              <InputNumber
+              <DecimalNumberInput
                 className={styles.numberInput}
                 aria-label={t(DEFAULT.MATERIAL_LIBRARY_PASSES)}
                 precision={ANTD_INPUT_NUMBER_PRECISION_INTEGER}

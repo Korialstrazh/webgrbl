@@ -1,17 +1,37 @@
+// One capsule around the quiet status part and the Connect button, so the two read as one control.
 .pillGroup {
   display: inline-flex;
   align-items: stretch;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+  transition: border-color 0.15s ease;
 }
 
+// While the connection popover is open the whole capsule takes the accent edge, so the open state never stops at the
+// split before Connect.
+.pillGroup:has(.pill[aria-expanded='true']) {
+  border-color: var(--color-accent);
+}
+
+// Keyboard focus rings only the focused part, the status part or Connect, following its own rounded corners, and the
+// ring paints above its neighbour so it is never cut at the split. Pointer presses draw no ring, as everywhere else.
+.pill:focus-visible,
+.connectButton:focus-visible {
+  position: relative;
+  z-index: 1;
+}
+
+// The status part is passive-looking: no fill or border of its own, only the state icon and a short word.
 .pill:global(.ant-btn) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-height: var(--target-min);
   padding: 0 var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 0;
   border-radius: var(--radius-pill);
-  background-color: var(--color-surface-2);
+  background-color: transparent;
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
@@ -19,46 +39,92 @@
   box-shadow: none;
   cursor: pointer;
 
-  &:not(:disabled):hover {
-    border-color: var(--color-border);
-    background-color: var(--color-surface-hover);
+  // A visible fill under the pointer, under the keyboard focus and while open, so the status part reads as a button.
+  &:not(:disabled):hover,
+  &:focus-visible,
+  &[aria-expanded='true'] {
+    background-color: var(--color-surface-active);
     color: var(--color-text);
   }
 }
 
+// antd's outlined button paints a 1 px accent border on hover and focus, which drew a second ring that stopped at the
+// split; both parts keep no border of their own, the capsule draws the one edge.
+.pillGroup .pill:global(.ant-btn):not(:disabled):not(:global(.ant-btn-disabled)),
+.pillGroup .connectButton:global(.ant-btn):not(:disabled):not(:global(.ant-btn-disabled)) {
+  border-width: 0;
+}
+
+// The state icon in the state colour, with the dot on its corner: unplugged, linking or linked.
+.statusIcon {
+  position: relative;
+  display: inline-flex;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
 .dot {
-  width: 0.625rem;
-  height: 0.625rem;
+  position: absolute;
+  inset-block-end: -0.125rem;
+  inset-inline-end: -0.1875rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--color-surface-2);
   border-radius: 50%;
-  background-color: var(--color-text-muted);
+  background-color: currentColor;
+}
+
+// Unplugged is amber at every width, so the state never reads as an empty radio button.
+.disconnected {
+  color: var(--color-warning);
 }
 
 .connected {
-  background-color: var(--color-success);
+  color: var(--color-success);
 }
 
 .connecting {
-  background-color: var(--color-warning);
+  color: var(--color-warning);
 }
 
 .lost {
-  background-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .status {
   font-weight: 600;
 }
 
-.firmware,
-.port {
-  color: var(--color-text-muted);
+// The state glyph keeps its own box, so the dot or the badge can sit on its corner.
+.stateGlyph {
+  display: inline-flex;
+}
+
+// While the simulated laser is the chosen port, a small flask in the state colour takes the dot's corner, cut out of
+// the pill by a ring in the pill's own fill, so state and simulator read as one icon; the tooltip names it in full.
+.simulatedBadge:global(.anticon) {
+  position: absolute;
+  inset-block-end: -0.4375rem;
+  inset-inline-end: -0.5625rem;
+  padding: 0.0625rem;
+  border-radius: 50%;
+  background-color: var(--color-surface-2);
+  color: currentColor;
+  font-size: 0.5625rem;
+}
+
+// The badge sits clear of the state glyph, so the icon keeps room for it before the word or the pill's edge.
+.statusIcon:has(.simulatedBadge) {
+  margin-inline-end: 0.375rem;
+}
+
+.status,
+.firmware {
   white-space: nowrap;
 }
 
-.port {
-  max-width: 12rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.firmware {
+  color: var(--color-text-muted);
 }
 
 .warningNote {
@@ -69,11 +135,18 @@
   font-size: 0.75rem;
 }
 
-// The action the pill offers while no laser is connected: the accent colour marks it as the place to connect.
+// The action the pill offers while no laser is connected: a solid accent fill with dark text, like every primary
+// button, marks it as the one place to connect.
 .connectVerb {
-  padding-left: var(--space-2);
-  border-left: 1px solid var(--color-border);
-  color: var(--color-accent);
+  display: inline-flex;
+  align-self: stretch;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-end: calc(-1 * var(--space-3));
+  padding: 0 var(--space-3);
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background-color: var(--color-accent);
+  color: var(--color-bg);
   font-weight: 600;
 
   > :global(.anticon) {
@@ -84,26 +157,36 @@
 .caret {
   color: var(--color-text-muted);
   font-size: 0.75rem;
+  // The chevron keeps its room at rest and only fades in, so the pill never changes width on hover, focus or open.
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.15s ease, visibility 0.15s;
+}
+
+.pill:hover .caret,
+.pill:focus-visible .caret,
+.pill[aria-expanded='true'] .caret {
+  visibility: visible;
+  opacity: 1;
 }
 
 // The pill with a one-click Connect button joined on its right: one shape, split by a line.
 .joined:global(.ant-btn) {
-  border-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-// The one-click Connect beside the pill: the accent colour marks it as the place to connect.
+// The one-click Connect beside the pill: a tinted accent fill marks it as the one button to press.
 .connectButton:global(.ant-btn) {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   min-height: var(--target-min);
   padding: 0 var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 0;
   border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background-color: var(--color-surface-2);
-  color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-bg);
   font-family: var(--font-ui);
   font-size: 0.8125rem;
   font-weight: 600;
@@ -116,67 +199,83 @@
   }
 
   &:not(:disabled):hover {
-    border-color: var(--color-border);
-    background-color: var(--color-surface-hover);
-    color: var(--color-accent);
+    background-color: var(--color-accent-hover);
+    color: var(--color-bg);
+  }
+
+  &:not(:disabled):active {
+    background-color: var(--color-accent-active);
+    color: var(--color-bg);
   }
 }
 
-// Wide windows spell the state out; the one-word look is only for a narrow window.
-.shortStatus {
-  display: none;
+.pill:not(:disabled):hover .connectVerb {
+  background-color: var(--color-accent-hover);
 }
 
-// In a narrow window the pill keeps the dot, a short state ("Not connected", "Lost") after a plug and the Connect verb,
-// or the state and the chevron once connected; the port and the firmware move to its popover and its label.
+// In a narrow window the firmware moves to the popover and the label, and the caret goes while Connect is offered.
 // 75rem must match the TopBar styles.
 @media (width < 75rem) {
   .firmware,
-  .port,
-  .connectOffered .caret,
-  .connectOffered .status {
+  .connectOffered .caret {
     display: none;
-  }
-
-  .shortStatus {
-    display: inline;
-    color: var(--color-text-muted);
   }
 }
 
-// At phone width the pill is its dot and the Connect verb, or the dot alone once there is a link: it must always fit.
+// Below 57rem the pill turns into one compact capsule: the state is its coloured state icon with the dot (its button
+// still opens the connection popover and names the state and port), and Connect is an icon and word in the same
+// fill, with no split line or chevron, both as tall as the other header buttons (36 px). 57rem must match the TopBar styles.
+@media (width < 57rem) {
+  .connectOffered .status,
+  .caret {
+    display: none;
+  }
+
+  .pill:global(.ant-btn),
+  .connectButton:global(.ant-btn) {
+    min-height: var(--control-height);
+  }
+
+  .pill:global(.ant-btn) {
+    min-width: var(--control-height);
+    justify-content: center;
+  }
+}
+
+// At phone width the pill is its state icon and the Connect verb, or the icon and Connected once there is a link: it
+// must always fit.
+// Both parts are full 44 px touch targets here.
 @media (width < 30rem) {
   .pill:global(.ant-btn) {
+    min-width: var(--target-min);
+    min-height: var(--target-min);
+    padding: 0 0.375rem;
+  }
+
+  .connectButton:global(.ant-btn) {
+    min-height: var(--target-min);
     padding: 0 var(--space-2);
   }
 
-  .status,
-  .shortStatus,
   .caret,
   .warningNote {
     display: none;
   }
 
   .connectVerb {
-    padding-left: 0;
-    border-left: 0;
-  }
-
-  .connectButton:global(.ant-btn) {
+    margin-inline-end: calc(-1 * var(--space-2));
     padding: 0 var(--space-2);
   }
 }
 
-// The plug before the narrow word, a little apart from it.
-.shortStatus :global(.anticon) {
-  margin-right: 0.25rem;
+// The status and Connect tooltips stay on one line at every width instead of wrapping over the panel below; a port name too long for
+// the window ends in an ellipsis rather than breaking the line.
+.portTooltip :global(.ant-tooltip-inner) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-// Each part of the joined pill draws its own whole ring, inside its own edge and above its neighbour, so the ring never
-// breaks at the split or runs into the other part.
-.pill:focus-visible,
-.connectButton:focus-visible {
-  position: relative;
-  z-index: 1;
-  outline-offset: calc(-1 * var(--focus-outline-width));
+.portTooltip:global(.ant-tooltip) {
+  max-width: min(32rem, calc(100vw - var(--space-4)));
 }

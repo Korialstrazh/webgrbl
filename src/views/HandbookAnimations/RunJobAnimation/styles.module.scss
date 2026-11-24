@@ -1,0 +1,77 @@
+@use '../handbook.animation';
+
+$loop: 5s;
+
+.startFace { fill: var(--color-accent); }
+.startLabel { fill: var(--color-bg); }
+.startButton { transform-box: fill-box; transform-origin: center; }
+.checkBox { stroke: var(--color-control-border); stroke-width: 1.5; }
+.checkText { fill: var(--color-border); }
+.tick { stroke: var(--color-success); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 0; }
+.burn { stroke: var(--color-bed-accent); stroke-width: 2.5; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 0; }
+.progressTrack { fill: var(--color-bed); }
+.progressFill { fill: var(--color-accent); transform-origin: 124px 143px; }
+.laserDot { opacity: 0; }
+
+// Motion only for readers who have not asked for less; otherwise the drawing as written is the still picture.
+@media (prefers-reduced-motion: no-preference) {
+  .startButton { animation: start-press $loop ease-out infinite; }
+  .tick { animation: tick-first $loop ease-out infinite; }
+  .tickSecond { animation-name: tick-second; }
+  .tickThird { animation-name: tick-third; }
+  .burn { animation: burn-draw $loop linear infinite; }
+  .progressFill { animation: progress-fill $loop linear infinite; }
+  .headColumn { animation: head-column $loop linear infinite; }
+  .gantryRow { animation: gantry-row $loop linear infinite; }
+  .laserDot { animation: laser-on $loop linear infinite; }
+}
+
+@keyframes start-press {
+  0%, 4% { transform: scale(1); }
+  8% { transform: scale(0.92); }
+  13%, 100% { transform: scale(1); }
+}
+
+@keyframes tick-first {
+  0%, 14% { stroke-dashoffset: 100; }
+  20%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes tick-second {
+  0%, 21% { stroke-dashoffset: 100; }
+  27%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes tick-third {
+  0%, 28% { stroke-dashoffset: 100; }
+  34%, 100% { stroke-dashoffset: 0; }
+}
+
+// The outline is 110 by 65 and the head walks it at a steady pace (each side's share of the time matches its length) in step with the burn line.
+@keyframes burn-draw {
+  0%, 38% { stroke-dashoffset: 100; }
+  88%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes progress-fill {
+  0%, 38% { transform: scaleX(0); }
+  88%, 100% { transform: scaleX(1); }
+}
+
+@keyframes head-column {
+  0%, 38% { transform: translateX(0); }
+  53.7%, 63% { transform: translateX(110px); }
+  78.7%, 100% { transform: translateX(0); }
+}
+
+@keyframes gantry-row {
+  0%, 53.7% { transform: translateY(0); }
+  63%, 78.7% { transform: translateY(65px); }
+  88%, 100% { transform: translateY(0); }
+}
+
+@keyframes laser-on {
+  0%, 37% { opacity: 0; }
+  38%, 88% { opacity: 1; }
+  89%, 100% { opacity: 0; }
+}

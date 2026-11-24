@@ -1,6 +1,8 @@
 /**
- * The entries of the Project menu, with the Save shortcut hint. Export G-code is disabled while it cannot start, with
- * a tooltip that says what is missing.
+ * The entries of the Project menu in three groups (open, save, export) with shortcut hints and, at phone
+ * width, Import SVG with the laser profiles, then Redo, in groups of their own, and a muted footer line with the
+ * app version. A phone hides the shortcut hints, having no keyboard to press them on.
+ * Export G-code is disabled while it cannot start, with a tooltip that says what is missing.
  *
  * @author michael.morosov
  *
@@ -15,36 +17,75 @@ import {
   FileAddOutlined,
   FolderOpenOutlined,
   HistoryOutlined,
+  PlusSquareOutlined,
   SaveOutlined,
 } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
-import { ANTD_MENU_ITEM_TYPE_DIVIDER } from '../../../utils/antd.constants';
-import type { GcodeExportAvailability } from '../../../utils/hooks/interfaces/GcodeExportAvailability';
+import type { ReactNode } from 'react';
+import { ANTD_MENU_ITEM_TYPE_DIVIDER, ANTD_MENU_ITEM_TYPE_GROUP } from '../../../utils/antd.constants';
+import { APP_VERSION } from '../../../utils/app.version.constants';
 import { DEFAULT } from '../../../utils/localization/default.locales';
+import { LaserMachineIcon } from '../../../views/LaserMachineIcon';
+import { RedoArrowIcon } from '../../../views/RedoArrowIcon';
 import type { ProjectMenuItems } from '../interfaces/ProjectMenuItems';
-import { PROJECT_MENU_KEY } from './project.menu.constants';
+import type { ProjectMenuItemsOptions } from '../interfaces/ProjectMenuItemsOptions';
+import {
+  LASER_MACHINE_ICON_NAME,
+  PROJECT_MENU_KEY,
+  REDO_ARROW_ICON_NAME,
+} from './project.menu.constants';
 import styles from './styles.module.scss';
 
-export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvailability): ProjectMenuItems => [
-  { key: PROJECT_MENU_KEY.NEW, icon: <FileAddOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_NEW) },
+const PHONE_ONLY_DIVIDER: ProjectMenuItems[number] = {
+  type: ANTD_MENU_ITEM_TYPE_DIVIDER,
+  className: styles.phoneOnly,
+};
+
+// Only at phone width, where Import SVG, the laser profile button and Redo leave the bar for these entries: the two
+// that add to the project first, then Redo on its own, then the version footer.
+const getPhoneOnlyMenuItems = (t: TFunction, options: ProjectMenuItemsOptions): ProjectMenuItems => [
+  PHONE_ONLY_DIVIDER,
+  {
+    key: PROJECT_MENU_KEY.IMPORT_SVG,
+    className: styles.phoneOnly,
+    icon: <FileAddOutlined aria-hidden />,
+    label: t(DEFAULT.TOP_BAR_MENU_IMPORT_SVG),
+  },
+  {
+    key: PROJECT_MENU_KEY.MACHINE_PROFILES,
+    className: styles.phoneOnly,
+    icon: <LaserMachineIcon aria-label={LASER_MACHINE_ICON_NAME} />,
+    label: t(DEFAULT.TOP_BAR_MENU_MACHINE_PROFILES),
+  },
+  PHONE_ONLY_DIVIDER,
+  {
+    key: PROJECT_MENU_KEY.REDO,
+    className: styles.phoneOnly,
+    icon: <RedoArrowIcon aria-label={REDO_ARROW_ICON_NAME} />,
+    disabled: !options.canRedo,
+    label: getShortcutMenuLabel(t(DEFAULT.TOP_BAR_REDO), t(DEFAULT.TOP_BAR_REDO_SHORTCUT)),
+  },
+  // The phone heading shows only the project name, so the release the user runs is named here, as a muted footer line
+  // that cannot be chosen.
+  PHONE_ONLY_DIVIDER,
+  {
+    type: ANTD_MENU_ITEM_TYPE_GROUP,
+    className: [styles.phoneOnly, styles.versionFooter].join(' '),
+    label: t(DEFAULT.TOP_BAR_PROJECT_MENU_VERSION, { appName: t(DEFAULT.APP_TITLE), version: APP_VERSION }),
+  },
+];
+
+const getShortcutMenuLabel = (labelText: string, shortcutText: string): ReactNode => (
+  <span className={styles.menuEntry}>
+    <span>{labelText}</span>
+    <span className={styles.hint}>{shortcutText}</span>
+  </span>
+);
+
+export const getProjectMenuItems = (t: TFunction, options: ProjectMenuItemsOptions): ProjectMenuItems => [
+  { key: PROJECT_MENU_KEY.NEW, icon: <PlusSquareOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_NEW) },
   { key: PROJECT_MENU_KEY.OPEN, icon: <HistoryOutlined aria-hidden />, label: t(DEFAULT.TOP_BAR_PROJECT_MENU_OPEN) },
-  {
-    key: PROJECT_MENU_KEY.SAVE,
-    icon: <SaveOutlined aria-hidden />,
-    label: (
-      <span className={styles.menuEntry}>
-        <span>{t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE)}</span>
-        <span className={styles.hint}>{t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE_SHORTCUT)}</span>
-      </span>
-    ),
-  },
-  { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
-  {
-    key: PROJECT_MENU_KEY.SAVE_AS_FILE,
-    icon: <DownloadOutlined aria-hidden />,
-    label: t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE_AS_FILE),
-  },
   {
     key: PROJECT_MENU_KEY.OPEN_FILE,
     icon: <FolderOpenOutlined aria-hidden />,
@@ -52,13 +93,27 @@ export const getProjectMenuItems = (t: TFunction, gcodeExport: GcodeExportAvaila
   },
   { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
   {
+    key: PROJECT_MENU_KEY.SAVE,
+    icon: <SaveOutlined aria-hidden />,
+    label: getShortcutMenuLabel(t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE), t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE_SHORTCUT)),
+  },
+  {
+    key: PROJECT_MENU_KEY.SAVE_AS_FILE,
+    icon: <DownloadOutlined aria-hidden />,
+    label: t(DEFAULT.TOP_BAR_PROJECT_MENU_SAVE_AS_FILE),
+  },
+  { type: ANTD_MENU_ITEM_TYPE_DIVIDER },
+  {
     key: PROJECT_MENU_KEY.EXPORT_GCODE,
     icon: <CodeOutlined aria-hidden />,
-    disabled: !gcodeExport.isGcodeExportEnabled,
+    disabled: !options.gcodeExport.isGcodeExportEnabled,
     label: (
-      <Tooltip title={gcodeExport.gcodeExportBlockedReasonKey && t(gcodeExport.gcodeExportBlockedReasonKey)}>
+      <Tooltip
+        title={options.gcodeExport.gcodeExportBlockedReasonKey && t(options.gcodeExport.gcodeExportBlockedReasonKey)}
+      >
         <span>{t(DEFAULT.TOP_BAR_PROJECT_MENU_EXPORT_GCODE)}</span>
       </Tooltip>
     ),
   },
+  ...getPhoneOnlyMenuItems(t, options),
 ];

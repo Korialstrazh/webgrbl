@@ -1,20 +1,33 @@
+// The project name is the main title of the header: the strongest text, in the main text colour.
 .nameButton {
+  // A flex row centres the pencil on the name, not on its baseline.
+  display: inline-flex;
+  align-items: center;
   max-width: 100%;
   height: auto;
   padding: 0;
-  line-height: 1.5;
-  font-size: 0.8125rem;
-  color: var(--color-text-muted);
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
 
-  // The pencil shows that the name can be changed, only when the pointer or the focus is on it.
+  // A muted pencil always shows that the name can be changed; it turns full contrast under the pointer or the focus.
   .pencil {
-    margin-inline-start: var(--space-1);
-    opacity: 0;
+    display: inline-flex;
+    margin-inline-start: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    transition: color 0.15s ease;
   }
 
   &:hover .pencil,
   &:focus-visible .pencil {
-    opacity: 1;
+    color: var(--color-text);
+  }
+
+  // A ring close to the name, so it stays clear of the brand line above it.
+  &:focus-visible {
+    outline-offset: 0.0625rem;
   }
 
   // The button label is the project name, so a long one is cut instead of widening the top bar.
@@ -29,12 +42,28 @@
   width: 14rem;
 }
 
-// In a narrow bar the app name is hidden, so the project name takes its place, a size larger and in the main text
-// colour, still on one line: a long name is cut with an ellipsis and its tooltip shows it whole.
+// In a narrow bar the name is a step smaller, still on one line: a long name is cut with an ellipsis and its tooltip
+// shows it whole.
 @media (width < 75rem) {
   .nameButton {
-    max-width: 100%;
+    font-size: 0.9375rem;
+  }
+}
+
+// At phone width the name is a step smaller and the pencil goes, so the name keeps its room; the tooltip and the
+// button label still say a tap renames.
+@media (width < 30rem) {
+  // A full 44 px tall tap target, though the name itself is one short line.
+  .nameButton {
+    min-height: var(--target-min);
     font-size: 0.875rem;
-    color: var(--color-text);
+  }
+
+  .nameButton .pencil {
+    display: none;
+  }
+
+  .renameBox {
+    width: 100%;
   }
 }

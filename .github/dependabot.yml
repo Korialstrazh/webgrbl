@@ -1,0 +1,16 @@
+# Weekly update proposals for the pinned CI actions and the Docker base images. npm packages are updated by hand: the
+# project pins exact versions and takes no release younger than 3 days.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3

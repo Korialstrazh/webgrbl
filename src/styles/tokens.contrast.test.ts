@@ -55,6 +55,11 @@ const BED_SURFACE_OF_TONE: Readonly<Record<BedTonePrefix, string>> = {
 const BED_TEXT_TOKEN_NAMES = ['ink', 'text'] as const;
 const BED_MARKER_TOKEN_NAMES = ['accent', 'laser-head', 'danger', 'travel'] as const;
 const MIN_GRAPHIC_CONTRAST = 3;
+const ICON_DISABLED_TOKEN = '--color-icon-disabled';
+const TOP_BAR_SURFACE_TOKEN = '--color-surface-1';
+// A disabled toolbar icon sits near 3:1 on the top bar: visible as disabled, clearly weaker than an enabled one.
+const MAX_DISABLED_ICON_CONTRAST = 4;
+const MIN_ENABLED_ICON_CONTRAST = 7;
 const DISABLED_TEXT_TOKEN = '--color-disabled-text';
 const DISABLED_BG_TOKEN = '--color-disabled-bg';
 const DISABLED_BORDER_TOKEN = '--color-disabled-border';
@@ -202,5 +207,15 @@ describe('design token contrast', () => {
       expect(getContrastRatio(requireToken(tonePrefix + tokenName), BED_SURFACE_OF_TONE[tonePrefix]))
         .toBeGreaterThanOrEqual(MIN_GRAPHIC_CONTRAST);
     }
+  });
+
+  it('shows a disabled toolbar icon at about 3:1 on the top bar and an enabled one at 7:1 or more', () => {
+    const disabledRatio: number =
+      getContrastRatio(requireToken(ICON_DISABLED_TOKEN), requireToken(TOP_BAR_SURFACE_TOKEN));
+    const enabledRatio: number = getContrastRatio(requireToken(TEXT_TOKEN), requireToken(TOP_BAR_SURFACE_TOKEN));
+
+    expect(disabledRatio).toBeGreaterThanOrEqual(MIN_GRAPHIC_CONTRAST);
+    expect(disabledRatio).toBeLessThan(MAX_DISABLED_ICON_CONTRAST);
+    expect(enabledRatio).toBeGreaterThanOrEqual(MIN_ENABLED_ICON_CONTRAST);
   });
 });

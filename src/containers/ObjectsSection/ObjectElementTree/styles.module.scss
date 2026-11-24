@@ -1,5 +1,23 @@
 .tree {
+  min-width: 0;
   padding: 0 var(--space-2) var(--space-2);
+
+  // antd sizes a tree row to its title, so a long element name or path ran past the panel edge; each flex child
+  // down the chain may shrink instead, so the name is cut short with an ellipsis and its title shows it in full.
+  :global(.ant-tree-treenode),
+  :global(.ant-tree-node-content-wrapper),
+  :global(.ant-tree-title) {
+    min-width: 0;
+  }
+
+  :global(.ant-tree-node-content-wrapper) {
+    flex: 1 1 0;
+    overflow: hidden;
+  }
+
+  :global(.ant-tree-title) {
+    display: block;
+  }
 }
 
 .empty {
